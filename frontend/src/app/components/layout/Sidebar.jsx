@@ -4,28 +4,28 @@ import Link from "next/link";
 
 export default function Sidebar() {
   const menuItems = [
-    "Dashboard",
-    "Unidades",
-    "Kitnets",
-    "Inquilinos",
-    "Solicitações",
-    "Vistorias",
-    "Contratos",
-    "Financeiro",
-    "Relatórios",
-    "Avisos",
-    "Notificações",
-    "Segurança & Auditoria",
-    "Automações",
-    "Revisão Sistema",
-    "Locadores",
-    "Usuários",
-    "Asaas Config",
-    "Asaas Transações",
-    "Asaas Repasses",
-    "Clicksign Config",
-    "WhatsApp & IA",
-    "Configurações",
+    { name: "Dashboard", href: "/" },
+    { name: "Unidades", href: "/unidades" },
+    { name: "Kitnets", href: "/kitnets" },
+    { name: "Inquilinos", href: "/inquilinos" },
+    { name: "Solicitações", href: "/solicitacoes" },
+    { name: "Vistorias", href: "/vistorias" },
+    { name: "Contratos", href: "/contratos" },
+    { name: "Financeiro", href: "/financeiro" },
+    { name: "Relatórios", href: "/relatorios" },
+    { name: "Avisos", href: "/avisos" },
+    { name: "Notificações", href: "/notificacoes" },
+    { name: "Segurança & Auditoria", href: "/seguranca" },
+    { name: "Automações", href: "/automacoes" },
+    { name: "Revisão Sistema", href: "/revisao" },
+    { name: "Locadores", href: "/locadores" },
+    { name: "Usuários", href: "/usuarios" },
+    { name: "Asaas Config", href: "/asaas-config" },
+    { name: "Asaas Transações", href: "/asaas-transacoes" },
+    { name: "Asaas Repasses", href: "/asaas-repasses" },
+    { name: "Clicksign Config", href: "/clicksign" },
+    { name: "WhatsApp & IA", href: "/whatsapp" },
+    { name: "Configurações", href: "/configuracoes" },
   ];
 
   return (
@@ -43,11 +43,11 @@ export default function Sidebar() {
       <nav className="flex-1 overflow-y-auto py-4">
         {menuItems.map((item) => (
           <Link
-            key={item}
-            href="#"
+            key={item.name}
+            href={item.href}
             className="block px-6 py-3 text-sm hover:bg-green-800 transition"
           >
-            {item}
+            {item.name}
           </Link>
         ))}
       </nav>
