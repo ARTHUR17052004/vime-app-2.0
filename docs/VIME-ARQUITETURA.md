@@ -340,3 +340,108 @@ Concluído:
 ✅ Fim do Dia 1
 
 🚧 Dia 2 - Layout Base da VIME
+
+## Dia 2
+
+Concluído:
+
+* CRUD completo de Unidades
+* Cadastro de Unidades
+* Edição de Unidades
+* Exclusão de Unidades
+* Busca de Unidades
+* Persistência LocalStorage
+* Status Ativa/Inativa/Manutenção
+* Estrutura preparada para integração com Backend
+
+Próximo passo:
+
+* Expandir cadastro de Unidades
+  * CEP
+  * Endereço
+  * Número
+  * Bairro
+  * Locador
+  * Observações
+
+* Preparar integração com API
+
+Status:
+
+🚧 Dia 2 - Em andamento
+### Status Atual do Módulo Unidades
+
+Implementado no Frontend:
+
+* Cadastro de Unidade
+* Edição de Unidade
+* Exclusão de Unidade
+* Busca por nome, cidade e endereço
+* Persistência local utilizando LocalStorage
+* Modal de cadastro/edição
+* Controle de status:
+
+  * Ativa
+  * Inativa
+  * Manutenção
+
+### Estrutura Atual da Unidade
+
+Campos disponíveis:
+
+* nome
+* cep
+* endereco
+* numero
+* bairro
+* cidade
+* uf
+* locador
+* kitnets
+* status
+* observacoes
+* aluguel
+* vencimento
+
+### Layout Atual
+
+A listagem de unidades utiliza Cards.
+
+Cada card apresenta:
+
+* Nome da unidade
+* Status
+* Endereço
+* Cidade/UF
+* Valor de aluguel
+* Quantidade de kitnets
+* Dia de vencimento
+* Locador
+
+### Menu de Ações
+
+Cada card possui menu contextual (⋮) com:
+
+* Visualizar
+* Editar
+* Excluir
+
+### Próxima Evolução
+
+Criar tela individual da unidade:
+
+/unidades/[id]
+
+Objetivo:
+
+Centralizar todas as informações relacionadas à unidade:
+
+* Dados da unidade
+* Kitnets
+* Inquilinos
+* Contratos
+* Solicitações
+* Vistorias
+* Financeiro
+
+Essa tela será o núcleo operacional da VIME.

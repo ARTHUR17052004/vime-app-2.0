@@ -5,13 +5,11 @@ import { useState, useEffect } from "react";
 import MainLayout from "../components/layout/MainLayout";
 import UnitModal from "../components/unidades/UnitModal";
 import UnitForm from "../components/unidades/UnitForm";
-import UnitTable from "../components/unidades/UnitTable";
+import UnitCardList from "../components/unidades/UnitCardList";
 
 export default function UnidadesPage() {
   const [modalOpen, setModalOpen] = useState(false);
-
   const [editingUnit, setEditingUnit] = useState(null);
-
   const [search, setSearch] = useState("");
 
   const [unidades, setUnidades] = useState(() => {
@@ -59,6 +57,11 @@ export default function UnidadesPage() {
     setModalOpen(true);
   };
 
+  const visualizarUnidade = (unidade) => {
+    setEditingUnit(unidade);
+    setModalOpen(true);
+  };
+
   const excluirUnidade = (id) => {
     const confirmar = window.confirm(
       "Deseja realmente excluir esta unidade?"
@@ -71,11 +74,15 @@ export default function UnidadesPage() {
     );
   };
 
-  const unidadesFiltradas = unidades.filter((unidade) =>
-    unidade.nome
-      .toLowerCase()
-      .includes(search.toLowerCase())
-  );
+  const unidadesFiltradas = unidades.filter((unidade) => {
+    const termo = search.toLowerCase();
+
+    return (
+      unidade.nome?.toLowerCase().includes(termo) ||
+      unidade.cidade?.toLowerCase().includes(termo) ||
+      unidade.endereco?.toLowerCase().includes(termo)
+    );
+  });
 
   return (
     <MainLayout>
@@ -86,7 +93,7 @@ export default function UnidadesPage() {
           </h1>
 
           <p className="text-gray-500 mt-2">
-            Gerenciamento de propriedades cadastradas.
+            Gestão de propriedades e imóveis
           </p>
 
           <p className="text-sm text-green-600 mt-1">
@@ -99,24 +106,25 @@ export default function UnidadesPage() {
             setEditingUnit(null);
             setModalOpen(true);
           }}
-          className="bg-green-600 text-white px-5 py-3 rounded-lg hover:bg-green-700 transition"
+          className="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition"
         >
-          Nova Unidade
+          + Nova Unidade
         </button>
       </div>
 
       <div className="bg-white rounded-xl shadow p-4 mb-6">
         <input
           type="text"
-          placeholder="🔍 Buscar unidade..."
+          placeholder="🔍 Buscar por nome, endereço ou cidade..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full border rounded-lg p-3"
         />
       </div>
 
-      <UnitTable
+      <UnitCardList
         unidades={unidadesFiltradas}
+        onView={visualizarUnidade}
         onEdit={editarUnidade}
         onDelete={excluirUnidade}
       />

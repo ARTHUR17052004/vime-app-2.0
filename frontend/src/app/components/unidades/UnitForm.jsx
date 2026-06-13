@@ -7,39 +7,55 @@ export default function UnitForm({
   onSave,
   onCancel,
 }) {
-  const [nome, setNome] = useState("");
-  const [cidade, setCidade] = useState("");
-  const [uf, setUf] = useState("");
-  const [kitnets, setKitnets] = useState("");
-  const [status, setStatus] = useState("Ativa");
+  const [formData, setFormData] = useState({
+    nome: "",
+    cep: "",
+    logradouro: "",
+    numero: "",
+    complemento: "",
+    bairro: "",
+    cidade: "",
+    uf: "",
+    locador: "",
+    kitnets: "",
+    aluguel: "",
+    vencimento: "10",
+    status: "Ativa",
+    observacoes: "",
+  });
 
   useEffect(() => {
     if (unidade) {
-      setNome(unidade.nome || "");
-      setCidade(unidade.cidade || "");
-      setUf(unidade.uf || "");
-      setKitnets(unidade.kitnets || "");
-      setStatus(unidade.status || "Ativa");
-    } else {
-      setNome("");
-      setCidade("");
-      setUf("");
-      setKitnets("");
-      setStatus("Ativa");
+      setFormData({
+        nome: unidade.nome || "",
+        cep: unidade.cep || "",
+        logradouro: unidade.logradouro || "",
+        numero: unidade.numero || "",
+        complemento: unidade.complemento || "",
+        bairro: unidade.bairro || "",
+        cidade: unidade.cidade || "",
+        uf: unidade.uf || "",
+        locador: unidade.locador || "",
+        kitnets: unidade.kitnets || "",
+        aluguel: unidade.aluguel || "",
+        vencimento: unidade.vencimento || "10",
+        status: unidade.status || "Ativa",
+        observacoes: unidade.observacoes || "",
+      });
     }
   }, [unidade]);
 
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    onSave({
-      nome,
-      cidade,
-      uf,
-      kitnets,
-      status,
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
-  }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
 
   return (
     <form
@@ -47,77 +63,125 @@ export default function UnitForm({
       className="grid grid-cols-2 gap-4"
     >
       <input
-        type="text"
+        name="nome"
         placeholder="Nome da Unidade"
-        value={nome}
-        onChange={(e) => setNome(e.target.value)}
+        value={formData.nome}
+        onChange={handleChange}
         className="border rounded-lg p-3"
         required
       />
 
       <input
-        type="text"
+        name="cep"
+        placeholder="CEP"
+        value={formData.cep}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
+
+      <input
+        name="logradouro"
+        placeholder="Logradouro"
+        value={formData.logradouro}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
+
+      <input
+        name="numero"
+        placeholder="Número"
+        value={formData.numero}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
+
+      <input
+        name="bairro"
+        placeholder="Bairro"
+        value={formData.bairro}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
+
+      <input
+        name="cidade"
         placeholder="Cidade"
-        value={cidade}
-        onChange={(e) => setCidade(e.target.value)}
+        value={formData.cidade}
+        onChange={handleChange}
         className="border rounded-lg p-3"
-        required
       />
 
       <input
-        type="text"
+        name="uf"
         placeholder="UF"
-        value={uf}
-        onChange={(e) => setUf(e.target.value)}
+        value={formData.uf}
+        onChange={handleChange}
         className="border rounded-lg p-3"
-        required
       />
 
       <input
-        type="number"
-        placeholder="Quantidade de Kitnets"
-        value={kitnets}
-        onChange={(e) => setKitnets(e.target.value)}
+        name="locador"
+        placeholder="Locador"
+        value={formData.locador}
+        onChange={handleChange}
         className="border rounded-lg p-3"
-        required
       />
 
-      <div className="col-span-2">
-        <label className="block mb-2 text-sm font-medium text-gray-700">
-          Status da Unidade
-        </label>
+      <input
+        name="kitnets"
+        placeholder="Quantidade de Kitnets"
+        value={formData.kitnets}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
 
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          className="w-full border rounded-lg p-3"
-        >
-          <option value="Ativa">
-            Ativa
-          </option>
+      <input
+        name="aluguel"
+        placeholder="Valor Aluguel"
+        value={formData.aluguel}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
 
-          <option value="Inativa">
-            Inativa
-          </option>
+      <input
+        name="vencimento"
+        placeholder="Dia Vencimento"
+        value={formData.vencimento}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      />
 
-          <option value="Manutenção">
-            Manutenção
-          </option>
-        </select>
-      </div>
+      <select
+        name="status"
+        value={formData.status}
+        onChange={handleChange}
+        className="border rounded-lg p-3"
+      >
+        <option>Ativa</option>
+        <option>Inativa</option>
+        <option>Manutenção</option>
+      </select>
 
-      <div className="col-span-2 flex justify-end gap-3 mt-4">
+      <textarea
+        name="observacoes"
+        placeholder="Observações"
+        value={formData.observacoes}
+        onChange={handleChange}
+        className="col-span-2 border rounded-lg p-3 h-32"
+      />
+
+      <div className="col-span-2 flex justify-end gap-3">
         <button
           type="button"
           onClick={onCancel}
-          className="bg-gray-200 px-4 py-2 rounded-lg"
+          className="px-4 py-2 bg-gray-200 rounded-lg"
         >
           Cancelar
         </button>
 
         <button
           type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg"
         >
           {unidade
             ? "Salvar Alterações"
