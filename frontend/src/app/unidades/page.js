@@ -57,6 +57,18 @@ export default function UnidadesPage() {
     setModalOpen(true);
   };
 
+  const excluirUnidade = (id) => {
+    const confirmar = window.confirm(
+      "Deseja realmente excluir esta unidade?"
+    );
+
+    if (!confirmar) return;
+
+    setUnidades((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
+  };
+
   return (
     <MainLayout>
       <div className="flex items-center justify-between mb-8">
@@ -88,6 +100,7 @@ export default function UnidadesPage() {
       <UnitTable
         unidades={unidades}
         onEdit={editarUnidade}
+        onDelete={excluirUnidade}
       />
 
       <UnitModal
