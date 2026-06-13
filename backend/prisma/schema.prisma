@@ -18,9 +18,111 @@ model Unidade {
   nome      String
   cidade    String
   uf        String
-  locador   String
+  
+  locadorId String?
+
+  locador Locador? @relation(fields: [locadorId], references: [id])
+  
   kitnets   Int
   status    String   @default("ATIVA")
+
+kitnetsRelacionadas Kitnet[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Kitnet {
+  id String @id @default(uuid())
+
+  numero String
+
+  metragem Float
+
+  valorAluguel Float
+
+  ocupada Boolean @default(false)
+
+  status String @default("DISPONIVEL")
+
+  unidadeId String
+
+  unidade Unidade @relation(fields: [unidadeId], references: [id])
+
+  inquilinos Inquilino[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Inquilino {
+
+  id String @id @default(uuid())
+
+  nome String
+
+  email String
+
+  telefone String
+
+  cpf String
+
+  dataInicioContrato DateTime
+
+  ativo Boolean @default(true)
+
+  kitnetId String
+
+  kitnet Kitnet @relation(fields: [kitnetId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+}
+
+model Usuario {
+  id String @id @default(uuid())
+
+  nome String
+
+  email String @unique
+
+  senha String
+
+  perfil Perfil
+
+  ativo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Locador {
+  id                 String    @id @default(uuid())
+  nome               String
+  email              String?   @unique
+  telefone           String?
+  cpfCnpj            String?   @unique
+
+  endereco           String?
+  cidade             String?
+  uf                 String?
+
+  banco              String?
+  agencia            String?
+  conta              String?
+
+  taxaAdministracao  Float?    @default(0)
+  multa              Float?    @default(0)
+  juros              Float?    @default(0)
+
+  ativo              Boolean   @default(true)
+
+  unidades           Unidade[]
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 }
