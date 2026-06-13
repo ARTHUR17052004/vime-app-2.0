@@ -5,6 +5,31 @@ export default function UnitTable({
   onEdit,
   onDelete,
 }) {
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Inativa":
+        return (
+          <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">
+            Inativa
+          </span>
+        );
+
+      case "Manutenção":
+        return (
+          <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm font-medium">
+            Manutenção
+          </span>
+        );
+
+      default:
+        return (
+          <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-medium">
+            Ativa
+          </span>
+        );
+    }
+  };
+
   if (unidades.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow">
@@ -40,10 +65,10 @@ export default function UnitTable({
       <table className="w-full">
         <thead>
           <tr className="border-b bg-gray-50">
-            <th className="text-left p-4">Nome</th>
-            <th className="text-left p-4">Cidade</th>
+            <th className="text-left p-4">🏢 Nome</th>
+            <th className="text-left p-4">📍 Cidade</th>
             <th className="text-left p-4">UF</th>
-            <th className="text-left p-4">Kitnets</th>
+            <th className="text-left p-4">🏠 Kitnets</th>
             <th className="text-left p-4">Status</th>
             <th className="text-left p-4">Ações</th>
           </tr>
@@ -72,9 +97,7 @@ export default function UnitTable({
               </td>
 
               <td className="p-4">
-                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
-                  Ativa
-                </span>
+                {getStatusBadge(unidade.status)}
               </td>
 
               <td className="p-4">

@@ -12,6 +12,8 @@ export default function UnidadesPage() {
 
   const [editingUnit, setEditingUnit] = useState(null);
 
+  const [search, setSearch] = useState("");
+
   const [unidades, setUnidades] = useState(() => {
     if (typeof window !== "undefined") {
       const dados = localStorage.getItem("vime-unidades");
@@ -69,6 +71,12 @@ export default function UnidadesPage() {
     );
   };
 
+  const unidadesFiltradas = unidades.filter((unidade) =>
+    unidade.nome
+      .toLowerCase()
+      .includes(search.toLowerCase())
+  );
+
   return (
     <MainLayout>
       <div className="flex items-center justify-between mb-8">
@@ -97,8 +105,18 @@ export default function UnidadesPage() {
         </button>
       </div>
 
+      <div className="bg-white rounded-xl shadow p-4 mb-6">
+        <input
+          type="text"
+          placeholder="🔍 Buscar unidade..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full border rounded-lg p-3"
+        />
+      </div>
+
       <UnitTable
-        unidades={unidades}
+        unidades={unidadesFiltradas}
         onEdit={editarUnidade}
         onDelete={excluirUnidade}
       />
