@@ -15,18 +15,34 @@ enum Perfil {
 
 model Unidade {
   id        String   @id @default(uuid())
+
   nome      String
+
+  cep          String?
+  logradouro   String?
+  numero       String?
+  complemento  String?
+  bairro       String?
+
   cidade    String
   uf        String
-  
+
+  aluguel      Float?
+  vencimento   Int?
+
+  observacoes  String?
+
+  locador      String?
+
   locadorId String?
 
-  locador Locador? @relation(fields: [locadorId], references: [id])
-  
-  kitnets   Int
-  status    String   @default("ATIVA")
+  locadorRel Locador? @relation(fields: [locadorId], references: [id])
 
-kitnetsRelacionadas Kitnet[]
+  kitnets   Int
+
+  status    String @default("ATIVA")
+
+  kitnetsRelacionadas Kitnet[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

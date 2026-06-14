@@ -1,23 +1,29 @@
 const prisma = require('../config/prisma');
 
 const listar = () => {
-    return prisma.unidade.findMany({
+  return prisma.unidade.findMany({
+    include: {
+      locadorRel: true
+    },
     orderBy: {
-        createdAt: 'desc'
+      createdAt: 'desc'
     }
-    });
+  });
 };
 
 const buscarPorId = (id) => {
-    return prisma.unidade.findUnique({
-        where: {id}
-    });
+  return prisma.unidade.findUnique({
+    where: { id },
+    include: {
+      locadorRel: true
+    }
+  });
 };
 
 const criar = (dados) => {
-    return prisma.unidade.create({
-        data: dados
-    });
+  return prisma.unidade.create({
+    data: dados
+  });
 };
 
 const atualizar = (id, dados) => {
