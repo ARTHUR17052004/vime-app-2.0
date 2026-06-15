@@ -86,7 +86,27 @@ model Inquilino {
 
   cpf String
 
+  rg String?
+
+  dataNascimento DateTime?
+
+  enderecoAnterior String?
+
+  contatoEmergencia String?
+
+  telefoneEmergencia String?
+
   dataInicioContrato DateTime
+
+  dataFimContrato DateTime?
+
+  prazoContrato Int?
+
+  tipoGarantia String?
+
+  valorCaucao Float?
+
+  indiceReajuste String?
 
   ativo Boolean @default(true)
 
