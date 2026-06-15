@@ -51,11 +51,13 @@ model Unidade {
 model Kitnet {
   id String @id @default(uuid())
 
+  nome String?
+
   numero String
 
   metragem Float
 
-  valorAluguel Float
+  aluguel Float
 
   ocupada Boolean @default(false)
 
