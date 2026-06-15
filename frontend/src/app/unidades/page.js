@@ -80,7 +80,7 @@ export default function UnidadesPage() {
     return (
       unidade.nome?.toLowerCase().includes(termo) ||
       unidade.cidade?.toLowerCase().includes(termo) ||
-      unidade.endereco?.toLowerCase().includes(termo)
+      unidade.logradouro?.toLowerCase().includes(termo)
     );
   });
 
@@ -118,7 +118,20 @@ export default function UnidadesPage() {
           placeholder="🔍 Buscar por nome, endereço ou cidade..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full border rounded-lg p-3"
+          className="
+            w-full
+            border
+            border-gray-300
+            rounded-xl
+            p-3
+            text-gray-900
+            placeholder:text-gray-500
+            bg-white
+            focus:outline-none
+            focus:ring-2
+            focus:ring-green-500
+            focus:border-green-500
+          "
         />
       </div>
 

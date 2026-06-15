@@ -445,3 +445,366 @@ Centralizar todas as informações relacionadas à unidade:
 * Financeiro
 
 Essa tela será o núcleo operacional da VIME.
+### Rota Dinâmica de Unidade
+
+Implementada rota:
+
+/unidades/[id]
+
+Objetivo:
+
+Centralizar todas as informações relacionadas à unidade.
+
+A página será utilizada como núcleo dos módulos:
+
+* Kitnets
+* Inquilinos
+* Contratos
+* Financeiro
+* Solicitações
+* Vistorias
+
+Estado atual:
+
+* Navegação funcional a partir dos cards
+* Recebimento do ID da unidade
+* Estrutura inicial da tela criada
+
+Próxima evolução:
+
+* Carregar dados reais da unidade
+* Exibir resumo operacional
+* Exibir kitnets vinculadas
+* Criar ações rápidas da unidade
+### Evolução da Tela de Unidade
+
+A rota dinâmica `/unidades/[id]` agora realiza:
+
+* Leitura do ID da URL
+* Busca da unidade no LocalStorage
+* Exibição dos dados reais da unidade
+
+Informações exibidas:
+
+* Nome
+* Status
+* Locador
+* Quantidade de kitnets
+* Vencimento
+* Endereço completo
+* CEP
+* Observações
+
+Próxima evolução planejada:
+
+* Vinculação de Kitnets
+* Vinculação de Inquilinos
+* Resumo Financeiro da Unidade
+* Histórico de Solicitações
+* Histórico de Vistorias
+## Módulo Unidades
+
+### Funcionalidades concluídas
+
+- Cadastro de unidade
+- Edição de unidade
+- Exclusão de unidade
+- Busca por nome/endereço/cidade
+- Cards de unidade
+- Menu de ações (3 pontos)
+- Visualização detalhada
+- Persistência LocalStorage
+
+### Rota
+
+/unidades
+/unidades/[id]
+
+### Campos atualmente suportados
+
+- Nome
+- CEP
+- Endereço
+- Número
+- Bairro
+- Cidade
+- UF
+- Locador
+- Quantidade de Kitnets
+- Status
+- Dia de vencimento
+- Observações
+## Módulo Unidades
+
+Status: Funcional
+
+### Implementado
+
+- Cadastro de unidades
+- Edição de unidades
+- Exclusão de unidades
+- Busca por nome
+- Busca por cidade
+- Busca por logradouro
+- Cards de visualização
+- Menu de ações (3 pontinhos)
+- Página de detalhes
+- Persistência LocalStorage
+
+### Campos
+
+- nome
+- cep
+- logradouro
+- numero
+- complemento
+- bairro
+- cidade
+- uf
+- locador
+- kitnets
+- aluguel
+- vencimento
+- status
+- observacoes
+
+### Rotas
+
+/unidades
+/unidades/[id]
+
+## Dia 3
+
+### Módulo Kitnets
+
+Status: Funcional
+
+### Implementado
+
+* Cadastro de Kitnets
+* Edição de Kitnets
+* Exclusão de Kitnets
+* Persistência LocalStorage
+* Tabela administrativa
+* Página de detalhes da Kitnet
+* Indicadores operacionais
+
+  * Total
+  * Disponíveis
+  * Ocupadas
+  * Manutenção
+* Menu de ações (3 pontinhos)
+
+  * Visualizar
+  * Editar
+  * Excluir
+
+### Campos atualmente suportados
+
+* nome
+* unidadeId
+* unidadeNome
+* metragem
+* aluguel
+* numero
+* status
+
+### Rotas
+
+/kitnets
+
+/kitnets/[id]
+
+### Regras atuais
+
+* Uma Kitnet pertence a uma única Unidade.
+* Uma Unidade pode possuir várias Kitnets.
+* A Kitnet possui controle de ocupação.
+* A Kitnet possui status operacional.
+
+### Próxima evolução
+
+* Integração com módulo Inquilinos.
+* Alteração automática de status para Ocupada quando houver vínculo com Inquilino.
+* Exibição do morador atual.
+* Exibição do contrato ativo.
+* Integração futura com Financeiro.
+
+Status:
+
+✅ Fim do Dia 3
+## Sincronização Geral Frontend ↔ Backend
+
+Atualização recebida do Backend.
+
+### Módulos Backend concluídos
+
+* Usuários
+* Autenticação JWT
+* Middleware de Autenticação
+* Middleware de Perfil
+* Locadores
+* Unidades
+* Kitnets
+* Inquilinos
+
+### Segurança
+
+Perfis disponíveis:
+
+* ADMINISTRADOR
+* ADMINISTRATIVO
+* ZELADOR
+
+### Contrato Oficial Inquilinos
+
+Campos:
+
+* id
+* nome
+* email
+* telefone
+* cpf
+* dataInicioContrato
+* ativo
+* kitnetId
+
+Relacionamentos:
+
+* Kitnet 1:N Inquilinos
+
+Decisão:
+
+Frontend seguirá exatamente o contrato acima durante a implementação do módulo Inquilinos para evitar retrabalho futuro.
+
+### Próxima Integração Prevista
+
+* JWT
+* Controle de Perfil
+* API Unidades
+* API Kitnets
+* API Inquilinos
+
+Status:
+
+Backend e Frontend sincronizados até o módulo Inquilinos.
+## Dia 4
+
+Início do módulo Inquilinos.
+
+Estrutura criada:
+
+* InquilinoForm.jsx
+* InquilinoTable.jsx
+* InquilinoModal.jsx
+* /inquilinos
+
+Contrato adotado:
+
+* id
+* nome
+* email
+* telefone
+* cpf
+* dataInicioContrato
+* ativo
+* kitnetId
+
+Sincronizado com Backend.
+### Módulo Inquilinos
+
+Estrutura base concluída:
+
+* InquilinosPage
+* InquilinoModal
+* InquilinoForm
+* InquilinoTable
+
+Próxima etapa:
+
+* Persistência LocalStorage
+* Cadastro funcional
+* Integração Form → Tabela
+* CRUD completo
+### Módulo Inquilinos
+
+Implementado:
+
+- Persistência LocalStorage
+- Cadastro funcional
+- Integração Form → Página
+- Atualização automática da tabela
+- Contador de inquilinos
+
+Status:
+🚧 CRUD em desenvolvimento
+## Módulo Inquilinos
+
+Status: Em desenvolvimento
+
+### Estrutura planejada
+
+Cadastro em etapas (Wizard)
+
+#### Etapa 1 - Dados Pessoais
+
+* Nome
+* E-mail
+* Telefone
+* CPF ou RG
+* Data de nascimento
+* Endereço anterior
+* Contato de emergência
+* Telefone de emergência
+* Upload de documento
+
+#### Etapa 2 - Vinculação
+
+* Seleção de Unidade
+* Seleção de Kitnet
+
+A listagem será gerada automaticamente utilizando os módulos de Unidades e Kitnets.
+
+#### Etapa 3 - Contrato
+
+* Data de início
+* Prazo
+* Tipo de garantia
+* Valor de caução
+* Quantidade de meses de caução
+* Índice de reajuste
+
+### Regras
+
+* Um Inquilino ocupa apenas uma Kitnet ativa.
+* Ao cadastrar um Inquilino, a Kitnet passa automaticamente para status "Ocupada".
+* O Dashboard de Kitnets deve atualizar automaticamente.
+* Os indicadores da Unidade devem atualizar automaticamente.
+## Módulo Inquilinos
+
+Status: Funcional
+
+### Implementado
+
+- Cadastro de inquilinos
+- Edição de inquilinos
+- Exclusão de inquilinos
+- Visualização individual
+- Formulário em etapas
+- Dados pessoais
+- Dados contratuais
+- Vinculação com kitnets
+- Controle de ocupação
+- Persistência LocalStorage
+
+### Regras
+
+- Um inquilino ocupa apenas uma kitnet
+- Uma kitnet ocupada não aparece para novos cadastros
+- Ao cadastrar inquilino a kitnet é marcada como ocupada
+- Ao excluir inquilino a kitnet é liberada automaticamente
+
+### Rotas
+
+/inquilinos
+/inquilinos/[id]
