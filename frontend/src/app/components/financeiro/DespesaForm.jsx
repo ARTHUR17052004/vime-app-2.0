@@ -1,0 +1,162 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+export default function DespesaForm({
+  onSave,
+  despesaEditando,
+}) {
+  const [formData, setFormData] =
+    useState({
+      categoria:
+        "Manutenção e Reparos",
+
+      descricao: "",
+
+      valor: "",
+
+      status: "Pago",
+
+      dataDespesa: "",
+
+      dataPagamento: "",
+
+      fornecedor: "",
+
+      observacoes: "",
+    });
+
+  useEffect(() => {
+    if (despesaEditando) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFormData(despesaEditando);
+    }
+  }, [despesaEditando]);
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]:
+        e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    onSave(formData);
+  };
+
+  const inputStyle =
+    "border border-gray-300 rounded-xl p-3 w-full";
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="space-y-6"
+    >
+      <h2 className="text-3xl font-bold">
+        {despesaEditando
+          ? "Editar Despesa"
+          : "Nova Despesa"}
+      </h2>
+
+      <div className="grid md:grid-cols-2 gap-5">
+
+        <select
+          name="categoria"
+          value={formData.categoria}
+          onChange={handleChange}
+          className={inputStyle}
+        >
+          <option>Manutenção e Reparos</option>
+          <option>Impostos e Taxas</option>
+          <option>Seguros</option>
+          <option>Pessoal</option>
+          <option>Condomínio</option>
+          <option>Administrativo</option>
+          <option>Marketing</option>
+          <option>Reformas</option>
+          <option>Financeiras</option>
+          <option>Depreciação</option>
+          <option>Devolução de Caução</option>
+        </select>
+
+        <input
+          name="descricao"
+          placeholder="Descrição"
+          value={formData.descricao}
+          onChange={handleChange}
+          className={inputStyle}
+          required
+        />
+
+        <input
+          name="valor"
+          placeholder="Valor"
+          value={formData.valor}
+          onChange={handleChange}
+          className={inputStyle}
+        />
+
+        <select
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+          className={inputStyle}
+        >
+          <option>Pago</option>
+          <option>Pendente</option>
+        </select>
+
+        <input
+          type="date"
+          name="dataDespesa"
+          value={formData.dataDespesa}
+          onChange={handleChange}
+          className={inputStyle}
+        />
+
+        <input
+          type="date"
+          name="dataPagamento"
+          value={formData.dataPagamento}
+          onChange={handleChange}
+          className={inputStyle}
+        />
+
+        <input
+          name="fornecedor"
+          placeholder="Fornecedor"
+          value={formData.fornecedor}
+          onChange={handleChange}
+          className={inputStyle}
+        />
+
+      </div>
+
+      <textarea
+        name="observacoes"
+        placeholder="Observações"
+        value={formData.observacoes}
+        onChange={handleChange}
+        className={`${inputStyle} min-h-[120px]`}
+      />
+
+      <div className="flex justify-end">
+        <button
+          className="
+            bg-green-700
+            text-white
+            px-6
+            py-3
+            rounded-xl
+          "
+        >
+          Salvar
+        </button>
+      </div>
+
+    </form>
+  );
+}

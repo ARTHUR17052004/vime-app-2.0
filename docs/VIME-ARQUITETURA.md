@@ -808,3 +808,710 @@ Status: Funcional
 
 /inquilinos
 /inquilinos/[id]
+✅ Módulos concluídos (Frontend V1)
+Unidades
+Cadastro
+Listagem
+Cards
+Visualização
+Edição
+Exclusão
+Kitnets
+Cadastro
+Listagem
+Cards
+Visualização
+Vinculação com Unidade
+Status disponível/ocupada
+Inquilinos
+Cadastro em etapas
+Vinculação automática à Kitnet
+Atualização da ocupação
+Visualização
+Editar
+Excluir
+Menu ⋮
+Locadores
+Cadastro completo
+Dados bancários
+Configurações financeiras
+Visualização
+Editar
+Excluir
+Menu ⋮
+Tela de detalhes
+Quantidade de unidades vinculadas
+Botão Subconta Asaas (placeholder)
+Módulo: Financeiro
+Status: V4 - Em andamento
+Implementado
+Gestão completa de receitas.
+Gestão completa de despesas.
+Modais de visualização e edição.
+Exclusão de registros.
+Marcação de receita como paga.
+Persistência em localStorage.
+Resumo financeiro.
+Sistema de abas.
+Estrutura preparada para Asaas.
+Próxima etapa
+Fluxo de Caixa.
+Próximos vencimentos.
+Inadimplência.
+Gráficos financeiros.
+Exportação PDF/Excel.
+Integração Asaas.
+Comunicação Frontend → Backend
+Novo requisito do Financeiro
+
+📋 Documentação do módulo Contratos
+✅ Implementado
+Cadastro de contratos
+Edição
+Exclusão
+Encerramento
+Renovação
+Marcar inadimplente
+Dashboard
+Resumo
+Filtros
+Tabs
+Próximos vencimentos
+Relatórios (estrutura)
+Tela de detalhes
+Histórico financeiro
+Histórico de eventos
+Integração automática com receitas
+Persistência via localStorage
+⏳ Melhorias anotadas para depois
+Contraste das fontes
+PDF real
+Excel real
+Timeline visual do histórico
+Melhorias visuais
+Ajustes finos
+
+Melhorias vistorias : 
+Vistorias V1 concluído 🚀
+
+ Trocar visual dos cards por lista expansível.
+ Implementar página Visualizar.
+ Upload de fotos.
+ Histórico da vistoria.
+ Assinatura digital.
+ PDF da vistoria.
+ # Atualização de Status - Módulo Vistorias
+
+## Status
+
+CONCLUÍDO
+
+---
+
+## Objetivo
+
+Implementar um sistema completo de gestão de vistorias para acompanhamento preventivo, corretivo e operacional das unidades e kitnets administradas pelo VIME.
+
+---
+
+## Funcionalidades Implementadas
+
+### CRUD Completo
+
+* Criar vistoria
+* Visualizar vistoria
+* Editar vistoria
+* Excluir vistoria
+
+---
+
+### Campos da Vistoria
+
+* Unidade
+* Kitnet
+* Nome da Vistoria
+* Categoria
+* Criticidade
+* Periodicidade
+* Responsável
+* Data Última
+* Data Próxima
+* Status
+* Observações
+
+---
+
+### Categorias
+
+* Preventiva
+* Corretiva
+* Inspeção
+* Limpeza
+* Segurança
+* Estrutural
+
+---
+
+### Criticidade
+
+* Baixa
+* Média
+* Alta
+* Crítica
+
+---
+
+### Periodicidade
+
+* Semanal
+* Quinzenal
+* Mensal
+* Bimestral
+* Trimestral
+* Semestral
+* Anual
+
+---
+
+### Status
+
+* PROGRAMADA
+* PENDENTE
+* REALIZADA
+* CANCELADA
+* ATRASADA
+
+---
+
+## Checklist Operacional
+
+Implementado checklist individual por vistoria.
+
+Itens atuais:
+
+* Portão
+* Telhado
+* Caixa de Água
+* Extintores
+* Iluminação
+* Corredores
+
+Estrutura:
+
+```json
+{
+  "checklist": {
+    "portao": true,
+    "telhado": false,
+    "caixaAgua": true,
+    "extintores": false,
+    "iluminacao": true,
+    "corredores": false
+  }
+}
+```
+
+---
+
+## Histórico de Movimentações
+
+Cada vistoria pode armazenar histórico operacional.
+
+Objetivo:
+
+* Auditoria
+* Controle de execução
+* Rastreabilidade
+
+---
+
+## Upload de Fotos
+
+Implementado sistema de anexos locais.
+
+Características:
+
+* Upload múltiplo
+* Conversão Base64
+* Armazenamento em localStorage
+* Persistência após edição
+* Visualização em tela de detalhes
+* Download individual
+* Abertura em nova aba
+
+Estrutura:
+
+```json
+{
+  "fotos": [
+    "base64..."
+  ]
+}
+```
+
+---
+
+## Tela de Visualização
+
+Implementada página específica para consulta completa da vistoria.
+
+Exibe:
+
+* Dados gerais
+* Observações
+* Histórico
+* Fotos
+* Status
+* Responsável
+* Datas
+
+---
+
+## Persistência Atual
+
+Frontend:
+
+* localStorage
+
+Chave:
+
+```text
+vime-vistorias
+```
+
+---
+
+## Regra Global de Interface
+
+Nova regra adotada para todo o VIME:
+
+Todo modal que possa ultrapassar a altura da tela deve possuir rolagem vertical interna.
+
+Padrão:
+
+```css
+max-h-[90vh]
+overflow-y-auto
+```
+
+Aplicação obrigatória nos próximos módulos.
+
+---
+
+## Arquivos Principais
+
+```text
+src/app/vistorias/page.jsx
+
+src/app/vistorias/[id]/page.jsx
+
+src/app/components/vistorias/VistoriaForm.jsx
+
+src/app/components/vistorias/VistoriaModal.jsx
+
+src/app/components/vistorias/VistoriaCard.jsx
+```
+
+---
+
+## Dependências Futuras
+
+O módulo Vistorias será integrado futuramente com:
+
+* Contratos
+* Financeiro
+* Relatórios
+* Notificações
+* WhatsApp IA
+
+---
+
+## Próximo Módulo
+
+Contratos
+
+Relacionamentos:
+
+Locador
+→ Unidade
+→ Kitnet
+→ Inquilino
+
+Campos previstos:
+
+* Locador
+* Unidade
+* Kitnet
+* Inquilino
+* Data Início
+* Data Fim
+* Valor Aluguel
+* Caução
+* Garantia
+* Índice Reajuste
+* Dia Vencimento
+* Status
+
+---
+
+Fim do Dia - Módulo Vistorias Concluído.
+# VIME APP 2.0
+
+## Relatório Geral de Progresso Atualizado
+
+Data de Referência: Junho/2026
+
+---
+
+# Visão Geral
+
+O VIME APP 2.0 está sendo reconstruído do zero sem dependência do Base44.
+
+Arquitetura definida:
+
+* Frontend: Next.js + React + Tailwind
+* Backend: Node.js + Express
+* Banco: PostgreSQL + Prisma
+* Integrações Futuras:
+
+  * Asaas
+  * Clicksign
+  * WhatsApp Cloud API
+
+---
+
+# Módulos Concluídos
+
+## Dashboard
+
+Status: CONCLUÍDO
+
+Funcionalidades:
+
+* Indicadores gerais
+* Resumos operacionais
+* Navegação principal
+
+---
+
+## Unidades
+
+Status: CONCLUÍDO
+
+Funcionalidades:
+
+* Cadastro
+* Visualização
+* Edição
+* Exclusão
+* Tela de detalhes
+* Persistência localStorage
+
+Campos:
+
+* Nome
+* Endereço
+* CEP
+* Cidade
+* UF
+* Locador
+* Status
+* Observações
+
+---
+
+## Kitnets
+
+Status: CONCLUÍDO
+
+Funcionalidades:
+
+* Cadastro
+* Visualização
+* Edição
+* Exclusão
+* Relacionamento com Unidade
+* Status de ocupação
+
+---
+
+## Inquilinos
+
+Status: CONCLUÍDO
+
+Funcionalidades:
+
+* Cadastro
+* Visualização
+* Edição
+* Exclusão
+* Relacionamento com Kitnet
+* Histórico básico
+
+---
+
+## Locadores
+
+Status: CONCLUÍDO
+
+Funcionalidades:
+
+* Cadastro
+* Visualização
+* Edição
+* Exclusão
+* Relacionamento com Unidades
+
+---
+
+## Contratos
+
+Status: CONCLUÍDO
+
+### Funcionalidades
+
+* Criar contrato
+* Editar contrato
+* Excluir contrato
+* Visualizar contrato
+* Encerrar contrato
+* Renovar contrato
+* Marcar inadimplência
+* Histórico de eventos
+* Histórico financeiro
+* Integração automática com receitas
+* Persistência localStorage
+
+### Campos
+
+* Locador
+* Unidade
+* Kitnet
+* Inquilino
+* Data início
+* Data fim
+* Valor aluguel
+* Caução
+* Garantia
+* Dia vencimento
+* Reajuste
+* Status
+
+### Dashboard
+
+* Contratos ativos
+* Contratos encerrados
+* Renovações próximas
+* Receita contratada
+
+---
+
+## Financeiro V4
+
+Status: CONCLUÍDO MVP
+
+### Receitas
+
+* Cadastro
+* Edição
+* Exclusão
+* Visualização
+* Marcar como paga
+
+### Despesas
+
+* Cadastro
+* Edição
+* Exclusão
+* Visualização
+
+### Dashboard
+
+* Receita total
+* Despesas totais
+* Lucro líquido
+* Receitas pendentes
+
+### Recursos
+
+* Fluxo de caixa
+* Próximos vencimentos
+* Inadimplência
+* Estrutura PDF
+* Estrutura Excel
+
+### Futuro
+
+* Integração Asaas
+* PDF real
+* Excel real
+
+---
+
+## Vistorias
+
+Status: CONCLUÍDO MVP
+
+### Funcionalidades
+
+* Cadastro
+* Visualização
+* Edição
+* Exclusão
+* Tela de detalhes
+* Histórico
+* Checklist
+* Upload de fotos
+* Download de fotos
+* Visualização das fotos
+* Persistência localStorage
+
+### Categorias
+
+* Preventiva
+* Corretiva
+* Inspeção
+* Limpeza
+* Segurança
+* Estrutural
+
+### Criticidade
+
+* Baixa
+* Média
+* Alta
+* Crítica
+
+### Status
+
+* PROGRAMADA
+* PENDENTE
+* REALIZADA
+* CANCELADA
+* ATRASADA
+
+### Checklist
+
+* Portão
+* Telhado
+* Caixa d'água
+* Extintores
+* Iluminação
+* Corredores
+
+### Recursos de Fotos
+
+* Upload múltiplo
+* Armazenamento Base64
+* Persistência local
+* Download
+* Visualização
+
+### Pendências Futuras
+
+* Assinatura digital
+* PDF da vistoria
+* WhatsApp automático
+* Backend PostgreSQL
+* Notificações automáticas
+
+---
+
+# Regra Global de Interface
+
+Implementada regra obrigatória:
+
+Todo modal do sistema deve possuir scroll interno quando o conteúdo ultrapassar a altura da tela.
+
+Padrão:
+
+```css
+max-h-[90vh]
+overflow-y-auto
+```
+
+Aplicação obrigatória em todos os módulos futuros.
+
+---
+
+# Integrações Futuras
+
+## Asaas
+
+* PIX
+* Boletos
+* Cobranças
+* Baixa automática
+
+## Clicksign
+
+* Assinaturas digitais
+* Contratos
+* Documentos
+
+## WhatsApp
+
+* Avisos
+* Cobranças
+* Lembretes
+* Notificações operacionais
+
+---
+
+# Situação Atual do Projeto
+
+## Concluídos
+
+✅ Dashboard
+
+✅ Unidades
+
+✅ Kitnets
+
+✅ Inquilinos
+
+✅ Locadores
+
+✅ Contratos
+
+✅ Financeiro MVP
+
+✅ Vistorias MVP
+
+---
+
+## Em análise para próxima etapa
+
+🔲 Solicitações
+
+🔲 Relatórios
+
+🔲 Avisos
+
+🔲 Notificações
+
+🔲 Usuários
+
+🔲 Segurança
+
+🔲 Automações
+
+---
+
+# Percentual Geral Estimado
+
+Frontend:
+85%
+
+Backend:
+45%
+
+Integrações:
+10%
+
+Projeto Geral:
+70%
+
+---
+
+Fim do Relatório Atualizado.

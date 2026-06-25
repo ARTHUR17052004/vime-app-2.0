@@ -4,7 +4,7 @@ export default function StatsCard({
 }) {
   return (
     <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-sm text-gray-500">
+      <h2 className="text-sm text-gray-800">
         {title}
       </h2>
 
