@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -15,31 +15,55 @@ export default function LocadorCard({
   onDelete,
   onEdit,
 }) {
+
   const [menuAberto, setMenuAberto] =
     useState(null);
 
-  const unidades = JSON.parse(
-    localStorage.getItem("vime-unidades") ||
-      "[]"
-  );
+  const [unidades, setUnidades] =
+    useState([]);
+
+  useEffect(() => {
+
+    const dados = JSON.parse(
+      localStorage.getItem(
+        "vime-unidades"
+      ) || "[]"
+    );
+
+    setUnidades(dados);
+
+  }, []);
 
   if (locadores.length === 0) {
+
     return (
+
       <div className="bg-white rounded-2xl shadow p-10 text-center">
+
         <h2 className="text-2xl font-semibold text-gray-700 mb-3">
+
           Módulo Locadores
+
         </h2>
 
         <p className="text-gray-500">
+
           Nenhum locador cadastrado ainda.
+
         </p>
+
       </div>
+
     );
+
   }
 
   return (
+
     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+
       {locadores.map((locador) => {
+
         const totalUnidades =
           unidades.filter(
             (u) =>
@@ -48,6 +72,7 @@ export default function LocadorCard({
           ).length;
 
         return (
+
           <div
             key={locador.id}
             className="
@@ -60,8 +85,11 @@ export default function LocadorCard({
               p-6
             "
           >
+
             <div className="flex justify-between items-start">
+
               <div className="flex gap-3">
+
                 <div
                   className="
                     w-12
@@ -73,12 +101,17 @@ export default function LocadorCard({
                     justify-center
                   "
                 >
+
                   <Building2 className="w-6 h-6 text-green-700" />
+
                 </div>
 
                 <div>
+
                   <h2 className="font-bold text-xl text-gray-800">
+
                     {locador.nome}
+
                   </h2>
 
                   <span
@@ -93,30 +126,35 @@ export default function LocadorCard({
                       text-blue-700
                     "
                   >
-                    {locador.tipoPessoa ===
-                    "PJ"
+
+                    {locador.tipoPessoa === "PJ"
                       ? "Pessoa Jurídica"
                       : "Pessoa Física"}
+
                   </span>
+
                 </div>
+
               </div>
 
               <button
                 onClick={() =>
                   setMenuAberto(
-                    menuAberto ===
-                      locador.id
+                    menuAberto === locador.id
                       ? null
                       : locador.id
                   )
                 }
               >
+
                 <MoreVertical className="text-gray-500" />
+
               </button>
+
             </div>
 
-            {menuAberto ===
-              locador.id && (
+            {menuAberto === locador.id && (
+
               <div
                 className="
                   absolute
@@ -130,6 +168,7 @@ export default function LocadorCard({
                   w-40
                 "
               >
+
                 <Link
                   href={`/locadores/${locador.id}`}
                   className="
@@ -139,13 +178,18 @@ export default function LocadorCard({
                     hover:bg-gray-100
                   "
                 >
+
                   Visualizar
+
                 </Link>
 
                 <button
                   onClick={() => {
+
                     setMenuAberto(null);
+
                     onEdit?.(locador);
+
                   }}
                   className="
                     w-full
@@ -156,15 +200,18 @@ export default function LocadorCard({
                     text-yellow-700
                   "
                 >
+
                   Editar
+
                 </button>
 
                 <button
                   onClick={() => {
+
                     setMenuAberto(null);
-                    onDelete?.(
-                      locador.id
-                    );
+
+                    onDelete?.(locador.id);
+
                   }}
                   className="
                     w-full
@@ -175,50 +222,69 @@ export default function LocadorCard({
                     text-red-700
                   "
                 >
+
                   Excluir
+
                 </button>
+
               </div>
+
             )}
 
             <div className="mt-6 space-y-3 text-gray-600">
+
               <div className="flex items-center gap-3">
+
                 <CreditCard size={18} />
+
                 <span>
+
                   {locador.documento}
+
                 </span>
+
               </div>
 
               <div className="flex items-center gap-3">
+
                 <Mail size={18} />
+
                 <span>
-                  {locador.email ||
-                    "-"}
+
+                  {locador.email || "-"}
+
                 </span>
+
               </div>
 
               <div className="flex items-center gap-3">
+
                 <Phone size={18} />
+
                 <span>
-                  {locador.telefone ||
-                    "-"}
+
+                  {locador.telefone || "-"}
+
                 </span>
+
               </div>
+
             </div>
 
             <div className="border-t mt-5 pt-5">
+
               <div className="text-gray-600 font-medium">
-                {totalUnidades} unidade(s)
-                vinculada(s)
+
+                {totalUnidades} unidade(s) vinculada(s)
+
               </div>
 
               <div className="mt-3 text-sm text-blue-600">
-                Taxa Adm.:{" "}
-                {locador.taxaAdministracao ||
-                  0}
-                % | Multa:{" "}
-                {locador.multa || 0}% |
-                Juros:{" "}
-                {locador.juros || 0}% a.m.
+
+                Taxa Adm.: {locador.taxaAdministracao || 0}% |
+                {" "}Multa: {locador.multa || 0}% |
+                {" "}Juros: {locador.juros || 0}% a.m.
+
               </div>
 
               <button
@@ -233,12 +299,21 @@ export default function LocadorCard({
                   hover:bg-blue-50
                 "
               >
+
                 Criar Subconta Asaas
+
               </button>
+
             </div>
+
           </div>
+
         );
+
       })}
+
     </div>
+
   );
+
 }
