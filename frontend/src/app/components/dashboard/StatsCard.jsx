@@ -1,16 +1,30 @@
+"use client";
+
+import Card from "../ui/Card";
+
 export default function StatsCard({
   title,
-  value
+  value,
+  color = "text-green-700",
+  subtitle,
 }) {
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-sm text-gray-800">
+    <Card>
+
+      <p className="text-sm text-gray-500">
         {title}
+      </p>
+
+      <h2 className={`text-4xl font-bold mt-3 ${color}`}>
+        {value}
       </h2>
 
-      <p className="text-3xl font-bold mt-2">
-        {value}
-      </p>
-    </div>
+      {subtitle && (
+        <p className="mt-2 text-sm text-gray-400">
+          {subtitle}
+        </p>
+      )}
+
+    </Card>
   );
 }

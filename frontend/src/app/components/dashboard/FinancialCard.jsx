@@ -1,41 +1,57 @@
+"use client";
+
+import Card from "../ui/Card";
+import { formatCurrency } from "@/utils/formatCurrency";
+
 export default function FinancialCard() {
+
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-lg font-semibold text-gray-800">
+    <Card>
+
+      <h2 className="text-xl font-bold mb-6">
         Financeiro
       </h2>
 
-      <div className="mt-4 space-y-3">
+      <div className="space-y-5">
+
         <div>
-          <p className="text-sm text-gray-500">
-            Receita Mensal
+
+          <p className="text-gray-500">
+            Receita
           </p>
 
-          <p className="text-2xl font-bold text-green-600">
-            R$ 0,00
-          </p>
+          <h2 className="text-3xl font-bold text-green-700">
+            {formatCurrency(18450)}
+          </h2>
+
         </div>
 
         <div>
-          <p className="text-sm text-gray-500">
+
+          <p className="text-gray-500">
             Despesas
           </p>
 
-          <p className="text-2xl font-bold text-red-600">
-            R$ 0,00
-          </p>
+          <h2 className="text-3xl font-bold text-red-600">
+            {formatCurrency(2800)}
+          </h2>
+
         </div>
 
         <div>
-          <p className="text-sm text-gray-500">
+
+          <p className="text-gray-500">
             Saldo
           </p>
 
-          <p className="text-2xl font-bold text-blue-600">
-            R$ 0,00
-          </p>
+          <h2 className="text-3xl font-bold text-blue-600">
+            {formatCurrency(15650)}
+          </h2>
+
         </div>
+
       </div>
-    </div>
+
+    </Card>
   );
 }

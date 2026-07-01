@@ -1,23 +1,57 @@
+"use client";
+
+import Card from "../ui/Card";
+import Badge from "../ui/Badge";
+
 export default function AlertsPanel() {
+
+  const alertas = [
+
+    {
+      titulo: "3 contratos vencem amanhã",
+      cor: "yellow",
+    },
+
+    {
+      titulo: "2 aluguéis atrasados",
+      cor: "red",
+    },
+
+    {
+      titulo: "1 assinatura pendente",
+      cor: "blue",
+    },
+
+  ];
+
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-xl font-bold mb-4">
+    <Card>
+
+      <h2 className="text-xl font-bold mb-5">
         Alertas
       </h2>
 
       <div className="space-y-4">
-        <div className="bg-yellow-100 text-yellow-800 p-3 rounded-lg">
-          Nenhum contrato vencendo.
-        </div>
 
-        <div className="bg-red-100 text-red-800 p-3 rounded-lg">
-          Nenhum aluguel atrasado.
-        </div>
+        {alertas.map((item, index) => (
 
-        <div className="bg-blue-100 text-blue-800 p-3 rounded-lg">
-          Nenhuma solicitação pendente.
-        </div>
+          <div
+            key={index}
+            className="flex justify-between items-center"
+          >
+
+            <span>{item.titulo}</span>
+
+            <Badge color={item.cor}>
+              Atenção
+            </Badge>
+
+          </div>
+
+        ))}
+
       </div>
-    </div>
+
+    </Card>
   );
 }

@@ -1,15 +1,45 @@
+"use client";
+
+import Card from "../ui/Card";
+
 export default function RecentActivities() {
+
+  const atividades = [
+
+    "João pagou aluguel",
+
+    "Maria assinou contrato",
+
+    "PIX recebido",
+
+    "Contrato renovado",
+
+    "WhatsApp enviado",
+
+  ];
+
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-lg font-semibold text-gray-800">
+    <Card>
+
+      <h2 className="text-xl font-bold mb-5">
         Atividades Recentes
       </h2>
 
-      <div className="mt-4">
-        <p className="text-gray-500">
-          Nenhuma atividade registrada.
-        </p>
+      <div className="space-y-3">
+
+        {atividades.map((item, index) => (
+
+          <div
+            key={index}
+            className="border rounded-xl p-3 hover:bg-gray-50"
+          >
+            {item}
+          </div>
+
+        ))}
+
       </div>
-    </div>
+
+    </Card>
   );
 }
