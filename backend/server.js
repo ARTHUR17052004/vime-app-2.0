@@ -7,6 +7,12 @@ const inquilinoRoutes = require('./src/routes/inquilinoRoutes');
 const usuarioRoutes = require('./src/routes/usuarioRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const locadorRoutes = require('./src/routes/locadorRoutes');
+const contratoRoutes = require('./src/routes/contratoRoutes');
+const receitaRoutes = require('./src/routes/receitaRoutes');
+const despesaRoutes = require('./src/routes/despesaRoutes');
+const financeiroRoutes = require('./src/routes/financeiroRoutes');
+const dashboardRoutes = require('./src/routes/dashboardRoutes');
+const asaasRoutes = require('./src/routes/asaasRoutes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,6 +32,12 @@ app.use('/inquilinos', inquilinoRoutes);
 app.use('/usuarios', usuarioRoutes);
 app.use('/auth', authRoutes);
 app.use('/locadores', locadorRoutes);
+app.use('/despesas', despesaRoutes);
+app.use('/contratos', contratoRoutes);
+app.use('/receitas', receitaRoutes);
+app.use('/financeiro', financeiroRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/asaas', asaasRoutes);
 app.listen(PORT, () => {
     console.log(`[VIME 2.0] Servidor profissional a correr com sucesso na porta ${PORT}`);
 });
