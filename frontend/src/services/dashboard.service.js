@@ -1,19 +1,41 @@
 import { api } from "./api";
 
 export const DashboardService = {
-  listar() {
-    return api("/dashboard");
-  },
+  async listar() {
 
-  atividades() {
-    return api("/dashboard/atividades");
-  },
+    const [
+      dashboard,
+      financeiro,
+      ocupacao,
+      atividades,
+      alertas,
+    ] = await Promise.all([
 
-  alertas() {
-    return api("/dashboard/alertas");
-  },
+      api("/dashboard"),
 
-  financeiro() {
-    return api("/dashboard/financeiro");
+      api("/dashboard/financeiro"),
+
+      api("/dashboard/ocupacao"),
+
+      api("/dashboard/atividades"),
+
+      api("/dashboard/alertas"),
+
+    ]);
+
+    return {
+
+      ...dashboard,
+
+      financeiro,
+
+      ocupacao,
+
+      atividades,
+
+      alertas,
+
+    };
+
   },
 };

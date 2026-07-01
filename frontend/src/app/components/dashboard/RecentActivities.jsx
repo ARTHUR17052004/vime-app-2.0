@@ -2,22 +2,9 @@
 
 import Card from "../ui/Card";
 
-export default function RecentActivities() {
-
-  const atividades = [
-
-    "João pagou aluguel",
-
-    "Maria assinou contrato",
-
-    "PIX recebido",
-
-    "Contrato renovado",
-
-    "WhatsApp enviado",
-
-  ];
-
+export default function RecentActivities({
+  atividades = [],
+}) {
   return (
     <Card>
 
@@ -27,16 +14,32 @@ export default function RecentActivities() {
 
       <div className="space-y-3">
 
-        {atividades.map((item, index) => (
+        {atividades.length === 0 ? (
 
-          <div
-            key={index}
-            className="border rounded-xl p-3 hover:bg-gray-50"
-          >
-            {item}
-          </div>
+          <p className="text-gray-500">
+            Nenhuma atividade encontrada.
+          </p>
 
-        ))}
+        ) : (
+
+          atividades.map((item) => (
+
+            <div
+              key={item.id}
+              className="border rounded-xl p-3 hover:bg-gray-50"
+            >
+              <p className="font-medium">
+                {item.descricao}
+              </p>
+
+              <p className="text-xs text-gray-500 mt-1">
+                {item.data}
+              </p>
+            </div>
+
+          ))
+
+        )}
 
       </div>
 

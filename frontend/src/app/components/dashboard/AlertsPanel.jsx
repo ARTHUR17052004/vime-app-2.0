@@ -3,26 +3,9 @@
 import Card from "../ui/Card";
 import Badge from "../ui/Badge";
 
-export default function AlertsPanel() {
-
-  const alertas = [
-
-    {
-      titulo: "3 contratos vencem amanhã",
-      cor: "yellow",
-    },
-
-    {
-      titulo: "2 aluguéis atrasados",
-      cor: "red",
-    },
-
-    {
-      titulo: "1 assinatura pendente",
-      cor: "blue",
-    },
-
-  ];
+export default function AlertsPanel({
+  alertas = [],
+}) {
 
   return (
     <Card>
@@ -33,22 +16,34 @@ export default function AlertsPanel() {
 
       <div className="space-y-4">
 
-        {alertas.map((item, index) => (
+        {alertas.length === 0 ? (
 
-          <div
-            key={index}
-            className="flex justify-between items-center"
-          >
+          <p className="text-gray-500">
+            Nenhum alerta encontrado.
+          </p>
 
-            <span>{item.titulo}</span>
+        ) : (
 
-            <Badge color={item.cor}>
-              Atenção
-            </Badge>
+          alertas.map((item, index) => (
 
-          </div>
+            <div
+              key={index}
+              className="flex justify-between items-center"
+            >
 
-        ))}
+              <span>
+                {item.titulo}
+              </span>
+
+              <Badge color="yellow">
+                Atenção
+              </Badge>
+
+            </div>
+
+          ))
+
+        )}
 
       </div>
 

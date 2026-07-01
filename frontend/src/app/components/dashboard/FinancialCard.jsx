@@ -3,11 +3,13 @@
 import Card from "../ui/Card";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-export default function FinancialCard() {
+export default function FinancialCard({ financeiro }) {
+  const recebido = financeiro?.recebido ?? 0;
+  const pendente = financeiro?.pendente ?? 0;
+  const atrasado = financeiro?.atrasado ?? 0;
 
   return (
     <Card>
-
       <h2 className="text-xl font-bold mb-6">
         Financeiro
       </h2>
@@ -15,43 +17,36 @@ export default function FinancialCard() {
       <div className="space-y-5">
 
         <div>
-
           <p className="text-gray-500">
-            Receita
+            Recebido
           </p>
 
           <h2 className="text-3xl font-bold text-green-700">
-            {formatCurrency(18450)}
+            {formatCurrency(recebido)}
           </h2>
-
         </div>
 
         <div>
-
           <p className="text-gray-500">
-            Despesas
+            Pendente
+          </p>
+
+          <h2 className="text-3xl font-bold text-yellow-600">
+            {formatCurrency(pendente)}
+          </h2>
+        </div>
+
+        <div>
+          <p className="text-gray-500">
+            Atrasado
           </p>
 
           <h2 className="text-3xl font-bold text-red-600">
-            {formatCurrency(2800)}
+            {formatCurrency(atrasado)}
           </h2>
-
-        </div>
-
-        <div>
-
-          <p className="text-gray-500">
-            Saldo
-          </p>
-
-          <h2 className="text-3xl font-bold text-blue-600">
-            {formatCurrency(15650)}
-          </h2>
-
         </div>
 
       </div>
-
     </Card>
   );
 }
