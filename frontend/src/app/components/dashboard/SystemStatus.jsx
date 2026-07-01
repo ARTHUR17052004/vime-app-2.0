@@ -1,39 +1,74 @@
+"use client";
+
+import Badge from "../ui/Badge";
+import Card from "../ui/Card";
+
 export default function SystemStatus() {
+
+  const sistemas = [
+
+    {
+      nome: "API",
+      status: "Online",
+      color: "green",
+    },
+
+    {
+      nome: "Banco",
+      status: "Online",
+      color: "green",
+    },
+
+    {
+      nome: "Asaas",
+      status: "Online",
+      color: "green",
+    },
+
+    {
+      nome: "Clicksign",
+      status: "Online",
+      color: "green",
+    },
+
+    {
+      nome: "WhatsApp",
+      status: "Online",
+      color: "green",
+    },
+
+  ];
+
   return (
-    <div className="bg-white rounded-xl shadow p-6">
-      <h2 className="text-xl font-bold mb-4">
+    <Card>
+
+      <h2 className="text-xl font-bold mb-5">
         Status do Sistema
       </h2>
 
-      <div className="space-y-3">
-        <div className="flex justify-between">
-          <span>WhatsApp</span>
-          <span className="text-green-600 font-bold">
-            Online
-          </span>
-        </div>
+      <div className="space-y-4">
 
-        <div className="flex justify-between">
-          <span>Clicksign</span>
-          <span className="text-green-600 font-bold">
-            Conectado
-          </span>
-        </div>
+        {sistemas.map((item) => (
 
-        <div className="flex justify-between">
-          <span>Asaas</span>
-          <span className="text-green-600 font-bold">
-            Conectado
-          </span>
-        </div>
+          <div
+            key={item.nome}
+            className="flex justify-between items-center"
+          >
 
-        <div className="flex justify-between">
-          <span>Banco</span>
-          <span className="text-green-600 font-bold">
-            Operacional
-          </span>
-        </div>
+            <span className="text-gray-700">
+              {item.nome}
+            </span>
+
+            <Badge color={item.color}>
+              {item.status}
+            </Badge>
+
+          </div>
+
+        ))}
+
       </div>
-    </div>
+
+    </Card>
   );
 }
