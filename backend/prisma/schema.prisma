@@ -7,257 +7,156 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Perfil {
-  ADMINISTRADOR
-  ADMINISTRATIVO
-  ZELADOR
-}
-
 model Unidade {
-  id        String   @id @default(uuid())
-
-  nome      String
-
-  cep          String?
-  logradouro   String?
-  numero       String?
-  complemento  String?
-  bairro       String?
-
-  cidade    String
-  uf        String
-
-  aluguel      Float?
-  vencimento   Int?
-
-  observacoes  String?
-
-  locador      String?
-
-  locadorId String?
-
-  locadorRel Locador? @relation(fields: [locadorId], references: [id])
-
-  kitnets   Int
-
-  status    String @default("ATIVA")
-
+  id                  String     @id @default(uuid())
+  nome                String
+  cidade              String
+  uf                  String
+  locador             String?
+  kitnets             Int
+  status              String     @default("ATIVA")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  aluguel             Float?
+  bairro              String?
+  cep                 String?
+  complemento         String?
+  locadorId           String?
+  logradouro          String?
+  numero              String?
+  observacoes         String?
+  vencimento          Int?
+  contratos           Contrato[]
   kitnetsRelacionadas Kitnet[]
-
-  contratos Contrato[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  locadorRel          Locador?   @relation(fields: [locadorId], references: [id])
 }
 
 model Kitnet {
-  id String @id @default(uuid())
-
-  nome String?
-
-  numero String
-
-  metragem Float
-
-  aluguel Float
-
-  ocupada Boolean @default(false)
-
-  status String @default("DISPONIVEL")
-
-  unidadeId String
-
-  unidade Unidade @relation(fields: [unidadeId], references: [id])
-
+  id         String      @id @default(uuid())
+  numero     String
+  metragem   Float
+  aluguel    Float
+  ocupada    Boolean     @default(false)
+  status     String      @default("DISPONIVEL")
+  unidadeId  String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  nome       String?
+  contratos  Contrato[]
   inquilinos Inquilino[]
-
-  contratos Contrato[]
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
+  unidade    Unidade     @relation(fields: [unidadeId], references: [id])
 }
 
 model Inquilino {
-
-  id String @id @default(uuid())
-
-  nome String
-
-  email String
-
-  telefone String
-
-  cpf String
-
-  rg String?
-
-  dataNascimento DateTime?
-
-  enderecoAnterior String?
-
-  contatoEmergencia String?
-
-  telefoneEmergencia String?
-
+  id                 String     @id @default(uuid())
+  nome               String
+  email              String
+  telefone           String
+  cpf                String
   dataInicioContrato DateTime
-
-  dataFimContrato DateTime?
-
-  prazoContrato Int?
-
-  tipoGarantia String?
-
-  valorCaucao Float?
-
-  indiceReajuste String?
-
-  ativo Boolean @default(true)
-
-  kitnetId String
-
-  kitnet Kitnet @relation(fields: [kitnetId], references: [id])
-
-  contratos Contrato[]
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
+  ativo              Boolean    @default(true)
+  kitnetId           String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  contatoEmergencia  String?
+  dataFimContrato    DateTime?
+  dataNascimento     DateTime?
+  enderecoAnterior   String?
+  indiceReajuste     String?
+  prazoContrato      Int?
+  rg                 String?
+  telefoneEmergencia String?
+  tipoGarantia       String?
+  valorCaucao        Float?
+  contratos          Contrato[]
+  kitnet             Kitnet     @relation(fields: [kitnetId], references: [id])
 }
 
 model Usuario {
-  id String @id @default(uuid())
-
-  nome String
-
-  email String @unique
-
-  senha String
-
-  perfil Perfil
-
-  ativo Boolean @default(true)
-
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    Perfil
+  ativo     Boolean  @default(true)
   createdAt DateTime @default(now())
-
   updatedAt DateTime @updatedAt
 }
 
 model Contrato {
-
-  id String @id @default(uuid())
-
-  locadorId String
-  unidadeId String
-  kitnetId String
-  inquilinoId String
-
-  dataInicio DateTime
-  dataFim DateTime?
-
-  valorAluguel Float
-
-  diaVencimento Int
-
-  tipoGarantia String?
-
-  valorCaucao Float?
-
+  id             String    @id @default(uuid())
+  locadorId      String
+  unidadeId      String
+  kitnetId       String
+  inquilinoId    String
+  dataInicio     DateTime
+  dataFim        DateTime?
+  valorAluguel   Float
+  diaVencimento  Int
+  tipoGarantia   String?
+  valorCaucao    Float?
   indiceReajuste String?
-
-  status String @default("ATIVO")
-
-  observacoes String?
-
-  locador Locador @relation(fields: [locadorId], references: [id])
-
-  unidade Unidade @relation(fields: [unidadeId], references: [id])
-
-  kitnet Kitnet @relation(fields: [kitnetId], references: [id])
-
-  inquilino Inquilino @relation(fields: [inquilinoId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
-  receitas Receita[]
+  status         String    @default("ATIVO")
+  observacoes    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  inquilino      Inquilino @relation(fields: [inquilinoId], references: [id])
+  kitnet         Kitnet    @relation(fields: [kitnetId], references: [id])
+  locador        Locador   @relation(fields: [locadorId], references: [id])
+  unidade        Unidade   @relation(fields: [unidadeId], references: [id])
+  receitas       Receita[]
 }
 
 model Locador {
-  id                 String    @id @default(uuid())
-  nome               String
-  email              String?   @unique
-  telefone           String?
-  cpfCnpj            String?   @unique
-
-  endereco           String?
-  cidade             String?
-  uf                 String?
-
-  banco              String?
-  agencia            String?
-  conta              String?
-
-  taxaAdministracao  Float?    @default(0)
-  multa              Float?    @default(0)
-  juros              Float?    @default(0)
-
-  ativo              Boolean   @default(true)
-
-  unidades           Unidade[]
-
-  contratos          Contrato[]
-
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
+  id                String     @id @default(uuid())
+  nome              String
+  email             String?    @unique
+  telefone          String?
+  cpfCnpj           String?    @unique
+  endereco          String?
+  cidade            String?
+  uf                String?
+  banco             String?
+  agencia           String?
+  conta             String?
+  taxaAdministracao Float?     @default(0)
+  multa             Float?     @default(0)
+  juros             Float?     @default(0)
+  ativo             Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  contratos         Contrato[]
+  unidades          Unidade[]
 }
 
 model Receita {
-
-  id String @id @default(uuid())
-
-  contratoId String?
-
-  contrato Contrato? @relation(fields: [contratoId], references: [id])
-
-  categoria String
-
-  descricao String
-
-  valor Float
-
-  vencimento DateTime?
-
+  id            String    @id @default(uuid())
+  contratoId    String?
+  categoria     String
+  descricao     String
+  valor         Float
+  vencimento    DateTime?
   dataPagamento DateTime?
-
-  status String @default("PENDENTE")
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
+  status        String    @default("PENDENTE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  contrato      Contrato? @relation(fields: [contratoId], references: [id])
 }
 
 model Despesa {
-
-  id String @id @default(uuid())
-
-  categoria String
-
-  descricao String
-
-  valor Float
-
-  vencimento DateTime?
-
+  id            String    @id @default(uuid())
+  categoria     String
+  descricao     String
+  valor         Float
+  vencimento    DateTime?
   dataPagamento DateTime?
+  status        String    @default("PENDENTE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
 
-  status String @default("PENDENTE")
-
-  createdAt DateTime @default(now())
-
-  updatedAt DateTime @updatedAt
-
+enum Perfil {
+  ADMINISTRADOR
+  ADMINISTRATIVO
+  ZELADOR
 }
