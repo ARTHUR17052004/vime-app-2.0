@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import UnitActionsMenu from "./UnitActionsMenu";
 
 export default function UnitCard({
@@ -8,16 +9,33 @@ export default function UnitCard({
   onEdit,
   onDelete,
 }) {
+  const router = useRouter();
+
   return (
-    <div className="bg-white rounded-2xl shadow p-6 border hover:shadow-lg transition">
+    <div
+      onClick={() =>
+        router.push(`/unidades/${unidade.id}`)
+      }
+      className="
+        bg-white
+        rounded-2xl
+        shadow-md
+        border
+        p-6
+        cursor-pointer
+        transition-all
+        hover:shadow-xl
+        hover:-translate-y-1
+      "
+    >
       <div className="flex justify-between items-start mb-5">
         <div>
-          <h3 className="text-2xl font-bold text-gray-800">
+          <h3 className="text-2xl font-bold text-gray-900">
             {unidade.nome}
           </h3>
 
           <span
-            className={`inline-block mt-2 px-3 py-1 rounded-full text-sm ${
+            className={`inline-block mt-2 px-3 py-1 rounded-full text-sm font-medium ${
               unidade.status === "Ativa"
                 ? "bg-green-100 text-green-700"
                 : unidade.status === "Manutenção"
@@ -29,45 +47,55 @@ export default function UnitCard({
           </span>
         </div>
 
-        <UnitActionsMenu
-          unidade={unidade}
-          onView={onView}
-          onEdit={onEdit}
-          onDelete={onDelete}
-        />
+        <div onClick={(e) => e.stopPropagation()}>
+          <UnitActionsMenu
+            unidade={unidade}
+            onView={onView}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </div>
       </div>
 
-      <div className="space-y-3 text-gray-600">
-        <p>
-          📍 {unidade.endereco || "-"}
+      <div className="space-y-3 text-gray-800">
+
+        <p className="font-medium">
+          📍 {unidade.logradouro || "-"}
           {unidade.numero
             ? `, ${unidade.numero}`
             : ""}
         </p>
 
         <p>
-          🏙 {unidade.cidade || "-"} - {unidade.uf || "-"}
+          🏙 {unidade.cidade || "-"} -{" "}
+          {unidade.uf || "-"}
         </p>
 
-        <p>
+        <p className="font-semibold">
           💰 R$ {unidade.aluguel || "0,00"}
         </p>
+
       </div>
 
       <div className="border-t my-4"></div>
 
-      <div className="space-y-2 text-gray-700">
+      <div className="space-y-3 text-gray-800">
+
         <p>
-          🏠 Kitnets: {unidade.kitnets || 0}
+          🏠 <strong>Kitnets:</strong>{" "}
+          {unidade.kitnets || 0}
         </p>
 
         <p>
-          📅 Vencimento: Dia {unidade.vencimento || "-"}
+          📅 <strong>Vencimento:</strong>{" "}
+          Dia {unidade.vencimento || "-"}
         </p>
 
         <p>
-          👤 Locador: {unidade.locador || "-"}
+          👤 <strong>Locador:</strong>{" "}
+          {unidade.locador || "-"}
         </p>
+
       </div>
     </div>
   );

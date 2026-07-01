@@ -7,7 +7,7 @@ export default function UnitForm({
   onSave,
   onCancel,
 }) {
-  const [formData, setFormData] = useState({
+  const initialState = {
     nome: "",
     cep: "",
     logradouro: "",
@@ -22,7 +22,9 @@ export default function UnitForm({
     vencimento: "10",
     status: "Ativa",
     observacoes: "",
-  });
+  };
+
+  const [formData, setFormData] = useState(initialState);
 
   useEffect(() => {
     if (unidade) {
@@ -42,20 +44,66 @@ export default function UnitForm({
         status: unidade.status || "Ativa",
         observacoes: unidade.observacoes || "",
       });
+    } else {
+      setFormData(initialState);
     }
   }, [unidade]);
 
+  const buscarCep = async (cep) => {
+    const cepLimpo = cep.replace(/\D/g, "");
+
+    if (cepLimpo.length !== 8) return;
+
+    console.log("Buscando CEP:", cepLimpo);
+
+    try {
+      const response = await fetch(
+        `https://viacep.com.br/ws/${cepLimpo}/json/`
+      );
+
+      const data = await response.json();
+
+      console.log("Resposta ViaCEP:", data);
+
+      if (data.erro) {
+        console.log("CEP não encontrado.");
+        return;
+      }
+
+      setFormData((prev) => ({
+        ...prev,
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        uf: data.uf || "",
+      }));
+
+      console.log("Campos preenchidos.");
+    } catch (error) {
+      console.error("Erro ao buscar CEP:", error);
+    }
+  };
+
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    if (name === "cep") {
+      buscarCep(value);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
   };
+
+  const inputStyle =
+    "border border-gray-300 rounded-xl p-3 text-gray-900 placeholder:text-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
 
   return (
     <form
@@ -67,7 +115,7 @@ export default function UnitForm({
         placeholder="Nome da Unidade"
         value={formData.nome}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
         required
       />
 
@@ -76,7 +124,7 @@ export default function UnitForm({
         placeholder="CEP"
         value={formData.cep}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -84,7 +132,7 @@ export default function UnitForm({
         placeholder="Logradouro"
         value={formData.logradouro}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -92,7 +140,7 @@ export default function UnitForm({
         placeholder="Número"
         value={formData.numero}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -100,7 +148,7 @@ export default function UnitForm({
         placeholder="Bairro"
         value={formData.bairro}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -108,7 +156,7 @@ export default function UnitForm({
         placeholder="Cidade"
         value={formData.cidade}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -116,7 +164,7 @@ export default function UnitForm({
         placeholder="UF"
         value={formData.uf}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -124,7 +172,7 @@ export default function UnitForm({
         placeholder="Locador"
         value={formData.locador}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -132,7 +180,7 @@ export default function UnitForm({
         placeholder="Quantidade de Kitnets"
         value={formData.kitnets}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -140,7 +188,7 @@ export default function UnitForm({
         placeholder="Valor Aluguel"
         value={formData.aluguel}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <input
@@ -148,18 +196,18 @@ export default function UnitForm({
         placeholder="Dia Vencimento"
         value={formData.vencimento}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       />
 
       <select
         name="status"
         value={formData.status}
         onChange={handleChange}
-        className="border rounded-lg p-3"
+        className={inputStyle}
       >
-        <option>Ativa</option>
-        <option>Inativa</option>
-        <option>Manutenção</option>
+        <option value="Ativa">Ativa</option>
+        <option value="Inativa">Inativa</option>
+        <option value="Manutenção">Manutenção</option>
       </select>
 
       <textarea
@@ -167,21 +215,21 @@ export default function UnitForm({
         placeholder="Observações"
         value={formData.observacoes}
         onChange={handleChange}
-        className="col-span-2 border rounded-lg p-3 h-32"
+        className="col-span-2 border border-gray-300 rounded-xl p-3 h-32 text-gray-900 placeholder:text-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
       />
 
       <div className="col-span-2 flex justify-end gap-3">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-200 rounded-lg"
+          className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
         >
           Cancelar
         </button>
 
         <button
           type="submit"
-          className="px-4 py-2 bg-green-600 text-white rounded-lg"
+          className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
         >
           {unidade
             ? "Salvar Alterações"

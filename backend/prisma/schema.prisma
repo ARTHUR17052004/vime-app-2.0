@@ -44,6 +44,8 @@ model Unidade {
 
   kitnetsRelacionadas Kitnet[]
 
+  contratos Contrato[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -68,6 +70,8 @@ model Kitnet {
   unidade Unidade @relation(fields: [unidadeId], references: [id])
 
   inquilinos Inquilino[]
+
+  contratos Contrato[]
 
   createdAt DateTime @default(now())
 
@@ -114,6 +118,8 @@ model Inquilino {
 
   kitnet Kitnet @relation(fields: [kitnetId], references: [id])
 
+  contratos Contrato[]
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
@@ -136,6 +142,47 @@ model Usuario {
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+}
+
+model Contrato {
+
+  id String @id @default(uuid())
+
+  locadorId String
+  unidadeId String
+  kitnetId String
+  inquilinoId String
+
+  dataInicio DateTime
+  dataFim DateTime?
+
+  valorAluguel Float
+
+  diaVencimento Int
+
+  tipoGarantia String?
+
+  valorCaucao Float?
+
+  indiceReajuste String?
+
+  status String @default("ATIVO")
+
+  observacoes String?
+
+  locador Locador @relation(fields: [locadorId], references: [id])
+
+  unidade Unidade @relation(fields: [unidadeId], references: [id])
+
+  kitnet Kitnet @relation(fields: [kitnetId], references: [id])
+
+  inquilino Inquilino @relation(fields: [inquilinoId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  receitas Receita[]
 }
 
 model Locador {
@@ -161,6 +208,56 @@ model Locador {
 
   unidades           Unidade[]
 
+  contratos          Contrato[]
+
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
+}
+
+model Receita {
+
+  id String @id @default(uuid())
+
+  contratoId String?
+
+  contrato Contrato? @relation(fields: [contratoId], references: [id])
+
+  categoria String
+
+  descricao String
+
+  valor Float
+
+  vencimento DateTime?
+
+  dataPagamento DateTime?
+
+  status String @default("PENDENTE")
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+}
+
+model Despesa {
+
+  id String @id @default(uuid())
+
+  categoria String
+
+  descricao String
+
+  valor Float
+
+  vencimento DateTime?
+
+  dataPagamento DateTime?
+
+  status String @default("PENDENTE")
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
 }
