@@ -3,7 +3,11 @@ const prisma = require('../config/prisma');
 const listar = () => {
   return prisma.inquilino.findMany({
     include: {
-      kitnet: true
+      kitnet: {
+        include: {
+          unidade: true
+        }
+      }
     },
     orderBy: {
       createdAt: 'desc'
