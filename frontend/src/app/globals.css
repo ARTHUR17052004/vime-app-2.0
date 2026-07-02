@@ -1,21 +1,142 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #08140f;
+  --foreground: #ffffff;
+
+  --glass: rgba(16, 33, 26, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --primary: #16a34a;
+  --primary-hover: #15803d;
+
+  --card-radius: 22px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-body {
-   background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), sans-serif;
+html,
+body{
+  width:100%;
+  height:100%;
+}
+
+body{
+  color:white;
+  font-family:var(--font-geist-sans),sans-serif;
+
+  background:
+    linear-gradient(
+      rgba(5,12,9,.82),
+      rgba(5,12,9,.82)
+    ),
+    url("/images/backgrounds/default.jpg");
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+
+  overflow:hidden;
+}
+
+::-webkit-scrollbar{
+  width:8px;
+}
+
+::-webkit-scrollbar-thumb{
+  background:#1f8f4c;
+  border-radius:20px;
+}
+
+::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.glass{
+
+  background:rgba(18,32,26,.55);
+
+  backdrop-filter:blur(20px);
+
+  -webkit-backdrop-filter:blur(20px);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:22px;
+
+  box-shadow:
+  0 8px 40px rgba(0,0,0,.35);
+
+}
+
+.glass-hover{
+
+  transition:.25s;
+
+}
+
+.glass-hover:hover{
+
+  transform:translateY(-3px);
+
+  border-color:rgba(34,197,94,.45);
+
+  box-shadow:
+  0 15px 40px rgba(0,0,0,.45);
+
+}
+
+input{
+
+  background:rgba(255,255,255,.06)!important;
+
+  border:1px solid rgba(255,255,255,.10)!important;
+
+  color:white!important;
+
+}
+
+input::placeholder{
+
+  color:#d1d5db;
+
+}
+
+button{
+
+  transition:.25s;
+
+}
+
+button:hover{
+
+  transform:translateY(-2px);
+
+}
+
+table{
+
+  color:white;
+
+}
+
+a{
+
+  text-decoration:none;
+
+  color:inherit;
 
 }

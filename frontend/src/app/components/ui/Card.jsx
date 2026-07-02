@@ -1,18 +1,23 @@
 export default function Card({
   children,
   className = "",
+  padding = "p-6",
+  hover = true,
+  border = true,
+  onClick,
 }) {
   return (
     <div
+      onClick={onClick}
       className={`
-      bg-white
-      rounded-2xl
-      border
-      border-gray-200
-      shadow-sm
-      p-6
-      ${className}
-    `}
+        glass
+        ${hover ? "glass-hover transition-all duration-300" : ""}
+        ${border ? "border border-white/10" : ""}
+        ${padding}
+        rounded-2xl
+        ${onClick ? "cursor-pointer" : ""}
+        ${className}
+      `}
     >
       {children}
     </div>

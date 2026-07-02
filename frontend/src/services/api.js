@@ -6,6 +6,8 @@ export async function api(endpoint, options = {}) {
       ? localStorage.getItem("token")
       : null;
 
+  console.log("API:", `${API_URL}${endpoint}`);
+
   const response = await fetch(`${API_URL}${endpoint}`, {
     headers: {
       "Content-Type": "application/json",
@@ -16,7 +18,11 @@ export async function api(endpoint, options = {}) {
     ...options,
   });
 
-  const data = await response.json();
+  const text = await response.text();
+
+  console.log("Resposta:", text);
+
+  const data = JSON.parse(text);
 
   if (!response.ok) {
     throw new Error(data.message || "Erro na API");
