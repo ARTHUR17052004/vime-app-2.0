@@ -22,6 +22,7 @@ export default function InquilinosPage() {
       localStorage.getItem("vime-inquilinos") || "[]"
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInquilinos(dados);
 
     setCarregado(true);

@@ -1620,3 +1620,39 @@ Vistorias
 
 Relatórios
 ████████░░
+
+📄 Nova documentação
+Sprint 04 — Layout Premium (Nova Estratégia)
+
+Objetivo: reconstruir a experiência visual do VIME mantendo a lógica já implementada.
+
+Etapas
+Novo MainLayout.
+Nova Sidebar com ícones e suporte a recolher.
+Nova Topbar com busca, notificações e perfil.
+Container central com largura máxima e espaçamentos consistentes.
+Novo Dashboard sobre essa base.
+Integração dos componentes existentes ao novo layout.
+E tem uma última decisão que eu acho importante
+
+Eu não vou mais te mandar um componente por vez.
+
+Dessa forma levaríamos semanas para chegar no visual que você quer.
+
+Em vez disso, eu quero trabalhar em blocos completos.
+
+Exemplo:
+
+Entrega 1: MainLayout + Sidebar + Topbar (tudo integrado).
+Entrega 2: Dashboard completo (KPIs, gráficos, atividades e alertas).
+Entrega 3: Aplicação do novo visual aos demais módulos.
+
+Assim, a cada entrega você já vê uma mudança grande na interface, em vez de pequenas melhorias isoladas. Pela referência que você escolheu, esse é o caminho que mais faz sentido para chegar ao resultado que você realmente quer.
+Sprint 05 — Layout Premium
+Entrega 02
+
+Arquivo atualizado:
+
+src/app/components/layout/Sidebar.jsx
+
+Status: ✅ Estrutura base concluída.
