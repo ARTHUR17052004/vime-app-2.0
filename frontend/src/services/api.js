@@ -20,13 +20,18 @@ export async function api(endpoint, options = {}) {
 
   const text = await response.text();
 
-  console.log("Resposta:", text);
+let data = {};
 
-  const data = JSON.parse(text);
+try {
+  data = text ? JSON.parse(text) : {};
+} catch {
+  console.error("Resposta da API:", text);
+  throw new Error("A API não retornou um JSON válido.");
+}
 
-  if (!response.ok) {
-    throw new Error(data.message || "Erro na API");
-  }
+if (!response.ok) {
+  throw new Error(data.message || "Erro na API");
+}
 
-  return data;
+return data;
 }

@@ -3,7 +3,7 @@
 export default function DashboardHeader({
   usuario = "Arthur",
   modulo = "Dashboard",
-  sistema = "VIME 2.0",
+  sistema = "2.0",
   ultimaAtualizacao,
 }) {
   const hora = new Date().getHours();
@@ -24,38 +24,83 @@ export default function DashboardHeader({
   });
 
   return (
-    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
+    <section
+      className="
+        pt-6
+        mb-10
+      "
+    >
+      <div className="flex items-end justify-between">
 
-      <div>
+        {/* ESQUERDA */}
 
-        <h1 className="text-4xl font-bold text-gray-800">
-          {saudacao}, {usuario} 👋
-        </h1>
+        <div className="pt-2">
 
-        <p className="text-gray-500 mt-2 capitalize">
-          {hoje}
-        </p>
+          <h1
+            className="
+              text-4xl
+              xl:text-[52px]
+              font-extrabold
+              tracking-tight
+              text-white
+              leading-none
+            "
+          >
+            {saudacao}, {usuario}
+            <span className="ml-3">👋</span>
+          </h1>
 
-        {ultimaAtualizacao && (
-          <p className="text-xs text-gray-400 mt-1">
-            Atualizado em {ultimaAtualizacao}
+          <p
+            className="
+              mt-3
+              text-base
+              text-gray-300
+              capitalize
+              font-medium
+            "
+          >
+            {hoje}
           </p>
-        )}
+
+          {ultimaAtualizacao && (
+            <p className="mt-2 text-sm text-gray-400">
+              Atualizado em {ultimaAtualizacao}
+            </p>
+          )}
+
+        </div>
+
+        {/* DIREITA */}
+
+        <div className="text-right select-none pt-4">
+
+          <p
+            className="
+              text-[11px]
+              uppercase
+              tracking-[0.45em]
+              text-emerald-400
+              font-semibold
+            "
+          >
+            {modulo}
+          </p>
+
+          <h2
+            className="
+              mt-1
+              text-5xl
+              font-black
+              text-emerald-500
+              leading-none
+            "
+          >
+            {sistema}
+          </h2>
+
+        </div>
 
       </div>
-
-      <div className="text-left lg:text-right">
-
-        <p className="text-sm uppercase tracking-widest text-gray-500">
-          {modulo}
-        </p>
-
-        <h2 className="text-3xl font-bold text-green-700">
-          {sistema}
-        </h2>
-
-      </div>
-
-    </div>
+    </section>
   );
 }

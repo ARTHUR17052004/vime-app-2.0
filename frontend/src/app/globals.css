@@ -1,90 +1,226 @@
 @import "tailwindcss";
 
+/* =========================================================
+   VARIÁVEIS
+========================================================= */
+
 :root {
+
   --background: #08140f;
   --foreground: #ffffff;
 
-  --glass: rgba(16, 33, 26, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --primary: #12d98b;
+  --primary-dark: #0ca76b;
 
-  --primary: #16a34a;
-  --primary-hover: #15803d;
+  --glass: rgba(18, 28, 36, .56);
+  --glass-border: rgba(255,255,255,.08);
 
-  --card-radius: 22px;
+  --card-radius:22px;
+
 }
 
+/* =========================================================
+   TEMA
+========================================================= */
+
 @theme inline {
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
 }
 
+/* =========================================================
+   RESET
+========================================================= */
+
 *{
+
   margin:0;
   padding:0;
   box-sizing:border-box;
+
 }
 
 html,
 body{
+
   width:100%;
   height:100%;
+
 }
 
 body{
+
   color:white;
+
   font-family:var(--font-geist-sans),sans-serif;
 
   background:
+
     linear-gradient(
-      rgba(5,12,9,.82),
-      rgba(5,12,9,.82)
+
+      rgba(7,14,10,.52),
+
+      rgba(7,14,10,.58)
+
     ),
+
     url("/images/backgrounds/default.jpg");
 
-  background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
+  background-size:cover;
   background-attachment:fixed;
 
   overflow:hidden;
+
+  -webkit-font-smoothing:antialiased;
+
+  text-rendering:optimizeLegibility;
+
 }
 
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
 ::-webkit-scrollbar{
-  width:8px;
+
+  width:9px;
+
 }
 
 ::-webkit-scrollbar-thumb{
-  background:#1f8f4c;
-  border-radius:20px;
+
+  background:#118e61;
+
+  border-radius:30px;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+  background:#15d98b;
+
 }
 
 ::-webkit-scrollbar-track{
+
   background:transparent;
+
 }
+
+/* =========================================================
+   GLASS
+========================================================= */
 
 .glass{
 
-  background:rgba(18,32,26,.55);
+  position:relative;
 
-  backdrop-filter:blur(20px);
+  overflow:hidden;
 
-  -webkit-backdrop-filter:blur(20px);
+  background:
 
-  border:1px solid rgba(255,255,255,.08);
+    linear-gradient(
+
+      145deg,
+
+      rgba(34,44,58,.78),
+
+      rgba(15,20,31,.66)
+
+    );
+
+  backdrop-filter:blur(26px);
+
+  -webkit-backdrop-filter:blur(26px);
+
+  border:1px solid rgba(255,255,255,.07);
 
   border-radius:22px;
 
   box-shadow:
-  0 8px 40px rgba(0,0,0,.35);
+
+      inset 0 1px 0 rgba(255,255,255,.05),
+
+      0 8px 35px rgba(0,0,0,.26);
 
 }
 
+/* brilho superior */
+
+.glass::before{
+
+  content:"";
+
+  position:absolute;
+
+  left:0;
+  right:0;
+  top:0;
+
+  height:1px;
+
+  background:
+
+    linear-gradient(
+
+      to right,
+
+      transparent,
+
+      rgba(255,255,255,.28),
+
+      transparent
+
+    );
+
+}
+
+/* brilho interno */
+
+.glass::after{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:
+
+    linear-gradient(
+
+      135deg,
+
+      rgba(255,255,255,.03),
+
+      transparent 45%
+
+    );
+
+  pointer-events:none;
+
+}
+
+/* =========================================================
+   HOVER
+========================================================= */
+
 .glass-hover{
 
-  transition:.25s;
+  transition:
+
+      transform .28s,
+
+      border-color .28s,
+
+      box-shadow .28s;
 
 }
 
@@ -92,32 +228,63 @@ body{
 
   transform:translateY(-3px);
 
-  border-color:rgba(34,197,94,.45);
+  border-color:rgba(18,217,139,.20);
 
   box-shadow:
-  0 15px 40px rgba(0,0,0,.45);
+
+      inset 0 1px 0 rgba(255,255,255,.06),
+
+      0 12px 40px rgba(18,217,139,.08);
 
 }
 
+/* =========================================================
+   INPUTS
+========================================================= */
+
 input{
 
-  background:rgba(255,255,255,.06)!important;
+  background:rgba(255,255,255,.05)!important;
 
-  border:1px solid rgba(255,255,255,.10)!important;
+  border:1px solid rgba(255,255,255,.08)!important;
 
   color:white!important;
+
+  transition:.25s;
+
+}
+
+input:focus{
+
+  outline:none;
+
+  border-color:rgba(18,217,139,.35)!important;
+
+  box-shadow:
+
+      0 0 0 3px rgba(18,217,139,.08);
 
 }
 
 input::placeholder{
 
-  color:#d1d5db;
+  color:#aab2b8;
 
 }
 
+/* =========================================================
+   BOTÕES
+========================================================= */
+
 button{
 
-  transition:.25s;
+  transition:
+
+      transform .25s,
+
+      box-shadow .25s,
+
+      background .25s;
 
 }
 
@@ -127,16 +294,52 @@ button:hover{
 
 }
 
+/* =========================================================
+   LINKS
+========================================================= */
+
+a{
+
+  color:inherit;
+
+  text-decoration:none;
+
+}
+
+/* =========================================================
+   TABELAS
+========================================================= */
+
 table{
 
   color:white;
 
 }
 
-a{
+/* =========================================================
+   ANIMAÇÕES
+========================================================= */
 
-  text-decoration:none;
+@keyframes fadeUp{
 
-  color:inherit;
+  from{
+
+    opacity:0;
+    transform:translateY(18px);
+
+  }
+
+  to{
+
+    opacity:1;
+    transform:none;
+
+  }
+
+}
+
+.fade-up{
+
+  animation:fadeUp .45s ease;
 
 }
