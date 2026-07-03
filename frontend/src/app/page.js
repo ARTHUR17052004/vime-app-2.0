@@ -1,9 +1,17 @@
 "use client";
 
+import { motion } from "framer-motion";
+import {
+  Users,
+  Building2,
+  House,
+  ClipboardList,
+} from "lucide-react";
+
 import MainLayout from "./components/layout/MainLayout";
 
 import DashboardHeader from "./components/dashboard/DashboardHeader";
-import StatsCard from "./components/dashboard/StatsCard";
+import DashboardStatsCard from "./components/dashboard/DashboardStatsCard";
 import FinancialCard from "./components/dashboard/FinancialCard";
 import OccupancyCard from "./components/dashboard/OccupancyCard";
 import RecentActivities from "./components/dashboard/RecentActivities";
@@ -11,12 +19,22 @@ import QuickActions from "./components/dashboard/QuickActions";
 import AlertsPanel from "./components/dashboard/AlertsPanel";
 import SystemStatus from "./components/dashboard/SystemStatus";
 
+import FadeIn from "./components/ui/FadeIn";
 import Loading from "./components/ui/Loading";
+
+import Page from "./components/ui/Page";
+import PageContainer from "./components/ui/PageContainer";
+import PageSection from "./components/ui/PageSection";
+import PageGrid from "./components/ui/PageGrid";
 
 import { useDashboard } from "../hooks/useDashboard";
 
 export default function Home() {
-  const { dados, loading, erro } = useDashboard();
+  const {
+    dados,
+    loading,
+    erro,
+  } = useDashboard();
 
   if (loading) {
     return (
@@ -28,60 +46,167 @@ export default function Home() {
 
   return (
     <MainLayout>
-      <DashboardHeader />
+      <Page>
+        <PageContainer>
 
-      {erro && (
-        <div className="mb-6 rounded-xl bg-yellow-100 border border-yellow-300 p-4 text-yellow-800">
-          API indisponível. Exibindo dados locais.
-        </div>
-      )}
+          <motion.main
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.55,
+              ease: "easeOut",
+            }}
+            className="space-y-8"
+          >
 
-      <div className="grid grid-cols-4 gap-6 mt-8">
-        <StatsCard
-          title="Inquilinos"
-          value={dados?.inquilinos ?? 0}
-        />
+            <FadeIn delay={0}>
+              <DashboardHeader />
+            </FadeIn>
 
-        <StatsCard
-          title="Unidades"
-          value={dados?.unidades ?? 0}
-        />
+            {erro && (
+              <div className="rounded-2xl border border-yellow-500/30 bg-yellow-500/10 backdrop-blur-xl px-6 py-4 text-yellow-300">
+                API indisponível. Exibindo dados locais.
+              </div>
+            )}
 
-        <StatsCard
-          title="Kitnets"
-          value={dados?.kitnets ?? 0}
-        />
+            {/* ========================= */}
+            {/* CARDS SUPERIORES */}
+            {/* ========================= */}
 
-        <StatsCard
-          title="Solicitações"
-          value={dados?.solicitacoesPendentes ?? 0}
-        />
-      </div>
+            <FadeIn delay={0.10}>
+              <PageSection spacing="xl">
 
-     <div className="grid grid-cols-3 gap-6 mt-8">
-        <FinancialCard
-          financeiro={dados?.financeiro}
-        />
+                <PageGrid cols={4}>
 
-        <OccupancyCard
-          ocupacao={dados?.ocupacao}
-        />
+                  <DashboardStatsCard
+                    title="Inquilinos"
+                    value={dados?.inquilinos ?? 0}
+                    subtitle="Ativos"
+                    icon={Users}
+                  />
 
-        <RecentActivities
-          atividades={dados?.atividades}
-        />
-      </div>
+                  <DashboardStatsCard
+                    title="Unidades"
+                    value={dados?.unidades ?? 0}
+                    subtitle="Ativas"
+                    icon={Building2}
+                  />
 
-      <div className="grid grid-cols-3 gap-6 mt-8">
-        <QuickActions />
+                  <DashboardStatsCard
+                    title="Kitnets"
+                    value={dados?.kitnets ?? 0}
+                    subtitle="Total"
+                    icon={House}
+                  />
 
-        <AlertsPanel
-          alertas={dados?.alertas}
-        />
+                  <DashboardStatsCard
+                    title="Solicitações"
+                    value={dados?.solicitacoesPendentes ?? 0}
+                    subtitle="Pendentes"
+                    icon={ClipboardList}
+                  />
 
-        <SystemStatus />
-      </div>
+                </PageGrid>
 
+              </PageSection>
+            </FadeIn>
+
+            {/* ========================= */}
+            {/* FINANCEIRO */}
+            {/* ========================= */}
+
+            <FadeIn delay={0.20}>
+
+              <PageSection spacing="xxl">
+
+                <PageGrid
+                  layout="8-4"
+                  gap="relaxed"
+                  className="grid-cols-12"
+                >
+
+                  <div className="col-span-12 xl:col-span-8">
+                    <FinancialCard
+                      financeiro={dados?.financeiro}
+                    />
+                  </div>
+
+                  <div className="col-span-12 xl:col-span-4">
+                    <RecentActivities
+                      atividades={dados?.atividades}
+                    />
+                  </div>
+
+                </PageGrid>
+
+              </PageSection>
+
+            </FadeIn>
+
+            {/* ========================= */}
+            {/* OCUPAÇÃO */}
+            {/* ========================= */}
+
+            <FadeIn delay={0.30}>
+
+              <PageSection spacing="xxl">
+
+                <PageGrid
+                  layout="5-7"
+                  gap="relaxed"
+                  className="grid-cols-12"
+                >
+
+                  <div className="col-span-12 xl:col-span-5">
+                    <OccupancyCard
+                      ocupacao={dados?.ocupacao}
+                    />
+                  </div>
+
+                  <div className="col-span-12 xl:col-span-7">
+                    <AlertsPanel
+                      alertas={dados?.alertas}
+                    />
+                  </div>
+
+                </PageGrid>
+
+              </PageSection>
+
+            </FadeIn>
+
+            {/* ========================= */}
+            {/* AÇÕES */}
+            {/* ========================= */}
+
+            <FadeIn delay={0.40}>
+
+              <PageSection spacing="xxl">
+
+                <PageGrid
+                  layout="5-7"
+                  gap="relaxed"
+                  className="grid-cols-12"
+                >
+
+                  <div className="col-span-12 xl:col-span-5">
+                    <QuickActions />
+                  </div>
+
+                  <div className="col-span-12 xl:col-span-7">
+                    <SystemStatus />
+                  </div>
+
+                </PageGrid>
+
+              </PageSection>
+
+            </FadeIn>
+
+          </motion.main>
+
+        </PageContainer>
+      </Page>
     </MainLayout>
   );
 }

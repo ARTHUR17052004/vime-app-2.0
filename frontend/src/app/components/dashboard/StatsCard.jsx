@@ -1,77 +1,43 @@
 "use client";
 
-import Card from "../ui/Card";
+import DashboardCard from "./DashboardCard";
+import dashboard from "../../config/dashboard";
 
 export default function StatsCard({
   title,
   value,
-  subtitle,
+  subtitle = "",
   icon,
-  color = "text-green-700",
-  trend,
-  trendType = "positive",
   onClick,
 }) {
   return (
-    <Card
+    <DashboardCard
       onClick={onClick}
-      className="flex flex-col justify-between h-full"
+      className={dashboard.stats.height}
     >
-      <div className="flex items-start justify-between">
+      <div className={dashboard.stats.container}>
 
-        <div>
+        <div className={dashboard.stats.header}>
 
-          <p className="text-sm font-medium text-gray-500">
+          <span className={dashboard.stats.title}>
             {title}
-          </p>
+          </span>
 
-          <h2 className={`text-4xl font-bold mt-3 ${color}`}>
-            {value}
-          </h2>
-
-        </div>
-
-        {icon && (
-          <div className="text-3xl">
+          <div className={dashboard.stats.icon}>
             {icon}
           </div>
-        )}
-
-      </div>
-
-      {(subtitle || trend) && (
-
-        <div className="mt-5 flex items-center justify-between">
-
-          {subtitle && (
-            <p className="text-sm text-gray-400">
-              {subtitle}
-            </p>
-          )}
-
-          {trend && (
-
-            <span
-              className={`
-                text-sm
-                font-semibold
-
-                ${
-                  trendType === "positive"
-                    ? "text-green-600"
-                    : "text-red-600"
-                }
-              `}
-            >
-              {trend}
-            </span>
-
-          )}
 
         </div>
 
-      )}
+        <h2 className={dashboard.stats.value}>
+          {value}
+        </h2>
 
-    </Card>
+        <span className={dashboard.stats.subtitle}>
+          {subtitle}
+        </span>
+
+      </div>
+    </DashboardCard>
   );
 }
