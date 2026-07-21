@@ -1,70 +1,218 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import {
+  House,
+  Ruler,
+  Wallet,
+  DoorOpen,
+} from "lucide-react";
+
+import Card from "../ui/Card";
+import KitnetActionsMenu from "./KitnetActionsMenu";
 
 export default function KitnetCard({
   kitnet,
+  onEdit,
+  onDelete,
 }) {
+
   const router = useRouter();
 
   return (
-    <div
+
+    <Card
+
       onClick={() =>
         router.push(`/kitnets/${kitnet.id}`)
       }
+
       className="
-        bg-white
-        rounded-2xl
-        shadow-md
-        border
-        p-6
         cursor-pointer
+
         transition-all
-        hover:shadow-xl
+
         hover:-translate-y-1
       "
+
     >
-      <div className="flex justify-between items-start mb-4">
-        <h3 className="text-2xl font-bold text-gray-900">
-          {kitnet.nome}
-        </h3>
 
-        <span
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            kitnet.status === "Disponível"
-              ? "bg-green-100 text-green-700"
-              : kitnet.status === "Ocupada"
-              ? "bg-red-100 text-red-700"
-              : "bg-yellow-100 text-yellow-700"
-          }`}
+      <div className="flex items-start justify-between">
+
+        <div>
+
+          <h2
+            className="
+              text-2xl
+              font-bold
+              text-white
+            "
+          >
+            {kitnet.nome}
+          </h2>
+
+          <span
+
+            className={`
+
+              inline-flex
+
+              mt-3
+
+              rounded-full
+
+              px-3
+              py-1
+
+              text-xs
+
+              font-semibold
+
+              ${
+                kitnet.status === "Disponível"
+
+                  ? "bg-emerald-500/15 text-emerald-400"
+
+                  : kitnet.status === "Ocupada"
+
+                  ? "bg-sky-500/15 text-sky-400"
+
+                  : "bg-yellow-500/15 text-yellow-400"
+
+              }
+
+            `}
+
+          >
+
+            {kitnet.status}
+
+          </span>
+
+        </div>
+
+        <div
+          onClick={(e) =>
+            e.stopPropagation()
+          }
         >
-          {kitnet.status}
-        </span>
-      </div>
 
-      <div className="space-y-2 text-gray-800">
+          <KitnetActionsMenu
 
-        <p>
-          🏠 <strong>Unidade:</strong>{" "}
-          {kitnet.unidadeNome}
-        </p>
+            kitnet={kitnet}
 
-        <p>
-          📏 <strong>Metragem:</strong>{" "}
-          {kitnet.metragem} m²
-        </p>
+            onEdit={onEdit}
 
-        <p>
-          💰 <strong>Aluguel:</strong>{" "}
-          R$ {kitnet.aluguel}
-        </p>
+            onDelete={onDelete}
 
-        <p>
-          🚪 <strong>Número:</strong>{" "}
-          {kitnet.numero}
-        </p>
+          />
+
+        </div>
 
       </div>
-    </div>
+
+      <div
+        className="
+          mt-8
+
+          space-y-4
+        "
+      >
+
+        <Info
+          icon={<House size={17} />}
+          label="Unidade"
+          value={kitnet.unidadeNome}
+        />
+
+        <Info
+          icon={<DoorOpen size={17} />}
+          label="Número"
+          value={kitnet.numero}
+        />
+
+        <Info
+          icon={<Ruler size={17} />}
+          label="Metragem"
+          value={`${kitnet.metragem} m²`}
+        />
+
+        <Info
+          icon={<Wallet size={17} />}
+          label="Aluguel"
+          value={`R$ ${kitnet.aluguel}`}
+        />
+
+      </div>
+
+    </Card>
+
   );
+
+}
+
+function Info({
+
+  icon,
+
+  label,
+
+  value,
+
+}) {
+
+  return (
+
+    <div
+      className="
+        flex
+
+        items-center
+
+        justify-between
+
+        border-b
+
+        border-white/5
+
+        pb-3
+      "
+    >
+
+      <div
+        className="
+          flex
+          items-center
+          gap-3
+
+          text-gray-400
+        "
+      >
+
+        {icon}
+
+        <span>
+
+          {label}
+
+        </span>
+
+      </div>
+
+      <span
+        className="
+          font-semibold
+
+          text-white
+        "
+      >
+
+        {value || "-"}
+
+      </span>
+
+    </div>
+
+  );
+
 }

@@ -1,84 +1,214 @@
+"use client";
+
 export default function Button({
+
   children,
+
   onClick,
+
   type = "button",
+
   variant = "primary",
+
   size = "md",
+
   fullWidth = false,
+
   disabled = false,
+
   loading = false,
+
   leftIcon,
+
   rightIcon,
+
+  login = false,
+
   className = "",
+
 }) {
   const variants = {
-    primary:
-      "bg-green-700 hover:bg-green-800 text-white",
 
-    secondary:
-      "bg-gray-100 hover:bg-gray-200 text-gray-700",
+    primary: `
+      bg-emerald-600
+      hover:bg-emerald-500
+      text-white
 
-    danger:
-      "bg-red-600 hover:bg-red-700 text-white",
+      border
+      border-emerald-500/30
 
-    warning:
-      "bg-yellow-500 hover:bg-yellow-600 text-white",
+      shadow-lg
+      shadow-emerald-950/40
+    `,
 
-    info:
-      "bg-blue-600 hover:bg-blue-700 text-white",
+    secondary: `
+      bg-white/5
+      hover:bg-white/10
+
+      border
+      border-white/10
+
+      text-white
+    `,
+
+    danger: `
+      bg-red-600
+      hover:bg-red-500
+
+      border
+      border-red-500/30
+
+      text-white
+    `,
+
+    warning: `
+      bg-yellow-500
+      hover:bg-yellow-400
+
+      border
+      border-yellow-400/30
+
+      text-black
+    `,
+
+    info: `
+      bg-sky-600
+      hover:bg-sky-500
+
+      border
+      border-sky-500/30
+
+      text-white
+    `,
+
+    ghost: `
+      bg-transparent
+
+      hover:bg-white/5
+
+      border
+      border-white/10
+
+      text-gray-300
+    `,
   };
 
   const sizes = {
-    sm: "px-3 py-2 text-sm",
-    md: "px-5 py-3",
-    lg: "px-7 py-4 text-lg",
+
+    sm: `
+      h-10
+      px-4
+
+      text-sm
+    `,
+
+    md: `
+      h-11
+      px-5
+
+      text-sm
+    `,
+
+    lg: `
+      h-12
+      px-6
+
+      text-base
+    `,
   };
 
   return (
+
     <button
+
       type={type}
+
       onClick={onClick}
+
       disabled={disabled || loading}
+
       className={`
         inline-flex
         items-center
         justify-center
         gap-2
 
-        rounded-xl
-        font-medium
-
         transition-all
-        duration-200
+        duration-300
 
-        focus:outline-none
-        focus:ring-2
-        focus:ring-green-500
+        font-semibold
 
-        ${variants[variant]}
-        ${sizes[size]}
-        ${fullWidth ? "w-full" : ""}
-        ${disabled ? "opacity-50 cursor-not-allowed" : ""}
+        ${
+          login
+            ? `
+              h-14
+              w-full
+
+              rounded-2xl
+
+              bg-gradient-to-r
+              from-emerald-500
+              to-emerald-600
+
+              hover:from-emerald-400
+              hover:to-emerald-500
+
+              text-white
+
+              shadow-lg
+              shadow-emerald-500/20
+            `
+            : `
+              rounded-xl
+
+              ${variants[variant]}
+
+              ${sizes[size]}
+            `
+        }
+
+        ${
+          fullWidth ? "w-full" : ""
+        }
+
+        ${
+          disabled
+            ? "opacity-50 cursor-not-allowed"
+            : ""
+        }
+
         ${className}
-      `}
+    `}
     >
+
       {loading ? (
+
         <>
+
           <span className="animate-spin">
             ⏳
           </span>
 
           Carregando...
+
         </>
+
       ) : (
+
         <>
+
           {leftIcon}
 
           {children}
 
           {rightIcon}
+
         </>
+
       )}
+
     </button>
+
   );
+
 }

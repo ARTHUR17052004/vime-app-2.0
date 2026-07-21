@@ -1,17 +1,23 @@
 "use client";
 
 import { useEffect } from "react";
+import { X } from "lucide-react";
 
 export default function Modal({
   open,
   onClose,
   children,
+
   title,
   subtitle,
+
   size = "lg",
+
   closeOnOverlay = true,
 }) {
+
   useEffect(() => {
+
     function handleKey(e) {
       if (e.key === "Escape") {
         onClose?.();
@@ -25,6 +31,7 @@ export default function Modal({
     return () => {
       document.removeEventListener("keydown", handleKey);
     };
+
   }, [open, onClose]);
 
   if (!open) return null;
@@ -38,84 +45,206 @@ export default function Modal({
   };
 
   return (
+
     <div
+
       onClick={closeOnOverlay ? onClose : undefined}
+
       className="
+
         fixed
         inset-0
-        z-50
+
+        z-[999]
+
         flex
         items-center
         justify-center
-        bg-black/50
-        backdrop-blur-sm
-        p-6
+
+        bg-black/60
+
+        backdrop-blur-md
+
+        p-8
+
+        animate-in
+        fade-in
+        duration-300
+
       "
+
     >
+
       <div
+
         onClick={(e) => e.stopPropagation()}
+
         className={`
-          glass
-          rounded-2xl
-          shadow-2xl
+
+          relative
+
           w-full
+
           ${sizes[size]}
-          max-h-[90vh]
-          flex
-          flex-col
+
+          max-h-[92vh]
+
+          overflow-hidden
+
+          rounded-[26px]
+
+          border
+          border-white/5
+
+          bg-gradient-to-br
+          from-[#1b2728]/90
+          via-[#1a242c]/88
+          to-[#151d26]/90
+
+          backdrop-blur-3xl
+
+          shadow-[0_30px_80px_rgba(0,0,0,.45)]
+
           animate-in
+          zoom-in-95
           fade-in
-          zoom-in
+          duration-300
+
         `}
+
       >
+
         {(title || subtitle) && (
-          <div className="border-b border-white/10 px-6 py-5">
 
-            <div className="flex justify-between items-start">
+          <div
 
-              <div>
+            className="
 
-                {title && (
-                  <h2 className="text-2xl font-bold text-white">
-                    {title}
-                  </h2>
-                )}
+              flex
+              items-start
+              justify-between
 
-                {subtitle && (
-                  <p className="text-gray-300 mt-1">
-                    {subtitle}
-                  </p>
-                )}
+              border-b
+              border-white/5
 
-              </div>
+              px-8
+              py-6
 
-              <button
-                onClick={onClose}
-                className="
-                  text-gray-300
-                  hover:text-white
-                  text-2xl
-                "
-              >
-                ×
-              </button>
+            "
+
+          >
+
+            <div>
+
+              {title && (
+
+                <h2
+
+                  className="
+
+                    text-3xl
+
+                    font-bold
+
+                    text-white
+
+                  "
+
+                >
+
+                  {title}
+
+                </h2>
+
+              )}
+
+              {subtitle && (
+
+                <p
+
+                  className="
+
+                    mt-2
+
+                    text-sm
+
+                    text-gray-400
+
+                  "
+
+                >
+
+                  {subtitle}
+
+                </p>
+
+              )}
 
             </div>
 
+            <button
+
+              onClick={onClose}
+
+              className="
+
+                flex
+                items-center
+                justify-center
+
+                w-11
+                h-11
+
+                rounded-xl
+
+                bg-white/5
+
+                border
+                border-white/5
+
+                text-gray-400
+
+                transition-all
+                duration-300
+
+                hover:bg-red-500/15
+                hover:border-red-500/20
+                hover:text-red-400
+
+              "
+
+            >
+
+              <X size={20} />
+
+            </button>
+
           </div>
+
         )}
 
         <div
+
           className="
+
             overflow-y-auto
-            p-6
-            flex-1
+
+            max-h-[calc(92vh-105px)]
+
+            p-8
+
           "
+
         >
+
           {children}
+
         </div>
 
       </div>
+
     </div>
+
   );
+
 }

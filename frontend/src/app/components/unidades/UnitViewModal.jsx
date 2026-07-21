@@ -1,71 +1,133 @@
 "use client";
 
+import Modal from "../ui/Modal";
+import Card from "../ui/Card";
+
+function Info({ label, value }) {
+  return (
+    <Card className="p-5">
+
+      <p className="text-xs uppercase tracking-[0.18em] text-gray-500">
+        {label}
+      </p>
+
+      <p className="mt-2 text-base font-semibold text-white">
+        {value || "-"}
+      </p>
+
+    </Card>
+  );
+}
+
 export default function UnitViewModal({
   unidade,
   isOpen,
   onClose,
 }) {
+
   if (!isOpen || !unidade) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-4xl p-6 shadow-xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            Detalhes da Unidade
-          </h2>
 
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500"
-          >
-            ✕
-          </button>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={unidade.nome}
+      subtitle="Informações completas da unidade"
+      size="xl"
+    >
+
+      <div className="space-y-8">
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <Info
+            label="Nome"
+            value={unidade.nome}
+          />
+
+          <Info
+            label="CEP"
+            value={unidade.cep}
+          />
+
+          <Info
+            label="Logradouro"
+            value={unidade.logradouro}
+          />
+
+          <Info
+            label="Número"
+            value={unidade.numero}
+          />
+
+          <Info
+            label="Complemento"
+            value={unidade.complemento}
+          />
+
+          <Info
+            label="Bairro"
+            value={unidade.bairro}
+          />
+
+          <Info
+            label="Cidade"
+            value={unidade.cidade}
+          />
+
+          <Info
+            label="UF"
+            value={unidade.uf}
+          />
+
+          <Info
+            label="Locador"
+            value={unidade.locador}
+          />
+
+          <Info
+            label="Kitnets"
+            value={unidade.kitnets}
+          />
+
+          <Info
+            label="Valor do aluguel"
+            value={
+              unidade.aluguel
+                ? `R$ ${unidade.aluguel}`
+                : "-"
+            }
+          />
+
+          <Info
+            label="Status"
+            value={unidade.status}
+          />
+
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <Card className="p-6">
 
-          <Info label="Nome" value={unidade.nome} />
-          <Info label="CEP" value={unidade.cep} />
+          <p className="text-xs uppercase tracking-[0.18em] text-gray-500">
 
-          <Info label="Endereço" value={unidade.endereco} />
-          <Info label="Número" value={unidade.numero} />
+            Observações
 
-          <Info label="Bairro" value={unidade.bairro} />
-          <Info label="Cidade" value={unidade.cidade} />
+          </p>
 
-          <Info label="UF" value={unidade.uf} />
-          <Info label="Locador" value={unidade.locador} />
+          <p className="mt-3 whitespace-pre-wrap leading-7 text-gray-300">
 
-          <Info label="Kitnets" value={unidade.kitnets} />
-          <Info label="Status" value={unidade.status} />
+            {unidade.observacoes ||
+              "Nenhuma observação cadastrada."}
 
-          <div className="col-span-2">
-            <label className="font-medium text-gray-600">
-              Observações
-            </label>
+          </p>
 
-            <div className="mt-2 border rounded-lg p-3 bg-gray-50 min-h-[100px]">
-              {unidade.observacoes || "Nenhuma observação"}
-            </div>
-          </div>
+        </Card>
 
-        </div>
       </div>
-    </div>
-  );
-}
 
-function Info({ label, value }) {
-  return (
-    <div>
-      <label className="font-medium text-gray-600">
-        {label}
-      </label>
+    </Modal>
 
-      <div className="mt-1 border rounded-lg p-3 bg-gray-50">
-        {value || "-"}
-      </div>
-    </div>
   );
+
 }
