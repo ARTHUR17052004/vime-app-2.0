@@ -1,32 +1,21 @@
 "use client";
 
+import Modal from "../ui/Modal";
+
 export default function UnitModal({
   isOpen,
   onClose,
   children,
 }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Nova Unidade
-          </h2>
-
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-red-500 text-2xl transition"
-          >
-            ✕
-          </button>
-        </div>
-
-        <div className="p-6">
-          {children}
-        </div>
-      </div>
-    </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title="Unidade"
+      subtitle="Cadastro e gerenciamento da unidade"
+      size="xl"
+    >
+      {children}
+    </Modal>
   );
 }
