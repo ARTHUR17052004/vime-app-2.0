@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 
 import MainLayout from "./components/layout/MainLayout";
-
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DashboardHeader from "./components/dashboard/DashboardHeader";
 import DashboardStatsCard from "./components/dashboard/DashboardStatsCard";
 import FinancialCard from "./components/dashboard/FinancialCard";
@@ -29,19 +29,33 @@ import PageGrid from "./components/ui/PageGrid";
 
 import { useDashboard } from "../hooks/useDashboard";
 
-export default function Home() {
   const {
     dados,
     loading,
     erro,
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   } = useDashboard();
 
   if (loading) {
     return (
+    <ProtectedRoute>
+
       <MainLayout>
-        <Loading />
+
+        <Page>
+
+          <PageContainer>
+
+            {/* todo o conteúdo atual */}
+
+          </PageContainer>
+
+        </Page>
+
       </MainLayout>
-    );
+
+    </ProtectedRoute>
+  );
   }
 
   return (
@@ -209,4 +223,3 @@ export default function Home() {
       </Page>
     </MainLayout>
   );
-}

@@ -146,7 +146,7 @@ export default function Button({
 
               rounded-2xl
 
-              bg-gradient-to-r
+              bg-linear-to-r
               from-emerald-500
               to-emerald-600
 
