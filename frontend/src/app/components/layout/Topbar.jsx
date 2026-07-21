@@ -1,13 +1,28 @@
 "use client";
-
+import { useAuth } from "../../../context/AuthContext";
+import { useState } from "react";
 import {
   Bell,
   Search,
   ChevronDown,
   Menu,
+  User,
+  LogOut,
+  Settings,
 } from "lucide-react";
 
 export default function Topbar() {
+  const { usuario, logout } = useAuth();
+
+  const nome =
+    usuario?.nome || "Visitante";
+
+  const perfil =
+    usuario?.perfil || "SEM PERFIL";
+
+  const inicial =
+    nome.charAt(0).toUpperCase();
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <header
       className="
@@ -224,7 +239,7 @@ export default function Topbar() {
     shadow-emerald-900/30
   "
 >
-  A
+  {inicial}
 </div>
 
 <div className="leading-tight">
@@ -236,7 +251,7 @@ export default function Topbar() {
       text-white
     "
   >
-    Arthur
+    {nome}
   </p>
 
   <p
@@ -245,34 +260,119 @@ export default function Topbar() {
       text-gray-400
     "
   >
-    Administrador
+    {perfil}
   </p>
 
 </div>
 
-<button
-  className="
-    w-8
-    h-8
+<div className="relative">
 
-    rounded-full
+  <button
+    onClick={() => setMenuOpen(!menuOpen)}
+    className="
+      w-8
+      h-8
+      rounded-full
+      flex
+      items-center
+      justify-center
+      hover:bg-white/5
+      transition
+    "
+  >
+    <ChevronDown
+      size={15}
+      className="text-gray-400"
+    />
+  </button>
 
-    flex
-    items-center
-    justify-center
+  {menuOpen && (
 
-    hover:bg-white/5
+    <div
+      className="
+        absolute
+        right-0
+        mt-3
+        w-56
 
-    transition
-  "
->
+        rounded-2xl
 
-  <ChevronDown
-    size={15}
-    className="text-gray-400"
-  />
+        border
+        border-white/10
 
-</button>
+        bg-slate-900/95
+
+        backdrop-blur-xl
+
+        shadow-2xl
+
+        overflow-hidden
+      "
+    >
+
+      <button
+        className="
+          w-full
+          flex
+          items-center
+          gap-3
+
+          px-5
+          py-4
+
+          text-white
+
+          hover:bg-white/5
+        "
+      >
+        <User size={17} />
+        Perfil
+      </button>
+
+      <button
+        className="
+          w-full
+          flex
+          items-center
+          gap-3
+
+          px-5
+          py-4
+
+          text-white
+
+          hover:bg-white/5
+        "
+      >
+        <Settings size={17} />
+        Configurações
+      </button>
+
+      <button
+        onClick={logout}
+        className="
+          w-full
+          flex
+          items-center
+          gap-3
+
+          px-5
+          py-4
+
+          text-red-400
+
+          hover:bg-red-500/10
+        "
+      >
+        <LogOut size={17} />
+        Sair
+      </button>
+
+    </div>
+
+  )}
+
+</div>
 
 </div>
 

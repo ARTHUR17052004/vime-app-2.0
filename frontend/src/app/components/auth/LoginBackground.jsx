@@ -25,7 +25,7 @@ export default function LoginBackground() {
         className="
           absolute
           inset-0
-          bg-gradient-to-br
+          bg-linear-to-br
           from-[#08120d]/80
           via-[#09110d]/70
           to-[#050607]/90
@@ -37,7 +37,7 @@ export default function LoginBackground() {
         className="
           absolute
           inset-0
-          backdrop-blur-[4px]
+          backdrop-blur-xs
         "
       />
 

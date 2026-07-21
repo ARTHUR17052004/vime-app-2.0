@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext({});
 
@@ -9,26 +9,35 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const usuarioStorage = localStorage.getItem("usuario");
+    try {
+      const usuarioStorage = localStorage.getItem("usuario");
 
-    if (token && usuarioStorage) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setUsuario(JSON.parse(usuarioStorage));
+      if (usuarioStorage) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setUsuario(JSON.parse(usuarioStorage));
+      }
+    } catch (error) {
+      console.error("Erro ao recuperar usuário:", error);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }, []);
 
   function login(token, usuario) {
-    localStorage.setItem("token", token);
-    localStorage.setItem("usuario", JSON.stringify(usuario));
+    document.cookie = `token=${token}; path=/; max-age=86400`;
+
+    localStorage.setItem(
+      "usuario",
+      JSON.stringify(usuario)
+    );
 
     setUsuario(usuario);
   }
 
   function logout() {
-    localStorage.removeItem("token");
+    document.cookie =
+      "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+
     localStorage.removeItem("usuario");
 
     setUsuario(null);
@@ -40,6 +49,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         usuario,
+        setUsuario,
         login,
         logout,
         autenticado: !!usuario,
@@ -49,4 +59,8 @@ export function AuthProvider({ children }) {
       {children}
     </AuthContext.Provider>
   );
+}
+
+export function useAuth() {
+  return useContext(AuthContext);
 }

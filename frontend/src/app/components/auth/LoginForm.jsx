@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Mail, Lock } from "lucide-react";
-
+import { useAuth } from "../../../context/AuthContext";
 import Button from "../ui/Button";
 import LoginInput from "./LoginInput";
 
@@ -12,7 +12,7 @@ import { api } from "../../../services/api";
 export default function LoginForm() {
 
   const router = useRouter();
-
+  const { login } = useAuth();
   const [email, setEmail] = useState("admin@vime.com");
   const [senha, setSenha] = useState("123456");
 
@@ -31,39 +31,26 @@ export default function LoginForm() {
     try {
 
       const response = await api("/auth/login", {
-
         method: "POST",
-
         body: JSON.stringify({
-
           email,
-
           senha,
-
         }),
-
       });
 
-      localStorage.setItem(
-        "token",
-        response.data.token
-      );
-
-      localStorage.setItem(
-        "usuario",
-        JSON.stringify(response.data.usuario)
+      login(
+        response.data.token,
+        response.data.usuario
       );
 
       if (lembrar) {
-
         localStorage.setItem(
           "vime-remember",
           "true"
         );
-
       }
 
-      router.push("/");
+      router.replace("/");
 
     } catch (err) {
 
