@@ -3,6 +3,15 @@
 import { useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+
+import PageHeader from "../components/common/PageHeader";
+import SearchInput from "../components/common/SearchInput";
+import PrimaryButton from "../components/common/PrimaryButton";
+import StatCounter from "../components/common/StatCounter";
+
 import LocadorModal from "../components/locadores/LocadorModal";
 import LocadorForm from "../components/locadores/LocadorForm";
 import LocadorCard from "../components/locadores/LocadorCard";
@@ -18,6 +27,9 @@ export default function LocadoresPage() {
   const [carregado, setCarregado] =
     useState(false);
 
+  const [search, setSearch] =
+    useState("");
+
   useEffect(() => {
     const dados = JSON.parse(
       localStorage.getItem(
@@ -25,6 +37,7 @@ export default function LocadoresPage() {
       ) || "[]"
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocadores(dados);
 
     setCarregado(true);
@@ -100,59 +113,94 @@ export default function LocadoresPage() {
     setModalOpen(true);
   };
 
+  const locadoresFiltrados =
+    locadores.filter((locador) => {
+
+      const termo =
+        search.toLowerCase();
+
+      return (
+        locador.nome
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        locador.email
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        locador.documento
+          ?.toLowerCase()
+          .includes(termo)
+      );
+    });
+
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-800">
-            Locadores
-          </h1>
 
-          <p className="text-gray-500 mt-2">
-            Gestão de proprietários
-          </p>
+      <Page>
 
-          <p className="text-sm text-green-600 mt-1">
-            {locadores.length} locador(es)
-            cadastrado(s)
-          </p>
-        </div>
+        <PageContainer>
 
-        <button
-          onClick={novoLocador}
-          className="
-            bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-lg
-            hover:bg-green-800
-          "
-        >
-          + Novo Locador
-        </button>
-      </div>
+          <PageHeader
+            title="Locadores"
+            subtitle="Gerencie todos os proprietários cadastrados."
+          >
 
-      <LocadorCard
-        locadores={locadores}
-        onDelete={excluirLocador}
-        onEdit={editarLocador}
-      />
+            <PrimaryButton
+              onClick={novoLocador}
+            >
+              Novo Locador
+            </PrimaryButton>
 
-      <LocadorModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setLocadorEditando(null);
-        }}
-      >
-        <LocadorForm
-          onSave={salvarLocador}
-          locadorEditando={
-            locadorEditando
-          }
-        />
-      </LocadorModal>
+          </PageHeader>
+
+          <StatCounter
+            total={locadores.length}
+            label="locador(es) cadastrado(s)"
+          />
+
+          <div className="mt-8 mb-8">
+
+            <SearchInput
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              placeholder="Pesquisar locador..."
+            />
+
+          </div>
+
+          <LocadorCard
+            locadores={locadoresFiltrados}
+            onDelete={excluirLocador}
+            onEdit={editarLocador}
+          />
+
+          <LocadorModal
+            isOpen={modalOpen}
+            onClose={() => {
+
+              setModalOpen(false);
+
+              setLocadorEditando(null);
+
+            }}
+          >
+
+            <LocadorForm
+              onSave={salvarLocador}
+              locadorEditando={
+                locadorEditando
+              }
+            />
+
+          </LocadorModal>
+
+        </PageContainer>
+
+      </Page>
+
     </MainLayout>
   );
 }
