@@ -7,6 +7,7 @@ import {
   Landmark,
 } from "lucide-react";
 
+import PageGrid from "../ui/PageGrid";
 import DashboardStatsCard from "../dashboard/DashboardStatsCard";
 
 export default function LocadorStats({
@@ -16,7 +17,7 @@ export default function LocadorStats({
   contas = 0,
 }) {
   return (
-    <div className="grid grid-cols-4 gap-6">
+    <PageGrid cols={4}>
 
       <DashboardStatsCard
         title="Locadores"
@@ -46,6 +47,6 @@ export default function LocadorStats({
         icon={Wallet}
       />
 
-    </div>
+    </PageGrid>
   );
 }

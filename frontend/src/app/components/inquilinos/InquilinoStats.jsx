@@ -1,16 +1,21 @@
 "use client";
 
-import StatCounter from "../common/StatCounter";
+import { Users } from "lucide-react";
+
+import PageGrid from "../ui/PageGrid";
+import DashboardStatsCard from "../dashboard/DashboardStatsCard";
 
 export default function InquilinoStats({
   total,
 }) {
   return (
-    <div className="mb-6">
-      <StatCounter
-        label="Total de Inquilinos"
+    <PageGrid cols={1}>
+      <DashboardStatsCard
+        title="Inquilinos"
         value={total}
+        subtitle="Total de inquilinos cadastrados"
+        icon={Users}
       />
-    </div>
+    </PageGrid>
   );
 }
