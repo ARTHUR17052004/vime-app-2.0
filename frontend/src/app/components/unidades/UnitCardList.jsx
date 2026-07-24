@@ -4,6 +4,7 @@ import { Building2 } from "lucide-react";
 
 import FadeIn from "../ui/FadeIn";
 import EmptyState from "../ui/EmptyState";
+import PageGrid from "../ui/PageGrid";
 
 import UnitCard from "./UnitCard";
 
@@ -36,20 +37,9 @@ export default function UnitCardList({
 
     <FadeIn>
 
-      <section
-        className="
-          grid
-
-          grid-cols-1
-
-          md:grid-cols-2
-
-          2xl:grid-cols-3
-
-          gap-8
-
-          items-stretch
-        "
+      <PageGrid
+        cols={3}
+        gap="relaxed"
       >
 
         {unidades.map((unidade, index) => (
@@ -70,7 +60,7 @@ export default function UnitCardList({
 
         ))}
 
-      </section>
+      </PageGrid>
 
     </FadeIn>
 

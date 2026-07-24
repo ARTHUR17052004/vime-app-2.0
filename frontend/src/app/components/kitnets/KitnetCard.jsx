@@ -2,40 +2,56 @@
 
 import { useRouter } from "next/navigation";
 import {
-  House,
-  Ruler,
+  MapPin,
+  Home,
+  Calendar,
+  User,
   Wallet,
-  DoorOpen,
 } from "lucide-react";
 
-import Card from "../ui/Card";
-import KitnetActionsMenu from "./KitnetActionsMenu";
+import DashboardCard from "../dashboard/DashboardCard";
+import UnitActionsMenu from "./UnitActionsMenu";
 
-export default function KitnetCard({
-  kitnet,
+export default function UnitCard({
+  unidade,
+  onView,
   onEdit,
   onDelete,
 }) {
-
   const router = useRouter();
 
+  const status = unidade.status || "Ativa";
+
+  const statusColor = {
+    Ativa:
+      "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
+
+    Manutenção:
+      "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
+
+    Inativa:
+      "bg-red-500/15 text-red-400 border border-red-500/20",
+  };
+
   return (
-
-    <Card
-
+    <DashboardCard
       onClick={() =>
-        router.push(`/kitnets/${kitnet.id}`)
+        router.push(`/unidades/${unidade.id}`)
       }
-
       className="
-        cursor-pointer
+        h-full
+        overflow-hidden
 
         transition-all
+        duration-300
 
-        hover:-translate-y-1
+        hover:-translate-y-2
+        hover:scale-[1.01]
+        hover:shadow-2xl
+        hover:shadow-emerald-900/20
       "
-
     >
+      {/* HEADER */}
 
       <div className="flex items-start justify-between">
 
@@ -43,50 +59,37 @@ export default function KitnetCard({
 
           <h2
             className="
-              text-2xl
-              font-bold
+              text-[34px]
+              font-black
+              tracking-tight
+              leading-none
               text-white
             "
           >
-            {kitnet.nome}
+            {unidade.nome}
           </h2>
 
           <span
-
             className={`
-
               inline-flex
-
-              mt-3
+              mt-4
 
               rounded-full
 
-              px-3
-              py-1
+              px-4
+              py-2
 
-              text-xs
+              text-[11px]
 
-              font-semibold
+              uppercase
+              tracking-[0.18em]
 
-              ${
-                kitnet.status === "Disponível"
+              font-bold
 
-                  ? "bg-emerald-500/15 text-emerald-400"
-
-                  : kitnet.status === "Ocupada"
-
-                  ? "bg-sky-500/15 text-sky-400"
-
-                  : "bg-yellow-500/15 text-yellow-400"
-
-              }
-
+              ${statusColor[status]}
             `}
-
           >
-
-            {kitnet.status}
-
+            {status}
           </span>
 
         </div>
@@ -96,123 +99,132 @@ export default function KitnetCard({
             e.stopPropagation()
           }
         >
-
-          <KitnetActionsMenu
-
-            kitnet={kitnet}
-
+          <UnitActionsMenu
+            unidade={unidade}
+            onView={onView}
             onEdit={onEdit}
-
             onDelete={onDelete}
-
           />
-
         </div>
 
       </div>
 
-      <div
-        className="
-          mt-8
+      {/* DADOS */}
 
-          space-y-4
-        "
-      >
+      <div className="mt-8 space-y-6">
 
-        <Info
-          icon={<House size={17} />}
-          label="Unidade"
-          value={kitnet.unidadeNome}
+        <InfoRow
+          icon={<MapPin size={18} />}
+          label={`${unidade.logradouro || "-"} ${unidade.numero || ""}`}
         />
 
-        <Info
-          icon={<DoorOpen size={17} />}
-          label="Número"
-          value={kitnet.numero}
+        <InfoRow
+          icon={<MapPin size={18} />}
+          label={`${unidade.cidade || "-"} - ${unidade.uf || "-"}`}
         />
 
-        <Info
-          icon={<Ruler size={17} />}
-          label="Metragem"
-          value={`${kitnet.metragem} m²`}
-        />
-
-        <Info
-          icon={<Wallet size={17} />}
-          label="Aluguel"
-          value={`R$ ${kitnet.aluguel}`}
+        <InfoRow
+          icon={<Wallet size={18} />}
+          label={`R$ ${unidade.aluguel || "0,00"}`}
+          valueClass="text-emerald-400 font-semibold"
         />
 
       </div>
 
-    </Card>
+      {/* DIVISOR */}
 
+      <div className="my-7 border-t border-white/10" />
+
+      {/* RODAPÉ */}
+
+      <div className="space-y-6">
+
+        <InfoRow
+          icon={<Home size={18} />}
+          label="Kitnets"
+          value={unidade.kitnets || 0}
+        />
+
+        <InfoRow
+          icon={<Calendar size={18} />}
+          label="Vencimento"
+          value={`Dia ${unidade.vencimento || "-"}`}
+        />
+
+        <InfoRow
+          icon={<User size={18} />}
+          label="Locador"
+          value={unidade.locador || "-"}
+        />
+
+      </div>
+
+    </DashboardCard>
   );
-
 }
 
-function Info({
-
+function InfoRow({
   icon,
-
   label,
-
   value,
-
+  valueClass = "text-white",
 }) {
-
   return (
-
     <div
       className="
-        flex
-
+        grid
+        grid-cols-[44px_1fr_auto]
         items-center
-
-        justify-between
-
-        border-b
-
-        border-white/5
-
-        pb-3
+        gap-4
       "
     >
-
       <div
         className="
           flex
           items-center
-          gap-3
+          justify-center
 
-          text-gray-400
+          w-10
+          h-10
+
+          rounded-xl
+
+          bg-gradient-to-br
+          from-emerald-500/15
+          to-emerald-700/10
+
+          border
+          border-emerald-500/10
+
+          text-emerald-400
         "
       >
-
         {icon}
-
-        <span>
-
-          {label}
-
-        </span>
-
       </div>
 
       <span
         className="
-          font-semibold
-
-          text-white
+          text-gray-300
+          text-[15px]
+          font-medium
         "
       >
-
-        {value || "-"}
-
+        {label}
       </span>
 
+      {value !== undefined && (
+        <span
+          className={`
+            text-[15px]
+            font-semibold
+            truncate
+
+            ${valueClass}
+          `}
+        >
+          {value}
+        </span>
+      )}
     </div>
-
   );
-
 }

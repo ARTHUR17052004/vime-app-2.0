@@ -13,20 +13,28 @@ export default function DashboardStatsCard({
     <DashboardCard
       onClick={onClick}
       className="
-        h-[122px]
+        min-h-[138px]
         px-7
+        py-6
+
+        transition-all
+        duration-300
+
+        hover:-translate-y-1
       "
     >
       <div className="flex h-full items-center justify-between">
 
-        {/* Informações */}
+        {/* ESQUERDA */}
 
         <div className="flex flex-col justify-center">
 
           <span
             className="
-              text-[13px]
-              font-medium
+              text-xs
+              font-semibold
+              uppercase
+              tracking-[0.18em]
               text-gray-400
             "
           >
@@ -35,52 +43,62 @@ export default function DashboardStatsCard({
 
           <span
             className="
-              mt-2
-              text-[40px]
+              mt-3
+              text-5xl
               leading-none
-              font-bold
+              font-black
+              tracking-tight
               text-white
             "
           >
             {value}
           </span>
 
-          <span
-            className="
-              mt-2
-              text-[13px]
-              text-gray-500
-            "
-          >
-            {subtitle}
-          </span>
+          {subtitle && (
+            <span
+              className="
+                mt-3
+                text-sm
+                text-gray-500
+              "
+            >
+              {subtitle}
+            </span>
+          )}
 
         </div>
 
-        {/* Ícone */}
+        {/* DIREITA */}
 
         <div
           className="
-            w-16
-            h-16
-            rounded-2xl
+            relative
 
             flex
             items-center
             justify-center
 
-            bg-emerald-500/10
+            w-16
+            h-16
+
+            rounded-2xl
+
             border
             border-emerald-500/20
+
+            bg-emerald-500/10
+
+            shadow-lg
+            shadow-emerald-900/20
           "
         >
-
-          <Icon
-            size={34}
-            strokeWidth={1.8}
-            className="text-emerald-400"
-          />
-
+          {Icon && (
+            <Icon
+              size={32}
+              strokeWidth={2}
+              className="text-emerald-400"
+            />
+          )}
         </div>
 
       </div>

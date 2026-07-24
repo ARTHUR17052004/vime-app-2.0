@@ -18,13 +18,11 @@ export default function UnitCard({
   onEdit,
   onDelete,
 }) {
-
   const router = useRouter();
 
   const status = unidade.status || "Ativa";
 
   const statusColor = {
-
     Ativa:
       "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
 
@@ -33,28 +31,26 @@ export default function UnitCard({
 
     Inativa:
       "bg-red-500/15 text-red-400 border border-red-500/20",
-
   };
 
   return (
-
     <DashboardCard
-
       onClick={() =>
         router.push(`/unidades/${unidade.id}`)
       }
-
       className="
         h-full
+        overflow-hidden
 
         transition-all
         duration-300
 
-        hover:-translate-y-1
+        hover:-translate-y-2
+        hover:scale-[1.01]
+        hover:shadow-2xl
+        hover:shadow-emerald-900/20
       "
-
     >
-
       {/* HEADER */}
 
       <div className="flex items-start justify-between">
@@ -63,10 +59,10 @@ export default function UnitCard({
 
           <h2
             className="
-              text-3xl
-
-              font-bold
-
+              text-[34px]
+              font-black
+              tracking-tight
+              leading-none
               text-white
             "
           >
@@ -74,51 +70,48 @@ export default function UnitCard({
           </h2>
 
           <span
-
             className={`
               inline-flex
-
-              mt-3
+              mt-4
 
               rounded-full
 
-              px-5
-              py-2.1
+              px-4
+              py-2
 
-              text-xs
+              text-[11px]
+
+              uppercase
+              tracking-[0.18em]
 
               font-bold
 
               ${statusColor[status]}
-
             `}
-
           >
-
             {status}
-
           </span>
 
         </div>
 
         <div
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) =>
+            e.stopPropagation()
+          }
         >
-
           <UnitActionsMenu
             unidade={unidade}
             onView={onView}
             onEdit={onEdit}
             onDelete={onDelete}
           />
-
         </div>
 
       </div>
 
       {/* DADOS */}
 
-      <div className="mt-8 space-y-8">
+      <div className="mt-8 space-y-6">
 
         <InfoRow
           icon={<MapPin size={18} />}
@@ -133,83 +126,75 @@ export default function UnitCard({
         <InfoRow
           icon={<Wallet size={18} />}
           label={`R$ ${unidade.aluguel || "0,00"}`}
-          valueClass="text-emerald-400 font-bold"
+          valueClass="text-emerald-400 font-semibold"
         />
 
       </div>
 
       {/* DIVISOR */}
 
-      <div className="my-7 border-t border-white/5" />
+      <div className="my-7 border-t border-white/10" />
 
       {/* RODAPÉ */}
 
-      <div className="space-y-10">
+      <div className="space-y-6">
 
         <InfoRow
           icon={<Home size={18} />}
           label="Kitnets"
-
           value={unidade.kitnets || 0}
         />
 
         <InfoRow
           icon={<Calendar size={18} />}
           label="Vencimento"
-
           value={`Dia ${unidade.vencimento || "-"}`}
         />
 
         <InfoRow
           icon={<User size={18} />}
           label="Locador"
-
           value={unidade.locador || "-"}
         />
 
       </div>
 
     </DashboardCard>
-
   );
-
 }
 
 function InfoRow({
-
   icon,
-
   label,
-
   value,
-
   valueClass = "text-white",
-
 }) {
-
   return (
-
     <div
       className="
         grid
-        grid-cols-[48px_1fr_200px]
+        grid-cols-[44px_1fr_auto]
         items-center
         gap-4
       "
     >
-
       <div
         className="
           flex
           items-center
           justify-center
 
-          w-11
-          h-11
+          w-10
+          h-10
 
           rounded-xl
 
-          bg-emerald-500/10
+          bg-gradient-to-br
+          from-emerald-500/15
+          to-emerald-700/10
+
+          border
+          border-emerald-500/10
 
           text-emerald-400
         "
@@ -220,7 +205,7 @@ function InfoRow({
       <span
         className="
           text-gray-300
-          text-[17px]
+          text-[15px]
           font-medium
         "
       >
@@ -228,12 +213,10 @@ function InfoRow({
       </span>
 
       {value !== undefined && (
-
         <span
           className={`
-            ml-12
-            text-[17px]
-            font-bold
+            text-[15px]
+            font-semibold
             truncate
 
             ${valueClass}
@@ -241,11 +224,7 @@ function InfoRow({
         >
           {value}
         </span>
-
       )}
-
     </div>
-
   );
-
 }
