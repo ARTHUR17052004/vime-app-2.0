@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const login = async (email, senha) => {
 
@@ -13,7 +14,12 @@ const login = async (email, senha) => {
     throw new Error('Usuário não encontrado.');
   }
 
-  if (usuario.senha !== senha) {
+  const senhaValida = await bcrypt.compare(
+    senha,
+    usuario.senha
+  );
+
+  if (!senhaValida) {
     throw new Error('Senha inválida.');
   }
 

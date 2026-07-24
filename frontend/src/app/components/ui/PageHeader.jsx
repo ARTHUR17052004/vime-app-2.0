@@ -1,107 +1,72 @@
 "use client";
 
-import FadeIn from "./FadeIn";
-
-export default function PageHeader({
+export default function VimePageHeader({
   title,
   subtitle,
+  count,
+  countLabel,
   actions,
-  badge,
+  children,
 }) {
   return (
+    <div className="mb-8">
 
-    <FadeIn>
+      <div className="flex items-start justify-between gap-6">
 
-      <section className="mb-10">
+        <div>
 
-        <div className="flex items-end justify-between gap-8">
+          <h1
+            className="
+              text-6xl
+              font-black
+              tracking-tight
+              text-white
+            "
+          >
+            {title}
+          </h1>
 
-          {/* ESQUERDA */}
-
-          <div>
-
-            {badge && (
-
-              <p
-                className="
-                  mb-3
-
-                  text-[11px]
-
-                  uppercase
-
-                  tracking-[0.40em]
-
-                  font-semibold
-
-                  text-emerald-400
-                "
-              >
-                {badge}
-              </p>
-
-            )}
-
-            <h1
+          {subtitle && (
+            <p
               className="
-                text-4xl
-                xl:text-5xl
-
-                font-black
-
-                tracking-tight
-
-                leading-none
-
-                text-white
+                mt-2
+                text-2xl
+                text-gray-300
               "
             >
-              {title}
-            </h1>
+              {subtitle}
+            </p>
+          )}
 
-            {subtitle && (
-
-              <p
-                className="
-                  mt-4
-
-                  max-w-3xl
-
-                  text-base
-
-                  leading-7
-
-                  text-gray-400
-                "
-              >
-                {subtitle}
-              </p>
-
-            )}
-
-          </div>
-
-          {/* DIREITA */}
-
-          {actions && (
-
-            <div
+          {count !== undefined && (
+            <p
               className="
-                flex
-                items-center
-                gap-3
+                mt-1
+                text-sm
+                font-semibold
+                text-emerald-400
               "
             >
-              {actions}
-            </div>
-
+              {count} {countLabel}
+            </p>
           )}
 
         </div>
 
-      </section>
+        {actions && (
+          <div className="flex gap-3">
+            {actions}
+          </div>
+        )}
 
-    </FadeIn>
+      </div>
 
+      {children && (
+        <div className="mt-8">
+          {children}
+        </div>
+      )}
+
+    </div>
   );
 }

@@ -2,6 +2,7 @@
 
 export default function Table({
   columns = [],
+
   data = [],
 
   loading = false,
@@ -11,6 +12,20 @@ export default function Table({
   onRowClick,
 
   striped = false,
+
+  hover = true,
+
+  stickyHeader = true,
+
+  compact = false,
+
+  maxHeight = "650px",
+
+  footer,
+
+  rowClassName = "",
+
+  cellClassName = "",
 }) {
 
   if (loading) {
@@ -54,7 +69,6 @@ export default function Table({
     <div
 
       className="
-
         overflow-hidden
 
         rounded-[22px]
@@ -70,24 +84,35 @@ export default function Table({
         backdrop-blur-xl
 
         shadow-[0_8px_20px_rgba(0,0,0,.18)]
-
       "
 
     >
 
-      <div className="overflow-auto max-h-[650px]">
+      <div
+        className="overflow-auto"
+        style={{
+          maxHeight,
+        }}
+      >
 
         <table className="min-w-full">
 
           <thead
-            className="
-              sticky
-              top-0
-              z-10
+            className={`
+              ${
+                stickyHeader
+                  ? `
+                    sticky
+                    top-0
+                    z-10
+                  `
+                  : ""
+              }
 
               bg-[#182128]/95
+
               backdrop-blur-xl
-            "
+            `}
           >
 
             <tr>
@@ -98,14 +123,8 @@ export default function Table({
 
                   key={column.key}
 
-                  className="
-
-                    px-6
-                    py-5
-
+                  className={`
                     text-left
-
-                    text-[12px]
 
                     uppercase
 
@@ -118,7 +137,12 @@ export default function Table({
                     border-b
                     border-white/5
 
-                  "
+                    ${
+                      compact
+                        ? "px-4 py-3 text-[11px]"
+                        : "px-6 py-5 text-[12px]"
+                    }
+                  `}
 
                 >
 
@@ -143,13 +167,11 @@ export default function Table({
                   colSpan={columns.length}
 
                   className="
-
                     py-20
 
                     text-center
 
                     text-gray-500
-
                   "
 
                 >
@@ -171,22 +193,32 @@ export default function Table({
                   onClick={() => onRowClick?.(item)}
 
                   className={`
-
                     transition-all
                     duration-300
 
                     border-b
                     border-white/[0.03]
 
-                    ${onRowClick ? "cursor-pointer" : ""}
-
-                    ${striped && index % 2 === 1
-                      ? "bg-white/[0.015]"
-                      : ""
+                    ${
+                      onRowClick
+                        ? "cursor-pointer"
+                        : ""
                     }
 
-                    hover:bg-emerald-500/5
+                    ${
+                      striped &&
+                      index % 2 === 1
+                        ? "bg-white/[0.015]"
+                        : ""
+                    }
 
+                    ${
+                      hover
+                        ? "hover:bg-emerald-500/5"
+                        : ""
+                    }
+
+                    ${rowClassName}
                   `}
 
                 >
@@ -197,25 +229,24 @@ export default function Table({
 
                       key={column.key}
 
-                      className="
-
-                        px-6
-                        py-5
-
-                        text-[14px]
+                      className={`
+                        whitespace-nowrap
 
                         text-gray-200
 
-                        whitespace-nowrap
+                        ${
+                          compact
+                            ? "px-4 py-3 text-[13px]"
+                            : "px-6 py-5 text-[14px]"
+                        }
 
-                      "
+                        ${cellClassName}
+                      `}
 
                     >
 
                       {column.render
-
                         ? column.render(item)
-
                         : item[column.key]}
 
                     </td>
@@ -233,6 +264,24 @@ export default function Table({
         </table>
 
       </div>
+
+      {footer && (
+
+        <div
+          className="
+            border-t
+            border-white/5
+
+            px-6
+            py-4
+          "
+        >
+
+          {footer}
+
+        </div>
+
+      )}
 
     </div>
 

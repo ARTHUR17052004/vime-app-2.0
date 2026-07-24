@@ -2,16 +2,44 @@
 
 export default function Textarea({
   label,
+
   error,
+
   helperText,
+
   required = false,
+
   rows = 5,
+
+  variant = "default",
+
+  fullWidth = true,
+
   className = "",
+
   ...props
 }) {
-  return (
-    <div className="space-y-2">
+  const variants = {
+    default: `
+      bg-white/[0.04]
+      backdrop-blur-xl
+      border-white/10
+    `,
 
+    glass: `
+      bg-white/[0.06]
+      backdrop-blur-2xl
+      border-white/15
+    `,
+  };
+
+  return (
+    <div
+      className={`
+        space-y-2
+        ${fullWidth ? "w-full" : ""}
+      `}
+    >
       {label && (
         <label
           className="
@@ -37,15 +65,13 @@ export default function Textarea({
         rows={rows}
         {...props}
         className={`
-          w-full
+          ${fullWidth ? "w-full" : ""}
 
           rounded-xl
 
           border
 
-          bg-white/[0.04]
-
-          backdrop-blur-xl
+          ${variants[variant]}
 
           text-white
 
@@ -70,12 +96,20 @@ export default function Textarea({
                 focus:ring-red-500/20
               `
               : `
-                border-white/10
                 hover:border-emerald-500/20
                 focus:border-emerald-500/40
                 focus:ring-2
                 focus:ring-emerald-500/20
               `
+          }
+
+          ${
+            props.disabled
+              ? `
+                opacity-50
+                cursor-not-allowed
+              `
+              : ""
           }
 
           ${className}
@@ -93,7 +127,6 @@ export default function Textarea({
           {error}
         </p>
       )}
-
     </div>
   );
 }

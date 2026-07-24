@@ -153,6 +153,7 @@ export default function KitnetsPage() {
     setModalOpen(true);
 
   }
+  
 
   const totalKitnets = kitnets.length;
 
@@ -185,21 +186,15 @@ export default function KitnetsPage() {
           <FadeIn>
 
             <PageHeader
-
               title="Kitnets"
-
               subtitle="Gerencie todas as kitnets cadastradas."
-
+              count={totalKitnets}
+              countLabel="kitnet(s) cadastrada(s)"
               actions={
-
                 <Button onClick={novaKitnet}>
-
                   + Nova Kitnet
-
                 </Button>
-
               }
-
             />
 
           </FadeIn>

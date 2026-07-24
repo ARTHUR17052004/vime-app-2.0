@@ -4,34 +4,81 @@ import { dashboard } from "@/theme/dashboardTheme";
 
 export default function Card({
   children,
+
   className = "",
+
   hover = true,
+
+  border = true,
+
+  padding = "md",
+
+  variant = "default",
+
   onClick,
 }) {
+  const paddings = {
+    sm: "p-4",
+    md: "p-6",
+    lg: "p-8",
+  };
+
+  const variants = {
+    default: dashboard.card.background,
+
+    glass: `
+      bg-white/[0.04]
+      backdrop-blur-xl
+    `,
+
+    solid: `
+      bg-[#1d2833]
+    `,
+  };
+
   return (
     <div
       onClick={onClick}
       style={{
         borderRadius: `${dashboard.card.radius}px`,
-        padding: `${dashboard.card.padding}px`,
-        background: dashboard.card.background,
-        border: dashboard.card.border,
-        backdropFilter: `blur(${dashboard.card.blur}px)`,
-        WebkitBackdropFilter: `blur(${dashboard.card.blur}px)`,
         boxShadow: dashboard.card.shadow,
       }}
       className={`
         relative
         overflow-hidden
+
         transition-all
         duration-300
-        ${hover ? "hover:-translate-y-1 hover:scale-[1.01]" : ""}
-        ${onClick ? "cursor-pointer" : ""}
+
+        ${variants[variant]}
+
+        ${paddings[padding]}
+
+        ${
+          border
+            ? dashboard.card.border
+            : ""
+        }
+
+        ${
+          hover
+            ? `
+              hover:-translate-y-1
+              hover:scale-[1.01]
+              hover:shadow-2xl
+            `
+            : ""
+        }
+
+        ${
+          onClick
+            ? "cursor-pointer"
+            : ""
+        }
+
         ${className}
       `}
     >
-      {/* brilho superior */}
-
       <div
         className="
           absolute
@@ -45,8 +92,6 @@ export default function Card({
           pointer-events-none
         "
       />
-
-      {/* iluminação */}
 
       <div
         className="
