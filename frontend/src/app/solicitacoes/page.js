@@ -6,10 +6,24 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
-import SolicitacaoResumo from "../components/solicitacoes/SolicitacaoResumo";
+
+import PageHeader from "../components/common/PageHeader";
+import SearchInput from "../components/common/SearchInput";
+import PrimaryButton from "../components/common/PrimaryButton";
+import StatCounter from "../components/common/StatCounter";
+
+import SolicitacaoStats from "../components/solicitacoes/SolicitacaoStats";
+import SolicitacaoFilters from "../components/solicitacoes/SolicitacaoFilters";
 import SolicitacaoTabs from "../components/solicitacoes/SolicitacaoTabs";
-import SolicitacaoFiltros from "../components/solicitacoes/SolicitacaoFiltros";
-import SolicitacaoCard from "../components/solicitacoes/SolicitacaoCard";
+import SolicitacaoCardList from "../components/solicitacoes/SolicitacaoCardList";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import PageSection from "../components/ui/PageSection";
+import FadeIn from "../components/ui/FadeIn";
+
+import Button from "../components/ui/Button";
+
 import SolicitacaoModal from "../components/solicitacoes/SolicitacaoModal";
 import SolicitacaoForm from "../components/solicitacoes/SolicitacaoForm";
 import SolicitacaoRelatorios from "../components/solicitacoes/SolicitacaoRelatorios";
@@ -25,7 +39,7 @@ export default function SolicitacoesPage() {
 
   const [solicitacaoEditando, setSolicitacaoEditando] =
     useState(null);
-  
+
   const [modalRespostaOpen, setModalRespostaOpen] =
     useState(false);
 
@@ -40,7 +54,6 @@ export default function SolicitacoesPage() {
 
   const [filtroStatus, setFiltroStatus] =
     useState("Todos");
-
 
   const [pesquisa, setPesquisa] =
     useState("");
@@ -357,207 +370,184 @@ setSolicitacaoResposta(null);
 
     setModalOpen(true);
 
-  }  const solicitacoesFiltradas =
-  solicitacoes.filter(
-    (item) => {
+  } const solicitacoesFiltradas = solicitacoes.filter((item) => {
 
-      const texto = `
+    const texto = `
+      ${item.numero || ""}
+      ${item.titulo || ""}
+      ${item.descricao || ""}
+      ${item.observacoes || ""}
+      ${item.responsavel || ""}
+    `.toLowerCase();
 
-        ${item.numero || ""}
-        ${item.titulo || ""}
-        ${item.descricao || ""}
-        ${item.observacoes || ""}
-        ${item.responsavel || ""}
+    if (
+      pesquisa &&
+      !texto.includes(
+        pesquisa.toLowerCase()
+      )
+    ) {
+      return false;
+    }
 
-      `
-        .toLowerCase();
+    if (
+      filtroStatus !== "Todos" &&
+      item.status !== filtroStatus
+    ) {
+      return false;
+    }
 
-      if (
+    switch (abaSelecionada) {
 
-        pesquisa &&
-        !texto.includes(
-          pesquisa.toLowerCase()
-        )
-
-      ) {
-
-        return false;
-
-      }
-
-      if (
-
-        filtroStatus !==
-          "Todos" &&
-        item.status !==
-          filtroStatus
-
-      ) {
-
-        return false;
-
-      }
-
-    
-      if (abaSelecionada === "solicitadas") {
+      case "solicitadas":
         return item.status === "SOLICITADA";
-        }
 
-      if (abaSelecionada === "cotacao") {
+      case "cotacao":
         return item.status === "EM COTAÇÃO";
-        }
 
-      if (abaSelecionada === "compra") {
+      case "compra":
         return item.status === "AGUARDANDO COMPRA";
-        }
 
-      if (abaSelecionada === "atendidas") {
+      case "atendidas":
         return item.status === "ATENDIDA";
-        }
 
-      if (abaSelecionada === "rejeitadas") {
+      case "rejeitadas":
         return item.status === "REJEITADA";
-        }
 
-      return true;
+      default:
+        return true;
 
     }
-  );
+
+  });
   
-  return (
+   return (
 
-    <MainLayout>
+  <MainLayout>
 
-      <div
-        className="
-          flex
-          items-center
-          justify-between
-          mb-8
-        "
-      >
+    <Page>
 
-        <div>
+      <PageContainer>
 
-          <h1 className="text-4xl font-bold text-gray-900">
-            Solicitações
-          </h1>
+        <FadeIn>
 
-          <p className="text-gray-700 mt-2">
-            Gestão de solicitações do sistema.
-          </p>
+          <PageHeader
+            title="Solicitações"
+            subtitle="Gerencie todas as solicitações cadastradas."
+            count={solicitacoes.length}
+            countLabel="solicitação(ões) cadastrada(s)"
+            actions={
+              <Button onClick={novaSolicitacao}>
+                + Nova Solicitação
+              </Button>
+            }
+          >
 
-          <p className="text-sm text-green-700 mt-1">
-            {solicitacoes.length} solicitação(ões) cadastrada(s)
-          </p>
+            <SearchInput
+              placeholder="Pesquisar solicitação..."
+              value={pesquisa}
+              onChange={(e) =>
+                setPesquisa(e.target.value)
+              }
+            />
 
-        </div>
+          </PageHeader>
 
-        <button
-          onClick={
-            novaSolicitacao
-          }
-          className="
-            bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-2xl
-            hover:bg-green-800
-          "
-        >
-          + Nova Solicitação
-        </button>
+        </FadeIn>
 
-      </div>
+        <FadeIn delay={0.10}>
 
-      <SolicitacaoResumo
-        solicitacoes={
-          solicitacoes
-        }
-      />
+          <PageSection spacing="xl">
 
-      <SolicitacaoFiltros
-        pesquisa={pesquisa}
-        setPesquisa={setPesquisa}
-        filtroStatus={filtroStatus}
-        setFiltroStatus={setFiltroStatus}
-        />
+            <SolicitacaoStats
+              solicitacoes={solicitacoes}
+            />
 
-      <SolicitacaoTabs
-        abaSelecionada={
-          abaSelecionada
-        }
-        setAbaSelecionada={
-          setAbaSelecionada
-        }
-      />      <SolicitacaoCard
-                solicitacoes={
-                  solicitacoesFiltradas
-                }
-                onEdit={
-                  editarSolicitacao
-                }
-                onDelete={
-                  excluirSolicitacao
-                }
-                onAlterarStatus={
-                  alterarStatus
-                }
-                 onResponder={
-                  responderSolicitacao
-                }
-              />
+          </PageSection>
 
+        </FadeIn>
 
-      <SolicitacaoRelatorios
-        solicitacoes={
-          solicitacoes
-        }
-      />
+        <FadeIn delay={0.15}>
 
-      <SolicitacaoModal
-        isOpen={modalOpen}
-        onClose={() => {
+          <PageSection spacing="lg">
 
-          setModalOpen(false);
+            <SolicitacaoFilters
+              filtroStatus={filtroStatus}
+              setFiltroStatus={setFiltroStatus}
+            />
 
-          setSolicitacaoEditando(
-            null
-          );
+            <SolicitacaoTabs
+              abaSelecionada={abaSelecionada}
+              setAbaSelecionada={setAbaSelecionada}
+            />
 
-        }}
-        title={
-          solicitacaoEditando
-            ? "Editar Solicitação"
-            : "Nova Solicitação"
-        }
-      >
+          </PageSection>
 
-        <SolicitacaoForm
-          onSave={
-            salvarSolicitacao
-          }
-          solicitacaoEditando={
+        </FadeIn>
+
+        <FadeIn delay={0.20}>
+
+          <PageSection spacing="xxl">
+
+            <SolicitacaoCardList
+              solicitacoes={solicitacoesFiltradas}
+              onEdit={editarSolicitacao}
+              onDelete={excluirSolicitacao}
+              onAlterarStatus={alterarStatus}
+              onResponder={responderSolicitacao}
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.30}>
+
+          <PageSection spacing="xxl">
+
+            <SolicitacaoRelatorios
+              solicitacoes={solicitacoes}
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <SolicitacaoModal
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSolicitacaoEditando(null);
+          }}
+          title={
             solicitacaoEditando
+              ? "Editar Solicitação"
+              : "Nova Solicitação"
           }
-        />
+        >
 
-      </SolicitacaoModal>
+          <SolicitacaoForm
+            onSave={salvarSolicitacao}
+            solicitacaoEditando={solicitacaoEditando}
+          />
+
+        </SolicitacaoModal>
+
         <SolicitacaoRespostaModal
           isOpen={modalRespostaOpen}
           onClose={() => {
-
             setModalRespostaOpen(false);
-
             setSolicitacaoResposta(null);
-
           }}
           solicitacao={solicitacaoResposta}
           onSalvar={salvarResposta}
         />
-    </MainLayout>
 
-  );
+      </PageContainer>
+
+    </Page>
+
+  </MainLayout>
+
+);
 
 }

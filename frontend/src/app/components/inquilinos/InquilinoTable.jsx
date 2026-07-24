@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import Table from "../ui/Table";
+import Badge from "../ui/Badge";
 export default function InquilinoTable({
   inquilinos,
   onDelete,
@@ -13,7 +15,18 @@ export default function InquilinoTable({
 
   if (inquilinos.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow p-10 text-center">
+      <div
+          className="
+            rounded-3xl
+            border
+            border-white/10
+            bg-white/5
+            backdrop-blur-xl
+            p-12
+            text-center
+            text-gray-300
+          "
+        >
         <h2 className="text-2xl font-semibold text-gray-700 mb-3">
           Módulo Inquilinos
         </h2>
@@ -26,31 +39,121 @@ export default function InquilinoTable({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow overflow-visible">
+    <Table>
       <table className="w-full text-gray-800">
-        <thead className="bg-gray-50 border-b text-gray-700">
+        <thead className="border-b border-white/10 text-gray-400 uppercase text-xs tracking-[0.25em]">
           <tr>
-            <th className="text-left p-4">
+            <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Inquilino
             </th>
 
-            <th className="text-left p-4">
+           <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Kitnet
             </th>
 
-            <th className="text-left p-4">
+            <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Contato
             </th>
 
-            <th className="text-left p-4">
+            <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Contrato
             </th>
 
-            <th className="text-left p-4">
+            <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Status
             </th>
 
-            <th className="text-center p-4">
+            <th
+              className="
+                px-6
+                py-5
+
+                text-xs
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-gray-400
+
+                font-semibold
+              "
+            >
               Ações
             </th>
           </tr>
@@ -60,9 +163,14 @@ export default function InquilinoTable({
           {inquilinos.map((inquilino) => (
             <tr
               key={inquilino.id}
-              className="border-b hover:bg-gray-50"
+              className="
+              border-b
+              border-white/5
+              hover:bg-white/5
+              transition
+              "
             >
-              <td className="p-4">
+              <td className="px-6 py-5">
                 <div className="font-semibold">
                   {inquilino.nome}
                 </div>
@@ -72,13 +180,13 @@ export default function InquilinoTable({
                 </div>
               </td>
 
-              <td className="p-4">
+              <td className="px-6 py-5">
                 {inquilino.unidadeNome
                   ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome}`
                   : inquilino.kitnetNome || "-"}
               </td>
 
-              <td className="p-4">
+              <td className="px-6 py-5">
                 <div>
                   {inquilino.email}
                 </div>
@@ -88,39 +196,52 @@ export default function InquilinoTable({
                 </div>
               </td>
 
-              <td className="p-4">
+              <td className="px-6 py-5">
                 {inquilino.dataFimContrato ||
                   "-"}
               </td>
 
-              <td className="p-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    inquilino.ativo
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {inquilino.ativo
-                    ? "Ativo"
-                    : "Inativo"}
-                </span>
+              <td className="px-6 py-5">
+               <Badge
+                color={
+                  inquilino.ativo
+                    ? "green"
+                    : "red"
+                }
+              >
+                {inquilino.ativo
+                  ? "Ativo"
+                  : "Inativo"}
+              </Badge>
               </td>
 
-              <td className="p-4 text-center relative">
+              <td className="px-6 py-5 text-center relative">
                 <button
                   onClick={() =>
                     setMenuAberto(
-                      menuAberto ===
-                        inquilino.id
+                      menuAberto === inquilino.id
                         ? null
                         : inquilino.id
                     )
                   }
                   className="
-                    text-2xl
-                    font-bold
-                    text-gray-600
+                    w-10
+                    h-10
+
+                    rounded-xl
+
+                    bg-white/5
+
+                    hover:bg-white/10
+
+                    transition
+
+                    flex
+                    items-center
+                    justify-center
+
+                    text-white
+                    text-xl
                   "
                 >
                   ⋮
@@ -130,15 +251,27 @@ export default function InquilinoTable({
                   inquilino.id && (
                   <div
                     className="
-                      absolute
-                      right-4
-                      top-12
-                      bg-white
-                      border
-                      rounded-xl
-                      shadow-lg
-                      z-50
-                      w-40
+                    absolute
+
+                    right-2
+                    top-12
+
+                    w-44
+
+                    rounded-2xl
+
+                    border
+                    border-white/10
+
+                    bg-slate-900/95
+
+                    backdrop-blur-xl
+
+                    shadow-2xl
+
+                    overflow-hidden
+
+                    z-50
                     "
                   >
                     <Link
@@ -147,7 +280,9 @@ export default function InquilinoTable({
                         block
                         px-4
                         py-3
-                        hover:bg-gray-100
+                        hover:bg-white/5
+                        text-gray-300
+                        transition
                       "
                     >
                       Visualizar
@@ -168,8 +303,9 @@ export default function InquilinoTable({
                         text-left
                         px-4
                         py-3
-                        hover:bg-yellow-50
-                        text-yellow-700
+                        hover:bg-yellow-500/10
+                        text-yellow-400
+                        transition
                       "
                     >
                       Editar
@@ -190,8 +326,9 @@ export default function InquilinoTable({
                         text-left
                         px-4
                         py-3
-                        hover:bg-red-50
-                        text-red-700
+                        hover:bg-red-500/10
+                        text-red-400
+                        transition
                       "
                     >
                       Excluir
@@ -203,6 +340,6 @@ export default function InquilinoTable({
           ))}
         </tbody>
       </table>
-    </div>
+    </Table>
   );
 }

@@ -5,18 +5,31 @@ import { X } from "lucide-react";
 
 export default function Modal({
   open,
+
   onClose,
+
   children,
 
   title,
+
   subtitle,
+
+  footer,
 
   size = "lg",
 
-  closeOnOverlay = true,
-}) {
+  showCloseButton = true,
 
+  closeOnOverlay = true,
+
+  closeOnEsc = true,
+
+  scrollable = true,
+
+  persistent = false,
+}) {
   useEffect(() => {
+    if (!closeOnEsc) return;
 
     function handleKey(e) {
       if (e.key === "Escape") {
@@ -25,14 +38,19 @@ export default function Modal({
     }
 
     if (open) {
-      document.addEventListener("keydown", handleKey);
+      document.addEventListener(
+        "keydown",
+        handleKey
+      );
     }
 
     return () => {
-      document.removeEventListener("keydown", handleKey);
+      document.removeEventListener(
+        "keydown",
+        handleKey
+      );
     };
-
-  }, [open, onClose]);
+  }, [open, onClose, closeOnEsc]);
 
   if (!open) return null;
 
@@ -45,13 +63,13 @@ export default function Modal({
   };
 
   return (
-
     <div
-
-      onClick={closeOnOverlay ? onClose : undefined}
-
+      onClick={
+        !persistent && closeOnOverlay
+          ? onClose
+          : undefined
+      }
       className="
-
         fixed
         inset-0
 
@@ -70,17 +88,13 @@ export default function Modal({
         animate-in
         fade-in
         duration-300
-
       "
-
     >
-
       <div
-
-        onClick={(e) => e.stopPropagation()}
-
+        onClick={(e) =>
+          e.stopPropagation()
+        }
         className={`
-
           relative
 
           w-full
@@ -109,17 +123,11 @@ export default function Modal({
           zoom-in-95
           fade-in
           duration-300
-
         `}
-
       >
-
-        {(title || subtitle) && (
-
+        {(title || subtitle || showCloseButton) && (
           <div
-
             className="
-
               flex
               items-start
               justify-between
@@ -129,122 +137,100 @@ export default function Modal({
 
               px-8
               py-6
-
             "
-
           >
-
             <div>
 
               {title && (
-
                 <h2
-
                   className="
-
                     text-3xl
-
                     font-bold
-
                     text-white
-
                   "
-
                 >
-
                   {title}
-
                 </h2>
-
               )}
 
               {subtitle && (
-
                 <p
-
                   className="
-
                     mt-2
-
                     text-sm
-
                     text-gray-400
-
                   "
-
                 >
-
                   {subtitle}
-
                 </p>
-
               )}
 
             </div>
 
-            <button
+            {showCloseButton && (
+              <button
+                onClick={onClose}
+                className="
+                  flex
+                  items-center
+                  justify-center
 
-              onClick={onClose}
+                  w-11
+                  h-11
 
-              className="
+                  rounded-xl
 
-                flex
-                items-center
-                justify-center
+                  bg-white/5
 
-                w-11
-                h-11
+                  border
+                  border-white/5
 
-                rounded-xl
+                  text-gray-400
 
-                bg-white/5
+                  transition-all
+                  duration-300
 
-                border
-                border-white/5
-
-                text-gray-400
-
-                transition-all
-                duration-300
-
-                hover:bg-red-500/15
-                hover:border-red-500/20
-                hover:text-red-400
-
-              "
-
-            >
-
-              <X size={20} />
-
-            </button>
+                  hover:bg-red-500/15
+                  hover:border-red-500/20
+                  hover:text-red-400
+                "
+              >
+                <X size={20} />
+              </button>
+            )}
 
           </div>
-
         )}
 
         <div
-
-          className="
-
-            overflow-y-auto
-
-            max-h-[calc(92vh-105px)]
-
+          className={`
             p-8
 
-          "
-
+            ${
+              scrollable
+                ? "overflow-y-auto max-h-[calc(92vh-105px)]"
+                : ""
+            }
+          `}
         >
-
           {children}
-
         </div>
 
+        {footer && (
+          <div
+            className="
+              border-t
+              border-white/5
+
+              px-8
+              py-5
+            "
+          >
+            {footer}
+          </div>
+        )}
+
       </div>
-
     </div>
-
   );
-
 }

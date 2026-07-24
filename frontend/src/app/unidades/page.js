@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import PageHeader from "../components/ui/PageHeader";
+import Button from "../components/ui/Button";
+
+import SearchInput from "../components/common/SearchInput";
+
 import UnitModal from "../components/unidades/UnitModal";
 import UnitForm from "../components/unidades/UnitForm";
 import UnitCardList from "../components/unidades/UnitCardList";
@@ -86,108 +94,66 @@ export default function UnidadesPage() {
 
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1
-            className="
-              text-6xl
-              font-black
-              tracking-tight
-              text-white
-            "
+
+      <Page>
+
+        <PageContainer>
+
+          <PageHeader
+            title="Unidades"
+            subtitle="Gerencie todas as unidades cadastradas."
+            count={unidades.length}
+            countLabel="unidade(s) cadastrada(s)"
+            actions={
+              <Button
+                onClick={() => {
+                  setEditingUnit(null);
+                  setModalOpen(true);
+                }}
+              >
+                + Nova Unidade
+              </Button>
+            }
+          />
+
+          <SearchInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, endereço ou cidade..."
+          />
+
+          <div className="mt-8">
+
+            <UnitCardList
+              unidades={unidadesFiltradas}
+              onView={visualizarUnidade}
+              onEdit={editarUnidade}
+              onDelete={excluirUnidade}
+            />
+
+          </div>
+
+          <UnitModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setEditingUnit(null);
+              setModalOpen(false);
+            }}
           >
-            Unidades
-          </h1>
+            <UnitForm
+              unidade={editingUnit}
+              onSave={adicionarUnidade}
+              onCancel={() => {
+                setEditingUnit(null);
+                setModalOpen(false);
+              }}
+            />
+          </UnitModal>
 
-          <p
-            className="
-              mt-2
-              text-2xl
-              text-gray-300
-            "
-          >
-            Gerencie todas as unidades cadastradas.
-          </p>
+        </PageContainer>
 
-          <p
-            className="
-              mt-1
-              text-sm
-              font-semibold
-              text-emerald-400
-            "
-          >
-            {unidades.length} unidade(s) cadastrada(s)
-          </p>
-        </div>
+      </Page>
 
-        <button
-          onClick={() => {
-            setEditingUnit(null);
-            setModalOpen(true);
-          }}
-          className="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition"
-        >
-          + Nova Unidade
-        </button>
-      </div>
-
-        <div className="mb-8">
-       <input
-        type="text"
-        placeholder="🔎 Buscar por nome, endereço ou cidade..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="
-          w-full
-          h-14
-
-          rounded-2xl
-
-          bg-white/5
-          backdrop-blur-xl
-
-          border
-          border-white/10
-
-          px-5
-
-          text-white
-          placeholder:text-gray-500
-
-          transition-all
-
-          focus:outline-none
-          focus:border-emerald-500/40
-          focus:ring-2
-          focus:ring-emerald-500/20
-        "
-      />
-      </div>
-
-      <UnitCardList
-        unidades={unidadesFiltradas}
-        onView={visualizarUnidade}
-        onEdit={editarUnidade}
-        onDelete={excluirUnidade}
-      />
-
-      <UnitModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setEditingUnit(null);
-          setModalOpen(false);
-        }}
-      >
-        <UnitForm
-          unidade={editingUnit}
-          onSave={adicionarUnidade}
-          onCancel={() => {
-            setEditingUnit(null);
-            setModalOpen(false);
-          }}
-        />
-      </UnitModal>
     </MainLayout>
   );
 }
