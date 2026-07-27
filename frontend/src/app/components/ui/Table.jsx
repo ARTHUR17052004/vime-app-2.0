@@ -1,8 +1,9 @@
 "use client";
 
 export default function Table({
-  columns = [],
+  children,
 
+  columns = [],
   data = [],
 
   loading = false,
@@ -12,11 +13,8 @@ export default function Table({
   onRowClick,
 
   striped = false,
-
   hover = true,
-
   stickyHeader = true,
-
   compact = false,
 
   maxHeight = "650px",
@@ -24,7 +22,6 @@ export default function Table({
   footer,
 
   rowClassName = "",
-
   cellClassName = "",
 }) {
 
@@ -35,7 +32,6 @@ export default function Table({
       <div
         className="
           rounded-[22px]
-
           border
           border-white/5
 
@@ -64,10 +60,68 @@ export default function Table({
 
   }
 
+  // MODO 1 -> TABLE CUSTOMIZADA (children)
+  if (children) {
+
+    return (
+
+      <div
+        className="
+          overflow-hidden
+
+          rounded-[22px]
+
+          border
+          border-white/5
+
+          bg-gradient-to-br
+          from-[#1b2728]/80
+          via-[#1a242c]/75
+          to-[#151d26]/80
+
+          backdrop-blur-xl
+
+          shadow-[0_8px_20px_rgba(0,0,0,.18)]
+        "
+      >
+
+        <div
+          className="overflow-auto"
+          style={{ maxHeight }}
+        >
+
+          {children}
+
+        </div>
+
+        {footer && (
+
+          <div
+            className="
+              border-t
+              border-white/5
+
+              px-6
+              py-4
+            "
+          >
+
+            {footer}
+
+          </div>
+
+        )}
+
+      </div>
+
+    );
+
+  }
+
+  // MODO 2 -> TABLE AUTOMÁTICA
   return (
 
     <div
-
       className="
         overflow-hidden
 
@@ -85,14 +139,11 @@ export default function Table({
 
         shadow-[0_8px_20px_rgba(0,0,0,.18)]
       "
-
     >
 
       <div
         className="overflow-auto"
-        style={{
-          maxHeight,
-        }}
+        style={{ maxHeight }}
       >
 
         <table className="min-w-full">
@@ -101,16 +152,11 @@ export default function Table({
             className={`
               ${
                 stickyHeader
-                  ? `
-                    sticky
-                    top-0
-                    z-10
-                  `
+                  ? "sticky top-0 z-10"
                   : ""
               }
 
               bg-[#182128]/95
-
               backdrop-blur-xl
             `}
           >
@@ -120,9 +166,7 @@ export default function Table({
               {columns.map((column) => (
 
                 <th
-
                   key={column.key}
-
                   className={`
                     text-left
 
@@ -143,7 +187,6 @@ export default function Table({
                         : "px-6 py-5 text-[12px]"
                     }
                   `}
-
                 >
 
                   {column.title}
@@ -163,9 +206,7 @@ export default function Table({
               <tr>
 
                 <td
-
                   colSpan={columns.length}
-
                   className="
                     py-20
 
@@ -173,7 +214,6 @@ export default function Table({
 
                     text-gray-500
                   "
-
                 >
 
                   {emptyMessage}
@@ -187,16 +227,17 @@ export default function Table({
               data.map((item, index) => (
 
                 <tr
-
                   key={item.id || index}
 
                   onClick={() => onRowClick?.(item)}
 
                   className={`
                     transition-all
+
                     duration-300
 
                     border-b
+
                     border-white/[0.03]
 
                     ${
@@ -220,15 +261,12 @@ export default function Table({
 
                     ${rowClassName}
                   `}
-
                 >
 
                   {columns.map((column) => (
 
                     <td
-
                       key={column.key}
-
                       className={`
                         whitespace-nowrap
 
@@ -242,7 +280,6 @@ export default function Table({
 
                         ${cellClassName}
                       `}
-
                     >
 
                       {column.render

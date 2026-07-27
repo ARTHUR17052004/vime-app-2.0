@@ -2,45 +2,43 @@
 
 import { useRouter } from "next/navigation";
 import {
-  MapPin,
-  Home,
-  Calendar,
-  User,
+  House,
+  Building2,
+  Ruler,
   Wallet,
 } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
-import UnitActionsMenu from "./UnitActionsMenu";
 
-export default function UnitCard({
-  unidade,
-  onView,
-  onEdit,
-  onDelete,
+export default function KitnetCard({
+  kitnet,
 }) {
   const router = useRouter();
 
-  const status = unidade.status || "Ativa";
+  const status =
+    kitnet.status || "Disponível";
 
   const statusColor = {
-    Ativa:
+    Disponível:
       "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
+
+    Ocupada:
+      "bg-red-500/15 text-red-400 border border-red-500/20",
 
     Manutenção:
       "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
-
-    Inativa:
-      "bg-red-500/15 text-red-400 border border-red-500/20",
   };
 
   return (
     <DashboardCard
       onClick={() =>
-        router.push(`/unidades/${unidade.id}`)
+        router.push(`/kitnets/${kitnet.id}`)
       }
       className="
         h-full
         overflow-hidden
+
+        p-8
 
         transition-all
         duration-300
@@ -51,6 +49,22 @@ export default function UnitCard({
         hover:shadow-emerald-900/20
       "
     >
+      {/* Barra superior */}
+
+      <div
+        className="
+          absolute
+          inset-x-0
+          top-0
+          h-1
+
+          bg-gradient-to-r
+          from-emerald-400
+          via-cyan-400
+          to-blue-500
+        "
+      />
+
       {/* HEADER */}
 
       <div className="flex items-start justify-between">
@@ -59,22 +73,26 @@ export default function UnitCard({
 
           <h2
             className="
-              text-[34px]
+              text-[32px]
+              xl:text-[34px]
+
               font-black
               tracking-tight
               leading-none
+
               text-white
             "
           >
-            {unidade.nome}
+            {kitnet.nome}
           </h2>
 
           <span
             className={`
               inline-flex
+
               mt-4
 
-              rounded-full
+              rounded-2xl
 
               px-4
               py-2
@@ -94,19 +112,6 @@ export default function UnitCard({
 
         </div>
 
-        <div
-          onClick={(e) =>
-            e.stopPropagation()
-          }
-        >
-          <UnitActionsMenu
-            unidade={unidade}
-            onView={onView}
-            onEdit={onEdit}
-            onDelete={onDelete}
-          />
-        </div>
-
       </div>
 
       {/* DADOS */}
@@ -114,19 +119,22 @@ export default function UnitCard({
       <div className="mt-8 space-y-6">
 
         <InfoRow
-          icon={<MapPin size={18} />}
-          label={`${unidade.logradouro || "-"} ${unidade.numero || ""}`}
+          icon={<Building2 size={18} />}
+          label="Unidade"
+          value={kitnet.unidadeNome || "-"}
         />
 
         <InfoRow
-          icon={<MapPin size={18} />}
-          label={`${unidade.cidade || "-"} - ${unidade.uf || "-"}`}
+          icon={<Ruler size={18} />}
+          label="Metragem"
+          value={`${kitnet.metragem || "-"} m²`}
         />
 
         <InfoRow
           icon={<Wallet size={18} />}
-          label={`R$ ${unidade.aluguel || "0,00"}`}
-          valueClass="text-emerald-400 font-semibold"
+          label="Aluguel"
+          value={`R$ ${kitnet.aluguel || "0,00"}`}
+          valueClass="text-emerald-400 font-bold"
         />
 
       </div>
@@ -140,21 +148,9 @@ export default function UnitCard({
       <div className="space-y-6">
 
         <InfoRow
-          icon={<Home size={18} />}
-          label="Kitnets"
-          value={unidade.kitnets || 0}
-        />
-
-        <InfoRow
-          icon={<Calendar size={18} />}
-          label="Vencimento"
-          value={`Dia ${unidade.vencimento || "-"}`}
-        />
-
-        <InfoRow
-          icon={<User size={18} />}
-          label="Locador"
-          value={unidade.locador || "-"}
+          icon={<House size={18} />}
+          label="Número"
+          value={kitnet.numero || "-"}
         />
 
       </div>
@@ -212,19 +208,18 @@ function InfoRow({
         {label}
       </span>
 
-      {value !== undefined && (
-        <span
-          className={`
-            text-[15px]
-            font-semibold
-            truncate
+      <span
+        className={`
+          text-[15px]
+          font-semibold
+          truncate
 
-            ${valueClass}
-          `}
-        >
-          {value}
-        </span>
-      )}
+          ${valueClass}
+        `}
+      >
+        {value}
+      </span>
+
     </div>
   );
 }

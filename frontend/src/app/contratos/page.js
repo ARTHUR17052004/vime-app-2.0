@@ -22,7 +22,7 @@ import ContratoModal from "../components/contratos/ContratoModal";
 import ContratoForm from "../components/contratos/ContratoForm";
 import ContratoStats from "../components/contratos/ContratoStats";
 import ContratoFilters from "../components/contratos/ContratoFilters";
-import ContratoCardList from "../components/contratos/ContratoCardList";
+import ContratoTable from "../components/contratos/ContratoTable";
 
 export default function ContratosPage() {
 
@@ -285,7 +285,7 @@ const vencendo =
             ) : abaSelecionada ===
               "contratos" ? (
 
-              <ContratoCardList
+              <ContratoTable
                 contratos={contratosFiltrados}
                 onEdit={editarContrato}
                 onDelete={excluirContrato}

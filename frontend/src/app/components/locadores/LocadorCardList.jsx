@@ -13,46 +13,38 @@ export default function LocadorCardList({
   onEdit,
   onDelete,
 }) {
+
   if (!locadores.length) {
+
     return (
+
       <FadeIn>
+
         <EmptyState
           icon={<Building2 size={54} />}
           title="Nenhum locador encontrado"
           description="Cadastre seu primeiro locador para começar o gerenciamento."
         />
+
       </FadeIn>
+
     );
+
   }
 
   return (
+
     <FadeIn>
-      <section
-        className="
-          grid
-          grid-cols-1
-          md:grid-cols-2
-          2xl:grid-cols-3
 
-          gap-8
+      <LocadorCard
+        locadores={locadores}
+        onView={onView}
+        onEdit={onEdit}
+        onDelete={onDelete}
+      />
 
-          items-stretch
-        "
-      >
-        {locadores.map((locador, index) => (
-          <FadeIn
-            key={locador.id}
-            delay={index * 0.04}
-          >
-            <LocadorCard
-              locador={locador}
-              onView={onView}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          </FadeIn>
-        ))}
-      </section>
     </FadeIn>
+
   );
+
 }

@@ -23,7 +23,7 @@ import FinanceiroTabs from "../components/financeiro/FinanceiroTabs";
 import FinanceiroReceitas from "../components/financeiro/FinanceiroReceitas";
 import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
-import PageHeader from "../components/common/PageHeader";
+import PageHeader from "../components/ui/PageHeader";
 
 
 export default function FinanceiroPage() {

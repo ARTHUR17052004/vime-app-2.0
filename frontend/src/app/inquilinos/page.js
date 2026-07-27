@@ -269,6 +269,9 @@ export default function InquilinosPage() {
 
   }, [inquilinos, search]);
 
+  console.log(inquilinos);
+  console.log(inquilinosFiltrados);
+
   return (
 
     <MainLayout>

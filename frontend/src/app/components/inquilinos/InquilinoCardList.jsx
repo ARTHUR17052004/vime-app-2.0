@@ -1,29 +1,29 @@
 "use client";
 
-import { House } from "lucide-react";
+import { Users } from "lucide-react";
 
 import FadeIn from "../ui/FadeIn";
 import EmptyState from "../ui/EmptyState";
 import PageGrid from "../ui/PageGrid";
 
-import KitnetCard from "./KitnetCard";
+import InquilinoCard from "./InquilinoCard";
 
-export default function KitnetCardList({
-  kitnets,
+export default function InquilinoCardList({
+  inquilinos,
   onEdit,
   onDelete,
 }) {
 
-  if (!kitnets.length) {
+  if (!inquilinos.length) {
 
     return (
 
       <FadeIn>
 
         <EmptyState
-          icon={<House size={54} />}
-          title="Nenhuma kitnet encontrada"
-          description="Cadastre sua primeira kitnet para começar o gerenciamento."
+          icon={<Users size={54} />}
+          title="Nenhum inquilino encontrado"
+          description="Cadastre seu primeiro inquilino para começar o gerenciamento."
         />
 
       </FadeIn>
@@ -41,15 +41,15 @@ export default function KitnetCardList({
         gap="relaxed"
       >
 
-        {kitnets.map((kitnet, index) => (
+        {inquilinos.map((inquilino,index)=>(
 
           <FadeIn
-            key={kitnet.id}
-            delay={index * 0.04}
+            key={inquilino.id}
+            delay={index*0.04}
           >
 
-            <KitnetCard
-              kitnet={kitnet}
+            <InquilinoCard
+              inquilino={inquilino}
               onEdit={onEdit}
               onDelete={onDelete}
             />
