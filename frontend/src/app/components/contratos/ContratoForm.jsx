@@ -1,265 +1,548 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function ContratoForm({
   onSave,
-  contratoEditando,
+  contrato,
 }) {
-  const [inquilinos, setInquilinos] =
-    useState([]);
 
-  const [formData, setFormData] =
-    useState({
-      numeroContrato: "",
+  const [locadores, setLocadores] = useState([]);
+  const [unidades, setUnidades] = useState([]);
+  const [kitnets, setKitnets] = useState([]);
+  const [inquilinos, setInquilinos] = useState([]);
 
-      inquilinoId: "",
+  const [formData, setFormData] = useState({
+    numeroContrato: "",
 
-      dataInicio: "",
-      dataFim: "",
+    locadorId: "",
+    locadorNome: "",
 
-      valorAluguel: "",
+    unidadeId: "",
+    unidadeNome: "",
 
-      diaVencimento: "",
+    kitnetId: "",
+    kitnetNome: "",
 
-      tipoGarantia: "",
-      valorCaucao: "",
+    inquilinoId: "",
+    inquilinoNome: "",
 
-      indiceReajuste: "",
+    dataInicio: "",
+    dataFim: "",
 
-      status: "ATIVO",
+    valorAluguel: "",
 
-      observacoes: "",
-    });
+    diaVencimento: "",
+
+    tipoGarantia: "",
+
+    valorCaucao: "",
+
+    indiceReajuste: "",
+
+    status: "ATIVO",
+
+    observacoes: "",
+  });
 
   useEffect(() => {
-    const dados = JSON.parse(
-      localStorage.getItem(
-        "vime-inquilinos"
-      ) || "[]"
+
+    setLocadores(
+      JSON.parse(
+        localStorage.getItem("vime-locadores") || "[]"
+      )
     );
 
-    setInquilinos(dados);
+    setUnidades(
+      JSON.parse(
+        localStorage.getItem("vime-unidades") || "[]"
+      )
+    );
+
+    setKitnets(
+      JSON.parse(
+        localStorage.getItem("vime-kitnets") || "[]"
+      )
+    );
+
+    setInquilinos(
+      JSON.parse(
+        localStorage.getItem("vime-inquilinos") || "[]"
+      )
+    );
+
   }, []);
 
   useEffect(() => {
-    if (!contratoEditando) return;
 
-    setFormData((prev) => ({
-      ...prev,
-      ...contratoEditando,
-    }));
-  }, [contratoEditando]);
+    if (!contrato) return;
 
-  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      ...contrato,
+    });
+
+  }, [contrato, formData]);
+
+  const unidadesFiltradas = useMemo(() => {
+
+    return unidades.filter(
+
+      (u) =>
+
+        String(u.locadorId) ===
+
+        String(formData.locadorId)
+
+    );
+
+  }, [unidades, formData.locadorId]);
+
+  const kitnetsFiltradas = useMemo(() => {
+
+    return kitnets.filter(
+
+      (k) =>
+
+        String(k.unidadeId) ===
+
+        String(formData.unidadeId)
+
+    );
+
+  }, [kitnets, formData.unidadeId]);
+
+  const inquilinosFiltrados = useMemo(() => {
+
+    return inquilinos.filter(
+
+      (i) =>
+
+        String(i.kitnetId) ===
+
+        String(formData.kitnetId)
+
+    );
+
+  }, [inquilinos, formData.kitnetId]);
+
+  function alterarCampo(e) {
+
     const { name, value } = e.target;
 
     setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
-  const handleSubmit = (e) => {
+      ...prev,
+
+      [name]: value,
+
+    }));
+
+  }
+
+  function salvar(e) {
+
     e.preventDefault();
 
-    const inquilino = inquilinos.find(
-      (i) =>
-        String(i.id) ===
-        String(formData.inquilinoId)
+    const locador = locadores.find(
+
+      (l) =>
+
+        String(l.id) ===
+
+        String(formData.locadorId)
+
     );
 
-    onSave({
+    const unidade = unidades.find(
+
+      (u) =>
+
+        String(u.id) ===
+
+        String(formData.unidadeId)
+
+    );
+
+    const kitnet = kitnets.find(
+
+      (k) =>
+
+        String(k.id) ===
+
+        String(formData.kitnetId)
+
+    );
+
+    const inquilino = inquilinos.find(
+
+      (i) =>
+
+        String(i.id) ===
+
+        String(formData.inquilinoId)
+
+    );
+
+    const contratoCompleto = {
+
       ...formData,
 
-      inquilinoNome:
-        inquilino?.nome || "",
+      locadorNome: locador?.nome || "",
 
-      kitnetNome:
-        inquilino?.kitnetNome || "",
+      unidadeNome: unidade?.nome || "",
 
-      unidadeNome:
-        inquilino?.unidadeNome || "",
-    });
-  };
+      kitnetNome: kitnet?.nome || "",
 
-  const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
-    
- return (
-  <form
-    onSubmit={handleSubmit}
-    className="space-y-8"
-  >
-    <div>
-      <h2 className="text-2xl font-bold text-gray-800">
-        {contratoEditando
-          ? "Editar Contrato"
-          : "Novo Contrato"}
-      </h2>
+      inquilinoNome: inquilino?.nome || "",
 
-      <p className="text-gray-500 mt-1">
-        Dados do contrato
-      </p>
-    </div>
+    };
 
-    <div className="grid md:grid-cols-2 gap-4">
+    onSave(contratoCompleto);
 
-      <input
-        name="numeroContrato"
-        placeholder="Número do Contrato"
-        value={formData.numeroContrato}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+  }
 
-      <select
-        name="inquilinoId"
-        value={formData.inquilinoId}
-        onChange={handleChange}
-        className={inputStyle}
-        required
-      >
-        <option value="">
-          Selecione um Inquilino
+  const input = `
+    w-full
+    rounded-xl
+    border
+    border-white/10
+    bg-white/5
+    px-4
+    py-3
+    text-white
+    outline-none
+    focus:border-emerald-500
+  `;
+  return (
+
+<form
+  onSubmit={salvar}
+  className="space-y-8"
+>
+
+  {/* CABEÇALHO */}
+
+  <div>
+
+    <h2
+      className="
+        text-3xl
+        font-black
+        text-white
+      "
+    >
+
+      {contrato
+        ? "Editar Contrato"
+        : "Novo Contrato"}
+
+    </h2>
+
+    <p className="text-gray-400 mt-2">
+
+      Preencha as informações do contrato.
+
+    </p>
+
+  </div>
+
+  {/* LOCALIZAÇÃO */}
+
+  <div className="grid md:grid-cols-2 gap-5">
+
+    <select
+      name="locadorId"
+      value={formData.locadorId}
+      onChange={alterarCampo}
+      className={input}
+      required
+    >
+
+      <option value="">
+        Selecione um Locador
+      </option>
+
+      {locadores.map((locador)=>(
+
+        <option
+          key={locador.id}
+          value={locador.id}
+        >
+
+          {locador.nome}
+
         </option>
 
-        {inquilinos.map((inquilino) => (
-          <option
-            key={inquilino.id}
-            value={inquilino.id}
-          >
-            {inquilino.nome}
-          </option>
-        ))}
-      </select>
+      ))}
 
-      <input
-        type="number"
-        name="valorAluguel"
-        placeholder="Valor do Aluguel"
-        value={formData.valorAluguel}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+    </select>
 
-      <input
-        type="date"
-        name="dataInicio"
-        value={formData.dataInicio}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+    <select
+      name="unidadeId"
+      value={formData.unidadeId}
+      onChange={alterarCampo}
+      className={input}
+      required
+    >
 
-      <input
-        type="date"
-        name="dataFim"
-        value={formData.dataFim}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      <option value="">
+        Selecione uma Unidade
+      </option>
 
-      <input
-        type="number"
-        name="diaVencimento"
-        placeholder="Dia do vencimento"
-        value={formData.diaVencimento}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      {unidadesFiltradas.map((unidade)=>(
 
-      <select
-        name="tipoGarantia"
-        value={formData.tipoGarantia}
-        onChange={handleChange}
-        className={inputStyle}
-      >
-        <option value="">
-          Tipo Garantia
+        <option
+          key={unidade.id}
+          value={unidade.id}
+        >
+
+          {unidade.nome}
+
         </option>
 
-        <option value="CAUCAO">
-          Caução
+      ))}
+
+    </select>
+
+    <select
+      name="kitnetId"
+      value={formData.kitnetId}
+      onChange={alterarCampo}
+      className={input}
+      required
+    >
+
+      <option value="">
+        Selecione uma Kitnet
+      </option>
+
+      {kitnetsFiltradas.map((kitnet)=>(
+
+        <option
+          key={kitnet.id}
+          value={kitnet.id}
+        >
+
+          {kitnet.nome}
+
         </option>
 
-        <option value="FIADOR">
-          Fiador
+      ))}
+
+    </select>
+
+    <select
+      name="inquilinoId"
+      value={formData.inquilinoId}
+      onChange={alterarCampo}
+      className={input}
+      required
+    >
+
+      <option value="">
+        Selecione um Inquilino
+      </option>
+
+      {inquilinosFiltrados.map((inquilino)=>(
+
+        <option
+          key={inquilino.id}
+          value={inquilino.id}
+        >
+
+          {inquilino.nome}
+
         </option>
 
-        <option value="SEGURO_FIANCA">
-          Seguro Fiança
-        </option>
-      </select>
+      ))}
 
-      <input
-        type="number"
-        name="valorCaucao"
-        placeholder="Valor Caução"
-        value={formData.valorCaucao}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+    </select>
 
-      <input
-        name="indiceReajuste"
-        placeholder="Índice de reajuste"
-        value={formData.indiceReajuste}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+  </div>
 
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        className={inputStyle}
-      >
-        <option value="ATIVO">
-          Ativo
-        </option>
+  {/* DADOS */}
 
-        <option value="PENDENTE">
-          Pendente
-        </option>
+  <div className="grid md:grid-cols-2 gap-5">
 
-        <option value="INADIMPLENTE">
-          Inadimplente
-        </option>
-
-        <option value="ENCERRADO">
-          Encerrado
-        </option>
-      </select>
-
-    </div>
-
-    <textarea
-      name="observacoes"
-      placeholder="Observações"
-      value={formData.observacoes}
-      onChange={handleChange}
-      className={`${inputStyle} w-full min-h-[120px]`}
+    <input
+      className={input}
+      name="numeroContrato"
+      placeholder="Número do Contrato"
+      value={formData.numeroContrato}
+      onChange={alterarCampo}
     />
 
-    <div className="flex justify-end">
-      <button
-        type="submit"
-        className="
-          bg-green-700
-          text-white
-          px-6
-          py-3
-          rounded-lg
-          hover:bg-green-800
-        "
-      >
-        {contratoEditando
-          ? "Salvar Alterações"
-          : "Salvar Contrato"}
-      </button>
-    </div>
+    <input
+      className={input}
+      type="number"
+      name="valorAluguel"
+      placeholder="Valor do aluguel"
+      value={formData.valorAluguel}
+      onChange={alterarCampo}
+    />
 
-  </form>
+    <input
+      className={input}
+      type="date"
+      name="dataInicio"
+      value={formData.dataInicio}
+      onChange={alterarCampo}
+    />
+
+    <input
+      className={input}
+      type="date"
+      name="dataFim"
+      value={formData.dataFim}
+      onChange={alterarCampo}
+    />
+
+    <input
+      className={input}
+      type="number"
+      name="diaVencimento"
+      placeholder="Dia do vencimento"
+      value={formData.diaVencimento}
+      onChange={alterarCampo}
+    />
+
+    <select
+      className={input}
+      name="status"
+      value={formData.status}
+      onChange={alterarCampo}
+    >
+
+      <option value="ATIVO">Ativo</option>
+
+      <option value="PENDENTE">Pendente</option>
+
+      <option value="INADIMPLENTE">Inadimplente</option>
+
+      <option value="ENCERRADO">Encerrado</option>
+
+    </select>
+
+  </div>
+    {/* GARANTIA */}
+
+  <div className="grid md:grid-cols-3 gap-5">
+
+    <select
+      name="tipoGarantia"
+      value={formData.tipoGarantia}
+      onChange={alterarCampo}
+      className={input}
+    >
+
+      <option value="">
+        Tipo de Garantia
+      </option>
+
+      <option value="CAUCAO">
+        Caução
+      </option>
+
+      <option value="FIADOR">
+        Fiador
+      </option>
+
+      <option value="SEGURO_FIANCA">
+        Seguro Fiança
+      </option>
+
+    </select>
+
+    <input
+      name="valorCaucao"
+      type="number"
+      placeholder="Valor Caução"
+      value={formData.valorCaucao}
+      onChange={alterarCampo}
+      className={input}
+    />
+
+    <input
+      name="indiceReajuste"
+      placeholder="Índice de Reajuste"
+      value={formData.indiceReajuste}
+      onChange={alterarCampo}
+      className={input}
+    />
+
+  </div>
+
+  {/* OBSERVAÇÕES */}
+
+  <textarea
+    name="observacoes"
+    value={formData.observacoes}
+    onChange={alterarCampo}
+    placeholder="Observações..."
+    className={`
+      ${input}
+
+      min-h-[140px]
+
+      resize-none
+    `}
+  />
+
+  {/* BOTÕES */}
+
+  <div className="flex justify-end gap-4 pt-6">
+
+    <button
+      type="button"
+      onClick={() => history.back()}
+      className="
+        rounded-xl
+
+        border
+        border-white/10
+
+        px-6
+        py-3
+
+        text-gray-300
+
+        transition
+
+        hover:bg-white/5
+      "
+    >
+      Cancelar
+    </button>
+
+    <button
+      type="submit"
+      className="
+        rounded-xl
+
+        bg-emerald-500
+
+        px-8
+        py-3
+
+        font-semibold
+
+        text-white
+
+        transition
+
+        hover:bg-emerald-600
+      "
+    >
+      {contrato
+        ? "Salvar Alterações"
+        : "Criar Contrato"}
+    </button>
+
+  </div>
+
+</form>
+
 );
 }

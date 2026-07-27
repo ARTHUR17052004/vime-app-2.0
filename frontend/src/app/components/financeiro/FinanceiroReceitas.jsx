@@ -1,7 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { MoreVertical } from "lucide-react";
+import {
+  MoreVertical,
+  Wallet,
+} from "lucide-react";
+
+import Table from "../ui/Table";
+import Badge from "../ui/Badge";
 
 import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
@@ -38,22 +44,73 @@ export default function FinanceiroReceitas({
 
   return (
   <>
-    <div className="bg-white rounded-3xl shadow p-6">
+    <Table>
 
-      <h2 className="text-2xl font-bold mb-6">
-        Receitas
-      </h2>
+      <div className="px-6 pt-6">
+
+        <div className="flex items-center gap-4">
+
+          <div
+            className="
+              w-12
+              h-12
+
+              rounded-2xl
+
+              bg-emerald-500/10
+
+              border
+              border-emerald-500/20
+
+              flex
+              items-center
+              justify-center
+            "
+          >
+
+            <Wallet className="w-6 h-6 text-emerald-400" />
+
+          </div>
+
+          <div>
+
+            <h2 className="text-2xl font-bold text-white">
+              Receitas
+            </h2>
+
+            <p className="text-gray-400">
+              Controle das receitas cadastradas.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
 
       {receitas.length === 0 ? (
         <div className="text-gray-500">
           Nenhuma receita cadastrada.
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto mt-6">
 
-          <table className="w-full">
+          <table className="w-full text-gray-200">
 
-            <thead className="border-b text-gray-500">
+            <thead
+              className="
+                border-b
+                border-white/10
+
+                text-gray-400
+
+                uppercase
+
+                tracking-[0.22em]
+
+                text-xs
+              "
+            >
               <tr>
                 <th className="text-left py-4">
                   Descrição
@@ -92,22 +149,22 @@ export default function FinanceiroReceitas({
                     {item.categoria}
                   </td>
 
-                  <td className="font-semibold text-green-700">
+                  <td className="font-semibold text-emerald-400">
                     R$ {item.valor}
                   </td>
 
                   <td>
-                    <span
-                      className={`
-                        px-3
-                        py-1
-                        rounded-xl
-                        text-sm
-                        ${corStatus(item.status)}
-                      `}
+                    <Badge
+                      color={
+                        item.status === "Pago"
+                          ? "green"
+                          : item.status === "Atrasado"
+                          ? "red"
+                          : "yellow"
+                      }
                     >
                       {item.status}
-                    </span>
+                    </Badge>
                   </td>
 
                   <td className="relative">
@@ -226,7 +283,7 @@ export default function FinanceiroReceitas({
         </div>
       )}
 
-    </div>
+    </Table>
 
     <ReceitaVisualizarModal
       isOpen={visualizarOpen}

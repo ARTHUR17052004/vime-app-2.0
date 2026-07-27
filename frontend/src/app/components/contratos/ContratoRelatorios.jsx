@@ -6,110 +6,189 @@ import {
   Download,
 } from "lucide-react";
 
+import DashboardCard from "../dashboard/DashboardCard";
+
 export default function ContratoRelatorios() {
+
   const relatorios = [
     {
       titulo: "Contratos Ativos",
-      descricao:
-        "Lista de contratos ativos",
+      descricao: "Lista de contratos ativos",
     },
-
     {
       titulo: "Contratos Encerrados",
-      descricao:
-        "Histórico de contratos",
+      descricao: "Histórico de contratos",
     },
-
     {
       titulo: "Inadimplência",
-      descricao:
-        "Contratos inadimplentes",
+      descricao: "Contratos inadimplentes",
     },
-
     {
       titulo: "Receita Contratada",
-      descricao:
-        "Valor total contratado",
+      descricao: "Valor total contratado",
     },
   ];
 
   return (
-    <div className="bg-white rounded-3xl shadow p-6">
 
-      <div className="flex items-center gap-3 mb-6">
+    <DashboardCard>
 
-        <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+      {/* HEADER */}
 
-          <FileBarChart className="w-6 h-6 text-blue-700" />
+      <div className="flex items-center gap-4 mb-8">
+
+        <div
+          className="
+            w-14
+            h-14
+
+            rounded-2xl
+
+            flex
+            items-center
+            justify-center
+
+            bg-emerald-500/10
+
+            border
+            border-emerald-500/20
+          "
+        >
+
+          <FileBarChart
+            size={28}
+            className="text-emerald-400"
+          />
 
         </div>
 
         <div>
 
-          <h2 className="text-2xl font-bold">
+          <h2
+            className="
+              text-3xl
+              font-black
+              text-white
+            "
+          >
             Relatórios
           </h2>
 
-          <p className="text-gray-500">
-            Exportação futura PDF e Excel
+          <p className="text-gray-400">
+            Exportação de PDF e Excel (em breve)
           </p>
 
         </div>
 
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
+      {/* CARDS */}
+
+      <div className="grid md:grid-cols-2 gap-6">
 
         {relatorios.map((item) => (
 
           <div
             key={item.titulo}
             className="
-              border
               rounded-2xl
-              p-5
+
+              border
+              border-white/5
+
+              bg-white/[0.03]
+
+              p-6
+
+              transition-all
+              duration-300
+
+              hover:bg-white/[0.05]
+              hover:-translate-y-1
             "
           >
 
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-start">
 
               <div>
 
-                <div className="font-semibold">
+                <h3
+                  className="
+                    text-lg
+                    font-bold
+                    text-white
+                  "
+                >
                   {item.titulo}
-                </div>
+                </h3>
 
-                <div className="text-sm text-gray-500">
+                <p className="mt-2 text-gray-400">
                   {item.descricao}
-                </div>
+                </p>
 
               </div>
 
-              <FileSpreadsheet
+              <div
                 className="
-                  w-6
-                  h-6
-                  text-green-700
+                  w-12
+                  h-12
+
+                  rounded-2xl
+
+                  flex
+                  items-center
+                  justify-center
+
+                  bg-emerald-500/10
+
+                  border
+                  border-emerald-500/20
                 "
-              />
+              >
+
+                <FileSpreadsheet
+                  size={22}
+                  className="text-emerald-400"
+                />
+
+              </div>
 
             </div>
 
             <button
               className="
-                mt-4
+                mt-8
+
                 flex
                 items-center
                 gap-2
-                bg-green-700
-                text-white
-                px-4
-                py-2
+
                 rounded-xl
+
+                border
+                border-emerald-500/20
+
+                bg-emerald-500/10
+
+                px-5
+                py-3
+
+                text-sm
+                font-semibold
+
+                text-emerald-400
+
+                transition-all
+                duration-300
+
+                hover:bg-emerald-500/20
               "
             >
+
               <Download size={16} />
+
               Exportar
+
             </button>
 
           </div>
@@ -118,6 +197,8 @@ export default function ContratoRelatorios() {
 
       </div>
 
-    </div>
+    </DashboardCard>
+
   );
+
 }

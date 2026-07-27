@@ -42,6 +42,8 @@ export default function UnitCard({
         h-full
         overflow-hidden
 
+        p-8
+
         transition-all
         duration-300
 
@@ -51,6 +53,10 @@ export default function UnitCard({
         hover:shadow-emerald-900/20
       "
     >
+      {/* Barra superior */}
+
+      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 via-emerald-500 to-cyan-400" />
+
       {/* HEADER */}
 
       <div className="flex items-start justify-between">
@@ -59,10 +65,13 @@ export default function UnitCard({
 
           <h2
             className="
-              text-[34px]
+              text-[32px]
+              xl:text-[34px]
+
               font-black
               tracking-tight
               leading-none
+
               text-white
             "
           >
@@ -72,9 +81,10 @@ export default function UnitCard({
           <span
             className={`
               inline-flex
+
               mt-4
 
-              rounded-full
+              rounded-2xl
 
               px-4
               py-2
@@ -126,7 +136,7 @@ export default function UnitCard({
         <InfoRow
           icon={<Wallet size={18} />}
           label={`R$ ${unidade.aluguel || "0,00"}`}
-          valueClass="text-emerald-400 font-semibold"
+          valueClass="text-emerald-400 font-bold"
         />
 
       </div>
@@ -225,6 +235,7 @@ function InfoRow({
           {value}
         </span>
       )}
+
     </div>
   );
 }
