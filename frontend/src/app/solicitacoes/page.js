@@ -9,8 +9,6 @@ import MainLayout from "../components/layout/MainLayout";
 
 import PageHeader from "../components/common/PageHeader";
 import SearchInput from "../components/common/SearchInput";
-import PrimaryButton from "../components/common/PrimaryButton";
-import StatCounter from "../components/common/StatCounter";
 
 import SolicitacaoStats from "../components/solicitacoes/SolicitacaoStats";
 import SolicitacaoFilters from "../components/solicitacoes/SolicitacaoFilters";

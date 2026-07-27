@@ -2,6 +2,10 @@
 
 import Link from "next/link";
 
+import Card from "../ui/Card";
+import Badge from "../ui/Badge";
+import Button from "../ui/Button";
+
 export default function SolicitacaoCard({
   solicitacoes,
   onEdit,
@@ -11,54 +15,14 @@ export default function SolicitacaoCard({
 }) {
 
   if (solicitacoes.length === 0) {
-
     return (
-
-      <div
-        className="
-          bg-white
-          rounded-3xl
-          shadow
-          border
-          p-10
-          text-center
-          text-gray-500
-        "
-      >
-
-        Nenhuma solicitação encontrada.
-
-      </div>
-
+      <Card className="p-10 text-center">
+        <p className="text-gray-400">
+          Nenhuma solicitação encontrada.
+        </p>
+      </Card>
     );
-
   }
-
-  const corStatus = (status) => {
-
-    switch (status) {
-
-      case "SOLICITADA":
-        return "bg-blue-100 text-blue-700";
-
-      case "EM COTAÇÃO":
-        return "bg-yellow-100 text-yellow-700";
-
-      case "AGUARDANDO COMPRA":
-        return "bg-orange-100 text-orange-700";
-
-      case "ATENDIDA":
-        return "bg-green-100 text-green-700";
-
-      case "REJEITADA":
-        return "bg-red-100 text-red-700";
-
-      default:
-        return "bg-gray-100 text-gray-700";
-
-    }
-
-  };
 
   return (
 
@@ -66,76 +30,61 @@ export default function SolicitacaoCard({
 
       {solicitacoes.map((item) => (
 
-        <div
+        <Card
           key={item.id}
-          className="
-            bg-white
-            rounded-3xl
-            shadow
-            border
-            p-8
-            hover:shadow-lg
-            transition
-          "
+          className="p-8"
         >
 
           <div className="flex justify-between items-start gap-6">
 
             <div className="flex-1">
 
-              <p className="text-sm text-gray-500">
-
+              <p className="text-sm text-gray-400">
                 {item.numero}
-
               </p>
 
-              <h2 className="text-2xl font-bold text-gray-900 mt-2">
-
+              <h2 className="text-2xl font-bold text-white mt-2">
                 {item.titulo}
-
               </h2>
 
             </div>
 
-            <span
-              className={`
-                px-4
-                py-2
-                rounded-full
-                text-xs
-                font-semibold
-                whitespace-nowrap
-                ${corStatus(item.status)}
-              `}
+            <Badge
+              variant={
+                item.status === "ATENDIDA"
+                  ? "emerald"
+                  : item.status === "REJEITADA"
+                  ? "red"
+                  : item.status === "EM COTAÇÃO"
+                  ? "yellow"
+                  : item.status === "AGUARDANDO COMPRA"
+                  ? "blue"
+                  : "gray"
+              }
             >
-
               {item.status}
-
-            </span>
+            </Badge>
 
           </div>
 
           <div className="mt-6">
 
-            <p className="text-sm text-gray-500 mb-2">
-
+            <p className="text-sm text-gray-400 mb-2">
               Descrição
-
             </p>
 
             <div
               className="
-                bg-gray-50
+                bg-white/5
                 border
+                border-white/10
                 rounded-2xl
                 p-5
-                text-gray-700
+                text-gray-300
                 leading-relaxed
               "
             >
-
               {item.descricao || "Sem descrição."}
-
             </div>
 
           </div>
@@ -144,221 +93,173 @@ export default function SolicitacaoCard({
 
             <div>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Responsável
               </p>
 
-              <p className="font-semibold text-gray-900 mt-1">
-
+              <p className="font-semibold text-white mt-1">
                 {item.responsavel || "-"}
-
               </p>
 
             </div>
 
             <div>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Data
               </p>
 
-              <p className="font-semibold text-gray-900 mt-1">
-
+              <p className="font-semibold text-white mt-1">
                 {item.data || "-"}
-
               </p>
 
             </div>
 
             <div>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-400">
                 Prazo
               </p>
 
-              <p className="font-semibold text-gray-900 mt-1">
-
+              <p className="font-semibold text-white mt-1">
                 {item.prazo || "-"}
-
               </p>
 
             </div>
 
           </div>
 
-          {
+          {item.observacoes && (
 
-            item.observacoes && (
+            <div className="mt-6">
 
-              <div className="mt-6">
+              <p className="text-sm text-gray-400 mb-2">
+                Observações
+              </p>
 
-                <p className="text-sm text-gray-500 mb-2">
-
-                  Observações
-
-                </p>
-
-                <div
-                  className="
-                    bg-gray-50
-                    border
-                    rounded-2xl
-                    p-5
-                    text-gray-700
-                  "
-                >
-
-                  {item.observacoes}
-
-                </div>
-
-              </div>
-
-            )
-
-          }
-
-          {
-            item.resposta && (
-
-              <div className="mt-6">
-
-                <p className="text-sm text-gray-500 mb-2">
-
-                  Resposta
-
-                </p>
-
-                <div
-                  className="
-                    bg-green-50
-                    border
-                    border-green-200
-                    rounded-2xl
-                    p-5
-                    text-gray-700
-                  "
-                >
-
-                  {item.resposta}
-
-                </div>
-
-              </div>
-
-            )
-          }
-          <div
-            className="
-              flex
-              items-center
-              justify-between
-              flex-wrap
-              gap-4
-              mt-8
-            "
-          >
-
-            <select
-              value={item.status}
-              onChange={(e) =>
-                onAlterarStatus(
-                  item.id,
-                  e.target.value
-                )
-              }
-              className="
-                border
-                rounded-xl
-                px-4
-                py-2
-                bg-white
-                text-gray-900
-              "
-            >
-
-              <option>SOLICITADA</option>
-
-              <option>EM COTAÇÃO</option>
-
-              <option>AGUARDANDO COMPRA</option>
-
-              <option>ATENDIDA</option>
-
-              <option>REJEITADA</option>
-
-            </select>
-
-            <div className="flex flex-wrap gap-3">
-
-                         <Link
-                href={`/solicitacoes/${item.id}`}
+              <div
                 className="
-                  px-5
-                  py-2
-                  rounded-xl
+                  bg-white/5
                   border
-                  hover:bg-gray-100
-                  transition
+                  border-white/10
+                  rounded-2xl
+                  p-5
+                  text-gray-300
                 "
               >
-                Visualizar
-              </Link>
-              
-              <button
-                onClick={() =>
-                  onResponder(item)
-                }
-                className="
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-blue-600
-                  text-white
-                  hover:bg-blue-700
-                  transition
-                "
-              >
-
-                Responder
-
-              </button>
-
-              <button
-                onClick={() => onEdit(item)}
-                className="
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-yellow-500
-                  text-white
-                  hover:bg-yellow-600
-                  transition
-                "
-              >
-                Editar
-              </button>
-
-              <button
-                onClick={() => onDelete(item.id)}
-                className="
-                  px-5
-                  py-2
-                  rounded-xl
-                  bg-red-600
-                  text-white
-                  hover:bg-red-700
-                  transition
-                "
-              >
-                Excluir
-              </button>
+                {item.observacoes}
+              </div>
 
             </div>
 
-          </div>
+          )}
+            {item.resposta && (
 
-        </div>
+  <div className="mt-6">
+
+    <p className="text-sm text-gray-400 mb-2">
+      Resposta
+    </p>
+
+    <div
+      className="
+        bg-emerald-500/10
+        border
+        border-emerald-500/20
+        rounded-2xl
+        p-5
+        text-gray-300
+      "
+    >
+      {item.resposta}
+    </div>
+
+  </div>
+
+)}
+
+<div
+  className="
+    flex
+    items-center
+    justify-between
+    flex-wrap
+    gap-4
+    mt-8
+  "
+>
+
+  <select
+    value={item.status}
+    onChange={(e) =>
+      onAlterarStatus(
+        item.id,
+        e.target.value
+      )
+    }
+    className="
+      rounded-xl
+      border
+      border-white/10
+      bg-white/5
+      px-4
+      py-3
+      text-white
+      outline-none
+      focus:border-emerald-500
+    "
+  >
+
+    <option value="SOLICITADA">SOLICITADA</option>
+
+    <option value="EM COTAÇÃO">EM COTAÇÃO</option>
+
+    <option value="AGUARDANDO COMPRA">
+      AGUARDANDO COMPRA
+    </option>
+
+    <option value="ATENDIDA">ATENDIDA</option>
+
+    <option value="REJEITADA">REJEITADA</option>
+
+  </select>
+
+  <div className="flex flex-wrap gap-3">
+
+    <Link href={`/solicitacoes/${item.id}`}>
+
+      <Button variant="secondary">
+        Visualizar
+      </Button>
+
+    </Link>
+
+    <Button
+      variant="blue"
+      onClick={() => onResponder(item)}
+    >
+      Responder
+    </Button>
+
+    <Button
+      variant="yellow"
+      onClick={() => onEdit(item)}
+    >
+      Editar
+    </Button>
+
+    <Button
+      variant="red"
+      onClick={() => onDelete(item.id)}
+    >
+      Excluir
+    </Button>
+
+  </div>
+
+</div>
+
+</Card>
 
       ))}
 
