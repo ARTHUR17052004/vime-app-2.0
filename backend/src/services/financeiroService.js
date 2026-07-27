@@ -29,8 +29,36 @@ const fluxoCaixa = async () => {
   });
 
   return fluxo;
+
+};
+
+const resumo = async () => {
+
+  const receitas = await prisma.receita.findMany();
+
+  const despesas = await prisma.despesa.findMany();
+
+  const totalReceitas = receitas.reduce(
+    (total, item) => total + item.valor,
+    0
+  );
+
+  const totalDespesas = despesas.reduce(
+    (total, item) => total + item.valor,
+    0
+  );
+
+  return {
+    totalReceitas,
+    totalDespesas,
+    saldo: totalReceitas - totalDespesas,
+    quantidadeReceitas: receitas.length,
+    quantidadeDespesas: despesas.length
+  };
+
 };
 
 module.exports = {
-  fluxoCaixa
+  fluxoCaixa,
+  resumo
 };

@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const morgan = require('morgan');
 
 const unidadeRoutes = require('./src/routes/unidadeRoutes');
 const kitnetRouts = require('./src/routes/kitnetRoutes');
@@ -15,6 +17,8 @@ const despesaRoutes = require('./src/routes/despesaRoutes');
 const financeiroRoutes = require('./src/routes/financeiroRoutes');
 const dashboardRoutes = require('./src/routes/dashboardRoutes');
 const asaasRoutes = require('./src/routes/asaasRoutes');
+const clicksignRoutes = require('./src/routes/clicksignRoutes');
+const solicitacaoRoutes = require('./src/routes/solicitacaoRoutes');
 
 const errorMiddleware = require('./src/middlewares/errorMiddleware');
 
@@ -22,6 +26,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors());
+app.use(helmet());
+app.use(morgan('dev'));
+app.use(express.json());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
@@ -47,8 +54,15 @@ app.use('/receitas', receitaRoutes);
 app.use('/financeiro', financeiroRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/asaas', asaasRoutes);
+app.use('/solicitacoes', solicitacaoRoutes);
+app.use('/clicksign', clicksignRoutes);
+app.use((req, res) => {
+  return res.status(404).json({
+    success: false,
+    message: 'Rota não encontrada.'
+  });
+});
 
-// Middleware global de tratamento de erros
 app.use(errorMiddleware);
 
 app.listen(PORT, () => {
