@@ -55,6 +55,10 @@ const buscarTransacao = async (id) => {
     where: { id }
   });
 
+  if (!receita) {
+    return null;
+  }
+
   return {
     id: receita.id,
     cliente: receita.descricao,

@@ -8,6 +8,8 @@ const authMiddleware = require('../middlewares/authMiddleware');
 
 router.use(authMiddleware);
 
+router.get('/', financeiroController.resumo);
+
 router.get('/fluxo-caixa', financeiroController.fluxoCaixa);
 
 module.exports = router;

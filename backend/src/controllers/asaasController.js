@@ -1,50 +1,70 @@
 const asaasService = require('../services/asaasService');
 
 const config = async (req, res) => {
-  const dados = await asaasService.config();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.config()
+  });
 };
 
 const status = async (req, res) => {
-  const dados = await asaasService.status();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.status()
+  });
 };
 
 const testarConexao = async (req, res) => {
-  const dados = await asaasService.testarConexao();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.testarConexao()
+  });
 };
 
 const buscarWallet = async (req, res) => {
-  const dados = await asaasService.buscarWallet();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.buscarWallet()
+  });
 };
 
 const listarTransacoes = async (req, res) => {
-  const dados = await asaasService.listarTransacoes();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.listarTransacoes()
+  });
 };
 
 const buscarTransacao = async (req, res) => {
+
   const dados = await asaasService.buscarTransacao(req.params.id);
 
   if (!dados) {
     return res.status(404).json({
-      mensagem: 'Transação não encontrada'
+      success: false,
+      message: 'Transação não encontrada.'
     });
   }
 
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: dados
+  });
+
 };
 
 const resumo = async (req, res) => {
-  const dados = await asaasService.resumo();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.resumo()
+  });
 };
 
 const sincronizar = async (req, res) => {
-  const dados = await asaasService.sincronizar();
-  res.json(dados);
+  return res.json({
+    success: true,
+    data: await asaasService.sincronizar()
+  });
 };
 
 module.exports = {

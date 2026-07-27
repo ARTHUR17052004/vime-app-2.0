@@ -25,5 +25,3 @@ router.patch('/:id/inadimplente', contratoController.inadimplente);
 router.patch('/:id/renovar', contratoController.renovar);
 
 module.exports = router;
-
- 

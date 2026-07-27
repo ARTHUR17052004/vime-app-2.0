@@ -28,30 +28,52 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  console.log("CRIANDO CONTRATO");
+  // Verifica se a kitnet existe
+  const kitnet = await prisma.kitnet.findUnique({
+    where: {
+      id: dados.kitnetId
+    }
+  });
 
+  if (!kitnet) {
+    throw new Error('Kitnet não encontrada.');
+  }
+
+  // Impede criar contrato em kitnet ocupada
+  if (kitnet.ocupada) {
+    throw new Error('Esta kitnet já possui um contrato ativo.');
+  }
+
+  // Cria o contrato
   const contrato = await prisma.contrato.create({
     data: dados
   });
 
-  console.log("CONTRATO:", contrato.id);
-
-  console.log("CRIANDO RECEITA");
-
+  // Cria a primeira receita automaticamente
   await prisma.receita.create({
     data: {
       contratoId: contrato.id,
       categoria: 'Aluguel',
-      descricao: 'Aluguel Kitnet',
+      descricao: `Aluguel - ${kitnet.numero}`,
       valor: contrato.valorAluguel,
       vencimento: contrato.dataInicio,
       status: 'PENDENTE'
     }
   });
 
-  console.log("RECEITA CRIADA");
+  // Marca a kitnet como ocupada
+  await prisma.kitnet.update({
+    where: {
+      id: dados.kitnetId
+    },
+    data: {
+      ocupada: true,
+      status: 'OCUPADA'
+    }
+  });
 
   return contrato;
+
 };
 
 const atualizar = (id, dados) => {
@@ -61,19 +83,64 @@ const atualizar = (id, dados) => {
   });
 };
 
-const remover = (id) => {
+const remover = async (id) => {
+
+  const contrato = await prisma.contrato.findUnique({
+    where: { id },
+    include: {
+      receitas: true
+    }
+  });
+
+  if (!contrato) {
+    throw new Error('Contrato não encontrado.');
+  }
+
+  if (contrato.receitas.length > 0) {
+    throw new Error(
+      'Não é possível excluir um contrato que possui receitas vinculadas.'
+    );
+  }
+
   return prisma.contrato.delete({
     where: { id }
   });
+
 };
 
-const encerrar = (id) => {
-  return prisma.contrato.update({
+const encerrar = async (id) => {
+
+  // Busca o contrato
+  const contrato = await prisma.contrato.findUnique({
+    where: { id }
+  });
+
+  if (!contrato) {
+    throw new Error('Contrato não encontrado.');
+  }
+
+  // Encerra o contrato
+  const contratoEncerrado = await prisma.contrato.update({
     where: { id },
     data: {
-      status: 'ENCERRADO'
+      status: 'ENCERRADO',
+      dataFim: contrato.dataFim || new Date()
     }
   });
+
+  // Libera a kitnet
+  await prisma.kitnet.update({
+    where: {
+      id: contrato.kitnetId
+    },
+    data: {
+      ocupada: false,
+      status: 'DISPONIVEL'
+    }
+  });
+
+  return contratoEncerrado;
+
 };
 
 const inadimplente = (id) => {

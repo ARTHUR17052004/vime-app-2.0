@@ -4,10 +4,25 @@ const fluxoCaixa = async (req, res) => {
 
   const fluxo = await financeiroService.fluxoCaixa();
 
-  res.json(fluxo);
+  return res.json({
+    success: true,
+    data: fluxo
+  });
+
+};
+
+const resumo = async (req, res) => {
+
+  const resumo = await financeiroService.resumo();
+
+  return res.json({
+    success: true,
+    data: resumo
+  });
 
 };
 
 module.exports = {
-  fluxoCaixa
+  fluxoCaixa,
+  resumo
 };

@@ -4,6 +4,10 @@ const router = express.Router();
 
 const asaasController = require('../controllers/asaasController');
 
+const authMiddleware = require('../middlewares/authMiddleware');
+
+router.use(authMiddleware);
+
 router.get('/config', asaasController.config);
 
 router.get('/status', asaasController.status);
