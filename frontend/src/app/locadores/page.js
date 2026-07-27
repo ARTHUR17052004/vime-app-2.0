@@ -3,11 +3,20 @@
 import { useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import PageHeader from "../components/ui/PageHeader";
+import Button from "../components/ui/Button";
+
+import SearchInput from "../components/common/SearchInput";
+
 import LocadorModal from "../components/locadores/LocadorModal";
 import LocadorForm from "../components/locadores/LocadorForm";
 import LocadorCard from "../components/locadores/LocadorCard";
 
 export default function LocadoresPage() {
+
   const [modalOpen, setModalOpen] = useState(false);
 
   const [locadores, setLocadores] = useState([]);
@@ -18,37 +27,54 @@ export default function LocadoresPage() {
   const [carregado, setCarregado] =
     useState(false);
 
+  const [search, setSearch] =
+    useState("");
+
   useEffect(() => {
+
     const dados = JSON.parse(
+
       localStorage.getItem(
         "vime-locadores"
       ) || "[]"
+
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLocadores(dados);
 
     setCarregado(true);
+
   }, []);
 
   useEffect(() => {
+
     if (!carregado) return;
 
     localStorage.setItem(
+
       "vime-locadores",
+
       JSON.stringify(locadores)
+
     );
+
   }, [locadores, carregado]);
 
   const salvarLocador = (dados) => {
+
     if (locadorEditando) {
+
       const listaAtualizada =
         locadores.map((item) =>
+
           item.id === locadorEditando.id
             ? {
                 ...item,
                 ...dados,
               }
             : item
+
         );
 
       setLocadores(listaAtualizada);
@@ -58,28 +84,39 @@ export default function LocadoresPage() {
       setModalOpen(false);
 
       return;
+
     }
 
     const novoLocador = {
+
       id: Date.now(),
+
       ...dados,
+
     };
 
     setLocadores((prev) => [
+
       ...prev,
+
       novoLocador,
+
     ]);
 
     setModalOpen(false);
+
   };
 
   const editarLocador = (locador) => {
+
     setLocadorEditando(locador);
 
     setModalOpen(true);
+
   };
 
   const excluirLocador = (id) => {
+
     const confirmar = window.confirm(
       "Deseja excluir este locador?"
     );
@@ -87,72 +124,118 @@ export default function LocadoresPage() {
     if (!confirmar) return;
 
     setLocadores((prev) =>
+
       prev.filter(
+
         (locador) =>
           locador.id !== id
+
       )
+
     );
+
   };
 
   const novoLocador = () => {
+
     setLocadorEditando(null);
 
     setModalOpen(true);
+
   };
 
+  const locadoresFiltrados =
+    locadores.filter((locador) => {
+
+      const termo =
+        search.toLowerCase();
+
+      return (
+
+        locador.nome
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        locador.email
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        locador.documento
+          ?.toLowerCase()
+          .includes(termo)
+
+      );
+
+    });
+
   return (
+
     <MainLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-800">
-            Locadores
-          </h1>
 
-          <p className="text-gray-500 mt-2">
-            Gestão de proprietários
-          </p>
+      <Page>
 
-          <p className="text-sm text-green-600 mt-1">
-            {locadores.length} locador(es)
-            cadastrado(s)
-          </p>
-        </div>
+        <PageContainer>
 
-        <button
-          onClick={novoLocador}
-          className="
-            bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-lg
-            hover:bg-green-800
-          "
-        >
-          + Novo Locador
-        </button>
-      </div>
+          <PageHeader
+            title="Locadores"
+            subtitle="Gerencie todos os proprietários cadastrados."
+            count={locadores.length}
+            countLabel="locador(es) cadastrado(s)"
+            actions={
+              <Button onClick={novoLocador}>
+                + Novo Locador
+              </Button>
+            }
+          />
 
-      <LocadorCard
-        locadores={locadores}
-        onDelete={excluirLocador}
-        onEdit={editarLocador}
-      />
+          <div className="mt-8">
 
-      <LocadorModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setLocadorEditando(null);
-        }}
-      >
-        <LocadorForm
-          onSave={salvarLocador}
-          locadorEditando={
-            locadorEditando
-          }
-        />
-      </LocadorModal>
+            <SearchInput
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+              placeholder="Pesquisar locador..."
+            />
+
+          </div>
+
+          <div className="mt-8">
+
+            <LocadorCard
+              locadores={locadoresFiltrados}
+              onDelete={excluirLocador}
+              onEdit={editarLocador}
+            />
+
+          </div>
+
+          <LocadorModal
+            isOpen={modalOpen}
+            onClose={() => {
+
+              setModalOpen(false);
+
+              setLocadorEditando(null);
+
+            }}
+          >
+
+            <LocadorForm
+              onSave={salvarLocador}
+              locadorEditando={
+                locadorEditando
+              }
+            />
+
+          </LocadorModal>
+
+        </PageContainer>
+
+      </Page>
+
     </MainLayout>
+
   );
+
 }

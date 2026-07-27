@@ -14,12 +14,17 @@ import FinanceiroDashboard from "../components/financeiro/FinanceiroDashboard";
 import FinanceiroInadimplencia from "../components/financeiro/FinanceiroInadimplencia";
 import FinanceiroFluxoCaixa from "../components/financeiro/FinanceiroFluxoCaixa";
 import FinanceiroProximosVencimentos from "../components/financeiro/FinanceiroProximosVencimentos";
-import FinanceiroResumo from "../components/financeiro/FinanceiroResumo";
-import FinanceiroFiltros from "../components/financeiro/FinanceiroFiltros";
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+
+import FinanceiroStats from "../components/financeiro/FinanceiroStats";
+import FinanceiroFilters from "../components/financeiro/FinanceiroFilters";
 import FinanceiroTabs from "../components/financeiro/FinanceiroTabs";
 import FinanceiroReceitas from "../components/financeiro/FinanceiroReceitas";
 import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
+import PageHeader from "../components/ui/PageHeader";
+
 
 export default function FinanceiroPage() {
   const [receitas, setReceitas] = useState([]);
@@ -36,8 +41,8 @@ export default function FinanceiroPage() {
   const [abaSelecionada, setAbaSelecionada] =
     useState("visao-geral");
 
-  const [filtroSelecionado, setFiltroSelecionado] =
-    useState("Este Mês");
+  const [search, setSearch] =
+    useState("");
 
   useEffect(() => {
     const receitasSalvas = JSON.parse(
@@ -106,59 +111,59 @@ export default function FinanceiroPage() {
   );
 };
 
-const excluirDespesa = (id) => {
-  if (!window.confirm("Excluir despesa?"))
-    return;
+  const excluirDespesa = (id) => {
+    if (!window.confirm("Excluir despesa?"))
+      return;
 
-  setDespesas((prev) =>
-    prev.filter((item) => item.id !== id)
-  );
-};
+    setDespesas((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
+  };
 
-const atualizarReceita = (
-  id,
-  novosDados
-) => {
-  setReceitas((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            ...novosDados,
-          }
-        : item
-    )
-  );
-};
+  const atualizarReceita = (
+    id,
+    novosDados
+  ) => {
+    setReceitas((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...novosDados,
+            }
+          : item
+      )
+    );
+  };
 
-const atualizarDespesa = (
-  id,
-  novosDados
-) => {
-  setDespesas((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            ...novosDados,
-          }
-        : item
-    )
-  );
-};
+  const atualizarDespesa = (
+    id,
+    novosDados
+  ) => {
+    setDespesas((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              ...novosDados,
+            }
+          : item
+      )
+    );
+  };
 
-const marcarReceitaComoPaga = (id) => {
-  setReceitas((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            status: "Pago",
-          }
-        : item
-    )
-  );
-};
+  const marcarReceitaComoPaga = (id) => {
+    setReceitas((prev) =>
+      prev.map((item) =>
+        item.id === id
+          ? {
+              ...item,
+              status: "Pago",
+            }
+          : item
+      )
+    );
+  };
 
   const receitaPrevista =
     receitas.reduce(
@@ -177,68 +182,63 @@ const marcarReceitaComoPaga = (id) => {
   const lucroLiquido =
     receitaPrevista - totalDespesas;
 
+  const receitasFiltradas = receitas.filter((item) => {
+
+    const texto = `
+      ${item.descricao || ""}
+      ${item.inquilino || ""}
+      ${item.unidade || ""}
+      ${item.kitnet || ""}
+    `.toLowerCase();
+
+    return texto.includes(
+      search.toLowerCase()
+    );
+
+  });
+
+  const despesasFiltradas = despesas.filter((item) => {
+
+    const texto = `
+      ${item.descricao || ""}
+      ${item.categoria || ""}
+      ${item.fornecedor || ""}
+    `.toLowerCase();
+
+    return texto.includes(
+      search.toLowerCase()
+    );
+
+  });
+
  return (
   <MainLayout>
 
-    <div className="flex items-center justify-between mb-8">
+    <Page>
 
-      <div>
-        <h1 className="text-4xl font-bold text-gray-800">
-          Financeiro
-        </h1>
+  <PageContainer>
 
-        <p className="text-gray-500 mt-2">
-          Controle financeiro
-        </p>
-      </div>
+    <PageHeader
+      total={receitas.length}
+      onNovaReceita={() => {
+        setTipoModal("receita");
+        setModalOpen(true);
+      }}
+      onNovaDespesa={() => {
+        setTipoModal("despesa");
+        setModalOpen(true);
+      }}
+    />
 
-      <div className="flex gap-3">
-
-        <button
-          onClick={() => {
-            setTipoModal("receita");
-            setModalOpen(true);
-          }}
-          className="
-            bg-green-700
-            text-white
-            px-6
-            py-3
-            rounded-xl
-          "
-        >
-          + Nova Receita
-        </button>
-
-        <button
-          onClick={() => {
-            setTipoModal("despesa");
-            setModalOpen(true);
-          }}
-          className="
-            bg-white
-            border
-            px-6
-            py-3
-            rounded-xl
-          "
-        >
-          + Nova Despesa
-        </button>
-
-      </div>
-
-    </div>
-
-    <FinanceiroResumo
+    <FinanceiroStats
       receitaPrevista={receitaPrevista}
       totalDespesas={totalDespesas}
       lucroLiquido={lucroLiquido}
     />
 
-    <FinanceiroFiltros
-      filtroSelecionado={filtroSelecionado}
-      setFiltroSelecionado={setFiltroSelecionado}
+    <FinanceiroFilters
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
     />
 
     <FinanceiroTabs
@@ -326,5 +326,9 @@ const marcarReceitaComoPaga = (id) => {
       )}
     </FinanceiroModal>
 
+      </PageContainer>
+
+    </Page>
+    
   </MainLayout>
 )}

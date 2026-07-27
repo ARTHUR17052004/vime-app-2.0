@@ -1,85 +1,43 @@
 "use client";
 
+import {
+  Wallet,
+  TrendingDown,
+  Landmark,
+} from "lucide-react";
+
+import PageGrid from "../ui/PageGrid";
+import DashboardStatsCard from "../dashboard/DashboardStatsCard";
+
 export default function FinanceiroResumo({
   receitaPrevista,
   totalDespesas,
   lucroLiquido,
 }) {
   return (
-    <div className="grid md:grid-cols-3 gap-6 mb-8">
+    <PageGrid cols={3}>
 
-      <div
-        className="
-          bg-white
-          rounded-3xl
-          shadow
-          p-6
-        "
-      >
-        <p className="text-gray-500">
-          Receita Prevista
-        </p>
+      <DashboardStatsCard
+        title="Receita Prevista"
+        value={`R$ ${receitaPrevista}`}
+        subtitle="Receitas cadastradas"
+        icon={Wallet}
+      />
 
-        <h2
-          className="
-            text-4xl
-            font-bold
-            text-green-700
-            mt-3
-          "
-        >
-          R$ {receitaPrevista}
-        </h2>
-      </div>
+      <DashboardStatsCard
+        title="Despesas"
+        value={`R$ ${totalDespesas}`}
+        subtitle="Total de despesas"
+        icon={TrendingDown}
+      />
 
-      <div
-        className="
-          bg-white
-          rounded-3xl
-          shadow
-          p-6
-        "
-      >
-        <p className="text-gray-500">
-          Total Despesas
-        </p>
+      <DashboardStatsCard
+        title="Lucro Líquido"
+        value={`R$ ${lucroLiquido}`}
+        subtitle="Resultado financeiro"
+        icon={Landmark}
+      />
 
-        <h2
-          className="
-            text-4xl
-            font-bold
-            text-red-600
-            mt-3
-          "
-        >
-          R$ {totalDespesas}
-        </h2>
-      </div>
-
-      <div
-        className="
-          bg-white
-          rounded-3xl
-          shadow
-          p-6
-        "
-      >
-        <p className="text-gray-500">
-          Lucro Líquido
-        </p>
-
-        <h2
-          className="
-            text-4xl
-            font-bold
-            text-blue-700
-            mt-3
-          "
-        >
-          R$ {lucroLiquido}
-        </h2>
-      </div>
-
-    </div>
+    </PageGrid>
   );
 }

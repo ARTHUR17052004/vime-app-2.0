@@ -1,30 +1,43 @@
 "use client";
 
-import Card from "../ui/Card";
+import DashboardCard from "./DashboardCard";
+import dashboard from "../../config/dashboard";
 
 export default function StatsCard({
   title,
   value,
-  color = "text-green-700",
-  subtitle,
+  subtitle = "",
+  icon,
+  onClick,
 }) {
   return (
-    <Card>
+    <DashboardCard
+      onClick={onClick}
+      className={dashboard.stats.height}
+    >
+      <div className={dashboard.stats.container}>
 
-      <p className="text-sm text-gray-500">
-        {title}
-      </p>
+        <div className={dashboard.stats.header}>
 
-      <h2 className={`text-4xl font-bold mt-3 ${color}`}>
-        {value}
-      </h2>
+          <span className={dashboard.stats.title}>
+            {title}
+          </span>
 
-      {subtitle && (
-        <p className="mt-2 text-sm text-gray-400">
+          <div className={dashboard.stats.icon}>
+            {icon}
+          </div>
+
+        </div>
+
+        <h2 className={dashboard.stats.value}>
+          {value}
+        </h2>
+
+        <span className={dashboard.stats.subtitle}>
           {subtitle}
-        </p>
-      )}
+        </span>
 
-    </Card>
+      </div>
+    </DashboardCard>
   );
 }

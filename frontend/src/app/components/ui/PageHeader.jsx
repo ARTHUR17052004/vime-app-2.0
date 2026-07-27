@@ -1,26 +1,71 @@
-export default function PageHeader({
+"use client";
+
+export default function VimePageHeader({
   title,
   subtitle,
+  count,
+  countLabel,
   actions,
+  children,
 }) {
   return (
-    <div className="flex items-center justify-between mb-8">
+    <div className="mb-8">
 
-      <div>
+      <div className="flex items-start justify-between gap-6">
 
-        <h1 className="text-3xl font-bold text-gray-800">
-          {title}
-        </h1>
+        <div>
 
-        {subtitle && (
-          <p className="text-gray-500 mt-2">
-            {subtitle}
-          </p>
+          <h1
+            className="
+              text-6xl
+              font-black
+              tracking-tight
+              text-white
+            "
+          >
+            {title}
+          </h1>
+
+          {subtitle && (
+            <p
+              className="
+                mt-2
+                text-2xl
+                text-gray-300
+              "
+            >
+              {subtitle}
+            </p>
+          )}
+
+          {count !== undefined && (
+            <p
+              className="
+                mt-1
+                text-sm
+                font-semibold
+                text-emerald-400
+              "
+            >
+              {count} {countLabel}
+            </p>
+          )}
+
+        </div>
+
+        {actions && (
+          <div className="flex gap-3">
+            {actions}
+          </div>
         )}
 
       </div>
 
-      {actions}
+      {children && (
+        <div className="mt-8">
+          {children}
+        </div>
+      )}
 
     </div>
   );

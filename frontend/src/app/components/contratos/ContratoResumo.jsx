@@ -2,135 +2,165 @@
 
 import {
   FileText,
-  CheckCircle,
+  CheckCircle2,
   AlertTriangle,
   Ban,
   DollarSign,
 } from "lucide-react";
 
+import DashboardCard from "../dashboard/DashboardCard";
+
 export default function ContratoResumo({
-  contratos,
+  contratos = [],
 }) {
-  const ativos =
-    contratos.filter(
-      (c) => c.status === "ATIVO"
-    ).length;
+  const ativos = contratos.filter(
+    (c) => c.status === "ATIVO"
+  ).length;
 
-  const pendentes =
-    contratos.filter(
-      (c) => c.status === "PENDENTE"
-    ).length;
+  const pendentes = contratos.filter(
+    (c) => c.status === "PENDENTE"
+  ).length;
 
-  const inadimplentes =
-    contratos.filter(
-      (c) => c.status === "INADIMPLENTE"
-    ).length;
+  const inadimplentes = contratos.filter(
+    (c) => c.status === "INADIMPLENTE"
+  ).length;
 
-  const encerrados =
-    contratos.filter(
-      (c) => c.status === "ENCERRADO"
-    ).length;
+  const encerrados = contratos.filter(
+    (c) => c.status === "ENCERRADO"
+  ).length;
 
-  const valorTotal =
-    contratos.reduce(
-      (total, item) =>
-        total +
-        Number(
-          item.valorAluguel || 0
-        ),
-      0
-    );
+  const valorTotal = contratos.reduce(
+    (total, item) =>
+      total + Number(item.valorAluguel || 0),
+    0
+  );
 
   const cards = [
     {
       titulo: "Ativos",
       valor: ativos,
-      icone: CheckCircle,
-      cor: "text-green-700",
-      fundo: "bg-green-100",
+      icon: CheckCircle2,
+      color: "emerald",
     },
-
     {
       titulo: "Pendentes",
       valor: pendentes,
-      icone: AlertTriangle,
-      cor: "text-yellow-700",
-      fundo: "bg-yellow-100",
+      icon: AlertTriangle,
+      color: "yellow",
     },
-
     {
       titulo: "Inadimplentes",
       valor: inadimplentes,
-      icone: Ban,
-      cor: "text-red-700",
-      fundo: "bg-red-100",
+      icon: Ban,
+      color: "red",
     },
-
     {
       titulo: "Encerrados",
       valor: encerrados,
-      icone: FileText,
-      cor: "text-gray-700",
-      fundo: "bg-gray-100",
+      icon: FileText,
+      color: "gray",
     },
-
     {
       titulo: "Valor Total",
-      valor: `R$ ${valorTotal}`,
-      icone: DollarSign,
-      cor: "text-blue-700",
-      fundo: "bg-blue-100",
+      valor: `R$ ${valorTotal.toLocaleString("pt-BR")}`,
+      icon: DollarSign,
+      color: "emerald",
     },
   ];
 
+  const colors = {
+    emerald: {
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/20",
+      text: "text-emerald-400",
+    },
+    yellow: {
+      bg: "bg-yellow-500/10",
+      border: "border-yellow-500/20",
+      text: "text-yellow-400",
+    },
+    red: {
+      bg: "bg-red-500/10",
+      border: "border-red-500/20",
+      text: "text-red-400",
+    },
+    gray: {
+      bg: "bg-white/5",
+      border: "border-white/10",
+      text: "text-gray-300",
+    },
+  };
+
   return (
-    <div className="grid md:grid-cols-2 xl:grid-cols-5 gap-6">
+    <div
+      className="
+        grid
+        grid-cols-1
+        md:grid-cols-2
+        xl:grid-cols-5
+        gap-6
+      "
+    >
+      {cards.map((card) => {
+        const Icon = card.icon;
 
-      {cards.map((card) => (
-        <div
-          key={card.titulo}
-          className="
-            bg-white
-            rounded-3xl
-            shadow
-            p-6
-          "
-        >
-          <div className="flex justify-between items-center">
+        return (
+          <DashboardCard key={card.titulo}>
+            <div className="flex items-center justify-between">
 
-            <div>
+              <div>
 
-              <p className="text-gray-500 text-sm">
-                {card.titulo}
-              </p>
+                <p
+                  className="
+                    uppercase
+                    tracking-[0.18em]
+                    text-[11px]
+                    text-gray-400
+                    font-semibold
+                  "
+                >
+                  {card.titulo}
+                </p>
 
-              <h2 className="text-3xl font-bold mt-3">
-                {card.valor}
-              </h2>
+                <h2
+                  className="
+                    mt-3
+                    text-4xl
+                    font-black
+                    text-white
+                  "
+                >
+                  {card.valor}
+                </h2>
+
+              </div>
+
+              <div
+                className={`
+                  w-16
+                  h-16
+                  rounded-2xl
+                  flex
+                  items-center
+                  justify-center
+                  border
+                  ${colors[card.color].bg}
+                  ${colors[card.color].border}
+                `}
+              >
+                <Icon
+                  className={`
+                    w-8
+                    h-8
+                    ${colors[card.color].text}
+                  `}
+                />
+              </div>
 
             </div>
-
-            <div
-              className={`
-                w-14
-                h-14
-                rounded-2xl
-                flex
-                items-center
-                justify-center
-                ${card.fundo}
-              `}
-            >
-              <card.icone
-                className={`w-7 h-7 ${card.cor}`}
-              />
-            </div>
-
-          </div>
-
-        </div>
-      ))}
-
+          </DashboardCard>
+        );
+      })}
     </div>
   );
 }

@@ -1,241 +1,519 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+
+import Input from "../ui/Input";
+import Select from "../ui/Select";
+import Textarea from "../ui/Textarea";
+import Button from "../ui/Button";
 
 export default function UnitForm({
   unidade,
   onSave,
   onCancel,
 }) {
+
   const initialState = {
+
     nome: "",
+
     cep: "",
+
     logradouro: "",
+
     numero: "",
+
     complemento: "",
+
     bairro: "",
+
     cidade: "",
+
     uf: "",
+
     locador: "",
+
     kitnets: "",
+
     aluguel: "",
+
     vencimento: "10",
+
     status: "Ativa",
+
     observacoes: "",
+
   };
 
-  const [formData, setFormData] = useState(initialState);
+  const [formData, setFormData] =
+    useState(initialState);
 
   useEffect(() => {
+
     if (unidade) {
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
+
         nome: unidade.nome || "",
+
         cep: unidade.cep || "",
-        logradouro: unidade.logradouro || "",
-        numero: unidade.numero || "",
-        complemento: unidade.complemento || "",
-        bairro: unidade.bairro || "",
-        cidade: unidade.cidade || "",
-        uf: unidade.uf || "",
-        locador: unidade.locador || "",
-        kitnets: unidade.kitnets || "",
-        aluguel: unidade.aluguel || "",
-        vencimento: unidade.vencimento || "10",
-        status: unidade.status || "Ativa",
-        observacoes: unidade.observacoes || "",
+
+        logradouro:
+          unidade.logradouro || "",
+
+        numero:
+          unidade.numero || "",
+
+        complemento:
+          unidade.complemento || "",
+
+        bairro:
+          unidade.bairro || "",
+
+        cidade:
+          unidade.cidade || "",
+
+        uf:
+          unidade.uf || "",
+
+        locador:
+          unidade.locador || "",
+
+        kitnets:
+          unidade.kitnets || "",
+
+        aluguel:
+          unidade.aluguel || "",
+
+        vencimento:
+          unidade.vencimento || "10",
+
+        status:
+          unidade.status || "Ativa",
+
+        observacoes:
+          unidade.observacoes || "",
+
       });
+
     } else {
+
       setFormData(initialState);
+
     }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unidade]);
 
-  const buscarCep = async (cep) => {
-    const cepLimpo = cep.replace(/\D/g, "");
+  async function buscarCep(cep) {
+
+    const cepLimpo =
+      cep.replace(/\D/g, "");
 
     if (cepLimpo.length !== 8) return;
 
-    console.log("Buscando CEP:", cepLimpo);
-
     try {
+
       const response = await fetch(
         `https://viacep.com.br/ws/${cepLimpo}/json/`
       );
 
-      const data = await response.json();
+      const data =
+        await response.json();
 
-      console.log("Resposta ViaCEP:", data);
-
-      if (data.erro) {
-        console.log("CEP não encontrado.");
-        return;
-      }
+      if (data.erro) return;
 
       setFormData((prev) => ({
+
         ...prev,
-        logradouro: data.logradouro || "",
-        bairro: data.bairro || "",
-        cidade: data.localidade || "",
-        uf: data.uf || "",
+
+        logradouro:
+          data.logradouro || "",
+
+        bairro:
+          data.bairro || "",
+
+        cidade:
+          data.localidade || "",
+
+        uf:
+          data.uf || "",
+
       }));
 
-      console.log("Campos preenchidos.");
-    } catch (error) {
-      console.error("Erro ao buscar CEP:", error);
-    }
-  };
+    } catch {
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+      console.log(
+        "Erro ao consultar CEP."
+      );
+
+    }
+
+  }
+
+  function handleChange(e) {
+
+    const {
+      name,
+      value,
+    } = e.target;
 
     setFormData((prev) => ({
+
       ...prev,
+
       [name]: value,
+
     }));
 
     if (name === "cep") {
+
       buscarCep(value);
+
     }
-  };
 
-  const handleSubmit = (e) => {
+  }
+
+  function handleSubmit(e) {
+
     e.preventDefault();
-    onSave(formData);
-  };
 
-  const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 placeholder:text-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
+    onSave(formData);
+
+  }
 
   return (
+
     <form
+
       onSubmit={handleSubmit}
-      className="grid grid-cols-2 gap-4"
-    >
-      <input
-        name="nome"
-        placeholder="Nome da Unidade"
-        value={formData.nome}
-        onChange={handleChange}
-        className={inputStyle}
-        required
-      />
 
-      <input
-        name="cep"
-        placeholder="CEP"
-        value={formData.cep}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      className="space-y-10"
 
-      <input
-        name="logradouro"
-        placeholder="Logradouro"
-        value={formData.logradouro}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+    >      {/* ===================================== */}
+      {/* DADOS DA UNIDADE */}
+      {/* ===================================== */}
 
-      <input
-        name="numero"
-        placeholder="Número"
-        value={formData.numero}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      <section className="space-y-6">
 
-      <input
-        name="bairro"
-        placeholder="Bairro"
-        value={formData.bairro}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+        <div>
 
-      <input
-        name="cidade"
-        placeholder="Cidade"
-        value={formData.cidade}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+          <p
+            className="
+              text-[11px]
+              uppercase
+              tracking-[0.35em]
+              text-emerald-400
+              font-semibold
+            "
+          >
+            Dados da Unidade
+          </p>
 
-      <input
-        name="uf"
-        placeholder="UF"
-        value={formData.uf}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+          <h2
+            className="
+              mt-2
+              text-2xl
+              font-bold
+              text-white
+            "
+          >
+            Informações principais
+          </h2>
 
-      <input
-        name="locador"
-        placeholder="Locador"
-        value={formData.locador}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+        </div>
 
-      <input
-        name="kitnets"
-        placeholder="Quantidade de Kitnets"
-        value={formData.kitnets}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-      <input
-        name="aluguel"
-        placeholder="Valor Aluguel"
-        value={formData.aluguel}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+          <Input
+            label="Nome da Unidade"
+            required
+            name="nome"
+            value={formData.nome}
+            onChange={handleChange}
+            placeholder="Ex.: Residencial Bela Vista"
+          />
 
-      <input
-        name="vencimento"
-        placeholder="Dia Vencimento"
-        value={formData.vencimento}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+          <Input
+            label="CEP"
+            name="cep"
+            value={formData.cep}
+            onChange={handleChange}
+            placeholder="00000-000"
+          />
 
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        className={inputStyle}
+        </div>
+
+      </section>
+
+      {/* ===================================== */}
+      {/* ENDEREÇO */}
+      {/* ===================================== */}
+
+      <section className="space-y-6">
+
+        <div>
+
+          <p
+            className="
+              text-[11px]
+              uppercase
+              tracking-[0.35em]
+              text-emerald-400
+              font-semibold
+            "
+          >
+            Endereço
+          </p>
+
+          <h2
+            className="
+              mt-2
+              text-2xl
+              font-bold
+              text-white
+            "
+          >
+            Localização da Unidade
+          </h2>
+
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <Input
+            label="Logradouro"
+            name="logradouro"
+            value={formData.logradouro}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Número"
+            name="numero"
+            value={formData.numero}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Complemento"
+            name="complemento"
+            value={formData.complemento}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Bairro"
+            name="bairro"
+            value={formData.bairro}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Cidade"
+            name="cidade"
+            value={formData.cidade}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="UF"
+            name="uf"
+            value={formData.uf}
+            onChange={handleChange}
+          />
+
+        </div>
+
+      </section>
+
+      {/* ===================================== */}
+      {/* INFORMAÇÕES DA UNIDADE */}
+      {/* ===================================== */}
+
+      <section className="space-y-6">
+
+        <div>
+
+          <p
+            className="
+              text-[11px]
+              uppercase
+              tracking-[0.35em]
+              text-emerald-400
+              font-semibold
+            "
+          >
+            Gestão
+          </p>
+
+          <h2
+            className="
+              mt-2
+              text-2xl
+              font-bold
+              text-white
+            "
+          >
+            Informações administrativas
+          </h2>
+
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          <Input
+            label="Locador"
+            name="locador"
+            value={formData.locador}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Quantidade de Kitnets"
+            name="kitnets"
+            value={formData.kitnets}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Valor do Aluguel"
+            name="aluguel"
+            value={formData.aluguel}
+            onChange={handleChange}
+          />
+
+          <Input
+            label="Dia do Vencimento"
+            name="vencimento"
+            value={formData.vencimento}
+            onChange={handleChange}
+          />
+
+          <Select
+            label="Status"
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+          >
+
+            <option value="Ativa">
+              Ativa
+            </option>
+
+            <option value="Inativa">
+              Inativa
+            </option>
+
+            <option value="Manutenção">
+              Manutenção
+            </option>
+
+          </Select>
+
+        </div>
+
+      </section>
+            {/* ===================================== */}
+      {/* OBSERVAÇÕES */}
+      {/* ===================================== */}
+
+      <section className="space-y-6">
+
+        <div>
+
+          <p
+            className="
+              text-[11px]
+              uppercase
+              tracking-[0.35em]
+              text-emerald-400
+              font-semibold
+            "
+          >
+            Observações
+          </p>
+
+          <h2
+            className="
+              mt-2
+              text-2xl
+              font-bold
+              text-white
+            "
+          >
+            Informações adicionais
+          </h2>
+
+        </div>
+
+        <Textarea
+
+          label="Observações"
+
+          name="observacoes"
+
+          rows={6}
+
+          value={formData.observacoes}
+
+          onChange={handleChange}
+
+          placeholder="Escreva observações importantes sobre esta unidade..."
+
+        />
+
+      </section>
+
+      {/* ===================================== */}
+      {/* BOTÕES */}
+      {/* ===================================== */}
+
+      <div
+        className="
+          pt-8
+
+          border-t
+          border-white/10
+
+          flex
+          items-center
+          justify-end
+
+          gap-4
+        "
       >
-        <option value="Ativa">Ativa</option>
-        <option value="Inativa">Inativa</option>
-        <option value="Manutenção">Manutenção</option>
-      </select>
 
-      <textarea
-        name="observacoes"
-        placeholder="Observações"
-        value={formData.observacoes}
-        onChange={handleChange}
-        className="col-span-2 border border-gray-300 rounded-xl p-3 h-32 text-gray-900 placeholder:text-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-      />
+        <Button
 
-      <div className="col-span-2 flex justify-end gap-3">
-        <button
           type="button"
-          onClick={onCancel}
-          className="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
-        >
-          Cancelar
-        </button>
 
-        <button
-          type="submit"
-          className="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          variant="secondary"
+
+          onClick={onCancel}
+
         >
+
+          Cancelar
+
+        </Button>
+
+        <Button
+
+          type="submit"
+
+        >
+
           {unidade
             ? "Salvar Alterações"
-            : "Salvar Unidade"}
-        </button>
+            : "Cadastrar Unidade"}
+
+        </Button>
+
       </div>
-    </form>
+          </form>
+
   );
+
 }

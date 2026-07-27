@@ -4,36 +4,35 @@ import { useMemo, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
-import ResumoGeral from "../components/relatorios/ResumoGeral";
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import RelatorioStats from "../components/relatorios/RelatorioStats";
+import RelatorioFilters from "../components/relatorios/RelatorioFilters";
 import RelatorioCards from "../components/relatorios/RelatorioCards";
-import RelatorioFiltros from "../components/relatorios/RelatorioFiltros";
 import RelatorioExportar from "../components/relatorios/RelatorioExportar";
+import FadeIn from "../components/ui/FadeIn";
+import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
+import Button from "../components/ui/Button";
 
 export default function RelatoriosPage() {
 
   const [pesquisa, setPesquisa] =
     useState("");
 
-  const modulos = [
-
-    "Unidades",
-
-    "Kitnets",
-
-    "Locadores",
-
-    "Inquilinos",
-
-    "Contratos",
-
-    "Solicitações",
-
-    "Vistorias",
-
-    "Financeiro",
-
-  ];
-
+  const modulos = useMemo(
+      () => [
+        "Unidades",
+        "Kitnets",
+        "Locadores",
+        "Inquilinos",
+        "Contratos",
+        "Solicitações",
+        "Vistorias",
+        "Financeiro",
+      ],
+      []
+    );
   const resultados =
     useMemo(() => {
 
@@ -49,102 +48,135 @@ export default function RelatoriosPage() {
 
       );
 
-    }, [pesquisa]);
+    }, [modulos, pesquisa]);
 
-  return (
+ return (
 
-    <MainLayout>
+  <MainLayout>
 
-      <div className="space-y-8">
+    <Page>
 
-        <div>
+      <PageContainer>
 
-          <h1 className="text-4xl font-bold text-gray-900">
+        <FadeIn>
 
-            Relatórios
+          <PageHeader
+            title="Relatórios"
+            subtitle="Visualize e exporte relatórios do sistema."
+            count={modulos.length}
+            countLabel="módulo(s) disponível(is)"
+            actions={
+              <Button>
+                Exportar Tudo
+              </Button>
+            }
+          >
 
-          </h1>
+            <RelatorioFilters
+              value={pesquisa}
+              onChange={(e) =>
+                setPesquisa(e.target.value)
+              }
+            />
 
-          <p className="text-gray-600 mt-2">
+          </PageHeader>
 
-            Central de relatórios do VIME 2.0
+        </FadeIn>
 
-          </p>
+        <FadeIn delay={0.10}>
 
-        </div>
+          <PageSection spacing="xl">
 
-        <ResumoGeral />
+            <RelatorioStats />
 
-        <RelatorioFiltros
-          pesquisa={pesquisa}
-          setPesquisa={setPesquisa}
-        />
+          </PageSection>
 
-        {
+        </FadeIn>
 
-          pesquisa && (
+        {pesquisa && (
 
-            <div className="bg-white rounded-3xl shadow border p-6">
+          <FadeIn delay={0.15}>
 
-              <h2 className="text-xl font-bold mb-4">
+            <PageSection spacing="lg">
 
-                Resultado da Pesquisa
+              <div className="rounded-[22px] border border-white/5 bg-linear-to-br from-[#1b2728]/80 via-[#1a242c]/75 to-[#151d26]/80 backdrop-blur-xl p-6">
 
-              </h2>
+                <h2 className="text-xl font-bold text-white mb-5">
 
-              <div className="flex flex-wrap gap-3">
+                  Resultado da Pesquisa
 
-                {
+                </h2>
 
-                  resultados.length > 0 ? (
+                <div className="flex flex-wrap gap-3">
+
+                  {resultados.length > 0 ? (
 
                     resultados.map((item) => (
 
                       <span
                         key={item}
                         className="
-                          bg-green-100
-                          text-green-700
+                          rounded-full
+                          border
+                          border-emerald-500/20
+                          bg-emerald-500/10
                           px-4
                           py-2
-                          rounded-full
+                          text-sm
+                          font-semibold
+                          text-emerald-300
                         "
                       >
-
                         {item}
-
                       </span>
 
                     ))
 
                   ) : (
 
-                    <span className="text-gray-500">
+                    <span className="text-gray-400">
 
                       Nenhum módulo encontrado.
 
                     </span>
 
-                  )
+                  )}
 
-                }
+                </div>
 
               </div>
 
-            </div>
+            </PageSection>
 
-          )
+          </FadeIn>
 
-        }
+        )}
 
-        <RelatorioCards />
+        <FadeIn delay={0.20}>
 
-        <RelatorioExportar />
+          <PageSection spacing="xxl">
 
-      </div>
+            <RelatorioCards />
 
-    </MainLayout>
+          </PageSection>
 
-  );
+        </FadeIn>
 
+        <FadeIn delay={0.30}>
+
+          <PageSection spacing="xxl">
+
+            <RelatorioExportar />
+
+          </PageSection>
+
+        </FadeIn>
+
+      </PageContainer>
+
+    </Page>
+
+  </MainLayout>
+
+);
 }

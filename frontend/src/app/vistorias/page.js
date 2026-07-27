@@ -2,19 +2,27 @@
 
 "use client";
 
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
 import { useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
-import VistoriaResumo from "../components/vistorias/VistoriaResumo";
-import OcorrenciaCard from "../components/vistorias/OcorrenciaCard";
 import VistoriaTabs from "../components/vistorias/VistoriaTabs";
-import VistoriaFiltros from "../components/vistorias/VistoriaFiltros";
-import VistoriaProximasVistorias from "../components/vistorias/VistoriaProximasVistorias";
-import VistoriaRelatorios from "../components/vistorias/VistoriaRelatorios";
 import VistoriaModal from "../components/vistorias/VistoriaModal";
 import VistoriaForm from "../components/vistorias/VistoriaForm";
-import VistoriaCard from "../components/vistorias/VistoriaCard";
+import VistoriaRelatorios from "../components/vistorias/VistoriaRelatorios";
+import VistoriaProximasVistorias from "../components/vistorias/VistoriaProximasVistorias";
+import OcorrenciaCard from "../components/vistorias/OcorrenciaCard";
+import FadeIn from "../components/ui/FadeIn";
+import PageSection from "../components/ui/PageSection";
+import Button from "../components/ui/Button";
+import PageHeader from "../components/ui/PageHeader";
+import SearchInput from "../components/common/SearchInput";
+
+import VistoriaStats from "../components/vistorias/VistoriaStats";
+import VistoriaFilters from "../components/vistorias/VistoriaFilters";
+import VistoriaCardList from "../components/vistorias/VistoriaCardList";
 export default function VistoriasPage() {
 
   const [modalOpen, setModalOpen] =
@@ -26,6 +34,9 @@ export default function VistoriasPage() {
   const [filtroSelecionado, setFiltroSelecionado] =
     useState("Todos");
 
+  const [search, setSearch] =
+    useState("");
+  
   const [vistorias, setVistorias] =
     useState([]);
 
@@ -36,7 +47,7 @@ export default function VistoriasPage() {
     useState(false);
 
   useEffect(() => {
-
+   
   const dados = JSON.parse(
     localStorage.getItem(
       "vime-vistorias"
@@ -386,157 +397,192 @@ const concluirVistoria = (
     setModalOpen(true);
 
   };
-   const vistoriasFiltradas =
-  vistorias.filter(
-    (vistoria) => {
+     const vistoriasFiltradas = vistorias.filter((vistoria) => {
 
-      if (
-        filtroSelecionado !==
-          "Todos" &&
-        vistoria.categoria !==
-          filtroSelecionado
-      ) {
-        return false;
-      }
+  const texto = `
+    ${vistoria.titulo || ""}
+    ${vistoria.categoria || ""}
+    ${vistoria.unidade || ""}
+    ${vistoria.kitnet || ""}
+    ${vistoria.responsavel || ""}
+  `.toLowerCase();
 
-      if (
-        abaSelecionada ===
-        "agendadas"
-      ) {
-        return (
-          vistoria.status ===
-          "PROGRAMADA"
-        );
-      }
+  if (
+    search &&
+    !texto.includes(search.toLowerCase())
+  ) {
+    return false;
+  }
 
-      if (
-        abaSelecionada ===
-        "realizadas"
-      ) {
-        return (
-          vistoria.status ===
-          "REALIZADA"
-        );
-      }
+  if (
+    filtroSelecionado !== "Todos" &&
+    vistoria.categoria !== filtroSelecionado
+  ) {
+    return false;
+  }
 
-      if (
-        abaSelecionada ===
-        "pendentes"
-      ) {
-        return (
-          vistoria.status ===
-          "PENDENTE"
-        );
-      }
+  switch (abaSelecionada) {
 
+    case "agendadas":
+      return vistoria.status === "PROGRAMADA";
+
+    case "realizadas":
+      return vistoria.status === "REALIZADA";
+
+    case "pendentes":
+      return vistoria.status === "PENDENTE";
+
+    default:
       return true;
 
-    }
-  );
+  }
 
-return (
+});
+
+   return (
+
   <MainLayout>
 
-    <div className="flex items-center justify-between mb-8">
+    <Page>
 
-      <div>
+      <PageContainer>
 
-        <h1 className="text-4xl font-bold text-gray-900">
-          Vistorias
-        </h1>
+        <FadeIn>
 
-        <p className="text-gray-700 mt-2">
-          Gestão de vistorias
-        </p>
+          <PageHeader
+            title="Vistorias"
+            subtitle="Gerencie todas as vistorias cadastradas."
+            count={vistorias.length}
+            countLabel="vistoria(s) cadastrada(s)"
+            actions={
+              <Button onClick={novaVistoria}>
+                + Nova Vistoria
+              </Button>
+            }
+          >
 
-        <p className="text-sm text-green-700 mt-1">
-          {vistorias.length} vistoria(s) cadastrada(s)
-        </p>
+            <SearchInput
+              placeholder="Pesquisar vistoria..."
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
+            />
 
-      </div>
+          </PageHeader>
 
-      <button
-        onClick={novaVistoria}
-        className="
-          bg-green-700
-          text-white
-          px-6
-          py-3
-          rounded-2xl
-          hover:bg-green-800
-        "
-      >
-        + Nova Vistoria
-      </button>
+        </FadeIn>
 
-    </div>
+        <FadeIn delay={0.10}>
 
-    <VistoriaResumo
-      vistorias={vistorias}
-    />
+          <PageSection spacing="xl">
 
-    <VistoriaFiltros
-      filtroSelecionado={filtroSelecionado}
-      setFiltroSelecionado={setFiltroSelecionado}
-    />
+            <VistoriaStats
+              vistorias={vistorias}
+            />
 
-    <VistoriaTabs
-      abaSelecionada={abaSelecionada}
-      setAbaSelecionada={setAbaSelecionada}
-    />
+          </PageSection>
 
-    {
-      abaSelecionada ===
-      "ocorrencias" ? (
+        </FadeIn>
 
-        <OcorrenciaCard />
+        <FadeIn delay={0.15}>
 
-      ) : (
+          <PageSection spacing="lg">
 
-        <div className="space-y-8">
+            <VistoriaFilters
+              filtroSelecionado={filtroSelecionado}
+              setFiltroSelecionado={setFiltroSelecionado}
+            />
 
-          <VistoriaCard
-            vistorias={vistoriasFiltradas}
-            onEdit={editarVistoria}
-            onDelete={excluirVistoria}
-            onConcluir={concluirVistoria}
-            onCancelar={cancelarVistoria}
+            <VistoriaTabs
+              abaSelecionada={abaSelecionada}
+              setAbaSelecionada={setAbaSelecionada}
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
+        {abaSelecionada === "ocorrencias" ? (
+
+          <FadeIn delay={0.20}>
+
+            <PageSection spacing="xxl">
+
+              <OcorrenciaCard />
+
+            </PageSection>
+
+          </FadeIn>
+
+        ) : (
+
+          <>
+
+            <FadeIn delay={0.20}>
+
+              <PageSection spacing="xxl">
+
+                <VistoriaCardList
+                  vistorias={vistoriasFiltradas}
+                  onEdit={editarVistoria}
+                  onDelete={excluirVistoria}
+                  onConcluir={concluirVistoria}
+                  onCancelar={cancelarVistoria}
+                />
+
+              </PageSection>
+
+            </FadeIn>
+
+            <FadeIn delay={0.30}>
+
+              <PageSection spacing="xxl">
+
+                <VistoriaProximasVistorias
+                  vistorias={vistorias}
+                />
+
+              </PageSection>
+
+            </FadeIn>
+
+            <FadeIn delay={0.40}>
+
+              <PageSection spacing="xxl">
+
+                <VistoriaRelatorios
+                  vistorias={vistorias}
+                />
+
+              </PageSection>
+
+            </FadeIn>
+
+          </>
+
+        )}
+
+        <VistoriaModal
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setVistoriaEditando(null);
+          }}
+        >
+
+          <VistoriaForm
+            onSave={salvarVistoria}
+            vistoriaEditando={vistoriaEditando}
           />
 
-          <VistoriaProximasVistorias
-            vistorias={vistorias}
-          />
+        </VistoriaModal>
 
-          <VistoriaRelatorios
-            vistorias={vistorias}
-          />
+      </PageContainer>
 
-        </div>
-
-      )
-    }
-
-    <VistoriaModal
-      isOpen={modalOpen}
-      onClose={() => {
-
-        setModalOpen(false);
-
-        setVistoriaEditando(
-          null
-        );
-
-      }}
-    >
-
-      <VistoriaForm
-        onSave={salvarVistoria}
-        vistoriaEditando={
-          vistoriaEditando
-        }
-      />
-
-    </VistoriaModal>
+    </Page>
 
   </MainLayout>
-)}
+
+  );
+}

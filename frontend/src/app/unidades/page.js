@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import PageHeader from "../components/ui/PageHeader";
+import Button from "../components/ui/Button";
+
+import SearchInput from "../components/common/SearchInput";
+
 import UnitModal from "../components/unidades/UnitModal";
 import UnitForm from "../components/unidades/UnitForm";
 import UnitCardList from "../components/unidades/UnitCardList";
@@ -86,78 +94,66 @@ export default function UnidadesPage() {
 
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold text-gray-800">
-            Unidades
-          </h1>
 
-          <p className="text-gray-500 mt-2">
-            Gestão de propriedades e imóveis
-          </p>
+      <Page>
 
-          <p className="text-sm text-green-600 mt-1">
-            {unidades.length} unidade(s) cadastrada(s)
-          </p>
-        </div>
+        <PageContainer>
 
-        <button
-          onClick={() => {
-            setEditingUnit(null);
-            setModalOpen(true);
-          }}
-          className="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800 transition"
-        >
-          + Nova Unidade
-        </button>
-      </div>
+          <PageHeader
+            title="Unidades"
+            subtitle="Gerencie todas as unidades cadastradas."
+            count={unidades.length}
+            countLabel="unidade(s) cadastrada(s)"
+            actions={
+              <Button
+                onClick={() => {
+                  setEditingUnit(null);
+                  setModalOpen(true);
+                }}
+              >
+                + Nova Unidade
+              </Button>
+            }
+          />
 
-      <div className="bg-white rounded-xl shadow p-4 mb-6">
-        <input
-          type="text"
-          placeholder="🔍 Buscar por nome, endereço ou cidade..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="
-            w-full
-            border
-            border-gray-300
-            rounded-xl
-            p-3
-            text-gray-900
-            placeholder:text-gray-500
-            bg-white
-            focus:outline-none
-            focus:ring-2
-            focus:ring-green-500
-            focus:border-green-500
-          "
-        />
-      </div>
+          <SearchInput
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar por nome, endereço ou cidade..."
+          />
 
-      <UnitCardList
-        unidades={unidadesFiltradas}
-        onView={visualizarUnidade}
-        onEdit={editarUnidade}
-        onDelete={excluirUnidade}
-      />
+          <div className="mt-8">
 
-      <UnitModal
-        isOpen={modalOpen}
-        onClose={() => {
-          setEditingUnit(null);
-          setModalOpen(false);
-        }}
-      >
-        <UnitForm
-          unidade={editingUnit}
-          onSave={adicionarUnidade}
-          onCancel={() => {
-            setEditingUnit(null);
-            setModalOpen(false);
-          }}
-        />
-      </UnitModal>
+            <UnitCardList
+              unidades={unidadesFiltradas}
+              onView={visualizarUnidade}
+              onEdit={editarUnidade}
+              onDelete={excluirUnidade}
+            />
+
+          </div>
+
+          <UnitModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setEditingUnit(null);
+              setModalOpen(false);
+            }}
+          >
+            <UnitForm
+              unidade={editingUnit}
+              onSave={adicionarUnidade}
+              onCancel={() => {
+                setEditingUnit(null);
+                setModalOpen(false);
+              }}
+            />
+          </UnitModal>
+
+        </PageContainer>
+
+      </Page>
+
     </MainLayout>
   );
 }

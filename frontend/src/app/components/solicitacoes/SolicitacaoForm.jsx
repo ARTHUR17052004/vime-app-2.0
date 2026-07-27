@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Textarea from "../ui/Textarea";
+
 export default function SolicitacaoForm({
   onSave,
   solicitacaoEditando,
@@ -24,7 +28,6 @@ export default function SolicitacaoForm({
 
     if (solicitacaoEditando) {
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm(solicitacaoEditando);
 
       return;
@@ -33,10 +36,9 @@ export default function SolicitacaoForm({
 
     setForm({
 
-      numero:
-        `SOL-${Date.now()
-          .toString()
-          .slice(-6)}`,
+      numero: `SOL-${Date.now()
+        .toString()
+        .slice(-6)}`,
 
       titulo: "",
 
@@ -44,13 +46,11 @@ export default function SolicitacaoForm({
 
       responsavel: "",
 
-      status:
-        "SOLICITADA",
+      status: "SOLICITADA",
 
-      data:
-        new Date()
-          .toISOString()
-          .split("T")[0],
+      data: new Date()
+        .toISOString()
+        .split("T")[0],
 
       prazo: "",
 
@@ -81,6 +81,20 @@ export default function SolicitacaoForm({
 
   }
 
+  const input = `
+    w-full
+    rounded-xl
+    border
+    border-white/10
+    bg-white/5
+    px-4
+    py-3
+    text-white
+    placeholder:text-gray-500
+    outline-none
+    focus:border-emerald-500
+  `;
+
   return (
 
     <form
@@ -92,106 +106,69 @@ export default function SolicitacaoForm({
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
             Número
-
           </label>
 
-          <input
+          <Input
             readOnly
             name="numero"
             value={form.numero}
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-gray-100
-              text-gray-900
-            "
+            className={`${input} bg-white/10`}
           />
 
         </div>
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
             Responsável
-
           </label>
 
-          <input
+          <Input
             name="responsavel"
             value={form.responsavel}
             onChange={alterarCampo}
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-white
-              text-gray-900
-            "
+            className={input}
           />
 
         </div>
 
-      </div>      <div>
+      </div>
 
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+      <div>
 
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
           Título
-
         </label>
 
-        <input
+        <Input
           name="titulo"
           value={form.titulo}
           onChange={alterarCampo}
           placeholder="Ex.: Troca de chuveiro"
-          className="
-            w-full
-            border
-            rounded-2xl
-            px-4
-            py-3
-            bg-white
-            text-gray-900
-            placeholder:text-gray-400
-          "
+          className={input}
         />
 
       </div>
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
-
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
           Descrição
-
         </label>
 
-        <textarea
+        <Textarea
           rows={6}
           name="descricao"
           value={form.descricao}
           onChange={alterarCampo}
           placeholder="Descreva detalhadamente a solicitação..."
-          className="
-            w-full
-            border
-            rounded-2xl
-            px-4
-            py-3
-            bg-white
-            text-gray-900
-            placeholder:text-gray-400
+          className={`
+            ${input}
+            min-h-[160px]
             resize-none
-          "
+          `}
         />
 
       </div>
@@ -200,103 +177,64 @@ export default function SolicitacaoForm({
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
             Data da Solicitação
-
           </label>
 
-          <input
+          <Input
             type="date"
             name="data"
             value={form.data}
             onChange={alterarCampo}
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-white
-              text-gray-900
-            "
+            className={input}
           />
 
         </div>
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
             Prazo
-
           </label>
 
-          <input
+          <Input
             type="date"
             name="prazo"
             value={form.prazo}
             onChange={alterarCampo}
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-white
-              text-gray-900
-            "
+            className={input}
           />
 
         </div>
 
-      </div>      <div>
+      </div>
 
-        <label className="block text-sm font-semibold text-gray-900 mb-2">
+      <div>
 
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
           Observações
-
         </label>
 
-        <textarea
+        <Textarea
           rows={4}
           name="observacoes"
           value={form.observacoes}
           onChange={alterarCampo}
           placeholder="Informações adicionais (opcional)..."
-          className="
-            w-full
-            border
-            rounded-2xl
-            px-4
-            py-3
-            bg-white
-            text-gray-900
-            placeholder:text-gray-400
+          className={`
+            ${input}
+            min-h-[120px]
             resize-none
-          "
+          `}
         />
 
       </div>
 
       <div className="flex justify-end pt-2">
 
-        <button
-          type="submit"
-          className="
-            bg-green-700
-            hover:bg-green-800
-            text-white
-            px-8
-            py-3
-            rounded-2xl
-            transition
-          "
-        >
-
+        <Button type="submit">
           Salvar Solicitação
-
-        </button>
+        </Button>
 
       </div>
 

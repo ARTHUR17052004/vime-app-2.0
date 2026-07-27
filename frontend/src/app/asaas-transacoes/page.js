@@ -1,4 +1,13 @@
+"use client";
+
 import MainLayout from "../components/layout/MainLayout";
+
+import Page from "../components/ui/Page";
+import PageContainer from "../components/ui/PageContainer";
+import FadeIn from "../components/ui/FadeIn";
+import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
+import Button from "../components/ui/Button";
 
 import AsaasResumoCards from "../components/asaas-transacoes/AsaasResumoCards";
 import AsaasFiltros from "../components/asaas-transacoes/AsaasFiltros";
@@ -7,63 +16,78 @@ import AsaasExportar from "../components/asaas-transacoes/AsaasExportar";
 import AsaasDetalhesModal from "../components/asaas-transacoes/AsaasDetalhesModal";
 
 export default function AsaasTransacoesPage() {
+
   return (
-    <MainLayout>
-      <div className="space-y-8">
 
-        <div className="flex items-center justify-between">
+  <MainLayout>
 
-          <div>
+    <Page>
 
-            <h1 className="text-4xl font-bold text-gray-800">
-              Asaas Transações
-            </h1>
+      <PageContainer>
 
-            <p className="text-gray-500 mt-2">
-              Gerencie cobranças, recebimentos e sincronizações com o Asaas.
-            </p>
+        <FadeIn>
 
-          </div>
+          <PageHeader
+            title="Asaas Transações"
+            subtitle="Gerencie cobranças, recebimentos e sincronizações."
+            count={1}
+            countLabel="integração Asaas"
+            actions={
+              <Button>
+                Nova Cobrança
+              </Button>
+            }
+          />
 
-          <div className="flex gap-4">
+        </FadeIn>
 
-            <button
-              className="
-              px-5
-              py-3
-              rounded-xl
-              border
-              border-gray-300
-              hover:bg-gray-100
-              "
-            >
-              Atualizar
-            </button>
+        <FadeIn delay={0.10}>
 
-            <button
-              className="
-              px-5
-              py-3
-              rounded-xl
-              bg-green-700
-              hover:bg-green-800
-              text-white
-              "
-            >
-              Nova Cobrança
-            </button>
+          <PageSection spacing="xl">
 
-          </div>
+            <AsaasResumoCards />
 
-        </div>
+          </PageSection>
 
-        <AsaasResumoCards />
-        <AsaasFiltros />
-        <AsaasTabela />
-        <AsaasExportar />
+        </FadeIn>
+
+        <FadeIn delay={0.20}>
+
+          <PageSection spacing="lg">
+
+            <AsaasFiltros />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.30}>
+
+          <PageSection spacing="xxl">
+
+            <AsaasTabela />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.40}>
+
+          <PageSection spacing="xxl">
+
+            <AsaasExportar />
+
+          </PageSection>
+
+        </FadeIn>
+
         <AsaasDetalhesModal />
 
-      </div>
-    </MainLayout>
-  );
+      </PageContainer>
+
+    </Page>
+
+  </MainLayout>
+
+);
 }

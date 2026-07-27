@@ -1,40 +1,94 @@
+"use client";
+
 export default function Badge({
   children,
-  color = "green",
+  variant = "emerald",
+  size = "md",
+  className = "",
 }) {
 
-  const colors = {
+  const variants = {
 
-    green:
-      "bg-green-100 text-green-700",
+    emerald: `
+      bg-emerald-500/10
+      text-emerald-400
+      border border-emerald-500/20
+    `,
 
-    red:
-      "bg-red-100 text-red-700",
+    blue: `
+      bg-sky-500/10
+      text-sky-400
+      border border-sky-500/20
+    `,
 
-    yellow:
-      "bg-yellow-100 text-yellow-700",
+    yellow: `
+      bg-yellow-500/10
+      text-yellow-300
+      border border-yellow-500/20
+    `,
 
-    blue:
-      "bg-blue-100 text-blue-700",
+    red: `
+      bg-red-500/10
+      text-red-400
+      border border-red-500/20
+    `,
 
-    gray:
-      "bg-gray-100 text-gray-700",
+    gray: `
+      bg-white/5
+      text-gray-300
+      border border-white/10
+    `,
+  };
 
+  const sizes = {
+
+    sm: `
+      h-6
+      px-2.5
+      text-[11px]
+    `,
+
+    md: `
+      h-7
+      px-3
+      text-xs
+    `,
+
+    lg: `
+      h-8
+      px-4
+      text-sm
+    `,
   };
 
   return (
+
     <span
       className={`
-      inline-flex
-      px-3
-      py-1
-      rounded-full
-      text-sm
-      font-medium
-      ${colors[color]}
+        inline-flex
+        items-center
+        justify-center
+
+        rounded-full
+
+        font-semibold
+
+        whitespace-nowrap
+
+        transition-all
+        duration-300
+
+        ${variants[variant]}
+        ${sizes[size]}
+
+        ${className}
       `}
     >
+
       {children}
+
     </span>
+
   );
+
 }

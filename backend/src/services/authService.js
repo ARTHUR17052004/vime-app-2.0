@@ -1,24 +1,37 @@
 const prisma = require('../config/prisma');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
 const login = async (email, senha) => {
+
   const usuario = await prisma.usuario.findUnique({
-    where: { email }
+    where: {
+      email
+    }
   });
 
   if (!usuario) {
-    throw new Error('Usuário não encontrado');
+    throw new Error('Usuário não encontrado.');
   }
 
-  if (usuario.senha !== senha) {
-    throw new Error('Senha inválida');
+  const senhaValida = await bcrypt.compare(
+    senha,
+    usuario.senha
+  );
+
+  if (!senhaValida) {
+    throw new Error('Senha inválida.');
   }
+
+  const payload = {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfil: usuario.perfil
+  };
 
   const token = jwt.sign(
-    {
-      id: usuario.id,
-      perfil: usuario.perfil
-    },
+    payload,
     process.env.JWT_SECRET || 'vime_secret_dev',
     {
       expiresIn: '1d'
@@ -27,13 +40,9 @@ const login = async (email, senha) => {
 
   return {
     token,
-    usuario: {
-      id: usuario.id,
-      nome: usuario.nome,
-      email: usuario.email,
-      perfil: usuario.perfil
-    }
+    usuario: payload
   };
+
 };
 
 module.exports = {

@@ -52,7 +52,8 @@ Significa que o terminal está na pasta errada.
 Entrar na pasta correta:
 
 ```bash
-cd frontend
+cd frontend ou cd backend
+
 ```
 
 E executar novamente:

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import DashboardCard from "../dashboard/DashboardCard"; 
 import {
   Building2,
   Mail,
@@ -30,6 +31,7 @@ export default function LocadorCard({
       ) || "[]"
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnidades(dados);
 
   }, []);
@@ -73,17 +75,17 @@ export default function LocadorCard({
 
         return (
 
-          <div
+          <DashboardCard
             key={locador.id}
             className="
               relative
-              bg-white
-              rounded-3xl
-              shadow
-              border
-              border-gray-100
-              p-6
-            "
+              h-full
+
+              transition-all
+              duration-300
+
+              hover:-translate-y-1
+  "
           >
 
             <div className="flex justify-between items-start">
@@ -95,20 +97,20 @@ export default function LocadorCard({
                     w-12
                     h-12
                     rounded-2xl
-                    bg-green-100
+                    bg-emerald-500/10
                     flex
                     items-center
                     justify-center
                   "
                 >
 
-                  <Building2 className="w-6 h-6 text-green-700" />
+                  <Building2 className="w-6 h-6 text-emerald-400" />
 
                 </div>
 
                 <div>
 
-                  <h2 className="font-bold text-xl text-gray-800">
+                  <h2 className="font-bold text-2xl text-white">
 
                     {locador.nome}
 
@@ -122,8 +124,8 @@ export default function LocadorCard({
                       py-1
                       rounded-xl
                       text-sm
-                      bg-blue-100
-                      text-blue-700
+                      bg-emerald-500/10
+                      text-emerald-400
                     "
                   >
 
@@ -231,7 +233,7 @@ export default function LocadorCard({
 
             )}
 
-            <div className="mt-6 space-y-3 text-gray-600">
+            <div className="mt-6 space-y-3 text-gray-300">
 
               <div className="flex items-center gap-3">
 
@@ -271,15 +273,15 @@ export default function LocadorCard({
 
             </div>
 
-            <div className="border-t mt-5 pt-5">
+            <div className="my-7 border-t border-white/5 pt-5">
 
-              <div className="text-gray-600 font-medium">
+              <div className="text-gray-300 font-medium">
 
                 {totalUnidades} unidade(s) vinculada(s)
 
               </div>
 
-              <div className="mt-3 text-sm text-blue-600">
+              <div className="mt-3 text-sm text-emerald-400">
 
                 Taxa Adm.: {locador.taxaAdministracao || 0}% |
                 {" "}Multa: {locador.multa || 0}% |
@@ -292,11 +294,11 @@ export default function LocadorCard({
                   w-full
                   mt-5
                   border
-                  border-blue-200
-                  rounded-xl
-                  py-3
-                  text-blue-700
-                  hover:bg-blue-50
+                border-emerald-500/20
+                bg-emerald-500/10
+                text-emerald-400
+                hover:bg-emerald-500/20
+                transition
                 "
               >
 
@@ -306,7 +308,7 @@ export default function LocadorCard({
 
             </div>
 
-          </div>
+          </DashboardCard>
 
         );
 
