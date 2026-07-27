@@ -2,10 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+import Input from "../ui/Input";
+import Select from "../ui/Select";
+import Button from "../ui/Button";
+import Textarea from "../ui/Textarea";
+
 export default function KitnetForm({
   onSave,
+  onCancel,
   kitnet,
 }) {
+
   const [unidades, setUnidades] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -16,19 +23,27 @@ export default function KitnetForm({
     status: "Disponível",
     aluguel: "",
     numero: "",
+    observacoes: "",
   });
 
   useEffect(() => {
+
     const unidadesSalvas = JSON.parse(
       localStorage.getItem("vime-unidades") || "[]"
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnidades(unidadesSalvas);
+
   }, []);
 
   useEffect(() => {
+
     if (kitnet) {
+
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
+
         nome: kitnet.nome || "",
         unidadeId: kitnet.unidadeId || "",
         unidadeNome: kitnet.unidadeNome || "",
@@ -36,9 +51,14 @@ export default function KitnetForm({
         status: kitnet.status || "Disponível",
         aluguel: kitnet.aluguel || "",
         numero: kitnet.numero || "",
+        observacoes: kitnet.observacoes || "",
+
       });
+
     } else {
+
       setFormData({
+
         nome: "",
         unidadeId: "",
         unidadeNome: "",
@@ -46,138 +66,168 @@ export default function KitnetForm({
         status: "Disponível",
         aluguel: "",
         numero: "",
+        observacoes: "",
+
       });
+
     }
+
   }, [kitnet]);
 
-  const handleChange = (e) => {
+  function handleChange(e) {
+
     const { name, value } = e.target;
 
     if (name === "unidadeId") {
-      const unidadeSelecionada = unidades.find(
+
+      const unidade = unidades.find(
         (u) => String(u.id) === value
       );
 
       setFormData((prev) => ({
+
         ...prev,
+
         unidadeId: value,
-        unidadeNome: unidadeSelecionada?.nome || "",
+
+        unidadeNome: unidade?.nome || "",
+
       }));
 
       return;
+
     }
 
     setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
-  const handleSubmit = (e) => {
+      ...prev,
+
+      [name]: value,
+
+    }));
+
+  }
+
+  function handleSubmit(e) {
+
     e.preventDefault();
 
     onSave(formData);
-  };
 
-  const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 placeholder:text-gray-500 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500";
+  }
 
   return (
+
     <form
       onSubmit={handleSubmit}
-      className="grid grid-cols-2 gap-4"
+      className="space-y-8"
     >
-      <input
-        name="nome"
-        placeholder="Nome da Kitnet"
-        value={formData.nome}
-        onChange={handleChange}
-        className={inputStyle}
-        required
-      />
 
-      <select
-        name="unidadeId"
-        value={formData.unidadeId}
-        onChange={handleChange}
-        className={inputStyle}
-        required
-      >
-        <option value="">
-          Selecione uma Unidade
-        </option>
+      <div className="grid grid-cols-2 gap-6">
 
-        {unidades.map((unidade) => (
-          <option
-            key={unidade.id}
-            value={unidade.id}
-          >
-            {unidade.nome}
-          </option>
-        ))}
-      </select>
+        <Input
+          label="Nome da Kitnet"
+          name="nome"
+          value={formData.nome}
+          onChange={handleChange}
+          required
+        />
 
-      <input
-        name="metragem"
-        placeholder="Metragem (m²)"
-        value={formData.metragem}
-        onChange={handleChange}
-        className={inputStyle}
-      />
-
-      <select
-        name="status"
-        value={formData.status}
-        onChange={handleChange}
-        className={inputStyle}
-      >
-        <option value="Disponível">
-          Disponível
-        </option>
-
-        <option value="Ocupada">
-          Ocupada
-        </option>
-
-        <option value="Manutenção">
-          Manutenção
-        </option>
-      </select>
-
-      <input
-        name="aluguel"
-        placeholder="Valor do aluguel"
-        value={formData.aluguel}
-        onChange={handleChange}
-        className={inputStyle}
-      />
-
-      <input
-        name="numero"
-        placeholder="Número da Kitnet"
-        value={formData.numero}
-        onChange={handleChange}
-        className={inputStyle}
-      />
-
-      <div className="col-span-2 flex justify-end gap-3 mt-4">
-        <button
-          type="submit"
-          className="
-            bg-green-600
-            text-white
-            px-6
-            py-3
-            rounded-lg
-            hover:bg-green-700
-            transition
-          "
+        <Select
+          label="Unidade"
+          name="unidadeId"
+          value={formData.unidadeId}
+          onChange={handleChange}
+          required
         >
+
+          <option value="">
+            Selecione...
+          </option>
+
+          {unidades.map((unidade) => (
+
+            <option
+              key={unidade.id}
+              value={unidade.id}
+            >
+
+              {unidade.nome}
+
+            </option>
+
+          ))}
+
+        </Select>
+
+        <Input
+          label="Número"
+          name="numero"
+          value={formData.numero}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Metragem (m²)"
+          name="metragem"
+          value={formData.metragem}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Valor do aluguel"
+          name="aluguel"
+          value={formData.aluguel}
+          onChange={handleChange}
+        />
+
+        <Select
+          label="Status"
+          name="status"
+          value={formData.status}
+          onChange={handleChange}
+        >
+
+          <option>Disponível</option>
+
+          <option>Ocupada</option>
+
+          <option>Manutenção</option>
+
+        </Select>
+
+      </div>
+
+      <Textarea
+        label="Observações"
+        rows={5}
+        name="observacoes"
+        value={formData.observacoes}
+        onChange={handleChange}
+      />
+
+      <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+
+        <Button
+          variant="secondary"
+          type="button"
+          onClick={onCancel}
+        >
+          Cancelar
+        </Button>
+
+        <Button type="submit">
+
           {kitnet
             ? "Salvar Alterações"
-            : "Salvar Kitnet"}
-        </button>
+            : "Cadastrar Kitnet"}
+
+        </Button>
+
       </div>
+
     </form>
+
   );
+
 }

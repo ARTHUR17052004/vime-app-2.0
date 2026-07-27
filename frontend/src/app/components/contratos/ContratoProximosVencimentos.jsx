@@ -1,44 +1,62 @@
 "use client";
 
-import {
-  CalendarClock,
-} from "lucide-react";
+import { CalendarClock } from "lucide-react";
+
+import DashboardCard from "../dashboard/DashboardCard";
 
 export default function ContratoProximosVencimentos({
   contratos,
 }) {
-
-  const contratosVencendo =
-    contratos
-      .filter(
-        (c) =>
-          c.status === "ATIVO"
-      )
-      .sort(
-        (a, b) =>
-          Number(a.diaVencimento) -
-          Number(b.diaVencimento)
-      );
+  const contratosVencendo = contratos
+    .filter((c) => c.status === "ATIVO")
+    .sort(
+      (a, b) =>
+        Number(a.diaVencimento) -
+        Number(b.diaVencimento)
+    );
 
   return (
-    <div className="bg-white rounded-3xl shadow p-6">
+    <DashboardCard>
 
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-4 mb-8">
 
-        <div className="w-12 h-12 rounded-2xl bg-yellow-100 flex items-center justify-center">
+        <div
+          className="
+            w-14
+            h-14
 
-          <CalendarClock className="w-6 h-6 text-yellow-700" />
+            rounded-2xl
 
+            flex
+            items-center
+            justify-center
+
+            bg-emerald-500/10
+
+            border
+            border-emerald-500/20
+          "
+        >
+          <CalendarClock
+            size={28}
+            className="text-emerald-400"
+          />
         </div>
 
         <div>
 
-          <h2 className="text-2xl font-bold">
+          <h2
+            className="
+              text-3xl
+              font-black
+              text-white
+            "
+          >
             Próximos Vencimentos
           </h2>
 
-          <p className="text-gray-500">
-            Contratos ativos
+          <p className="text-gray-400">
+            Contratos ativos ordenados por vencimento
           </p>
 
         </div>
@@ -47,62 +65,92 @@ export default function ContratoProximosVencimentos({
 
       {contratosVencendo.length === 0 ? (
 
-        <div className="text-gray-500">
+        <div
+          className="
+            py-16
+
+            text-center
+
+            text-gray-500
+          "
+        >
           Nenhum contrato ativo.
         </div>
 
       ) : (
 
-        <div className="space-y-4">
+        <div className="space-y-5">
 
-          {contratosVencendo.map(
-            (contrato) => (
+          {contratosVencendo.map((contrato) => (
 
-              <div
-                key={contrato.id}
-                className="
-                  border
-                  rounded-2xl
-                  p-4
-                  flex
-                  justify-between
-                  items-center
-                "
-              >
+            <div
+              key={contrato.id}
+              className="
+                flex
+                items-center
+                justify-between
 
-                <div>
+                rounded-2xl
 
-                  <div className="font-semibold text-gray-800">
-                    {contrato.inquilinoNome}
-                  </div>
+                border
+                border-white/5
 
-                  <div className="text-sm text-gray-500">
-                    {contrato.unidadeNome}
-                  </div>
+                bg-white/[0.02]
 
-                </div>
+                px-6
+                py-5
 
-                <div className="text-right">
+                transition-all
+                duration-300
 
-                  <div className="font-bold text-green-700">
-                    R$ {contrato.valorAluguel}
-                  </div>
+                hover:bg-white/[0.05]
+              "
+            >
 
-                  <div className="text-sm text-gray-500">
-                    Dia {contrato.diaVencimento}
-                  </div>
+              <div>
 
-                </div>
+                <h3
+                  className="
+                    text-lg
+                    font-bold
+                    text-white
+                  "
+                >
+                  {contrato.inquilinoNome}
+                </h3>
+
+                <p className="text-gray-400">
+                  {contrato.unidadeNome}
+                </p>
 
               </div>
 
-            )
-          )}
+              <div className="text-right">
+
+                <p
+                  className="
+                    text-xl
+                    font-bold
+                    text-emerald-400
+                  "
+                >
+                  R$ {contrato.valorAluguel}
+                </p>
+
+                <p className="text-gray-400">
+                  Dia {contrato.diaVencimento}
+                </p>
+
+              </div>
+
+            </div>
+
+          ))}
 
         </div>
 
       )}
 
-    </div>
+    </DashboardCard>
   );
 }

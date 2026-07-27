@@ -1,32 +1,67 @@
 "use client";
 
+import { House } from "lucide-react";
+
+import FadeIn from "../ui/FadeIn";
+import EmptyState from "../ui/EmptyState";
+import PageGrid from "../ui/PageGrid";
+
 import KitnetCard from "./KitnetCard";
 
 export default function KitnetCardList({
   kitnets,
+  onEdit,
+  onDelete,
 }) {
-  if (!kitnets.length) {
-    return (
-      <div className="bg-white rounded-xl shadow p-10 text-center">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3">
-          Módulo Kitnets
-        </h2>
 
-        <p className="text-gray-500">
-          Nenhuma kitnet cadastrada ainda.
-        </p>
-      </div>
+  if (!kitnets.length) {
+
+    return (
+
+      <FadeIn>
+
+        <EmptyState
+          icon={<House size={54} />}
+          title="Nenhuma kitnet encontrada"
+          description="Cadastre sua primeira kitnet para começar o gerenciamento."
+        />
+
+      </FadeIn>
+
     );
+
   }
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {kitnets.map((kitnet) => (
-        <KitnetCard
-          key={kitnet.id}
-          kitnet={kitnet}
-        />
-      ))}
-    </div>
+
+    <FadeIn>
+
+      <PageGrid
+        cols={3}
+        gap="relaxed"
+      >
+
+        {kitnets.map((kitnet, index) => (
+
+          <FadeIn
+            key={kitnet.id}
+            delay={index * 0.04}
+          >
+
+            <KitnetCard
+              kitnet={kitnet}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+
+          </FadeIn>
+
+        ))}
+
+      </PageGrid>
+
+    </FadeIn>
+
   );
+
 }

@@ -5,40 +5,62 @@ import Button from "./Button";
 
 export default function ConfirmDialog({
   open,
+
   onClose,
+
   onConfirm,
-  title,
-  description,
+
+  title = "Confirmação",
+
+  description = "Deseja realmente continuar?",
+
+  confirmText = "Confirmar",
+
+  cancelText = "Cancelar",
+
+  confirmVariant = "danger",
+
+  loading = false,
 }) {
   return (
     <Modal
       open={open}
       onClose={onClose}
+      title={title}
+      size="sm"
     >
-      <h2 className="text-2xl font-bold">
-        {title}
-      </h2>
-
-      <p className="mt-3 text-gray-600">
+      <p
+        className="
+          text-gray-300
+          leading-relaxed
+        "
+      >
         {description}
       </p>
 
-      <div className="flex justify-end gap-4 mt-8">
-
+      <div
+        className="
+          flex
+          justify-end
+          gap-3
+          mt-8
+        "
+      >
         <Button
           variant="secondary"
           onClick={onClose}
+          disabled={loading}
         >
-          Cancelar
+          {cancelText}
         </Button>
 
         <Button
-          variant="danger"
+          variant={confirmVariant}
           onClick={onConfirm}
+          loading={loading}
         >
-          Confirmar
+          {confirmText}
         </Button>
-
       </div>
     </Modal>
   );

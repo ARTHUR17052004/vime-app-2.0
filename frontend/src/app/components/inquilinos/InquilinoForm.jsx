@@ -42,12 +42,14 @@ export default function InquilinoForm({
       localStorage.getItem("vime-kitnets") || "[]"
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setKitnets(dados);
   }, []);
 
   useEffect(() => {
     if (!inquilino) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData({
       nome: inquilino.nome || "",
       email: inquilino.email || "",

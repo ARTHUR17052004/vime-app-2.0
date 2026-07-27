@@ -1,172 +1,167 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
+
+import Table from "../ui/Table";
+import EmptyState from "../ui/EmptyState";
+
+import KitnetActionsMenu from "./KitnetActionsMenu";
+
+import { House } from "lucide-react";
 
 export default function KitnetTable({
   kitnets,
   onEdit,
   onDelete,
 }) {
-  const [menuAberto, setMenuAberto] =
-    useState(null);
 
-  if (kitnets.length === 0) {
+  if (!kitnets.length) {
+
     return (
-      <div className="bg-white rounded-xl shadow p-10 text-center">
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3">
-          Módulo Kitnets
-        </h2>
 
-        <p className="text-gray-500">
-          Nenhuma kitnet cadastrada ainda.
-        </p>
-      </div>
+      <EmptyState
+        icon={<House size={54} />}
+        title="Nenhuma kitnet cadastrada"
+        description="Cadastre sua primeira kitnet para começar o gerenciamento."
+      />
+
     );
+
   }
 
+  const columns = [
+
+    {
+
+      key: "nome",
+
+      title: "Kitnet",
+
+    },
+
+    {
+
+      key: "unidadeNome",
+
+      title: "Unidade",
+
+    },
+
+    {
+
+      key: "numero",
+
+      title: "Número",
+
+    },
+
+    {
+
+      key: "metragem",
+
+      title: "Metragem",
+
+      render: (item) => `${item.metragem} m²`,
+
+    },
+
+    {
+
+      key: "aluguel",
+
+      title: "Aluguel",
+
+      render: (item) => `R$ ${item.aluguel}`,
+
+    },
+
+    {
+
+      key: "status",
+
+      title: "Status",
+
+      render: (item) => (
+
+        <span
+
+          className={`
+
+            px-3
+            py-1
+
+            rounded-full
+
+            text-xs
+
+            font-semibold
+
+            ${
+              item.status === "Disponível"
+
+                ? "bg-emerald-500/15 text-emerald-400"
+
+                : item.status === "Ocupada"
+
+                ? "bg-sky-500/15 text-sky-400"
+
+                : "bg-yellow-500/15 text-yellow-400"
+
+            }
+
+          `}
+
+        >
+
+          {item.status}
+
+        </span>
+
+      ),
+
+    },
+
+    {
+
+      key: "acoes",
+
+      title: "",
+
+      render: (item) => (
+
+        <KitnetActionsMenu
+
+          kitnet={item}
+
+          onEdit={onEdit}
+
+          onDelete={onDelete}
+
+        />
+
+      ),
+
+    },
+
+  ];
+
   return (
-    <div className="bg-white rounded-xl shadow overflow-hidden">
-      <table className="w-full text-gray-800">
-        <thead className="bg-gray-50 border-b text-gray-700">
-          <tr>
-            <th className="text-left p-4">Kitnet</th>
-            <th className="text-left p-4">Unidade</th>
-            <th className="text-left p-4">Número</th>
-            <th className="text-left p-4">Metragem</th>
-            <th className="text-left p-4">Aluguel</th>
-            <th className="text-left p-4">Status</th>
-            <th className="text-center p-4">
-              Ações
-            </th>
-          </tr>
-        </thead>
 
-        <tbody>
-          {kitnets.map((kitnet) => (
-            <tr
-              key={kitnet.id}
-              className="border-b hover:bg-gray-50"
-            >
-              <td className="p-4 font-medium">
-                {kitnet.nome}
-              </td>
+    <Table
 
-              <td className="p-4">
-                {kitnet.unidadeNome}
-              </td>
+      columns={columns}
 
-              <td className="p-4">
-                {kitnet.numero}
-              </td>
+      data={kitnets}
 
-              <td className="p-4">
-                {kitnet.metragem} m²
-              </td>
+      onRowClick={(item) => {
 
-              <td className="p-4">
-                R$ {kitnet.aluguel}
-              </td>
+        window.location.href =
+          `/kitnets/${item.id}`;
 
-              <td className="p-4">
-                <span
-                  className={`px-3 py-1 rounded-full text-sm ${
-                    kitnet.status === "Disponível"
-                      ? "bg-green-100 text-green-700"
-                      : kitnet.status === "Ocupada"
-                      ? "bg-blue-100 text-blue-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {kitnet.status}
-                </span>
-              </td>
+      }}
 
-              <td className="p-4 text-center relative">
-                <button
-                  onClick={() =>
-                    setMenuAberto(
-                      menuAberto === kitnet.id
-                        ? null
-                        : kitnet.id
-                    )
-                  }
-                  className="
-                    text-2xl
-                    font-bold
-                    text-gray-600
-                    hover:text-gray-900
-                  "
-                >
-                  ⋮
-                </button>
+    />
 
-                {menuAberto === kitnet.id && (
-                  <div
-                    className="
-                      absolute
-                      right-4
-                      mt-2
-                      w-40
-                      bg-white
-                      border
-                      rounded-xl
-                      shadow-lg
-                      z-50
-                    "
-                  >
-                    <Link
-                      href={`/kitnets/${kitnet.id}`}
-                      className="
-                        block
-                        px-4
-                        py-3
-                        text-left
-                        hover:bg-gray-100
-                      "
-                    >
-                      👁 Visualizar
-                    </Link>
-
-                    <button
-                      onClick={() => {
-                        onEdit(kitnet);
-                        setMenuAberto(null);
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        hover:bg-gray-100
-                      "
-                    >
-                      ✏️ Editar
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        onDelete(kitnet.id);
-                        setMenuAberto(null);
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        text-red-600
-                        hover:bg-red-50
-                      "
-                    >
-                      🗑 Excluir
-                    </button>
-                  </div>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
   );
+
 }

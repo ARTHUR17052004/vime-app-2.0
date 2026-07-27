@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 
 import SolicitacaoModal from "./SolicitacaoModal";
 
+import Button from "../ui/Button";
+import Select from "../ui/Select";
+import Textarea from "../ui/Textarea";
+
 export default function SolicitacaoRespostaModal({
   isOpen,
   onClose,
@@ -11,17 +15,14 @@ export default function SolicitacaoRespostaModal({
   solicitacao,
 }) {
 
-  const [resposta, setResposta] =
-    useState("");
+  const [resposta, setResposta] = useState("");
 
-  const [status, setStatus] =
-    useState("SOLICITADA");
+  const [status, setStatus] = useState("SOLICITADA");
 
   useEffect(() => {
 
     if (!solicitacao) return;
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResposta(
       solicitacao.resposta || ""
     );
@@ -48,6 +49,20 @@ export default function SolicitacaoRespostaModal({
 
   }
 
+  const input = `
+    w-full
+    rounded-xl
+    border
+    border-white/10
+    bg-white/5
+    px-4
+    py-3
+    text-white
+    placeholder:text-gray-500
+    outline-none
+    focus:border-emerald-500
+  `;
+
   return (
 
     <SolicitacaoModal
@@ -58,60 +73,47 @@ export default function SolicitacaoRespostaModal({
 
       <form
         onSubmit={enviar}
-        className="space-y-6"
+        className="space-y-8"
       >
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
 
             Resposta
 
           </label>
 
-          <textarea
+          <Textarea
             rows={8}
             value={resposta}
             onChange={(e) =>
               setResposta(e.target.value)
             }
             placeholder="Digite a resposta da solicitação..."
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-white
-              text-gray-900
+            className={`
+              ${input}
+              min-h-[220px]
               resize-none
-            "
+            `}
           />
 
         </div>
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
+          <label className="block text-sm font-semibold text-gray-300 mb-2">
 
             Novo Status
 
           </label>
 
-          <select
+          <Select
             value={status}
             onChange={(e) =>
               setStatus(e.target.value)
             }
-            className="
-              w-full
-              border
-              rounded-2xl
-              px-4
-              py-3
-              bg-white
-              text-gray-900
-            "
+            className={input}
           >
 
             <option>SOLICITADA</option>
@@ -124,43 +126,23 @@ export default function SolicitacaoRespostaModal({
 
             <option>REJEITADA</option>
 
-          </select>
+          </Select>
 
         </div>
 
         <div className="flex justify-end gap-4">
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
             onClick={onClose}
-            className="
-              px-6
-              py-3
-              rounded-2xl
-              border
-              hover:bg-gray-100
-            "
           >
-
             Cancelar
+          </Button>
 
-          </button>
-
-          <button
-            type="submit"
-            className="
-              px-8
-              py-3
-              rounded-2xl
-              bg-green-700
-              text-white
-              hover:bg-green-800
-            "
-          >
-
+          <Button type="submit">
             Enviar Resposta
-
-          </button>
+          </Button>
 
         </div>
 
