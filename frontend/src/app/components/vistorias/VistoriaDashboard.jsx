@@ -6,70 +6,114 @@ export default function VistoriaDashboard({
 
   const agendadas =
     vistorias.filter(
-      (vistoria) =>
-        vistoria.status ===
-        "AGENDADA"
+      (v) => v.status === "AGENDADA"
     ).length;
 
   const realizadas =
     vistorias.filter(
-      (vistoria) =>
-        vistoria.status ===
-        "REALIZADA"
+      (v) => v.status === "REALIZADA"
     ).length;
 
   const pendentes =
     vistorias.filter(
-      (vistoria) =>
-        vistoria.status ===
-        "PENDENTE"
+      (v) => v.status === "PENDENTE"
     ).length;
+
+  const cards = [
+
+    {
+      titulo: "Agendadas",
+      valor: agendadas,
+      cor: "text-sky-400",
+      fundo: "bg-sky-500/10",
+    },
+
+    {
+      titulo: "Realizadas",
+      valor: realizadas,
+      cor: "text-emerald-400",
+      fundo: "bg-emerald-500/10",
+    },
+
+    {
+      titulo: "Pendentes",
+      valor: pendentes,
+      cor: "text-yellow-400",
+      fundo: "bg-yellow-500/10",
+    },
+
+  ];
 
   return (
 
-    <div className="bg-white rounded-3xl shadow p-10">
+    <div
+      className="
+        rounded-[22px]
+        border
+        border-white/10
+        bg-white/[0.04]
+        p-8
+      "
+    >
 
-      <h2 className="text-3xl font-bold text-gray-900 mb-8">
+      <h2
+        className="
+          text-3xl
+          font-bold
+          text-white
+          mb-8
+        "
+      >
         Dashboard das Vistorias
       </h2>
 
       <div className="grid md:grid-cols-3 gap-6">
 
-        <div className="bg-blue-50 rounded-3xl p-6">
+        {cards.map((card) => (
 
-          <h3 className="text-gray-800 text-lg">
-            Agendadas
-          </h3>
+          <div
+            key={card.titulo}
+            className="
+              rounded-2xl
+              border
+              border-white/10
+              bg-white/[0.03]
+              p-6
+            "
+          >
 
-          <div className="text-4xl font-bold text-blue-700 mt-3">
-            {agendadas}
+            <div
+              className={`
+                w-14
+                h-14
+                rounded-2xl
+                flex
+                items-center
+                justify-center
+                text-2xl
+                font-bold
+                ${card.fundo}
+                ${card.cor}
+              `}
+            >
+
+              {card.valor}
+
+            </div>
+
+            <p
+              className="
+                mt-5
+                text-gray-300
+                text-lg
+              "
+            >
+              {card.titulo}
+            </p>
+
           </div>
 
-        </div>
-
-        <div className="bg-green-50 rounded-3xl p-6">
-
-          <h3 className="text-gray-800 text-lg">
-            Realizadas
-          </h3>
-
-          <div className="text-4xl font-bold text-green-700 mt-3">
-            {realizadas}
-          </div>
-
-        </div>
-
-        <div className="bg-yellow-50 rounded-3xl p-6">
-
-          <h3 className="text-gray-800 text-lg">
-            Pendentes
-          </h3>
-
-          <div className="text-4xl font-bold text-yellow-700 mt-3">
-            {pendentes}
-          </div>
-
-        </div>
+        ))}
 
       </div>
 

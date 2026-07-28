@@ -2,50 +2,54 @@
 
 import { useEffect, useState } from "react";
 
+import Button from "../ui/Button";
+import Input from "../ui/Input";
+import Select from "../ui/Select";
+import Textarea from "../ui/Textarea";
+
 export default function VistoriaForm({
   onSave,
   vistoriaEditando,
 }) {
 
-  const [formData, setFormData] =
-    useState({
-      unidadeNome: "",
-      kitnetNome: "",
+  const [formData, setFormData] = useState({
+    unidadeNome: "",
+    kitnetNome: "",
 
-      nomeVistoria: "",
+    nomeVistoria: "",
 
-      categoria: "Preventiva",
+    categoria: "Preventiva",
 
-      criticidade: "Média",
+    criticidade: "Média",
 
-      periodicidade: "Mensal",
+    periodicidade: "Mensal",
 
-      responsavel: "",
+    responsavel: "",
 
-      dataUltima: "",
+    dataUltima: "",
 
-      dataProxima: "",
+    dataProxima: "",
 
-      status: "PROGRAMADA",
+    status: "PROGRAMADA",
 
-      observacoes: "",
+    observacoes: "",
 
-      fotos: [],
-      checklist: {
-        portao: false,
-        telhado: false,
-        caixaAgua: false,
-        extintores: false,
-        iluminacao: false,
-        corredores: false,
-      },
-    });
+    fotos: [],
+
+    checklist: {
+      portao: false,
+      telhado: false,
+      caixaAgua: false,
+      extintores: false,
+      iluminacao: false,
+      corredores: false,
+    },
+  });
 
   useEffect(() => {
 
     if (vistoriaEditando) {
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         ...formData,
         ...vistoriaEditando,
@@ -60,8 +64,7 @@ export default function VistoriaForm({
 
     setFormData({
       ...formData,
-      [e.target.name]:
-        e.target.value,
+      [e.target.name]: e.target.value,
     });
 
   };
@@ -74,6 +77,20 @@ export default function VistoriaForm({
 
   };
 
+  const input = `
+    w-full
+    rounded-xl
+    border
+    border-white/10
+    bg-white/5
+    px-4
+    py-3
+    text-white
+    placeholder:text-gray-500
+    outline-none
+    focus:border-emerald-500
+  `;
+
   return (
 
     <form
@@ -85,44 +102,30 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-900">
+          <label className="font-semibold text-gray-300">
             Unidade
           </label>
 
-          <input
+          <Input
             name="unidadeNome"
             value={formData.unidadeNome}
             onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
+            className={input}
           />
 
         </div>
 
         <div>
 
-          <label className="font-semibold text-gray-900">
+          <label className="font-semibold text-gray-300">
             Kitnet
           </label>
 
-          <input
+          <Input
             name="kitnetNome"
             value={formData.kitnetNome}
             onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
+            className={input}
           />
 
         </div>
@@ -131,23 +134,16 @@ export default function VistoriaForm({
 
       <div>
 
-        <label className="font-semibold text-gray-900">
+        <label className="font-semibold text-gray-300">
           Nome da Vistoria
         </label>
 
-        <input
+        <Input
           name="nomeVistoria"
           value={formData.nomeVistoria}
           onChange={handleChange}
-          className="
-            w-full
-            border
-            rounded-2xl
-            p-4
-            mt-2
-            text-gray-900
-          "
           placeholder="Ex: Limpeza das Áreas Comuns"
+          className={input}
         />
 
       </div>
@@ -156,89 +152,47 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-900">
+          <label className="font-semibold text-gray-300">
             Categoria
           </label>
 
-          <select
+          <Select
             name="categoria"
             value={formData.categoria}
             onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
+            className={input}
           >
 
-            <option>
-              Preventiva
-            </option>
+            <option>Preventiva</option>
+            <option>Corretiva</option>
+            <option>Inspeção</option>
+            <option>Limpeza</option>
+            <option>Segurança</option>
+            <option>Estrutural</option>
 
-            <option>
-              Corretiva
-            </option>
-
-            <option>
-              Inspeção
-            </option>
-
-            <option>
-              Limpeza
-            </option>
-
-            <option>
-              Segurança
-            </option>
-
-            <option>
-              Estrutural
-            </option>
-
-          </select>
+          </Select>
 
         </div>
 
         <div>
 
-          <label className="font-semibold text-gray-900">
+          <label className="font-semibold text-gray-300">
             Criticidade
           </label>
 
-          <select
+          <Select
             name="criticidade"
             value={formData.criticidade}
             onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
+            className={input}
           >
 
-            <option>
-              Baixa
-            </option>
+            <option>Baixa</option>
+            <option>Média</option>
+            <option>Alta</option>
+            <option>Crítica</option>
 
-            <option>
-              Média
-            </option>
-
-            <option>
-              Alta
-            </option>
-
-            <option>
-              Crítica
-            </option>
-
-          </select>
+          </Select>
 
         </div>
 
@@ -248,170 +202,115 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-900">
+          <label className="font-semibold text-gray-300">
             Periodicidade
           </label>
 
-          <select
+          <Select
             name="periodicidade"
             value={formData.periodicidade}
             onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
+            className={input}
           >
 
-            <option>
-              Semanal
-            </option>
+            <option>Semanal</option>
+            <option>Quinzenal</option>
+            <option>Mensal</option>
+            <option>Bimestral</option>
+            <option>Trimestral</option>
+            <option>Semestral</option>
+            <option>Anual</option>
 
-            <option>
-              Quinzenal
-            </option>
-
-            <option>
-              Mensal
-            </option>
-
-            <option>
-              Bimestral
-            </option>
-
-            <option>
-              Trimestral
-            </option>
-
-            <option>
-              Semestral
-            </option>
-
-            <option>
-              Anual
-            </option>
-
-          </select>
+          </Select>
 
         </div>
-
-        <div>
-
-          <label className="font-semibold text-gray-900">
-            Responsável
-          </label>
-
-          <input
-            name="responsavel"
-            value={formData.responsavel}
-            onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
-            placeholder="Nome do responsável"
-          />
-
-        </div>
-
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-
-        <div>
-
-          <label className="font-semibold text-gray-900">
-            Data Última
-          </label>
-
-          <input
-            type="date"
-            name="dataUltima"
-            value={formData.dataUltima}
-            onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
-          />
-
-        </div>
-
-        <div>
-
-          <label className="font-semibold text-gray-900">
-            Data Próxima
-          </label>
-
-          <input
-            type="date"
-            name="dataProxima"
-            value={formData.dataProxima}
-            onChange={handleChange}
-            className="
-              w-full
-              border
-              rounded-2xl
-              p-4
-              mt-2
-              text-gray-900
-            "
-          />
-
-        </div>
-
-      </div>
 
       <div>
 
-        <label className="font-semibold text-gray-900">
-          Status
-        </label>
+  <label className="font-semibold text-gray-300">
+    Responsável
+  </label>
 
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-          className="
-            w-full
-            border
-            rounded-2xl
-            p-4
-            mt-2
-            text-gray-900
-          "
-        >
+  <Input
+    name="responsavel"
+    value={formData.responsavel}
+    onChange={handleChange}
+    placeholder="Nome do responsável"
+    className={input}
+  />
 
-          <option>PROGRAMADA</option>
-          <option>PENDENTE</option>
-          <option>REALIZADA</option>
-          <option>CANCELADA</option>
-          <option>ATRASADA</option>
+</div>
 
-        </select>
+</div>
 
-      </div>
+<div className="grid md:grid-cols-2 gap-6">
 
-      <div>
+  <div>
 
-  <label className="font-semibold text-gray-900 block mb-4">
+    <label className="font-semibold text-gray-300">
+      Data Última
+    </label>
+
+    <Input
+      type="date"
+      name="dataUltima"
+      value={formData.dataUltima}
+      onChange={handleChange}
+      className={input}
+    />
+
+  </div>
+
+  <div>
+
+    <label className="font-semibold text-gray-300">
+      Data Próxima
+    </label>
+
+    <Input
+      type="date"
+      name="dataProxima"
+      value={formData.dataProxima}
+      onChange={handleChange}
+      className={input}
+    />
+
+  </div>
+
+</div>
+
+<div>
+
+  <label className="font-semibold text-gray-300">
+    Status
+  </label>
+
+  <Select
+    name="status"
+    value={formData.status}
+    onChange={handleChange}
+    className={input}
+  >
+
+    <option>PROGRAMADA</option>
+    <option>PENDENTE</option>
+    <option>REALIZADA</option>
+    <option>CANCELADA</option>
+    <option>ATRASADA</option>
+
+  </Select>
+
+</div>
+
+<div>
+
+  <label className="font-semibold text-gray-300 block mb-4">
     Checklist da Vistoria
   </label>
 
   <div className="grid md:grid-cols-2 gap-4">
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.portao}
@@ -425,10 +324,10 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Portão</span>
+      <span>Portão</span>
     </label>
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.telhado}
@@ -442,10 +341,10 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Telhado</span>
+      <span>Telhado</span>
     </label>
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.caixaAgua}
@@ -459,10 +358,10 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Caixa de Água</span>
+      <span>Caixa de Água</span>
     </label>
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.extintores}
@@ -476,10 +375,10 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Extintores</span>
+      <span>Extintores</span>
     </label>
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.iluminacao}
@@ -493,10 +392,10 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Iluminação</span>
+      <span>Iluminação</span>
     </label>
 
-    <label className="flex items-center gap-3 border rounded-2xl p-4">
+    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
       <input
         type="checkbox"
         checked={formData.checklist.corredores}
@@ -510,7 +409,7 @@ export default function VistoriaForm({
           })
         }
       />
-      <span className="text-gray-900">Corredores</span>
+      <span>Corredores</span>
     </label>
 
   </div>
@@ -519,61 +418,43 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-bold text-gray-900 text-lg block mb-4">
+  <label className="font-bold text-gray-300 text-lg block mb-4">
     Fotos da Vistoria
   </label>
 
-  <input
+  <Input
     type="file"
     multiple
     accept="image/*"
-    className="
-      w-full
-      border
-      rounded-2xl
-      p-4
-      text-gray-900
-    "
+    className={input}
     onChange={(e) => {
 
-      const arquivos =
-        Array.from(
-          e.target.files || []
-        );
-
-      arquivos.forEach(
-        (arquivo) => {
-
-          const reader =
-            new FileReader();
-
-          reader.onload =
-            () => {
-
-              setFormData(
-                (prev) => ({
-
-                  ...prev,
-
-                  fotos: [
-
-                    ...(prev.fotos || []),
-
-                    reader.result,
-
-                  ],
-
-                })
-              );
-
-            };
-
-          reader.readAsDataURL(
-            arquivo
-          );
-
-        }
+      const arquivos = Array.from(
+        e.target.files || []
       );
+
+      arquivos.forEach((arquivo) => {
+
+        const reader = new FileReader();
+
+        reader.onload = () => {
+
+          setFormData((prev) => ({
+
+            ...prev,
+
+            fotos: [
+              ...(prev.fotos || []),
+              reader.result,
+            ],
+
+          }));
+
+        };
+
+        reader.readAsDataURL(arquivo);
+
+      });
 
     }}
   />
@@ -582,25 +463,23 @@ export default function VistoriaForm({
 
     <div className="grid md:grid-cols-3 gap-4 mt-6">
 
-      {formData.fotos.map(
-        (foto, index) => (
+      {formData.fotos.map((foto, index) => (
 
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            key={index}
-            src={foto}
-            alt={`Foto ${index}`}
-            className="
-              w-full
-              h-40
-              object-cover
-              rounded-2xl
-              border
-            "
-          />
+        <img
+          key={index}
+          src={foto}
+          alt={`Foto ${index}`}
+          className="
+            w-full
+            h-40
+            object-cover
+            rounded-2xl
+            border
+            border-white/10
+          "
+        />
 
-        )
-      )}
+      ))}
 
     </div>
 
@@ -610,43 +489,34 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-semibold text-gray-900">
+  <label className="font-semibold text-gray-300">
     Observações
   </label>
 
-  <textarea
+  <Textarea
     rows={6}
     name="observacoes"
     value={formData.observacoes}
     onChange={handleChange}
-    className="
-      w-full
-      border
-      rounded-2xl
-      p-4
-      mt-2
-      text-gray-900
-    "
+    className={`
+      ${input}
+      min-h-[160px]
+      resize-none
+    `}
   />
 
 </div>
 
-<button
-  type="submit"
-  className="
-    bg-green-700
-    text-white
-    px-8
-    py-4
-    rounded-2xl
-    hover:bg-green-800
-  "
->
-  Salvar Vistoria
-</button>
+<div className="flex justify-end">
+
+  <Button type="submit">
+    Salvar Vistoria
+  </Button>
+
+</div>
 
 </form>
 
-  );
+);
 
 }

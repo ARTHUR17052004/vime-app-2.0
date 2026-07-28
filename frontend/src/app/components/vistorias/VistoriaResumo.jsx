@@ -28,57 +28,105 @@ export default function VistoriaResumo({
   const total =
     vistorias.length;
 
+  const cards = [
+
+    {
+      titulo: "Total",
+      valor: total,
+      cor: "text-white",
+      fundo: "bg-white/10",
+    },
+
+    {
+      titulo: "Programadas",
+      valor: programadas,
+      cor: "text-sky-400",
+      fundo: "bg-sky-500/10",
+    },
+
+    {
+      titulo: "Realizadas",
+      valor: realizadas,
+      cor: "text-emerald-400",
+      fundo: "bg-emerald-500/10",
+    },
+
+    {
+      titulo: "Atrasadas",
+      valor: atrasadas,
+      cor: "text-red-400",
+      fundo: "bg-red-500/10",
+    },
+
+  ];
+
   return (
 
-    <div className="grid md:grid-cols-4 gap-6 mb-8">
+    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
 
-      <div className="bg-white rounded-3xl shadow p-8">
+      {cards.map((card) => (
 
-        <p className="text-gray-800">
-          Total
-        </p>
+        <div
+          key={card.titulo}
+          className="
+            rounded-[22px]
+            border
+            border-white/10
+            bg-white/[0.04]
+            backdrop-blur-xl
+            p-6
+            transition-all
+            duration-300
+            hover:border-emerald-500/30
+            hover:shadow-[0_0_35px_rgba(16,185,129,.08)]
+          "
+        >
 
-        <h2 className="text-4xl font-bold text-gray-900 mt-3">
-          {total}
-        </h2>
+          <div className="flex items-center justify-between">
 
-      </div>
+            <div>
 
-      <div className="bg-white rounded-3xl shadow p-8">
+              <p className="text-gray-400 text-sm">
+                {card.titulo}
+              </p>
 
-        <p className="text-gray-800">
-          Programadas
-        </p>
+              <h2
+                className={`
+                  text-4xl
+                  font-black
+                  mt-3
+                  ${card.cor}
+                `}
+              >
+                {card.valor}
+              </h2>
 
-        <h2 className="text-4xl font-bold text-blue-700 mt-3">
-          {programadas}
-        </h2>
+            </div>
 
-      </div>
+            <div
+              className={`
+                w-14
+                h-14
+                rounded-2xl
+                flex
+                items-center
+                justify-center
+                text-xl
+                font-bold
+                ${card.fundo}
+                ${card.cor}
+              `}
+            >
 
-      <div className="bg-white rounded-3xl shadow p-8">
+              {card.valor}
 
-        <p className="text-gray-800">
-          Realizadas
-        </p>
+            </div>
 
-        <h2 className="text-4xl font-bold text-green-700 mt-3">
-          {realizadas}
-        </h2>
+          </div>
 
-      </div>
+        </div>
 
-      <div className="bg-white rounded-3xl shadow p-8">
-
-        <p className="text-gray-800">
-          Atrasadas
-        </p>
-
-        <h2 className="text-4xl font-bold text-red-700 mt-3">
-          {atrasadas}
-        </h2>
-
-      </div>
+      ))}
 
     </div>
 
