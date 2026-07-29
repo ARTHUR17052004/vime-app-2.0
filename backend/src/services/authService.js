@@ -38,6 +38,21 @@ const login = async (email, senha) => {
     }
   );
 
+  const logService = require("./logService");
+  await logService.registrar({
+
+  usuarioId: usuario.id,
+
+  usuarioNome: usuario.nome,
+
+  modulo: "AUTH",
+
+  acao: "LOGIN",
+
+  descricao: "Usuário realizou login.",
+
+});
+
   return {
     token,
     usuario: payload
