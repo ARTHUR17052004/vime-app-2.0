@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  defs,
 } from "recharts";
 
 const data = [
@@ -30,22 +29,28 @@ function formatarValor(valor) {
 
 export default function RevenueChart() {
   return (
-    <div className="w-full h-[320px]">
+    <div
+      className="
+        w-full
 
+        h-[280px]
+
+        px-6
+        pt-4
+        pb-6
+      "
+    >
       <ResponsiveContainer width="100%" height="100%">
-
         <AreaChart
           data={data}
           margin={{
-            top: 15,
-            right: 10,
-            left: -25,
-            bottom: 0,
+            top: 25,
+            right: 20,
+            left: 10,
+            bottom: 15,
           }}
         >
-
           <defs>
-
             <linearGradient
               id="receitaGradient"
               x1="0"
@@ -53,7 +58,6 @@ export default function RevenueChart() {
               x2="0"
               y2="1"
             >
-
               <stop
                 offset="0%"
                 stopColor="#22c55e"
@@ -65,9 +69,7 @@ export default function RevenueChart() {
                 stopColor="#22c55e"
                 stopOpacity={0}
               />
-
             </linearGradient>
-
           </defs>
 
           <CartesianGrid
@@ -86,9 +88,7 @@ export default function RevenueChart() {
             }}
           />
 
-          <YAxis
-            hide
-          />
+          <YAxis hide />
 
           <Tooltip
             cursor={{
@@ -121,11 +121,8 @@ export default function RevenueChart() {
               fill: "#22c55e",
             }}
           />
-
         </AreaChart>
-
       </ResponsiveContainer>
-
     </div>
   );
 }

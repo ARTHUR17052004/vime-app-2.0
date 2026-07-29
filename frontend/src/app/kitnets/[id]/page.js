@@ -19,6 +19,7 @@ export default function KitnetDetalhesPage() {
       (item) => String(item.id) === params.id
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setKitnet(encontrada);
   }, [params.id]);
 

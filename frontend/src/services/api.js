@@ -1,10 +1,23 @@
 import { API_URL } from "../config/api";
 
 export async function api(endpoint, options = {}) {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : null;
+  function getCookie(nome) {
+  if (typeof document === "undefined") return null;
+
+  const cookies = document.cookie.split(";");
+
+  for (const cookie of cookies) {
+    const [key, value] = cookie.trim().split("=");
+
+    if (key === nome) {
+      return value;
+    }
+  }
+
+  return null;
+}
+
+const token = getCookie("token");
 
   console.log("API:", `${API_URL}${endpoint}`);
 

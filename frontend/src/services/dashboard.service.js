@@ -3,39 +3,49 @@ import { api } from "./api";
 export const DashboardService = {
   async listar() {
 
-    const [
-      dashboard,
-      financeiro,
-      ocupacao,
-      atividades,
-      alertas,
-    ] = await Promise.all([
+    const resultado = {};
 
-      api("/dashboard"),
+    try {
+      resultado.dashboard = await api("/dashboard");
+      console.log("✓ dashboard");
+    } catch (e) {
+      console.error("/dashboard", e);
+    }
 
-      api("/dashboard/financeiro"),
+    try {
+      resultado.financeiro = await api("/dashboard/financeiro");
+      console.log("✓ financeiro");
+    } catch (e) {
+      console.error("/dashboard/financeiro", e);
+    }
 
-      api("/dashboard/ocupacao"),
+    try {
+      resultado.ocupacao = await api("/dashboard/ocupacao");
+      console.log("✓ ocupacao");
+    } catch (e) {
+      console.error("/dashboard/ocupacao", e);
+    }
 
-      api("/dashboard/atividades"),
+    try {
+      resultado.atividades = await api("/dashboard/atividades");
+      console.log("✓ atividades");
+    } catch (e) {
+      console.error("/dashboard/atividades", e);
+    }
 
-      api("/dashboard/alertas"),
-
-    ]);
+    try {
+      resultado.alertas = await api("/dashboard/alertas");
+      console.log("✓ alertas");
+    } catch (e) {
+      console.error("/dashboard/alertas", e);
+    }
 
     return {
-
-      ...dashboard,
-
-      financeiro,
-
-      ocupacao,
-
-      atividades,
-
-      alertas,
-
+      ...resultado.dashboard,
+      financeiro: resultado.financeiro,
+      ocupacao: resultado.ocupacao,
+      atividades: resultado.atividades,
+      alertas: resultado.alertas,
     };
-
   },
 };
