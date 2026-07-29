@@ -1,6 +1,8 @@
 const prisma = require('../config/prisma');
 
+const ClicksignApi = require("./ClicksignApi");
 const logService = require("./logService");
+const auditoriaService = require("./auditoriaService");
 
 const listar = () => {
   return prisma.contrato.findMany({
@@ -30,7 +32,6 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  // Busca os registros necessários
   const kitnet = await prisma.kitnet.findUnique({
     where: {
       id: dados.kitnetId
@@ -55,8 +56,6 @@ const criar = async (dados) => {
     }
   });
 
-  // Valida existência
-
   if (!kitnet) {
     throw new Error('Kitnet não encontrada.');
   }
@@ -72,8 +71,6 @@ const criar = async (dados) => {
   if (!inquilino) {
     throw new Error('Inquilino não encontrado.');
   }
-
-  // Valida relacionamentos
 
   if (kitnet.unidadeId !== unidade.id) {
     throw new Error(
@@ -93,23 +90,17 @@ const criar = async (dados) => {
     );
   }
 
-  // Impede criar contrato em kitnet ocupada
-
   if (kitnet.ocupada) {
     throw new Error(
       'Esta kitnet já possui um contrato ativo.'
     );
   }
 
-  // Valida valor do aluguel
-
   if (dados.valorAluguel <= 0) {
     throw new Error(
       'Valor do aluguel inválido.'
     );
   }
-
-  // Valida vencimento
 
   if (
     dados.diaVencimento < 1 ||
@@ -120,8 +111,6 @@ const criar = async (dados) => {
     );
   }
 
-  // Valida datas
-
   if (
     dados.dataFim &&
     new Date(dados.dataFim) <= new Date(dados.dataInicio)
@@ -131,13 +120,40 @@ const criar = async (dados) => {
     );
   }
 
-  // Cria contrato
-
   const contrato = await prisma.contrato.create({
     data: dados
   });
 
-  // Cria primeira receita
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "CRIAR",
+    valorAnterior: null,
+    valorNovo: contrato
+  });
+
+  await ClicksignApi.criarDocumento({
+    contratoId: contrato.id,
+    nome: `Contrato ${contrato.id}`,
+    arquivo: "contrato.pdf"
+  });
+
+  await ClicksignApi.enviarAssinatura(
+    contrato.id,
+    {
+      email: inquilino.email
+    }
+  );
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CLICKSIGN",
+    acao: "CRIAR_DOCUMENTO",
+    descricao: `Documento do contrato ${contrato.id} enviado.`
+  });
 
   await prisma.receita.create({
     data: {
@@ -150,8 +166,6 @@ const criar = async (dados) => {
     }
   });
 
-  // Ocupa kitnet
-
   await prisma.kitnet.update({
     where: {
       id: dados.kitnetId
@@ -161,8 +175,6 @@ const criar = async (dados) => {
       status: 'OCUPADA'
     }
   });
-
-  // Log
 
   await logService.registrar({
     usuarioId: null,
@@ -178,9 +190,23 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  const anterior = await prisma.contrato.findUnique({
+    where: { id }
+  });
+
   const contrato = await prisma.contrato.update({
     where: { id },
     data: dados
+  });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "ATUALIZAR",
+    valorAnterior: anterior,
+    valorNovo: contrato
   });
 
   await logService.registrar({
@@ -214,6 +240,16 @@ const remover = async (id) => {
     );
   }
 
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "EXCLUIR",
+    valorAnterior: contrato,
+    valorNovo: null
+  });
+
   await logService.registrar({
     usuarioId: null,
     usuarioNome: "Sistema",
@@ -246,7 +282,7 @@ const encerrar = async (id) => {
     }
   });
 
-  await prisma.kitnet.update({
+    await prisma.kitnet.update({
     where: {
       id: contrato.kitnetId
     },
@@ -254,6 +290,16 @@ const encerrar = async (id) => {
       ocupada: false,
       status: 'DISPONIVEL'
     }
+  });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "ENCERRAR",
+    valorAnterior: contrato,
+    valorNovo: contratoEncerrado
   });
 
   await logService.registrar({
@@ -268,20 +314,72 @@ const encerrar = async (id) => {
 
 };
 
-const inadimplente = (id) => {
-  return prisma.contrato.update({
+const inadimplente = async (id) => {
+
+  const anterior = await prisma.contrato.findUnique({
+    where: { id }
+  });
+
+  const contrato = await prisma.contrato.update({
     where: { id },
     data: {
       status: 'INADIMPLENTE'
     }
   });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "INADIMPLENTE",
+    valorAnterior: anterior,
+    valorNovo: contrato
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "INADIMPLENTE",
+    descricao: `Contrato ${contrato.id} marcado como inadimplente.`
+  });
+
+  return contrato;
+
 };
 
-const renovar = (id, dados) => {
-  return prisma.contrato.update({
+const renovar = async (id, dados) => {
+
+  const anterior = await prisma.contrato.findUnique({
+    where: { id }
+  });
+
+  const contrato = await prisma.contrato.update({
     where: { id },
     data: dados
   });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    registroId: contrato.id,
+    acao: "RENOVAR",
+    valorAnterior: anterior,
+    valorNovo: contrato
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "RENOVAR",
+    descricao: `Contrato ${contrato.id} renovado.`
+  });
+
+  return contrato;
+
 };
 
 module.exports = {

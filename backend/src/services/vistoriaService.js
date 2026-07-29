@@ -1,5 +1,7 @@
 const prisma = require('../config/prisma');
+
 const logService = require('./logService');
+const auditoriaService = require('./auditoriaService');
 
 const listar = () => {
   return prisma.vistoria.findMany({
@@ -27,6 +29,16 @@ const criar = async (dados) => {
     data: dados
   });
 
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    registroId: vistoria.id,
+    acao: "CRIAR",
+    valorAnterior: null,
+    valorNovo: vistoria
+  });
+
   await logService.registrar({
     usuarioId: null,
     usuarioNome: "Sistema",
@@ -41,9 +53,23 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  const anterior = await prisma.vistoria.findUnique({
+    where: { id }
+  });
+
   const vistoria = await prisma.vistoria.update({
     where: { id },
     data: dados
+  });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    registroId: vistoria.id,
+    acao: "ATUALIZAR",
+    valorAnterior: anterior,
+    valorNovo: vistoria
   });
 
   await logService.registrar({
@@ -62,6 +88,20 @@ const remover = async (id) => {
 
   const vistoria = await prisma.vistoria.findUnique({
     where: { id }
+  });
+
+  if (!vistoria) {
+    throw new Error("Vistoria não encontrada.");
+  }
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    registroId: vistoria.id,
+    acao: "EXCLUIR",
+    valorAnterior: vistoria,
+    valorNovo: null
   });
 
   await logService.registrar({

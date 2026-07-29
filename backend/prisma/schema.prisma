@@ -1,98 +1,238 @@
-const prisma = require("../config/prisma");
+generator client {
+  provider = "prisma-client-js"
+}
 
-const listar = () => {
-  return prisma.unidade.findMany({
-    include: {
-      locadorRel: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-};
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-const buscarPorId = (id) => {
-  return prisma.unidade.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      locadorRel: true,
-    },
-  });
-};
+model Unidade {
+  id                  String     @id @default(uuid())
+  nome                String
+  cidade              String
+  uf                  String
+  locador             String?
+  kitnets             Int
+  status              String     @default("ATIVA")
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  aluguel             Float?
+  bairro              String?
+  cep                 String?
+  complemento         String?
+  locadorId           String?
+  logradouro          String?
+  numero              String?
+  observacoes         String?
+  vencimento          Int?
+  contratos           Contrato[]
+  kitnetsRelacionadas Kitnet[]
+  locadorRel          Locador?   @relation(fields: [locadorId], references: [id])
+}
 
-const criar = (dados) => {
-  return prisma.unidade.create({
-    data: {
-      nome: dados.nome,
-      cep: dados.cep || null,
-      logradouro: dados.logradouro || null,
-      numero: dados.numero || null,
-      complemento: dados.complemento || null,
-      bairro: dados.bairro || null,
-      cidade: dados.cidade,
-      uf: dados.uf,
-      locador: dados.locador || null,
-      locadorId: dados.locadorId || null,
-      kitnets: Number(dados.kitnets || 0),
-      aluguel:
-        dados.aluguel !== ""
-          ? Number(dados.aluguel)
-          : null,
-      vencimento:
-        dados.vencimento !== ""
-          ? Number(dados.vencimento)
-          : null,
-      status: (dados.status || "ATIVA").toUpperCase(),
-      observacoes: dados.observacoes || null,
-    },
-  });
-};
+model Kitnet {
+  id         String      @id @default(uuid())
+  numero     String
+  metragem   Float
+  aluguel    Float
+  ocupada    Boolean     @default(false)
+  status     String      @default("DISPONIVEL")
+  unidadeId  String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  nome       String?
+  contratos  Contrato[]
+  inquilinos Inquilino[]
+  unidade    Unidade     @relation(fields: [unidadeId], references: [id])
+}
 
-const atualizar = (id, dados) => {
-  return prisma.unidade.update({
-    where: {
-      id,
-    },
-    data: {
-      nome: dados.nome,
-      cep: dados.cep || null,
-      logradouro: dados.logradouro || null,
-      numero: dados.numero || null,
-      complemento: dados.complemento || null,
-      bairro: dados.bairro || null,
-      cidade: dados.cidade,
-      uf: dados.uf,
-      locador: dados.locador || null,
-      locadorId: dados.locadorId || null,
-      kitnets: Number(dados.kitnets || 0),
-      aluguel:
-        dados.aluguel !== ""
-          ? Number(dados.aluguel)
-          : null,
-      vencimento:
-        dados.vencimento !== ""
-          ? Number(dados.vencimento)
-          : null,
-      status: (dados.status || "ATIVA").toUpperCase(),
-      observacoes: dados.observacoes || null,
-    },
-  });
-};
+model Inquilino {
+  id                 String     @id @default(uuid())
+  nome               String
+  email              String
+  telefone           String
+  cpf                String
+  dataInicioContrato DateTime
+  ativo              Boolean    @default(true)
+  kitnetId           String
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  contatoEmergencia  String?
+  dataFimContrato    DateTime?
+  dataNascimento     DateTime?
+  enderecoAnterior   String?
+  indiceReajuste     String?
+  prazoContrato      Int?
+  rg                 String?
+  telefoneEmergencia String?
+  tipoGarantia       String?
+  valorCaucao        Float?
+  contratos          Contrato[]
+  kitnet             Kitnet     @relation(fields: [kitnetId], references: [id])
+}
 
-const remover = (id) => {
-  return prisma.unidade.delete({
-    where: {
-      id,
-    },
-  });
-};
+model Usuario {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String   @unique
+  senha     String
+  perfil    Perfil
+  ativo     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 
-module.exports = {
-  listar,
-  buscarPorId,
-  criar,
-  atualizar,
-  remover,
-};
+model Contrato {
+  id             String    @id @default(uuid())
+  locadorId      String
+  unidadeId      String
+  kitnetId       String
+  inquilinoId    String
+  dataInicio     DateTime
+  dataFim        DateTime?
+  valorAluguel   Float
+  diaVencimento  Int
+  tipoGarantia   String?
+  valorCaucao    Float?
+  indiceReajuste String?
+  status         String    @default("ATIVO")
+  observacoes    String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  inquilino      Inquilino @relation(fields: [inquilinoId], references: [id])
+  kitnet         Kitnet    @relation(fields: [kitnetId], references: [id])
+  locador        Locador   @relation(fields: [locadorId], references: [id])
+  unidade        Unidade   @relation(fields: [unidadeId], references: [id])
+  receitas       Receita[]
+}
+
+model Locador {
+  id                String     @id @default(uuid())
+  nome              String
+  email             String?    @unique
+  telefone          String?
+  cpfCnpj           String?    @unique
+  endereco          String?
+  cidade            String?
+  uf                String?
+  banco             String?
+  agencia           String?
+  conta             String?
+  taxaAdministracao Float?     @default(0)
+  multa             Float?     @default(0)
+  juros             Float?     @default(0)
+  ativo             Boolean    @default(true)
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  contratos         Contrato[]
+  unidades          Unidade[]
+}
+
+model Receita {
+  id            String    @id @default(uuid())
+  contratoId    String?
+  categoria     String
+  descricao     String
+  valor         Float
+  vencimento    DateTime?
+  dataPagamento DateTime?
+  status        String    @default("PENDENTE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  contrato      Contrato? @relation(fields: [contratoId], references: [id])
+}
+
+model Despesa {
+  id            String    @id @default(uuid())
+  categoria     String
+  descricao     String
+  valor         Float
+  vencimento    DateTime?
+  dataPagamento DateTime?
+  status        String    @default("PENDENTE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Solicitacao {
+  id String @id @default(uuid())
+
+  numero String
+
+  titulo String
+
+  descricao String?
+
+  responsavel String?
+
+  data DateTime?
+
+  prazo DateTime?
+
+  status String @default("SOLICITADA")
+
+  observacoes String?
+
+  resposta String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model Vistoria {
+  id String @id @default(uuid())
+
+  titulo String
+
+  descricao String?
+
+  status String @default("PENDENTE")
+
+  data DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  ocorrencias Ocorrencia[]
+}
+
+model Ocorrencia {
+  id String @id @default(uuid())
+
+  vistoriaId String
+
+  titulo String
+
+  descricao String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  vistoria Vistoria @relation(fields: [vistoriaId], references: [id])
+}
+
+model LogSistema {
+  id          String   @id @default(uuid())
+
+  usuarioId   String?
+  usuarioNome String?
+
+  modulo      String
+  acao        String
+
+  descricao   String?
+
+  ip          String?
+
+  createdAt   DateTime @default(now())
+}
+
+enum Perfil {
+  ADMINISTRADOR
+  ADMINISTRATIVO
+  ZELADOR
+}
