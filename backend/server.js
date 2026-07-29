@@ -5,7 +5,9 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
+const iniciarJobs = require("./src/jobs");
 const authRoutes = require("./src/routes/authRoutes");
+const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
 const usuarioRoutes = require("./src/routes/usuarioRoutes");
 const locadorRoutes = require("./src/routes/locadorRoutes");
 const unidadeRoutes = require("./src/routes/unidadeRoutes");
@@ -25,6 +27,7 @@ const clicksignRoutes = require("./src/routes/clicksignRoutes");
 const solicitacaoRoutes = require("./src/routes/solicitacaoRoutes");
 const vistoriaRoutes = require("./src/routes/vistoriaRoutes");
 const logRoutes = require("./src/routes/logRoutes");
+const whatsappRoutes = require("./src/routes/whatsappRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -116,6 +119,8 @@ app.use("/solicitacoes", solicitacaoRoutes);
 
 app.use("/vistorias", vistoriaRoutes);
 
+app.use("/auditoria", auditoriaRoutes);
+
 /* ===========================
    ASAAS
 =========================== */
@@ -127,7 +132,14 @@ app.use("/asaas", asaasRoutes);
 =========================== */
 
 app.use("/clicksign", clicksignRoutes);
+
 app.use("/logs", logRoutes);
+
+/* ===========================
+   WHATSAPP
+=========================== */
+
+app.use("/whatsapp", whatsappRoutes);
 
 /* ===========================
    404
@@ -150,4 +162,7 @@ app.listen(PORT, () => {
   console.log(
     `[VIME 2.0] Servidor iniciado com sucesso na porta ${PORT}`
   );
+
+  iniciarJobs();
+
 });

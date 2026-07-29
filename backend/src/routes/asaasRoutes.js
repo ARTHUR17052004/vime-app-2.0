@@ -24,4 +24,14 @@ router.get('/resumo', asaasController.resumo);
 
 router.post('/sincronizar', asaasController.sincronizar);
 
+router.get("/clientes", asaasController.listarClientes);
+
+router.post("/clientes", asaasController.criarCliente);
+
+router.get("/cobrancas", asaasController.listarCobrancas);
+
+router.post("/cobrancas", asaasController.criarCobranca);
+
+router.post("/webhook", asaasController.webhook);
+
 module.exports = router;

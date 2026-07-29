@@ -11,14 +11,26 @@ router.get('/config', clicksignController.config);
 
 router.get('/status', clicksignController.status);
 
-router.get('/documentos', clicksignController.listarDocumentos);
-
-router.get('/documentos/:id', clicksignController.buscarDocumento);
-
-router.post('/documentos', clicksignController.criarDocumento);
-
 router.post('/enviar', clicksignController.enviarDocumento);
 
 router.post('/sincronizar', clicksignController.sincronizar);
+
+router.get("/documentos", clicksignController.listarDocumentosApi);
+
+router.post("/documentos", clicksignController.criarDocumentoApi);
+
+router.get("/documentos/:id", clicksignController.buscarDocumentoApi);
+
+router.delete("/documentos/:id", clicksignController.cancelarDocumento);
+
+router.post(
+  "/documentos/:id/assinar",
+  clicksignController.enviarAssinatura
+);
+
+router.post(
+  "/webhook",
+  clicksignController.webhook
+);
 
 module.exports = router;

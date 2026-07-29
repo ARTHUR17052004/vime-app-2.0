@@ -1,5 +1,8 @@
 const axios = require("axios");
 
+const USAR_MOCK =
+    process.env.ASAAS_MOCK === "true";
+
 class AsaasApi {
 
   constructor() {
@@ -15,23 +18,37 @@ class AsaasApi {
 
   async request(method, endpoint, body = null) {
 
-    // ===== MOCK =====
+  // ===== MOCK FORÇADO =====
 
-    if (!this.apiKey) {
+  if (USAR_MOCK) {
 
-      return {
-        success: true,
-        mock: true,
-        method,
-        endpoint,
-        body
-      };
+    return {
+      success: true,
+      mock: true,
+      method,
+      endpoint,
+      body
+    };
 
-    }
+  }
 
-    // ===== API REAL =====
+  // ===== MOCK AUTOMÁTICO (sem API Key) =====
 
-    const response = await axios({
+  if (!this.apiKey) {
+
+    return {
+      success: true,
+      mock: true,
+      method,
+      endpoint,
+      body
+    };
+
+  }
+
+  // ===== API REAL =====
+
+  const response = await axios({
 
       method,
 
@@ -192,6 +209,24 @@ class AsaasApi {
       "POST",
       `/payments/${id}/restore`
     );
+
+  }
+
+  // ==========================
+  // WEBHOOKS
+  // ==========================
+
+  async receberWebhook(dados) {
+
+    console.log("Webhook Asaas recebido:");
+
+    console.log(dados);
+
+    return {
+      success: true,
+      recebido: true,
+      dados
+    };
 
   }
 
