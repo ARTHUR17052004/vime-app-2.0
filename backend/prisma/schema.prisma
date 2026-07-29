@@ -216,17 +216,19 @@ model Ocorrencia {
 }
 
 model LogSistema {
-  id String @id @default(uuid())
+  id          String   @id @default(uuid())
 
-  usuario String?
+  usuarioId   String?
+  usuarioNome String?
 
-  modulo String
+  modulo      String
+  acao        String
 
-  acao String
+  descricao   String?
 
-  ip String?
+  ip          String?
 
-  createdAt DateTime @default(now())
+  createdAt   DateTime @default(now())
 }
 
 enum Perfil {

@@ -24,6 +24,7 @@ const clicksignRoutes = require("./src/routes/clicksignRoutes");
 
 const solicitacaoRoutes = require("./src/routes/solicitacaoRoutes");
 const vistoriaRoutes = require("./src/routes/vistoriaRoutes");
+const logRoutes = require("./src/routes/logRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -126,6 +127,7 @@ app.use("/asaas", asaasRoutes);
 =========================== */
 
 app.use("/clicksign", clicksignRoutes);
+app.use("/logs", logRoutes);
 
 /* ===========================
    404

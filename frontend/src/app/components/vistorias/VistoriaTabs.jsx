@@ -30,7 +30,7 @@ export default function VistoriaTabs({
 
   return (
 
-    <div className="flex gap-4 mb-8 flex-wrap">
+    <div className="flex flex-wrap gap-3 mb-8">
 
       {abas.map((aba) => (
 
@@ -41,15 +41,36 @@ export default function VistoriaTabs({
               aba.id
             )
           }
-          className={`px-6 py-3 rounded-2xl transition
-          ${
-            abaSelecionada ===
-            aba.id
-              ? "bg-green-700 text-white"
-              : "bg-white text-gray-900"
-          }`}
+          className={`
+            px-6
+            py-3
+            rounded-2xl
+            font-semibold
+            transition-all
+            duration-300
+
+            ${
+              abaSelecionada === aba.id
+                ? `
+                  bg-emerald-500
+                  text-white
+                  shadow-lg
+                  shadow-emerald-500/20
+                `
+                : `
+                  bg-white/5
+                  border
+                  border-white/10
+                  text-gray-300
+                  hover:bg-white/10
+                  hover:border-emerald-500/30
+                `
+            }
+          `}
         >
+
           {aba.nome}
+
         </button>
 
       ))}

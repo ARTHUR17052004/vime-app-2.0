@@ -1,5 +1,7 @@
 "use client";
 
+import Button from "../ui/Button";
+
 export default function VistoriaFiltros({
   filtroSelecionado,
   setFiltroSelecionado,
@@ -17,27 +19,24 @@ export default function VistoriaFiltros({
 
   return (
 
-    <div className="flex gap-4 mb-8 flex-wrap">
+    <div className="flex flex-wrap gap-3">
 
       {filtros.map((filtro) => (
 
-        <button
+        <Button
           key={filtro}
+          type="button"
           onClick={() =>
-            setFiltroSelecionado(
-              filtro
-            )
+            setFiltroSelecionado(filtro)
           }
-          className={`px-5 py-3 rounded-2xl transition
-          ${
-            filtroSelecionado ===
-            filtro
-              ? "bg-green-700 text-white"
-              : "bg-white text-gray-900 border"
-          }`}
+          variant={
+            filtroSelecionado === filtro
+              ? "primary"
+              : "secondary"
+          }
         >
           {filtro}
-        </button>
+        </Button>
 
       ))}
 

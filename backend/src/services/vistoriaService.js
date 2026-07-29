@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const logService = require('./logService');
 
 const listar = () => {
   return prisma.vistoria.findMany({
@@ -20,23 +21,61 @@ const buscarPorId = (id) => {
   });
 };
 
-const criar = (dados) => {
-  return prisma.vistoria.create({
+const criar = async (dados) => {
+
+  const vistoria = await prisma.vistoria.create({
     data: dados
   });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    acao: "CRIAR",
+    descricao: `Vistoria ${vistoria.id} criada.`
+  });
+
+  return vistoria;
+
 };
 
-const atualizar = (id, dados) => {
-  return prisma.vistoria.update({
+const atualizar = async (id, dados) => {
+
+  const vistoria = await prisma.vistoria.update({
     where: { id },
     data: dados
   });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    acao: "ATUALIZAR",
+    descricao: `Vistoria ${vistoria.id} atualizada.`
+  });
+
+  return vistoria;
+
 };
 
-const remover = (id) => {
+const remover = async (id) => {
+
+  const vistoria = await prisma.vistoria.findUnique({
+    where: { id }
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    acao: "EXCLUIR",
+    descricao: `Vistoria ${vistoria.id} excluída.`
+  });
+
   return prisma.vistoria.delete({
     where: { id }
   });
+
 };
 
 module.exports = {

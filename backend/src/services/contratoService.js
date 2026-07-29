@@ -1,5 +1,7 @@
 const prisma = require('../config/prisma');
 
+const logService = require("./logService");
+
 const listar = () => {
   return prisma.contrato.findMany({
     include: {
@@ -28,28 +30,115 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  // Verifica se a kitnet existe
+  // Busca os registros necessários
   const kitnet = await prisma.kitnet.findUnique({
     where: {
       id: dados.kitnetId
     }
   });
 
+  const unidade = await prisma.unidade.findUnique({
+    where: {
+      id: dados.unidadeId
+    }
+  });
+
+  const locador = await prisma.locador.findUnique({
+    where: {
+      id: dados.locadorId
+    }
+  });
+
+  const inquilino = await prisma.inquilino.findUnique({
+    where: {
+      id: dados.inquilinoId
+    }
+  });
+
+  // Valida existência
+
   if (!kitnet) {
     throw new Error('Kitnet não encontrada.');
   }
 
-  // Impede criar contrato em kitnet ocupada
-  if (kitnet.ocupada) {
-    throw new Error('Esta kitnet já possui um contrato ativo.');
+  if (!unidade) {
+    throw new Error('Unidade não encontrada.');
   }
 
-  // Cria o contrato
+  if (!locador) {
+    throw new Error('Locador não encontrado.');
+  }
+
+  if (!inquilino) {
+    throw new Error('Inquilino não encontrado.');
+  }
+
+  // Valida relacionamentos
+
+  if (kitnet.unidadeId !== unidade.id) {
+    throw new Error(
+      'A kitnet informada não pertence à unidade selecionada.'
+    );
+  }
+
+  if (unidade.locadorId !== locador.id) {
+    throw new Error(
+      'A unidade informada não pertence ao locador selecionado.'
+    );
+  }
+
+  if (inquilino.kitnetId !== kitnet.id) {
+    throw new Error(
+      'O inquilino informado não pertence à kitnet selecionada.'
+    );
+  }
+
+  // Impede criar contrato em kitnet ocupada
+
+  if (kitnet.ocupada) {
+    throw new Error(
+      'Esta kitnet já possui um contrato ativo.'
+    );
+  }
+
+  // Valida valor do aluguel
+
+  if (dados.valorAluguel <= 0) {
+    throw new Error(
+      'Valor do aluguel inválido.'
+    );
+  }
+
+  // Valida vencimento
+
+  if (
+    dados.diaVencimento < 1 ||
+    dados.diaVencimento > 31
+  ) {
+    throw new Error(
+      'Dia de vencimento inválido.'
+    );
+  }
+
+  // Valida datas
+
+  if (
+    dados.dataFim &&
+    new Date(dados.dataFim) <= new Date(dados.dataInicio)
+  ) {
+    throw new Error(
+      'A data final deve ser maior que a data inicial.'
+    );
+  }
+
+  // Cria contrato
+
   const contrato = await prisma.contrato.create({
     data: dados
   });
 
-  // Cria a primeira receita automaticamente
+  // Cria primeira receita
+
   await prisma.receita.create({
     data: {
       contratoId: contrato.id,
@@ -61,7 +150,8 @@ const criar = async (dados) => {
     }
   });
 
-  // Marca a kitnet como ocupada
+  // Ocupa kitnet
+
   await prisma.kitnet.update({
     where: {
       id: dados.kitnetId
@@ -72,15 +162,37 @@ const criar = async (dados) => {
     }
   });
 
+  // Log
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "CRIAR",
+    descricao: `Contrato ${contrato.id} criado.`
+  });
+
   return contrato;
 
 };
 
-const atualizar = (id, dados) => {
-  return prisma.contrato.update({
+const atualizar = async (id, dados) => {
+
+  const contrato = await prisma.contrato.update({
     where: { id },
     data: dados
   });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "ATUALIZAR",
+    descricao: `Contrato ${contrato.id} atualizado.`
+  });
+
+  return contrato;
+
 };
 
 const remover = async (id) => {
@@ -102,6 +214,14 @@ const remover = async (id) => {
     );
   }
 
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "EXCLUIR",
+    descricao: `Contrato ${contrato.id} excluído.`
+  });
+
   return prisma.contrato.delete({
     where: { id }
   });
@@ -110,7 +230,6 @@ const remover = async (id) => {
 
 const encerrar = async (id) => {
 
-  // Busca o contrato
   const contrato = await prisma.contrato.findUnique({
     where: { id }
   });
@@ -119,7 +238,6 @@ const encerrar = async (id) => {
     throw new Error('Contrato não encontrado.');
   }
 
-  // Encerra o contrato
   const contratoEncerrado = await prisma.contrato.update({
     where: { id },
     data: {
@@ -128,7 +246,6 @@ const encerrar = async (id) => {
     }
   });
 
-  // Libera a kitnet
   await prisma.kitnet.update({
     where: {
       id: contrato.kitnetId
@@ -137,6 +254,14 @@ const encerrar = async (id) => {
       ocupada: false,
       status: 'DISPONIVEL'
     }
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CONTRATOS",
+    acao: "ENCERRAR",
+    descricao: `Contrato ${contrato.id} encerrado.`
   });
 
   return contratoEncerrado;

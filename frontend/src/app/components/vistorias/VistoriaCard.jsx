@@ -8,6 +8,8 @@ import {
   MoreVertical,
 } from "lucide-react";
 
+import Button from "../ui/Button";
+
 export default function VistoriaCard({
   vistorias,
   onEdit,
@@ -26,9 +28,24 @@ export default function VistoriaCard({
 
     return (
 
-      <div className="bg-white rounded-3xl shadow p-10">
+      <div
+        className="
+          rounded-[22px]
+          border
+          border-white/10
+          bg-white/[0.04]
+          p-10
+          text-center
+        "
+      >
 
-        <h2 className="text-2xl font-bold text-gray-900">
+        <h2
+          className="
+            text-2xl
+            font-bold
+            text-white
+          "
+        >
           Nenhuma vistoria cadastrada
         </h2>
 
@@ -38,236 +55,299 @@ export default function VistoriaCard({
 
   }
 
- return (
+  const badgeStatus = (status) => {
 
-  <div className="space-y-4">
+    switch (status) {
 
-    {vistorias.map(
-      (vistoria) => (
+      case "REALIZADA":
+        return "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+
+      case "PENDENTE":
+        return "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30";
+
+      case "CANCELADA":
+        return "bg-red-500/20 text-red-400 border border-red-500/30";
+
+      case "ATRASADA":
+        return "bg-red-500/20 text-red-400 border border-red-500/30";
+
+      default:
+        return "bg-sky-500/20 text-sky-400 border border-sky-500/30";
+
+    }
+
+  };
+
+  return (
+
+    <div className="space-y-6">
+
+      {vistorias.map((vistoria) => (
 
         <div
           key={vistoria.id}
           className="
-            bg-white
-            rounded-3xl
-            shadow
+            rounded-[22px]
             border
+            border-white/10
+            bg-white/[0.04]
+            backdrop-blur-xl
             overflow-hidden
+            transition-all
+            duration-300
+            hover:border-emerald-500/30
+            hover:shadow-[0_0_40px_rgba(16,185,129,.08)]
           "
         >
 
           <div
             className="
-              p-6
+              p-7
               flex
-              items-center
+              items-start
               justify-between
+              gap-6
             "
           >
 
-            <div>
+            <div className="flex-1">
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4 flex-wrap">
 
                 <span
                   className={`
-                    px-3
-                    py-1
+                    px-4
+                    py-1.5
                     rounded-full
-                    text-sm
-                    font-medium
-
-                    ${
-                      vistoria.status ===
-                      "REALIZADA"
-                        ? "bg-green-100 text-green-700"
-                        : vistoria.status ===
-                          "PENDENTE"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : vistoria.status ===
-                          "CANCELADA"
-                        ? "bg-red-100 text-red-700"
-                        : vistoria.status ===
-                          "ATRASADA"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-blue-100 text-blue-700"
-                    }
+                    text-xs
+                    font-semibold
+                    ${badgeStatus(vistoria.status)}
                   `}
                 >
                   {vistoria.status}
                 </span>
 
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2
+                  className="
+                    text-2xl
+                    font-bold
+                    text-white
+                  "
+                >
                   {vistoria.nomeVistoria}
                 </h2>
 
               </div>
 
-              <div className="mt-3 text-gray-800">
+              <div className="mt-5 grid md:grid-cols-2 gap-4">
 
-                {vistoria.unidadeNome}
-                {" • "}
-                {vistoria.kitnetNome}
+                <div>
 
-              </div>
+                  <p className="text-xs text-gray-500 uppercase">
+                    Unidade / Kitnet
+                  </p>
 
-              <div className="mt-2 text-gray-700">
+                  <p className="text-gray-300 mt-1">
 
-                Responsável:
-                {" "}
-                {vistoria.responsavel}
+                    {vistoria.unidadeNome}
 
-              </div>
+                    {" • "}
 
-              <div className="text-gray-700">
+                    {vistoria.kitnetNome}
 
-                Periodicidade:
-                {" "}
-                {vistoria.periodicidade}
+                  </p>
 
-              </div>
+                </div>
 
-              <div className="text-gray-700">
+                <div>
 
-                Próxima:
-                {" "}
-                {vistoria.dataProxima}
+                  <p className="text-xs text-gray-500 uppercase">
+                    Responsável
+                  </p>
+
+                  <p className="text-gray-300 mt-1">
+                    {vistoria.responsavel}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-gray-500 uppercase">
+                    Periodicidade
+                  </p>
+
+                  <p className="text-gray-300 mt-1">
+                    {vistoria.periodicidade}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-gray-500 uppercase">
+                    Próxima Execução
+                  </p>
+
+                  <p className="text-gray-300 mt-1">
+                    {vistoria.dataProxima}
+                  </p>
+
+                </div>
 
               </div>
 
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
 
               <button
                 onClick={() =>
                   setMenuAberto(
-                    menuAberto ===
-                    vistoria.id
+                    menuAberto === vistoria.id
                       ? null
                       : vistoria.id
                   )
                 }
+                className="
+                  w-10
+                  h-10
+                  rounded-xl
+                  hover:bg-white/5
+                  transition
+                  flex
+                  items-center
+                  justify-center
+                "
               >
+
                 <MoreVertical
                   size={20}
-                  className="text-gray-700"
+                  className="text-gray-400"
                 />
+
               </button>
 
               <button
                 onClick={() =>
                   setAberto(
-                    aberto ===
-                    vistoria.id
+                    aberto === vistoria.id
                       ? null
                       : vistoria.id
                   )
                 }
+                className="
+                  w-10
+                  h-10
+                  rounded-xl
+                  hover:bg-white/5
+                  transition
+                  flex
+                  items-center
+                  justify-center
+                "
               >
-                {aberto ===
-                vistoria.id ? (
-                  <ChevronUp size={20}
-                  className="text-gray-700" />
+
+                {aberto === vistoria.id ? (
+
+                  <ChevronUp
+                    size={20}
+                    className="text-gray-400"
+                  />
+
                 ) : (
-                  <ChevronDown size={20} className="text-gray-700" />
+
+                  <ChevronDown
+                    size={20}
+                    className="text-gray-400"
+                  />
+
                 )}
+
               </button>
 
             </div>
 
           </div>
+                    {menuAberto === vistoria.id && (
 
-          {menuAberto ===
-            vistoria.id && (
-
-            <div className="border-t bg-white">
+            <div
+              className="
+                border-t
+                border-white/10
+                bg-white/[0.03]
+              "
+            >
 
               <Link
                 href={`/vistorias/${vistoria.id}`}
                 className="
                   block
                   px-6
-                  py-3
-                  text-gray-900
-                  font-medium
-                  hover:bg-gray-50
+                  py-4
+                  text-gray-300
+                  hover:bg-white/5
+                  transition
                 "
               >
                 Visualizar
               </Link>
 
               <button
-                onClick={() =>
-                  onEdit?.(
-                    vistoria
-                  )
-                }
+                onClick={() => onEdit?.(vistoria)}
                 className="
                   w-full
                   text-left
                   px-6
-                  py-3
-                  text-yellow-700
-                  font-medium
-                  hover:bg-yellow-50
+                  py-4
+                  text-yellow-400
+                  hover:bg-white/5
+                  transition
                 "
               >
                 Editar
               </button>
 
               <button
-                onClick={() =>
-                  onConcluir?.(
-                    vistoria.id
-                  )
-                }
+                onClick={() => onConcluir?.(vistoria.id)}
                 className="
                   w-full
                   text-left
                   px-6
-                  py-3
-                  text-green-700
-                  font-medium
-                  hover:bg-green-50
+                  py-4
+                  text-emerald-400
+                  hover:bg-white/5
+                  transition
                 "
               >
                 Realizar
               </button>
 
               <button
-                onClick={() =>
-                  onCancelar?.(
-                    vistoria.id
-                  )
-                }
+                onClick={() => onCancelar?.(vistoria.id)}
                 className="
                   w-full
                   text-left
                   px-6
-                  py-3
-                  text-orange-700
-                  font-medium
-                  hover:bg-orange-50
+                  py-4
+                  text-orange-400
+                  hover:bg-white/5
+                  transition
                 "
               >
                 Cancelar
               </button>
 
               <button
-                onClick={() =>
-                  onDelete?.(
-                    vistoria.id
-                  )
-                }
+                onClick={() => onDelete?.(vistoria.id)}
                 className="
                   w-full
                   text-left
                   px-6
-                  py-3
-                  text-red-700
-                  font-medium
-                  hover:bg-red-50
+                  py-4
+                  text-red-400
+                  hover:bg-white/5
+                  transition
                 "
               >
                 Excluir
@@ -277,75 +357,103 @@ export default function VistoriaCard({
 
           )}
 
-          {aberto ===
-            vistoria.id && (
+          {aberto === vistoria.id && (
 
-            <div className="border-t p-6 bg-gray-50">
+            <div
+              className="
+                border-t
+                border-white/10
+                bg-white/[0.02]
+                p-7
+              "
+            >
 
               <div className="grid md:grid-cols-2 gap-6">
 
                 <div>
 
-                  <div className="font-semibold text-gray-900">
+                  <p className="text-xs text-gray-500 uppercase">
                     Categoria
-                  </div>
+                  </p>
 
-                  <div className="text-gray-700">
+                  <p className="text-white mt-1">
                     {vistoria.categoria}
-                  </div>
+                  </p>
 
                 </div>
 
                 <div>
 
-                  <div className="font-semibold text-gray-900">
+                  <p className="text-xs text-gray-500 uppercase">
                     Criticidade
-                  </div>
+                  </p>
 
-                  <div className="text-gray-700">
+                  <p className="text-white mt-1">
                     {vistoria.criticidade}
-                  </div>
+                  </p>
 
                 </div>
 
                 <div>
 
-                  <div className="font-semibold text-gray-900">
+                  <p className="text-xs text-gray-500 uppercase">
                     Última Execução
-                  </div>
+                  </p>
 
-                  <div className="text-gray-700">
+                  <p className="text-white mt-1">
                     {vistoria.dataUltima}
-                  </div>
+                  </p>
 
                 </div>
 
                 <div>
 
-                  <div className="font-semibold text-gray-900">
+                  <p className="text-xs text-gray-500 uppercase">
                     Próxima Execução
-                  </div>
+                  </p>
 
-                  <div className="text-gray-700">
+                  <p className="text-white mt-1">
                     {vistoria.dataProxima}
-                  </div>
+                  </p>
 
                 </div>
 
               </div>
 
-              <div className="mt-6">
+              <div className="mt-8">
 
-                <div className="font-semibold text-gray-900">
+                <p className="text-xs text-gray-500 uppercase">
                   Observações
+                </p>
+
+                <div
+                  className="
+                    mt-3
+                    rounded-2xl
+                    border
+                    border-white/10
+                    bg-white/5
+                    p-5
+                    text-gray-300
+                    leading-7
+                  "
+                >
+                  {vistoria.observacoes ||
+                    "Nenhuma observação cadastrada."}
                 </div>
 
-                <div className="text-gray-700 mt-2">
-                  {
-                    vistoria.observacoes ||
-                    "Nenhuma observação cadastrada."
+              </div>
+
+              <div className="flex justify-end mt-8">
+
+                <Button
+                  onClick={() =>
+                    setAberto(null)
                   }
-                </div>
+                  variant="secondary"
+                >
+                  Fechar
+                </Button>
 
               </div>
 
@@ -355,9 +463,10 @@ export default function VistoriaCard({
 
         </div>
 
-      )
-    )}
+      ))}
 
-  </div>
+    </div>
 
-)}
+  );
+
+}

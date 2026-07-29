@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const logService = require('./logService');
 
 const listar = () => {
     return prisma.usuario.findMany({
@@ -8,23 +9,61 @@ const listar = () => {
     });
 };
 
-const criar = (dados) => {
-    return prisma.usuario.create({
+const criar = async (dados) => {
+
+    const usuario = await prisma.usuario.create({
         data: dados
     });
+
+    await logService.registrar({
+        usuarioId: null,
+        usuarioNome: "Sistema",
+        modulo: "USUARIOS",
+        acao: "CRIAR",
+        descricao: `Usuário ${usuario.nome} criado.`
+    });
+
+    return usuario;
+
 };
 
-const atualizar = (id, dados) => {
-    return prisma.usuario.update({
+const atualizar = async (id, dados) => {
+
+    const usuario = await prisma.usuario.update({
         where: { id },
         data: dados
     });
+
+    await logService.registrar({
+        usuarioId: null,
+        usuarioNome: "Sistema",
+        modulo: "USUARIOS",
+        acao: "ATUALIZAR",
+        descricao: `Usuário ${usuario.nome} atualizado.`
+    });
+
+    return usuario;
+
 };
 
-const remover = (id) => {
+const remover = async (id) => {
+
+    const usuario = await prisma.usuario.findUnique({
+        where: { id }
+    });
+
+    await logService.registrar({
+        usuarioId: null,
+        usuarioNome: "Sistema",
+        modulo: "USUARIOS",
+        acao: "EXCLUIR",
+        descricao: `Usuário ${usuario.nome} removido.`
+    });
+
     return prisma.usuario.delete({
         where: { id }
     });
+
 };
 
 module.exports = {
