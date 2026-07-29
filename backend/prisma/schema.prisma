@@ -231,6 +231,30 @@ model LogSistema {
   createdAt   DateTime @default(now())
 }
 
+model Auditoria {
+
+  id            String   @id @default(uuid())
+
+  usuarioId     String?
+
+  usuarioNome   String?
+
+  modulo        String
+
+  registroId    String?
+
+  acao          String
+
+  valorAnterior Json?
+
+  valorNovo     Json?
+
+  ip            String?
+
+  createdAt     DateTime @default(now())
+
+}
+
 enum Perfil {
   ADMINISTRADOR
   ADMINISTRATIVO

@@ -67,6 +67,60 @@ const sincronizar = async (req, res) => {
   });
 };
 
+const AsaasApi = require("../services/AsaasApi");
+
+const listarClientes = async (req, res) => {
+
+  const dados = await AsaasApi.listarClientes();
+
+  return res.json({
+    success: true,
+    data: dados
+  });
+
+};
+
+const criarCliente = async (req, res) => {
+
+  const dados = await AsaasApi.criarCliente(req.body);
+
+  return res.json({
+    success: true,
+    data: dados
+  });
+
+};
+
+const listarCobrancas = async (req, res) => {
+
+  const dados = await AsaasApi.listarCobrancas();
+
+  return res.json({
+    success: true,
+    data: dados
+  });
+
+};
+
+const criarCobranca = async (req, res) => {
+
+  const dados = await AsaasApi.criarCobranca(req.body);
+
+  return res.json({
+    success: true,
+    data: dados
+  });
+
+};
+
+const webhook = async (req, res) => {
+
+  const dados = await AsaasApi.receberWebhook(req.body);
+
+  return res.json(dados);
+
+};
+
 module.exports = {
   config,
   status,
@@ -75,5 +129,10 @@ module.exports = {
   listarTransacoes,
   buscarTransacao,
   resumo,
-  sincronizar
+  sincronizar,
+  listarClientes,
+  criarCliente,
+  listarCobrancas,
+  criarCobranca,
+  webhook
 };
