@@ -5,7 +5,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 
-const iniciarJobs = require("./src/jobs");
+// const iniciarJobs = require("./src/jobs");
+
 const authRoutes = require("./src/routes/authRoutes");
 const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
 const usuarioRoutes = require("./src/routes/usuarioRoutes");
@@ -119,6 +120,10 @@ app.use("/solicitacoes", solicitacaoRoutes);
 
 app.use("/vistorias", vistoriaRoutes);
 
+/* ===========================
+   AUDITORIA
+=========================== */
+
 app.use("/auditoria", auditoriaRoutes);
 
 /* ===========================
@@ -132,6 +137,10 @@ app.use("/asaas", asaasRoutes);
 =========================== */
 
 app.use("/clicksign", clicksignRoutes);
+
+/* ===========================
+   LOGS
+=========================== */
 
 app.use("/logs", logRoutes);
 
@@ -158,11 +167,14 @@ app.use((req, res) => {
 
 app.use(errorMiddleware);
 
+/* ===========================
+   START SERVER
+=========================== */
+
 app.listen(PORT, () => {
   console.log(
     `[VIME 2.0] Servidor iniciado com sucesso na porta ${PORT}`
   );
 
-  iniciarJobs();
-
+  // iniciarJobs();
 });

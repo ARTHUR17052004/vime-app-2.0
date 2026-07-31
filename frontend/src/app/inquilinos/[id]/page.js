@@ -1,157 +1,239 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
+
 import { useParams } from "next/navigation";
 
 import MainLayout from "../../components/layout/MainLayout";
 
-export default function InquilinoDetalhesPage() {
-  const params = useParams();
+import Page from "../../components/ui/Page";
+import PageContainer from "../../components/ui/PageContainer";
+import PageHeader from "../../components/ui/PageHeader";
+import PageSection from "../../components/ui/PageSection";
+import Card from "../../components/ui/Card";
 
-  const [inquilino, setInquilino] =
-    useState(null);
+import { InquilinoService } from "../../../services/inquilinos.service";
+
+export default function InquilinoDetalhesPage() {
+
+  const { id } = useParams();
+
+  const [inquilino, setInquilino] = useState(null);
+
+  const [loading, setLoading] = useState(true);
+
+  const [erro, setErro] = useState("");
+
+  const carregarInquilino = useCallback(async () => {
+
+    try {
+
+      setLoading(true);
+
+      const resposta = await InquilinoService.buscar(id);
+
+      setInquilino(resposta.data || resposta);
+
+    } catch (err) {
+
+      console.error(err);
+
+      setErro(
+        err.message ||
+        "Erro ao carregar inquilino."
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  }, [id]);
 
   useEffect(() => {
-    const inquilinos = JSON.parse(
-      localStorage.getItem("vime-inquilinos") ||
-        "[]"
-    );
 
-    const encontrado = inquilinos.find(
-      (item) =>
-        String(item.id) === String(params.id)
-    );
+    if (id) {
 
-    setInquilino(encontrado);
-  }, [params.id]);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      carregarInquilino();
 
-  if (!inquilino) {
+    }
+
+  }, [id, carregarInquilino]);
+
+  if (loading) {
+
     return (
+
       <MainLayout>
-        <div className="p-8">
-          <h1 className="text-2xl font-bold">
-            Inquilino não encontrado
-          </h1>
-        </div>
+
+        <Page>
+
+          <PageContainer>
+
+            <div className="flex justify-center py-32">
+
+              <p className="text-gray-400">
+
+                Carregando...
+
+              </p>
+
+            </div>
+
+          </PageContainer>
+
+        </Page>
+
       </MainLayout>
+
     );
+
+  }
+
+  if (erro || !inquilino) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <div className="text-red-400">
+
+              {erro || "Inquilino não encontrado."}
+
+            </div>
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
   }
 
   return (
+
     <MainLayout>
-      <div className="max-w-6xl mx-auto">
 
-        <div className="bg-white rounded-2xl shadow p-8">
+      <Page>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            {inquilino.nome}
-          </h1>
+        <PageContainer>
 
-          <p className="text-gray-500 mb-8">
-            Detalhes do Inquilino
-          </p>
+          <PageHeader
+            title={inquilino.nome}
+            subtitle="Detalhes do Inquilino"
+          />
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <PageSection>
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Nome
-              </p>
+            <Card>
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.nome}
-              </p>
-            </div>
+              <div className="grid md:grid-cols-2 gap-8">
 
-            <div>
-              <p className="text-sm text-gray-500">
-                CPF
-              </p>
+                <Info
+                  label="Nome"
+                  value={inquilino.nome}
+                />
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.cpf}
-              </p>
-            </div>
+                <Info
+                  label="CPF"
+                  value={inquilino.cpf}
+                />
 
-            <div>
-              <p className="text-sm text-gray-500">
-                E-mail
-              </p>
+                <Info
+                  label="E-mail"
+                  value={inquilino.email}
+                />
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.email}
-              </p>
-            </div>
+                <Info
+                  label="Telefone"
+                  value={inquilino.telefone}
+                />
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Telefone
-              </p>
+                <Info
+                  label="Kitnet"
+                  value={inquilino.kitnetNome || "-"}
+                />
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.telefone}
-              </p>
-            </div>
+                <Info
+                  label="Unidade"
+                  value={inquilino.unidadeNome || "-"}
+                />
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Kitnet
-              </p>
+                <Info
+                  label="Início do Contrato"
+                  value={
+                    inquilino.dataInicioContrato
+                      ? new Date(
+                          inquilino.dataInicioContrato
+                        ).toLocaleDateString("pt-BR")
+                      : "-"
+                  }
+                />
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.kitnetNome || "-"}
-              </p>
-            </div>
+                <Info
+                  label="Fim do Contrato"
+                  value={
+                    inquilino.dataFimContrato
+                      ? new Date(
+                          inquilino.dataFimContrato
+                        ).toLocaleDateString("pt-BR")
+                      : "-"
+                  }
+                />
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Unidade
-              </p>
+                <Info
+                  label="Status"
+                  value={
+                    inquilino.ativo
+                      ? "Ativo"
+                      : "Inativo"
+                  }
+                />
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.unidadeNome || "-"}
-              </p>
-            </div>
+              </div>
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Início do Contrato
-              </p>
+            </Card>
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.dataInicioContrato ||
-                  "-"}
-              </p>
-            </div>
+          </PageSection>
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Fim do Contrato
-              </p>
+        </PageContainer>
 
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.dataFimContrato ||
-                  "-"}
-              </p>
-            </div>
+      </Page>
 
-            <div>
-              <p className="text-sm text-gray-500">
-                Status
-              </p>
-
-              <p className="font-semibold text-lg text-gray-900">
-                {inquilino.ativo
-                  ? "Ativo"
-                  : "Inativo"}
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
     </MainLayout>
+
   );
+
+}
+
+function Info({ label, value }) {
+
+  return (
+
+    <div>
+
+      <p className="text-sm text-gray-400">
+
+        {label}
+
+      </p>
+
+      <p className="text-lg font-semibold text-white">
+
+        {value || "-"}
+
+      </p>
+
+    </div>
+
+  );
+
 }

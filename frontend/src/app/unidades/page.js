@@ -15,7 +15,7 @@ import UnitModal from "../components/unidades/UnitModal";
 import UnitForm from "../components/unidades/UnitForm";
 import UnitCardList from "../components/unidades/UnitCardList";
 
-import { UnidadeService } from "../../services/unidades.service";
+import { UnidadeService } from "@/services/unidades.service";
 
 export default function UnidadesPage() {
 
@@ -45,10 +45,7 @@ export default function UnidadesPage() {
       const resposta =
         await UnidadeService.listar();
 
-      console.log(
-        "Resposta da API:",
-        resposta
-      );
+      console.log(JSON.stringify(resposta, null, 2));
 
       const lista = Array.isArray(resposta)
 

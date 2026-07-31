@@ -7,12 +7,13 @@ import Select from "../ui/Select";
 import Button from "../ui/Button";
 import Textarea from "../ui/Textarea";
 
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function KitnetForm({
   onSave,
   onCancel,
   kitnet,
 }) {
-
   const [unidades, setUnidades] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -26,24 +27,36 @@ export default function KitnetForm({
     observacoes: "",
   });
 
+  /* ======================================
+     CARREGA AS UNIDADES DA API
+  ====================================== */
+
   useEffect(() => {
+    async function carregarUnidades() {
+      try {
+        const resposta = await UnidadeService.listar();
 
-    const unidadesSalvas = JSON.parse(
-      localStorage.getItem("vime-unidades") || "[]"
-    );
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUnidades(unidadesSalvas);
+        setUnidades(lista);
+      } catch (err) {
+        console.error("Erro ao carregar unidades:", err);
+      }
+    }
 
+    carregarUnidades();
   }, []);
 
+  /* ======================================
+     PREENCHE O FORMULÁRIO
+  ====================================== */
+
   useEffect(() => {
-
     if (kitnet) {
-
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
-
         nome: kitnet.nome || "",
         unidadeId: kitnet.unidadeId || "",
         unidadeNome: kitnet.unidadeNome || "",
@@ -52,13 +65,9 @@ export default function KitnetForm({
         aluguel: kitnet.aluguel || "",
         numero: kitnet.numero || "",
         observacoes: kitnet.observacoes || "",
-
       });
-
     } else {
-
       setFormData({
-
         nome: "",
         unidadeId: "",
         unidadeNome: "",
@@ -67,62 +76,43 @@ export default function KitnetForm({
         aluguel: "",
         numero: "",
         observacoes: "",
-
       });
-
     }
-
   }, [kitnet]);
-
-  function handleChange(e) {
-
+    function handleChange(e) {
     const { name, value } = e.target;
 
     if (name === "unidadeId") {
-
       const unidade = unidades.find(
         (u) => String(u.id) === value
       );
 
       setFormData((prev) => ({
-
         ...prev,
-
         unidadeId: value,
-
         unidadeNome: unidade?.nome || "",
-
       }));
 
       return;
-
     }
 
     setFormData((prev) => ({
-
       ...prev,
-
       [name]: value,
-
     }));
-
   }
 
   function handleSubmit(e) {
-
     e.preventDefault();
 
     onSave(formData);
-
   }
 
   return (
-
     <form
       onSubmit={handleSubmit}
       className="space-y-8"
     >
-
       <div className="grid grid-cols-2 gap-6">
 
         <Input
@@ -140,24 +130,26 @@ export default function KitnetForm({
           onChange={handleChange}
           required
         >
-
-          <option value="">
+          <option
+            value=""
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
             Selecione...
           </option>
 
-          {unidades.map((unidade) => (
-
-            <option
-              key={unidade.id}
-              value={unidade.id}
-            >
-
-              {unidade.nome}
-
-            </option>
-
-          ))}
-
+          <option
+            key={unidade.id}
+            value={unidade.id}
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            {unidade.nome}
+          </option>
         </Select>
 
         <Input
@@ -170,6 +162,7 @@ export default function KitnetForm({
         <Input
           label="Metragem (m²)"
           name="metragem"
+          type="number"
           value={formData.metragem}
           onChange={handleChange}
         />
@@ -177,6 +170,7 @@ export default function KitnetForm({
         <Input
           label="Valor do aluguel"
           name="aluguel"
+          type="number"
           value={formData.aluguel}
           onChange={handleChange}
         />
@@ -187,13 +181,24 @@ export default function KitnetForm({
           value={formData.status}
           onChange={handleChange}
         >
+          
+          <option
+            value="Disponível"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            Disponível
+          </option>
 
-          <option>Disponível</option>
+          <option value="Ocupada">
+            Ocupada
+          </option>
 
-          <option>Ocupada</option>
-
-          <option>Manutenção</option>
-
+          <option value="Manutenção">
+            Manutenção
+          </option>
         </Select>
 
       </div>
@@ -217,17 +222,13 @@ export default function KitnetForm({
         </Button>
 
         <Button type="submit">
-
           {kitnet
             ? "Salvar Alterações"
             : "Cadastrar Kitnet"}
-
         </Button>
 
       </div>
 
     </form>
-
   );
-
 }

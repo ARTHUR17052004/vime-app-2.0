@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import {
   House,
@@ -11,6 +11,7 @@ import {
 
 import MainLayout from "../components/layout/MainLayout";
 
+import { KitnetService } from "../../services/kitnets.service";
 import FadeIn from "../components/ui/FadeIn";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
@@ -31,88 +32,83 @@ export default function KitnetsPage() {
 
   const [kitnets, setKitnets] = useState([]);
 
-  const [carregado, setCarregado] =
-    useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [kitnetEditando, setKitnetEditando] =
-    useState(null);
+  const [erro, setErro] = useState("");
 
-  useEffect(() => {
+  const [kitnetEditando, setKitnetEditando] = useState(null);
 
-    const dados = JSON.parse(
+  /* ==========================================
+     CARREGAR DADOS
+  ========================================== */
 
-      localStorage.getItem("vime-kitnets") || "[]"
+  const carregarKitnets = useCallback(async () => {
 
-    );
+    try {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setKitnets(dados);
+      setLoading(true);
 
-    setCarregado(true);
+      const resposta = await KitnetService.listar();
+
+      const lista = Array.isArray(resposta)
+        ? resposta
+        : resposta.data || [];
+
+      setKitnets(lista);
+
+    } catch (err) {
+
+      console.error(err);
+
+      setErro(
+        err.message ||
+        "Erro ao carregar kitnets."
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
 
   }, []);
 
   useEffect(() => {
 
-    if (!carregado) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    carregarKitnets();
 
-    localStorage.setItem(
+  }, [carregarKitnets]);
 
-      "vime-kitnets",
+  /* ==========================================
+     CRUD
+  ========================================== */
 
-      JSON.stringify(kitnets)
+  const salvarKitnet = async (dados) => {
+      try {
+        if (kitnetEditando) {
+          await KitnetService.atualizar(
+            kitnetEditando.id,
+            dados
+          );
+        } else {
+          await KitnetService.criar(dados);
+        }
 
-    );
+        await carregarKitnets();
 
-  }, [kitnets, carregado]);
+        setKitnetEditando(null);
+        setModalOpen(false);
 
-  function salvarKitnet(dados) {
+      } catch (err) {
+        console.error(err);
 
-    if (kitnetEditando) {
-
-      setKitnets((prev) =>
-
-        prev.map((item) =>
-
-          item.id === kitnetEditando.id
-
-            ? {
-
-                ...item,
-
-                ...dados,
-
-              }
-
-            : item
-
-        )
-
-      );
-
-    } else {
-
-      setKitnets((prev) => [
-
-        ...prev,
-
-        {
-
-          id: Date.now(),
-
-          ...dados,
-
-        },
-
-      ]);
-
-    }
-
-    setKitnetEditando(null);
-
-    setModalOpen(false);
-
-  }
+        alert(
+          err.message ||
+          "Erro ao salvar kitnet."
+        );
+      }
+    };
 
   function editarKitnet(kitnet) {
 
@@ -122,29 +118,27 @@ export default function KitnetsPage() {
 
   }
 
-  function excluirKitnet(id) {
+  const excluirKitnet = async (id) => {
+  const confirmar = window.confirm(
+    "Deseja realmente excluir esta kitnet?"
+  );
 
-    if (
+  if (!confirmar) return;
 
-      !window.confirm(
+  try {
+    await KitnetService.excluir(id);
 
-        "Deseja realmente excluir esta kitnet?"
+    await carregarKitnets();
 
-      )
+  } catch (err) {
+    console.error(err);
 
-    ) {
-
-      return;
-
-    }
-
-    setKitnets((prev) =>
-
-      prev.filter((item) => item.id !== id)
-
+    alert(
+      err.message ||
+      "Erro ao excluir kitnet."
     );
-
   }
+};
 
   function novaKitnet() {
 
@@ -153,7 +147,10 @@ export default function KitnetsPage() {
     setModalOpen(true);
 
   }
-  
+
+  /* ==========================================
+     DASHBOARD
+  ========================================== */
 
   const totalKitnets = kitnets.length;
 
@@ -175,113 +172,158 @@ export default function KitnetsPage() {
 
   ).length;
 
+  if (loading) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <div className="flex items-center justify-center py-32">
+
+              <p className="text-gray-400 text-lg">
+
+                Carregando kitnets...
+
+              </p>
+
+            </div>
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
+  }
   return (
 
-    <MainLayout>
+  <MainLayout>
 
-      <Page>
+    <Page>
 
-        <PageContainer>
+      <PageContainer>
 
-          <FadeIn>
+        {erro && (
 
-            <PageHeader
-              title="Kitnets"
-              subtitle="Gerencie todas as kitnets cadastradas."
-              count={totalKitnets}
-              countLabel="kitnet(s) cadastrada(s)"
-              actions={
-                <Button onClick={novaKitnet}>
-                  + Nova Kitnet
-                </Button>
-              }
-            />
+          <div
+            className="
+              mb-6
+              rounded-2xl
+              border
+              border-red-500/20
+              bg-red-500/10
+              px-5
+              py-4
+              text-red-300
+            "
+          >
+            {erro}
+          </div>
 
-          </FadeIn>
+        )}
 
-          <FadeIn delay={0.10}>
+        <FadeIn>
 
-            <PageSection spacing="xl">
+          <PageHeader
+            title="Kitnets"
+            subtitle="Gerencie todas as kitnets cadastradas."
+            count={totalKitnets}
+            countLabel="kitnet(s) cadastrada(s)"
+            actions={
+              <Button onClick={novaKitnet}>
+                + Nova Kitnet
+              </Button>
+            }
+          />
 
-              <PageGrid cols={4}>
+        </FadeIn>
 
-                <DashboardStatsCard
-                  title="Total"
-                  value={totalKitnets}
-                  subtitle="Kitnets cadastradas"
-                  icon={House}
-                />
+        <FadeIn delay={0.10}>
 
-                <DashboardStatsCard
-                  title="Disponíveis"
-                  value={disponiveis}
-                  subtitle="Prontas para locação"
-                  icon={CheckCircle2}
-                />
+          <PageSection spacing="xl">
 
-                <DashboardStatsCard
-                  title="Ocupadas"
-                  value={ocupadas}
-                  subtitle="Atualmente alugadas"
-                  icon={Users}
-                />
+            <PageGrid cols={4}>
 
-                <DashboardStatsCard
-                  title="Manutenção"
-                  value={manutencao}
-                  subtitle="Indisponíveis"
-                  icon={Wrench}
-                />
-
-              </PageGrid>
-
-            </PageSection>
-
-          </FadeIn>
-
-          <FadeIn delay={0.20}>
-
-            <PageSection spacing="xxl">
-
-              <KitnetTable
-
-                kitnets={kitnets}
-
-                onEdit={editarKitnet}
-
-                onDelete={excluirKitnet}
-
+              <DashboardStatsCard
+                title="Total"
+                value={totalKitnets}
+                subtitle="Kitnets cadastradas"
+                icon={House}
               />
 
-            </PageSection>
+              <DashboardStatsCard
+                title="Disponíveis"
+                value={disponiveis}
+                subtitle="Prontas para locação"
+                icon={CheckCircle2}
+              />
 
-          </FadeIn>
-                    <KitnetModal
-            isOpen={modalOpen}
+              <DashboardStatsCard
+                title="Ocupadas"
+                value={ocupadas}
+                subtitle="Atualmente alugadas"
+                icon={Users}
+              />
+
+              <DashboardStatsCard
+                title="Manutenção"
+                value={manutencao}
+                subtitle="Indisponíveis"
+                icon={Wrench}
+              />
+
+            </PageGrid>
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.20}>
+
+          <PageSection spacing="xxl">
+
+            <KitnetTable
+              kitnets={kitnets}
+              onEdit={editarKitnet}
+              onDelete={excluirKitnet}
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <KitnetModal
+          isOpen={modalOpen}
+          kitnet={kitnetEditando}
+          onClose={() => {
+            setKitnetEditando(null);
+            setModalOpen(false);
+          }}
+        >
+
+          <KitnetForm
             kitnet={kitnetEditando}
-            onClose={() => {
+            onSave={salvarKitnet}
+            onCancel={() => {
               setKitnetEditando(null);
               setModalOpen(false);
             }}
-          >
+          />
 
-            <KitnetForm
-              kitnet={kitnetEditando}
-              onSave={salvarKitnet}
-              onCancel={() => {
-                setKitnetEditando(null);
-                setModalOpen(false);
-              }}
-            />
+        </KitnetModal>
 
-          </KitnetModal>
+      </PageContainer>
 
-        </PageContainer>
+    </Page>
 
-      </Page>
+  </MainLayout>
 
-    </MainLayout>
-
-  );
+);
 
 }

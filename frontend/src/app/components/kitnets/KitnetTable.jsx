@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Table from "../ui/Table";
 import EmptyState from "../ui/EmptyState";
@@ -14,6 +14,8 @@ export default function KitnetTable({
   onEdit,
   onDelete,
 }) {
+
+  const router = useRouter();
 
   if (!kitnets.length) {
 
@@ -32,68 +34,43 @@ export default function KitnetTable({
   const columns = [
 
     {
-
       key: "nome",
-
       title: "Kitnet",
-
     },
 
     {
-
       key: "unidadeNome",
-
       title: "Unidade",
-
     },
 
     {
-
       key: "numero",
-
       title: "Número",
-
     },
 
     {
-
       key: "metragem",
-
       title: "Metragem",
-
       render: (item) => `${item.metragem} m²`,
-
     },
 
     {
-
       key: "aluguel",
-
       title: "Aluguel",
-
       render: (item) => `R$ ${item.aluguel}`,
-
     },
 
     {
-
       key: "status",
-
       title: "Status",
-
       render: (item) => (
 
         <span
-
           className={`
-
             px-3
             py-1
-
             rounded-full
-
             text-xs
-
             font-semibold
 
             ${
@@ -108,9 +85,7 @@ export default function KitnetTable({
                 : "bg-yellow-500/15 text-yellow-400"
 
             }
-
           `}
-
         >
 
           {item.status}
@@ -118,29 +93,20 @@ export default function KitnetTable({
         </span>
 
       ),
-
     },
 
     {
-
       key: "acoes",
-
       title: "",
-
       render: (item) => (
 
         <KitnetActionsMenu
-
           kitnet={item}
-
           onEdit={onEdit}
-
           onDelete={onDelete}
-
         />
 
       ),
-
     },
 
   ];
@@ -148,18 +114,11 @@ export default function KitnetTable({
   return (
 
     <Table
-
       columns={columns}
-
       data={kitnets}
-
       onRowClick={(item) => {
-
-        window.location.href =
-          `/kitnets/${item.id}`;
-
+        router.push(`/kitnets/${item.id}`);
       }}
-
     />
 
   );

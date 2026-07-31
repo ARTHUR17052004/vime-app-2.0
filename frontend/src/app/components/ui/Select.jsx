@@ -2,27 +2,17 @@
 
 export default function Select({
   label,
-
   error,
-
   helperText,
-
   required = false,
-
   options = [],
-
+  children,
   leftIcon,
-
   rightIcon,
-
   size = "md",
-
   variant = "default",
-
   fullWidth = true,
-
   className = "",
-
   ...props
 }) {
   const sizes = {
@@ -37,7 +27,6 @@ export default function Select({
       backdrop-blur-xl
       border-white/10
     `,
-
     glass: `
       bg-white/[0.06]
       backdrop-blur-2xl
@@ -58,10 +47,8 @@ export default function Select({
             flex
             items-center
             gap-1
-
             text-sm
             font-semibold
-
             text-gray-300
           "
         >
@@ -84,6 +71,7 @@ export default function Select({
               -translate-y-1/2
               text-gray-500
               pointer-events-none
+              z-10
             "
           >
             {leftIcon}
@@ -100,7 +88,6 @@ export default function Select({
             ${sizes[size]}
 
             rounded-xl
-
             border
 
             ${variants[variant]}
@@ -152,15 +139,22 @@ export default function Select({
             ${className}
           `}
         >
-          {options.map((option) => (
-            <option
-              key={option.value}
-              value={option.value}
-              className="bg-[#1d2833] text-white"
-            >
-              {option.label}
-            </option>
-          ))}
+
+          {children
+            ? children
+            : options.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  style={{
+                    backgroundColor: "#1d2833",
+                    color: "#ffffff",
+                  }}
+                >
+                  {option.label}
+                </option>
+              ))
+          }
         </select>
 
         {rightIcon ? (
@@ -204,7 +198,6 @@ export default function Select({
           {error}
         </p>
       )}
-
     </div>
   );
 }

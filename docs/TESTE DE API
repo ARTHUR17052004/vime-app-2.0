@@ -1,0 +1,107 @@
+Teste 1 (o mais fácil)
+
+Cadastre um registro.
+
+Depois abra o Thunder Client.
+
+Faça:
+
+GET
+http://localhost:3001/unidades
+
+Se o registro apareceu lá...
+
+✅ Veio do banco.
+
+Teste 2
+
+Abra o PostgreSQL.
+
+Execute:
+
+SELECT * FROM unidades;
+
+Se apareceu lá...
+
+✅ Gravou no banco.
+
+Teste 3
+
+Abra o navegador.
+
+F12
+
+Depois:
+
+Network
+
+Depois:
+
+Fetch/XHR
+
+Agora cadastre uma unidade.
+
+Você deverá ver algo como:
+
+POST
+/unidades
+
+Depois um
+
+GET
+/unidades
+
+Isso significa:
+
+Frontend
+↓
+
+API
+
+↓
+
+Banco
+
+↓
+
+API
+
+↓
+
+Frontend
+
+Perfeito.
+
+Teste 4
+
+Aperte:
+
+F5
+
+Se tudo continuar na tela...
+
+✅ Está vindo do PostgreSQL.
+
+Se desaparecer...
+
+❌ Ainda existe algum localStorage.
+
+Teste 5
+
+O mais importante de todos
+
+No Console (F12), execute:
+
+localStorage
+
+ou
+
+Object.keys(localStorage)
+
+Se o módulo foi totalmente migrado, você não deve mais encontrar chaves como:
+
+vime-unidades
+vime-kitnets
+vime-inquilinos
+
+Se essas chaves ainda estiverem sendo recriadas quando você usa o módulo, ainda existe algum componente escrevendo no localStorage.

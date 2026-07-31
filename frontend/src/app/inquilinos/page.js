@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -16,6 +16,8 @@ import InquilinoTable from "../components/inquilinos/InquilinoTable";
 import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
 
+import { InquilinoService } from "../../services/inquilinos.service";
+
 export default function InquilinosPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -25,134 +27,112 @@ export default function InquilinosPage() {
   const [inquilinoEditando, setInquilinoEditando] =
     useState(null);
 
-  const [carregado, setCarregado] =
-    useState(false);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState("");
 
   const [search, setSearch] =
     useState("");
 
-  useEffect(() => {
+  /* ==========================================
+     CARREGAR DADOS
+  ========================================== */
 
-    const dados = JSON.parse(
+  const carregarInquilinos = useCallback(async () => {
 
-      localStorage.getItem(
-        "vime-inquilinos"
-      ) || "[]"
+    try {
 
-    );
+      setLoading(true);
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInquilinos(dados);
+      setErro("");
 
-    setCarregado(true);
+      const resposta =
+        await InquilinoService.listar();
+
+      const lista = Array.isArray(resposta)
+
+        ? resposta
+
+        : resposta.data || [];
+
+      setInquilinos(lista);
+
+    } catch (err) {
+
+      console.error(err);
+
+      setErro(
+
+        err.message ||
+
+        "Erro ao carregar inquilinos."
+
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
 
   }, []);
 
   useEffect(() => {
 
-    if (!carregado) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    carregarInquilinos();
 
-    localStorage.setItem(
+  }, [carregarInquilinos]);
 
-      "vime-inquilinos",
+  /* ==========================================
+     CRUD
+  ========================================== */
 
-      JSON.stringify(inquilinos)
+  const salvarInquilino = async (dados) => {
 
-    );
+    try {
 
-  }, [inquilinos, carregado]);
+      if (inquilinoEditando) {
 
-  const salvarInquilino = (dados) => {
+        await InquilinoService.atualizar(
 
-    if (inquilinoEditando) {
+          inquilinoEditando.id,
 
-      setInquilinos((prev) =>
+          dados
 
-        prev.map((item) =>
+        );
 
-          item.id === inquilinoEditando.id
-            ? {
-                ...item,
-                ...dados,
-              }
-            : item
+      } else {
 
-        )
+        await InquilinoService.criar(
 
-      );
+          dados
 
-      setInquilinoEditando(null);
-
-      setModalOpen(false);
-
-      return;
-
-    }
-
-    const novoInquilino = {
-
-      id: Date.now(),
-
-      ...dados,
-
-    };
-
-    setInquilinos((prev) => [
-
-      ...prev,
-
-      novoInquilino,
-
-    ]);
-
-    const kitnets = JSON.parse(
-
-      localStorage.getItem(
-        "vime-kitnets"
-      ) || "[]"
-
-    );
-
-    const kitnetsAtualizadas = kitnets.map(
-
-      (kitnet) => {
-
-        if (
-
-          String(kitnet.id) ===
-          String(dados.kitnetId)
-
-        ) {
-
-          return {
-
-            ...kitnet,
-
-            status: "Ocupada",
-
-            inquilinoId: novoInquilino.id,
-
-            inquilinoNome: novoInquilino.nome,
-
-          };
-
-        }
-
-        return kitnet;
+        );
 
       }
 
-    );
+      await carregarInquilinos();
 
-    localStorage.setItem(
+      setModalOpen(false);
 
-      "vime-kitnets",
+      setInquilinoEditando(null);
 
-      JSON.stringify(kitnetsAtualizadas)
+    } catch (err) {
 
-    );
+      console.error(err);
 
-    setModalOpen(false);
+      alert(
+
+        err.message ||
+
+        "Erro ao salvar inquilino."
+
+      );
+
+    }
 
   };
 
@@ -164,7 +144,7 @@ export default function InquilinosPage() {
 
   };
 
-  const excluirInquilino = (id) => {
+  const excluirInquilino = async (id) => {
 
     const confirmar = window.confirm(
 
@@ -174,72 +154,25 @@ export default function InquilinosPage() {
 
     if (!confirmar) return;
 
-    const inquilino = inquilinos.find(
+    try {
 
-      (item) => item.id === id
+      await InquilinoService.excluir(id);
 
-    );
+      await carregarInquilinos();
 
-    if (inquilino?.kitnetId) {
+    } catch (err) {
 
-      const kitnets = JSON.parse(
+      console.error(err);
 
-        localStorage.getItem(
-          "vime-kitnets"
-        ) || "[]"
+      alert(
 
-      );
+        err.message ||
 
-      const kitnetsAtualizadas = kitnets.map(
-
-        (kitnet) => {
-
-          if (
-
-            String(kitnet.id) ===
-            String(inquilino.kitnetId)
-
-          ) {
-
-            return {
-
-              ...kitnet,
-
-              status: "Disponível",
-
-              inquilinoId: null,
-
-              inquilinoNome: null,
-
-            };
-
-          }
-
-          return kitnet;
-
-        }
-
-      );
-
-      localStorage.setItem(
-
-        "vime-kitnets",
-
-        JSON.stringify(kitnetsAtualizadas)
+        "Erro ao excluir inquilino."
 
       );
 
     }
-
-    setInquilinos((prev) =>
-
-      prev.filter(
-
-        (item) => item.id !== id
-
-      )
-
-    );
 
   };
 
@@ -250,6 +183,10 @@ export default function InquilinosPage() {
     setModalOpen(true);
 
   };
+
+  /* ==========================================
+     FILTRO
+  ========================================== */
 
   const inquilinosFiltrados = useMemo(() => {
 
@@ -269,8 +206,39 @@ export default function InquilinosPage() {
 
   }, [inquilinos, search]);
 
-  console.log(inquilinos);
-  console.log(inquilinosFiltrados);
+  /* ==========================================
+     LOADING
+  ========================================== */
+
+  if (loading) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <div className="flex justify-center items-center py-32">
+
+              <p className="text-gray-400 text-lg">
+
+                Carregando inquilinos...
+
+              </p>
+
+            </div>
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
+  }
 
   return (
 
@@ -279,6 +247,27 @@ export default function InquilinosPage() {
       <Page>
 
         <PageContainer>
+
+          {erro && (
+
+            <div
+              className="
+                mb-6
+                rounded-2xl
+                border
+                border-red-500/20
+                bg-red-500/10
+                px-5
+                py-4
+                text-red-300
+              "
+            >
+
+              {erro}
+
+            </div>
+
+          )}
 
           <PageHeader
             title="Inquilinos"
@@ -296,7 +285,9 @@ export default function InquilinosPage() {
 
             <SearchInput
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               placeholder="Pesquisar inquilino..."
             />
 

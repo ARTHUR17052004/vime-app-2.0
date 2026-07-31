@@ -18,6 +18,7 @@ export default function UnidadeDetalhesPage() {
       (item) => String(item.id) === String(params.id)
     );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setUnidade(encontrada);
   }, [params.id]);
 

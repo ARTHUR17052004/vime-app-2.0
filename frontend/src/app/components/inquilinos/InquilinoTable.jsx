@@ -182,23 +182,24 @@ export default function InquilinoTable({
 
               <td className="px-6 py-5">
                 {inquilino.unidadeNome
-                  ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome}`
+                  ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome || ""}`
                   : inquilino.kitnetNome || "-"}
               </td>
 
               <td className="px-6 py-5">
                 <div>
-                  {inquilino.email}
+                  {inquilino.email || "-"}
                 </div>
 
                 <div className="text-sm text-gray-500">
-                  {inquilino.telefone}
+                  {inquilino.telefone || "-"}
                 </div>
               </td>
 
               <td className="px-6 py-5">
-                {inquilino.dataFimContrato ||
-                  "-"}
+                {inquilino.dataFimContrato
+                  ? new Date(inquilino.dataFimContrato).toLocaleDateString("pt-BR")
+                  : "-"}
               </td>
 
               <td className="px-6 py-5">

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { KitnetService } from "../../../services/kitnets.service";
+
 import DadosPessoaisStep from "./steps/DadosPessoaisStep";
 import KitnetStep from "./steps/KitnetStep";
 import ContratoStep from "./steps/ContratoStep";
@@ -10,6 +12,7 @@ export default function InquilinoForm({
   onSave,
   inquilino,
 }) {
+
   const [step, setStep] = useState(1);
 
   const [kitnets, setKitnets] = useState([]);
@@ -38,19 +41,41 @@ export default function InquilinoForm({
   });
 
   useEffect(() => {
-    const dados = JSON.parse(
-      localStorage.getItem("vime-kitnets") || "[]"
-    );
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setKitnets(dados);
+    async function carregarKitnets() {
+
+      try {
+
+        const resposta =
+          await KitnetService.listar();
+
+        const lista = Array.isArray(resposta)
+
+          ? resposta
+
+          : resposta.data || [];
+
+        setKitnets(lista);
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarKitnets();
+
   }, []);
 
   useEffect(() => {
+
     if (!inquilino) return;
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setFormData({
+
       nome: inquilino.nome || "",
       email: inquilino.email || "",
       telefone: inquilino.telefone || "",
@@ -65,7 +90,8 @@ export default function InquilinoForm({
       telefoneEmergencia:
         inquilino.telefoneEmergencia || "",
 
-      kitnetId: inquilino.kitnetId || "",
+      kitnetId:
+        inquilino.kitnetId || "",
 
       dataInicioContrato:
         inquilino.dataInicioContrato || "",
@@ -87,10 +113,13 @@ export default function InquilinoForm({
 
       ativo:
         inquilino.ativo ?? true,
+
     });
+
   }, [inquilino]);
 
-  const handleChange = (e) => {
+  function handleChange(e) {
+
     const {
       name,
       value,
@@ -99,51 +128,69 @@ export default function InquilinoForm({
     } = e.target;
 
     setFormData((prev) => ({
+
       ...prev,
+
       [name]:
         type === "checkbox"
           ? checked
           : value,
+
     }));
-  };
 
-  const proximoStep = () => {
+  }
+
+  function proximoStep() {
+
     setStep((prev) => prev + 1);
-  };
 
-  const voltarStep = () => {
+  }
+
+  function voltarStep() {
+
     setStep((prev) => prev - 1);
-  };
 
-  const handleSubmit = (e) => {
+  }
+
+  function handleSubmit(e) {
+
     e.preventDefault();
 
-    const kitnetSelecionada = kitnets.find(
-      (item) =>
-        String(item.id) ===
-        String(formData.kitnetId)
-    );
+    const kitnetSelecionada =
+      kitnets.find(
 
-    const dadosCompletos = {
+        (item) =>
+
+          String(item.id) ===
+          String(formData.kitnetId)
+
+      );
+
+    onSave({
+
       ...formData,
 
-      kitnetNome: kitnetSelecionada
-        ? `APT ${kitnetSelecionada.numero}`
-        : "",
+      kitnetNome:
+        kitnetSelecionada
+          ? `APT ${kitnetSelecionada.numero}`
+          : "",
 
       unidadeNome:
         kitnetSelecionada?.unidadeNome || "",
-    };
 
-    onSave(dadosCompletos);
-  };
+    });
+
+  }
 
   return (
+
     <form
       onSubmit={handleSubmit}
       className="space-y-8"
     >
+
       <div className="flex items-center justify-center gap-4">
+
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
             step >= 1
@@ -177,80 +224,82 @@ export default function InquilinoForm({
         >
           3
         </div>
+
       </div>
 
       {step === 1 && (
+
         <DadosPessoaisStep
           formData={formData}
           handleChange={handleChange}
         />
+
       )}
 
       {step === 2 && (
+
         <KitnetStep
           formData={formData}
           handleChange={handleChange}
           kitnets={kitnets}
         />
+
       )}
 
       {step === 3 && (
+
         <ContratoStep
           formData={formData}
           handleChange={handleChange}
         />
+
       )}
 
       <div className="flex justify-between">
+
         {step > 1 ? (
+
           <button
             type="button"
             onClick={voltarStep}
-            className="
-              px-6
-              py-3
-              rounded-lg
-              border
-              border-gray-300
-            "
+            className="px-6 py-3 rounded-lg border border-gray-300"
           >
             Voltar
           </button>
+
         ) : (
+
           <div />
+
         )}
 
         {step < 3 ? (
+
           <button
             type="button"
             onClick={proximoStep}
-            className="
-              bg-green-600
-              text-white
-              px-6
-              py-3
-              rounded-lg
-            "
+            className="bg-green-600 text-white px-6 py-3 rounded-lg"
           >
             Continuar
           </button>
+
         ) : (
+
           <button
             type="submit"
-            className="
-              bg-green-700
-              text-white
-              px-6
-              py-3
-              rounded-lg
-            "
+            className="bg-green-700 text-white px-6 py-3 rounded-lg"
           >
             {inquilino
               ? "Salvar Alterações"
               : "Salvar Inquilino"}
           </button>
+
         )}
+
       </div>
+
     </form>
+
   );
+
 }
