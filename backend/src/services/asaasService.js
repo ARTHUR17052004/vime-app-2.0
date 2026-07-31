@@ -81,11 +81,83 @@ const resumo = async () => {
 
 };
 
-const sincronizar = async () => {
+const sincronizar = async (evento) => {
+
+  if (!evento) {
+    return {
+      success: false,
+      mensagem: "Evento inválido."
+    };
+  }
+
+  const { payment } = evento;
+
+  if (!payment) {
+    return {
+      success: false,
+      mensagem: "Pagamento não informado."
+    };
+  }
+
+  const receita = await prisma.receita.findFirst({
+    where: {
+      id: payment.externalReference
+    }
+  });
+
+  if (!receita) {
+    return {
+      success: false,
+      mensagem: "Receita não encontrada."
+    };
+  }
+
+  switch (evento.event) {
+
+    case "PAYMENT_RECEIVED":
+
+      await prisma.receita.update({
+        where: {
+          id: receita.id
+        },
+        data: {
+          status: "PAGA",
+          dataPagamento: new Date()
+        }
+      });
+
+      break;
+
+    case "PAYMENT_OVERDUE":
+
+      await prisma.receita.update({
+        where: {
+          id: receita.id
+        },
+        data: {
+          status: "ATRASADA"
+        }
+      });
+
+      break;
+
+    case "PAYMENT_REFUNDED":
+
+      await prisma.receita.update({
+        where: {
+          id: receita.id
+        },
+        data: {
+          status: "ESTORNADA"
+        }
+      });
+
+      break;
+
+  }
 
   return {
-    success: true,
-    mensagem: 'Sincronização simulada concluída.'
+    success: true
   };
 
 };

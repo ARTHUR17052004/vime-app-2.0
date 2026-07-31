@@ -143,7 +143,7 @@ const enviarAssinatura = async (req, res) => {
 
 const webhook = async (req, res) => {
 
-  const dados = await ClicksignApi.receberWebhook(req.body);
+  const dados = await clicksignService.sincronizar(req.body);
 
   return res.json(dados);
 
