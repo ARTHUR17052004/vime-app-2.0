@@ -16,11 +16,9 @@ class AsaasApi {
 
   }
 
-  async request(method, endpoint, body = null) {
+async request(method, endpoint, body = null) {
 
-  // ===== MOCK FORÇADO =====
-
-  if (USAR_MOCK) {
+  if (USAR_MOCK || !this.apiKey) {
 
     return {
       success: true,
@@ -32,23 +30,9 @@ class AsaasApi {
 
   }
 
-  // ===== MOCK AUTOMÁTICO (sem API Key) =====
+  try {
 
-  if (!this.apiKey) {
-
-    return {
-      success: true,
-      mock: true,
-      method,
-      endpoint,
-      body
-    };
-
-  }
-
-  // ===== API REAL =====
-
-  const response = await axios({
+    const response = await axios({
 
       method,
 
@@ -68,7 +52,28 @@ class AsaasApi {
 
     return response.data;
 
+  } catch (error) {
+
+    console.error("Erro Asaas:");
+
+    if (error.response) {
+
+      console.error(error.response.data);
+
+      throw new Error(
+        error.response.data.errors?.[0]?.description ||
+        "Erro ao comunicar com o Asaas."
+      );
+
+    }
+
+    throw new Error(
+      error.message || "Erro desconhecido no Asaas."
+    );
+
   }
+
+}
 
     async criarCliente(cliente) {
 
