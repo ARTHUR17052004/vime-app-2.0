@@ -3,6 +3,8 @@ const prisma = require('../config/prisma');
 const ClicksignApi = require("./ClicksignApi");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
+const AsaasApi = require("./AsaasApi");
+const WhatsappService = require("./WhatsappService");
 
 const listar = () => {
   return prisma.contrato.findMany({
@@ -10,7 +12,8 @@ const listar = () => {
       locador: true,
       unidade: true,
       kitnet: true,
-      inquilino: true
+      inquilino: true,
+      receitas: true
     },
     orderBy: {
       createdAt: 'desc'
@@ -25,7 +28,8 @@ const buscarPorId = (id) => {
       locador: true,
       unidade: true,
       kitnet: true,
-      inquilino: true
+      inquilino: true,
+      receitas: true
     }
   });
 };
@@ -70,6 +74,49 @@ const criar = async (dados) => {
 
   if (!inquilino) {
     throw new Error('Inquilino não encontrado.');
+  }
+
+  const contratoAtivo = await prisma.contrato.findFirst({
+    where: {
+      inquilinoId: dados.inquilinoId,
+      status: "ATIVO"
+    }
+  });
+
+  const contratoKitnet = await prisma.contrato.findFirst({
+    where: {
+      kitnetId: dados.kitnetId,
+      status: "ATIVO"
+    }
+  });
+
+  if (contratoKitnet) {
+    throw new Error(
+      "Esta kitnet já possui um contrato ativo."
+    );
+  }
+
+  const contratoUnidade = await prisma.contrato.findFirst({
+    where: {
+      unidadeId: dados.unidadeId,
+      kitnetId: dados.kitnetId,
+      status: "ATIVO"
+    }
+  });
+
+  if (
+    contratoUnidade &&
+    contratoUnidade.id !== contratoKitnet?.id
+  ) {
+    throw new Error(
+      "Já existe um contrato ativo para esta unidade/kitnet."
+    );
+  }
+
+  if (contratoAtivo) {
+    throw new Error(
+      "Este inquilino já possui um contrato ativo."
+    );
   }
 
   if (kitnet.unidadeId !== unidade.id) {
@@ -147,6 +194,25 @@ const criar = async (dados) => {
     }
   );
 
+  await AsaasApi.criarCliente({
+    name: inquilino.nome,
+    email: inquilino.email,
+    cpfCnpj: inquilino.cpf,
+    phone: inquilino.telefone
+  });
+
+  await AsaasApi.criarCobranca({
+    customer: inquilino.cpf,
+    billingType: "BOLETO",
+    value: contrato.valorAluguel,
+    dueDate: contrato.dataInicio
+  });
+
+  await WhatsappService.enviarMensagem({
+    telefone: inquilino.telefone,
+    mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso e enviado para assinatura.`
+  });
+
   await logService.registrar({
     usuarioId: null,
     usuarioNome: "Sistema",
@@ -173,6 +239,15 @@ const criar = async (dados) => {
     data: {
       ocupada: true,
       status: 'OCUPADA'
+    }
+  });
+
+  await prisma.inquilino.update({
+    where: {
+      id: dados.inquilinoId
+    },
+    data: {
+      status: "ATIVO"
     }
   });
 
@@ -258,6 +333,25 @@ const remover = async (id) => {
     descricao: `Contrato ${contrato.id} excluído.`
   });
 
+  await prisma.kitnet.update({
+    where: {
+      id: contrato.kitnetId
+    },
+    data: {
+      ocupada: false,
+      status: "DISPONIVEL"
+    }
+  });
+
+  await prisma.inquilino.update({
+    where: {
+      id: contrato.inquilinoId
+    },
+    data: {
+      status: "INATIVO"
+    }
+  });
+
   return prisma.contrato.delete({
     where: { id }
   });
@@ -282,13 +376,22 @@ const encerrar = async (id) => {
     }
   });
 
-    await prisma.kitnet.update({
+  await prisma.kitnet.update({
     where: {
       id: contrato.kitnetId
     },
     data: {
       ocupada: false,
       status: 'DISPONIVEL'
+    }
+  });
+
+  await prisma.inquilino.update({
+    where: {
+      id: contrato.inquilinoId
+    },
+    data: {
+      status: "INATIVO"
     }
   });
 
@@ -302,12 +405,30 @@ const encerrar = async (id) => {
     valorNovo: contratoEncerrado
   });
 
+  await prisma.receita.updateMany({
+    where: {
+      contratoId: contrato.id,
+      status: "PENDENTE",
+      vencimento: {
+        gt: new Date()
+      }
+    },
+    data: {
+      status: "CANCELADA"
+    }
+  });
+
   await logService.registrar({
     usuarioId: null,
     usuarioNome: "Sistema",
     modulo: "CONTRATOS",
     acao: "ENCERRAR",
     descricao: `Contrato ${contrato.id} encerrado.`
+  });
+
+  await WhatsappService.enviarMensagem({
+    telefone: contrato.inquilino?.telefone,
+    mensagem: "Seu contrato foi encerrado."
   });
 
   return contratoEncerrado;
@@ -327,6 +448,16 @@ const inadimplente = async (id) => {
     }
   });
 
+  await prisma.receita.updateMany({
+    where: {
+      contratoId: contrato.id,
+      status: "PENDENTE"
+    },
+    data: {
+      status: "ATRASADA"
+    }
+  });
+
   await auditoriaService.registrar({
     usuarioId: null,
     usuarioNome: "Sistema",
@@ -343,6 +474,11 @@ const inadimplente = async (id) => {
     modulo: "CONTRATOS",
     acao: "INADIMPLENTE",
     descricao: `Contrato ${contrato.id} marcado como inadimplente.`
+  });
+
+  await WhatsappService.enviarMensagem({
+    telefone: contrato.inquilino?.telefone,
+    mensagem: "Identificamos um débito em aberto. Entre em contato com a administração."
   });
 
   return contrato;

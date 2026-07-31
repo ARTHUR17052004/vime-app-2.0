@@ -115,7 +115,7 @@ const criarCobranca = async (req, res) => {
 
 const webhook = async (req, res) => {
 
-  const dados = await AsaasApi.receberWebhook(req.body);
+  const dados = await asaasService.sincronizar(req.body);
 
   return res.json(dados);
 

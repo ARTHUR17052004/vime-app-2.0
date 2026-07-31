@@ -16,19 +16,21 @@ class ClicksignApi {
 
   }
 
-  async request(method, endpoint, body = null) {
+async request(method, endpoint, body = null) {
 
-    if (USAR_MOCK || !this.apiKey) {
+  if (USAR_MOCK || !this.apiKey) {
 
-      return {
-        success: true,
-        mock: true,
-        method,
-        endpoint,
-        body
-      };
+    return {
+      success: true,
+      mock: true,
+      method,
+      endpoint,
+      body
+    };
 
-    }
+  }
+
+  try {
 
     const response = await axios({
 
@@ -50,6 +52,26 @@ class ClicksignApi {
 
     return response.data;
 
+  } catch (error) {
+
+    console.error("Erro Clicksign:");
+
+    if (error.response) {
+
+      console.error(error.response.data);
+
+      throw new Error(
+        error.response.data.message ||
+        "Erro ao comunicar com a Clicksign."
+      );
+
+    }
+
+    throw new Error(
+      error.message || "Erro desconhecido na Clicksign."
+    );
+
+  }
   }
 
   async criarDocumento(documento) {

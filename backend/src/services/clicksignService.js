@@ -1,3 +1,5 @@
+const prisma = require("../config/prisma");
+
 const config = async () => {
   return {
     ambiente: process.env.CLICKSIGN_ENV || 'sandbox',
@@ -38,11 +40,62 @@ const enviarDocumento = async (dados) => {
   };
 };
 
-const sincronizar = async () => {
+const sincronizar = async (evento) => {
+
+  if (!evento) {
+    return {
+      success: false,
+      message: "Evento inválido."
+    };
+  }
+
+  const documento = await prisma.contrato.findFirst({
+    where: {
+      id: evento.document?.key
+    }
+  });
+
+  if (!documento) {
+    return {
+      success: false,
+      message: "Contrato não encontrado."
+    };
+  }
+
+  switch (evento.event?.name) {
+
+    case "signature_finished":
+
+      await prisma.contrato.update({
+        where: {
+          id: documento.id
+        },
+        data: {
+          status: "ASSINADO"
+        }
+      });
+
+      break;
+
+    case "document_cancelled":
+
+      await prisma.contrato.update({
+        where: {
+          id: documento.id
+        },
+        data: {
+          status: "CANCELADO"
+        }
+      });
+
+      break;
+
+  }
+
   return {
-    success: true,
-    message: 'Sincronização simulada concluída.'
+    success: true
   };
+
 };
 
 module.exports = {
