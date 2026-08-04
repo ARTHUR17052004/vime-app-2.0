@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   EllipsisVertical,
@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
+
+import ActionMenu from "../ui/ActionMenu";
 
 export default function KitnetActionsMenu({
   kitnet,
@@ -21,57 +23,67 @@ export default function KitnetActionsMenu({
 
   const [open, setOpen] = useState(false);
 
-  const ref = useRef(null);
+  const [position, setPosition] = useState({
+    top: 0,
+    left: 0,
+  });
 
-  useEffect(() => {
+  function abrirMenu(e) {
 
-    function handleClick(e) {
+    e.stopPropagation();
 
-      if (
-        ref.current &&
-        !ref.current.contains(e.target)
-      ) {
+    const rect =
+      e.currentTarget.getBoundingClientRect();
 
-        setOpen(false);
+    const larguraMenu = 220;
 
-      }
+    let left =
+      rect.right - larguraMenu;
 
+    let top =
+      rect.bottom + 8;
+
+    if (
+      left + larguraMenu >
+      window.innerWidth - 16
+    ) {
+      left =
+        window.innerWidth -
+        larguraMenu -
+        16;
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClick
-    );
+    if (left < 16) {
+      left = 16;
+    }
 
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClick
-      );
+    setPosition({
+      top,
+      left,
+    });
 
-  }, []);
+    setOpen(true);
 
-  function close() {
-    setOpen(false);
   }
 
   return (
 
-    <div
-      ref={ref}
-      className="relative"
-    >
+    <>
 
       <button
-
         onClick={(e) => {
 
-          e.stopPropagation();
+          if (open) {
 
-          setOpen(!open);
+            setOpen(false);
+
+            return;
+
+          }
+
+          abrirMenu(e);
 
         }}
-
         className="
           flex
           items-center
@@ -101,77 +113,56 @@ export default function KitnetActionsMenu({
 
       </button>
 
-      {open && (
+      <ActionMenu
+        open={open}
+        position={position}
+        onClose={() =>
+          setOpen(false)
+        }
+      >
 
-        <div
-          className="
-            absolute
-            right-0
-            top-12
+        <MenuButton
+          icon={<Eye size={17} />}
+          label="Visualizar"
+          onClick={() => {
 
-            w-52
+            router.push(
+              `/kitnets/${kitnet.id}`
+            );
 
-            rounded-2xl
+            setOpen(false);
 
-            border
-            border-white/10
+          }}
+        />
 
-            bg-[#19242b]/95
+        <MenuButton
+          icon={<Pencil size={17} />}
+          label="Editar"
+          onClick={() => {
 
-            backdrop-blur-xl
+            onEdit?.(kitnet);
 
-            shadow-2xl
+            setOpen(false);
 
-            overflow-hidden
+          }}
+        />
 
-            z-50
-          "
-        >
+        <MenuButton
+          danger
+          icon={<Trash2 size={17} />}
+          label="Excluir"
+          onClick={() => {
 
-          <MenuButton
-            icon={<Eye size={17} />}
-            label="Visualizar"
-            onClick={() => {
+            onDelete?.(kitnet.id);
 
-              router.push(
-                `/kitnets/${kitnet.id}`
-              );
+            setOpen(false);
 
-              close();
+          }}
+        />
 
-            }}
-          />
+      </ActionMenu>
 
-          <MenuButton
-            icon={<Pencil size={17} />}
-            label="Editar"
-            onClick={() => {
-
-              onEdit(kitnet);
-
-              close();
-
-            }}
-          />
-
-          <MenuButton
-            danger
-            icon={<Trash2 size={17} />}
-            label="Excluir"
-            onClick={() => {
-
-              onDelete(kitnet.id);
-
-              close();
-
-            }}
-          />
-
-        </div>
-
-      )}
-
-    </div>
+    </>
 
   );
 
@@ -183,7 +174,7 @@ function MenuButton({
 
   label,
 
-  danger,
+  danger = false,
 
   onClick,
 
@@ -192,9 +183,7 @@ function MenuButton({
   return (
 
     <button
-
       onClick={onClick}
-
       className={`
         w-full
 
@@ -203,12 +192,12 @@ function MenuButton({
 
         gap-3
 
-        px-4
+        px-5
         py-3
 
         text-sm
 
-        transition
+        transition-all
 
         ${
           danger
@@ -218,7 +207,7 @@ function MenuButton({
             `
             : `
               text-gray-200
-              hover:bg-emerald-500/10
+              hover:bg-white/5
             `
         }
       `}
@@ -226,7 +215,11 @@ function MenuButton({
 
       {icon}
 
-      {label}
+      <span>
+
+        {label}
+
+      </span>
 
     </button>
 

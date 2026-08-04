@@ -108,24 +108,48 @@ model Contrato {
 }
 
 model Locador {
-  id                String     @id @default(uuid())
+  id                String   @id @default(uuid())
+
+  tipoPessoa        String   @default("PF")
+
   nome              String
-  email             String?    @unique
+
+  cpfCnpj           String?  @unique
+
+  email             String?  @unique
+
   telefone          String?
-  cpfCnpj           String?    @unique
-  endereco          String?
-  cidade            String?
-  uf                String?
+
   banco             String?
+
   agencia           String?
+
   conta             String?
-  taxaAdministracao Float?     @default(0)
-  multa             Float?     @default(0)
-  juros             Float?     @default(0)
-  ativo             Boolean    @default(true)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+
+  pix               String?
+
+  taxaAdministracao Float?   @default(0)
+
+  multa             Float?   @default(0)
+
+  juros             Float?   @default(0)
+
+  endereco          String?
+
+  cidade            String?
+
+  uf                String?
+
+  observacoes       String?
+
+  ativo             Boolean  @default(true)
+
+  createdAt         DateTime @default(now())
+
+  updatedAt         DateTime @updatedAt
+
   contratos         Contrato[]
+
   unidades          Unidade[]
 }
 

@@ -8,7 +8,6 @@ import FadeIn from "../components/ui/FadeIn";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import PageSection from "../components/ui/PageSection";
-
 import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
 
@@ -23,6 +22,8 @@ import ContratoForm from "../components/contratos/ContratoForm";
 import ContratoStats from "../components/contratos/ContratoStats";
 import ContratoFilters from "../components/contratos/ContratoFilters";
 import ContratoTable from "../components/contratos/ContratoTable";
+
+import { ContratoService } from "@/services/contratos.service";
 
 export default function ContratosPage() {
 
@@ -44,148 +45,175 @@ export default function ContratosPage() {
   const [search, setSearch] =
     useState("");
 
-  const [carregado, setCarregado] =
-    useState(false);
+  async function carregarContratos() {
+
+    try {
+
+      const resposta =
+        await ContratoService.listar();
+
+      const lista = Array.isArray(resposta)
+        ? resposta
+        : resposta.data || [];
+
+      setContratos(lista);
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao carregar contratos:",
+        error
+      );
+
+    }
+
+  }
 
   useEffect(() => {
 
-    const dados = JSON.parse(
-      localStorage.getItem(
-        "vime-contratos"
-      ) || "[]"
-    );
-
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setContratos(dados);
-
-    setCarregado(true);
+    carregarContratos();
 
   }, []);
 
-  useEffect(() => {
-
-    if (!carregado) return;
-
-    localStorage.setItem(
-      "vime-contratos",
-      JSON.stringify(contratos)
-    );
-
-  }, [contratos, carregado]);
-
-  const novoContrato = () => {
+  function novoContrato() {
 
     setContratoEditando(null);
 
     setModalOpen(true);
 
-  };
-  const salvarContrato = (dados) => {
+  }
 
-  if (contratoEditando) {
+  async function salvarContrato(dados) {
 
-    setContratos((prev) =>
-      prev.map((item) =>
-        item.id === contratoEditando.id
-          ? {
-              ...item,
-              ...dados,
-            }
-          : item
-      )
-    );
+    try {
 
-  } else {
+      if (contratoEditando) {
 
-    setContratos((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...dados,
-      },
-    ]);
+        await ContratoService.atualizar(
+
+          contratoEditando.id,
+
+          dados
+
+        );
+
+      } else {
+
+        await ContratoService.criar(dados);
+
+      }
+
+      await carregarContratos();
+
+      setContratoEditando(null);
+
+      setModalOpen(false);
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao salvar contrato:",
+        error
+      );
+
+      alert("Erro ao salvar contrato.");
+
+    }
 
   }
 
-  setContratoEditando(null);
+  function editarContrato(contrato) {
 
-  setModalOpen(false);
+    setContratoEditando(contrato);
 
-};
+    setModalOpen(true);
 
-const editarContrato = (contrato) => {
+  }
 
-  setContratoEditando(contrato);
+  async function excluirContrato(id) {
 
-  setModalOpen(true);
+    const confirmar = window.confirm(
+      "Deseja realmente excluir este contrato?"
+    );
 
-};
+    if (!confirmar) return;
 
-const excluirContrato = (id) => {
+    try {
 
-  const confirmar = window.confirm(
-    "Deseja realmente excluir este contrato?"
+      await ContratoService.excluir(id);
+
+      await carregarContratos();
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao excluir contrato:",
+        error
+      );
+
+      alert("Erro ao excluir contrato.");
+
+    }
+
+  }
+    const contratosFiltrados = contratos.filter(
+    (contrato) => {
+
+      const termo =
+        search.toLowerCase();
+
+      const busca =
+
+        contrato.inquilinoNome
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        contrato.locadorNome
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        contrato.unidadeNome
+          ?.toLowerCase()
+          .includes(termo) ||
+
+        contrato.kitnetNome
+          ?.toLowerCase()
+          .includes(termo);
+
+      if (!busca) return false;
+
+      if (
+        filtroSelecionado ===
+        "Todos"
+      )
+        return true;
+
+      return (
+        contrato.status ===
+        filtroSelecionado
+      );
+
+    }
   );
 
-  if (!confirmar) return;
+  const totalContratos =
+    contratos.length;
 
-  setContratos((prev) =>
-    prev.filter((item) => item.id !== id)
-  );
+  const ativos =
+    contratos.filter(
+      (c) => c.status === "ATIVO"
+    ).length;
 
-};
+  const encerrados =
+    contratos.filter(
+      (c) => c.status === "ENCERRADO"
+    ).length;
 
-const contratosFiltrados = contratos.filter((contrato) => {
+  const vencendo =
+    contratos.filter(
+      (c) => c.status === "VENCENDO"
+    ).length;
 
-  const termo = search.toLowerCase();
-
-  const busca =
-
-    contrato.inquilino
-      ?.toLowerCase()
-      .includes(termo) ||
-
-    contrato.locador
-      ?.toLowerCase()
-      .includes(termo) ||
-
-    contrato.unidade
-      ?.toLowerCase()
-      .includes(termo) ||
-
-    contrato.kitnet
-      ?.toLowerCase()
-      .includes(termo);
-
-  if (!busca) return false;
-
-  if (filtroSelecionado === "Todos")
-    return true;
-
-  return (
-    contrato.status ===
-    filtroSelecionado
-  );
-
-});
-
-const totalContratos =
-  contratos.length;
-
-const ativos =
-  contratos.filter(
-    (c) => c.status === "Ativo"
-  ).length;
-
-const encerrados =
-  contratos.filter(
-    (c) => c.status === "Encerrado"
-  ).length;
-
-const vencendo =
-  contratos.filter(
-    (c) => c.status === "Vencendo"
-  ).length;
   return (
 
   <MainLayout>
@@ -202,9 +230,15 @@ const vencendo =
             count={totalContratos}
             countLabel="contrato(s) cadastrado(s)"
             actions={
-              <Button onClick={novoContrato}>
+
+              <Button
+                onClick={novoContrato}
+              >
+
                 + Novo Contrato
+
               </Button>
+
             }
           />
 
@@ -226,27 +260,14 @@ const vencendo =
 
         </FadeIn>
 
-        <FadeIn delay={0.15}>
-
-          <PageSection>
-
-            <ContratoStats
-              total={totalContratos}
-              ativos={ativos}
-              encerrados={encerrados}
-              vencendo={vencendo}
-            />
-
-          </PageSection>
-
-        </FadeIn>
-
         <FadeIn delay={0.20}>
 
           <PageSection>
 
             <ContratoFilters
-              filtroSelecionado={filtroSelecionado}
+              filtroSelecionado={
+                filtroSelecionado
+              }
               setFiltroSelecionado={
                 setFiltroSelecionado
               }
@@ -261,7 +282,9 @@ const vencendo =
           <PageSection>
 
             <ContratoTabs
-              abaSelecionada={abaSelecionada}
+              abaSelecionada={
+                abaSelecionada
+              }
               setAbaSelecionada={
                 setAbaSelecionada
               }
@@ -275,15 +298,13 @@ const vencendo =
 
           <PageSection>
 
-            {abaSelecionada ===
-            "visao-geral" ? (
+            {abaSelecionada === "visao-geral" ? (
 
               <ContratoDashboard
                 contratos={contratosFiltrados}
               />
 
-            ) : abaSelecionada ===
-              "contratos" ? (
+            ) : abaSelecionada === "contratos" ? (
 
               <ContratoTable
                 contratos={contratosFiltrados}
@@ -291,8 +312,7 @@ const vencendo =
                 onDelete={excluirContrato}
               />
 
-            ) : abaSelecionada ===
-              "vencimentos" ? (
+            ) : abaSelecionada === "vencimentos" ? (
 
               <ContratoProximosVencimentos
                 contratos={contratos}
@@ -309,21 +329,30 @@ const vencendo =
           </PageSection>
 
         </FadeIn>
-                <ContratoModal
+
+        <ContratoModal
           isOpen={modalOpen}
           onClose={() => {
+
             setModalOpen(false);
+
             setContratoEditando(null);
+
           }}
         >
+
           <ContratoForm
             contrato={contratoEditando}
             onSave={salvarContrato}
             onCancel={() => {
+
               setModalOpen(false);
+
               setContratoEditando(null);
+
             }}
           />
+
         </ContratoModal>
 
       </PageContainer>
@@ -333,4 +362,5 @@ const vencendo =
   </MainLayout>
 
 );
+
 }

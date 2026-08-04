@@ -6,7 +6,9 @@ export default function LocadorForm({
   onSave,
   locadorEditando,
 }) {
+
   const [formData, setFormData] = useState({
+
     tipoPessoa: "PF",
 
     nome: "",
@@ -24,195 +26,402 @@ export default function LocadorForm({
     juros: "",
 
     observacoes: "",
+
   });
 
   useEffect(() => {
-    if (locadorEditando) {
-      setFormData({
-        tipoPessoa:
-          locadorEditando.tipoPessoa || "PF",
 
-        nome: locadorEditando.nome || "",
-        documento:
-          locadorEditando.documento || "",
-        email: locadorEditando.email || "",
-        telefone:
-          locadorEditando.telefone || "",
+    if (!locadorEditando) return;
 
-        banco: locadorEditando.banco || "",
-        agencia:
-          locadorEditando.agencia || "",
-        conta: locadorEditando.conta || "",
-        pix: locadorEditando.pix || "",
+    setFormData({
 
-        taxaAdministracao:
-          locadorEditando.taxaAdministracao ||
-          "",
+      tipoPessoa:
+        locadorEditando.tipoPessoa || "PF",
 
-        multa: locadorEditando.multa || "",
+      nome:
+        locadorEditando.nome || "",
 
-        juros: locadorEditando.juros || "",
+      documento:
+        locadorEditando.documento || "",
 
-        observacoes:
-          locadorEditando.observacoes || "",
-      });
-    }
+      email:
+        locadorEditando.email || "",
+
+      telefone:
+        locadorEditando.telefone || "",
+
+      banco:
+        locadorEditando.banco || "",
+
+      agencia:
+        locadorEditando.agencia || "",
+
+      conta:
+        locadorEditando.conta || "",
+
+      pix:
+        locadorEditando.pix || "",
+
+      taxaAdministracao:
+        locadorEditando.taxaAdministracao || "",
+
+      multa:
+        locadorEditando.multa || "",
+
+      juros:
+        locadorEditando.juros || "",
+
+      observacoes:
+        locadorEditando.observacoes || "",
+
+    });
+
   }, [locadorEditando]);
 
-  const handleChange = (e) => {
+  function handleChange(e) {
+
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-  };
 
-  const handleSubmit = (e) => {
+  }
+
+  function handleSubmit(e) {
+
     e.preventDefault();
 
     onSave(formData);
-  };
 
-  const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
+  }
+
+  const inputStyle = `
+
+    w-full
+
+    rounded-2xl
+
+    border
+    border-white/10
+
+    bg-white/5
+
+    backdrop-blur
+
+    px-4
+    py-3
+
+    text-white
+
+    placeholder:text-gray-400
+
+    transition-all
+
+    focus:outline-none
+
+    focus:border-emerald-500
+
+    focus:ring-2
+    focus:ring-emerald-500/20
+
+  `;
 
   return (
+
     <form
       onSubmit={handleSubmit}
-      className="space-y-8"
+      className="space-y-6"
     >
-      <div>
-        <h2 className="text-2xl font-bold text-gray-800">
-          {locadorEditando
-            ? "Editar Locador"
-            : "Cadastro de Locador"}
+
+      {/* Cabeçalho */}
+
+      <div className="space-y-2">
+
+        <h2 className="text-3xl font-bold text-white">
+
+          {
+
+            locadorEditando
+
+              ? "Editar Locador"
+
+              : "Cadastro de Locador"
+
+          }
+
         </h2>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-400">
+
           Dados do proprietário
+
         </p>
+
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <select
-          name="tipoPessoa"
-          value={formData.tipoPessoa}
-          onChange={handleChange}
-          className={inputStyle}
-        >
-          <option value="PF">
-            Pessoa Física
-          </option>
+      {/* Dados Básicos */}
 
-          <option value="PJ">
-            Pessoa Jurídica
-          </option>
-        </select>
+      <div className="space-y-4">
 
-        <input
-          name="nome"
-          placeholder="Nome Completo"
-          value={formData.nome}
-          onChange={handleChange}
-          className={inputStyle}
-          required
-        />
+        <h3 className="text-lg font-semibold text-white">
 
-        <input
-          name="documento"
-          placeholder="CPF ou CNPJ"
-          value={formData.documento}
-          onChange={handleChange}
-          className={inputStyle}
-          required
-        />
+          Informações Gerais
 
-        <input
-          name="email"
-          type="email"
-          placeholder="E-mail"
-          value={formData.email}
-          onChange={handleChange}
-          className={inputStyle}
-        />
-
-        <input
-          name="telefone"
-          placeholder="Telefone"
-          value={formData.telefone}
-          onChange={handleChange}
-          className={inputStyle}
-        />
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
-          Dados Bancários
         </h3>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-6">
 
           <select
-            name="banco"
-            value={formData.banco}
+            name="tipoPessoa"
+            value={formData.tipoPessoa}
             onChange={handleChange}
             className={inputStyle}
           >
-            <option value="">
-              Selecione um banco
+            <option
+              value="PF"
+              style={{
+                backgroundColor: "#1d2833",
+                color: "#ffffff",
+              }}
+            >
+              Pessoa Física
             </option>
 
-            <option value="001 - Banco do Brasil">
-              001 - Banco do Brasil
-            </option>
-
-            <option value="104 - Caixa Econômica Federal">
-              104 - Caixa Econômica Federal
-            </option>
-
-            <option value="237 - Bradesco">
-              237 - Bradesco
-            </option>
-
-            <option value="341 - Itaú">
-              341 - Itaú
-            </option>
-
-            <option value="033 - Santander">
-              033 - Santander
-            </option>
-
-            <option value="260 - Nubank">
-              260 - Nubank
-            </option>
-
-            <option value="077 - Inter">
-              077 - Inter
-            </option>
-
-            <option value="290 - PagBank">
-              290 - PagBank
-            </option>
-
-            <option value="323 - Mercado Pago">
-              323 - Mercado Pago
-            </option>
-
-            <option value="336 - C6 Bank">
-              336 - C6 Bank
-            </option>
-
-            <option value="756 - Sicoob">
-              756 - Sicoob
-            </option>
-
-            <option value="748 - Sicredi">
-              748 - Sicredi
+            <option
+              value="PJ"
+              style={{
+                backgroundColor: "#1d2833",
+                color: "#ffffff",
+              }}
+            >
+              Pessoa Jurídica
             </option>
           </select>
 
           <input
+
+            name="nome"
+
+            placeholder="Nome Completo"
+
+            value={formData.nome}
+
+            onChange={handleChange}
+
+            className={inputStyle}
+
+            required
+
+          />
+
+          <input
+
+            name="documento"
+
+            placeholder="CPF ou CNPJ"
+
+            value={formData.documento}
+
+            onChange={handleChange}
+
+            className={inputStyle}
+
+            required
+
+          />
+
+          <input
+
+            name="email"
+
+            type="email"
+
+            placeholder="E-mail"
+
+            value={formData.email}
+
+            onChange={handleChange}
+
+            className={inputStyle}
+
+          />
+
+          <input
+
+            name="telefone"
+
+            placeholder="Telefone"
+
+            value={formData.telefone}
+
+            onChange={handleChange}
+
+            className={inputStyle}
+
+          />
+
+        </div>
+
+      </div>
+
+      {/* Dados Bancários */}
+
+      <div className="space-y-4">
+
+        <h3 className="text-lg font-semibold text-white">
+
+          Dados Bancários
+
+        </h3>
+
+        <div className="grid md:grid-cols-2 gap-6">
+
+          <select
+
+            name="banco"
+
+            value={formData.banco}
+
+            onChange={handleChange}
+
+            className={inputStyle}
+
+          >
+
+            <option
+              value=""
+              style={{
+                backgroundColor: "#1d2833",
+                color: "#ffffff",
+              }}
+            >
+              Selecione um banco
+            </option>
+
+          <option
+            value="001 - Banco do Brasil"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            001 - Banco do Brasil
+          </option>
+
+          <option
+            value="104 - Caixa Econômica Federal"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            104 - Caixa Econômica Federal
+          </option>
+
+          <option
+            value="237 - Bradesco"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            237 - Bradesco
+          </option>
+
+          <option
+            value="341 - Itaú"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            341 - Itaú
+          </option>
+
+          <option
+            value="033 - Santander"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            033 - Santander
+          </option>
+
+          <option
+            value="260 - Nubank"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            260 - Nubank
+          </option>
+
+          <option
+            value="077 - Inter"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            077 - Inter
+          </option>
+
+          <option
+            value="290 - PagBank"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            290 - PagBank
+          </option>
+
+          <option
+            value="323 - Mercado Pago"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            323 - Mercado Pago
+          </option>
+
+          <option
+            value="336 - C6 Bank"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            336 - C6 Bank
+          </option>
+
+          <option
+            value="756 - Sicoob"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            756 - Sicoob
+          </option>
+
+          <option
+            value="748 - Sicredi"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            748 - Sicredi
+          </option>
+          </select>
+
+                    <input
             name="agencia"
             placeholder="Agência"
             value={formData.agencia}
@@ -235,15 +444,23 @@ export default function LocadorForm({
             onChange={handleChange}
             className={inputStyle}
           />
+
         </div>
+
       </div>
 
-      <div>
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">
+      {/* Configurações Financeiras */}
+
+      <div className="space-y-4">
+
+        <h3 className="text-lg font-semibold text-white">
+
           Configurações Financeiras
+
         </h3>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        <div className="grid md:grid-cols-3 gap-6">
+
           <input
             name="taxaAdministracao"
             placeholder="Taxa Administração (%)"
@@ -267,34 +484,80 @@ export default function LocadorForm({
             onChange={handleChange}
             className={inputStyle}
           />
+
         </div>
+
       </div>
 
-      <textarea
-        name="observacoes"
-        placeholder="Observações"
-        value={formData.observacoes}
-        onChange={handleChange}
-        className={`${inputStyle} w-full min-h-[120px]`}
-      />
+      {/* Observações */}
 
-      <div className="flex justify-end">
+      <div className="space-y-4">
+
+        <h3 className="text-lg font-semibold text-white">
+
+          Observações
+
+        </h3>
+
+        <textarea
+          name="observacoes"
+          placeholder="Observações sobre o locador..."
+          value={formData.observacoes}
+          onChange={handleChange}
+          className={`${inputStyle} min-h-[140px] resize-none`}
+        />
+
+      </div>
+
+      {/* Rodapé */}
+
+      <div
+        className="
+          flex
+          justify-end
+
+          border-t
+          border-white/10
+
+          pt-6
+        "
+      >
+
         <button
           type="submit"
           className="
-            bg-green-700
-            text-white
-            px-6
+            rounded-2xl
+
+            bg-emerald-600
+
+            px-8
             py-3
-            rounded-lg
-            hover:bg-green-800
+
+            font-semibold
+            text-white
+
+            transition-all
+
+            hover:bg-emerald-700
+
+            hover:shadow-xl
           "
         >
+
           {locadorEditando
+
             ? "Salvar Alterações"
-            : "Salvar Locador"}
+
+            : "Salvar Locador"
+
+          }
+
         </button>
+
       </div>
+
     </form>
+
   );
+
 }

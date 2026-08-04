@@ -21,9 +21,13 @@ const buscarPorId = (id) => {
 };
 
 const criar = (dados) => {
+
+  console.log(dados);
+
   return prisma.kitnet.create({
     data: dados
   });
+
 };
 
 const atualizar = (id, dados) => {

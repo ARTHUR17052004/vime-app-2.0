@@ -14,105 +14,180 @@ export default function KitnetForm({
   onCancel,
   kitnet,
 }) {
+
   const [unidades, setUnidades] = useState([]);
 
   const [formData, setFormData] = useState({
     nome: "",
     unidadeId: "",
     unidadeNome: "",
-    metragem: "",
-    status: "Disponível",
-    aluguel: "",
     numero: "",
+    metragem: "",
+    aluguel: "",
+    status: "DISPONIVEL",
     observacoes: "",
   });
 
   /* ======================================
-     CARREGA AS UNIDADES DA API
+     CARREGA UNIDADES
   ====================================== */
 
   useEffect(() => {
+
     async function carregarUnidades() {
+
       try {
-        const resposta = await UnidadeService.listar();
+
+        const resposta =
+          await UnidadeService.listar();
 
         const lista = Array.isArray(resposta)
           ? resposta
           : resposta.data || [];
 
         setUnidades(lista);
+
       } catch (err) {
-        console.error("Erro ao carregar unidades:", err);
+
+        console.error(
+          "Erro ao carregar unidades:",
+          err
+        );
+
       }
+
     }
 
     carregarUnidades();
+
   }, []);
 
   /* ======================================
-     PREENCHE O FORMULÁRIO
+     EDIÇÃO
   ====================================== */
 
   useEffect(() => {
+
     if (kitnet) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+
       setFormData({
+
         nome: kitnet.nome || "",
-        unidadeId: kitnet.unidadeId || "",
-        unidadeNome: kitnet.unidadeNome || "",
-        metragem: kitnet.metragem || "",
-        status: kitnet.status || "Disponível",
-        aluguel: kitnet.aluguel || "",
-        numero: kitnet.numero || "",
-        observacoes: kitnet.observacoes || "",
+
+        unidadeId:
+          kitnet.unidadeId || "",
+
+        unidadeNome:
+          kitnet.unidadeNome || "",
+
+        numero:
+          kitnet.numero || "",
+
+        metragem:
+          kitnet.metragem || "",
+
+        aluguel:
+          kitnet.aluguel || "",
+
+        status:
+          kitnet.status || "DISPONIVEL",
+
+        observacoes:
+          kitnet.observacoes || "",
+
       });
+
     } else {
+
       setFormData({
+
         nome: "",
         unidadeId: "",
         unidadeNome: "",
-        metragem: "",
-        status: "Disponível",
-        aluguel: "",
         numero: "",
+        metragem: "",
+        aluguel: "",
+        status: "DISPONIVEL",
         observacoes: "",
+
       });
+
     }
+
   }, [kitnet]);
-    function handleChange(e) {
+
+  /* ======================================
+     ALTERAÇÃO
+  ====================================== */
+
+  function handleChange(e) {
+
     const { name, value } = e.target;
 
     if (name === "unidadeId") {
+
       const unidade = unidades.find(
         (u) => String(u.id) === value
       );
 
       setFormData((prev) => ({
+
         ...prev,
+
         unidadeId: value,
-        unidadeNome: unidade?.nome || "",
+
+        unidadeNome:
+          unidade?.nome || "",
+
       }));
 
       return;
+
     }
 
     setFormData((prev) => ({
+
       ...prev,
+
       [name]: value,
+
     }));
+
   }
 
+  /* ======================================
+     SALVAR
+  ====================================== */
+
   function handleSubmit(e) {
+
     e.preventDefault();
 
-    onSave(formData);
+    onSave({
+
+      nome: formData.nome,
+
+      unidadeId: formData.unidadeId,
+
+      numero: formData.numero,
+
+      metragem: Number(formData.metragem),
+
+      aluguel: Number(formData.aluguel),
+
+      status: formData.status,
+
+    });
+
   }
 
   return (
+
     <form
       onSubmit={handleSubmit}
       className="space-y-8"
     >
+
       <div className="grid grid-cols-2 gap-6">
 
         <Input
@@ -130,26 +205,32 @@ export default function KitnetForm({
           onChange={handleChange}
           required
         >
+
           <option
             value=""
             style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
+              backgroundColor:"#1d2833",
+              color:"#fff",
             }}
           >
             Selecione...
           </option>
 
-          <option
-            key={unidade.id}
-            value={unidade.id}
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            {unidade.nome}
-          </option>
+          {unidades.map((unidade) => (
+
+            <option
+              key={unidade.id}
+              value={unidade.id}
+              style={{
+                backgroundColor:"#1d2833",
+                color:"#fff",
+              }}
+            >
+              {unidade.nome}
+            </option>
+
+          ))}
+
         </Select>
 
         <Input
@@ -181,24 +262,37 @@ export default function KitnetForm({
           value={formData.status}
           onChange={handleChange}
         >
-          
+
           <option
-            value="Disponível"
+            value="DISPONIVEL"
             style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
+              backgroundColor:"#1d2833",
+              color:"#fff",
             }}
           >
             Disponível
           </option>
 
-          <option value="Ocupada">
+          <option
+            value="OCUPADA"
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
             Ocupada
           </option>
 
-          <option value="Manutenção">
+          <option
+            value="MANUTENCAO"
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
             Manutenção
           </option>
+
         </Select>
 
       </div>
@@ -211,24 +305,37 @@ export default function KitnetForm({
         onChange={handleChange}
       />
 
-      <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+      <div
+        className="
+          flex
+          justify-end
+          gap-4
+          pt-4
+          border-t
+          border-white/10
+        "
+      >
 
         <Button
-          variant="secondary"
           type="button"
+          variant="secondary"
           onClick={onCancel}
         >
           Cancelar
         </Button>
 
         <Button type="submit">
+
           {kitnet
             ? "Salvar Alterações"
             : "Cadastrar Kitnet"}
+
         </Button>
 
       </div>
 
     </form>
+
   );
+
 }

@@ -1,5 +1,5 @@
 "use client";
-
+import LocadorDetailsModal from "./LocadorDetailsModal";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import DashboardCard from "../dashboard/DashboardCard"; 
@@ -16,6 +16,9 @@ export default function LocadorCard({
   onDelete,
   onEdit,
 }) {
+
+  const [locadorSelecionado, setLocadorSelecionado] =
+    useState(null);
 
   const [menuAberto, setMenuAberto] =
     useState(null);
@@ -160,37 +163,26 @@ export default function LocadorCard({
               <div
                 className="
                   absolute
-                  right-5
-                  top-14
-                  bg-white
+                  right-2
+                  top-12
+                  w-48
+                  overflow-hidden
+                  rounded-2xl
                   border
-                  rounded-xl
-                  shadow-xl
+                  border-white/10
+                  bg-slate-900/95
+                  backdrop-blur-xl
+                  shadow-2xl
                   z-50
-                  w-40
                 "
               >
-
-                <Link
-                  href={`/locadores/${locador.id}`}
-                  className="
-                    block
-                    px-4
-                    py-3
-                    hover:bg-gray-100
-                  "
-                >
-
-                  Visualizar
-
-                </Link>
 
                 <button
                   onClick={() => {
 
                     setMenuAberto(null);
 
-                    onEdit?.(locador);
+                    setLocadorSelecionado(locador);
 
                   }}
                   className="
@@ -198,13 +190,34 @@ export default function LocadorCard({
                     text-left
                     px-4
                     py-3
-                    hover:bg-yellow-50
-                    text-yellow-700
+                    text-sm
+                    text-white
+                    hover:bg-emerald-500/10
+                    transition-all
                   "
                 >
 
-                  Editar
+                  Visualizar
 
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuAberto(null);
+                    onEdit?.(locador);
+                  }}
+                  className="
+                    w-full
+                    text-left
+                    px-4
+                    py-3
+                    text-sm
+                    text-white
+                    hover:bg-emerald-500/10
+                    transition-all
+                  "
+                >
+                  Editar
                 </button>
 
                 <button
@@ -220,8 +233,10 @@ export default function LocadorCard({
                     text-left
                     px-4
                     py-3
-                    hover:bg-red-50
-                    text-red-700
+                    text-sm
+                    text-white
+                    hover:bg-red-500/10
+                    transition-all
                   "
                 >
 
@@ -307,6 +322,12 @@ export default function LocadorCard({
               </button>
 
             </div>
+            
+            <LocadorDetailsModal
+              open={locadorSelecionado?.id === locador.id}
+              locador={locadorSelecionado}
+              onClose={() => setLocadorSelecionado(null)}
+            />
 
           </DashboardCard>
 

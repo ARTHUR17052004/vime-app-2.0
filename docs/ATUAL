@@ -112,3 +112,92 @@ Ainda não integrados
 ⏳ Solicitações
 ⏳ Vistorias
 ⏳ Relatórios
+
+04/08/2026
+Status atualizado do projeto
+Backend
+✅ Estrutura
+✅ Banco de Dados (PostgreSQL + Prisma)
+✅ Autenticação JWT
+✅ CRUD de todos os módulos
+✅ API homologada
+✅ Mock das integrações
+
+Backend: 100%
+
+Frontend – Integração API
+Homologados (100%)
+✅ Login
+✅ Unidades
+✅ Kitnets
+✅ Inquilinos
+✅ Locadores 🆕
+Pendentes
+⏳ Dashboard
+⏳ Contratos
+⏳ Financeiro
+⏳ Solicitações
+⏳ Vistorias
+⏳ Relatórios
+Ainda faltam criar
+⏳ Usuários
+⏳ Perfis
+⏳ Permissões
+⏳ Configurações Administrativas
+Roadmap
+Fase 1 — Integração da API
+✅ Login
+✅ Unidades
+✅ Kitnets
+✅ Inquilinos
+✅ Locadores
+⏳ Dashboard
+⏳ Contratos
+⏳ Financeiro
+⏳ Solicitações
+⏳ Vistorias
+⏳ Relatórios
+Fase 2
+⏳ Usuários
+⏳ Perfis
+⏳ Permissões
+Fase 3
+
+Integrações reais
+
+⏳ Asaas
+⏳ Clicksign
+⏳ WhatsApp
+Fase 4
+⏳ Publicação
+⏳ VPS
+⏳ Domínio
+⏳ Produção
+
+04/08/2026
+
+Minha sugestão é reorganizar o projeto
+
+Em vez de continuar criando novos módulos, vamos deixar a base sólida.
+
+A sequência seria:
+
+✅ Locadores
+✅ Unidades
+✅ Kitnets
+🔄 Inquilinos (revisão completa)
+🔄 Usuários/Login do Inquilino
+🔄 Envio de e-mail
+🔄 Contratos
+🔄 Financeiro
+🔄 Solicitações
+🔄 Vistorias
+🔄 Dashboard final
+
+Isso reduz bastante a chance de precisar voltar para corrigir dependências depois.
+
+Sobre o envio de e-mail
+
+Eu não faria um "e-mail simples". Já deixaria pronto para produção usando um serviço como SMTP (HostGator) ou outro provedor de e-mail transacional. Assim, quando o sistema entrar em produção, basta configurar as credenciais e o fluxo já estará funcionando sem precisar reescrever essa parte.
+
+Acho que esse é o melhor momento para fazer isso, porque o módulo de Inquilinos é justamente onde nasce a identidade de acesso ao sistema. Depois, Contratos e os demais módulos passam a consumir essa estrutura já pronta.

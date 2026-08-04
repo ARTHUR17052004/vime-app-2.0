@@ -105,16 +105,23 @@ export default function ContratoResumo({
         const Icon = card.icon;
 
         return (
-          <DashboardCard key={card.titulo}>
+          <DashboardCard
+            key={card.titulo}
+            className="
+              hover:-translate-y-1
+              transition-all
+              duration-300
+            "
+          >
             <div className="flex items-center justify-between">
 
               <div>
 
                 <p
                   className="
+                    text-xs
                     uppercase
                     tracking-[0.18em]
-                    text-[11px]
                     text-gray-400
                     font-semibold
                   "
@@ -158,6 +165,7 @@ export default function ContratoResumo({
               </div>
 
             </div>
+
           </DashboardCard>
         );
       })}

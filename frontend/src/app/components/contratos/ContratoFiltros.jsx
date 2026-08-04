@@ -13,34 +13,49 @@ export default function ContratoFiltros({
   ];
 
   return (
-    <div className="bg-white rounded-3xl shadow p-6 mb-8">
+    <div
+      className="
+        rounded-3xl
+        border
+        border-white/10
+        bg-slate-900/80
+        backdrop-blur-xl
+        p-6
+        shadow-xl
+      "
+    >
 
-      <h2 className="text-xl font-bold mb-5">
+      <h2
+        className="
+          text-xl
+          font-bold
+          text-white
+          mb-5
+        "
+      >
         Filtros
       </h2>
 
-      <div className="flex gap-3 flex-wrap">
+      <div className="flex flex-wrap gap-3">
 
         {filtros.map((filtro) => (
 
           <button
             key={filtro}
             onClick={() =>
-              setFiltroSelecionado(
-                filtro
-              )
+              setFiltroSelecionado(filtro)
             }
             className={`
               px-5
               py-2
-              rounded-2xl
-              transition
+              rounded-xl
+              font-medium
+              transition-all
 
               ${
-                filtroSelecionado ===
-                filtro
-                  ? "bg-green-700 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                filtroSelecionado === filtro
+                  ? "bg-emerald-600 text-white shadow-lg"
+                  : "bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
               }
             `}
           >

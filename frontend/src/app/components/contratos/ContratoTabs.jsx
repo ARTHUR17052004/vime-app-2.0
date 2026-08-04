@@ -4,7 +4,6 @@ export default function ContratoTabs({
   abaSelecionada,
   setAbaSelecionada,
 }) {
-
   const abas = [
     {
       id: "visao-geral",
@@ -25,38 +24,26 @@ export default function ContratoTabs({
   ];
 
   return (
-
     <div
       className="
-        rounded-[22px]
-
+        rounded-3xl
         border
-        border-white/5
-
-        bg-gradient-to-br
-        from-[#1b2728]/80
-        via-[#1a242c]/75
-        to-[#151d26]/80
-
+        border-white/10
+        bg-white/5
         backdrop-blur-xl
-
         p-2
       "
     >
-
       <div className="flex flex-wrap gap-2">
-
         {abas.map((aba) => (
-
           <button
             key={aba.id}
             onClick={() =>
               setAbaSelecionada(aba.id)
             }
             className={`
-              px-6
-              py-3
-
+              px-5
+              py-2.5
               rounded-xl
 
               text-sm
@@ -70,30 +57,21 @@ export default function ContratoTabs({
                   ? `
                     bg-emerald-500
                     text-white
-
                     shadow-lg
-                    shadow-emerald-900/30
+                    shadow-emerald-500/20
                   `
                   : `
                     text-gray-300
-
                     hover:bg-white/5
                     hover:text-white
                   `
               }
             `}
           >
-
             {aba.nome}
-
           </button>
-
         ))}
-
       </div>
-
     </div>
-
   );
-
 }

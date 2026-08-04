@@ -86,8 +86,13 @@ export default function Table({
       >
 
         <div
-          className="overflow-auto"
-          style={{ maxHeight }}
+          className="
+            overflow-x-auto
+            overflow-y-visible
+          "
+          style={{
+            maxHeight,
+          }}
         >
 
           {children}
@@ -142,8 +147,13 @@ export default function Table({
     >
 
       <div
-        className="overflow-auto"
-        style={{ maxHeight }}
+        className="
+          overflow-x-auto
+          overflow-y-visible
+        "
+        style={{
+          maxHeight,
+        }}
       >
 
         <table className="min-w-full">

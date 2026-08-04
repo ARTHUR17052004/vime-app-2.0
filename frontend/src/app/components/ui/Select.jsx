@@ -34,170 +34,169 @@ export default function Select({
     `,
   };
 
-  return (
-    <div
-      className={`
-        space-y-2
-        ${fullWidth ? "w-full" : ""}
-      `}
-    >
-      {label && (
-        <label
+ return (
+  <div
+    className={`
+      space-y-2
+      ${fullWidth ? "w-full" : ""}
+    `}
+  >
+    {label && (
+      <label
+        className="
+          flex
+          items-center
+          gap-1
+          text-sm
+          font-semibold
+          text-gray-300
+        "
+      >
+        {label}
+
+        {required && (
+          <span className="text-red-400">*</span>
+        )}
+      </label>
+    )}
+
+    <div className="relative">
+
+      {leftIcon && (
+        <div
           className="
-            flex
-            items-center
-            gap-1
-            text-sm
-            font-semibold
-            text-gray-300
+            absolute
+            left-4
+            top-1/2
+            -translate-y-1/2
+            text-gray-500
+            pointer-events-none
+            z-10
           "
         >
-          {label}
-
-          {required && (
-            <span className="text-red-400">*</span>
-          )}
-        </label>
+          {leftIcon}
+        </div>
       )}
 
-      <div className="relative">
+      <select
+        {...props}
+        className={`
+          appearance-none
 
-        {leftIcon && (
-          <div
-            className="
-              absolute
-              left-4
-              top-1/2
-              -translate-y-1/2
-              text-gray-500
-              pointer-events-none
-              z-10
-            "
-          >
-            {leftIcon}
-          </div>
-        )}
+          ${fullWidth ? "w-full" : ""}
 
-        <select
-          {...props}
-          className={`
-            appearance-none
+          ${sizes[size]}
 
-            ${fullWidth ? "w-full" : ""}
+          rounded-xl
+          border
 
-            ${sizes[size]}
+          ${variants[variant]}
 
-            rounded-xl
-            border
+          text-white
 
-            ${variants[variant]}
+          outline-none
 
-            text-white
+          transition-all
+          duration-300
 
-            outline-none
-
-            transition-all
-            duration-300
-
-            ${
-              leftIcon
-                ? "pl-11"
-                : "pl-4"
-            }
-
-            ${
-              rightIcon
-                ? "pr-11"
-                : "pr-10"
-            }
-
-            ${
-              error
-                ? `
-                  border-red-500/40
-                  focus:border-red-400
-                  focus:ring-2
-                  focus:ring-red-500/20
-                `
-                : `
-                  hover:border-emerald-500/20
-                  focus:border-emerald-500/40
-                  focus:ring-2
-                  focus:ring-emerald-500/20
-                `
-            }
-
-            ${
-              props.disabled
-                ? `
-                  opacity-50
-                  cursor-not-allowed
-                `
-                : ""
-            }
-
-            ${className}
-          `}
-        >
-
-          {children
-            ? children
-            : options.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  style={{
-                    backgroundColor: "#1d2833",
-                    color: "#ffffff",
-                  }}
-                >
-                  {option.label}
-                </option>
-              ))
+          ${
+            leftIcon
+              ? "pl-11"
+              : "pl-4"
           }
-        </select>
 
-        {rightIcon ? (
-          <div
-            className="
-              absolute
-              right-4
-              top-1/2
-              -translate-y-1/2
-              text-gray-500
-              pointer-events-none
-            "
-          >
-            {rightIcon}
-          </div>
-        ) : (
-          <div
-            className="
-              absolute
-              right-4
-              top-1/2
-              -translate-y-1/2
-              text-gray-500
-              pointer-events-none
-            "
-          >
-            ▼
-          </div>
-        )}
+          ${
+            rightIcon
+              ? "pr-11"
+              : "pr-10"
+          }
 
-      </div>
+          ${
+            error
+              ? `
+                border-red-500/40
+                focus:border-red-400
+                focus:ring-2
+                focus:ring-red-500/20
+              `
+              : `
+                hover:border-emerald-500/20
+                focus:border-emerald-500/40
+                focus:ring-2
+                focus:ring-emerald-500/20
+              `
+          }
 
-      {helperText && !error && (
-        <p className="text-xs text-gray-500">
-          {helperText}
-        </p>
+          ${
+            props.disabled
+              ? `
+                opacity-50
+                cursor-not-allowed
+              `
+              : ""
+          }
+
+          ${className}
+        `}
+      >
+
+        {children ||
+          options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              style={{
+                backgroundColor: "#1d2833",
+                color: "#ffffff",
+              }}
+            >
+              {option.label}
+            </option>
+          ))}
+
+      </select>
+
+      {rightIcon ? (
+        <div
+          className="
+            absolute
+            right-4
+            top-1/2
+            -translate-y-1/2
+            text-gray-500
+            pointer-events-none
+          "
+        >
+          {rightIcon}
+        </div>
+      ) : (
+        <div
+          className="
+            absolute
+            right-4
+            top-1/2
+            -translate-y-1/2
+            text-gray-500
+            pointer-events-none
+          "
+        >
+          ▼
+        </div>
       )}
 
-      {error && (
-        <p className="text-xs font-medium text-red-400">
-          {error}
-        </p>
-      )}
     </div>
-  );
+
+    {helperText && !error && (
+      <p className="text-xs text-gray-500">
+        {helperText}
+      </p>
+    )}
+
+    {error && (
+      <p className="text-xs font-medium text-red-400">
+        {error}
+      </p>
+    )}
+  </div>
+);
 }
