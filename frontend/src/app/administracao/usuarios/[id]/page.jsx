@@ -61,17 +61,12 @@ export default function UsuarioDetalhesPage() {
 
       try {
 
-        const resposta = await UsuarioService.buscar(
+        const resposta = await UsuarioService.buscar(params.id);
 
-          params.id
+        console.log("RESPOSTA DA API:", resposta);
+        console.log("DADOS:", resposta.data);
 
-        );
-
-        setUsuario(
-
-          resposta.data || resposta
-
-        );
+        setUsuario(resposta.data || resposta);
 
       } catch (err) {
 

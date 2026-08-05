@@ -85,45 +85,44 @@ export default function UsuariosPage() {
 
   async function salvarUsuario(dados) {
 
-    try {
+  console.log("DADOS RECEBIDOS:", dados);
 
-      if (usuarioEditando) {
+  console.log("USUARIO EDITANDO:", usuarioEditando);
 
-        await UsuarioService.atualizar(
+  try {
 
-          usuarioEditando.id,
+    if (usuarioEditando) {
 
-          dados
+      console.log("VAI ATUALIZAR");
 
-        );
-
-      } else {
-
-        await UsuarioService.criar(dados);
-
-      }
-
-      await carregarUsuarios();
-
-      setUsuarioEditando(null);
-
-      setModalOpen(false);
-
-    } catch (err) {
-
-      console.error(err);
-
-      alert(
-
-        err.message ||
-
-        "Erro ao salvar usuário."
-
+      await UsuarioService.atualizar(
+        usuarioEditando.id,
+        dados
       );
+
+      console.log("ATUALIZOU");
+
+    } else {
+
+      console.log("VAI CRIAR");
+
+      await UsuarioService.criar(dados);
 
     }
 
+    await carregarUsuarios();
+
+    setUsuarioEditando(null);
+
+    setModalOpen(false);
+
+  } catch (err) {
+
+    console.error("ERRO:", err);
+
   }
+
+}
 
   function novoUsuario() {
 
@@ -207,43 +206,33 @@ export default function UsuariosPage() {
 
   async function redefinirSenha(usuario) {
 
-    const confirmar = window.confirm(
+  const novaSenha = prompt(
+    `Digite a nova senha para ${usuario.nome}:`
+  );
 
-      `Redefinir senha de ${usuario.nome}?`
+  if (!novaSenha) return;
 
+  try {
+
+    await UsuarioService.redefinirSenha(
+      usuario.id,
+      novaSenha
     );
 
-    if (!confirmar) return;
+    alert("Senha redefinida com sucesso.");
 
-    try {
+  } catch (err) {
 
-      await UsuarioService.redefinirSenha(
+    console.error(err);
 
-        usuario.id
-
-      );
-
-      alert(
-
-        "Senha redefinida."
-
-      );
-
-    } catch (err) {
-
-      console.error(err);
-
-      alert(
-
-        err.message ||
-
-        "Erro ao redefinir senha."
-
-      );
-
-    }
+    alert(
+      err.message ||
+      "Erro ao redefinir senha."
+    );
 
   }
+
+}
 
   async function alterarStatus(usuario) {
 

@@ -1,45 +1,25 @@
 "use client";
 
 import Modal from "../ui/Modal";
-
 import UsuariosForm from "./UsuariosForm";
 
 export default function UsuariosModal({
-
   isOpen,
-
   onClose,
-
   usuario,
-
   onSave,
-
 }) {
-
   return (
-
     <Modal
-
-      isOpen={isOpen}
-
+      open={isOpen}
       onClose={onClose}
-
-      maxWidth="max-w-4xl"
-
+      size="lg"
     >
-
       <UsuariosForm
-
         usuario={usuario}
-
         onSave={onSave}
-
         onCancel={onClose}
-
       />
-
     </Modal>
-
   );
-
 }

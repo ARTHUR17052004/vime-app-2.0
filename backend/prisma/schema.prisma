@@ -73,12 +73,35 @@ model Inquilino {
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String   @unique
-  senha     String
-  perfil    Perfil
-  ativo     Boolean  @default(true)
+  id String @id @default(uuid())
+
+  nome     String
+  email    String  @unique
+  telefone String?
+
+  senha String
+
+  // TEMPORÁRIO: opcional para permitir a migration
+  perfilId String?
+
+  perfil Perfil? @relation(fields: [perfilId], references: [id])
+
+  ativo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Perfil {
+  id String @id @default(uuid())
+
+  nome      String  @unique
+  descricao String?
+
+  ativo Boolean @default(true)
+
+  usuarios Usuario[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -108,49 +131,49 @@ model Contrato {
 }
 
 model Locador {
-  id                String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  tipoPessoa        String   @default("PF")
+  tipoPessoa String @default("PF")
 
-  nome              String
+  nome String
 
-  cpfCnpj           String?  @unique
+  cpfCnpj String? @unique
 
-  email             String?  @unique
+  email String? @unique
 
-  telefone          String?
+  telefone String?
 
-  banco             String?
+  banco String?
 
-  agencia           String?
+  agencia String?
 
-  conta             String?
+  conta String?
 
-  pix               String?
+  pix String?
 
-  taxaAdministracao Float?   @default(0)
+  taxaAdministracao Float? @default(0)
 
-  multa             Float?   @default(0)
+  multa Float? @default(0)
 
-  juros             Float?   @default(0)
+  juros Float? @default(0)
 
-  endereco          String?
+  endereco String?
 
-  cidade            String?
+  cidade String?
 
-  uf                String?
+  uf String?
 
-  observacoes       String?
+  observacoes String?
 
-  ativo             Boolean  @default(true)
+  ativo Boolean @default(true)
 
-  createdAt         DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  updatedAt         DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-  contratos         Contrato[]
+  contratos Contrato[]
 
-  unidades          Unidade[]
+  unidades Unidade[]
 }
 
 model Receita {
@@ -240,47 +263,39 @@ model Ocorrencia {
 }
 
 model LogSistema {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   usuarioId   String?
   usuarioNome String?
 
-  modulo      String
-  acao        String
+  modulo String
+  acao   String
 
-  descricao   String?
+  descricao String?
 
-  ip          String?
+  ip String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Auditoria {
+  id String @id @default(uuid())
 
-  id            String   @id @default(uuid())
+  usuarioId String?
 
-  usuarioId     String?
+  usuarioNome String?
 
-  usuarioNome   String?
+  modulo String
 
-  modulo        String
+  registroId String?
 
-  registroId    String?
-
-  acao          String
+  acao String
 
   valorAnterior Json?
 
-  valorNovo     Json?
+  valorNovo Json?
 
-  ip            String?
+  ip String?
 
-  createdAt     DateTime @default(now())
-
-}
-
-enum Perfil {
-  ADMINISTRADOR
-  ADMINISTRATIVO
-  ZELADOR
+  createdAt DateTime @default(now())
 }

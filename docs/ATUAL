@@ -113,91 +113,110 @@ Ainda não integrados
 ⏳ Vistorias
 ⏳ Relatórios
 
-04/08/2026
-Status atualizado do projeto
+05/08/2026
+
+📋 VIME 2.0 — Relatório Atualizado
+✅ Módulos concluídos
 Backend
-✅ Estrutura
-✅ Banco de Dados (PostgreSQL + Prisma)
-✅ Autenticação JWT
-✅ CRUD de todos os módulos
-✅ API homologada
-✅ Mock das integrações
-
-Backend: 100%
-
-Frontend – Integração API
-Homologados (100%)
-✅ Login
-✅ Unidades
-✅ Kitnets
-✅ Inquilinos
-✅ Locadores 🆕
-Pendentes
-⏳ Dashboard
-⏳ Contratos
-⏳ Financeiro
-⏳ Solicitações
-⏳ Vistorias
-⏳ Relatórios
-Ainda faltam criar
-⏳ Usuários
-⏳ Perfis
-⏳ Permissões
-⏳ Configurações Administrativas
-Roadmap
-Fase 1 — Integração da API
-✅ Login
-✅ Unidades
-✅ Kitnets
-✅ Inquilinos
+✅ Autenticação (JWT)
+✅ Middleware de Autenticação
+✅ Middleware de Perfil
+✅ CRUD de Usuários
+✅ CRUD de Locadores
+✅ CRUD de Unidades
+✅ CRUD de Kitnets
+Frontend
+✅ Dashboard Base
+✅ Layout Principal
+✅ Sidebar
+✅ Topbar
+✅ Biblioteca de Componentes UI
+✅ Administração → Usuários
+✅ Listagem
+✅ Cadastro
+✅ Visualização
+✅ Edição
+✅ Exclusão
+✅ Alteração de Status
+✅ Redefinição de Senha
+✅ Integração completa com API
+✅ Auditoria
+✅ Logs
 ✅ Locadores
-⏳ Dashboard
+✅ Unidades
+✅ Kitnets
+🔄 Em desenvolvimento
+Integração da autenticação em todo o sistema
+🔄 Dashboard utilizando o usuário autenticado
+🔄 Sidebar utilizando o usuário autenticado
+🔄 Topbar utilizando o usuário autenticado
+🔄 Perfil do usuário autenticado
+🔄 Avatar dinâmico
+🔄 Contexto global do usuário logado
+Revisão de módulos
+🔄 Revisão completa de Inquilinos
+🔄 Padronização Frontend ↔ Backend
+⏳ Próximos módulos
+Operação
 ⏳ Contratos
 ⏳ Financeiro
 ⏳ Solicitações
 ⏳ Vistorias
-⏳ Relatórios
-Fase 2
-⏳ Usuários
+Administração
+⏳ Auditoria (Interface)
+⏳ Logs (Interface)
 ⏳ Perfis
 ⏳ Permissões
-Fase 3
-
-Integrações reais
-
+⏳ Sessões
+Sistema
+⏳ Dashboard Final
+⏳ Relatórios
+⏳ Notificações
+⏳ Configurações
+Integrações
 ⏳ Asaas
 ⏳ Clicksign
-⏳ WhatsApp
-Fase 4
-⏳ Publicação
-⏳ VPS
-⏳ Domínio
-⏳ Produção
+⏳ WhatsApp IA
+❌ Removido do escopo
+❌ Envio de e-mail de acesso para novos usuários.
+❌ Convite por e-mail para utilização do sistema.
 
-04/08/2026
+Essas funcionalidades poderão ser implementadas futuramente caso necessário, porém não fazem parte do MVP do VIME 2.0.
 
-Minha sugestão é reorganizar o projeto
-
-Em vez de continuar criando novos módulos, vamos deixar a base sólida.
-
-A sequência seria:
-
+📅 Ordem de desenvolvimento atualizada
+Fase 1 — Base do Sistema
+✅ Autenticação
+✅ Usuários
 ✅ Locadores
 ✅ Unidades
 ✅ Kitnets
-🔄 Inquilinos (revisão completa)
-🔄 Usuários/Login do Inquilino
-🔄 Envio de e-mail
-🔄 Contratos
-🔄 Financeiro
-🔄 Solicitações
-🔄 Vistorias
-🔄 Dashboard final
+Fase 2 — Consolidação da Base
+🔄 Integração completa da autenticação (Dashboard, Sidebar, Topbar e Perfil)
+🔄 Revisão completa de Inquilinos
+🔄 Padronização Frontend ↔ Backend
+Fase 3 — Operação
+⏳ Contratos
+⏳ Financeiro
+⏳ Solicitações
+⏳ Vistorias
+Fase 4 — Administração
+⏳ Auditoria
+⏳ Logs
+⏳ Perfis
+⏳ Permissões
+⏳ Sessões
+Fase 5 — Finalização
+⏳ Dashboard Final
+⏳ Relatórios
+⏳ Notificações
+⏳ Configurações
+⏳ Integrações (Asaas, Clicksign e WhatsApp IA)
+📌 Situação atual do projeto
 
-Isso reduz bastante a chance de precisar voltar para corrigir dependências depois.
+O VIME 2.0 já possui toda a infraestrutura principal concluída, incluindo autenticação, controle de acesso, arquitetura do frontend, componentes reutilizáveis e os principais cadastros do sistema (Usuários, Locadores, Unidades e Kitnets).
 
-Sobre o envio de e-mail
+O módulo Administração → Usuários foi finalizado com integração completa entre frontend e backend, contemplando cadastro, edição, exclusão, alteração de status, redefinição de senha, auditoria e registro de logs.
 
-Eu não faria um "e-mail simples". Já deixaria pronto para produção usando um serviço como SMTP (HostGator) ou outro provedor de e-mail transacional. Assim, quando o sistema entrar em produção, basta configurar as credenciais e o fluxo já estará funcionando sem precisar reescrever essa parte.
+O próximo objetivo estratégico é concluir a integração da autenticação em toda a interface, fazendo com que Dashboard, Sidebar, Topbar e Perfil utilizem exclusivamente os dados do usuário autenticado.
 
-Acho que esse é o melhor momento para fazer isso, porque o módulo de Inquilinos é justamente onde nasce a identidade de acesso ao sistema. Depois, Contratos e os demais módulos passam a consumir essa estrutura já pronta.
+Após essa etapa, iniciaremos o desenvolvimento do módulo Contratos, responsável por integrar Locadores, Unidades, Kitnets e Inquilinos, tornando o sistema efetivamente operacional e servindo como base para os módulos Financeiro, Asaas, Clicksign e WhatsApp IA.

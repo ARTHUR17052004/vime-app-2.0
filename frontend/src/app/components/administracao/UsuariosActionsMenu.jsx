@@ -98,10 +98,12 @@ export default function UsuariosActionsMenu({
 
         onClick={(e) => {
 
+          e.preventDefault();
+          e.stopPropagation();
+
           if (open) {
 
             setOpen(false);
-
             return;
 
           }
@@ -170,19 +172,17 @@ export default function UsuariosActionsMenu({
         />
 
         <MenuButton
-
           icon={<Pencil size={18} />}
-
           label="Editar"
-
           onClick={() => {
+
+            console.log("EDITAR CLICADO", usuario);
 
             onEditar?.(usuario);
 
             setOpen(false);
 
           }}
-
         />
 
         <MenuButton
@@ -291,36 +291,39 @@ function MenuButton({
 
     <button
 
-      onClick={onClick}
+      type="button"
+
+      onClick={(e) => {
+
+        e.preventDefault();
+
+        e.stopPropagation();
+
+        onClick?.();
+
+      }}
 
       className={`
         flex
         items-center
-
         gap-3
-
         w-full
-
         px-5
         py-3
-
         transition
 
         ${
           danger
-
             ? `
               text-red-400
               hover:bg-red-500/10
             `
-
             : `
               text-gray-300
               hover:bg-white/5
             `
         }
       `}
-
     >
 
       {icon}

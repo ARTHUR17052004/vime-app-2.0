@@ -24,8 +24,6 @@ const menuConfig = [
         label: "Dashboard",
         href: "/",
         icon: LayoutDashboard,
-        badge: null,
-        disabled: false,
       },
     ],
   },
@@ -118,6 +116,17 @@ const menuConfig = [
         href: "/whatsapp",
         icon: Bot,
         badge: "IA",
+      },
+    ],
+  },
+
+  {
+    title: "Administração",
+    items: [
+      {
+        label: "Administração",
+        href: "/administracao",
+        icon: ShieldCheck,
       },
     ],
   },

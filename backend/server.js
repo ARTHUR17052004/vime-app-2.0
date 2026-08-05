@@ -6,7 +6,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 
 // const iniciarJobs = require("./src/jobs");
-
+const perfilRoutes = require("./src/routes/perfilRoutes");
 const iniciarJobs = require("./src/jobs");
 const authRoutes = require("./src/routes/authRoutes");
 const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
@@ -64,6 +64,12 @@ app.use("/auth", authRoutes);
 =========================== */
 
 app.use("/usuarios", usuarioRoutes);
+
+/* ===========================
+   PERFIS
+=========================== */
+
+app.use("/perfis", perfilRoutes);
 
 /* ===========================
    LOCADORES

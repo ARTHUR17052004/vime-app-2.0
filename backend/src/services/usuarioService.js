@@ -18,24 +18,6 @@ const listar = () => {
 
         },
 
-        select: {
-
-            id: true,
-
-            nome: true,
-
-            email: true,
-
-            perfil: true,
-
-            ativo: true,
-
-            createdAt: true,
-
-            updatedAt: true,
-
-        },
-
     });
 
 };
@@ -54,6 +36,32 @@ const buscarPorId = (id) => {
 
         },
 
+    });
+
+};
+
+/* =====================================================
+   CRIAR
+===================================================== */
+
+const criar = async (dados) => {
+
+    const senhaHash = await bcrypt.hash(
+        dados.senha,
+        10
+    );
+
+    const usuario = await prisma.usuario.create({
+
+        data: {
+            nome: dados.nome,
+            email: dados.email,
+            telefone: dados.telefone,
+            perfil: dados.perfil,
+            senha: senhaHash,
+            ativo: dados.ativo,
+        },
+
         select: {
 
             id: true,
@@ -73,39 +81,6 @@ const buscarPorId = (id) => {
         },
 
     });
-
-};
-
-/* =====================================================
-   CRIAR
-===================================================== */
-
-const criar = async (dados) => {
-
-    const senhaHash = await bcrypt.hash(
-
-        dados.senha,
-
-        10
-
-    );
-
-    const usuario = await prisma.usuario.create({
-    data: {
-        ...dados,
-        senha: senhaHash,
-    },
-
-    select: {
-        id: true,
-        nome: true,
-        email: true,
-        perfil: true,
-        ativo: true,
-        createdAt: true,
-        updatedAt: true,
-    },
-});
 
     await auditoriaService.registrar({
 
@@ -147,13 +122,16 @@ const criar = async (dados) => {
    ATUALIZAR
 ===================================================== */
 
-const atualizar = async (
+/* =====================================================
+   ATUALIZAR
+===================================================== */
 
-    id,
+const atualizar = async (id, dados) => {
 
-    dados
-
-) => {
+    console.log("==================================");
+    console.log("ATUALIZAR USUÁRIO");
+    console.log("ID:", id);
+    console.log("DADOS RECEBIDOS:", dados);
 
     const anterior = await prisma.usuario.findUnique({
 
@@ -165,11 +143,15 @@ const atualizar = async (
 
     });
 
+    console.log("USUÁRIO ANTES:", anterior);
+
     const data = {
 
         nome: dados.nome,
 
         email: dados.email,
+
+        telefone: dados.telefone,
 
         perfil: dados.perfil,
 
@@ -189,6 +171,8 @@ const atualizar = async (
 
     }
 
+    console.log("DATA ENVIADA AO PRISMA:", data);
+
     const usuario = await prisma.usuario.update({
 
         where: {
@@ -200,6 +184,8 @@ const atualizar = async (
         data,
 
     });
+
+    console.log("USUÁRIO APÓS UPDATE:", usuario);
 
     await auditoriaService.registrar({
 
