@@ -1,30 +1,12 @@
 "use client";
 
-import {
-  Shield,
-  Users,
-  KeyRound,
-  Activity,
-  FileText,
-  History,
-} from "lucide-react";
-
-import DashboardStatsCard from "../dashboard/DashboardStatsCard";
 import PageGrid from "../ui/PageGrid";
+
+import AdministracaoCard from "./AdministracaoCard";
 
 export default function AdministracaoStats({
 
-  usuarios = 0,
-
-  perfis = 0,
-
-  permissoes = 0,
-
-  sessoes = 0,
-
-  auditorias = 0,
-
-  logs = 0,
+  cards = [],
 
 }) {
 
@@ -32,47 +14,25 @@ export default function AdministracaoStats({
 
     <PageGrid cols={3}>
 
-      <DashboardStatsCard
-        title="Usuários"
-        value={usuarios}
-        subtitle="Usuários cadastrados"
-        icon={Users}
-      />
+      {cards.map((card) => (
 
-      <DashboardStatsCard
-        title="Perfis"
-        value={perfis}
-        subtitle="Perfis de acesso"
-        icon={Shield}
-      />
+        <AdministracaoCard
 
-      <DashboardStatsCard
-        title="Permissões"
-        value={permissoes}
-        subtitle="Permissões configuradas"
-        icon={KeyRound}
-      />
+          key={card.title}
 
-      <DashboardStatsCard
-        title="Sessões"
-        value={sessoes}
-        subtitle="Usuários online"
-        icon={Activity}
-      />
+          title={card.title}
 
-      <DashboardStatsCard
-        title="Auditorias"
-        value={auditorias}
-        subtitle="Registros do dia"
-        icon={History}
-      />
+          subtitle={card.subtitle}
 
-      <DashboardStatsCard
-        title="Logs"
-        value={logs}
-        subtitle="Eventos registrados"
-        icon={FileText}
-      />
+          value={card.value}
+
+          icon={card.icon}
+
+          color={card.color}
+
+        />
+
+      ))}
 
     </PageGrid>
 

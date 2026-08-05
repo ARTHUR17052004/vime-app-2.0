@@ -8,19 +8,28 @@ export default function AdministracaoTable({
 
   data,
 
-  loading,
+  loading = false,
 
-  emptyMessage,
+  emptyMessage = "Nenhum registro encontrado.",
+
+  onRowClick,
 
 }) {
 
   return (
 
     <Table
+
       columns={columns}
+
       data={data}
+
       loading={loading}
+
       emptyMessage={emptyMessage}
+
+      onRowClick={onRowClick}
+
     />
 
   );

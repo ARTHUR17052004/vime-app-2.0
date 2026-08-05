@@ -7,7 +7,7 @@ import {
   UserPlus,
 } from "lucide-react";
 
-export default function AdministracaoHeader({
+export default function UsuariosHeader({
 
   totalUsuarios = 0,
 
@@ -19,13 +19,13 @@ export default function AdministracaoHeader({
 
     <PageHeader
 
-      title="Administração"
+      title="Usuários"
 
-      subtitle="Centro de Controle do VIME."
+      subtitle="Gerencie todos os usuários do sistema."
 
       count={totalUsuarios}
 
-      countLabel="usuário(s)"
+      countLabel="usuário(s) cadastrado(s)"
 
       actions={
 

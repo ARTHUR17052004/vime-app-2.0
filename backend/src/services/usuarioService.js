@@ -1,114 +1,416 @@
-const prisma = require('../config/prisma');
+const prisma = require("../config/prisma");
+const bcrypt = require("bcryptjs");
 
-const logService = require('./logService');
+const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 
+/* =====================================================
+   LISTAR
+===================================================== */
+
 const listar = () => {
+
     return prisma.usuario.findMany({
+
         orderBy: {
-            createdAt: 'desc'
-        }
+
+            createdAt: "desc",
+
+        },
+
+        select: {
+
+            id: true,
+
+            nome: true,
+
+            email: true,
+
+            perfil: true,
+
+            ativo: true,
+
+            createdAt: true,
+
+            updatedAt: true,
+
+        },
+
     });
+
 };
+
+/* =====================================================
+   BUSCAR POR ID
+===================================================== */
+
+const buscarPorId = (id) => {
+
+    return prisma.usuario.findUnique({
+
+        where: {
+
+            id,
+
+        },
+
+        select: {
+
+            id: true,
+
+            nome: true,
+
+            email: true,
+
+            perfil: true,
+
+            ativo: true,
+
+            createdAt: true,
+
+            updatedAt: true,
+
+        },
+
+    });
+
+};
+
+/* =====================================================
+   CRIAR
+===================================================== */
 
 const criar = async (dados) => {
 
+    const senhaHash = await bcrypt.hash(
+
+        dados.senha,
+
+        10
+
+    );
+
     const usuario = await prisma.usuario.create({
-        data: dados
-    });
+    data: {
+        ...dados,
+        senha: senhaHash,
+    },
+
+    select: {
+        id: true,
+        nome: true,
+        email: true,
+        perfil: true,
+        ativo: true,
+        createdAt: true,
+        updatedAt: true,
+    },
+});
 
     await auditoriaService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         registroId: usuario.id,
+
         acao: "CRIAR",
+
         valorAnterior: null,
-        valorNovo: usuario
+
+        valorNovo: usuario,
+
     });
 
     await logService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         acao: "CRIAR",
-        descricao: `Usuário ${usuario.nome} criado.`
+
+        descricao: `Usuário ${usuario.nome} criado.`,
+
     });
 
     return usuario;
 
 };
 
-const atualizar = async (id, dados) => {
+/* =====================================================
+   ATUALIZAR
+===================================================== */
+
+const atualizar = async (
+
+    id,
+
+    dados
+
+) => {
 
     const anterior = await prisma.usuario.findUnique({
-        where: { id }
+
+        where: {
+
+            id,
+
+        },
+
     });
 
+    const data = {
+
+        nome: dados.nome,
+
+        email: dados.email,
+
+        perfil: dados.perfil,
+
+        ativo: dados.ativo,
+
+    };
+
+    if (dados.senha) {
+
+        data.senha = await bcrypt.hash(
+
+            dados.senha,
+
+            10
+
+        );
+
+    }
+
     const usuario = await prisma.usuario.update({
-        where: { id },
-        data: dados
+
+        where: {
+
+            id,
+
+        },
+
+        data,
+
     });
 
     await auditoriaService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         registroId: usuario.id,
+
         acao: "ATUALIZAR",
+
         valorAnterior: anterior,
-        valorNovo: usuario
+
+        valorNovo: usuario,
+
     });
 
     await logService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         acao: "ATUALIZAR",
-        descricao: `Usuário ${usuario.nome} atualizado.`
+
+        descricao: `Usuário ${usuario.nome} atualizado.`,
+
     });
 
     return usuario;
 
 };
+
+/* =====================================================
+   REMOVER
+===================================================== */
 
 const remover = async (id) => {
 
     const usuario = await prisma.usuario.findUnique({
-        where: { id }
+
+        where: {
+
+            id,
+
+        },
+
     });
 
     if (!usuario) {
-        throw new Error("Usuário não encontrado.");
+
+        throw new Error(
+
+            "Usuário não encontrado."
+
+        );
+
     }
 
     await auditoriaService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         registroId: usuario.id,
+
         acao: "EXCLUIR",
+
         valorAnterior: usuario,
-        valorNovo: null
+
+        valorNovo: null,
+
     });
 
     await logService.registrar({
+
         usuarioId: null,
+
         usuarioNome: "Sistema",
+
         modulo: "USUARIOS",
+
         acao: "EXCLUIR",
-        descricao: `Usuário ${usuario.nome} removido.`
+
+        descricao: `Usuário ${usuario.nome} removido.`,
+
     });
 
     return prisma.usuario.delete({
-        where: { id }
+
+        where: {
+
+            id,
+
+        },
+
     });
 
 };
 
+/* =====================================================
+   REDEFINIR SENHA
+===================================================== */
+
+const redefinirSenha = async (
+
+    id,
+
+    novaSenha
+
+) => {
+
+    const senhaHash = await bcrypt.hash(
+
+        novaSenha,
+
+        10
+
+    );
+
+    return prisma.usuario.update({
+
+        where: {
+
+            id,
+
+        },
+
+        data: {
+
+            senha: senhaHash,
+
+        },
+
+    });
+
+};
+
+/* =====================================================
+   ENVIAR ACESSO
+===================================================== */
+
+const enviarAcesso = async (id) => {
+
+    const usuario = await prisma.usuario.findUnique({
+
+        where: {
+
+            id,
+
+        },
+
+    });
+
+    if (!usuario) {
+
+        throw new Error(
+
+            "Usuário não encontrado."
+
+        );
+
+    }
+
+    /*
+        Aqui entraremos depois com:
+
+        ✔ Nodemailer
+
+        ✔ Resend
+
+        ✔ Gmail SMTP
+
+        ✔ Microsoft 365
+
+        ✔ Amazon SES
+
+        etc.
+    */
+
+    return {
+
+        success: true,
+
+        message: "Convite preparado para envio.",
+
+    };
+
+};
+
 module.exports = {
+
     listar,
+
+    buscarPorId,
+
     criar,
+
     atualizar,
-    remover
+
+    remover,
+
+    redefinirSenha,
+
+    enviarAcesso,
+
 };
