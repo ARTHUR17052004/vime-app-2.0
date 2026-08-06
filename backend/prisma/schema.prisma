@@ -299,3 +299,85 @@ model Auditoria {
 
   createdAt DateTime @default(now())
 }
+
+model ConfiguracaoWhatsapp {
+  id String @id @default(uuid())
+
+  nomeConexao String @default("VIME 2.0")
+
+  numero String?
+
+  token String?
+
+  apiUrl String?
+
+  provider String @default("META")
+
+  conectado Boolean @default(false)
+
+  qrCode String?
+
+  webhook String?
+
+  ultimaSincronizacao DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsappContato {
+  id String @id @default(uuid())
+
+  nome String?
+
+  telefone String @unique
+
+  foto String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  conversas WhatsappConversa[]
+}
+
+model WhatsappConversa {
+  id String @id @default(uuid())
+
+  contatoId String
+
+  ultimaMensagem String?
+
+  ultimaData DateTime?
+
+  naoLidas Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  contato WhatsappContato @relation(fields: [contatoId], references: [id])
+
+  mensagens WhatsappMensagem[]
+}
+
+model WhatsappMensagem {
+  id String @id @default(uuid())
+
+  conversaId String
+
+  mensagemIdMeta String?
+
+  texto String
+
+  tipo String
+
+  status String?
+
+  enviadaPorIA Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  conversa WhatsappConversa @relation(fields: [conversaId], references: [id])
+}

@@ -220,3 +220,41 @@ O módulo Administração → Usuários foi finalizado com integração completa
 O próximo objetivo estratégico é concluir a integração da autenticação em toda a interface, fazendo com que Dashboard, Sidebar, Topbar e Perfil utilizem exclusivamente os dados do usuário autenticado.
 
 Após essa etapa, iniciaremos o desenvolvimento do módulo Contratos, responsável por integrar Locadores, Unidades, Kitnets e Inquilinos, tornando o sistema efetivamente operacional e servindo como base para os módulos Financeiro, Asaas, Clicksign e WhatsApp IA.
+
+>OPERAÇÃO DE PRIORIDADE<
+
+
+
+>CONECTAR DASHBOARD COM O SISTEMA = o dashboard atualmente n registra nada das outas ferramentas, o que deveria fazer, logo temos que fazelo ser eficiente e realmente mostrar dados do sistema e não dados aleatorios ou locais ok ?, imagem ta de referencia 
+
+>CRIAR 4 QUE FALTAM =  ainda faltam criar 4 ferramentas o clicksign, whatsapp, e o resto, ainda nem possuem logica, nem paginas
+
+>LANÇAR ONLINE = ainda o sistema com o endereço online vimesistema.online não está totalmente funcional online logo, preciso resolver isso o mais rapido possível para que ele possa ser testado
+
+>MELHORAR APARENCIA =ainda tem algumas paginas do sistema que estão fora do padrão logo tenho que arrumar logo, para que fique PADRONIZADO, essas são as nossas prioridades de hoje, esqueça tudo fora disso, e vamos focar apenas nisso ok ??
+
+Módulo 1 — WhatsApp IA
+
+Hoje só vamos sair dele quando essa lista estiver 100% verde.
+
+Backend
+✅ Enviar mensagem
+⬜ Receber mensagem da Meta
+⬜ Salvar mensagem no banco
+⬜ Salvar contato
+⬜ Criar conversa automaticamente
+⬜ Atualizar última mensagem
+⬜ Socket emitir atualização
+Frontend
+✅ Tela pronta
+⬜ Conversas reais
+⬜ Chat real
+⬜ Atualização automática
+⬜ Enviar mensagem
+⬜ Receber sem atualizar página
+IA
+⬜ Receber mensagem
+⬜ Enviar para OpenAI
+⬜ Buscar contexto
+⬜ Responder
+⬜ Registrar históricos

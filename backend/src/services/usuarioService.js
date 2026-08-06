@@ -18,6 +18,22 @@ const listar = () => {
 
         },
 
+        include: {
+
+            perfil: {
+
+                select: {
+
+                    id: true,
+
+                    nome: true,
+
+                },
+
+            },
+
+        },
+
     });
 
 };
@@ -36,6 +52,22 @@ const buscarPorId = (id) => {
 
         },
 
+        include: {
+
+            perfil: {
+
+                select: {
+
+                    id: true,
+
+                    nome: true,
+
+                },
+
+            },
+
+        },
+
     });
 
 };
@@ -47,40 +79,46 @@ const buscarPorId = (id) => {
 const criar = async (dados) => {
 
     const senhaHash = await bcrypt.hash(
+
         dados.senha,
+
         10
+
     );
 
     const usuario = await prisma.usuario.create({
 
-        data: {
-            nome: dados.nome,
-            email: dados.email,
-            telefone: dados.telefone,
-            perfil: dados.perfil,
-            senha: senhaHash,
-            ativo: dados.ativo,
-        },
+    data: {
 
-        select: {
+        nome: dados.nome,
 
-            id: true,
+        email: dados.email,
 
-            nome: true,
+        telefone: dados.telefone,
 
-            email: true,
+        senha: senhaHash,
 
-            perfil: true,
+        ativo: dados.ativo ?? true,
 
-            ativo: true,
+        perfil: {
 
-            createdAt: true,
+            connect: {
 
-            updatedAt: true,
+                id: dados.perfilId,
+
+            },
 
         },
 
-    });
+    },
+
+    include: {
+
+        perfil: true,
+
+    },
+
+});
 
     await auditoriaService.registrar({
 
@@ -117,7 +155,6 @@ const criar = async (dados) => {
     return usuario;
 
 };
-
 /* =====================================================
    ATUALIZAR
 ===================================================== */
@@ -141,6 +178,12 @@ const atualizar = async (id, dados) => {
 
         },
 
+        include: {
+
+            perfil: true,
+
+        },
+
     });
 
     console.log("USUÁRIO ANTES:", anterior);
@@ -153,11 +196,23 @@ const atualizar = async (id, dados) => {
 
         telefone: dados.telefone,
 
-        perfil: dados.perfil,
-
         ativo: dados.ativo,
 
     };
+
+    if (dados.perfilId) {
+
+        data.perfil = {
+
+            connect: {
+
+                id: dados.perfilId,
+
+            },
+
+        };
+
+    }
 
     if (dados.senha) {
 
@@ -182,6 +237,12 @@ const atualizar = async (id, dados) => {
         },
 
         data,
+
+        include: {
+
+            perfil: true,
+
+        },
 
     });
 
@@ -234,6 +295,12 @@ const remover = async (id) => {
         where: {
 
             id,
+
+        },
+
+        include: {
+
+            perfil: true,
 
         },
 
@@ -292,7 +359,6 @@ const remover = async (id) => {
     });
 
 };
-
 /* =====================================================
    REDEFINIR SENHA
 ===================================================== */
@@ -357,22 +423,6 @@ const enviarAcesso = async (id) => {
 
     }
 
-    /*
-        Aqui entraremos depois com:
-
-        ✔ Nodemailer
-
-        ✔ Resend
-
-        ✔ Gmail SMTP
-
-        ✔ Microsoft 365
-
-        ✔ Amazon SES
-
-        etc.
-    */
-
     return {
 
         success: true,
@@ -382,7 +432,6 @@ const enviarAcesso = async (id) => {
     };
 
 };
-
 module.exports = {
 
     listar,

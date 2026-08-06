@@ -41,11 +41,17 @@ export const DashboardService = {
     }
 
     return {
-      ...resultado.dashboard,
-      financeiro: resultado.financeiro,
-      ocupacao: resultado.ocupacao,
-      atividades: resultado.atividades,
-      alertas: resultado.alertas,
+
+      ...(resultado.dashboard?.data || {}),
+
+      financeiro: resultado.financeiro?.data,
+
+      ocupacao: resultado.ocupacao?.data,
+
+      atividades: resultado.atividades?.data,
+
+      alertas: resultado.alertas?.data,
+
     };
   },
-};
+};  

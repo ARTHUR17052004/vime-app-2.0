@@ -1,9 +1,12 @@
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const { setIO } = require("./src/socket");
 
 // const iniciarJobs = require("./src/jobs");
 const perfilRoutes = require("./src/routes/perfilRoutes");
@@ -34,6 +37,36 @@ const whatsappRoutes = require("./src/routes/whatsappRoutes");
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
 const app = express();
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+
+  cors: {
+
+    origin: "*",
+
+    methods: ["GET", "POST"]
+
+  }
+
+});
+
+setIO(io);
+
+app.set("io", io);
+
+io.on("connection", (socket) => {
+
+  console.log("🔌 Cliente conectado:", socket.id);
+
+  socket.on("disconnect", () => {
+
+    console.log("❌ Cliente desconectado:", socket.id);
+
+  });
+
+});
 
 const PORT = process.env.PORT || 3001;
 
@@ -167,8 +200,10 @@ app.use(errorMiddleware);
    START SERVER
 =========================== */
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
+
   console.log(
     `[VIME 2.0] Servidor iniciado com sucesso na porta ${PORT}`
   );
+
 });
