@@ -4,7 +4,7 @@ const ClicksignApi = require("./ClicksignApi");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 const AsaasApi = require("./AsaasApi");
-const WhatsappService = require("./WhatsappService");
+const WhatsappService = require("./whatsappService");
 
 const listar = () => {
   return prisma.contrato.findMany({
