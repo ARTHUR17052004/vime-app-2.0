@@ -6,13 +6,92 @@ const { getIO } = require("../socket");
 const USAR_MOCK =
   process.env.WHATSAPP_MOCK === "true";
 
+let conversasMock = [
+
+  {
+    id: 1,
+    nome: "Maria Oliveira",
+    numero: "+55 11 99999-1111",
+    ultimaMensagem: "Bom dia, gostaria de informações.",
+    horario: "09:12",
+    naoLidas: 2,
+    online: true,
+
+    mensagens: [
+      {
+        id: 1,
+        tipo: "recebida",
+        texto: "Bom dia, gostaria de informações.",
+        hora: "09:10",
+      },
+      {
+        id: 2,
+        tipo: "enviada",
+        texto: "Bom dia! Claro, como posso ajudar?",
+        hora: "09:11",
+      },
+      {
+        id: 3,
+        tipo: "recebida",
+        texto: "Tenho interesse em uma kitnet.",
+        hora: "09:12",
+      }
+    ]
+  },
+
+  {
+    id: 2,
+    nome: "João Pedro",
+    numero: "+55 11 98888-2222",
+    ultimaMensagem: "Obrigado pelo atendimento.",
+    horario: "Ontem",
+    naoLidas: 0,
+    online: false,
+
+    mensagens: [
+      {
+        id: 1,
+        tipo: "recebida",
+        texto: "Muito obrigado pelo atendimento.",
+        hora: "18:10",
+      },
+      {
+        id: 2,
+        tipo: "enviada",
+        texto: "Nós agradecemos o contato!",
+        hora: "18:11",
+      }
+    ]
+  },
+
+  {
+    id: 3,
+    nome: "Carlos Henrique",
+    numero: "+55 11 97777-3333",
+    ultimaMensagem: "Quando vence meu aluguel?",
+    horario: "08:45",
+    naoLidas: 1,
+    online: true,
+
+    mensagens: [
+      {
+        id: 1,
+        tipo: "recebida",
+        texto: "Quando vence meu aluguel?",
+        hora: "08:45",
+      }
+    ]
+  }
+
+];
+
 class WhatsappService {
 
   /* ==========================================
-   BUSCAR CONFIGURAÇÃO
+   CONECTAR
 ========================================== */
 
-async obterConfiguracao() {
+async conectar() {
 
   let configuracao =
     await prisma.configuracaoWhatsapp.findFirst();
@@ -28,7 +107,30 @@ async obterConfiguracao() {
 
           provider: "META",
 
-          conectado: false,
+          conectado: true,
+
+          ultimaSincronizacao: new Date(),
+
+        },
+
+      });
+
+  } else {
+
+    configuracao =
+      await prisma.configuracaoWhatsapp.update({
+
+        where: {
+
+          id: configuracao.id,
+
+        },
+
+        data: {
+
+          conectado: true,
+
+          ultimaSincronizacao: new Date(),
 
         },
 
@@ -40,34 +142,6 @@ async obterConfiguracao() {
 
 }
 
-/* ==========================================
-   CONECTAR
-========================================== */
-
-async conectar() {
-
-  const configuracao =
-    await this.obterConfiguracao();
-
-  return await prisma.configuracaoWhatsapp.update({
-
-    where: {
-
-      id: configuracao.id,
-
-    },
-
-    data: {
-
-      conectado: true,
-
-      ultimaSincronizacao: new Date(),
-
-    },
-
-  });
-
-}
   constructor() {
 
     this.baseURL =
@@ -171,14 +245,35 @@ async gerarQrCode() {
 
 } 
 
-/* ==========================================
-   STATUS
-========================================== */
+ async status() {
 
-async status() {
+  const configuracao = await prisma.configuracaoWhatsapp.findFirst();
 
-  const configuracao =
-    await this.obterConfiguracao();
+  if (!configuracao) {
+
+    return {
+
+      conectado: !!this.token,
+
+      mock: USAR_MOCK,
+
+      provider: "META",
+
+      nomeConexao: "VIME 2.0",
+
+      numero: null,
+
+      webhook: null,
+
+      qrCode: null,
+
+      ultimaSincronizacao: null,
+
+      conversas: []
+
+    };
+
+  }
 
   return {
 
@@ -203,7 +298,6 @@ async status() {
   };
 
 }
-
 /* ==========================================
    CONVERSAS
 ========================================== */
@@ -322,7 +416,29 @@ async sincronizar() {
 
 async configuracao() {
 
-  return await this.obterConfiguracao();
+  let configuracao =
+    await prisma.configuracaoWhatsapp.findFirst();
+
+  if (!configuracao) {
+
+    configuracao =
+      await prisma.configuracaoWhatsapp.create({
+
+        data: {
+
+          nomeConexao: "VIME 2.0",
+
+          provider: "META",
+
+          conectado: false,
+
+        },
+
+      });
+
+  }
+
+  return configuracao;
 
 }
 
@@ -332,34 +448,36 @@ async configuracao() {
 
 async salvarConfiguracao(dados) {
 
-  const configuracao =
-    await this.obterConfiguracao();
+  let configuracao =
+    await prisma.configuracaoWhatsapp.findFirst();
 
-  return await prisma.configuracaoWhatsapp.update({
+  if (!configuracao) {
 
-    where: {
+    configuracao =
+      await prisma.configuracaoWhatsapp.create({
 
-      id: configuracao.id,
+        data: dados,
 
-    },
+      });
 
-    data: {
+  } else {
 
-      nomeConexao: dados.nomeConexao,
+    configuracao =
+      await prisma.configuracaoWhatsapp.update({
 
-      numero: dados.numero,
+        where: {
 
-      provider: dados.provider,
+          id: configuracao.id,
 
-      webhook: dados.webhook,
+        },
 
-      token: dados.token,
+        data: dados,
 
-      apiUrl: dados.apiUrl,
+      });
 
-    },
+  }
 
-  });
+  return configuracao;
 
 }
 
