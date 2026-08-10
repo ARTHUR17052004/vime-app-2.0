@@ -224,12 +224,9 @@ Após essa etapa, iniciaremos o desenvolvimento do módulo Contratos, responsáv
 >OPERAÇÃO DE PRIORIDADE<
 
 
+>CRIAR 4 QUE FALTAM =  ainda faltam criar 3 ferramentas o clicksign, Configurações, e o Notificações, ainda nem possuem logica, nem paginas whatsapp se encontra com 45% completo
 
->CONECTAR DASHBOARD COM O SISTEMA = o dashboard atualmente n registra nada das outas ferramentas, o que deveria fazer, logo temos que fazelo ser eficiente e realmente mostrar dados do sistema e não dados aleatorios ou locais ok ?, imagem ta de referencia 
-
->CRIAR 4 QUE FALTAM =  ainda faltam criar 4 ferramentas o clicksign, whatsapp, e o resto, ainda nem possuem logica, nem paginas
-
->LANÇAR ONLINE = ainda o sistema com o endereço online vimesistema.online não está totalmente funcional online logo, preciso resolver isso o mais rapido possível para que ele possa ser testado
+>LANÇAR ONLINE = ainda o sistema com o endereço online vimesistema.online não está totalmente funcional online, precisamos postar o backend mas pra isso temos que aumentar o plano podemos deixar em ultimo lugar.
 
 >MELHORAR APARENCIA =ainda tem algumas paginas do sistema que estão fora do padrão logo tenho que arrumar logo, para que fique PADRONIZADO, essas são as nossas prioridades de hoje, esqueça tudo fora disso, e vamos focar apenas nisso ok ??
 
@@ -258,3 +255,132 @@ IA
 ⬜ Buscar contexto
 ⬜ Responder
 ⬜ Registrar históricos
+
+OPERAÇÃO DE PRIORIDADE – VIME 2.0
+
+1. CONFIGURAÇÕES (PRIORIDADE ATUAL)
+
+O módulo de Configurações será desenvolvido antes do Clicksign, pois é um módulo interno, independente de integrações externas e servirá como base para diversas funcionalidades futuras do sistema.
+
+Estrutura prevista:
+
+• Dashboard de Configurações
+• Cards de resumo
+• CRUD completo
+• Backend
+• Frontend
+• Banco de Dados
+• Modal de edição
+• Tabela de configurações
+
+Cards principais:
+
+⚙️ Configurações Gerais
+👥 Usuários
+🔐 Permissões
+📧 Email SMTP
+💬 WhatsApp
+💵 Financeiro
+📄 Contratos
+🏢 Empresa
+🗄️ Backup
+📝 Logs
+
+Estrutura da tabela Configuracao (Prisma):
+
+id
+empresa
+cnpj
+telefone
+email
+endereco
+cidade
+uf
+cep
+logo
+tema
+corPrimaria
+corSecundaria
+smtpHost
+smtpPorta
+smtpUsuario
+smtpSenha
+asaasToken
+clicksignToken
+whatsappToken
+whatsappNumero
+createdAt
+updatedAt
+
+Estrutura do Frontend:
+
+/configuracoes
+├── components
+├── hooks
+├── services
+├── modal
+├── dashboard
+├── tabela
+└── detalhes
+
+Todo o módulo seguirá exatamente o padrão visual e estrutural utilizado em Unidades, Usuários, Locadores e Financeiro, mantendo a identidade visual e a organização do VIME 2.0.
+
+────────────────────────────────────────
+
+2. NOTIFICAÇÕES
+
+Após Configurações será desenvolvido o módulo de Notificações contendo:
+
+• Central de notificações
+• Notificações lidas
+• Não lidas
+• Criar aviso
+• Filtros
+• Backend
+• Frontend
+
+────────────────────────────────────────
+
+3. FINALIZAÇÃO DO WHATSAPP
+
+Após Notificações será retomado o módulo WhatsApp para conclusão de todas as funcionalidades:
+
+• Configuração
+• Conexão
+• Conversas
+• Envio de mensagens
+• Recebimento de mensagens
+• IA
+• Automações
+
+────────────────────────────────────────
+
+4. PADRONIZAÇÃO VISUAL
+
+Depois dos módulos concluídos será realizada uma revisão completa do sistema para padronizar:
+
+• Cards
+• Botões
+• Cabeçalhos
+• Tabelas
+• Modais
+• Cores
+• Espaçamentos
+• Layout
+
+Todas as telas deverão seguir exatamente o padrão visual do Dashboard.
+
+────────────────────────────────────────
+
+5. PUBLICAÇÃO FINAL
+
+Somente após todas as funcionalidades estarem concluídas será realizada a publicação definitiva do sistema:
+
+• Backend
+• Frontend
+• Domínio
+• SSL
+• Integração WhatsApp
+• Testes finais
+
+Essa estratégia evita retrabalho, reduz custos durante o desenvolvimento e garante que a versão publicada seja completa, estável e pronta para apresentação.

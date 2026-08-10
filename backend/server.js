@@ -7,6 +7,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const { setIO } = require("./src/socket");
+const configuracaoRoutes = require("./src/routes/configuracaoRoutes");
 
 // const iniciarJobs = require("./src/jobs");
 const perfilRoutes = require("./src/routes/perfilRoutes");
@@ -178,6 +179,12 @@ app.use("/logs", logRoutes);
 =========================== */
 
 app.use("/whatsapp", whatsappRoutes);
+
+/* ===========================
+CONFIGURAÇÕES
+=========================== */
+
+app.use("/configuracoes", configuracaoRoutes);
 
 /* ===========================
    404
