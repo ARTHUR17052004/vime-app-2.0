@@ -381,3 +381,36 @@ model WhatsappMensagem {
 
   conversa WhatsappConversa @relation(fields: [conversaId], references: [id])
 }
+model Configuracao {
+  id               Int      @id @default(autoincrement())
+
+  empresa          String
+  cnpj             String?
+  telefone         String?
+  email            String?
+
+  endereco         String?
+  cidade           String?
+  uf               String?
+  cep              String?
+
+  logo             String?
+  tema             String? @default("claro")
+
+  corPrimaria      String? @default("#F4C430")
+  corSecundaria    String? @default("#1F2937")
+
+  smtpHost         String?
+  smtpPorta        Int?
+  smtpUsuario      String?
+  smtpSenha        String?
+
+  asaasToken       String?
+  clicksignToken   String?
+
+  whatsappToken    String?
+  whatsappNumero   String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
