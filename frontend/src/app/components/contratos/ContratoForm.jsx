@@ -398,7 +398,7 @@ export default function ContratoForm({
               }}
             >
 
-              {kitnet.nome}
+              {kitnet.nome || `Kitnet ${kitnet.numero}`}
 
             </option>
 

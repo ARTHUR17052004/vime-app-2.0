@@ -5,7 +5,7 @@ export default function StepDadosPessoais({
   handleChange,
 }) {
   const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
+    "border border-white/10 rounded-xl p-3 text-white bg-white/5 backdrop-blur placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
 
   return (
     <div className="grid grid-cols-2 gap-4">

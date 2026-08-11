@@ -146,7 +146,7 @@ export default function KitnetDetalhesPage() {
             <InfoRow
               icon={<Building2 size={20} />}
               label="Unidade"
-              value={kitnet.unidadeNome || "-"}
+              value={kitnet.unidade?.nome || kitnet.unidadeNome || "-"}
             />
 
             <InfoRow

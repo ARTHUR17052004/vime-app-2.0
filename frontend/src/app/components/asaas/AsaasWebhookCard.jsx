@@ -83,6 +83,13 @@ export default function AsaasWebhookCard() {
           </button>
 
           <button
+            onClick={() =>
+              window.open(
+                "https://docs.asaas.com/docs/webhook",
+                "_blank",
+                "noopener,noreferrer"
+              )
+            }
             className="
               bg-purple-700
               hover:bg-purple-800

@@ -66,7 +66,6 @@ const menuConfig = [
         label: "Solicitações",
         href: "/solicitacoes",
         icon: ClipboardList,
-        badge: "3",
       },
       {
         label: "Vistorias",

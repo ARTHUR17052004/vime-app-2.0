@@ -4,29 +4,80 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MainLayout from "../../components/layout/MainLayout";
 
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function UnidadeDetalhesPage() {
   const params = useParams();
 
   const [unidade, setUnidade] = useState(null);
 
+  const [loading, setLoading] = useState(true);
+
+  const [erro, setErro] = useState("");
+
   useEffect(() => {
-    const unidades = JSON.parse(
-      localStorage.getItem("vime-unidades") || "[]"
-    );
 
-    const encontrada = unidades.find(
-      (item) => String(item.id) === String(params.id)
-    );
+    async function carregarUnidade() {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUnidade(encontrada);
+      try {
+
+        setLoading(true);
+
+        setErro("");
+
+        const resposta = await UnidadeService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        const encontrada = lista.find(
+          (item) => String(item.id) === String(params.id)
+        );
+
+        setUnidade(encontrada || null);
+
+        if (!encontrada) {
+          setErro("Unidade não encontrada.");
+        }
+
+      } catch (err) {
+
+        console.error(err);
+
+        setErro(
+          err.message || "Erro ao carregar unidade."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    }
+
+    if (params.id) {
+      carregarUnidade();
+    }
+
   }, [params.id]);
 
-  if (!unidade) {
+  if (loading) {
     return (
       <MainLayout>
         <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-2xl p-8">
           Carregando unidade...
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (erro || !unidade) {
+    return (
+      <MainLayout>
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-red-300 rounded-2xl p-8">
+          {erro || "Unidade não encontrada."}
         </div>
       </MainLayout>
     );

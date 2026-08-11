@@ -41,6 +41,8 @@ export default function KitnetTable({
     {
       key: "unidadeNome",
       title: "Unidade",
+      render: (item) =>
+        item.unidade?.nome || item.unidadeNome || "-",
     },
 
     {
@@ -63,36 +65,46 @@ export default function KitnetTable({
     {
       key: "status",
       title: "Status",
-      render: (item) => (
+      render: (item) => {
 
-        <span
-          className={`
-            px-3
-            py-1
-            rounded-full
-            text-xs
-            font-semibold
+        const statusLabel = {
+          DISPONIVEL: "Disponível",
+          OCUPADA: "Ocupada",
+          MANUTENCAO: "Manutenção",
+        }[item.status] || item.status;
 
-            ${
-              item.status === "Disponível"
+        return (
 
-                ? "bg-emerald-500/15 text-emerald-400"
+          <span
+            className={`
+              px-3
+              py-1
+              rounded-full
+              text-xs
+              font-semibold
 
-                : item.status === "Ocupada"
+              ${
+                item.status === "DISPONIVEL"
 
-                ? "bg-sky-500/15 text-sky-400"
+                  ? "bg-emerald-500/15 text-emerald-400"
 
-                : "bg-yellow-500/15 text-yellow-400"
+                  : item.status === "OCUPADA"
 
-            }
-          `}
-        >
+                  ? "bg-sky-500/15 text-sky-400"
 
-          {item.status}
+                  : "bg-yellow-500/15 text-yellow-400"
 
-        </span>
+              }
+            `}
+          >
 
-      ),
+            {statusLabel}
+
+          </span>
+
+        );
+
+      },
     },
 
     {

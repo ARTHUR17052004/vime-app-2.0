@@ -2,7 +2,7 @@
 import LocadorDetailsModal from "./LocadorDetailsModal";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import DashboardCard from "../dashboard/DashboardCard"; 
+import DashboardCard from "../dashboard/DashboardCard";
 import {
   Building2,
   Mail,
@@ -10,6 +10,8 @@ import {
   CreditCard,
   MoreVertical,
 } from "lucide-react";
+
+import { UnidadeService } from "@/services/unidades.service";
 
 export default function LocadorCard({
   locadores,
@@ -28,14 +30,27 @@ export default function LocadorCard({
 
   useEffect(() => {
 
-    const dados = JSON.parse(
-      localStorage.getItem(
-        "vime-unidades"
-      ) || "[]"
-    );
+    async function carregarUnidades() {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUnidades(dados);
+      try {
+
+        const resposta = await UnidadeService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        setUnidades(lista);
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarUnidades();
 
   }, []);
 

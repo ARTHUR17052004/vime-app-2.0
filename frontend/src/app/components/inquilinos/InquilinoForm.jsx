@@ -176,7 +176,9 @@ export default function InquilinoForm({
           : "",
 
       unidadeNome:
-        kitnetSelecionada?.unidadeNome || "",
+        kitnetSelecionada?.unidade?.nome ||
+        kitnetSelecionada?.unidadeNome ||
+        "",
 
     });
 
@@ -192,34 +194,34 @@ export default function InquilinoForm({
       <div className="flex items-center justify-center gap-4">
 
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
             step >= 1
-              ? "bg-green-700"
-              : "bg-gray-300"
+              ? "bg-emerald-600"
+              : "bg-white/10"
           }`}
         >
           1
         </div>
 
-        <div className="w-16 h-1 bg-gray-300" />
+        <div className="w-16 h-1 bg-white/10" />
 
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
             step >= 2
-              ? "bg-green-700"
-              : "bg-gray-300"
+              ? "bg-emerald-600"
+              : "bg-white/10"
           }`}
         >
           2
         </div>
 
-        <div className="w-16 h-1 bg-gray-300" />
+        <div className="w-16 h-1 bg-white/10" />
 
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${
             step >= 3
-              ? "bg-green-700"
-              : "bg-gray-300"
+              ? "bg-emerald-600"
+              : "bg-white/10"
           }`}
         >
           3
@@ -262,7 +264,7 @@ export default function InquilinoForm({
           <button
             type="button"
             onClick={voltarStep}
-            className="px-6 py-3 rounded-lg border border-gray-300"
+            className="px-6 py-3 rounded-lg border border-white/10 text-white hover:bg-white/5 transition-all"
           >
             Voltar
           </button>
@@ -278,7 +280,7 @@ export default function InquilinoForm({
           <button
             type="button"
             onClick={proximoStep}
-            className="bg-green-600 text-white px-6 py-3 rounded-lg"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
           >
             Continuar
           </button>
@@ -287,7 +289,7 @@ export default function InquilinoForm({
 
           <button
             type="submit"
-            className="bg-green-700 text-white px-6 py-3 rounded-lg"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-lg font-semibold transition-all"
           >
             {inquilino
               ? "Salvar Alterações"

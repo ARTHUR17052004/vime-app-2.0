@@ -5,6 +5,9 @@ import { useParams } from "next/navigation";
 
 import MainLayout from "../../components/layout/MainLayout";
 
+import { LocadorService } from "@/services/locadores.service";
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function DetalhesLocadorPage() {
   const params = useParams();
 
@@ -12,38 +15,76 @@ export default function DetalhesLocadorPage() {
   const [totalUnidades, setTotalUnidades] =
     useState(0);
 
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const locadores = JSON.parse(
-      localStorage.getItem(
-        "vime-locadores"
-      ) || "[]"
-    );
 
-    const unidades = JSON.parse(
-      localStorage.getItem(
-        "vime-unidades"
-      ) || "[]"
-    );
+    async function carregarLocador() {
 
-    const encontrado = locadores.find(
-      (item) =>
-        String(item.id) ===
-        String(params.id)
-    );
+      try {
 
-    setLocador(encontrado);
+        setLoading(true);
 
-    if (encontrado) {
-      const quantidade =
-        unidades.filter(
-          (u) =>
-            String(u.locadorId) ===
-            String(encontrado.id)
-        ).length;
+        const [respostaLocadores, respostaUnidades] =
+          await Promise.all([
+            LocadorService.listar(),
+            UnidadeService.listar(),
+          ]);
 
-      setTotalUnidades(quantidade);
+        const locadores = Array.isArray(respostaLocadores)
+          ? respostaLocadores
+          : respostaLocadores.data || [];
+
+        const unidades = Array.isArray(respostaUnidades)
+          ? respostaUnidades
+          : respostaUnidades.data || [];
+
+        const encontrado = locadores.find(
+          (item) =>
+            String(item.id) ===
+            String(params.id)
+        );
+
+        setLocador(encontrado || null);
+
+        if (encontrado) {
+          const quantidade =
+            unidades.filter(
+              (u) =>
+                String(u.locadorId) ===
+                String(encontrado.id)
+            ).length;
+
+          setTotalUnidades(quantidade);
+        }
+
+      } catch (err) {
+
+        console.error(err);
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
     }
+
+    if (params.id) {
+      carregarLocador();
+    }
+
   }, [params.id]);
+
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-3xl p-10">
+          Carregando locador...
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!locador) {
     return (

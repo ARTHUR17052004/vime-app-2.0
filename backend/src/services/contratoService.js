@@ -36,6 +36,9 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
+  if (dados.dataInicio) dados.dataInicio = new Date(dados.dataInicio);
+  if (dados.dataFim) dados.dataFim = new Date(dados.dataFim);
+
   const kitnet = await prisma.kitnet.findUnique({
     where: {
       id: dados.kitnetId
@@ -181,37 +184,48 @@ const criar = async (dados) => {
     valorNovo: contrato
   });
 
-  await ClicksignApi.criarDocumento({
-    contratoId: contrato.id,
-    nome: `Contrato ${contrato.id}`,
-    arquivo: "contrato.pdf"
-  });
+  try {
 
-  await ClicksignApi.enviarAssinatura(
-    contrato.id,
-    {
-      email: inquilino.email
-    }
-  );
+    await ClicksignApi.criarDocumento({
+      contratoId: contrato.id,
+      nome: `Contrato ${contrato.id}`,
+      arquivo: "contrato.pdf"
+    });
 
-  await AsaasApi.criarCliente({
-    name: inquilino.nome,
-    email: inquilino.email,
-    cpfCnpj: inquilino.cpf,
-    phone: inquilino.telefone
-  });
+    await ClicksignApi.enviarAssinatura(
+      contrato.id,
+      {
+        email: inquilino.email
+      }
+    );
 
-  await AsaasApi.criarCobranca({
-    customer: inquilino.cpf,
-    billingType: "BOLETO",
-    value: contrato.valorAluguel,
-    dueDate: contrato.dataInicio
-  });
+    await AsaasApi.criarCliente({
+      name: inquilino.nome,
+      email: inquilino.email,
+      cpfCnpj: inquilino.cpf,
+      phone: inquilino.telefone
+    });
 
-  await WhatsappService.enviarMensagem({
-    telefone: inquilino.telefone,
-    mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso e enviado para assinatura.`
-  });
+    await AsaasApi.criarCobranca({
+      customer: inquilino.cpf,
+      billingType: "BOLETO",
+      value: contrato.valorAluguel,
+      dueDate: contrato.dataInicio
+    });
+
+    await WhatsappService.enviarMensagem({
+      numero: inquilino.telefone,
+      mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso e enviado para assinatura.`
+    });
+
+  } catch (integracaoError) {
+
+    console.error(
+      "Erro em integração externa ao criar contrato (Clicksign/Asaas/WhatsApp):",
+      integracaoError.message
+    );
+
+  }
 
   await logService.registrar({
     usuarioId: null,
@@ -264,6 +278,9 @@ const criar = async (dados) => {
 };
 
 const atualizar = async (id, dados) => {
+
+  if (dados.dataInicio) dados.dataInicio = new Date(dados.dataInicio);
+  if (dados.dataFim) dados.dataFim = new Date(dados.dataFim);
 
   const anterior = await prisma.contrato.findUnique({
     where: { id }
@@ -426,10 +443,14 @@ const encerrar = async (id) => {
     descricao: `Contrato ${contrato.id} encerrado.`
   });
 
-  await WhatsappService.enviarMensagem({
-    telefone: contrato.inquilino?.telefone,
-    mensagem: "Seu contrato foi encerrado."
-  });
+  try {
+    await WhatsappService.enviarMensagem({
+      numero: contrato.inquilino?.telefone,
+      mensagem: "Seu contrato foi encerrado."
+    });
+  } catch (whatsappError) {
+    console.error("Erro ao enviar WhatsApp de encerramento:", whatsappError.message);
+  }
 
   return contratoEncerrado;
 
@@ -476,10 +497,14 @@ const inadimplente = async (id) => {
     descricao: `Contrato ${contrato.id} marcado como inadimplente.`
   });
 
-  await WhatsappService.enviarMensagem({
-    telefone: contrato.inquilino?.telefone,
-    mensagem: "Identificamos um débito em aberto. Entre em contato com a administração."
-  });
+  try {
+    await WhatsappService.enviarMensagem({
+      numero: contrato.inquilino?.telefone,
+      mensagem: "Identificamos um débito em aberto. Entre em contato com a administração."
+    });
+  } catch (whatsappError) {
+    console.error("Erro ao enviar WhatsApp de inadimplência:", whatsappError.message);
+  }
 
   return contrato;
 

@@ -156,19 +156,19 @@ export default function KitnetsPage() {
 
   const disponiveis = kitnets.filter(
 
-    (k) => k.status === "Disponível"
+    (k) => k.status === "DISPONIVEL"
 
   ).length;
 
   const ocupadas = kitnets.filter(
 
-    (k) => k.status === "Ocupada"
+    (k) => k.status === "OCUPADA"
 
   ).length;
 
   const manutencao = kitnets.filter(
 
-    (k) => k.status === "Manutenção"
+    (k) => k.status === "MANUTENCAO"
 
   ).length;
 
