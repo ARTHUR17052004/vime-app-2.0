@@ -50,9 +50,9 @@ export default function VistoriaProximasVistorias({
 
   return (
 
-    <div className="bg-white rounded-3xl shadow p-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+      <h2 className="text-2xl font-bold text-white mb-6">
 
         Próximas Execuções
 
@@ -61,7 +61,7 @@ export default function VistoriaProximasVistorias({
       {proximas.length ===
       0 ? (
 
-        <p className="text-gray-800">
+        <p className="text-gray-300">
           Nenhuma vistoria cadastrada.
         </p>
 
@@ -85,6 +85,7 @@ export default function VistoriaProximasVistorias({
                   }
                   className="
                     border
+                    border-white/10
                     rounded-2xl
                     p-5
                   "
@@ -94,7 +95,7 @@ export default function VistoriaProximasVistorias({
 
                     <div>
 
-                      <h3 className="font-bold text-gray-900 text-lg">
+                      <h3 className="font-bold text-white text-lg">
 
                         {
                           vistoria.nomeVistoria
@@ -102,7 +103,7 @@ export default function VistoriaProximasVistorias({
 
                       </h3>
 
-                      <div className="text-gray-700 mt-1">
+                      <div className="text-gray-400 mt-1">
 
                         Responsável:
                         {" "}
@@ -112,7 +113,7 @@ export default function VistoriaProximasVistorias({
 
                       </div>
 
-                      <div className="text-gray-700">
+                      <div className="text-gray-400">
 
                         Periodicidade:
                         {" "}
@@ -126,7 +127,7 @@ export default function VistoriaProximasVistorias({
 
                     <div className="text-right">
 
-                      <div className="font-semibold text-green-700">
+                      <div className="font-semibold text-emerald-400">
 
                         {
                           vistoria.dataProxima
@@ -134,7 +135,7 @@ export default function VistoriaProximasVistorias({
 
                       </div>
 
-                      <div className="text-sm text-gray-700 mt-1">
+                      <div className="text-sm text-gray-400 mt-1">
 
                         {dias > 0
                           ? `${dias} dia(s)`

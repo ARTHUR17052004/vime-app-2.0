@@ -81,7 +81,6 @@ model Usuario {
 
   senha String
 
-  // TEMPORÁRIO: opcional para permitir a migration
   perfilId String?
 
   perfil Perfil? @relation(fields: [perfilId], references: [id])
@@ -90,6 +89,27 @@ model Usuario {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  notificacoes Notificacao[]
+}
+
+model Notificacao {
+  id          String   @id @default(uuid())
+
+  usuarioId   String?
+
+  origem      String   // ex: "WHATSAPP", "ASAAS", "CLICKSIGN", "SISTEMA"
+
+  titulo      String
+
+  mensagem    String
+
+  lida        Boolean  @default(false)
+  lidaEm      DateTime?
+
+  createdAt   DateTime @default(now())
+
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
 }
 
 model Perfil {

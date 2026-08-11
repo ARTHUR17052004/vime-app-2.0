@@ -28,14 +28,14 @@ export default function AsaasStatusCard() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
-        <h2 className="text-2xl font-bold text-gray-800">
+      <div className="px-8 py-6 border-b border-white/[0.07]">
+        <h2 className="text-2xl font-bold text-white">
           Status da Integração
         </h2>
 
-        <p className="text-gray-500 mt-1">
+        <p className="text-gray-400 mt-1">
           Acompanhe rapidamente a situação da conexão com o Asaas.
         </p>
       </div>
@@ -55,13 +55,13 @@ export default function AsaasStatusCard() {
                 className={`w-3 h-3 rounded-full ${item.cor}`}
               />
 
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-200">
                 {item.titulo}
               </span>
 
             </div>
 
-            <span className="font-semibold text-gray-800">
+            <span className="font-semibold text-white">
               {item.valor}
             </span>
 
@@ -71,13 +71,13 @@ export default function AsaasStatusCard() {
 
       </div>
 
-      <div className="px-8 py-4 bg-gray-50 border-t flex justify-between">
+      <div className="px-8 py-4 border-t border-white/[0.07] flex justify-between">
 
-        <span className="text-gray-500">
+        <span className="text-gray-400">
           Última verificação
         </span>
 
-        <span className="font-semibold text-green-600">
+        <span className="font-semibold text-green-400">
           Agora mesmo
         </span>
 

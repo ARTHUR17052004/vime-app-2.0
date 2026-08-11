@@ -33,15 +33,15 @@ export default function AsaasDiagnostico() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
+      <div className="px-8 py-6 border-b border-white/[0.07]">
 
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-2xl font-bold text-white">
           Diagnóstico da Integração
         </h2>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-400 mt-2">
           Verifique rapidamente a saúde da integração com o Asaas.
         </p>
 
@@ -58,9 +58,10 @@ export default function AsaasDiagnostico() {
               justify-between
               items-center
               border
+              border-white/[0.07]
               rounded-xl
               p-4
-              hover:bg-gray-50
+              hover:bg-white/5
               transition
             "
           >
@@ -71,13 +72,13 @@ export default function AsaasDiagnostico() {
                 className={`w-3 h-3 rounded-full ${item.cor}`}
               />
 
-              <span className="font-semibold text-gray-700">
+              <span className="font-semibold text-gray-200">
                 {item.nome}
               </span>
 
             </div>
 
-            <span className="font-semibold text-gray-800">
+            <span className="font-semibold text-white">
               {item.status}
             </span>
 
@@ -87,13 +88,13 @@ export default function AsaasDiagnostico() {
 
       </div>
 
-      <div className="border-t bg-gray-50 px-8 py-5 flex justify-between">
+      <div className="border-t border-white/[0.07] px-8 py-5 flex justify-between">
 
-        <span className="text-gray-500">
+        <span className="text-gray-400">
           Última sincronização
         </span>
 
-        <span className="font-bold text-green-700">
+        <span className="font-bold text-green-400">
           Hoje • 14:35
         </span>
 

@@ -39,30 +39,6 @@ export default function LocadorCard({
 
   }, []);
 
-  if (locadores.length === 0) {
-
-    return (
-
-      <div className="bg-white rounded-2xl shadow p-10 text-center">
-
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3">
-
-          Módulo Locadores
-
-        </h2>
-
-        <p className="text-gray-500">
-
-          Nenhum locador cadastrado ainda.
-
-        </p>
-
-      </div>
-
-    );
-
-  }
-
   return (
 
     <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">

@@ -6,14 +6,14 @@ export default function AsaasConfiguracaoForm() {
   const [mostrarApi, setMostrarApi] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
-        <h2 className="text-2xl font-bold text-gray-800">
+      <div className="px-8 py-6 border-b border-white/[0.07]">
+        <h2 className="text-2xl font-bold text-white">
           Configuração da Integração
         </h2>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-400 mt-2">
           Configure sua conta Asaas para utilização no VIME.
         </p>
       </div>
@@ -21,18 +21,18 @@ export default function AsaasConfiguracaoForm() {
       <div className="p-8 grid md:grid-cols-2 gap-6">
 
         <div>
-          <label className="block text-sm font-semibold mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Ambiente
           </label>
 
-          <select className="w-full border rounded-xl p-3">
-            <option>Sandbox</option>
-            <option>Produção</option>
+          <select className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white">
+            <option className="bg-[#1b2430]">Sandbox</option>
+            <option className="bg-[#1b2430]">Produção</option>
           </select>
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Wallet ID
           </label>
 
@@ -44,7 +44,7 @@ export default function AsaasConfiguracaoForm() {
 
         <div className="md:col-span-2">
 
-          <label className="block text-sm font-semibold mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             API Key
           </label>
 
@@ -60,7 +60,7 @@ export default function AsaasConfiguracaoForm() {
               onClick={() =>
                 setMostrarApi(!mostrarApi)
               }
-              className="px-5 rounded-xl border hover:bg-gray-100"
+              className="px-5 rounded-xl border border-white/[0.07] text-gray-200 hover:bg-white/5"
             >
               {mostrarApi ? "Ocultar" : "Mostrar"}
             </button>
@@ -70,7 +70,7 @@ export default function AsaasConfiguracaoForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Taxa Administrativa (%)
           </label>
 
@@ -81,7 +81,7 @@ export default function AsaasConfiguracaoForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Token do Webhook
           </label>
 
@@ -93,7 +93,7 @@ export default function AsaasConfiguracaoForm() {
 
       </div>
 
-      <div className="border-t px-8 py-6 flex flex-wrap gap-4">
+      <div className="border-t border-white/[0.07] px-8 py-6 flex flex-wrap gap-4">
 
         <button
           className="

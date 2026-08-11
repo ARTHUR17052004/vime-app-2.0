@@ -43,25 +43,25 @@ export default function AsaasTabela() {
   const badge = (status) => {
     switch (status) {
       case "Recebido":
-        return "bg-green-100 text-green-700";
+        return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
 
       case "Pendente":
-        return "bg-yellow-100 text-yellow-700";
+        return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20";
 
       case "Atrasado":
-        return "bg-red-100 text-red-700";
+        return "bg-red-500/10 text-red-400 border border-red-500/20";
 
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-white/5 text-gray-300 border border-white/10";
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 overflow-hidden">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
 
-      <div className="px-6 py-5 border-b">
+      <div className="px-6 py-5 border-b border-white/[0.07]">
 
-        <h2 className="text-xl font-bold text-gray-800">
+        <h2 className="text-xl font-bold text-white">
           Cobranças
         </h2>
 
@@ -71,31 +71,31 @@ export default function AsaasTabela() {
 
         <table className="w-full">
 
-          <thead className="bg-gray-50">
+          <thead className="bg-white/5">
 
             <tr>
 
-              <th className="text-left p-4 text-gray-700">
+              <th className="text-left p-4 text-gray-300">
                 Cliente
               </th>
 
-              <th className="text-left p-4 text-gray-700">
+              <th className="text-left p-4 text-gray-300">
                 Valor
               </th>
 
-              <th className="text-left p-4 text-gray-700">
+              <th className="text-left p-4 text-gray-300">
                 Vencimento
               </th>
 
-              <th className="text-left p-4 text-gray-700">
+              <th className="text-left p-4 text-gray-300">
                 Forma
               </th>
 
-              <th className="text-left p-4 text-gray-700">
+              <th className="text-left p-4 text-gray-300">
                 Status
               </th>
 
-              <th className="text-right p-4 text-gray-700">
+              <th className="text-right p-4 text-gray-300">
                 Ações
               </th>
 
@@ -109,30 +109,30 @@ export default function AsaasTabela() {
 
               <tr
                 key={item.id}
-                className="border-t hover:bg-gray-50"
+                className="border-t border-white/[0.07] hover:bg-white/5"
               >
 
                 <td className="p-4">
 
-                  <div className="font-semibold text-gray-800">
+                  <div className="font-semibold text-white">
                     {item.cliente}
                   </div>
 
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-gray-400">
                     {item.documento}
                   </div>
 
                 </td>
 
-                <td className="p-4 font-semibold text-gray-800">
+                <td className="p-4 font-semibold text-white">
                   {item.valor}
                 </td>
 
-                <td className="p-4 text-gray-700">
+                <td className="p-4 text-gray-300">
                   {item.vencimento}
                 </td>
 
-                <td className="p-4 text-gray-700">
+                <td className="p-4 text-gray-300">
                   {item.forma}
                 </td>
 
@@ -158,7 +158,9 @@ export default function AsaasTabela() {
                         py-2
                         rounded-lg
                         border
-                        hover:bg-gray-100
+                        border-white/[0.07]
+                        text-gray-200
+                        hover:bg-white/5
                       "
                     >
                       Visualizar
@@ -191,15 +193,15 @@ export default function AsaasTabela() {
 
       </div>
 
-      <div className="px-6 py-4 border-t flex justify-between items-center">
+      <div className="px-6 py-4 border-t border-white/[0.07] flex justify-between items-center">
 
-        <span className="text-gray-500 text-sm">
+        <span className="text-gray-400 text-sm">
           Exibindo 4 cobranças
         </span>
 
         <div className="flex gap-2">
 
-          <button className="border rounded-lg px-4 py-2 hover:bg-gray-100">
+          <button className="border border-white/[0.07] text-gray-200 rounded-lg px-4 py-2 hover:bg-white/5">
             Anterior
           </button>
 
@@ -207,7 +209,7 @@ export default function AsaasTabela() {
             1
           </button>
 
-          <button className="border rounded-lg px-4 py-2 hover:bg-gray-100">
+          <button className="border border-white/[0.07] text-gray-200 rounded-lg px-4 py-2 hover:bg-white/5">
             Próxima
           </button>
 

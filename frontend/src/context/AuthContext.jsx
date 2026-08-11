@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
+import { api } from "../services/api";
 
 export const AuthContext = createContext({});
 
@@ -23,20 +24,24 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  function login(token, usuario) {
-    document.cookie = `token=${token}; path=/; max-age=86400`;
+ function login(token, usuario) {
 
-    localStorage.setItem(
-      "usuario",
-      JSON.stringify(usuario)
-    );
+  localStorage.setItem("token", token);
 
-    setUsuario(usuario);
-  }
+  localStorage.setItem(
+    "usuario",
+    JSON.stringify(usuario)
+  );
 
-  function logout() {
-    document.cookie =
-      "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
+  setUsuario(usuario);
+}
+
+  async function logout() {
+    try {
+      await api("/auth/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Erro ao fazer logout no servidor:", error);
+    }
 
     localStorage.removeItem("usuario");
 

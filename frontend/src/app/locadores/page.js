@@ -7,13 +7,15 @@ import MainLayout from "../components/layout/MainLayout";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
+import FadeIn from "../components/ui/FadeIn";
 
 import SearchInput from "../components/common/SearchInput";
 
 import LocadorModal from "../components/locadores/LocadorModal";
 import LocadorForm from "../components/locadores/LocadorForm";
-import LocadorCard from "../components/locadores/LocadorCard";
+import LocadorCardList from "../components/locadores/LocadorCardList";
 
 import { LocadorService } from "@/services/locadores.service";
 
@@ -172,17 +174,21 @@ export default function LocadoresPage() {
 
       <PageContainer>
 
-        <PageHeader
-          title="Locadores"
-          subtitle="Gerencie todos os proprietários cadastrados."
-          count={locadores.length}
-          countLabel="locador(es) cadastrado(s)"
-          actions={
-            <Button onClick={novoLocador}>
-              + Novo Locador
-            </Button>
-          }
-        />
+        <FadeIn>
+
+          <PageHeader
+            title="Locadores"
+            subtitle="Gerencie todos os proprietários cadastrados."
+            count={locadores.length}
+            countLabel="locador(es) cadastrado(s)"
+            actions={
+              <Button onClick={novoLocador}>
+                + Novo Locador
+              </Button>
+            }
+          />
+
+        </FadeIn>
 
         {loading && (
 
@@ -208,27 +214,35 @@ export default function LocadoresPage() {
 
           <>
 
-            <div className="mt-8">
+            <FadeIn delay={0.10}>
 
-              <SearchInput
-                value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
-                }
-                placeholder="Pesquisar locador..."
-              />
+              <PageSection>
 
-            </div>
+                <SearchInput
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
+                  placeholder="Pesquisar locador..."
+                />
 
-            <div className="mt-8">
+              </PageSection>
 
-              <LocadorCard
-                locadores={locadoresFiltrados}
-                onDelete={excluirLocador}
-                onEdit={editarLocador}
-              />
+            </FadeIn>
 
-            </div>
+            <FadeIn delay={0.20}>
+
+              <PageSection>
+
+                <LocadorCardList
+                  locadores={locadoresFiltrados}
+                  onDelete={excluirLocador}
+                  onEdit={editarLocador}
+                />
+
+              </PageSection>
+
+            </FadeIn>
 
           </>
 

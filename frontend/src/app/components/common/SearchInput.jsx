@@ -36,11 +36,14 @@ export default function SearchInput({
 
         rounded-2xl
 
-        bg-white/5
+        bg-gradient-to-br
+        from-[#202a36]/95
+        via-[#1b2430]/96
+        to-[#151c25]/96
         backdrop-blur-xl
 
         border
-        border-white/10
+        border-white/[0.07]
 
         px-5
 

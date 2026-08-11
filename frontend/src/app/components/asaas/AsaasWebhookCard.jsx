@@ -19,15 +19,15 @@ export default function AsaasWebhookCard() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
+      <div className="px-8 py-6 border-b border-white/[0.07]">
 
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-2xl font-bold text-white">
           Webhook do Asaas
         </h2>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-400 mt-2">
           Configure esta URL dentro do painel do Asaas para que o
           VIME receba automaticamente os eventos de pagamento.
         </p>
@@ -36,7 +36,7 @@ export default function AsaasWebhookCard() {
 
       <div className="p-8">
 
-        <label className="block text-sm font-semibold mb-3">
+        <label className="block text-sm font-semibold text-gray-200 mb-3">
           URL do Webhook
         </label>
 
@@ -50,7 +50,6 @@ export default function AsaasWebhookCard() {
               border
               rounded-xl
               p-3
-              bg-gray-50
             "
           />
 
@@ -98,9 +97,11 @@ export default function AsaasWebhookCard() {
           <button
             className="
               border
+              border-white/[0.07]
               rounded-xl
               py-3
-              hover:bg-gray-100
+              text-gray-200
+              hover:bg-white/5
             "
           >
             Gerar Novo Token
@@ -110,13 +111,13 @@ export default function AsaasWebhookCard() {
 
       </div>
 
-      <div className="border-t bg-gray-50 px-8 py-4">
+      <div className="border-t border-white/[0.07] px-8 py-4">
 
         <div className="flex items-center gap-3">
 
           <div className="w-3 h-3 rounded-full bg-green-500" />
 
-          <span className="font-medium text-gray-700">
+          <span className="font-medium text-gray-200">
             Webhook pronto para configuração.
           </span>
 

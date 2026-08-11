@@ -7,7 +7,9 @@ import MainLayout from "../components/layout/MainLayout";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
+import FadeIn from "../components/ui/FadeIn";
 
 import SearchInput from "../components/common/SearchInput";
 
@@ -296,48 +298,64 @@ export default function UnidadesPage() {
 
           )}
 
-          <PageHeader
-            title="Unidades"
-            subtitle="Gerencie todas as unidades cadastradas."
-            count={unidades.length}
-            countLabel="unidade(s) cadastrada(s)"
-            actions={
+          <FadeIn delay={0}>
 
-              <Button
-                onClick={() => {
+            <PageHeader
+              title="Unidades"
+              subtitle="Gerencie todas as unidades cadastradas."
+              count={unidades.length}
+              countLabel="unidade(s) cadastrada(s)"
+              actions={
 
-                  setEditingUnit(null);
+                <Button
+                  onClick={() => {
 
-                  setModalOpen(true);
+                    setEditingUnit(null);
 
-                }}
-              >
+                    setModalOpen(true);
 
-                + Nova Unidade
+                  }}
+                >
 
-              </Button>
+                  + Nova Unidade
 
-            }
-          />
+                </Button>
 
-          <SearchInput
-            value={search}
-            onChange={(e) =>
-              setSearch(e.target.value)
-            }
-            placeholder="Buscar por nome, endereço ou cidade..."
-          />
-
-          <div className="mt-8">
-
-            <UnitCardList
-              unidades={unidadesFiltradas}
-              onView={visualizarUnidade}
-              onEdit={editarUnidade}
-              onDelete={excluirUnidade}
+              }
             />
 
-          </div>
+          </FadeIn>
+
+          <FadeIn delay={0.10}>
+
+            <PageSection>
+
+              <SearchInput
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Buscar por nome, endereço ou cidade..."
+              />
+
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.20}>
+
+            <PageSection>
+
+              <UnitCardList
+                unidades={unidadesFiltradas}
+                onView={visualizarUnidade}
+                onEdit={editarUnidade}
+                onDelete={excluirUnidade}
+              />
+
+            </PageSection>
+
+          </FadeIn>
                     <UnitModal
             isOpen={modalOpen}
             onClose={() => {

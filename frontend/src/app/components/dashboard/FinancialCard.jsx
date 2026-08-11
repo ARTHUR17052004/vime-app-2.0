@@ -1,25 +1,64 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Wallet } from "lucide-react";
 
 import Panel from "../ui/Panel";
 import RevenueChart from "../charts/RevenueChart";
 
 import { formatCurrency } from "@/utils/formatCurrency";
+import { DashboardService } from "@/services/dashboard.service";
+
+const ANO_ATUAL = new Date().getFullYear();
+
+const ANOS = [
+  ANO_ATUAL,
+  ANO_ATUAL - 1,
+  ANO_ATUAL - 2,
+  ANO_ATUAL - 3,
+  ANO_ATUAL - 4,
+];
 
 export default function FinancialCard({ financeiro }) {
   const recebido = financeiro?.recebido ?? 0;
   const pendente = financeiro?.pendente ?? 0;
   const atrasado = financeiro?.atrasado ?? 0;
 
+  const [ano, setAno] = useState(ANO_ATUAL);
+  const [receitasMensais, setReceitasMensais] = useState(undefined);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        const dados = await DashboardService.receitasMensais(ano);
+
+        if (ativo) {
+          setReceitasMensais(dados);
+        }
+      } catch (err) {
+        console.error("/dashboard/receitas-mensais", err);
+      }
+    }
+
+    carregar();
+
+    return () => {
+      ativo = false;
+    };
+  }, [ano]);
+
   return (
     <Panel
       label="FINANCEIRO"
-      title="Receitas nos últimos 6 meses"
+      title="Receitas mensais"
       action={
         <div className="flex items-center gap-3">
 
-          <button
+          <select
+            value={ano}
+            onChange={(e) => setAno(Number(e.target.value))}
             className="
               h-10
               px-5
@@ -39,8 +78,12 @@ export default function FinancialCard({ financeiro }) {
               hover:border-emerald-500/20
             "
           >
-            Este ano ▼
-          </button>
+            {ANOS.map((opcao) => (
+              <option key={opcao} value={opcao}>
+                {opcao}
+              </option>
+            ))}
+          </select>
 
           <div
             className="
@@ -93,7 +136,7 @@ export default function FinancialCard({ financeiro }) {
             overflow-hidden
           "
         >
-          <RevenueChart />
+          <RevenueChart data={receitasMensais} />
         </div>
 
         {/* RESUMO */}

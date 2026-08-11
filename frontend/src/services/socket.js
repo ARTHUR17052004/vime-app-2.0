@@ -1,11 +1,8 @@
 import { io } from "socket.io-client";
-
 import { API_URL } from "../config/api";
 
 export const socket = io(API_URL, {
-
   transports: ["websocket"],
-
   autoConnect: true,
-
+  withCredentials: true,
 });

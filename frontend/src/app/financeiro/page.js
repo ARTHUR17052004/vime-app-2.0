@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
+import FadeIn from "../components/ui/FadeIn";
+
 import FinanceiroModal from "../components/financeiro/FinanceiroModal";
 
 import ReceitaForm from "../components/financeiro/ReceitaForm";
@@ -218,33 +220,43 @@ export default function FinanceiroPage() {
 
   <PageContainer>
 
-    <PageHeader
-      total={receitas.length}
-      onNovaReceita={() => {
-        setTipoModal("receita");
-        setModalOpen(true);
-      }}
-      onNovaDespesa={() => {
-        setTipoModal("despesa");
-        setModalOpen(true);
-      }}
-    />
+    <FadeIn>
+      <PageHeader
+        total={receitas.length}
+        onNovaReceita={() => {
+          setTipoModal("receita");
+          setModalOpen(true);
+        }}
+        onNovaDespesa={() => {
+          setTipoModal("despesa");
+          setModalOpen(true);
+        }}
+      />
+    </FadeIn>
 
-    <FinanceiroStats
-      receitaPrevista={receitaPrevista}
-      totalDespesas={totalDespesas}
-      lucroLiquido={lucroLiquido}
-    />
+    <FadeIn delay={0.10}>
+      <FinanceiroStats
+        receitaPrevista={receitaPrevista}
+        totalDespesas={totalDespesas}
+        lucroLiquido={lucroLiquido}
+      />
+    </FadeIn>
 
-    <FinanceiroFilters
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-    />
+    <FadeIn delay={0.20}>
+      <FinanceiroFilters
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </FadeIn>
 
-    <FinanceiroTabs
-      abaSelecionada={abaSelecionada}
-      setAbaSelecionada={setAbaSelecionada}
-    />
+    <FadeIn delay={0.25}>
+      <FinanceiroTabs
+        abaSelecionada={abaSelecionada}
+        setAbaSelecionada={setAbaSelecionada}
+      />
+    </FadeIn>
+
+    <FadeIn delay={0.30}>
 
     {abaSelecionada === "visao-geral" && (
       <div className="space-y-8">
@@ -310,6 +322,8 @@ export default function FinanceiroPage() {
     {abaSelecionada === "asaas" && (
       <FinanceiroAsaas />
     )}
+
+    </FadeIn>
 
     <FinanceiroModal
       isOpen={modalOpen}

@@ -40,6 +40,9 @@ export default function UsuariosTable({
     {
       key: "perfil",
       title: "Perfil",
+
+      render: (usuario) =>
+        usuario.perfil?.nome || "—",
     },
 
     {

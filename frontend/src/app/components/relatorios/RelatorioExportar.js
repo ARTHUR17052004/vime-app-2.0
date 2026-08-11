@@ -26,9 +26,9 @@ export default function RelatorioExportar() {
 
   return (
 
-    <div className="bg-white rounded-3xl shadow border p-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">
+      <h2 className="text-2xl font-bold text-white mb-6">
 
         Exportações
 

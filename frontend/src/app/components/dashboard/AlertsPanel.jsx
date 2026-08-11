@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Card from "../ui/Card";
 import {
   ShieldAlert,
@@ -57,7 +58,8 @@ export default function AlertsPanel({
 
         </div>
 
-        <button
+        <Link
+          href="/contratos"
           className="
             flex
             items-center
@@ -72,7 +74,7 @@ export default function AlertsPanel({
 
           <ChevronRight size={16} />
 
-        </button>
+        </Link>
 
       </div>
 

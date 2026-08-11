@@ -2,6 +2,8 @@
 
 import MainLayout from "../components/layout/MainLayout";
 
+import FadeIn from "../components/ui/FadeIn";
+
 import ClicksignHeader from "../components/clicksign/ClicksignHeader";
 import DashboardCards from "../components/clicksign/DashboardCards";
 
@@ -19,49 +21,69 @@ export default function ClicksignPage() {
 
       <div className="space-y-6">
 
-        <ClicksignHeader />
+        <FadeIn delay={0}>
 
-        <DashboardCards />
+          <ClicksignHeader />
+
+        </FadeIn>
+
+        <FadeIn delay={0.10}>
+
+          <DashboardCards />
+
+        </FadeIn>
 
         {/* DOCUMENTOS + LATERAL */}
 
-        <div className="grid gap-6 xl:grid-cols-3">
+        <FadeIn delay={0.20}>
 
-          <div className="xl:col-span-2">
+          <div className="grid gap-6 xl:grid-cols-3">
 
-            <DocumentosCard />
+            <div className="xl:col-span-2">
+
+              <DocumentosCard />
+
+            </div>
+
+            <div className="space-y-6">
+
+              <PendenciasCard />
+
+              <AcessoRapido />
+
+            </div>
 
           </div>
 
-          <div className="space-y-6">
-
-            <PendenciasCard />
-
-            <AcessoRapido />
-
-          </div>
-
-        </div>
+        </FadeIn>
 
         {/* SEGUNDA LINHA */}
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <FadeIn delay={0.30}>
 
-          <TemplatesCard />
+          <div className="grid gap-6 xl:grid-cols-2">
 
-          <TokenCard />
+            <TemplatesCard />
 
-        </div>
+            <TokenCard />
+
+          </div>
+
+        </FadeIn>
 
         {/* TERCEIRA LINHA */}
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <FadeIn delay={0.40}>
 
-          <HistoricoCard />
+          <div className="grid gap-6 xl:grid-cols-2">
 
-          <AssinantesCard />
+            <HistoricoCard />
 
-        </div>
+            <AssinantesCard />
+
+          </div>
+
+        </FadeIn>
 
       </div>
 

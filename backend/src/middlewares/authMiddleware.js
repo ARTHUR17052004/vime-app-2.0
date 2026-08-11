@@ -1,38 +1,40 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
+  console.log("===== AUTH =====");
+  console.log("Cookies:", req.cookies);
+  console.log("Headers:", req.headers.authorization);
 
-  const authHeader = req.headers.authorization;
+  const token =
+    req.cookies?.token ||
+    req.headers.authorization?.replace("Bearer ", "");
 
-  if (!authHeader) {
+  console.log("Token encontrado:", token);
+
+  if (!token) {
     return res.status(401).json({
       success: false,
-      message: 'Token não informado.'
+      message: "Token não informado.",
     });
   }
 
-  const [, token] = authHeader.split(' ');
-
   try {
-
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'vime_secret_dev'
+      process.env.JWT_SECRET || "vime_secret_dev"
     );
 
     req.usuario = decoded;
 
     next();
-
-  } catch (error) {
+  } catch (err) {
+    console.log("Erro JWT:", err.message);
 
     return res.status(401).json({
       success: false,
-      message: 'Token inválido.'
+      message: "Token inválido.",
     });
-
   }
-
 };
 
 module.exports = authMiddleware;

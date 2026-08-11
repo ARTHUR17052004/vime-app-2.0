@@ -155,10 +155,43 @@ const financeiro = async () => {
   };
 };
 
+const MESES = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+];
+
+const receitasMensais = async (ano) => {
+
+  const receitas = await prisma.receita.findMany({
+    where: {
+      vencimento: {
+        gte: new Date(`${ano}-01-01`),
+        lte: new Date(`${ano}-12-31`)
+      }
+    }
+  });
+
+  const totais = new Array(12).fill(0);
+
+  receitas.forEach(r => {
+    if (!r.vencimento) return;
+
+    const mes = new Date(r.vencimento).getMonth();
+
+    totais[mes] += r.valor;
+  });
+
+  return MESES.map((mes, index) => ({
+    mes,
+    receita: totais[index]
+  }));
+};
+
 module.exports = {
   resumo,
   atividades,
   alertas,
   ocupacao,
-  financeiro
+  financeiro,
+  receitasMensais
 };

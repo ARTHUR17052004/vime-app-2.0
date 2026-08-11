@@ -9,48 +9,48 @@ export default function ReceitaVisualizarModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl p-8 relative">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl shadow-[0_18px_45px_rgba(0,0,0,.35)] w-full max-w-2xl p-8 relative">
 
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-2xl text-gray-500"
+          className="absolute top-5 right-5 text-2xl text-gray-400"
         >
           ✕
         </button>
 
-        <h2 className="text-3xl font-bold mb-8">
+        <h2 className="text-3xl font-bold text-white mb-8">
           Receita
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-4 text-gray-200">
 
           <div>
-            <strong>Descrição:</strong>
+            <strong className="text-gray-400">Descrição:</strong>
             <div>{receita.descricao}</div>
           </div>
 
           <div>
-            <strong>Categoria:</strong>
+            <strong className="text-gray-400">Categoria:</strong>
             <div>{receita.categoria}</div>
           </div>
 
           <div>
-            <strong>Valor:</strong>
+            <strong className="text-gray-400">Valor:</strong>
             <div>R$ {receita.valor}</div>
           </div>
 
           <div>
-            <strong>Status:</strong>
+            <strong className="text-gray-400">Status:</strong>
             <div>{receita.status}</div>
           </div>
 
           <div>
-            <strong>Vencimento:</strong>
+            <strong className="text-gray-400">Vencimento:</strong>
             <div>{receita.dataVencimento || "-"}</div>
           </div>
 
           <div>
-            <strong>Observações:</strong>
+            <strong className="text-gray-400">Observações:</strong>
             <div>{receita.observacoes || "-"}</div>
           </div>
 

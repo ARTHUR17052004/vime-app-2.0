@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Card from "../ui/Card";
 import {
   Bell,
@@ -71,7 +72,8 @@ export default function RecentActivities({
 
         </div>
 
-        <button
+        <Link
+          href="/contratos"
           className="
             flex
             items-center
@@ -86,7 +88,7 @@ export default function RecentActivities({
 
           <ChevronRight size={16} />
 
-        </button>
+        </Link>
 
       </div>
 

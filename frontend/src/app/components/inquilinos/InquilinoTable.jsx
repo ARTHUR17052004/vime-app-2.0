@@ -19,19 +19,21 @@ export default function InquilinoTable({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-white/[0.07]
+            bg-gradient-to-br
+            from-[#202a36]/95
+            via-[#1b2430]/96
+            to-[#151c25]/96
             backdrop-blur-xl
             p-12
             text-center
-            text-gray-300
           "
         >
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3">
+        <h2 className="text-2xl font-semibold text-white mb-3">
           Módulo Inquilinos
         </h2>
 
-        <p className="text-gray-500">
+        <p className="text-gray-400">
           Nenhum inquilino cadastrado ainda.
         </p>
       </div>
@@ -40,7 +42,7 @@ export default function InquilinoTable({
 
   return (
     <Table>
-      <table className="w-full text-gray-800">
+      <table className="w-full text-gray-200">
         <thead className="border-b border-white/10 text-gray-400 uppercase text-xs tracking-[0.25em]">
           <tr>
             <th

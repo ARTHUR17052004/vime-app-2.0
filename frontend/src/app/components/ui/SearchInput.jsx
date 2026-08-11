@@ -33,14 +33,14 @@ export default function SearchInput({
           py-3
           rounded-2xl
           border
-          border-gray-200
-          bg-white
-          text-gray-800
+          border-white/10
+          bg-white/5
+          text-white
           outline-none
           transition-all
-          focus:border-emerald-500
+          focus:border-emerald-500/50
           focus:ring-2
-          focus:ring-emerald-200
+          focus:ring-emerald-500/20
         "
       />
     </div>

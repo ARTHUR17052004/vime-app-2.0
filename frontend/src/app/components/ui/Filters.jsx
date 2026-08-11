@@ -7,7 +7,22 @@ export default function Filters({
   className = "",
 }) {
   return (
-    <div className={`flex flex-wrap gap-3 mb-8 ${className}`}>
+    <div
+      className={`
+        rounded-3xl
+        border
+        border-white/10
+        bg-slate-900/80
+        backdrop-blur-xl
+        p-6
+        shadow-xl
+        mb-8
+        flex
+        flex-wrap
+        gap-3
+        ${className}
+      `}
+    >
       {options.map((option) => {
         const ativo = option === value;
 
@@ -35,12 +50,12 @@ export default function Filters({
                     shadow-lg
                   `
                   : `
-                    bg-white
-                    border-gray-200
-                    text-gray-700
-                    hover:bg-gray-50
-                    hover:border-emerald-500
-                    hover:text-emerald-700
+                    bg-white/5
+                    border-white/10
+                    text-gray-300
+                    hover:bg-white/10
+                    hover:border-emerald-500/50
+                    hover:text-emerald-400
                   `
               }
             `}

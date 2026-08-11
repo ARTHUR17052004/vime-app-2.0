@@ -80,10 +80,33 @@ const financeiro = async (req, res) => {
   }
 };
 
+const receitasMensais = async (req, res) => {
+  try {
+    const anoParam = parseInt(req.query.ano, 10);
+
+    const ano = Number.isInteger(anoParam)
+      ? anoParam
+      : new Date().getFullYear();
+
+    const dados = await dashboardService.receitasMensais(ano);
+
+    return res.status(200).json({
+      success: true,
+      data: dados
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
 module.exports = {
   resumo,
   atividades,
   alertas,
   ocupacao,
-  financeiro
+  financeiro,
+  receitasMensais
 };

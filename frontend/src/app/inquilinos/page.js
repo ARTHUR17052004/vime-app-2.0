@@ -7,7 +7,9 @@ import MainLayout from "../components/layout/MainLayout";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
+import FadeIn from "../components/ui/FadeIn";
 
 import SearchInput from "../components/common/SearchInput";
 
@@ -269,47 +271,63 @@ export default function InquilinosPage() {
 
           )}
 
-          <PageHeader
-            title="Inquilinos"
-            subtitle="Gerencie todos os inquilinos cadastrados."
-            count={inquilinos.length}
-            countLabel="inquilino(s) cadastrado(s)"
-            actions={
-              <Button onClick={novoInquilino}>
-                + Novo Inquilino
-              </Button>
-            }
-          />
+          <FadeIn>
 
-          <div className="mt-8">
-
-            <SearchInput
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
+            <PageHeader
+              title="Inquilinos"
+              subtitle="Gerencie todos os inquilinos cadastrados."
+              count={inquilinos.length}
+              countLabel="inquilino(s) cadastrado(s)"
+              actions={
+                <Button onClick={novoInquilino}>
+                  + Novo Inquilino
+                </Button>
               }
-              placeholder="Pesquisar inquilino..."
             />
 
-          </div>
+          </FadeIn>
 
-          <div className="mt-8">
+          <FadeIn delay={0.10}>
 
-            <InquilinoStats
-              total={inquilinos.length}
-            />
+            <PageSection>
 
-          </div>
+              <SearchInput
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Pesquisar inquilino..."
+              />
 
-          <div className="mt-8">
+            </PageSection>
 
-            <InquilinoTable
-              inquilinos={inquilinosFiltrados}
-              onDelete={excluirInquilino}
-              onEdit={editarInquilino}
-            />
+          </FadeIn>
 
-          </div>
+          <FadeIn delay={0.20}>
+
+            <PageSection>
+
+              <InquilinoStats
+                total={inquilinos.length}
+              />
+
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.30}>
+
+            <PageSection>
+
+              <InquilinoTable
+                inquilinos={inquilinosFiltrados}
+                onDelete={excluirInquilino}
+                onEdit={editarInquilino}
+              />
+
+            </PageSection>
+
+          </FadeIn>
 
           <InquilinoModal
             isOpen={modalOpen}

@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const ClicksignApi = require("./ClicksignApi");
 
 const config = async () => {
   return {
@@ -16,22 +17,6 @@ const status = async () => {
   };
 };
 
-const listarDocumentos = async () => {
-  return [];
-};
-
-const buscarDocumento = async (id) => {
-  return null;
-};
-
-const criarDocumento = async (dados) => {
-  return {
-    id: 'SIMULADO',
-    status: 'CRIADO',
-    documento: dados
-  };
-};
-
 const enviarDocumento = async (dados) => {
   return {
     enviado: true,
@@ -40,7 +25,11 @@ const enviarDocumento = async (dados) => {
   };
 };
 
-const sincronizar = async (evento) => {
+/* ==========================================
+   PROCESSAR WEBHOOK (chamado pela ClickSign)
+========================================== */
+
+const processarWebhook = async (evento) => {
 
   if (!evento) {
     return {
@@ -98,12 +87,67 @@ const sincronizar = async (evento) => {
 
 };
 
+/* ==========================================
+   SINCRONIZAÇÃO MANUAL (botão na tela)
+   Busca documentos reais na ClickSign e
+   atualiza os contratos locais.
+
+   ATENÇÃO: ajuste os nomes dos campos
+   (doc.status, doc.key) conforme o formato
+   real que a API da ClickSign devolver —
+   sugiro dar um console.log(documentos)
+   na primeira execução pra conferir.
+========================================== */
+
+const sincronizar = async () => {
+
+  const resposta = await ClicksignApi.listarDocumentos();
+
+  const documentos = resposta?.documents || resposta?.data || [];
+
+  let atualizados = 0;
+
+  for (const doc of documentos) {
+
+    const contrato = await prisma.contrato.findFirst({
+      where: {
+        id: doc.key || doc.id
+      }
+    });
+
+    if (!contrato) continue;
+
+    let novoStatus = contrato.status;
+
+    if (doc.status === "closed" || doc.finished === true) {
+      novoStatus = "ASSINADO";
+    } else if (doc.status === "canceled") {
+      novoStatus = "CANCELADO";
+    }
+
+    if (novoStatus !== contrato.status) {
+
+      await prisma.contrato.update({
+        where: { id: contrato.id },
+        data: { status: novoStatus }
+      });
+
+      atualizados++;
+    }
+
+  }
+
+  return {
+    success: true,
+    atualizados
+  };
+
+};
+
 module.exports = {
   config,
   status,
-  listarDocumentos,
-  buscarDocumento,
-  criarDocumento,
   enviarDocumento,
-  sincronizar
+  sincronizar,
+  processarWebhook
 };

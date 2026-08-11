@@ -33,13 +33,13 @@ export default function AsaasWizard() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] p-8">
 
-      <h2 className="text-2xl font-bold text-gray-800">
+      <h2 className="text-2xl font-bold text-white">
         Assistente de Configuração
       </h2>
 
-      <p className="text-gray-500 mt-2 mb-8">
+      <p className="text-gray-400 mt-2 mb-8">
         Siga as etapas abaixo para concluir a integração com o Asaas.
       </p>
 
@@ -56,23 +56,23 @@ export default function AsaasWizard() {
 
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white
-                ${etapa.ativo ? "bg-green-600" : "bg-gray-300"}`}
+                ${etapa.ativo ? "bg-green-600" : "bg-white/10"}`}
               >
                 {etapa.numero}
               </div>
 
-              <span className="mt-3 font-semibold text-gray-800">
+              <span className="mt-3 font-semibold text-white">
                 {etapa.titulo}
               </span>
 
-              <span className="text-xs text-gray-500 text-center mt-1">
+              <span className="text-xs text-gray-400 text-center mt-1">
                 {etapa.descricao}
               </span>
 
             </div>
 
             {index < etapas.length - 1 && (
-              <div className="flex-1 h-1 bg-gray-200 mx-4 rounded" />
+              <div className="flex-1 h-1 bg-white/10 mx-4 rounded" />
             )}
 
           </div>

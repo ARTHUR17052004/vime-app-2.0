@@ -54,4 +54,10 @@ export const DashboardService = {
 
     };
   },
-};  
+
+  async receitasMensais(ano) {
+    const resultado = await api(`/dashboard/receitas-mensais?ano=${ano}`);
+
+    return resultado?.data || [];
+  },
+};

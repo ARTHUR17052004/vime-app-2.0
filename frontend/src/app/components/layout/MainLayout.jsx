@@ -2,6 +2,7 @@
 
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import CommandPalette from "./CommandPalette";
 
 export default function MainLayout({ children }) {
   return (
@@ -97,6 +98,8 @@ export default function MainLayout({ children }) {
         </section>
 
       </div>
+
+      <CommandPalette />
 
     </div>
   );

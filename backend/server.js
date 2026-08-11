@@ -1,17 +1,17 @@
 require("dotenv").config();
 
 const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const { setIO } = require("./src/socket");
-const configuracaoRoutes = require("./src/routes/configuracaoRoutes");
+const http = require("http");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { Server } = require("socket.io");
 
-// const iniciarJobs = require("./src/jobs");
-const perfilRoutes = require("./src/routes/perfilRoutes");
 const iniciarJobs = require("./src/jobs");
+const { setIO } = require("./src/socket");
+
 const authRoutes = require("./src/routes/authRoutes");
 const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
 const usuarioRoutes = require("./src/routes/usuarioRoutes");
@@ -20,61 +20,42 @@ const unidadeRoutes = require("./src/routes/unidadeRoutes");
 const kitnetRoutes = require("./src/routes/kitnetRoutes");
 const inquilinoRoutes = require("./src/routes/inquilinoRoutes");
 const contratoRoutes = require("./src/routes/contratoRoutes");
-
 const receitaRoutes = require("./src/routes/receitaRoutes");
 const despesaRoutes = require("./src/routes/despesaRoutes");
 const financeiroRoutes = require("./src/routes/financeiroRoutes");
-
 const dashboardRoutes = require("./src/routes/dashboardRoutes");
-
 const asaasRoutes = require("./src/routes/asaasRoutes");
 const clicksignRoutes = require("./src/routes/clicksignRoutes");
-
 const solicitacaoRoutes = require("./src/routes/solicitacaoRoutes");
 const vistoriaRoutes = require("./src/routes/vistoriaRoutes");
 const logRoutes = require("./src/routes/logRoutes");
 const whatsappRoutes = require("./src/routes/whatsappRoutes");
+const notificacaoRoutes = require("./src/routes/notificacaoRoutes");
+const buscaRoutes = require("./src/routes/buscaRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
 const app = express();
-
-const server = http.createServer(app);
-
-const io = new Server(server, {
-
-  cors: {
-
-    origin: "*",
-
-    methods: ["GET", "POST"]
-
-  }
-
-});
-
-setIO(io);
-
-app.set("io", io);
-
-io.on("connection", (socket) => {
-
-  console.log("🔌 Cliente conectado:", socket.id);
-
-  socket.on("disconnect", () => {
-
-    console.log("❌ Cliente desconectado:", socket.id);
-
-  });
-
-});
-
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(helmet());
+/* ===========================
+   CORS
+=========================== */
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+
+app.use(
+  helmet({
+    hsts: process.env.NODE_ENV === "production",
+  })
+);
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/health", (req, res) => {
   return res.status(200).json({
@@ -87,108 +68,26 @@ app.get("/health", (req, res) => {
   });
 });
 
-/* ===========================
-   AUTENTICAÇÃO
-=========================== */
-
 app.use("/auth", authRoutes);
-
-/* ===========================
-   USUÁRIOS
-=========================== */
-
 app.use("/usuarios", usuarioRoutes);
-
-/* ===========================
-   PERFIS
-=========================== */
-
-app.use("/perfis", perfilRoutes);
-
-/* ===========================
-   LOCADORES
-=========================== */
-
 app.use("/locadores", locadorRoutes);
-
-/* ===========================
-   UNIDADES
-=========================== */
-
 app.use("/unidades", unidadeRoutes);
-
-/* ===========================
-   KITNETS
-=========================== */
-
 app.use("/kitnets", kitnetRoutes);
-
-/* ===========================
-   INQUILINOS
-=========================== */
-
 app.use("/inquilinos", inquilinoRoutes);
-
-/* ===========================
-   CONTRATOS
-=========================== */
-
 app.use("/contratos", contratoRoutes);
-
-/* ===========================
-   FINANCEIRO
-=========================== */
-
 app.use("/receitas", receitaRoutes);
 app.use("/despesas", despesaRoutes);
 app.use("/financeiro", financeiroRoutes);
-
-/* ===========================
-   DASHBOARD
-=========================== */
-
 app.use("/dashboard", dashboardRoutes);
-
-/* ===========================
-   SOLICITAÇÕES
-=========================== */
-
 app.use("/solicitacoes", solicitacaoRoutes);
-
-/* ===========================
-   VISTORIAS
-=========================== */
-
 app.use("/vistorias", vistoriaRoutes);
-
-/* ===========================
-   ASAAS
-=========================== */
-
+app.use("/auditoria", auditoriaRoutes);
 app.use("/asaas", asaasRoutes);
-
-/* ===========================
-   CLICKSIGN
-=========================== */
-
 app.use("/clicksign", clicksignRoutes);
 app.use("/logs", logRoutes);
-
-/* ===========================
-   WHATSAPP
-=========================== */
-
 app.use("/whatsapp", whatsappRoutes);
-
-/* ===========================
-CONFIGURAÇÕES
-=========================== */
-
-app.use("/configuracoes", configuracaoRoutes);
-
-/* ===========================
-   404
-=========================== */
+app.use("/notificacoes", notificacaoRoutes);
+app.use("/busca", buscaRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
@@ -197,20 +96,72 @@ app.use((req, res) => {
   });
 });
 
-/* ===========================
-   ERROR MIDDLEWARE
-=========================== */
-
 app.use(errorMiddleware);
 
 /* ===========================
-   START SERVER
+   SERVIDOR HTTP + SOCKET.IO
+=========================== */
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  },
+});
+
+/* ===========================
+   AUTENTICAÇÃO DO SOCKET
+   Lê o mesmo cookie "token" do login
+   e coloca o usuário numa sala própria,
+   pra notificações filtradas por usuário.
 =========================== */
 
-server.listen(PORT, () => {
+function parseCookies(cookieHeader = "") {
+  return cookieHeader
+    .split(";")
+    .map((v) => v.trim())
+    .filter(Boolean)
+    .reduce((acc, item) => {
+      const [key, ...rest] = item.split("=");
+      acc[key] = decodeURIComponent(rest.join("="));
+      return acc;
+    }, {});
+}
 
+io.use((socket, next) => {
+  try {
+    const cookies = parseCookies(socket.handshake.headers.cookie);
+    const token = cookies.token;
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "vime_secret_dev"
+    );
+
+    socket.usuario = decoded;
+
+    next();
+  } catch (error) {
+    next();
+  }
+});
+
+io.on("connection", (socket) => {
+  if (socket.usuario?.id) {
+    socket.join(`usuario:${socket.usuario.id}`);
+  }
+});
+
+setIO(io);
+
+httpServer.listen(PORT, () => {
   console.log(
     `[VIME 2.0] Servidor iniciado com sucesso na porta ${PORT}`
   );
-
+  iniciarJobs();
 });

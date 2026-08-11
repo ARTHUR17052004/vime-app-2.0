@@ -15,7 +15,7 @@ export default function FinanceiroFiltros({
   ];
 
   return (
-    <div className="bg-white rounded-3xl shadow p-4 mb-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-4 mb-8">
 
       <div className="flex flex-wrap gap-3">
 
@@ -38,7 +38,7 @@ export default function FinanceiroFiltros({
                 filtroSelecionado ===
                 filtro
                   ? "bg-green-700 text-white"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "bg-white/5 text-gray-200 hover:bg-white/10"
               }
             `}
           >

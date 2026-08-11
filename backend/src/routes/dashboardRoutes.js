@@ -18,4 +18,6 @@ router.get('/ocupacao', dashboardController.ocupacao);
 
 router.get('/financeiro', dashboardController.financeiro);
 
+router.get('/receitas-mensais', dashboardController.receitasMensais);
+
 module.exports = router;

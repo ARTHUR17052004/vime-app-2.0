@@ -103,14 +103,14 @@ export default function ResumoGeral() {
 
         <div
           key={card.titulo}
-          className="bg-white rounded-3xl shadow border p-6"
+          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6"
         >
 
-          <p className="text-gray-500">
+          <p className="text-gray-400">
             {card.titulo}
           </p>
 
-          <h2 className="text-4xl font-bold text-green-700 mt-3">
+          <h2 className="text-4xl font-bold text-green-400 mt-3">
             {card.valor}
           </h2>
 

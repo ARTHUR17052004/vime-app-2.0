@@ -24,6 +24,8 @@ const layout = {
 
     padding: "p-8",
 
+    paddingSm: "p-7",
+
     radius: "rounded-[22px]",
 
     gap: "gap-6",

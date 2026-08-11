@@ -84,7 +84,7 @@ export default function FinanceiroDespesas({
 
       {despesas.length === 0 ? (
 
-        <div className="px-6 pb-6 text-gray-500">
+        <div className="px-6 pb-6 text-gray-400">
           Nenhuma despesa cadastrada.
         </div>
 
@@ -192,10 +192,16 @@ export default function FinanceiroDespesas({
                           absolute
                           right-0
                           top-10
-                          bg-white
+                          bg-gradient-to-br
+                          from-[#202a36]/95
+                          via-[#1b2430]/96
+                          to-[#151c25]/96
+                          backdrop-blur-xl
                           rounded-xl
-                          shadow-xl
+                          shadow-[0_18px_45px_rgba(0,0,0,.35)]
                           border
+                          border-white/[0.07]
+                          text-gray-200
                           w-44
                           z-50
                         "
@@ -212,7 +218,7 @@ export default function FinanceiroDespesas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-gray-100
+                            hover:bg-white/5
                           "
                         >
                           Visualizar
@@ -229,8 +235,8 @@ export default function FinanceiroDespesas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-yellow-50
-                            text-yellow-700
+                            hover:bg-yellow-500/10
+                            text-yellow-400
                           "
                         >
                           Editar
@@ -246,8 +252,8 @@ export default function FinanceiroDespesas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-red-50
-                            text-red-700
+                            hover:bg-red-500/10
+                            text-red-400
                           "
                         >
                           Excluir

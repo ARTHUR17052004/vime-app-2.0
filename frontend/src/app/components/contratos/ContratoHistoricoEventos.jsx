@@ -22,15 +22,15 @@ export default function ContratoHistoricoEventos({
     );
 
   return (
-    <div className="bg-white rounded-3xl shadow p-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+      <h2 className="text-2xl font-bold text-white mb-6">
         Histórico de Eventos
       </h2>
 
       {eventosContrato.length === 0 ? (
 
-        <div className="text-gray-500">
+        <div className="text-gray-400">
           Nenhum evento encontrado.
         </div>
 
@@ -45,6 +45,7 @@ export default function ContratoHistoricoEventos({
                 key={evento.id}
                 className="
                   border
+                  border-white/10
                   rounded-2xl
                   p-5
                 "
@@ -58,7 +59,7 @@ export default function ContratoHistoricoEventos({
                   {evento.titulo}
                 </div>
 
-                <div className="text-sm text-gray-500 mt-2">
+                <div className="text-sm text-gray-400 mt-2">
                   {evento.data}
                 </div>
 

@@ -8,13 +8,14 @@ import {
   ChevronRight,
   Search,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import menuConfig from "../../config/menuConfig";
 
 export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const activeLinkRef = useRef(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("vime-sidebar");
@@ -24,6 +25,13 @@ export default function Sidebar() {
       setCollapsed(saved === "true");
     }
   }, []);
+
+  useEffect(() => {
+    activeLinkRef.current?.scrollIntoView({
+      block: "nearest",
+      behavior: "auto",
+    });
+  }, [pathname]);
 
   function toggleSidebar() {
     const value = !collapsed;
@@ -35,6 +43,18 @@ export default function Sidebar() {
       value
     );
   }
+
+  useEffect(() => {
+    function aoAlternar() {
+      toggleSidebar();
+    }
+
+    window.addEventListener("toggle-sidebar", aoAlternar);
+
+    return () =>
+      window.removeEventListener("toggle-sidebar", aoAlternar);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collapsed]);
 
   return (
 
@@ -70,17 +90,17 @@ export default function Sidebar() {
 {/* ========================= */}
 
 <div
-  className="
+  className={`
     h-24
-    px-5
 
     flex
     items-center
-    justify-between
 
     border-b
     border-white/5
-  "
+
+    ${collapsed ? "flex-col justify-center gap-2 px-2" : "justify-between px-5"}
+  `}
 >
 
   {!collapsed && (
@@ -133,13 +153,13 @@ export default function Sidebar() {
   {collapsed && (
 
     <img
-      src="/images/logo-vime.png"
+      src="/images/logo-vime.jpeg"
       alt="VIME"
       className="
-        w-11
-        h-11
+        w-9
+        h-9
         object-contain
-        mx-auto
+        rounded-lg
       "
       draggable={false}
     />
@@ -152,6 +172,7 @@ export default function Sidebar() {
       flex
       items-center
       justify-center
+      shrink-0
 
       w-9
       h-9
@@ -167,9 +188,9 @@ export default function Sidebar() {
   >
 
     {collapsed ? (
-      <ChevronRight size={50} />
+      <ChevronRight size={18} />
     ) : (
-      <ChevronLeft size={50} />
+      <ChevronLeft size={18} />
     )}
 
   </button>
@@ -184,8 +205,13 @@ export default function Sidebar() {
 
         <div className="px-5 pt-4 pb-3">
 
-          <div
+          <button
+            onClick={() =>
+              window.dispatchEvent(new Event("abrir-busca-universal"))
+            }
             className="
+              w-full
+
               flex
               items-center
               gap-3
@@ -200,30 +226,34 @@ export default function Sidebar() {
               bg-white/5
 
               px-3
+
+              transition
+
+              hover:bg-white/10
+              hover:border-white/20
             "
           >
 
             <Search
               size={16}
-              className="text-gray-400"
+              className="text-gray-400 shrink-0"
             />
 
-            <input
-              placeholder="Pesquisar..."
+            <span
               className="
                 flex-1
 
-                bg-transparent
-
-                outline-none
+                text-left
 
                 text-sm
 
-                placeholder:text-gray-500
+                text-gray-500
               "
-            />
+            >
+              Pesquisar...
+            </span>
 
-          </div>
+          </button>
 
         </div>
 
@@ -234,7 +264,7 @@ export default function Sidebar() {
       {/* ========================= */}
 
       <div
-        className="
+        className={`
           flex-1
 
           overflow-y-auto
@@ -243,11 +273,11 @@ export default function Sidebar() {
           scrollbar-thumb-white/10
           scrollbar-track-transparent
 
-          px-50
-          py-50
+          px-3
+          py-4
 
-          space-y-80
-        "
+          ${collapsed ? "space-y-2" : "space-y-8"}
+        `}
       >
 
         {menuConfig.map((section) => (
@@ -288,22 +318,22 @@ export default function Sidebar() {
 
       <Link
         key={item.label}
+        ref={active ? activeLinkRef : null}
         href={item.href}
         className={`
           relative
 
           flex
           items-center
-          justify-between
 
           h-12
 
           rounded-2xl
 
-          px-5
-
           transition-all
           duration-300
+
+          ${collapsed ? "justify-center px-0" : "justify-between px-5"}
 
           ${
             active

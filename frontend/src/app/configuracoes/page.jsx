@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
+import FadeIn from "../components/ui/FadeIn";
+
 import ConfiguracoesHeader from "../components/configuracoes/ConfiguracoesHeader";
 import ConfiguracoesStats from "../components/configuracoes/ConfiguracoesStats";
 import PainelRapido from "../components/configuracoes/PainelRapido";
@@ -44,59 +46,65 @@ export default function ConfiguracoesPage() {
     <MainLayout>
       <div className="space-y-6">
         {/* Cabeçalho */}
-        <ConfiguracoesHeader />
+        <FadeIn delay={0}>
+          <ConfiguracoesHeader />
+        </FadeIn>
 
         {/* Dashboard */}
-        <ConfiguracoesStats />
+        <FadeIn delay={0.10}>
+          <ConfiguracoesStats />
+        </FadeIn>
 
         {/* Conteúdo */}
-        <div className="grid gap-6 xl:grid-cols-3">
-          {/* Coluna Principal */}
-          <div className="space-y-6 xl:col-span-2">
-            <EmpresaCard
-              dados={dados}
-              onChange={alterar}
-              onSalvar={salvar}
-            />
+        <FadeIn delay={0.20}>
+          <div className="grid gap-6 xl:grid-cols-3">
+            {/* Coluna Principal */}
+            <div className="space-y-6 xl:col-span-2">
+              <EmpresaCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+              />
 
-            <LogoCard />
+              <LogoCard />
 
-            <TemaCard
-              dados={dados}
-              onChange={alterar}
-              onSalvar={salvar}
-            />
+              <TemaCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+              />
 
-            <PersonalizacaoCard
-              dados={dados}
-              onChange={alterar}
-              onSalvar={salvar}
-            />
+              <PersonalizacaoCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+              />
 
-            <SistemaCard />
+              <SistemaCard />
 
-            <IntegracoesCard />
+              <IntegracoesCard />
 
-            <SMTPCard />
+              <SMTPCard />
 
-            <BancoDadosCard />
+              <BancoDadosCard />
 
-            <BackupCard />
+              <BackupCard />
 
-            <SegurancaCard />
+              <SegurancaCard />
 
-            <LicencaCard />
+              <LicencaCard />
 
-            <HistoricoCard />
-          </div>
+              <HistoricoCard />
+            </div>
 
-          {/* Coluna Lateral */}
-          <div>
-            <div className="sticky top-24">
-              <PainelRapido />
+            {/* Coluna Lateral */}
+            <div>
+              <div className="sticky top-24">
+                <PainelRapido />
+              </div>
             </div>
           </div>
-        </div>
+        </FadeIn>
       </div>
     </MainLayout>
   );

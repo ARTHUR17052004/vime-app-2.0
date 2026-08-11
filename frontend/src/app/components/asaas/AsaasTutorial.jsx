@@ -45,15 +45,15 @@ export default function AsaasTutorial() {
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
+      <div className="px-8 py-6 border-b border-white/[0.07]">
 
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-2xl font-bold text-white">
           Guia de Configuração
         </h2>
 
-        <p className="text-gray-500 mt-2">
+        <p className="text-gray-400 mt-2">
           Siga as etapas abaixo para concluir corretamente a integração com o Asaas.
         </p>
 
@@ -69,9 +69,10 @@ export default function AsaasTutorial() {
               flex
               gap-5
               border
+              border-white/[0.07]
               rounded-2xl
               p-5
-              hover:bg-gray-50
+              hover:bg-white/5
               transition
             "
           >
@@ -96,11 +97,11 @@ export default function AsaasTutorial() {
 
             <div>
 
-              <h3 className="font-bold text-lg text-gray-800">
+              <h3 className="font-bold text-lg text-white">
                 {passo.titulo}
               </h3>
 
-              <p className="text-gray-500 mt-1">
+              <p className="text-gray-400 mt-1">
                 {passo.descricao}
               </p>
 
@@ -112,9 +113,9 @@ export default function AsaasTutorial() {
 
       </div>
 
-      <div className="border-t bg-green-50 px-8 py-5">
+      <div className="border-t border-white/[0.07] bg-green-500/10 px-8 py-5">
 
-        <p className="text-green-700 font-semibold">
+        <p className="text-green-400 font-semibold">
           ✔ Após concluir todas as etapas, sua integração estará pronta para utilização no VIME.
         </p>
 

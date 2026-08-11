@@ -10,7 +10,7 @@ import {
   Tooltip,
 } from "recharts";
 
-const data = [
+const mockData = [
   { mes: "Jan", receita: 18000 },
   { mes: "Fev", receita: 26000 },
   { mes: "Mar", receita: 24000 },
@@ -27,7 +27,7 @@ function formatarValor(valor) {
   });
 }
 
-export default function RevenueChart() {
+export default function RevenueChart({ data = mockData }) {
   return (
     <div
       className="

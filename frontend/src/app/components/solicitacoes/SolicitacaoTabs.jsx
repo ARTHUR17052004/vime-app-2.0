@@ -32,7 +32,7 @@ export default function SolicitacaoTabs({
   ];
 
   return (
-    <div className="bg-white rounded-3xl shadow p-2 mb-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-2 mb-8">
 
       <div className="flex gap-2 flex-wrap">
 
@@ -53,7 +53,7 @@ export default function SolicitacaoTabs({
               ${
                 abaSelecionada === aba.id
                   ? "bg-green-700 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  : "text-gray-400 hover:bg-white/5"
               }
             `}
           >

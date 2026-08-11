@@ -48,7 +48,7 @@ export default function DetalhesLocadorPage() {
   if (!locador) {
     return (
       <MainLayout>
-        <div className="bg-white rounded-3xl shadow p-10">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-3xl p-10">
           Locador não encontrado.
         </div>
       </MainLayout>
@@ -57,24 +57,24 @@ export default function DetalhesLocadorPage() {
 
   return (
     <MainLayout>
-      <div className="bg-white rounded-3xl shadow p-10">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
 
-        <h1 className="text-4xl font-bold text-gray-800 mb-2">
+        <h1 className="text-4xl font-bold text-white mb-2">
           {locador.nome}
         </h1>
 
-        <p className="text-gray-500 mb-10">
+        <p className="text-gray-400 mb-10">
           Detalhes do Locador
         </p>
 
         <div className="grid md:grid-cols-2 gap-10">
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Tipo
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.tipoPessoa === "PJ"
                 ? "Pessoa Jurídica"
                 : "Pessoa Física"}
@@ -82,111 +82,111 @@ export default function DetalhesLocadorPage() {
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Documento
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.documento || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               E-mail
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.email || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Telefone
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.telefone || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Banco
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.banco || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Agência
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.agencia || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Conta
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.conta || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Chave PIX
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.pix || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Taxa Administração
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.taxaAdministracao || 0}%
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Multa
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.multa || 0}%
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Juros
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {locador.juros || 0}% a.m.
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Unidades Vinculadas
             </p>
 
-            <h2 className="font-bold text-2xl">
+            <h2 className="font-bold text-2xl text-white">
               {totalUnidades}
             </h2>
           </div>
@@ -194,11 +194,11 @@ export default function DetalhesLocadorPage() {
         </div>
 
         <div className="mt-10">
-          <p className="text-gray-500 mb-2">
+          <p className="text-gray-400 mb-2">
             Observações
           </p>
 
-          <div className="bg-gray-50 border rounded-2xl p-6">
+          <div className="bg-white/5 border border-white/10 text-gray-200 rounded-2xl p-6">
             {locador.observacoes ||
               "Nenhuma observação cadastrada."}
           </div>
