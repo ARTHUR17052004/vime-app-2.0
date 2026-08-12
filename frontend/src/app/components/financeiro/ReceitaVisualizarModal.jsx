@@ -46,12 +46,11 @@ export default function ReceitaVisualizarModal({
 
           <div>
             <strong className="text-gray-400">Vencimento:</strong>
-            <div>{receita.dataVencimento || "-"}</div>
-          </div>
-
-          <div>
-            <strong className="text-gray-400">Observações:</strong>
-            <div>{receita.observacoes || "-"}</div>
+            <div>
+              {receita.vencimento
+                ? new Date(receita.vencimento).toLocaleDateString("pt-BR")
+                : "-"}
+            </div>
           </div>
 
         </div>

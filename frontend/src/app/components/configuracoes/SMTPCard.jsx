@@ -2,14 +2,17 @@
 
 import {
   Mail,
-  Send,
   ShieldCheck,
-  Server,
 } from "lucide-react";
 
-export default function SMTPCard() {
+export default function SMTPCard({
+  dados = {},
+  onChange = () => {},
+  onSalvar = () => {},
+  salvando = false,
+}) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div id="secao-smtp" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -51,6 +54,8 @@ export default function SMTPCard() {
           </label>
 
           <input
+            value={dados.smtpHost || ""}
+            onChange={(e) => onChange("smtpHost", e.target.value)}
             placeholder="smtp.gmail.com"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
           />
@@ -66,6 +71,9 @@ export default function SMTPCard() {
           </label>
 
           <input
+            type="number"
+            value={dados.smtpPorta || ""}
+            onChange={(e) => onChange("smtpPorta", e.target.value)}
             placeholder="587"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
           />
@@ -81,6 +89,8 @@ export default function SMTPCard() {
           </label>
 
           <input
+            value={dados.smtpUsuario || ""}
+            onChange={(e) => onChange("smtpUsuario", e.target.value)}
             placeholder="contato@empresa.com"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
           />
@@ -97,6 +107,8 @@ export default function SMTPCard() {
 
           <input
             type="password"
+            value={dados.smtpSenha || ""}
+            onChange={(e) => onChange("smtpSenha", e.target.value)}
             placeholder="********"
             className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
           />
@@ -105,61 +117,21 @@ export default function SMTPCard() {
 
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-4">
+      <button
+        onClick={onSalvar}
+        disabled={salvando}
+        className="
+          mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition px-6 py-3 text-white flex items-center gap-2
+        "
+      >
 
-        <label className="flex items-center gap-2 text-gray-300">
+        <ShieldCheck size={18} />
 
-          <input type="checkbox" />
+        {salvando ? "Salvando..." : "Salvar"}
 
-          SSL
-
-        </label>
-
-        <label className="flex items-center gap-2 text-gray-300">
-
-          <input type="checkbox" defaultChecked />
-
-          TLS
-
-        </label>
-
-        <label className="flex items-center gap-2 text-gray-300">
-
-          <input type="checkbox" defaultChecked />
-
-          Autenticação
-
-        </label>
-
-      </div>
-
-      <div className="mt-8 flex flex-wrap gap-4">
-
-        <button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white flex items-center gap-2">
-
-          <ShieldCheck size={18} />
-
-          Salvar
-
-        </button>
-
-        <button className="rounded-xl border border-blue-500 text-blue-400 hover:bg-blue-500/10 transition px-6 py-3 flex items-center gap-2">
-
-          <Send size={18} />
-
-          Testar Envio
-
-        </button>
-
-        <button className="rounded-xl border border-white/10 hover:border-white/30 transition px-6 py-3 text-gray-300 flex items-center gap-2">
-
-          <Server size={18} />
-
-          Verificar Servidor
-
-        </button>
-
-      </div>
+      </button>
 
     </div>
   );

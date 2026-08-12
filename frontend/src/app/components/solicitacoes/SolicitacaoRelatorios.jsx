@@ -1,7 +1,7 @@
 "use client";
 
-// import { jsPDF } from "jspdf";
-// import autoTable from "jspdf-autotable";
+import { exportarPDF, exportarExcel } from "@/utils/exportar";
+
 export default function SolicitacaoRelatorios({
   solicitacoes = [],
 }) {
@@ -41,21 +41,54 @@ export default function SolicitacaoRelatorios({
         "REJEITADA"
     ).length;
 
- function exportarPDF() {
+  const colunas = [
+    "Número",
+    "Título",
+    "Responsável",
+    "Status",
+    "Prazo",
+  ];
 
-  alert(
-    "Teste do botão PDF."
-  );
+  const linhas = solicitacoes.map((item) => [
+    item.numero || "-",
+    item.titulo || "-",
+    item.responsavel || "-",
+    item.status || "-",
+    item.prazo
+      ? new Date(item.prazo).toLocaleDateString("pt-BR")
+      : "-",
+  ]);
 
-}
+  function handleExportarPDF() {
 
-  function exportarExcel() {
+    exportarPDF({
+      titulo: "Relatório de Solicitações",
+      subtitulo: `Total: ${total} · Solicitadas: ${solicitadas} · Em Cotação: ${cotacao} · Aguardando Compra: ${compra} · Atendidas: ${atendidas} · Rejeitadas: ${rejeitadas}`,
+      secoes: [
+        {
+          colunas,
+          linhas,
+        },
+      ],
+      nomeArquivo: "relatorio-solicitacoes",
+    });
 
-  alert(
-    "Teste do botão Excel."
-  );
+  }
 
-}
+  function handleExportarExcel() {
+
+    exportarExcel({
+      abas: [
+        {
+          nome: "Solicitações",
+          colunas,
+          linhas,
+        },
+      ],
+      nomeArquivo: "relatorio-solicitacoes",
+    });
+
+  }
 
   function imprimir() {
 
@@ -172,7 +205,7 @@ export default function SolicitacaoRelatorios({
       <div className="grid md:grid-cols-3 gap-6">
 
   <button
-    onClick={exportarPDF}
+    onClick={handleExportarPDF}
     className="
       bg-green-700
       hover:bg-green-800
@@ -186,7 +219,7 @@ export default function SolicitacaoRelatorios({
   </button>
 
   <button
-    onClick={exportarExcel}
+    onClick={handleExportarExcel}
     className="
       bg-green-700
       hover:bg-green-800

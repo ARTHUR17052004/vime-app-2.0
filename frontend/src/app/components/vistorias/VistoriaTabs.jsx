@@ -35,7 +35,7 @@ export default function VistoriaTabs({
         rounded-3xl
         border
         border-white/10
-        bg-white/5
+        bg-slate-900/80
         backdrop-blur-xl
         p-2
         mb-8

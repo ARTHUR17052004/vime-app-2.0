@@ -5,6 +5,19 @@ const listar = async (req, res) => {
   res.json(inquilinos);
 };
 
+const buscarPorId = async (req, res) => {
+
+  const inquilino = await inquilinoService.buscarPorId(req.params.id);
+
+  if (!inquilino) {
+    return res.status(404).json({
+      mensagem: 'Inquilino não encontrado.'
+    });
+  }
+
+  res.json(inquilino);
+};
+
 const criar = async (req, res) => {
   const inquilino = await inquilinoService.criar(req.body);
   res.status(201).json(inquilino);
@@ -29,6 +42,7 @@ const remover = async (req, res) => {
 
 module.exports = {
   listar,
+  buscarPorId,
   criar,
   atualizar,
   remover

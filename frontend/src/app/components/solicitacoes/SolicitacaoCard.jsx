@@ -1,267 +1,349 @@
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  MoreVertical,
+  Eye,
+  Pencil,
+  Trash2,
+  MessageSquare,
+  Tag,
+} from "lucide-react";
 
-import Card from "../ui/Card";
 import Badge from "../ui/Badge";
-import Button from "../ui/Button";
+import ActionMenu from "../ui/ActionMenu";
+import SolicitacaoRespostaRapidaModal from "./SolicitacaoRespostaRapidaModal";
+import { usePermissao } from "@/hooks/usePermissao";
+
+const STATUS_CONFIG = {
+  SOLICITADA: {
+    badge: "gray",
+    borda: "border-white/15",
+  },
+  "EM COTAÇÃO": {
+    badge: "yellow",
+    borda: "border-yellow-500/40",
+  },
+  "AGUARDANDO COMPRA": {
+    badge: "blue",
+    borda: "border-sky-500/40",
+  },
+  ATENDIDA: {
+    badge: "emerald",
+    borda: "border-emerald-500/40",
+  },
+  REJEITADA: {
+    badge: "red",
+    borda: "border-red-500/40",
+  },
+};
 
 export default function SolicitacaoCard({
   solicitacoes,
   onEdit,
   onDelete,
-  onAlterarStatus,
-  onResponder,
+  onAtualizado,
 }) {
+
+  const router = useRouter();
+
+  const podeClassificar = usePermissao("solicitacoes.classificar");
+
+  const [menuAberto, setMenuAberto] = useState(null);
+
+  const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
+
+  const [respondendo, setRespondendo] = useState(null);
+
+  function abrirMenu(e, id) {
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const larguraMenu = 200;
+
+    let left = rect.right - larguraMenu;
+    let top = rect.bottom + 8;
+
+    if (left + larguraMenu > window.innerWidth - 16) {
+      left = window.innerWidth - larguraMenu - 16;
+    }
+
+    if (left < 16) left = 16;
+
+    setPosicaoMenu({ top, left });
+
+    setMenuAberto(id);
+
+  }
 
   if (solicitacoes.length === 0) {
     return (
-      <Card className="p-10 text-center">
+      <div
+        className="
+          rounded-3xl
+          border
+          border-white/10
+          bg-gradient-to-br
+          from-[#202a36]/95
+          via-[#1b2430]/96
+          to-[#151c25]/96
+          backdrop-blur-xl
+          p-10
+          text-center
+        "
+      >
         <p className="text-gray-400">
           Nenhuma solicitação encontrada.
         </p>
-      </Card>
+      </div>
     );
   }
 
   return (
 
-    <div className="space-y-6">
+    <div className="space-y-4">
 
-      {solicitacoes.map((item) => (
+      {solicitacoes.map((item) => {
 
-        <Card
-          key={item.id}
-          className="p-8"
-        >
+        const config = STATUS_CONFIG[item.status] || STATUS_CONFIG.SOLICITADA;
 
-          <div className="flex justify-between items-start gap-6">
+        return (
 
-            <div className="flex-1">
+          <div
+            key={item.id}
+            className={`
+              rounded-2xl
+              border
+              ${config.borda}
+              bg-gradient-to-br
+              from-[#202a36]/95
+              via-[#1b2430]/96
+              to-[#151c25]/96
+              backdrop-blur-xl
+              p-6
+              transition-all
+              duration-300
+              hover:-translate-y-0.5
+            `}
+          >
 
-              <p className="text-sm text-gray-400">
-                {item.numero}
-              </p>
+            <div className="flex items-start justify-between gap-6 flex-wrap">
 
-              <h2 className="text-2xl font-bold text-white mt-2">
-                {item.titulo}
-              </h2>
+              <div className="flex-1 min-w-[280px] grid sm:grid-cols-2 xl:grid-cols-5 gap-5">
 
-            </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    Data
+                  </p>
+                  <p className="text-white mt-1 text-sm">
+                    {item.data
+                      ? new Date(item.data).toLocaleDateString("pt-BR")
+                      : "-"}
+                  </p>
+                </div>
 
-            <Badge
-              variant={
-                item.status === "ATENDIDA"
-                  ? "emerald"
-                  : item.status === "REJEITADA"
-                  ? "red"
-                  : item.status === "EM COTAÇÃO"
-                  ? "yellow"
-                  : item.status === "AGUARDANDO COMPRA"
-                  ? "blue"
-                  : "gray"
-              }
-            >
-              {item.status}
-            </Badge>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    {item.numero}
+                  </p>
+                  <p className="text-white font-semibold mt-1">
+                    {item.titulo}
+                  </p>
+                </div>
 
-          </div>
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    Criado por
+                  </p>
+                  <p className="text-white mt-1 text-sm">
+                    {item.criadoPorNome || "-"}
+                  </p>
+                  {item.criadoPorPerfil && (
+                    <p className="text-gray-500 text-xs mt-0.5">
+                      {item.criadoPorPerfil}
+                    </p>
+                  )}
+                </div>
 
-          <div className="mt-6">
+                <div className="xl:col-span-1">
+                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                    Descrição
+                  </p>
+                  <p className="text-gray-300 mt-1 text-sm line-clamp-2">
+                    {item.descricao || "Sem descrição."}
+                  </p>
+                </div>
 
-            <p className="text-sm text-gray-400 mb-2">
-              Descrição
-            </p>
+                <div className="flex items-center gap-3">
 
-            <div
-              className="
-                bg-white/5
-                border
-                border-white/10
-                rounded-2xl
-                p-5
-                text-gray-300
-                leading-relaxed
-              "
-            >
-              {item.descricao || "Sem descrição."}
-            </div>
+                  <Badge variant={config.badge}>
+                    {item.status}
+                  </Badge>
 
-          </div>
+                </div>
 
-          <div className="grid md:grid-cols-3 gap-6 mt-8">
-
-            <div>
-
-              <p className="text-sm text-gray-400">
-                Responsável
-              </p>
-
-              <p className="font-semibold text-white mt-1">
-                {item.responsavel || "-"}
-              </p>
-
-            </div>
-
-            <div>
-
-              <p className="text-sm text-gray-400">
-                Data
-              </p>
-
-              <p className="font-semibold text-white mt-1">
-                {item.data || "-"}
-              </p>
-
-            </div>
-
-            <div>
-
-              <p className="text-sm text-gray-400">
-                Prazo
-              </p>
-
-              <p className="font-semibold text-white mt-1">
-                {item.prazo || "-"}
-              </p>
-
-            </div>
-
-          </div>
-
-          {item.observacoes && (
-
-            <div className="mt-6">
-
-              <p className="text-sm text-gray-400 mb-2">
-                Observações
-              </p>
-
-              <div
-                className="
-                  bg-white/5
-                  border
-                  border-white/10
-                  rounded-2xl
-                  p-5
-                  text-gray-300
-                "
-              >
-                {item.observacoes}
               </div>
 
+              <button
+                onClick={(e) => {
+
+                  e.stopPropagation();
+
+                  if (menuAberto === item.id) {
+                    setMenuAberto(null);
+                    return;
+                  }
+
+                  abrirMenu(e, item.id);
+
+                }}
+                className="
+                  w-10
+                  h-10
+                  rounded-xl
+                  bg-white/5
+                  hover:bg-white/10
+                  flex
+                  items-center
+                  justify-center
+                  transition
+                  shrink-0
+                "
+              >
+                <MoreVertical size={18} className="text-gray-300" />
+              </button>
+
+              <ActionMenu
+                open={menuAberto === item.id}
+                position={posicaoMenu}
+                onClose={() => setMenuAberto(null)}
+              >
+
+                <button
+                  onClick={() => {
+                    setMenuAberto(null);
+                    router.push(`/solicitacoes/${item.id}`);
+                  }}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-5
+                    py-3
+                    text-gray-300
+                    hover:bg-white/5
+                    transition
+                  "
+                >
+                  <Eye size={17} />
+                  Visualizar
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuAberto(null);
+                    setRespondendo(item);
+                  }}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-5
+                    py-3
+                    text-blue-400
+                    hover:bg-blue-500/10
+                    transition
+                  "
+                >
+                  <MessageSquare size={17} />
+                  Responder
+                </button>
+
+                {podeClassificar && (
+
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      setRespondendo(item);
+                    }}
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-3
+                      px-5
+                      py-3
+                      text-sky-400
+                      hover:bg-sky-500/10
+                      transition
+                    "
+                  >
+                    <Tag size={17} />
+                    Classificar
+                  </button>
+
+                )}
+
+                <button
+                  onClick={() => {
+                    setMenuAberto(null);
+                    onEdit(item);
+                  }}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-5
+                    py-3
+                    text-yellow-400
+                    hover:bg-yellow-500/10
+                    transition
+                  "
+                >
+                  <Pencil size={17} />
+                  Editar
+                </button>
+
+                <button
+                  onClick={() => {
+                    setMenuAberto(null);
+                    onDelete(item.id);
+                  }}
+                  className="
+                    w-full
+                    flex
+                    items-center
+                    gap-3
+                    px-5
+                    py-3
+                    text-red-400
+                    hover:bg-red-500/10
+                    transition
+                  "
+                >
+                  <Trash2 size={17} />
+                  Excluir
+                </button>
+
+              </ActionMenu>
+
             </div>
 
-          )}
-            {item.resposta && (
+          </div>
 
-  <div className="mt-6">
+        );
 
-    <p className="text-sm text-gray-400 mb-2">
-      Resposta
-    </p>
+      })}
 
-    <div
-      className="
-        bg-emerald-500/10
-        border
-        border-emerald-500/20
-        rounded-2xl
-        p-5
-        text-gray-300
-      "
-    >
-      {item.resposta}
-    </div>
-
-  </div>
-
-)}
-
-<div
-  className="
-    flex
-    items-center
-    justify-between
-    flex-wrap
-    gap-4
-    mt-8
-  "
->
-
-  <select
-    value={item.status}
-    onChange={(e) =>
-      onAlterarStatus(
-        item.id,
-        e.target.value
-      )
-    }
-    className="
-      rounded-xl
-      border
-      border-white/10
-      bg-white/5
-      px-4
-      py-3
-      text-white
-      outline-none
-      focus:border-emerald-500
-    "
-  >
-
-    <option value="SOLICITADA">SOLICITADA</option>
-
-    <option value="EM COTAÇÃO">EM COTAÇÃO</option>
-
-    <option value="AGUARDANDO COMPRA">
-      AGUARDANDO COMPRA
-    </option>
-
-    <option value="ATENDIDA">ATENDIDA</option>
-
-    <option value="REJEITADA">REJEITADA</option>
-
-  </select>
-
-  <div className="flex flex-wrap gap-3">
-
-    <Link href={`/solicitacoes/${item.id}`}>
-
-      <Button variant="secondary">
-        Visualizar
-      </Button>
-
-    </Link>
-
-    <Button
-      variant="blue"
-      onClick={() => onResponder(item)}
-    >
-      Responder
-    </Button>
-
-    <Button
-      variant="yellow"
-      onClick={() => onEdit(item)}
-    >
-      Editar
-    </Button>
-
-    <Button
-      variant="red"
-      onClick={() => onDelete(item.id)}
-    >
-      Excluir
-    </Button>
-
-  </div>
-
-</div>
-
-</Card>
-
-      ))}
+      <SolicitacaoRespostaRapidaModal
+        solicitacao={respondendo}
+        onClose={() => setRespondendo(null)}
+        onAtualizado={() => onAtualizado?.()}
+      />
 
     </div>
 

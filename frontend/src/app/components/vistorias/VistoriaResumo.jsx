@@ -72,7 +72,10 @@ export default function VistoriaResumo({
             rounded-[22px]
             border
             border-white/10
-            bg-white/[0.04]
+            bg-gradient-to-br
+            from-[#202a36]/95
+            via-[#1b2430]/96
+            to-[#151c25]/96
             backdrop-blur-xl
             p-6
             transition-all

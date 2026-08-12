@@ -1,15 +1,9 @@
 const jwt = require("jsonwebtoken");
 
 const authMiddleware = (req, res, next) => {
-  console.log("===== AUTH =====");
-  console.log("Cookies:", req.cookies);
-  console.log("Headers:", req.headers.authorization);
-
   const token =
     req.cookies?.token ||
     req.headers.authorization?.replace("Bearer ", "");
-
-  console.log("Token encontrado:", token);
 
   if (!token) {
     return res.status(401).json({

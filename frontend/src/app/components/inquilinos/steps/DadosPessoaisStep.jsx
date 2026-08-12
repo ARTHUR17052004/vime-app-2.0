@@ -53,13 +53,18 @@ export default function StepDadosPessoais({
         className={inputStyle}
       />
 
-      <input
-        type="date"
-        name="dataNascimento"
-        value={formData.dataNascimento}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      <div>
+        <label className="block text-xs text-gray-400 mb-1.5">
+          Data de Nascimento
+        </label>
+        <input
+          type="date"
+          name="dataNascimento"
+          value={formData.dataNascimento}
+          onChange={handleChange}
+          className={`${inputStyle} w-full`}
+        />
+      </div>
 
       <input
         name="enderecoAnterior"

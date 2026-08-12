@@ -1,24 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
+import { ReceitaService } from "@/services/financeiro.service";
+
 export default function ContratoHistoricoFinanceiro({
   contratoId,
 }) {
 
-  const receitas = JSON.parse(
-    localStorage.getItem(
-      "vime-receitas"
-    ) || "[]"
-  );
+  const [receitasContrato, setReceitasContrato] =
+    useState([]);
 
-  const receitasContrato =
-    receitas.filter(
-      (receita) =>
-        String(
-          receita.contratoId
-        ) === String(
-          contratoId
-        )
-    );
+  const [carregando, setCarregando] =
+    useState(true);
+
+  useEffect(() => {
+
+    async function carregar() {
+
+      try {
+
+        const resposta = await ReceitaService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        setReceitasContrato(
+          lista.filter(
+            (receita) =>
+              String(receita.contratoId) === String(contratoId)
+          )
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar histórico financeiro:", err);
+
+      } finally {
+
+        setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
+
+  }, [contratoId]);
 
   return (
     <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
@@ -27,7 +56,13 @@ export default function ContratoHistoricoFinanceiro({
         Histórico Financeiro
       </h2>
 
-      {receitasContrato.length === 0 ? (
+      {carregando ? (
+
+        <div className="text-gray-400">
+          Carregando...
+        </div>
+
+      ) : receitasContrato.length === 0 ? (
 
         <div className="text-gray-400">
           Nenhuma movimentação encontrada.
@@ -76,7 +111,7 @@ export default function ContratoHistoricoFinanceiro({
                       text-sm
                       ${
                         receita.status ===
-                        "Pago"
+                        "PAGO"
                           ? "text-green-600"
                           : "text-orange-600"
                       }

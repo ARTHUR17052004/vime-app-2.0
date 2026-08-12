@@ -42,9 +42,9 @@ export default function EmpresaCard({
 
         <Input
           label="Empresa"
-          value={dados.nome || ""}
+          value={dados.empresa || ""}
           onChange={(e) =>
-            onChange("nome", e.target.value)
+            onChange("empresa", e.target.value)
           }
         />
 

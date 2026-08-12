@@ -10,11 +10,12 @@ const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 
 const iniciarJobs = require("./src/jobs");
-const { setIO } = require("./src/socket");
+const { setIO, registrarConexao, removerConexao } = require("./src/socket");
 
 const authRoutes = require("./src/routes/authRoutes");
 const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
 const usuarioRoutes = require("./src/routes/usuarioRoutes");
+const perfilRoutes = require("./src/routes/perfilRoutes");
 const locadorRoutes = require("./src/routes/locadorRoutes");
 const unidadeRoutes = require("./src/routes/unidadeRoutes");
 const kitnetRoutes = require("./src/routes/kitnetRoutes");
@@ -29,9 +30,12 @@ const clicksignRoutes = require("./src/routes/clicksignRoutes");
 const solicitacaoRoutes = require("./src/routes/solicitacaoRoutes");
 const vistoriaRoutes = require("./src/routes/vistoriaRoutes");
 const logRoutes = require("./src/routes/logRoutes");
+const sessaoRoutes = require("./src/routes/sessaoRoutes");
 const whatsappRoutes = require("./src/routes/whatsappRoutes");
 const notificacaoRoutes = require("./src/routes/notificacaoRoutes");
 const buscaRoutes = require("./src/routes/buscaRoutes");
+const configuracaoRoutes = require("./src/routes/configuracaoRoutes");
+const modeloDocumentoRoutes = require("./src/routes/modeloDocumentoRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -70,6 +74,7 @@ app.get("/health", (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/usuarios", usuarioRoutes);
+app.use("/perfis", perfilRoutes);
 app.use("/locadores", locadorRoutes);
 app.use("/unidades", unidadeRoutes);
 app.use("/kitnets", kitnetRoutes);
@@ -85,9 +90,12 @@ app.use("/auditoria", auditoriaRoutes);
 app.use("/asaas", asaasRoutes);
 app.use("/clicksign", clicksignRoutes);
 app.use("/logs", logRoutes);
+app.use("/sessoes", sessaoRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/notificacoes", notificacaoRoutes);
 app.use("/busca", buscaRoutes);
+app.use("/configuracoes", configuracaoRoutes);
+app.use("/modelos-documento", modeloDocumentoRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
@@ -154,7 +162,12 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   if (socket.usuario?.id) {
     socket.join(`usuario:${socket.usuario.id}`);
+    registrarConexao(socket);
   }
+
+  socket.on("disconnect", () => {
+    removerConexao(socket);
+  });
 });
 
 setIO(io);

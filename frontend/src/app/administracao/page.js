@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+
 import {
   Users,
   Shield,
@@ -23,16 +25,76 @@ import AdministracaoHeader from "../components/administracao/AdministracaoHeader
 import AdministracaoStats from "../components/administracao/AdministracaoStats";
 import AdministracaoCard from "../components/administracao/AdministracaoCard";
 
+import { UsuarioService } from "@/services/usuarios.service";
+import { PerfilService } from "@/services/perfis.service";
+import { SessaoService } from "@/services/sessao.service";
+import { AuditoriaService } from "@/services/auditoria.service";
+import { LogService } from "@/services/log.service";
+
+function paraLista(resposta) {
+  return Array.isArray(resposta)
+    ? resposta
+    : resposta?.data || [];
+}
+
 export default function AdministracaoPage() {
 
   const router = useRouter();
+
+  const [totais, setTotais] = useState({
+    usuarios: 0,
+    perfis: 0,
+    permissoes: 0,
+    sessoes: 0,
+    auditorias: 0,
+    logs: 0,
+  });
+
+  const carregarTotais = useCallback(async () => {
+
+    const [
+      usuarios,
+      perfis,
+      sessoes,
+      auditorias,
+      logs,
+    ] = await Promise.all([
+      UsuarioService.listar().then(paraLista).catch(() => []),
+      PerfilService.listar().then(paraLista).catch(() => []),
+      SessaoService.listar().then(paraLista).catch(() => []),
+      AuditoriaService.listar().then(paraLista).catch(() => []),
+      LogService.listar().then(paraLista).catch(() => []),
+    ]);
+
+    const permissoesConcedidas = perfis.reduce(
+      (total, perfil) =>
+        total + (perfil.permissoes?.length || 0),
+      0
+    );
+
+    setTotais({
+      usuarios: usuarios.length,
+      perfis: perfis.length,
+      permissoes: permissoesConcedidas,
+      sessoes: sessoes.length,
+      auditorias: auditorias.length,
+      logs: logs.length,
+    });
+
+  }, []);
+
+  useEffect(() => {
+
+    carregarTotais();
+
+  }, [carregarTotais]);
 
   const cards = [
 
     {
       title: "Usuários",
       subtitle: "Usuários cadastrados",
-      value: 12,
+      value: totais.usuarios,
       icon: Users,
       color: "emerald",
     },
@@ -40,15 +102,15 @@ export default function AdministracaoPage() {
     {
       title: "Perfis",
       subtitle: "Perfis cadastrados",
-      value: 3,
+      value: totais.perfis,
       icon: Shield,
       color: "blue",
     },
 
     {
       title: "Permissões",
-      subtitle: "Permissões",
-      value: 78,
+      subtitle: "Permissões concedidas",
+      value: totais.permissoes,
       icon: KeyRound,
       color: "yellow",
     },
@@ -56,7 +118,7 @@ export default function AdministracaoPage() {
     {
       title: "Sessões",
       subtitle: "Usuários Online",
-      value: 2,
+      value: totais.sessoes,
       icon: Activity,
       color: "purple",
     },
@@ -64,7 +126,7 @@ export default function AdministracaoPage() {
     {
       title: "Auditorias",
       subtitle: "Registros",
-      value: 15,
+      value: totais.auditorias,
       icon: History,
       color: "emerald",
     },
@@ -72,7 +134,7 @@ export default function AdministracaoPage() {
     {
       title: "Logs",
       subtitle: "Eventos",
-      value: 9,
+      value: totais.logs,
       icon: FileText,
       color: "red",
     },
@@ -91,7 +153,7 @@ export default function AdministracaoPage() {
 
             <AdministracaoHeader
 
-              totalUsuarios={12}
+              totalUsuarios={totais.usuarios}
 
               onNovoUsuario={() =>
                 router.push("/administracao/usuarios")
@@ -260,6 +322,30 @@ export default function AdministracaoPage() {
                   >
 
                     Abrir Logs
+
+                  </Button>
+
+                </AdministracaoCard>
+
+                <AdministracaoCard
+
+                  title="Modelos de Documentos"
+
+                  subtitle="Modelo de PDF do contrato"
+
+                >
+
+                  <Button
+
+                    className="w-full"
+
+                    onClick={() =>
+                      router.push("/administracao/modelos")
+                    }
+
+                  >
+
+                    Abrir Modelos
 
                   </Button>
 

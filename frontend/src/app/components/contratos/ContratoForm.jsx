@@ -29,6 +29,9 @@ export default function ContratoForm({
   const [inquilinos, setInquilinos] =
     useState([]);
 
+  const [salvando, setSalvando] =
+    useState(false);
+
   const [formData, setFormData] =
     useState({
 
@@ -218,26 +221,40 @@ export default function ContratoForm({
 
   }
 
-  function salvar(e) {
+  async function salvar(e) {
 
     e.preventDefault();
 
-    onSave({
+    setSalvando(true);
 
-      ...formData,
+    try {
 
-      valorAluguel: Number(formData.valorAluguel),
+      await onSave({
 
-      diaVencimento: Number(formData.diaVencimento),
+        ...formData,
 
-      valorCaucao: formData.valorCaucao
-        ? Number(formData.valorCaucao)
-        : null,
+        valorAluguel: Number(formData.valorAluguel),
 
-      dataFim:
-        formData.dataFim || null,
+        diaVencimento: Number(formData.diaVencimento),
 
-    });
+        valorCaucao: formData.valorCaucao
+          ? Number(formData.valorCaucao)
+          : null,
+
+        dataFim:
+          formData.dataFim || null,
+
+      });
+
+    } catch {
+
+      // erro já é exibido pelo chamador (onSave)
+
+    } finally {
+
+      setSalvando(false);
+
+    }
 
   }
 
@@ -449,22 +466,38 @@ export default function ContratoForm({
 
       <div className="grid md:grid-cols-2 gap-5">
 
-        <input
-          className={input}
-          type="date"
-          name="dataInicio"
-          value={formData.dataInicio}
-          onChange={alterarCampo}
-          required
-        />
+        <div>
 
-        <input
-          className={input}
-          type="date"
-          name="dataFim"
-          value={formData.dataFim}
-          onChange={alterarCampo}
-        />
+          <label className="mb-1.5 block text-sm text-gray-400">
+            Data de Criação do Contrato
+          </label>
+
+          <input
+            className={input}
+            type="date"
+            name="dataInicio"
+            value={formData.dataInicio}
+            onChange={alterarCampo}
+            required
+          />
+
+        </div>
+
+        <div>
+
+          <label className="mb-1.5 block text-sm text-gray-400">
+            Data Final do Contrato
+          </label>
+
+          <input
+            className={input}
+            type="date"
+            name="dataFim"
+            value={formData.dataFim}
+            onChange={alterarCampo}
+          />
+
+        </div>
 
         <input
           className={input}
@@ -636,15 +669,18 @@ export default function ContratoForm({
     type="button"
     variant="secondary"
     onClick={onCancel}
+    disabled={salvando}
   >
     Cancelar
   </Button>
 
-  <Button type="submit">
+  <Button type="submit" disabled={salvando}>
 
-    {contrato
-      ? "Salvar Alterações"
-      : "Criar Contrato"}
+    {salvando
+      ? "Salvando..."
+      : contrato
+        ? "Salvar Alterações"
+        : "Criar Contrato"}
 
   </Button>
 

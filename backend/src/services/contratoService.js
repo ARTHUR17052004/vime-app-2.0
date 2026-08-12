@@ -5,6 +5,7 @@ const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 const AsaasApi = require("./AsaasApi");
 const WhatsappService = require("./whatsappService");
+const notificacaoService = require("./notificacaoService");
 
 const listar = () => {
   return prisma.contrato.findMany({
@@ -273,6 +274,12 @@ const criar = async (dados) => {
     descricao: `Contrato ${contrato.id} criado.`
   });
 
+  await notificacaoService.criar({
+    origem: "SISTEMA",
+    titulo: "Novo contrato criado",
+    mensagem: `Contrato de ${inquilino.nome} na kitnet ${kitnet.numero} foi criado.`
+  });
+
   return contrato;
 
 };
@@ -443,6 +450,12 @@ const encerrar = async (id) => {
     descricao: `Contrato ${contrato.id} encerrado.`
   });
 
+  await notificacaoService.criar({
+    origem: "SISTEMA",
+    titulo: "Contrato encerrado",
+    mensagem: `Contrato ${contrato.id} foi encerrado.`
+  });
+
   try {
     await WhatsappService.enviarMensagem({
       numero: contrato.inquilino?.telefone,
@@ -495,6 +508,12 @@ const inadimplente = async (id) => {
     modulo: "CONTRATOS",
     acao: "INADIMPLENTE",
     descricao: `Contrato ${contrato.id} marcado como inadimplente.`
+  });
+
+  await notificacaoService.criar({
+    origem: "SISTEMA",
+    titulo: "Contrato inadimplente",
+    mensagem: `Contrato ${contrato.id} foi marcado como inadimplente.`
   });
 
   try {

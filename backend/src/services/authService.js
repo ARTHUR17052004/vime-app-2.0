@@ -13,9 +13,6 @@ const login = async (email, senha) => {
     }
   });
 
-  console.log("USUARIO DO BANCO:");
-  console.log(usuario);
-
   if (!usuario) {
     throw new Error('Usuário não encontrado.');
   }

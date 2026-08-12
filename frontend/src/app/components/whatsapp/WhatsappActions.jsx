@@ -85,11 +85,17 @@ export default function WhatsappActions({
 
   async function enviarTeste() {
 
+    const numero = prompt(
+      "Digite o número de WhatsApp para o teste (com DDD, ex: 5562999999999):"
+    );
+
+    if (!numero) return;
+
     try {
 
       await WhatsappService.enviar({
 
-        numero: "5562984661680", // <-- coloque aqui o seu número de teste
+        numero,
 
         mensagem: "Teste enviado pelo VIME 2.0 🚀",
 

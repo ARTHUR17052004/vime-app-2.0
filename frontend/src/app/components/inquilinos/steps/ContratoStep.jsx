@@ -10,21 +10,31 @@ export default function ContratoStep({
   return (
     <div className="grid grid-cols-2 gap-4">
 
-      <input
-        type="date"
-        name="dataInicioContrato"
-        value={formData.dataInicioContrato}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      <div>
+        <label className="block text-xs text-gray-400 mb-1.5">
+          Início do Contrato
+        </label>
+        <input
+          type="date"
+          name="dataInicioContrato"
+          value={formData.dataInicioContrato}
+          onChange={handleChange}
+          className={`${inputStyle} w-full`}
+        />
+      </div>
 
-      <input
-        type="date"
-        name="dataFimContrato"
-        value={formData.dataFimContrato}
-        onChange={handleChange}
-        className={inputStyle}
-      />
+      <div>
+        <label className="block text-xs text-gray-400 mb-1.5">
+          Fim do Contrato
+        </label>
+        <input
+          type="date"
+          name="dataFimContrato"
+          value={formData.dataFimContrato}
+          onChange={handleChange}
+          className={`${inputStyle} w-full`}
+        />
+      </div>
 
       <input
         name="prazoContrato"

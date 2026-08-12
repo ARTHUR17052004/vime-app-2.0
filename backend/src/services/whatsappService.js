@@ -139,8 +139,12 @@ class WhatsappService {
     const configuracao =
       await this.obterConfiguracao();
 
+    const configurado =
+      await metaWhatsappService.temCredenciais();
+
     return {
       conectado: configuracao.conectado,
+      configurado,
       provider: configuracao.provider,
       nomeConexao: configuracao.nomeConexao,
       numero: configuracao.numero,
@@ -253,6 +257,7 @@ class WhatsappService {
         provider: dados.provider,
         webhook: dados.webhook,
         token: dados.token,
+        phoneNumberId: dados.phoneNumberId,
         apiUrl: dados.apiUrl,
       },
     });
@@ -264,8 +269,9 @@ class WhatsappService {
 
   async enviarMensagem(dados) {
 
-    // Usa a Meta Cloud API quando o token estiver configurado
-    if (process.env.WHATSAPP_ACCESS_TOKEN) {
+    // Usa a Meta Cloud API quando token + phone number ID estiverem configurados
+    // (na tela de Configuração ou via variáveis de ambiente)
+    if (await metaWhatsappService.temCredenciais()) {
 
       const resultado = await metaWhatsappService.enviarMensagem(
         dados.numero,

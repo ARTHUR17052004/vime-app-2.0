@@ -1,20 +1,126 @@
 "use client";
 
+import { useState } from "react";
+
+import { exportarPDF, exportarExcel } from "@/utils/exportar";
+
+import { UnidadeService } from "@/services/unidades.service";
+import { KitnetService } from "@/services/kitnets.service";
+import { LocadorService } from "@/services/locadores.service";
+import { InquilinoService } from "@/services/inquilinos.service";
+import { ContratoService } from "@/services/contratos.service";
+import { SolicitacaoService } from "@/services/solicitacao.service";
+import { VistoriaService } from "@/services/vistoria.service";
+import { ReceitaService, DespesaService } from "@/services/financeiro.service";
+
+function paraLista(resposta) {
+  return Array.isArray(resposta)
+    ? resposta
+    : resposta?.data || [];
+}
+
+async function coletarResumo() {
+
+  const [
+    unidades,
+    kitnets,
+    locadores,
+    inquilinos,
+    contratos,
+    solicitacoes,
+    vistorias,
+    receitas,
+    despesas,
+  ] = await Promise.all([
+    UnidadeService.listar().then(paraLista).catch(() => []),
+    KitnetService.listar().then(paraLista).catch(() => []),
+    LocadorService.listar().then(paraLista).catch(() => []),
+    InquilinoService.listar().then(paraLista).catch(() => []),
+    ContratoService.listar().then(paraLista).catch(() => []),
+    SolicitacaoService.listar().then(paraLista).catch(() => []),
+    VistoriaService.listar().then(paraLista).catch(() => []),
+    ReceitaService.listar().then(paraLista).catch(() => []),
+    DespesaService.listar().then(paraLista).catch(() => []),
+  ]);
+
+  return [
+    ["Unidades", unidades.length],
+    ["Kitnets", kitnets.length],
+    ["Locadores", locadores.length],
+    ["Inquilinos", inquilinos.length],
+    ["Contratos", contratos.length],
+    ["Solicitações", solicitacoes.length],
+    ["Vistorias", vistorias.length],
+    ["Receitas", receitas.length],
+    ["Despesas", despesas.length],
+  ];
+
+}
+
 export default function RelatorioExportar() {
 
-  function exportarPDF() {
+  const [gerando, setGerando] =
+    useState(false);
 
-    alert(
-      "Exportação PDF será implementada na V2."
-    );
+  async function handleExportarPDF() {
+
+    setGerando(true);
+
+    try {
+
+      const linhas = await coletarResumo();
+
+      exportarPDF({
+        titulo: "Resumo Geral do Sistema",
+        secoes: [
+          {
+            colunas: ["Módulo", "Total de Registros"],
+            linhas,
+          },
+        ],
+        nomeArquivo: "resumo-geral",
+      });
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao gerar PDF.");
+
+    } finally {
+
+      setGerando(false);
+
+    }
 
   }
 
-  function exportarExcel() {
+  async function handleExportarExcel() {
 
-    alert(
-      "Exportação Excel será implementada na V2."
-    );
+    setGerando(true);
+
+    try {
+
+      const linhas = await coletarResumo();
+
+      exportarExcel({
+        abas: [
+          {
+            nome: "Resumo Geral",
+            colunas: ["Módulo", "Total de Registros"],
+            linhas,
+          },
+        ],
+        nomeArquivo: "resumo-geral",
+      });
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao gerar Excel.");
+
+    } finally {
+
+      setGerando(false);
+
+    }
 
   }
 
@@ -34,13 +140,19 @@ export default function RelatorioExportar() {
 
       </h2>
 
+      <p className="text-gray-400 -mt-4 mb-6">
+        Resumo geral com o total de registros de cada módulo do sistema.
+      </p>
+
       <div className="grid md:grid-cols-3 gap-6">
 
         <button
-          onClick={exportarPDF}
+          onClick={handleExportarPDF}
+          disabled={gerando}
           className="
             bg-green-700
             hover:bg-green-800
+            disabled:opacity-50
             text-white
             rounded-2xl
             p-5
@@ -48,15 +160,17 @@ export default function RelatorioExportar() {
           "
         >
 
-          Exportar PDF
+          {gerando ? "Gerando..." : "Exportar PDF"}
 
         </button>
 
         <button
-          onClick={exportarExcel}
+          onClick={handleExportarExcel}
+          disabled={gerando}
           className="
             bg-green-700
             hover:bg-green-800
+            disabled:opacity-50
             text-white
             rounded-2xl
             p-5
@@ -64,7 +178,7 @@ export default function RelatorioExportar() {
           "
         >
 
-          Exportar Excel
+          {gerando ? "Gerando..." : "Exportar Excel"}
 
         </button>
 

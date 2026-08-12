@@ -1,6 +1,7 @@
 "use client";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   ChevronDown,
@@ -13,6 +14,7 @@ import NotificationBell from "../notificacoes/NotificationBell";
 
 export default function Topbar() {
   const { usuario, logout } = useAuth();
+  const router = useRouter();
 
   const nome = usuario?.nome || "Visitante";
   const perfil = usuario?.perfil || "SEM PERFIL";
@@ -273,6 +275,10 @@ export default function Topbar() {
               "
             >
               <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/perfil");
+                }}
                 className="
                   w-full
                   flex
@@ -292,6 +298,10 @@ export default function Topbar() {
               </button>
 
               <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/configuracoes");
+                }}
                 className="
                   w-full
                   flex

@@ -4,6 +4,16 @@ const bcrypt = require("bcryptjs");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 
+const semSenha = (usuario) => {
+
+    if (!usuario) return usuario;
+
+    const { senha, ...resto } = usuario;
+
+    return resto;
+
+};
+
 /* =====================================================
    LISTAR
 ===================================================== */
@@ -15,6 +25,12 @@ const listar = () => {
         orderBy: {
 
             createdAt: "desc",
+
+        },
+
+        omit: {
+
+            senha: true,
 
         },
 
@@ -49,6 +65,12 @@ const buscarPorId = (id) => {
         where: {
 
             id,
+
+        },
+
+        omit: {
+
+            senha: true,
 
         },
 
@@ -112,6 +134,12 @@ const criar = async (dados) => {
 
     },
 
+    omit: {
+
+        senha: true,
+
+    },
+
     include: {
 
         perfil: true,
@@ -134,7 +162,7 @@ const criar = async (dados) => {
 
         valorAnterior: null,
 
-        valorNovo: usuario,
+        valorNovo: semSenha(usuario),
 
     });
 
@@ -165,16 +193,17 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
-    console.log("==================================");
-    console.log("ATUALIZAR USUÁRIO");
-    console.log("ID:", id);
-    console.log("DADOS RECEBIDOS:", dados);
-
     const anterior = await prisma.usuario.findUnique({
 
         where: {
 
             id,
+
+        },
+
+        omit: {
+
+            senha: true,
 
         },
 
@@ -185,8 +214,6 @@ const atualizar = async (id, dados) => {
         },
 
     });
-
-    console.log("USUÁRIO ANTES:", anterior);
 
     const data = {
 
@@ -226,8 +253,6 @@ const atualizar = async (id, dados) => {
 
     }
 
-    console.log("DATA ENVIADA AO PRISMA:", data);
-
     const usuario = await prisma.usuario.update({
 
         where: {
@@ -238,6 +263,12 @@ const atualizar = async (id, dados) => {
 
         data,
 
+        omit: {
+
+            senha: true,
+
+        },
+
         include: {
 
             perfil: true,
@@ -245,8 +276,6 @@ const atualizar = async (id, dados) => {
         },
 
     });
-
-    console.log("USUÁRIO APÓS UPDATE:", usuario);
 
     await auditoriaService.registrar({
 
@@ -260,9 +289,9 @@ const atualizar = async (id, dados) => {
 
         acao: "ATUALIZAR",
 
-        valorAnterior: anterior,
+        valorAnterior: semSenha(anterior),
 
-        valorNovo: usuario,
+        valorNovo: semSenha(usuario),
 
     });
 
@@ -298,6 +327,12 @@ const remover = async (id) => {
 
         },
 
+        omit: {
+
+            senha: true,
+
+        },
+
         include: {
 
             perfil: true,
@@ -328,7 +363,7 @@ const remover = async (id) => {
 
         acao: "EXCLUIR",
 
-        valorAnterior: usuario,
+        valorAnterior: semSenha(usuario),
 
         valorNovo: null,
 
@@ -393,6 +428,12 @@ const redefinirSenha = async (
 
         },
 
+        omit: {
+
+            senha: true,
+
+        },
+
     });
 
 };
@@ -408,6 +449,12 @@ const enviarAcesso = async (id) => {
         where: {
 
             id,
+
+        },
+
+        omit: {
+
+            senha: true,
 
         },
 

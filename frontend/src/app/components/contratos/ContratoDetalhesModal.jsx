@@ -34,21 +34,11 @@ export default function ContratoDetalhesModal({
 
           <div>
             <p className="text-gray-400">
-              Número Contrato
-            </p>
-
-            <p className="font-semibold text-white">
-              {contrato.numeroContrato}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-gray-400">
               Inquilino
             </p>
 
             <p className="font-semibold text-white">
-              {contrato.inquilinoNome}
+              {contrato.inquilino?.nome || contrato.inquilinoNome}
             </p>
           </div>
 
@@ -58,7 +48,7 @@ export default function ContratoDetalhesModal({
             </p>
 
             <p className="font-semibold text-white">
-              {contrato.unidadeNome}
+              {contrato.unidade?.nome || contrato.unidadeNome}
             </p>
           </div>
 
@@ -68,7 +58,7 @@ export default function ContratoDetalhesModal({
             </p>
 
             <p className="font-semibold text-white">
-              {contrato.kitnetNome}
+              {contrato.kitnet?.nome || contrato.kitnetNome}
             </p>
           </div>
 
@@ -94,21 +84,25 @@ export default function ContratoDetalhesModal({
 
           <div>
             <p className="text-gray-400">
-              Data Início
+              Data de Criação
             </p>
 
             <p className="font-semibold text-white">
-              {contrato.dataInicio}
+              {contrato.dataInicio
+                ? new Date(contrato.dataInicio).toLocaleDateString("pt-BR")
+                : "-"}
             </p>
           </div>
 
           <div>
             <p className="text-gray-400">
-              Data Fim
+              Data Final do Contrato
             </p>
 
             <p className="font-semibold text-white">
-              {contrato.dataFim}
+              {contrato.dataFim
+                ? new Date(contrato.dataFim).toLocaleDateString("pt-BR")
+                : "Indeterminado"}
             </p>
           </div>
 

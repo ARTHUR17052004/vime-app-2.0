@@ -3,6 +3,9 @@ const express = require('express');
 const router = express.Router();
 
 const unidadeController = require('../controllers/unidadeController');
+const authMiddleware = require('../middlewares/authMiddleware');
+
+router.use(authMiddleware);
 
 router.get('/', unidadeController.listar);
 

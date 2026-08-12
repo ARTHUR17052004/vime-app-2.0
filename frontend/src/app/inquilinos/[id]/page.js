@@ -148,6 +148,11 @@ export default function InquilinoDetalhesPage() {
                 />
 
                 <Info
+                  label="RG"
+                  value={inquilino.rg}
+                />
+
+                <Info
                   label="E-mail"
                   value={inquilino.email}
                 />
@@ -158,13 +163,39 @@ export default function InquilinoDetalhesPage() {
                 />
 
                 <Info
+                  label="Data de Nascimento"
+                  value={
+                    inquilino.dataNascimento
+                      ? new Date(
+                          inquilino.dataNascimento
+                        ).toLocaleDateString("pt-BR")
+                      : "-"
+                  }
+                />
+
+                <Info
+                  label="Endereço Anterior"
+                  value={inquilino.enderecoAnterior}
+                />
+
+                <Info
+                  label="Contato de Emergência"
+                  value={inquilino.contatoEmergencia}
+                />
+
+                <Info
+                  label="Telefone de Emergência"
+                  value={inquilino.telefoneEmergencia}
+                />
+
+                <Info
                   label="Kitnet"
-                  value={inquilino.kitnetNome || "-"}
+                  value={inquilino.kitnet?.nome || inquilino.kitnetNome || "-"}
                 />
 
                 <Info
                   label="Unidade"
-                  value={inquilino.unidadeNome || "-"}
+                  value={inquilino.kitnet?.unidade?.nome || inquilino.unidadeNome || "-"}
                 />
 
                 <Info
@@ -187,6 +218,34 @@ export default function InquilinoDetalhesPage() {
                         ).toLocaleDateString("pt-BR")
                       : "-"
                   }
+                />
+
+                <Info
+                  label="Prazo do Contrato"
+                  value={
+                    inquilino.prazoContrato
+                      ? `${inquilino.prazoContrato} meses`
+                      : "-"
+                  }
+                />
+
+                <Info
+                  label="Tipo de Garantia"
+                  value={inquilino.tipoGarantia}
+                />
+
+                <Info
+                  label="Valor da Caução"
+                  value={
+                    inquilino.valorCaucao
+                      ? `R$ ${inquilino.valorCaucao}`
+                      : "-"
+                  }
+                />
+
+                <Info
+                  label="Índice de Reajuste"
+                  value={inquilino.indiceReajuste}
                 />
 
                 <Info

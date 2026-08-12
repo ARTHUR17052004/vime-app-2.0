@@ -85,26 +85,16 @@ export default function UsuariosPage() {
 
   async function salvarUsuario(dados) {
 
-  console.log("DADOS RECEBIDOS:", dados);
-
-  console.log("USUARIO EDITANDO:", usuarioEditando);
-
   try {
 
     if (usuarioEditando) {
-
-      console.log("VAI ATUALIZAR");
 
       await UsuarioService.atualizar(
         usuarioEditando.id,
         dados
       );
 
-      console.log("ATUALIZOU");
-
     } else {
-
-      console.log("VAI CRIAR");
 
       await UsuarioService.criar(dados);
 
@@ -118,7 +108,12 @@ export default function UsuariosPage() {
 
   } catch (err) {
 
-    console.error("ERRO:", err);
+    alert(
+      err.message ||
+      "Erro ao salvar usuário."
+    );
+
+    throw err;
 
   }
 
@@ -296,7 +291,7 @@ export default function UsuariosPage() {
 
         .includes(texto) ||
 
-      usuario.perfil
+      usuario.perfil?.nome
 
         ?.toLowerCase()
 
@@ -334,7 +329,7 @@ export default function UsuariosPage() {
 
     (u) =>
 
-      u.perfil === "ADMINISTRADOR"
+      u.perfil?.nome?.toUpperCase() === "ADMINISTRADOR"
 
   ).length;
 

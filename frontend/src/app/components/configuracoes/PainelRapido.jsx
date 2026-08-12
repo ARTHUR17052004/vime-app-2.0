@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import {
   Shield,
   DatabaseBackup,
@@ -12,16 +14,18 @@ const opcoes = [
   {
     titulo: "Segurança",
     descricao: "Permissões, senhas e autenticação.",
-    status: "Protegido",
+    status: "Ver seção",
     icon: Shield,
     color: "text-emerald-400",
+    alvo: "secao-seguranca",
   },
   {
     titulo: "Backup",
     descricao: "Gerencie cópias de segurança.",
-    status: "Ativo",
+    status: "Ver seção",
     icon: DatabaseBackup,
     color: "text-cyan-400",
+    alvo: "secao-backup",
   },
   {
     titulo: "SMTP",
@@ -29,6 +33,7 @@ const opcoes = [
     status: "Configurar",
     icon: Mail,
     color: "text-yellow-400",
+    alvo: "secao-smtp",
   },
   {
     titulo: "Auditoria",
@@ -36,10 +41,27 @@ const opcoes = [
     status: "Visualizar",
     icon: ClipboardList,
     color: "text-purple-400",
+    rota: "/administracao/auditoria",
   },
 ];
 
 export default function PainelRapido() {
+
+  const router = useRouter();
+
+  function acessar(item) {
+
+    if (item.rota) {
+      router.push(item.rota);
+      return;
+    }
+
+    document
+      .getElementById(item.alvo)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  }
+
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
 
@@ -69,6 +91,7 @@ export default function PainelRapido() {
 
             <button
               key={item.titulo}
+              onClick={() => acessar(item)}
               className="w-full rounded-2xl border border-white/10 bg-slate-800/70 hover:border-emerald-500/30 hover:-translate-y-1 transition-all p-5 text-left"
             >
 

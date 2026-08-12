@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Paperclip, X } from "lucide-react";
 
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -16,19 +17,36 @@ export default function SolicitacaoForm({
     numero: "",
     titulo: "",
     descricao: "",
-    responsavel: "",
-    status: "SOLICITADA",
-    data: "",
     prazo: "",
     observacoes: "",
 
   });
 
+  const [anexo, setAnexo] = useState(null);
+
+  const inputArquivoRef = useRef(null);
+
   useEffect(() => {
 
     if (solicitacaoEditando) {
 
-      setForm(solicitacaoEditando);
+      setForm({
+
+        numero: solicitacaoEditando.numero || "",
+
+        titulo: solicitacaoEditando.titulo || "",
+
+        descricao: solicitacaoEditando.descricao || "",
+
+        prazo: solicitacaoEditando.prazo
+          ? new Date(solicitacaoEditando.prazo)
+              .toISOString()
+              .split("T")[0]
+          : "",
+
+        observacoes: solicitacaoEditando.observacoes || "",
+
+      });
 
       return;
 
@@ -36,21 +54,11 @@ export default function SolicitacaoForm({
 
     setForm({
 
-      numero: `SOL-${Date.now()
-        .toString()
-        .slice(-6)}`,
+      numero: `SOL-${Date.now().toString().slice(-6)}`,
 
       titulo: "",
 
       descricao: "",
-
-      responsavel: "",
-
-      status: "SOLICITADA",
-
-      data: new Date()
-        .toISOString()
-        .split("T")[0],
 
       prazo: "",
 
@@ -58,18 +66,51 @@ export default function SolicitacaoForm({
 
     });
 
+    setAnexo(null);
+
   }, [solicitacaoEditando]);
 
   function alterarCampo(e) {
-
     setForm((prev) => ({
-
       ...prev,
-
-      [e.target.name]:
-        e.target.value,
-
+      [e.target.name]: e.target.value,
     }));
+  }
+
+  function selecionarArquivo(e) {
+
+    const arquivo = e.target.files?.[0];
+
+    if (!arquivo) return;
+
+    if (arquivo.size > 8 * 1024 * 1024) {
+      alert("Arquivo muito grande (máximo 8 MB).");
+      return;
+    }
+
+    const leitor = new FileReader();
+
+    leitor.onload = () => {
+
+      setAnexo({
+        nome: arquivo.name,
+        tipo: arquivo.type || "application/octet-stream",
+        dados: leitor.result,
+      });
+
+    };
+
+    leitor.readAsDataURL(arquivo);
+
+  }
+
+  function removerArquivo() {
+
+    setAnexo(null);
+
+    if (inputArquivoRef.current) {
+      inputArquivoRef.current.value = "";
+    }
 
   }
 
@@ -77,7 +118,10 @@ export default function SolicitacaoForm({
 
     e.preventDefault();
 
-    onSave(form);
+    onSave({
+      ...form,
+      anexo,
+    });
 
   }
 
@@ -102,37 +146,18 @@ export default function SolicitacaoForm({
       className="space-y-8"
     >
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div>
 
-        <div>
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
+          Número
+        </label>
 
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Número
-          </label>
-
-          <Input
-            readOnly
-            name="numero"
-            value={form.numero}
-            className={`${input} bg-white/10`}
-          />
-
-        </div>
-
-        <div>
-
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Responsável
-          </label>
-
-          <Input
-            name="responsavel"
-            value={form.responsavel}
-            onChange={alterarCampo}
-            className={input}
-          />
-
-        </div>
+        <Input
+          readOnly
+          name="numero"
+          value={form.numero}
+          className={`${input} bg-white/10`}
+        />
 
       </div>
 
@@ -173,39 +198,19 @@ export default function SolicitacaoForm({
 
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div>
 
-        <div>
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
+          Prazo
+        </label>
 
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Data da Solicitação
-          </label>
-
-          <Input
-            type="date"
-            name="data"
-            value={form.data}
-            onChange={alterarCampo}
-            className={input}
-          />
-
-        </div>
-
-        <div>
-
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
-            Prazo
-          </label>
-
-          <Input
-            type="date"
-            name="prazo"
-            value={form.prazo}
-            onChange={alterarCampo}
-            className={input}
-          />
-
-        </div>
+        <Input
+          type="date"
+          name="prazo"
+          value={form.prazo}
+          onChange={alterarCampo}
+          className={input}
+        />
 
       </div>
 
@@ -230,10 +235,86 @@ export default function SolicitacaoForm({
 
       </div>
 
+      <div>
+
+        <label className="block text-sm font-semibold text-gray-300 mb-2">
+          Anexo
+        </label>
+
+        {anexo ? (
+
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              rounded-xl
+              border
+              border-white/10
+              bg-white/5
+              px-4
+              py-3
+            "
+          >
+
+            <span className="text-sm text-gray-300 truncate">
+              📎 {anexo.nome}
+            </span>
+
+            <button
+              type="button"
+              onClick={removerArquivo}
+              className="text-gray-400 hover:text-red-400 transition"
+            >
+              <X size={18} />
+            </button>
+
+          </div>
+
+        ) : (
+
+          <button
+            type="button"
+            onClick={() => inputArquivoRef.current?.click()}
+            className="
+              flex
+              items-center
+              gap-2
+              rounded-xl
+              border
+              border-dashed
+              border-white/15
+              bg-white/5
+              px-4
+              py-3
+              text-sm
+              text-gray-400
+              hover:bg-white/10
+              hover:text-gray-200
+              transition
+            "
+          >
+            <Paperclip size={16} />
+            Anexar arquivo (imagem, PDF, etc.)
+          </button>
+
+        )}
+
+        <input
+          ref={inputArquivoRef}
+          type="file"
+          onChange={selecionarArquivo}
+          className="hidden"
+        />
+
+      </div>
+
       <div className="flex justify-end pt-2">
 
         <Button type="submit">
-          Salvar Solicitação
+          {solicitacaoEditando
+            ? "Salvar Alterações"
+            : "Salvar Solicitação"}
         </Button>
 
       </div>

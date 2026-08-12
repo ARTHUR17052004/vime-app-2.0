@@ -6,6 +6,19 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
 
+import { VistoriaService } from "@/services/vistoria.service";
+import { AuditoriaService } from "@/services/auditoria.service";
+
+function formatarData(data) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : null;
+}
+
+const ACAO_LABEL = {
+  CRIAR: "Vistoria criada",
+  ATUALIZAR: "Vistoria atualizada",
+  EXCLUIR: "Vistoria excluída",
+};
+
 export default function DetalhesVistoriaPage() {
 
   const params = useParams();
@@ -13,25 +26,68 @@ export default function DetalhesVistoriaPage() {
   const [vistoria, setVistoria] =
     useState(null);
 
+  const [historico, setHistorico] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
   useEffect(() => {
 
-    const vistorias = JSON.parse(
-      localStorage.getItem(
-        "vime-vistorias"
-      ) || "[]"
-    );
+    async function carregar() {
 
-    const encontrada =
-      vistorias.find(
-        (item) =>
-          String(item.id) ===
-          String(params.id)
-      );
+      try {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVistoria(encontrada);
+        setCarregando(true);
+
+        const [respostaVistoria, respostaAuditoria] = await Promise.all([
+          VistoriaService.buscar(params.id),
+          AuditoriaService.listar(),
+        ]);
+
+        setVistoria(respostaVistoria.data || respostaVistoria);
+
+        const listaAuditoria = Array.isArray(respostaAuditoria)
+          ? respostaAuditoria
+          : respostaAuditoria.data || [];
+
+        setHistorico(
+          listaAuditoria.filter(
+            (item) =>
+              item.modulo === "VISTORIAS" &&
+              item.registroId === params.id
+          )
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar vistoria:", err);
+
+      } finally {
+
+        setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
 
   }, [params.id]);
+
+  if (carregando) {
+
+    return (
+
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando...
+        </div>
+      </MainLayout>
+
+    );
+
+  }
 
   if (!vistoria) {
 
@@ -62,7 +118,7 @@ export default function DetalhesVistoriaPage() {
         <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
 
           <h1 className="text-4xl font-bold text-white">
-            {vistoria.nomeVistoria}
+            {vistoria.titulo}
           </h1>
 
           <p className="text-gray-400 mt-2">
@@ -80,37 +136,30 @@ export default function DetalhesVistoriaPage() {
           <div className="grid md:grid-cols-3 gap-6">
 
             <div>
-              <p className="text-gray-400">Nome</p>
-              <h3 className="font-semibold text-white">
-                {vistoria.nomeVistoria}
-              </h3>
-            </div>
-
-            <div>
               <p className="text-gray-400">Categoria</p>
               <h3 className="font-semibold text-white">
-                {vistoria.categoria}
+                {vistoria.categoria || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Criticidade</p>
               <h3 className="font-semibold text-white">
-                {vistoria.criticidade}
+                {vistoria.criticidade || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Responsável</p>
               <h3 className="font-semibold text-white">
-                {vistoria.responsavel}
+                {vistoria.responsavel || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Periodicidade</p>
               <h3 className="font-semibold text-white">
-                {vistoria.periodicidade}
+                {vistoria.periodicidade || "-"}
               </h3>
             </div>
 
@@ -124,28 +173,28 @@ export default function DetalhesVistoriaPage() {
             <div>
               <p className="text-gray-400">Última Execução</p>
               <h3 className="font-semibold text-white">
-                {vistoria.dataUltima || "Ainda não executada"}
+                {formatarData(vistoria.dataUltima) || "Ainda não executada"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Próxima Execução</p>
               <h3 className="font-semibold text-white">
-                {vistoria.dataProxima}
+                {formatarData(vistoria.dataProxima) || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Unidade</p>
               <h3 className="font-semibold text-white">
-                {vistoria.unidadeNome}
+                {vistoria.unidade || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Kitnet</p>
               <h3 className="font-semibold text-white">
-                {vistoria.kitnetNome}
+                {vistoria.kitnet || "-"}
               </h3>
             </div>
 
@@ -222,35 +271,32 @@ export default function DetalhesVistoriaPage() {
 
           <div className="space-y-4">
 
-            {vistoria.historico?.length ? (
+            {historico.length ? (
 
-              vistoria.historico
-                .slice()
-                .reverse()
-                .map((item, index) => (
+              historico.map((item) => (
 
-                  <div
-                    key={index}
-                    className="
-                      border-l-4
-                      border-green-600
-                      bg-white/5
-                      rounded-r-2xl
-                      p-5
-                    "
-                  >
+                <div
+                  key={item.id}
+                  className="
+                    border-l-4
+                    border-green-600
+                    bg-white/5
+                    rounded-r-2xl
+                    p-5
+                  "
+                >
 
-                    <div className="font-semibold text-white">
-                      {item.descricao}
-                    </div>
-
-                    <div className="text-sm text-gray-400 mt-2">
-                      {item.data}
-                    </div>
-
+                  <div className="font-semibold text-white">
+                    {ACAO_LABEL[item.acao] || item.acao}
                   </div>
 
-                ))
+                  <div className="text-sm text-gray-400 mt-2">
+                    {new Date(item.createdAt).toLocaleString("pt-BR")}
+                  </div>
+
+                </div>
+
+              ))
 
             ) : (
 

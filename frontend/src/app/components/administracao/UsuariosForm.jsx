@@ -6,19 +6,43 @@ import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Button from "../ui/Button";
 
+import { PerfilService } from "@/services/perfis.service";
+
 export default function UsuariosForm({
   usuario,
   onSave,
   onCancel,
 }) {
+  const [perfis, setPerfis] = useState([]);
+
+  const [salvando, setSalvando] = useState(false);
+
   const [formData, setFormData] = useState({
     nome: "",
     email: "",
     telefone: "",
-    perfil: "ADMINISTRATIVO",
+    perfilId: "",
     senha: "",
     ativo: true,
   });
+
+  useEffect(() => {
+    async function carregarPerfis() {
+      try {
+        const resposta = await PerfilService.listar();
+
+        setPerfis(
+          Array.isArray(resposta)
+            ? resposta
+            : resposta.data || []
+        );
+      } catch (err) {
+        console.error("Erro ao carregar perfis:", err);
+      }
+    }
+
+    carregarPerfis();
+  }, []);
 
   useEffect(() => {
     if (!usuario) {
@@ -26,7 +50,7 @@ export default function UsuariosForm({
         nome: "",
         email: "",
         telefone: "",
-        perfil: "ADMINISTRATIVO",
+        perfilId: "",
         senha: "",
         ativo: true,
       });
@@ -38,7 +62,7 @@ export default function UsuariosForm({
       nome: usuario.nome || "",
       email: usuario.email || "",
       telefone: usuario.telefone || "",
-      perfil: usuario.perfil || "ADMINISTRATIVO",
+      perfilId: usuario.perfil?.id || usuario.perfilId || "",
       senha: "",
       ativo: usuario.ativo ?? true,
     });
@@ -62,10 +86,18 @@ export default function UsuariosForm({
     }));
   }
 
-  function salvar(e) {
+  async function salvar(e) {
     e.preventDefault();
 
-    onSave(formData);
+    setSalvando(true);
+
+    try {
+      await onSave(formData);
+    } catch {
+      // erro já é exibido pelo chamador (onSave)
+    } finally {
+      setSalvando(false);
+    }
   }
 
   return (
@@ -110,22 +142,19 @@ export default function UsuariosForm({
 
         <Select
           label="Perfil"
-          name="perfil"
-          value={formData.perfil}
+          name="perfilId"
+          value={formData.perfilId}
           onChange={alterarCampo}
+          required
           options={[
             {
-              label: "Administrador",
-              value: "ADMINISTRADOR",
+              label: "Selecione um perfil",
+              value: "",
             },
-            {
-              label: "Administrativo",
-              value: "ADMINISTRATIVO",
-            },
-            {
-              label: "Zelador",
-              value: "ZELADOR",
-            },
+            ...perfis.map((perfil) => ({
+              label: perfil.nome,
+              value: perfil.id,
+            })),
           ]}
         />
       </div>
@@ -137,6 +166,7 @@ export default function UsuariosForm({
           name="senha"
           value={formData.senha}
           onChange={alterarCampo}
+          required={!usuario}
         />
       </div>
 
@@ -177,12 +207,15 @@ export default function UsuariosForm({
           type="button"
           variant="secondary"
           onClick={onCancel}
+          disabled={salvando}
         >
           Cancelar
         </Button>
 
-        <Button type="submit">
-          {usuario ? "Salvar Alterações" : "Criar Usuário"}
+        <Button type="submit" disabled={salvando}>
+          {salvando
+            ? "Salvando..."
+            : usuario ? "Salvar Alterações" : "Criar Usuário"}
         </Button>
       </div>
     </form>

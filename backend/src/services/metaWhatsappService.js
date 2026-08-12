@@ -1,42 +1,56 @@
 const axios = require("axios");
+const prisma = require("../config/prisma");
 
 class MetaWhatsappService {
 
-  constructor() {
+  async obterCredenciais() {
 
-  console.log("ENV PHONE:", process.env.WHATSAPP_PHONE_NUMBER_ID);
-  console.log("ENV TOKEN:", process.env.WHATSAPP_ACCESS_TOKEN?.substring(0,20));
+    const configuracao =
+      await prisma.configuracaoWhatsapp.findFirst();
 
-  this.phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  this.token = process.env.WHATSAPP_ACCESS_TOKEN;
+    return {
+      phoneId:
+        configuracao?.phoneNumberId ||
+        process.env.WHATSAPP_PHONE_NUMBER_ID,
 
-  console.log("THIS PHONE:", this.phoneId);
+      token:
+        configuracao?.token ||
+        process.env.WHATSAPP_ACCESS_TOKEN,
+    };
 
-  this.baseURL = `https://graph.facebook.com/v23.0/${this.phoneId}`;
+  }
 
-}
+  async temCredenciais() {
 
- async request(endpoint, body) {
+    const { phoneId, token } = await this.obterCredenciais();
 
-  console.log("================================");
-  console.log("TOKEN:", this.token);
-  console.log("PHONE:", this.phoneId);
-  console.log("URL:", `${this.baseURL}${endpoint}`);
-  console.log("BODY:", body);
-  console.log("================================");
+    return Boolean(phoneId && token);
 
-  const response = await axios({
-    method: "POST",
-    url: `${this.baseURL}${endpoint}`,
-    headers: {
-      Authorization: `Bearer ${this.token}`,
-      "Content-Type": "application/json",
-    },
-    data: body,
-  });
+  }
 
-  return response.data;
-}
+  async request(endpoint, body) {
+
+    const { phoneId, token } = await this.obterCredenciais();
+
+    if (!phoneId || !token) {
+      throw new Error(
+        "WhatsApp não configurado: informe o Token e o Phone Number ID na tela de Configuração."
+      );
+    }
+
+    const response = await axios({
+      method: "POST",
+      url: `https://graph.facebook.com/v23.0/${phoneId}${endpoint}`,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      data: body,
+    });
+
+    return response.data;
+
+  }
 
   async enviarMensagem(numero, mensagem) {
 
@@ -65,10 +79,6 @@ class MetaWhatsappService {
   }
 
   async webhook(dados) {
-
-    console.log("PHONE ID:", this.phoneId);
-
-    console.log("TOKEN:", this.token.substring(0, 25));
 
     console.log("Webhook Meta:");
 

@@ -2,7 +2,18 @@
 
 import { Palette, Moon, Sun, Monitor } from "lucide-react";
 
-export default function TemaCard() {
+const TEMAS = [
+  { valor: "claro", label: "Claro", icon: Sun, color: "text-yellow-400" },
+  { valor: "escuro", label: "Escuro", icon: Moon, color: "text-emerald-400" },
+  { valor: "automatico", label: "Automático", icon: Monitor, color: "text-cyan-400" },
+];
+
+export default function TemaCard({
+  dados = {},
+  onChange = () => {},
+  onSalvar = () => {},
+  salvando = false,
+}) {
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
 
@@ -37,50 +48,43 @@ export default function TemaCard() {
 
       <div className="grid md:grid-cols-3 gap-5">
 
-        <button className="rounded-2xl border border-white/10 bg-slate-800/70 p-6 hover:border-emerald-500 transition-all">
+        {TEMAS.map((tema) => {
 
-          <Sun
-            size={34}
-            className="mx-auto text-yellow-400"
-          />
+          const Icon = tema.icon;
+          const ativo = (dados.tema || "claro") === tema.valor;
 
-          <p className="mt-4 text-white font-medium">
+          return (
 
-            Claro
+            <button
+              key={tema.valor}
+              type="button"
+              onClick={() => onChange("tema", tema.valor)}
+              className={`
+                rounded-2xl border p-6 transition-all
+                ${
+                  ativo
+                    ? "border-emerald-500 bg-slate-800/70"
+                    : "border-white/10 bg-slate-800/70 hover:border-emerald-500/40"
+                }
+              `}
+            >
 
-          </p>
+              <Icon
+                size={34}
+                className={`mx-auto ${tema.color}`}
+              />
 
-        </button>
+              <p className="mt-4 text-white font-medium">
 
-        <button className="rounded-2xl border border-emerald-500 bg-slate-800/70 p-6">
+                {tema.label}
 
-          <Moon
-            size={34}
-            className="mx-auto text-emerald-400"
-          />
+              </p>
 
-          <p className="mt-4 text-white font-medium">
+            </button>
 
-            Escuro
+          );
 
-          </p>
-
-        </button>
-
-        <button className="rounded-2xl border border-white/10 bg-slate-800/70 p-6 hover:border-emerald-500 transition-all">
-
-          <Monitor
-            size={34}
-            className="mx-auto text-cyan-400"
-          />
-
-          <p className="mt-4 text-white font-medium">
-
-            Automático
-
-          </p>
-
-        </button>
+        })}
 
       </div>
 
@@ -96,7 +100,8 @@ export default function TemaCard() {
 
           <input
             type="color"
-            defaultValue="#10b981"
+            value={dados.corPrimaria || "#10b981"}
+            onChange={(e) => onChange("corPrimaria", e.target.value)}
             className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-transparent cursor-pointer"
           />
 
@@ -112,7 +117,8 @@ export default function TemaCard() {
 
           <input
             type="color"
-            defaultValue="#1e293b"
+            value={dados.corSecundaria || "#1e293b"}
+            onChange={(e) => onChange("corSecundaria", e.target.value)}
             className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-transparent cursor-pointer"
           />
 
@@ -120,9 +126,17 @@ export default function TemaCard() {
 
       </div>
 
-      <button className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white">
+      <button
+        onClick={onSalvar}
+        disabled={salvando}
+        className="
+          mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition px-6 py-3 text-white
+        "
+      >
 
-        Salvar Tema
+        {salvando ? "Salvando..." : "Salvar Tema"}
 
       </button>
 

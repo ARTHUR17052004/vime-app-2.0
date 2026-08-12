@@ -8,6 +8,7 @@ import {
   Eye,
   Pencil,
   Trash2,
+  Download,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -18,6 +19,7 @@ export default function ContratoTable({
   contratos = [],
   onEdit,
   onDelete,
+  onBaixarPdf,
 }) {
 
   const [menuAberto, setMenuAberto] =
@@ -295,6 +297,37 @@ export default function ContratoTable({
                   Visualizar
 
                 </Link>
+
+                <button
+                  onClick={() => {
+
+                    setMenuAberto(null);
+
+                    onBaixarPdf?.(contrato.id);
+
+                  }}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+
+                    w-full
+
+                    px-5
+                    py-3
+
+                    text-emerald-400
+
+                    hover:bg-emerald-500/10
+                    transition
+                  "
+                >
+
+                  <Download size={18} />
+
+                  Baixar PDF
+
+                </button>
 
                 <button
                   onClick={() => {

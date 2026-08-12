@@ -24,7 +24,13 @@ const resumo = async () => {
     }
   });
 
-  const solicitacoesPendentes = 0;
+  const solicitacoesPendentes = await prisma.solicitacao.count({
+    where: {
+      status: {
+        notIn: ['ATENDIDA', 'REJEITADA']
+      }
+    }
+  });
 
   const receitas = await prisma.receita.findMany({
     where: {
@@ -61,23 +67,30 @@ const resumo = async () => {
   };
 };
 
+const STATUS_ATIVIDADE = {
+  SOLICITADA: 'solicitada',
+  'EM COTAÇÃO': 'em cotação',
+  'AGUARDANDO COMPRA': 'aguardando compra',
+  ATENDIDA: 'atendida',
+  REJEITADA: 'rejeitada'
+};
+
 const atividades = async () => {
 
-  const contratos = await prisma.contrato.findMany({
+  const solicitacoes = await prisma.solicitacao.findMany({
     take: 10,
     orderBy: {
-      createdAt: 'desc'
-    },
-    include: {
-      inquilino: true
+      updatedAt: 'desc'
     }
   });
 
-  return contratos.map(item => ({
+  return solicitacoes.map(item => ({
     id: item.id,
-    tipo: 'CONTRATO',
-    descricao: `Contrato criado para ${item.inquilino.nome}`,
-    data: item.createdAt
+    tipo: 'SOLICITACAO',
+    descricao: `${item.numero} · ${item.titulo}`,
+    data: item.updatedAt,
+    status: STATUS_ATIVIDADE[item.status] || item.status,
+    link: `/solicitacoes/${item.id}`
   }));
 };
 

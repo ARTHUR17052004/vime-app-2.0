@@ -77,6 +77,7 @@ export default function ActionMenu({
 
     <div
       ref={menuRef}
+      onClick={(e) => e.stopPropagation()}
       style={{
         position: "fixed",
         top: `${position.top}px`,

@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,28 +9,52 @@ import ContratoHistoricoEventos from "../../components/contratos/ContratoHistori
 import ContratoFinanceiroResumo from "../../components/contratos/ContratoFinanceiroResumo";
 import ContratoHistoricoCard from "../../components/contratos/ContratoHistoricoCard";
 
+import { ContratoService } from "@/services/contratos.service";
+
 export default function DetalhesContratoPage() {
   const params = useParams();
 
   const [contrato, setContrato] =
     useState(null);
 
+  const [carregando, setCarregando] =
+    useState(true);
+
   useEffect(() => {
-    const contratos = JSON.parse(
-      localStorage.getItem(
-        "vime-contratos"
-      ) || "[]"
-    );
 
-    const encontrado =
-      contratos.find(
-        (item) =>
-          String(item.id) ===
-          String(params.id)
-      );
+    async function carregar() {
 
-    setContrato(encontrado);
+      try {
+
+        const resposta = await ContratoService.buscar(params.id);
+
+        setContrato(resposta.data || resposta);
+
+      } catch (err) {
+
+        console.error("Erro ao carregar contrato:", err);
+
+      } finally {
+
+        setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
+
   }, [params.id]);
+
+  if (carregando) {
+    return (
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando...
+        </div>
+      </MainLayout>
+    );
+  }
 
   if (!contrato) {
     return (
@@ -70,7 +93,7 @@ export default function DetalhesContratoPage() {
             </p>
 
             <h2 className="font-bold text-2xl text-white">
-              {contrato.inquilinoNome}
+              {contrato.inquilino?.nome || contrato.inquilinoNome}
             </h2>
           </div>
 
@@ -80,7 +103,7 @@ export default function DetalhesContratoPage() {
             </p>
 
             <h2 className="font-bold text-2xl text-white">
-              {contrato.unidadeNome}
+              {contrato.unidade?.nome || contrato.unidadeNome}
             </h2>
           </div>
 
@@ -90,7 +113,7 @@ export default function DetalhesContratoPage() {
             </p>
 
             <h2 className="font-bold text-2xl text-white">
-              {contrato.kitnetNome}
+              {contrato.kitnet?.nome || contrato.kitnetNome}
             </h2>
           </div>
 
@@ -110,7 +133,9 @@ export default function DetalhesContratoPage() {
             </p>
 
             <h2 className="font-bold text-2xl text-white">
-              {contrato.dataInicio}
+              {contrato.dataInicio
+                ? new Date(contrato.dataInicio).toLocaleDateString("pt-BR")
+                : "-"}
             </h2>
           </div>
 
@@ -120,7 +145,9 @@ export default function DetalhesContratoPage() {
             </p>
 
             <h2 className="font-bold text-2xl text-white">
-              {contrato.dataFim}
+              {contrato.dataFim
+                ? new Date(contrato.dataFim).toLocaleDateString("pt-BR")
+                : "Indeterminado"}
             </h2>
           </div>
 

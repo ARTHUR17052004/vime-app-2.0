@@ -7,22 +7,64 @@ import {
 } from "lucide-react";
 
 import Table from "../ui/Table";
+import { exportarPDF, exportarExcel } from "@/utils/exportar";
+
+const COLUNAS_RECEITAS = ["Categoria", "Descrição", "Valor", "Vencimento", "Status"];
+const COLUNAS_DESPESAS = ["Categoria", "Descrição", "Valor", "Vencimento", "Status"];
+
+function formatarMoeda(valor) {
+  return `R$ ${Number(valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+}
+
+function formatarData(data) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : "-";
+}
 
 export default function FinanceiroRelatorios({
-  receitas,
-  despesas,
+  receitas = [],
+  despesas = [],
 }) {
 
-  const exportarPDF = () => {
-    alert(
-      "Em breve: exportação PDF."
-    );
+  const linhasReceitas = receitas.map((item) => [
+    item.categoria || "-",
+    item.descricao || "-",
+    formatarMoeda(item.valor),
+    formatarData(item.vencimento),
+    item.status || "-",
+  ]);
+
+  const linhasDespesas = despesas.map((item) => [
+    item.categoria || "-",
+    item.descricao || "-",
+    formatarMoeda(item.valor),
+    formatarData(item.vencimento),
+    item.status || "-",
+  ]);
+
+  const handleExportarPDF = () => {
+
+    exportarPDF({
+      titulo: "Relatório Financeiro",
+      subtitulo: `Receitas: ${receitas.length} · Despesas: ${despesas.length}`,
+      secoes: [
+        { titulo: "Receitas", colunas: COLUNAS_RECEITAS, linhas: linhasReceitas },
+        { titulo: "Despesas", colunas: COLUNAS_DESPESAS, linhas: linhasDespesas },
+      ],
+      nomeArquivo: "relatorio-financeiro",
+    });
+
   };
 
-  const exportarExcel = () => {
-    alert(
-      "Em breve: exportação Excel."
-    );
+  const handleExportarExcel = () => {
+
+    exportarExcel({
+      abas: [
+        { nome: "Receitas", colunas: COLUNAS_RECEITAS, linhas: linhasReceitas },
+        { nome: "Despesas", colunas: COLUNAS_DESPESAS, linhas: linhasDespesas },
+      ],
+      nomeArquivo: "relatorio-financeiro",
+    });
+
   };
 
   return (
@@ -105,7 +147,7 @@ export default function FinanceiroRelatorios({
           </p>
 
           <button
-            onClick={exportarPDF}
+            onClick={handleExportarPDF}
             className="
               flex
               items-center
@@ -169,7 +211,7 @@ export default function FinanceiroRelatorios({
           </p>
 
           <button
-            onClick={exportarExcel}
+            onClick={handleExportarExcel}
             className="
               flex
               items-center

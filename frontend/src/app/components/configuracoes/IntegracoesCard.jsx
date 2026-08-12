@@ -1,5 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import {
   MessageCircle,
   FileSignature,
@@ -8,38 +10,47 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const integracoes = [
-  {
-    nome: "WhatsApp",
-    descricao: "Envio de mensagens automáticas.",
-    status: "Conectado",
-    icon: MessageCircle,
-    color: "bg-green-500/20 text-green-400",
-  },
-  {
-    nome: "Asaas",
-    descricao: "Cobranças e pagamentos.",
-    status: "Conectado",
-    icon: Wallet,
-    color: "bg-cyan-500/20 text-cyan-400",
-  },
-  {
-    nome: "Clicksign",
-    descricao: "Assinatura digital.",
-    status: "Pendente",
-    icon: FileSignature,
-    color: "bg-yellow-500/20 text-yellow-400",
-  },
-  {
-    nome: "Inteligência Artificial",
-    descricao: "Assistente do sistema.",
-    status: "Em breve",
-    icon: Bot,
-    color: "bg-purple-500/20 text-purple-400",
-  },
-];
+export default function IntegracoesCard({
+  dados = {},
+}) {
 
-export default function IntegracoesCard() {
+  const router = useRouter();
+
+  const integracoes = [
+    {
+      nome: "WhatsApp",
+      descricao: "Envio de mensagens automáticas.",
+      conectado: !!dados.whatsappToken,
+      icon: MessageCircle,
+      color: "bg-green-500/20 text-green-400",
+      rota: "/whatsapp",
+    },
+    {
+      nome: "Asaas",
+      descricao: "Cobranças e pagamentos.",
+      conectado: !!dados.asaasToken,
+      icon: Wallet,
+      color: "bg-cyan-500/20 text-cyan-400",
+      rota: "/asaas-config",
+    },
+    {
+      nome: "Clicksign",
+      descricao: "Assinatura digital.",
+      conectado: !!dados.clicksignToken,
+      icon: FileSignature,
+      color: "bg-yellow-500/20 text-yellow-400",
+      rota: "/clicksign",
+    },
+    {
+      nome: "Inteligência Artificial",
+      descricao: "Assistente do sistema.",
+      conectado: null,
+      icon: Bot,
+      color: "bg-purple-500/20 text-purple-400",
+      rota: null,
+    },
+  ];
+
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
 
@@ -65,6 +76,13 @@ export default function IntegracoesCard() {
 
           const Icon = item.icon;
 
+          const status =
+            item.conectado === null
+              ? "Em breve"
+              : item.conectado
+                ? "Conectado"
+                : "Não configurado";
+
           return (
 
             <div
@@ -82,9 +100,15 @@ export default function IntegracoesCard() {
 
                 </div>
 
-                <span className="px-3 py-1 rounded-full text-xs bg-white/10 text-gray-300">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs ${
+                    item.conectado
+                      ? "bg-emerald-500/15 text-emerald-400"
+                      : "bg-white/10 text-gray-300"
+                  }`}
+                >
 
-                  {item.status}
+                  {status}
 
                 </span>
 
@@ -103,7 +127,13 @@ export default function IntegracoesCard() {
               </p>
 
               <button
-                className="mt-6 w-full rounded-2xl bg-emerald-600 hover:bg-emerald-700 transition-all py-3 flex items-center justify-center gap-2 font-medium text-white"
+                disabled={!item.rota}
+                onClick={() => item.rota && router.push(item.rota)}
+                className="
+                  mt-6 w-full rounded-2xl bg-emerald-600 hover:bg-emerald-700
+                  disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-emerald-600
+                  transition-all py-3 flex items-center justify-center gap-2 font-medium text-white
+                "
               >
 
                 Configurar

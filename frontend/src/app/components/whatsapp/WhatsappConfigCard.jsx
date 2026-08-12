@@ -17,6 +17,8 @@ export default function WhatsappConfigCard({
     numero: "",
     provider: "META",
     webhook: "",
+    token: "",
+    phoneNumberId: "",
   });
 
   const [salvando, setSalvando] = useState(false);
@@ -29,6 +31,8 @@ export default function WhatsappConfigCard({
       numero: dados.numero || "",
       provider: dados.provider || "META",
       webhook: dados.webhook || "",
+      token: dados.token || "",
+      phoneNumberId: dados.phoneNumberId || "",
     });
   }, [dados]);
 
@@ -121,7 +125,37 @@ export default function WhatsappConfigCard({
           }
         />
 
+        <Input
+          label="Phone Number ID (Meta)"
+          value={form.phoneNumberId}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              phoneNumberId: e.target.value,
+            })
+          }
+          placeholder="Ex: 123456789012345"
+        />
+
+        <Input
+          label="Access Token (Meta)"
+          type="password"
+          value={form.token}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              token: e.target.value,
+            })
+          }
+          placeholder="EAAG..."
+        />
+
       </div>
+
+      <p className="mt-4 text-sm text-gray-500">
+        O Phone Number ID e o Access Token são obtidos no painel do{" "}
+        <strong>Meta for Developers</strong>, dentro do seu app do WhatsApp Business API.
+      </p>
 
       <div className="mt-8 flex gap-4 flex-wrap">
 

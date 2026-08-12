@@ -120,6 +120,8 @@ model Perfil {
 
   ativo Boolean @default(true)
 
+  permissoes Json?
+
   usuarios Usuario[]
 
   createdAt DateTime @default(now())
@@ -243,9 +245,41 @@ model Solicitacao {
 
   resposta String?
 
+  criadoPorId String?
+
+  criadoPorNome String?
+
+  criadoPorPerfil String?
+
+  mensagens SolicitacaoMensagem[]
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+}
+
+model SolicitacaoMensagem {
+  id String @id @default(uuid())
+
+  solicitacaoId String
+
+  solicitacao Solicitacao @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+
+  autorId String?
+
+  autorNome String
+
+  texto String?
+
+  statusAlterado String?
+
+  anexoNome String?
+
+  anexoTipo String?
+
+  anexoDados String?
+
+  createdAt DateTime @default(now())
 }
 
 model Vistoria {
@@ -255,9 +289,31 @@ model Vistoria {
 
   descricao String?
 
+  unidade String?
+
+  kitnet String?
+
+  categoria String?
+
+  criticidade String?
+
+  periodicidade String?
+
+  responsavel String?
+
   status String @default("PENDENTE")
 
   data DateTime?
+
+  dataUltima DateTime?
+
+  dataProxima DateTime?
+
+  checklist Json?
+
+  fotos Json?
+
+  observacoes String?
 
   createdAt DateTime @default(now())
 
@@ -328,6 +384,8 @@ model ConfiguracaoWhatsapp {
   numero String?
 
   token String?
+
+  phoneNumberId String?
 
   apiUrl String?
 
@@ -433,4 +491,17 @@ model Configuracao {
 
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+}
+
+model ModeloDocumento {
+  id String @id @default(uuid())
+
+  tipo String @unique
+
+  nomeArquivo String?
+
+  conteudo String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

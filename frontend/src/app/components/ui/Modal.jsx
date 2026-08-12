@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 export default function Modal({
@@ -52,7 +53,7 @@ export default function Modal({
     };
   }, [open, onClose, closeOnEsc]);
 
-  if (!open) return null;
+  if (!open || typeof window === "undefined") return null;
 
   const sizes = {
     sm: "max-w-md",
@@ -62,7 +63,7 @@ export default function Modal({
     full: "max-w-[95vw]",
   };
 
-  return (
+  return createPortal(
     <div
       onClick={
         !persistent && closeOnOverlay
@@ -231,6 +232,7 @@ export default function Modal({
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

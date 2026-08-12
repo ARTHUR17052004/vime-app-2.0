@@ -1,8 +1,33 @@
 "use client";
 
+import { useRef } from "react";
 import { Image, UploadCloud } from "lucide-react";
 
-export default function LogoCard() {
+export default function LogoCard({
+  dados = {},
+  onChange = () => {},
+  onSalvar = () => {},
+  salvando = false,
+}) {
+
+  const inputRef = useRef(null);
+
+  function selecionarArquivo(e) {
+
+    const arquivo = e.target.files?.[0];
+
+    if (!arquivo) return;
+
+    const leitor = new FileReader();
+
+    leitor.onload = () => {
+      onChange("logo", leitor.result);
+    };
+
+    leitor.readAsDataURL(arquivo);
+
+  }
+
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
 
@@ -24,15 +49,45 @@ export default function LogoCard() {
 
       <div className="grid md:grid-cols-2 gap-6">
 
-        <div className="rounded-2xl border border-dashed border-white/10 bg-slate-800/50 h-48 flex flex-col items-center justify-center text-gray-400">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="
+            rounded-2xl border border-dashed border-white/10
+            bg-slate-800/50 h-48
+            flex flex-col items-center justify-center
+            text-gray-400
+            hover:border-emerald-500/40 hover:text-emerald-400
+            transition-all
+            overflow-hidden
+          "
+        >
 
-          <UploadCloud size={42} />
+          {dados.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={dados.logo}
+              alt="Logo do sistema"
+              className="max-h-full max-w-full object-contain p-4"
+            />
+          ) : (
+            <>
+              <UploadCloud size={42} />
+              <p className="mt-4 text-sm">
+                Clique para enviar uma logo
+              </p>
+            </>
+          )}
 
-          <p className="mt-4 text-sm">
-            Clique para enviar uma logo
-          </p>
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            onChange={selecionarArquivo}
+            className="hidden"
+          />
 
-        </div>
+        </button>
 
         <div className="space-y-4">
 
@@ -42,24 +97,23 @@ export default function LogoCard() {
             </label>
 
             <input
+              value={dados.empresa || ""}
+              onChange={(e) => onChange("empresa", e.target.value)}
               className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
               placeholder="VIME APP"
             />
           </div>
 
-          <div>
-            <label className="text-gray-300 text-sm">
-              Favicon
-            </label>
-
-            <input
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
-              placeholder="favicon.ico"
-            />
-          </div>
-
-          <button className="mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white">
-            Salvar Alterações
+          <button
+            onClick={onSalvar}
+            disabled={salvando}
+            className="
+              mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700
+              disabled:opacity-50 disabled:cursor-not-allowed
+              transition px-6 py-3 text-white
+            "
+          >
+            {salvando ? "Salvando..." : "Salvar Alterações"}
           </button>
 
         </div>

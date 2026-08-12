@@ -23,7 +23,7 @@ export default function FinanceiroDashboard({
   const receitasPendentes = receitas
     .filter(
       (item) =>
-        item.status !== "Pago"
+        item.status !== "PAGO"
     )
     .reduce(
       (total, item) =>

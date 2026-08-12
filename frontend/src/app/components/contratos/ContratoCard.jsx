@@ -135,18 +135,18 @@ export default function ContratoCard({
                       text-white
                     "
                   >
-                    {contrato.inquilinoNome}
+                    {contrato.inquilino?.nome || contrato.inquilinoNome}
                   </h2>
 
                   <p className="text-gray-400 mt-1">
 
-                    {contrato.unidadeNome}
+                    {contrato.unidade?.nome || contrato.unidadeNome}
 
                   </p>
 
                   <p className="text-gray-500 text-sm">
 
-                    {contrato.kitnetNome}
+                    {contrato.kitnet?.nome || contrato.kitnetNome}
 
                   </p>
 
@@ -365,7 +365,13 @@ export default function ContratoCard({
 
                 <span>
 
-                  {contrato.dataInicio} até {contrato.dataFim}
+                  {contrato.dataInicio
+                    ? new Date(contrato.dataInicio).toLocaleDateString("pt-BR")
+                    : "-"}
+                  {" "}até{" "}
+                  {contrato.dataFim
+                    ? new Date(contrato.dataFim).toLocaleDateString("pt-BR")
+                    : "indeterminado"}
 
                 </span>
 

@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
+const notificacaoService = require('./notificacaoService');
 
 const listar = () => {
   return prisma.solicitacao.findMany({
@@ -17,7 +18,18 @@ const buscarPorId = (id) => {
   });
 };
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
+
+  dados.data = new Date();
+
+  if (dados.prazo) dados.prazo = new Date(dados.prazo);
+
+  delete dados.responsavel;
+  delete dados.anexo;
+
+  dados.criadoPorId = autor?.id || null;
+  dados.criadoPorNome = autor?.nome || "Sistema";
+  dados.criadoPorPerfil = autor?.perfil || null;
 
   const solicitacao = await prisma.solicitacao.create({
     data: dados
@@ -41,11 +53,30 @@ const criar = async (dados) => {
     descricao: `Solicitação ${solicitacao.id} criada.`
   });
 
+  await notificacaoService.criar({
+    origem: "SISTEMA",
+    titulo: "Nova solicitação",
+    mensagem: `${solicitacao.criadoPorNome || "Alguém"} criou a solicitação "${solicitacao.titulo}" (${solicitacao.numero}).`
+  });
+
   return solicitacao;
 
 };
 
 const atualizar = async (id, dados) => {
+
+  if (dados.data) dados.data = new Date(dados.data);
+  if (dados.prazo) dados.prazo = new Date(dados.prazo);
+
+  delete dados.id;
+  delete dados.createdAt;
+  delete dados.updatedAt;
+  delete dados.historico;
+  delete dados.mensagens;
+  delete dados.criadoPorId;
+  delete dados.criadoPorNome;
+  delete dados.criadoPorPerfil;
+  delete dados.anexo;
 
   const anterior = await prisma.solicitacao.findUnique({
     where: { id }

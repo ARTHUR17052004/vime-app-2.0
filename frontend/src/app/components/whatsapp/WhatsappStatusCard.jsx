@@ -83,6 +83,54 @@ export default function WhatsappStatusCard({ dados }) {
 
         <div className="flex items-center gap-3">
 
+          {
+
+            dados?.configurado ? (
+
+              <CheckCircle2
+                className="text-green-500"
+                size={22}
+              />
+
+            ) : (
+
+              <XCircle
+                className="text-yellow-500"
+                size={22}
+              />
+
+            )
+
+          }
+
+          <div>
+
+            <p className="text-sm text-gray-400">
+
+              Credenciais da API
+
+            </p>
+
+            <p className="font-semibold text-white">
+
+              {
+
+                dados?.configurado
+
+                  ? "Configuradas"
+
+                  : "Não configuradas"
+
+              }
+
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="flex items-center gap-3">
+
           <Smartphone
             size={22}
             className="text-green-500"

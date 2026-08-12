@@ -31,11 +31,11 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const corStatus = (status) => {
-    if (status === "Pago") {
+    if (status === "PAGO") {
       return "bg-green-100 text-green-700";
     }
 
-    if (status === "Atrasado") {
+    if (status === "ATRASADA") {
       return "bg-red-100 text-red-700";
     }
 
@@ -156,9 +156,9 @@ export default function FinanceiroReceitas({
                   <td>
                     <Badge
                       color={
-                        item.status === "Pago"
+                        item.status === "PAGO"
                           ? "green"
-                          : item.status === "Atrasado"
+                          : item.status === "ATRASADA"
                           ? "red"
                           : "yellow"
                       }

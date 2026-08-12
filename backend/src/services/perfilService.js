@@ -138,6 +138,20 @@ const atualizar = async (id, dados) => {
 
     });
 
+    const data = {
+
+        nome: dados.nome,
+        descricao: dados.descricao,
+        ativo: dados.ativo,
+
+    };
+
+    if (dados.permissoes !== undefined) {
+
+        data.permissoes = dados.permissoes;
+
+    }
+
     const perfil = await prisma.perfil.update({
 
         where: {
@@ -146,13 +160,7 @@ const atualizar = async (id, dados) => {
 
         },
 
-        data: {
-
-            nome: dados.nome,
-            descricao: dados.descricao,
-            ativo: dados.ativo,
-
-        },
+        data,
 
     });
 

@@ -46,13 +46,21 @@ export default function DespesaVisualizarModal({
           </div>
 
           <div>
-            <strong className="text-gray-400">Fornecedor:</strong>
-            <div>{despesa.fornecedor || "-"}</div>
+            <strong className="text-gray-400">Vencimento:</strong>
+            <div>
+              {despesa.vencimento
+                ? new Date(despesa.vencimento).toLocaleDateString("pt-BR")
+                : "-"}
+            </div>
           </div>
 
           <div>
-            <strong className="text-gray-400">Observações:</strong>
-            <div>{despesa.observacoes || "-"}</div>
+            <strong className="text-gray-400">Data de Pagamento:</strong>
+            <div>
+              {despesa.dataPagamento
+                ? new Date(despesa.dataPagamento).toLocaleDateString("pt-BR")
+                : "-"}
+            </div>
           </div>
 
         </div>

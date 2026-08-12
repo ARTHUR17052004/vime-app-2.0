@@ -23,7 +23,25 @@ const buscarPorId = (id) => {
   });
 };
 
+const converterDatas = (dados) => {
+
+  if (dados.data) dados.data = new Date(dados.data);
+  if (dados.dataUltima) dados.dataUltima = new Date(dados.dataUltima);
+  if (dados.dataProxima) dados.dataProxima = new Date(dados.dataProxima);
+
+  delete dados.id;
+  delete dados.createdAt;
+  delete dados.updatedAt;
+  delete dados.historico;
+  delete dados.ocorrencias;
+
+  return dados;
+
+};
+
 const criar = async (dados) => {
+
+  dados = converterDatas(dados);
 
   const vistoria = await prisma.vistoria.create({
     data: dados
@@ -52,6 +70,8 @@ const criar = async (dados) => {
 };
 
 const atualizar = async (id, dados) => {
+
+  dados = converterDatas(dados);
 
   const anterior = await prisma.vistoria.findUnique({
     where: { id }

@@ -1,17 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
+
 export default function InquilinoTable({
   inquilinos,
   onDelete,
   onEdit,
 }) {
+
+  const router = useRouter();
+
   const [menuAberto, setMenuAberto] =
     useState(null);
+
+  const [posicaoMenu, setPosicaoMenu] =
+    useState({ top: 0, left: 0 });
+
+  function abrirMenu(e, id) {
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const larguraMenu = 176;
+
+    let left = rect.right - larguraMenu;
+    let top = rect.bottom + 8;
+
+    if (left + larguraMenu > window.innerWidth - 16) {
+      left = window.innerWidth - larguraMenu - 16;
+    }
+
+    if (left < 16) left = 16;
+
+    setPosicaoMenu({ top, left });
+
+    setMenuAberto(id);
+
+  }
 
   if (inquilinos.length === 0) {
     return (
@@ -218,15 +247,18 @@ export default function InquilinoTable({
               </Badge>
               </td>
 
-              <td className="px-6 py-5 text-center relative">
+              <td className="px-6 py-5 text-center">
                 <button
-                  onClick={() =>
-                    setMenuAberto(
-                      menuAberto === inquilino.id
-                        ? null
-                        : inquilino.id
-                    )
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    if (menuAberto === inquilino.id) {
+                      setMenuAberto(null);
+                      return;
+                    }
+
+                    abrirMenu(e, inquilino.id);
+                  }}
                   className="
                     w-10
                     h-10
@@ -250,94 +282,77 @@ export default function InquilinoTable({
                   ⋮
                 </button>
 
-                {menuAberto ===
-                  inquilino.id && (
-                  <div
+                <ActionMenu
+                  open={menuAberto === inquilino.id}
+                  position={posicaoMenu}
+                  onClose={() => setMenuAberto(null)}
+                >
+
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      router.push(`/inquilinos/${inquilino.id}`);
+                    }}
                     className="
-                    absolute
-
-                    right-2
-                    top-12
-
-                    w-44
-
-                    rounded-2xl
-
-                    border
-                    border-white/10
-
-                    bg-slate-900/95
-
-                    backdrop-blur-xl
-
-                    shadow-2xl
-
-                    overflow-hidden
-
-                    z-50
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-white/5
+                      text-gray-300
+                      transition
                     "
                   >
-                    <Link
-                      href={`/inquilinos/${inquilino.id}`}
-                      className="
-                        block
-                        px-4
-                        py-3
-                        hover:bg-white/5
-                        text-gray-300
-                        transition
-                      "
-                    >
-                      Visualizar
-                    </Link>
+                    Visualizar
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        onEdit?.(
-                          inquilino
-                        );
+                  <button
+                    onClick={() => {
+                      onEdit?.(
+                        inquilino
+                      );
 
-                        setMenuAberto(
-                          null
-                        );
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        hover:bg-yellow-500/10
-                        text-yellow-400
-                        transition
-                      "
-                    >
-                      Editar
-                    </button>
+                      setMenuAberto(
+                        null
+                      );
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-yellow-500/10
+                      text-yellow-400
+                      transition
+                    "
+                  >
+                    Editar
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        onDelete?.(
-                          inquilino.id
-                        );
+                  <button
+                    onClick={() => {
+                      onDelete?.(
+                        inquilino.id
+                      );
 
-                        setMenuAberto(
-                          null
-                        );
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        hover:bg-red-500/10
-                        text-red-400
-                        transition
-                      "
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                )}
+                      setMenuAberto(
+                        null
+                      );
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-red-500/10
+                      text-red-400
+                      transition
+                    "
+                  >
+                    Excluir
+                  </button>
+
+                </ActionMenu>
               </td>
             </tr>
           ))}

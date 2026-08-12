@@ -1,6 +1,8 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -24,12 +26,69 @@ import SegurancaCard from "../components/configuracoes/SegurancaCard";
 import LicencaCard from "../components/configuracoes/LicencaCard";
 import HistoricoCard from "../components/configuracoes/HistoricoCard";
 
+import { ConfiguracaoService } from "@/services/configuracao.service";
+
+const PADRAO = {
+  empresa: "VIME APP 2.0",
+  cnpj: "",
+  telefone: "",
+  email: "",
+  endereco: "",
+  cidade: "",
+  uf: "",
+  cep: "",
+  logo: "",
+  tema: "claro",
+  corPrimaria: "#10B981",
+  corSecundaria: "#1E293B",
+  smtpHost: "",
+  smtpPorta: "",
+  smtpUsuario: "",
+  smtpSenha: "",
+  asaasToken: "",
+  clicksignToken: "",
+  whatsappToken: "",
+  whatsappNumero: "",
+};
+
 export default function ConfiguracoesPage() {
-  const [dados, setDados] = useState({
-    nomeSistema: "VIME APP 2.0",
-    corPrincipal: "#10B981",
-    corSecundaria: "#1E293B",
-  });
+  const [dados, setDados] = useState(PADRAO);
+  const [carregando, setCarregando] = useState(true);
+  const [salvando, setSalvando] = useState(false);
+
+  const carregar = useCallback(async () => {
+
+    try {
+
+      setCarregando(true);
+
+      const resposta = await ConfiguracaoService.listar();
+
+      const lista = Array.isArray(resposta)
+        ? resposta
+        : resposta.data || [];
+
+      if (lista.length > 0) {
+        setDados({ ...PADRAO, ...lista[0] });
+      }
+
+    } catch (err) {
+
+      console.error("Erro ao carregar configurações:", err);
+
+    } finally {
+
+      setCarregando(false);
+
+    }
+
+  }, []);
+
+  useEffect(() => {
+
+    carregar();
+
+  }, [carregar]);
 
   function alterar(campo, valor) {
     setDados((old) => ({
@@ -38,8 +97,54 @@ export default function ConfiguracoesPage() {
     }));
   }
 
-  function salvar() {
-    console.log(dados);
+  async function salvar() {
+
+    setSalvando(true);
+
+    try {
+
+      const payload = {
+        ...dados,
+        smtpPorta: dados.smtpPorta ? Number(dados.smtpPorta) : null,
+      };
+
+      delete payload.id;
+      delete payload.createdAt;
+      delete payload.updatedAt;
+
+      if (dados.id) {
+        await ConfiguracaoService.atualizar(dados.id, payload);
+      } else {
+        const resposta = await ConfiguracaoService.criar(payload);
+        const criada = resposta.data || resposta;
+        setDados((old) => ({ ...old, id: criada.id }));
+      }
+
+      alert("Configurações salvas com sucesso.");
+
+    } catch (err) {
+
+      alert(
+        err.message ||
+        "Erro ao salvar configurações."
+      );
+
+    } finally {
+
+      setSalvando(false);
+
+    }
+
+  }
+
+  if (carregando) {
+    return (
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando configurações...
+        </div>
+      </MainLayout>
+    );
   }
 
   return (
@@ -64,14 +169,21 @@ export default function ConfiguracoesPage() {
                 dados={dados}
                 onChange={alterar}
                 onSalvar={salvar}
+                salvando={salvando}
               />
 
-              <LogoCard />
+              <LogoCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+                salvando={salvando}
+              />
 
               <TemaCard
                 dados={dados}
                 onChange={alterar}
                 onSalvar={salvar}
+                salvando={salvando}
               />
 
               <PersonalizacaoCard
@@ -82,9 +194,16 @@ export default function ConfiguracoesPage() {
 
               <SistemaCard />
 
-              <IntegracoesCard />
+              <IntegracoesCard
+                dados={dados}
+              />
 
-              <SMTPCard />
+              <SMTPCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+                salvando={salvando}
+              />
 
               <BancoDadosCard />
 
