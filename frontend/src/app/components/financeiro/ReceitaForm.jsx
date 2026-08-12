@@ -38,14 +38,14 @@ export default function ReceitaForm({
   };
 
   const inputStyle =
-    "border border-gray-300 rounded-xl p-3 w-full";
+    "border border-white/10 bg-white/5 text-white rounded-xl p-3 w-full";
 
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-bold">
+      <h2 className="text-3xl font-bold text-white">
         {receitaEditando
           ? "Editar Receita"
           : "Nova Receita"}
@@ -90,7 +90,7 @@ export default function ReceitaForm({
           className={inputStyle}
         >
           <option value="PENDENTE">Pendente</option>
-          <option value="PAGO">Pago</option>
+          <option value="PAGA">Pago</option>
           <option value="ATRASADA">Atrasado</option>
         </select>
 

@@ -56,6 +56,7 @@ model Inquilino {
   dataInicioContrato DateTime
   ativo              Boolean    @default(true)
   kitnetId           String
+  asaasCustomerId    String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   contatoEmergencia  String?
@@ -199,17 +200,21 @@ model Locador {
 }
 
 model Receita {
-  id            String    @id @default(uuid())
-  contratoId    String?
-  categoria     String
-  descricao     String
-  valor         Float
-  vencimento    DateTime?
-  dataPagamento DateTime?
-  status        String    @default("PENDENTE")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  contrato      Contrato? @relation(fields: [contratoId], references: [id])
+  id              String    @id @default(uuid())
+  contratoId      String?
+  categoria       String
+  descricao       String
+  valor           Float
+  vencimento      DateTime?
+  dataPagamento   DateTime?
+  status          String    @default("PENDENTE")
+  asaasPaymentId  String?   @unique
+  asaasCustomerId String?
+  enviadaAsaas    Boolean   @default(false)
+  lembreteEnviadoEm DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  contrato        Contrato? @relation(fields: [contratoId], references: [id])
 }
 
 model Despesa {
@@ -483,8 +488,14 @@ model Configuracao {
   smtpUsuario      String?
   smtpSenha        String?
 
-  asaasToken       String?
-  clicksignToken   String?
+  asaasToken            String?
+  asaasAmbiente         String?  @default("sandbox")
+  asaasWalletId         String?
+  asaasWebhookToken     String?
+  asaasTaxaAdministracao Float?  @default(0)
+
+  clicksignToken        String?
+  clicksignAmbiente     String?  @default("sandbox")
 
   whatsappToken    String?
   whatsappNumero   String?

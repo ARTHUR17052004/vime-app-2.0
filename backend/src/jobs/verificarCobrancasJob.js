@@ -12,7 +12,7 @@ module.exports = async () => {
 
   const vencidas = await prisma.receita.count({
   where: {
-    status: "VENCIDA"
+    status: "ATRASADA"
   }
 });
 

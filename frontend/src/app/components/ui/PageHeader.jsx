@@ -11,13 +11,15 @@ export default function VimePageHeader({
   return (
     <div className="mb-8">
 
-      <div className="flex items-start justify-between gap-6">
+      <div className="flex items-start justify-between gap-6 flex-wrap">
 
         <div>
 
           <h1
             className="
-              text-6xl
+              text-3xl
+              sm:text-4xl
+              md:text-6xl
               font-black
               tracking-tight
               text-white
@@ -30,7 +32,8 @@ export default function VimePageHeader({
             <p
               className="
                 mt-2
-                text-2xl
+                text-base
+                md:text-2xl
                 text-gray-300
               "
             >

@@ -39,8 +39,12 @@ export default function MainLayout({ children }) {
       <div
         className="
           flex
-          gap-8
-          p-6
+          gap-0
+          md:gap-8
+
+          p-3
+          md:p-6
+
           h-screen
         "
       >
@@ -49,8 +53,8 @@ export default function MainLayout({ children }) {
 
         <aside
           className="
-            w-65
-            shrink-0
+            md:w-65
+            md:shrink-0
           "
         >
           <Sidebar />
@@ -79,7 +83,8 @@ export default function MainLayout({ children }) {
             className="
               flex-1
               overflow-y-auto
-              pt-12
+              pt-6
+              md:pt-12
             "
           >
 

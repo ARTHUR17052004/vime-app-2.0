@@ -1,41 +1,51 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   Users,
-  UserPlus,
   Mail,
   FileSignature,
-  CheckCircle2,
-  MoreVertical,
 } from "lucide-react";
 
-const assinantes = [
-  {
-    nome: "Arthur Henrique",
-    cargo: "Administrador",
-    email: "arthur@vime.com.br",
-    documentos: 248,
-    status: "Ativo",
-  },
-  {
-    nome: "Maria Oliveira",
-    cargo: "Financeiro",
-    email: "financeiro@vime.com.br",
-    documentos: 91,
-    status: "Ativo",
-  },
-  {
-    nome: "Carlos Souza",
-    cargo: "Jurídico",
-    email: "juridico@vime.com.br",
-    documentos: 36,
-    status: "Inativo",
-  },
-];
+import { ClicksignService } from "@/services/clicksign.service";
+
+function extrairDocumentos(resposta) {
+  const data = resposta?.data || resposta;
+  const lista = data?.documents || data?.data || [];
+  return Array.isArray(lista) ? lista : [];
+}
 
 export default function AssinantesCard() {
+  const [documentos, setDocumentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const resposta = await ClicksignService.listarDocumentos();
+        setDocumentos(extrairDocumentos(resposta));
+      } catch (err) {
+        console.error("Erro ao carregar assinantes:", err);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregar();
+  }, []);
+
+  // Assinantes são derivados dos "signers" que a Clicksign devolve junto
+  // de cada documento — quando não há documentos reais ainda, não há
+  // como listar assinantes (evitamos inventar dados).
+  const assinantes = documentos.flatMap((doc) =>
+    Array.isArray(doc.signers)
+      ? doc.signers.map((s) => ({ ...s, documento: doc.filename || doc.key }))
+      : []
+  );
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div id="clicksign-assinantes" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center justify-between mb-6">
 
@@ -54,38 +64,35 @@ export default function AssinantesCard() {
 
           <p className="text-slate-400">
 
-            Pessoas autorizadas a assinar documentos.
+            Pessoas adicionadas como signatárias nos documentos enviados.
 
           </p>
 
         </div>
 
-        <button className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-white hover:bg-emerald-700 transition">
-
-          <UserPlus size={18} />
-
-          Novo Assinante
-
-        </button>
-
       </div>
 
-      <div className="space-y-4">
+      {carregando ? (
+        <p className="text-center text-slate-400 py-6">Carregando...</p>
+      ) : assinantes.length === 0 ? (
+        <p className="text-center text-slate-500 py-6">
+          Nenhum assinante cadastrado ainda. Adicione signatários ao enviar um documento em "Documentos".
+        </p>
+      ) : (
+        <div className="space-y-4">
 
-        {assinantes.map((usuario, index) => (
+          {assinantes.map((assinante, index) => (
 
-          <div
-            key={index}
-            className="rounded-2xl border border-white/10 bg-slate-800/40 p-5 transition hover:border-emerald-500/30"
-          >
-
-            <div className="flex items-center justify-between">
+            <div
+              key={index}
+              className="rounded-2xl border border-white/10 bg-slate-800/40 p-5 transition hover:border-emerald-500/30"
+            >
 
               <div className="flex items-center gap-4">
 
                 <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/10 text-xl font-bold text-emerald-400">
 
-                  {usuario.nome.charAt(0)}
+                  {(assinante.name || assinante.email || "?").charAt(0).toUpperCase()}
 
                 </div>
 
@@ -93,13 +100,13 @@ export default function AssinantesCard() {
 
                   <h3 className="text-lg font-semibold text-white">
 
-                    {usuario.nome}
+                    {assinante.name || "Sem nome"}
 
                   </h3>
 
                   <p className="text-sm text-slate-400">
 
-                    {usuario.cargo}
+                    {assinante.documento}
 
                   </p>
 
@@ -107,71 +114,38 @@ export default function AssinantesCard() {
 
               </div>
 
-              <button className="rounded-xl bg-slate-700 p-2 hover:bg-slate-600">
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
 
-                <MoreVertical
-                  size={18}
-                  className="text-white"
-                />
+                <div className="flex items-center gap-2 text-slate-300">
 
-              </button>
+                  <Mail
+                    size={17}
+                    className="text-emerald-400"
+                  />
 
-            </div>
+                  {assinante.email || "—"}
 
-            <div className="mt-5 grid gap-4 md:grid-cols-3">
+                </div>
 
-              <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-slate-300">
 
-                <Mail
-                  size={17}
-                  className="text-emerald-400"
-                />
+                  <FileSignature
+                    size={17}
+                    className="text-blue-400"
+                  />
 
-                {usuario.email}
+                  {assinante.documento}
 
-              </div>
-
-              <div className="flex items-center gap-2 text-slate-300">
-
-                <FileSignature
-                  size={17}
-                  className="text-blue-400"
-                />
-
-                {usuario.documentos} documentos
-
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <CheckCircle2
-                  size={17}
-                  className={
-                    usuario.status === "Ativo"
-                      ? "text-emerald-400"
-                      : "text-red-400"
-                  }
-                />
-
-                <span
-                  className={
-                    usuario.status === "Ativo"
-                      ? "text-emerald-400"
-                      : "text-red-400"
-                  }
-                >
-                  {usuario.status}
-                </span>
+                </div>
 
               </div>
 
             </div>
 
-          </div>
+          ))}
 
-        ))}
-
-      </div>
+        </div>
+      )}
 
     </div>
   );

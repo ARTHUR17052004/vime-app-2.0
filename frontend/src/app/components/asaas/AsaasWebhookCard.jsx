@@ -2,11 +2,19 @@
 
 import { useState } from "react";
 
+import { API_URL } from "@/config/api";
+import { AsaasService } from "@/services/asaas.service";
+
 export default function AsaasWebhookCard() {
-  const webhook =
-    "https://api.vimesistema.online/webhooks/asaas";
+  const webhook = `${API_URL}/asaas/webhook`;
 
   const [copiado, setCopiado] = useState(false);
+  const [testando, setTestando] = useState(false);
+  const [gerando, setGerando] = useState(false);
+  const [status, setStatus] = useState({
+    tipo: "neutro",
+    texto: "Webhook pronto para configuração.",
+  });
 
   const copiar = async () => {
     await navigator.clipboard.writeText(webhook);
@@ -16,6 +24,53 @@ export default function AsaasWebhookCard() {
     setTimeout(() => {
       setCopiado(false);
     }, 2000);
+  };
+
+  async function testarWebhook() {
+    setTestando(true);
+
+    try {
+      const resposta = await AsaasService.testarWebhook();
+      const info = resposta.data || resposta;
+
+      setStatus({
+        tipo: "sucesso",
+        texto: info.mensagem || "Webhook registrado com sucesso no Asaas.",
+      });
+    } catch (err) {
+      setStatus({
+        tipo: "erro",
+        texto: err.message || "Não foi possível registrar o webhook no Asaas.",
+      });
+    } finally {
+      setTestando(false);
+    }
+  }
+
+  async function gerarToken() {
+    setGerando(true);
+
+    try {
+      await AsaasService.gerarTokenWebhook();
+
+      setStatus({
+        tipo: "sucesso",
+        texto: "Novo token gerado e salvo. Clique em Testar Webhook para reenviar a configuração ao Asaas.",
+      });
+    } catch (err) {
+      setStatus({
+        tipo: "erro",
+        texto: err.message || "Não foi possível gerar um novo token.",
+      });
+    } finally {
+      setGerando(false);
+    }
+  }
+
+  const corBola = {
+    neutro: "bg-emerald-500",
+    sucesso: "bg-emerald-500",
+    erro: "bg-red-500",
   };
 
   return (
@@ -48,8 +103,11 @@ export default function AsaasWebhookCard() {
             className="
               flex-1
               border
+              border-white/[0.07]
               rounded-xl
               p-3
+              bg-white/5
+              text-white
             "
           />
 
@@ -71,15 +129,18 @@ export default function AsaasWebhookCard() {
         <div className="mt-8 grid md:grid-cols-3 gap-4">
 
           <button
+            onClick={testarWebhook}
+            disabled={testando}
             className="
               bg-green-700
               hover:bg-green-800
+              disabled:opacity-50
               text-white
               rounded-xl
               py-3
             "
           >
-            Testar Webhook
+            {testando ? "Testando..." : "Testar Webhook"}
           </button>
 
           <button
@@ -102,6 +163,8 @@ export default function AsaasWebhookCard() {
           </button>
 
           <button
+            onClick={gerarToken}
+            disabled={gerando}
             className="
               border
               border-white/[0.07]
@@ -109,9 +172,10 @@ export default function AsaasWebhookCard() {
               py-3
               text-gray-200
               hover:bg-white/5
+              disabled:opacity-50
             "
           >
-            Gerar Novo Token
+            {gerando ? "Gerando..." : "Gerar Novo Token"}
           </button>
 
         </div>
@@ -122,10 +186,10 @@ export default function AsaasWebhookCard() {
 
         <div className="flex items-center gap-3">
 
-          <div className="w-3 h-3 rounded-full bg-green-500" />
+          <div className={`w-3 h-3 rounded-full ${corBola[status.tipo]}`} />
 
           <span className="font-medium text-gray-200">
-            Webhook pronto para configuração.
+            {status.texto}
           </span>
 
         </div>

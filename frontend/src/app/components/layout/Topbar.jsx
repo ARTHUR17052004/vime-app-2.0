@@ -41,7 +41,8 @@ export default function Topbar() {
 
         shadow-[0_12px_40px_rgba(0,0,0,.22)]
 
-        px-7
+        px-3
+        md:px-7
 
         flex
         items-center
@@ -78,9 +79,12 @@ export default function Topbar() {
           <Menu size={20} className="text-white" />
         </button>
 
-        <div className="ml-5">
+        <div className="ml-3 md:ml-5">
           <p
             className="
+              hidden
+              sm:block
+
               text-[10px]
 
               uppercase
@@ -185,7 +189,7 @@ export default function Topbar() {
       {/* DIREITA */}
       {/* ========================= */}
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 sm:gap-5">
         <NotificationBell />
 
         <div
@@ -214,7 +218,7 @@ export default function Topbar() {
           {inicial}
         </div>
 
-        <div className="leading-tight">
+        <div className="leading-tight hidden sm:block">
           <p
             className="
               text-[14px]

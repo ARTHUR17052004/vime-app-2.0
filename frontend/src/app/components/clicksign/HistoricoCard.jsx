@@ -1,55 +1,53 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   History,
-  Send,
-  PenSquare,
   CheckCircle2,
   XCircle,
   Clock3,
 } from "lucide-react";
 
-const historico = [
-  {
-    titulo: "Documento enviado",
-    descricao: "Contrato de Locação - João Silva",
-    horario: "Hoje • 09:12",
-    cor: "text-blue-400",
-    icone: Send,
-  },
-  {
-    titulo: "Documento assinado",
-    descricao: "Maria Souza concluiu a assinatura.",
-    horario: "Hoje • 10:34",
-    cor: "text-emerald-400",
-    icone: PenSquare,
-  },
-  {
-    titulo: "Assinatura concluída",
-    descricao: "Contrato finalizado com sucesso.",
-    horario: "Ontem • 16:20",
-    cor: "text-emerald-500",
-    icone: CheckCircle2,
-  },
-  {
-    titulo: "Documento recusado",
-    descricao: "Pedro Lima recusou a assinatura.",
-    horario: "Ontem • 11:48",
-    cor: "text-red-400",
-    icone: XCircle,
-  },
-  {
-    titulo: "Documento expirou",
-    descricao: "Prazo para assinatura encerrado.",
-    horario: "08/08 • 18:00",
-    cor: "text-yellow-400",
-    icone: Clock3,
-  },
-];
+import { ClicksignService } from "@/services/clicksign.service";
+
+function extrairDocumentos(resposta) {
+  const data = resposta?.data || resposta;
+  const lista = data?.documents || data?.data || [];
+  return Array.isArray(lista) ? lista : [];
+}
+
+function infoEvento(doc) {
+  if (doc.status === "canceled") {
+    return { titulo: "Documento cancelado", cor: "text-red-400", icone: XCircle };
+  }
+  if (doc.finished || doc.status === "closed") {
+    return { titulo: "Documento concluído", cor: "text-emerald-400", icone: CheckCircle2 };
+  }
+  return { titulo: "Aguardando assinatura", cor: "text-yellow-400", icone: Clock3 };
+}
 
 export default function HistoricoCard() {
+  const [documentos, setDocumentos] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const resposta = await ClicksignService.listarDocumentos();
+        setDocumentos(extrairDocumentos(resposta));
+      } catch (err) {
+        console.error("Erro ao carregar histórico:", err);
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    carregar();
+  }, []);
+
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div id="clicksign-historico" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
 
       <div className="mb-6 flex items-center justify-between">
 
@@ -74,77 +72,70 @@ export default function HistoricoCard() {
 
         </div>
 
-        <button className="text-emerald-400 hover:text-emerald-300 transition">
-
-          Ver tudo
-
-        </button>
-
       </div>
 
-      <div className="space-y-5">
+      {carregando ? (
+        <p className="text-center text-slate-400 py-6">Carregando...</p>
+      ) : documentos.length === 0 ? (
+        <p className="text-center text-slate-500 py-6">
+          Nenhuma movimentação registrada ainda. O histórico é preenchido conforme documentos são enviados e assinados.
+        </p>
+      ) : (
+        <div className="space-y-5">
 
-        {historico.map((item, index) => {
+          {documentos.map((doc, index) => {
 
-          const Icon = item.icone;
+            const info = infoEvento(doc);
+            const Icon = info.icone;
 
-          return (
+            return (
 
-            <div
-              key={index}
-              className="flex gap-4"
-            >
+              <div
+                key={doc.key || doc.id || index}
+                className="flex gap-4"
+              >
 
-              <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center">
 
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-800">
 
-                  <Icon
-                    size={20}
-                    className={item.cor}
-                  />
+                    <Icon
+                      size={20}
+                      className={info.cor}
+                    />
+
+                  </div>
+
+                  {index !== documentos.length - 1 && (
+                    <div className="mt-2 h-12 w-px bg-slate-700" />
+                  )}
 
                 </div>
 
-                {index !== historico.length - 1 && (
-                  <div className="mt-2 h-12 w-px bg-slate-700" />
-                )}
-
-              </div>
-
-              <div className="flex-1 rounded-2xl border border-white/10 bg-slate-800/30 p-4">
-
-                <div className="flex items-center justify-between">
+                <div className="flex-1 rounded-2xl border border-white/10 bg-slate-800/30 p-4">
 
                   <h3 className="font-semibold text-white">
 
-                    {item.titulo}
+                    {info.titulo}
 
                   </h3>
 
-                  <span className="text-xs text-slate-500">
+                  <p className="mt-2 text-sm text-slate-400">
 
-                    {item.horario}
+                    {doc.filename || doc.key || "Documento"}
 
-                  </span>
+                  </p>
 
                 </div>
 
-                <p className="mt-2 text-sm text-slate-400">
-
-                  {item.descricao}
-
-                </p>
-
               </div>
 
-            </div>
+            );
 
-          );
+          })}
 
-        })}
-
-      </div>
+        </div>
+      )}
 
     </div>
   );

@@ -146,16 +146,16 @@ const financeiro = async () => {
 
   receitas.forEach(r => {
 
-    if (r.status === 'RECEBIDO')
+    if (r.status === 'PAGA')
       recebido += r.valor;
 
     if (r.status === 'PENDENTE')
       pendente += r.valor;
 
-    if (r.status === 'ATRASADO')
+    if (r.status === 'ATRASADA')
       atrasado += r.valor;
 
-    if (r.status === 'CANCELADO')
+    if (r.status === 'CANCELADA')
       cancelado += r.valor;
 
   });

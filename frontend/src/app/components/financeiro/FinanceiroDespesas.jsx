@@ -31,14 +31,14 @@ export default function FinanceiroDespesas({
 
   const corStatus = (status) => {
     if (status === "PAGO") {
-      return "bg-green-100 text-green-700";
+      return "bg-emerald-500/10 text-emerald-400";
     }
 
     if (status === "ATRASADA") {
-      return "bg-red-100 text-red-700";
+      return "bg-red-500/10 text-red-400";
     }
 
-    return "bg-yellow-100 text-yellow-700";
+    return "bg-yellow-500/10 text-yellow-400";
   };
 
  return (
@@ -158,9 +158,9 @@ export default function FinanceiroDespesas({
                   <td>
 
                     <Badge
-                      color={
+                      variant={
                         item.status === "PAGO"
-                          ? "green"
+                          ? "emerald"
                           : item.status === "ATRASADA"
                           ? "red"
                           : "yellow"

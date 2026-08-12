@@ -22,7 +22,7 @@ module.exports = async () => {
       id: receita.id
     },
     data: {
-      status: "VENCIDA"
+      status: "ATRASADA"
     }
   });
 

@@ -15,6 +15,18 @@ const status = async (req, res) => {
   });
 };
 
+const testarConexao = async (req, res) => {
+
+  const resultado = await clicksignService.testarConexao();
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
+  });
+
+};
+
 const enviarDocumento = async (req, res) => {
 
   const dados = await clicksignService.enviarDocumento(req.body);
@@ -110,6 +122,7 @@ const webhook = async (req, res) => {
 module.exports = {
   config,
   status,
+  testarConexao,
 
   enviarDocumento,
   sincronizar,

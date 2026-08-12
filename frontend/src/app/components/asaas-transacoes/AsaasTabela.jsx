@@ -1,60 +1,68 @@
 "use client";
 
-export default function AsaasTabela() {
-  const cobrancas = [
-    {
-      id: 1,
-      cliente: "João Silva",
-      documento: "CPF • 123.456.789-00",
-      valor: "R$ 950,00",
-      vencimento: "10/07/2026",
-      forma: "PIX",
-      status: "Recebido",
-    },
-    {
-      id: 2,
-      cliente: "Maria Oliveira",
-      documento: "CPF • 987.654.321-00",
-      valor: "R$ 1.250,00",
-      vencimento: "12/07/2026",
-      forma: "Boleto",
-      status: "Pendente",
-    },
-    {
-      id: 3,
-      cliente: "Carlos Souza",
-      documento: "CPF • 456.789.123-55",
-      valor: "R$ 780,00",
-      vencimento: "05/07/2026",
-      forma: "PIX",
-      status: "Atrasado",
-    },
-    {
-      id: 4,
-      cliente: "Fernanda Lima",
-      documento: "CPF • 321.654.987-10",
-      valor: "R$ 640,00",
-      vencimento: "02/07/2026",
-      forma: "Cartão",
-      status: "Cancelado",
-    },
-  ];
+const formatarValor = (valor) => {
+  const numero = Number(valor || 0);
 
-  const badge = (status) => {
-    switch (status) {
-      case "Recebido":
-        return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+  return numero.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+};
 
-      case "Pendente":
-        return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20";
+const formatarData = (data) => {
+  if (!data) return "-";
 
-      case "Atrasado":
-        return "bg-red-500/10 text-red-400 border border-red-500/20";
+  return new Date(data).toLocaleDateString("pt-BR", {
+    timeZone: "UTC",
+  });
+};
 
-      default:
-        return "bg-white/5 text-gray-300 border border-white/10";
-    }
-  };
+const rotuloStatus = (status) => {
+  switch (status) {
+    case "PAGA":
+      return "Recebido";
+
+    case "PENDENTE":
+      return "Pendente";
+
+    case "ATRASADA":
+      return "Atrasado";
+
+    case "CANCELADA":
+      return "Cancelado";
+
+    case "ESTORNADA":
+      return "Estornado";
+
+    default:
+      return status || "-";
+  }
+};
+
+const badge = (status) => {
+  switch (status) {
+    case "PAGA":
+      return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+
+    case "PENDENTE":
+      return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20";
+
+    case "ATRASADA":
+      return "bg-red-500/10 text-red-400 border border-red-500/20";
+
+    default:
+      return "bg-white/5 text-gray-300 border border-white/10";
+  }
+};
+
+export default function AsaasTabela({
+  transacoes = [],
+  loading = false,
+  onVisualizar,
+  onDetalhes,
+  onEnviar,
+  enviandoId,
+}) {
 
   return (
     <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
@@ -105,7 +113,23 @@ export default function AsaasTabela() {
 
           <tbody>
 
-            {cobrancas.map((item) => (
+            {loading && (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-gray-400">
+                  Carregando cobranças...
+                </td>
+              </tr>
+            )}
+
+            {!loading && transacoes.length === 0 && (
+              <tr>
+                <td colSpan={6} className="p-8 text-center text-gray-400">
+                  Nenhuma cobrança encontrada.
+                </td>
+              </tr>
+            )}
+
+            {!loading && transacoes.map((item) => (
 
               <tr
                 key={item.id}
@@ -119,21 +143,23 @@ export default function AsaasTabela() {
                   </div>
 
                   <div className="text-sm text-gray-400">
-                    {item.documento}
+                    {item.enviadaAsaas
+                      ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
+                      : "Ainda não enviada ao Asaas"}
                   </div>
 
                 </td>
 
                 <td className="p-4 font-semibold text-white">
-                  {item.valor}
+                  {formatarValor(item.valor)}
                 </td>
 
                 <td className="p-4 text-gray-300">
-                  {item.vencimento}
+                  {formatarData(item.vencimento)}
                 </td>
 
                 <td className="p-4 text-gray-300">
-                  {item.forma}
+                  {item.formaPagamento || "-"}
                 </td>
 
                 <td className="p-4">
@@ -143,16 +169,17 @@ export default function AsaasTabela() {
                       item.status
                     )}`}
                   >
-                    {item.status}
+                    {rotuloStatus(item.status)}
                   </span>
 
                 </td>
 
                 <td className="p-4">
 
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-end gap-2 flex-wrap">
 
                     <button
+                      onClick={() => onVisualizar?.(item)}
                       className="
                         px-4
                         py-2
@@ -167,6 +194,7 @@ export default function AsaasTabela() {
                     </button>
 
                     <button
+                      onClick={() => onDetalhes?.(item)}
                       className="
                         px-4
                         py-2
@@ -178,6 +206,27 @@ export default function AsaasTabela() {
                     >
                       Detalhes
                     </button>
+
+                    {!item.enviadaAsaas && (
+                      <button
+                        onClick={() => onEnviar?.(item)}
+                        disabled={enviandoId === item.id}
+                        className="
+                          px-4
+                          py-2
+                          rounded-lg
+                          bg-sky-600
+                          hover:bg-sky-700
+                          disabled:opacity-50
+                          disabled:cursor-not-allowed
+                          text-white
+                        "
+                      >
+                        {enviandoId === item.id
+                          ? "Enviando..."
+                          : "Enviar ao Asaas"}
+                      </button>
+                    )}
 
                   </div>
 
@@ -196,24 +245,8 @@ export default function AsaasTabela() {
       <div className="px-6 py-4 border-t border-white/[0.07] flex justify-between items-center">
 
         <span className="text-gray-400 text-sm">
-          Exibindo 4 cobranças
+          Exibindo {transacoes.length} cobrança(s)
         </span>
-
-        <div className="flex gap-2">
-
-          <button className="border border-white/[0.07] text-gray-200 rounded-lg px-4 py-2 hover:bg-white/5">
-            Anterior
-          </button>
-
-          <button className="bg-green-700 text-white rounded-lg px-4 py-2">
-            1
-          </button>
-
-          <button className="border border-white/[0.07] text-gray-200 rounded-lg px-4 py-2 hover:bg-white/5">
-            Próxima
-          </button>
-
-        </div>
 
       </div>
 

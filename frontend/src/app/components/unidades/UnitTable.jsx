@@ -30,10 +30,10 @@ export default function UnitTable({
               <span
                 className={`inline-block mt-2 px-3 py-1 rounded-full text-sm ${
                   unidade.status === "Ativa"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-emerald-500/10 text-emerald-400"
                     : unidade.status === "Manutenção"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-yellow-500/10 text-yellow-400"
+                    : "bg-red-500/10 text-red-400"
                 }`}
               >
                 {unidade.status}

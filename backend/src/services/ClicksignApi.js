@@ -1,77 +1,108 @@
 const axios = require("axios");
 
+const prisma = require("../config/prisma");
+
 const USAR_MOCK =
   process.env.CLICKSIGN_MOCK === "true";
 
+const BASE_URLS = {
+  sandbox: "https://sandbox.clicksign.com/api/v1",
+  producao: "https://app.clicksign.com/api/v1",
+};
+
 class ClicksignApi {
 
-  constructor() {
+  async obterConfig() {
 
-    this.baseURL =
+    const configuracao = await prisma.configuracao.findFirst({
+      orderBy: { id: "asc" },
+    });
+
+    const apiKey =
+      configuracao?.clicksignToken ||
+      process.env.CLICKSIGN_API_KEY ||
+      "";
+
+    const ambiente =
+      configuracao?.clicksignAmbiente ||
+      process.env.CLICKSIGN_ENV ||
+      "sandbox";
+
+    const baseURL =
       process.env.CLICKSIGN_API_URL ||
-      "https://sandbox.clicksign.com/api/v1";
-
-    this.apiKey =
-      process.env.CLICKSIGN_API_KEY || "";
-
-  }
-
-async request(method, endpoint, body = null) {
-
-  if (USAR_MOCK || !this.apiKey) {
+      BASE_URLS[ambiente] ||
+      BASE_URLS.sandbox;
 
     return {
-      success: true,
-      mock: true,
-      method,
-      endpoint,
-      body
+      apiKey,
+      ambiente,
+      baseURL,
+      configuracaoId: configuracao?.id || null,
     };
 
   }
 
-  try {
+  async request(method, endpoint, body = null) {
 
-    const response = await axios({
+    const { apiKey, baseURL } = await this.obterConfig();
 
-      method,
+    if (USAR_MOCK || !apiKey) {
 
-      url: `${this.baseURL}${endpoint}`,
+      return {
+        success: true,
+        mock: true,
+        method,
+        endpoint,
+        body
+      };
 
-      headers: {
+    }
 
-        Authorization: this.apiKey,
+    try {
 
-        "Content-Type": "application/json"
+      const response = await axios({
 
-      },
+        method,
 
-      data: body
+        url: `${baseURL}${endpoint}`,
 
-    });
+        headers: {
 
-    return response.data;
+          // API da Clicksign espera Bearer token (diferente do Asaas,
+          // que usa o header "access_token")
+          Authorization: `Bearer ${apiKey}`,
 
-  } catch (error) {
+          "Content-Type": "application/json"
 
-    console.error("Erro Clicksign:");
+        },
 
-    if (error.response) {
+        data: body
 
-      console.error(error.response.data);
+      });
+
+      return response.data;
+
+    } catch (error) {
+
+      console.error("Erro Clicksign:");
+
+      if (error.response) {
+
+        console.error(error.response.data);
+
+        throw new Error(
+          error.response.data.message ||
+          "Erro ao comunicar com a Clicksign."
+        );
+
+      }
 
       throw new Error(
-        error.response.data.message ||
-        "Erro ao comunicar com a Clicksign."
+        error.message || "Erro desconhecido na Clicksign."
       );
 
     }
 
-    throw new Error(
-      error.message || "Erro desconhecido na Clicksign."
-    );
-
-  }
   }
 
   async criarDocumento(documento) {
@@ -117,6 +148,16 @@ async request(method, endpoint, body = null) {
     return this.request(
       "DELETE",
       `/documents/${id}`
+    );
+
+  }
+
+  async adicionarSignatario(documentoId, signatario) {
+
+    return this.request(
+      "POST",
+      `/documents/${documentoId}/signers`,
+      signatario
     );
 
   }

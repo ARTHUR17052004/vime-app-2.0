@@ -16,6 +16,8 @@ router.get('/config', clicksignController.config);
 
 router.get('/status', clicksignController.status);
 
+router.post('/testar-conexao', clicksignController.testarConexao);
+
 router.post('/enviar', clicksignController.enviarDocumento);
 
 router.post('/sincronizar', clicksignController.sincronizar);

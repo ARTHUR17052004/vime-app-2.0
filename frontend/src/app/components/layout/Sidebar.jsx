@@ -15,6 +15,7 @@ import menuConfig from "../../config/menuConfig";
 export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const activeLinkRef = useRef(null);
 
   useEffect(() => {
@@ -31,6 +32,9 @@ export default function Sidebar() {
       block: "nearest",
       behavior: "auto",
     });
+
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMobileOpen(false);
   }, [pathname]);
 
   function toggleSidebar() {
@@ -46,7 +50,11 @@ export default function Sidebar() {
 
   useEffect(() => {
     function aoAlternar() {
-      toggleSidebar();
+      if (window.innerWidth < 768) {
+        setMobileOpen((v) => !v);
+      } else {
+        toggleSidebar();
+      }
     }
 
     window.addEventListener("toggle-sidebar", aoAlternar);
@@ -58,13 +66,44 @@ export default function Sidebar() {
 
   return (
 
+    <>
+
+    {mobileOpen && (
+
+      <div
+        onClick={() => setMobileOpen(false)}
+        className="
+          fixed
+          inset-0
+          z-30
+
+          bg-black/60
+          backdrop-blur-sm
+
+          md:hidden
+        "
+      />
+
+    )}
+
     <aside
       className={`
-        relative
+        fixed
+        md:relative
+
+        inset-y-0
+        left-0
+        z-40
+        md:z-auto
+
         flex
         flex-col
 
-        ${collapsed ? "w-20" : "w-62.5"}
+        w-72
+        ${collapsed ? "md:w-20" : "md:w-62.5"}
+
+        ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
+        md:translate-x-0
 
         h-screen
 
@@ -520,6 +559,8 @@ export default function Sidebar() {
 </div>
 
 </aside>
+
+</>
 
 );
 

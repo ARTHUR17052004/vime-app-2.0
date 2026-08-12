@@ -1,13 +1,80 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import {
   Webhook,
   CheckCircle2,
-  Save,
+  Copy,
   Wifi,
+  WifiOff,
 } from "lucide-react";
 
+import { ClicksignService } from "@/services/clicksign.service";
+import { API_URL } from "@/config/api";
+
+const EVENTOS = [
+  "Documento Criado",
+  "Documento Assinado",
+  "Documento Recusado",
+  "Documento Cancelado",
+  "Documento Expirado",
+  "Assinante Adicionado",
+];
+
+const WEBHOOK_URL = `${API_URL}/clicksign/webhook`;
+
 export default function WebhookCard() {
+  const [statusApi, setStatusApi] = useState({ configurado: false });
+  const [testando, setTestando] = useState(false);
+  const [mensagem, setMensagem] = useState(null);
+  const [copiado, setCopiado] = useState(false);
+
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const resposta = await ClicksignService.status();
+        setStatusApi(resposta?.data || resposta);
+      } catch (err) {
+        console.error("Erro ao carregar status da Clicksign:", err);
+      }
+    }
+
+    carregar();
+  }, []);
+
+  function copiarUrl() {
+    navigator.clipboard?.writeText(WEBHOOK_URL);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 2000);
+  }
+
+  async function testarWebhook() {
+    setTestando(true);
+    setMensagem(null);
+
+    try {
+      const resposta = await ClicksignService.testarConexao();
+      const info = resposta.data || resposta;
+
+      setMensagem({
+        tipo: resposta.success ? "sucesso" : "erro",
+        texto: resposta.success
+          ? "Backend acessível — cadastre esta URL como webhook no painel da Clicksign para receber eventos."
+          : info.mensagem || "Não foi possível validar a conexão com a Clicksign.",
+      });
+    } catch (err) {
+      setMensagem({
+        tipo: "erro",
+        texto: err.message || "Não foi possível testar o webhook.",
+      });
+    } finally {
+      setTestando(false);
+    }
+  }
+
+  const conectado = !!statusApi?.configurado;
+
   return (
     <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
 
@@ -46,15 +113,31 @@ export default function WebhookCard() {
 
           <label className="mb-2 block text-sm text-slate-300">
 
-            URL do Webhook
+            URL do Webhook (cadastre no painel da Clicksign)
 
           </label>
 
-          <input
-            type="text"
-            placeholder="https://vimesistema.online/api/clicksign/webhook"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
-          />
+          <div className="flex">
+
+            <input
+              type="text"
+              readOnly
+              value={WEBHOOK_URL}
+              className="flex-1 rounded-l-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none"
+            />
+
+            <button
+              onClick={copiarUrl}
+              className="rounded-r-2xl border-y border-r border-white/10 bg-slate-700 px-4 hover:bg-slate-600"
+            >
+              <Copy size={18} className="text-white" />
+            </button>
+
+          </div>
+
+          {copiado && (
+            <p className="mt-1 text-xs text-emerald-400">URL copiada.</p>
+          )}
 
         </div>
 
@@ -62,50 +145,48 @@ export default function WebhookCard() {
 
           <label className="mb-3 block text-sm text-slate-300">
 
-            Eventos Monitorados
+            Eventos que este endpoint já trata (definidos no código, informativo)
 
           </label>
 
           <div className="grid gap-3 md:grid-cols-2">
 
-            {[
-              "Documento Criado",
-              "Documento Assinado",
-              "Documento Recusado",
-              "Documento Cancelado",
-              "Documento Expirado",
-              "Assinante Adicionado",
-            ].map((evento, index) => (
+            {EVENTOS.map((evento, index) => (
 
-              <label
+              <div
                 key={index}
-                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white"
+                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-slate-300"
               >
-
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="accent-emerald-500"
-                />
 
                 {evento}
 
-              </label>
+              </div>
 
             ))}
 
           </div>
 
+          <p className="mt-2 text-xs text-slate-500">
+            Hoje o backend processa "signature_finished" e "document_cancelled" — os demais eventos são aceitos mas ainda não geram ação.
+          </p>
+
         </div>
 
-        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+        <div
+          className={`rounded-2xl border p-4 ${
+            conectado
+              ? "border-emerald-500/20 bg-emerald-500/10"
+              : "border-white/10 bg-slate-800/40"
+          }`}
+        >
 
           <div className="flex items-center gap-3">
 
-            <Wifi
-              size={20}
-              className="text-emerald-400"
-            />
+            {conectado ? (
+              <Wifi size={20} className="text-emerald-400" />
+            ) : (
+              <WifiOff size={20} className="text-slate-400" />
+            )}
 
             <div>
 
@@ -117,7 +198,9 @@ export default function WebhookCard() {
 
               <p className="text-sm text-slate-300">
 
-                Webhook conectado e aguardando eventos.
+                {conectado
+                  ? "Token configurado. Cadastre a URL acima no painel da Clicksign."
+                  : "Nenhum token da Clicksign configurado ainda."}
 
               </p>
 
@@ -129,21 +212,29 @@ export default function WebhookCard() {
 
       </div>
 
+      {mensagem && (
+        <div
+          className={`mt-6 rounded-xl px-5 py-3 text-sm ${
+            mensagem.tipo === "sucesso"
+              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+              : "bg-red-500/10 text-red-400 border border-red-500/20"
+          }`}
+        >
+          {mensagem.texto}
+        </div>
+      )}
+
       <div className="mt-8 flex flex-wrap justify-end gap-3">
 
-        <button className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-800 px-5 py-3 text-white transition hover:border-emerald-500">
+        <button
+          onClick={testarWebhook}
+          disabled={testando}
+          className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-800 px-5 py-3 text-white transition hover:border-emerald-500 disabled:opacity-50"
+        >
 
           <CheckCircle2 size={18} />
 
-          Testar Webhook
-
-        </button>
-
-        <button className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-white transition hover:bg-emerald-700">
-
-          <Save size={18} />
-
-          Salvar
+          {testando ? "Testando..." : "Testar Webhook"}
 
         </button>
 

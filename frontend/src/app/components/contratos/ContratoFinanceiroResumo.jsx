@@ -42,28 +42,28 @@ export default function ContratoFinanceiroResumo({
       titulo: "Aluguel",
       valor: `R$ ${valorAluguel}`,
       icone: DollarSign,
-      cor: "bg-green-100 text-green-700",
+      cor: "bg-emerald-500/10 text-emerald-400",
     },
 
     {
       titulo: "Receita Anual",
       valor: `R$ ${receitaAnual}`,
       icone: TrendingUp,
-      cor: "bg-blue-100 text-blue-700",
+      cor: "bg-sky-500/10 text-sky-400",
     },
 
     {
       titulo: "Meses Restantes",
       valor: mesesRestantes,
       icone: Calendar,
-      cor: "bg-yellow-100 text-yellow-700",
+      cor: "bg-yellow-500/10 text-yellow-400",
     },
 
     {
       titulo: "Status",
       valor: contrato?.status,
       icone: FileText,
-      cor: "bg-gray-100 text-gray-700",
+      cor: "bg-white/5 text-gray-300",
     },
   ];
 

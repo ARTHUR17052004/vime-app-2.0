@@ -30,6 +30,7 @@ import FinanceiroReceitas from "../components/financeiro/FinanceiroReceitas";
 import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
 import PageHeader from "../components/ui/PageHeader";
+import Button from "../components/ui/Button";
 
 
 export default function FinanceiroPage() {
@@ -281,15 +282,32 @@ export default function FinanceiroPage() {
 
     <FadeIn>
       <PageHeader
-        total={receitas.length}
-        onNovaReceita={() => {
-          setTipoModal("receita");
-          setModalOpen(true);
-        }}
-        onNovaDespesa={() => {
-          setTipoModal("despesa");
-          setModalOpen(true);
-        }}
+        title="Financeiro"
+        subtitle="Gerencie receitas, despesas e o fluxo de caixa do sistema."
+        count={receitas.length}
+        countLabel="receita(s) cadastrada(s)"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setTipoModal("despesa");
+                setModalOpen(true);
+              }}
+            >
+              + Nova Despesa
+            </Button>
+
+            <Button
+              onClick={() => {
+                setTipoModal("receita");
+                setModalOpen(true);
+              }}
+            >
+              + Nova Receita
+            </Button>
+          </>
+        }
       />
     </FadeIn>
 

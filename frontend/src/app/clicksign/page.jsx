@@ -12,6 +12,7 @@ import PendenciasCard from "../components/clicksign/PendenciasCard";
 import TemplatesCard from "../components/clicksign/TemplatesCard";
 import HistoricoCard from "../components/clicksign/HistoricoCard";
 import TokenCard from "../components/clicksign/TokenCard";
+import WebhookCard from "../components/clicksign/WebhookCard";
 import AssinantesCard from "../components/clicksign/AssinantesCard";
 import AcessoRapido from "../components/clicksign/AcessoRapido";
 
@@ -39,7 +40,7 @@ export default function ClicksignPage() {
 
           <div className="grid gap-6 xl:grid-cols-3">
 
-            <div className="xl:col-span-2">
+            <div id="clicksign-documentos" className="xl:col-span-2">
 
               <DocumentosCard />
 
@@ -65,9 +66,21 @@ export default function ClicksignPage() {
 
             <TemplatesCard />
 
-            <TokenCard />
+            <div id="clicksign-token">
+
+              <TokenCard />
+
+            </div>
 
           </div>
+
+        </FadeIn>
+
+        {/* WEBHOOK */}
+
+        <FadeIn delay={0.35}>
+
+          <WebhookCard />
 
         </FadeIn>
 

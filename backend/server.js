@@ -45,9 +45,25 @@ const PORT = process.env.PORT || 3001;
 /* ===========================
    CORS
 =========================== */
+const origensPadrao = [
+  "http://localhost:3000",
+  "https://vimesistema.online",
+  "https://www.vimesistema.online",
+];
+
+const origensPermitidas = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
+  : origensPadrao;
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: (origin, callback) => {
+      if (!origin || origensPermitidas.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Origem não permitida pelo CORS."));
+    },
     credentials: true,
   })
 );
@@ -113,7 +129,7 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: origensPermitidas,
     credentials: true,
   },
 });
