@@ -8,14 +8,12 @@ export default function ReceitaForm({
 }) {
   const [formData, setFormData] =
     useState({
-      unidade: "",
       categoria: "Aluguel",
       descricao: "",
       valor: "",
-      status: "Pendente",
-      dataVencimento: "",
+      status: "PENDENTE",
+      vencimento: "",
       dataPagamento: "",
-      observacoes: "",
     });
 
   useEffect(() => {
@@ -40,29 +38,20 @@ export default function ReceitaForm({
   };
 
   const inputStyle =
-    "border border-gray-300 rounded-xl p-3 w-full";
+    "border border-white/10 bg-white/5 text-white rounded-xl p-3 w-full";
 
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-bold">
+      <h2 className="text-3xl font-bold text-white">
         {receitaEditando
           ? "Editar Receita"
           : "Nova Receita"}
       </h2>
 
       <div className="grid md:grid-cols-2 gap-5">
-
-        <input
-          name="unidade"
-          placeholder="Unidade"
-          value={formData.unidade}
-          onChange={handleChange}
-          className={inputStyle}
-          required
-        />
 
         <select
           name="categoria"
@@ -100,36 +89,38 @@ export default function ReceitaForm({
           onChange={handleChange}
           className={inputStyle}
         >
-          <option>Pendente</option>
-          <option>Pago</option>
-          <option>Atrasado</option>
+          <option value="PENDENTE">Pendente</option>
+          <option value="PAGA">Pago</option>
+          <option value="ATRASADA">Atrasado</option>
         </select>
 
-        <input
-          type="date"
-          name="dataVencimento"
-          value={formData.dataVencimento}
-          onChange={handleChange}
-          className={inputStyle}
-        />
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5">
+            Vencimento
+          </label>
+          <input
+            type="date"
+            name="vencimento"
+            value={formData.vencimento}
+            onChange={handleChange}
+            className={`${inputStyle} w-full`}
+          />
+        </div>
 
-        <input
-          type="date"
-          name="dataPagamento"
-          value={formData.dataPagamento}
-          onChange={handleChange}
-          className={inputStyle}
-        />
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5">
+            Data de Pagamento
+          </label>
+          <input
+            type="date"
+            name="dataPagamento"
+            value={formData.dataPagamento}
+            onChange={handleChange}
+            className={`${inputStyle} w-full`}
+          />
+        </div>
 
       </div>
-
-      <textarea
-        name="observacoes"
-        placeholder="Observações"
-        value={formData.observacoes}
-        onChange={handleChange}
-        className={`${inputStyle} min-h-[120px]`}
-      />
 
       <div className="flex justify-end">
 

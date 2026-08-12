@@ -8,7 +8,7 @@ export default function FinanceiroProximosVencimentos({
   receitas,
 }) {
   const vencimentos = receitas.filter(
-    (item) => item.status !== "Pago"
+    (item) => item.status !== "PAGO"
   );
 
   return (
@@ -101,7 +101,9 @@ export default function FinanceiroProximosVencimentos({
                   </p>
 
                   <p className="text-sm text-gray-500 mt-1">
-                    Vencimento: {item.dataVencimento || "-"}
+                    Vencimento: {item.vencimento
+                      ? new Date(item.vencimento).toLocaleDateString("pt-BR")
+                      : "-"}
                   </p>
 
                 </div>
@@ -114,7 +116,7 @@ export default function FinanceiroProximosVencimentos({
 
                   <div
                     className={`mt-2 text-sm font-medium ${
-                      item.status === "Atrasado"
+                      item.status === "ATRASADA"
                         ? "text-red-400"
                         : "text-yellow-400"
                     }`}

@@ -8,10 +8,10 @@ const perfilMiddleware = require('../middlewares/perfilMiddleware');
 
 router.get('/', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.listar);
 
-router.post('/', usuarioController.criar);
+router.post('/', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.criar);
 
-router.put('/:id', usuarioController.atualizar);
+router.put('/:id', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.atualizar);
 
-router.delete('/:id', usuarioController.remover);
+router.delete('/:id', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.remover);
 
 module.exports = router;

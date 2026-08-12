@@ -50,7 +50,7 @@ export default function SolicitacaoResponder({
             block
             text-sm
             font-semibold
-            text-gray-900
+            text-gray-300
             mb-2
           "
         >
@@ -70,11 +70,12 @@ export default function SolicitacaoResponder({
           className="
             w-full
             border
+            border-white/10
             rounded-2xl
             px-4
             py-3
-            bg-white
-            text-gray-900
+            bg-white/5
+            text-white
           "
         />
 
@@ -87,7 +88,7 @@ export default function SolicitacaoResponder({
             block
             text-sm
             font-semibold
-            text-gray-900
+            text-gray-300
             mb-2
           "
         >
@@ -106,11 +107,12 @@ export default function SolicitacaoResponder({
           className="
             w-full
             border
+            border-white/10
             rounded-2xl
             px-4
             py-3
-            bg-white
-            text-gray-900
+            bg-white/5
+            text-white
           "
         >
 

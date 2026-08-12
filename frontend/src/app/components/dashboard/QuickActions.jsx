@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Card from "../ui/Card";
 
 import {
@@ -13,18 +14,22 @@ const actions = [
   {
     title: "Nova Unidade",
     icon: Building2,
+    href: "/unidades",
   },
   {
     title: "Novo Inquilino",
     icon: UserPlus,
+    href: "/inquilinos",
   },
   {
     title: "Novo Contrato",
     icon: FileSignature,
+    href: "/contratos",
   },
   {
     title: "Nova Solicitação",
     icon: ClipboardPlus,
+    href: "/solicitacoes",
   },
 ];
 
@@ -72,8 +77,9 @@ export default function QuickActions() {
 
           return (
 
-            <button
+            <Link
               key={item.title}
+              href={item.href}
               className="
                 group
                 rounded-2xl
@@ -133,7 +139,7 @@ export default function QuickActions() {
                 {item.title}
               </h3>
 
-            </button>
+            </Link>
 
           );
 

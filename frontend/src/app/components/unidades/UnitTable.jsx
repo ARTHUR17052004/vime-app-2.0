@@ -8,7 +8,7 @@ export default function UnitTable({
 }) {
   if (unidades.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow p-10 text-center text-gray-500">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-xl p-10 text-center text-gray-400">
         Nenhuma unidade cadastrada.
       </div>
     );
@@ -19,33 +19,33 @@ export default function UnitTable({
       {unidades.map((unidade) => (
         <div
           key={unidade.id}
-          className="bg-white rounded-2xl shadow-md border p-6 hover:shadow-lg transition"
+          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6 transition hover:border-emerald-400/20"
         >
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-800">
+              <h2 className="text-2xl font-bold text-white">
                 {unidade.nome}
               </h2>
 
               <span
                 className={`inline-block mt-2 px-3 py-1 rounded-full text-sm ${
                   unidade.status === "Ativa"
-                    ? "bg-green-100 text-green-700"
+                    ? "bg-emerald-500/10 text-emerald-400"
                     : unidade.status === "Manutenção"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-yellow-500/10 text-yellow-400"
+                    : "bg-red-500/10 text-red-400"
                 }`}
               >
                 {unidade.status}
               </span>
             </div>
 
-            <button className="text-gray-500 text-xl hover:text-gray-800">
+            <button className="text-gray-400 text-xl hover:text-white">
               ⋮
             </button>
           </div>
 
-          <div className="space-y-3 text-gray-600">
+          <div className="space-y-3 text-gray-400">
             <p>
               📍 {unidade.endereco || "-"}
               {unidade.numero
@@ -63,9 +63,9 @@ export default function UnitTable({
             </p>
           </div>
 
-          <div className="border-t my-4"></div>
+          <div className="border-t border-white/10 my-4"></div>
 
-          <div className="space-y-2 text-gray-700">
+          <div className="space-y-2 text-gray-300">
             <p>
               🏠 Kitnets: {unidade.kitnets || 0}
             </p>

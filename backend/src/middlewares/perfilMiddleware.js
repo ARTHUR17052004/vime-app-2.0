@@ -3,13 +3,15 @@ const perfilMiddleware = (...perfisPermitidos) => {
 
     if (!req.usuario) {
       return res.status(401).json({
-        mensagem: 'Usuário não autenticado'
+        success: false,
+        message: "Usuário não autenticado"
       });
     }
 
     if (!perfisPermitidos.includes(req.usuario.perfil)) {
       return res.status(403).json({
-        mensagem: 'Acesso negado'
+        success: false,
+        message: "Acesso negado"
       });
     }
 

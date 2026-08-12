@@ -19,6 +19,9 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
+  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
+  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
+
   const despesa = await prisma.despesa.create({
     data: dados
   });
@@ -46,6 +49,9 @@ const criar = async (dados) => {
 };
 
 const atualizar = async (id, dados) => {
+
+  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
+  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
 
   const anterior = await prisma.despesa.findUnique({
     where: { id }

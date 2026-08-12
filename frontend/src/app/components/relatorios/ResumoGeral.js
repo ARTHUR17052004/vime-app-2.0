@@ -2,6 +2,21 @@
 
 import { useEffect, useState } from "react";
 
+import { UnidadeService } from "@/services/unidades.service";
+import { KitnetService } from "@/services/kitnets.service";
+import { LocadorService } from "@/services/locadores.service";
+import { InquilinoService } from "@/services/inquilinos.service";
+import { ContratoService } from "@/services/contratos.service";
+import { SolicitacaoService } from "@/services/solicitacao.service";
+import { VistoriaService } from "@/services/vistoria.service";
+import { ReceitaService, DespesaService } from "@/services/financeiro.service";
+
+function paraLista(resposta) {
+  return Array.isArray(resposta)
+    ? resposta
+    : resposta?.data || [];
+}
+
 export default function ResumoGeral() {
 
   const [cards, setCards] =
@@ -9,89 +24,77 @@ export default function ResumoGeral() {
 
   useEffect(() => {
 
-    const unidades =
-      JSON.parse(
-        localStorage.getItem("vime-unidades") || "[]"
-      ).length;
+    async function carregar() {
 
-    const kitnets =
-      JSON.parse(
-        localStorage.getItem("vime-kitnets") || "[]"
-      ).length;
+      const [
+        unidades,
+        kitnets,
+        locadores,
+        inquilinos,
+        contratos,
+        solicitacoes,
+        vistorias,
+        receitas,
+        despesas,
+      ] = await Promise.all([
+        UnidadeService.listar().then(paraLista).catch(() => []),
+        KitnetService.listar().then(paraLista).catch(() => []),
+        LocadorService.listar().then(paraLista).catch(() => []),
+        InquilinoService.listar().then(paraLista).catch(() => []),
+        ContratoService.listar().then(paraLista).catch(() => []),
+        SolicitacaoService.listar().then(paraLista).catch(() => []),
+        VistoriaService.listar().then(paraLista).catch(() => []),
+        ReceitaService.listar().then(paraLista).catch(() => []),
+        DespesaService.listar().then(paraLista).catch(() => []),
+      ]);
 
-    const locadores =
-      JSON.parse(
-        localStorage.getItem("vime-locadores") || "[]"
-      ).length;
+      setCards([
 
-    const inquilinos =
-      JSON.parse(
-        localStorage.getItem("vime-inquilinos") || "[]"
-      ).length;
+        {
+          titulo: "Unidades",
+          valor: unidades.length,
+        },
 
-    const contratos =
-      JSON.parse(
-        localStorage.getItem("vime-contratos") || "[]"
-      ).length;
+        {
+          titulo: "Kitnets",
+          valor: kitnets.length,
+        },
 
-    const solicitacoes =
-      JSON.parse(
-        localStorage.getItem("vime-solicitacoes") || "[]"
-      ).length;
+        {
+          titulo: "Locadores",
+          valor: locadores.length,
+        },
 
-    const vistorias =
-      JSON.parse(
-        localStorage.getItem("vime-vistorias") || "[]"
-      ).length;
+        {
+          titulo: "Inquilinos",
+          valor: inquilinos.length,
+        },
 
-    const financeiro =
-      JSON.parse(
-        localStorage.getItem("vime-financeiro") || "[]"
-      ).length;
+        {
+          titulo: "Contratos",
+          valor: contratos.length,
+        },
 
-    setCards([
+        {
+          titulo: "Solicitações",
+          valor: solicitacoes.length,
+        },
 
-      {
-        titulo: "Unidades",
-        valor: unidades,
-      },
+        {
+          titulo: "Vistorias",
+          valor: vistorias.length,
+        },
 
-      {
-        titulo: "Kitnets",
-        valor: kitnets,
-      },
+        {
+          titulo: "Financeiro",
+          valor: receitas.length + despesas.length,
+        },
 
-      {
-        titulo: "Locadores",
-        valor: locadores,
-      },
+      ]);
 
-      {
-        titulo: "Inquilinos",
-        valor: inquilinos,
-      },
+    }
 
-      {
-        titulo: "Contratos",
-        valor: contratos,
-      },
-
-      {
-        titulo: "Solicitações",
-        valor: solicitacoes,
-      },
-
-      {
-        titulo: "Vistorias",
-        valor: vistorias,
-      },
-
-      {
-        titulo: "Financeiro",
-        valor: financeiro,
-      },
-
-    ]);
+    carregar();
 
   }, []);
 
@@ -103,14 +106,14 @@ export default function ResumoGeral() {
 
         <div
           key={card.titulo}
-          className="bg-white rounded-3xl shadow border p-6"
+          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6"
         >
 
-          <p className="text-gray-500">
+          <p className="text-gray-400">
             {card.titulo}
           </p>
 
-          <h2 className="text-4xl font-bold text-green-700 mt-3">
+          <h2 className="text-4xl font-bold text-green-400 mt-3">
             {card.valor}
           </h2>
 

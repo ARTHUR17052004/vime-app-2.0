@@ -428,3 +428,503 @@ Todo módulo novo deve possuir:
 # Objetivo Final
 
 Criar um ERP imobiliário moderno, consistente, reutilizável e preparado para produção.
+
+04/08/2026
+
+🎨 VIME APP 2.0 — Design System Oficial
+
+Documento oficial de arquitetura visual, componentes e experiência do usuário do VIME APP 2.0.
+
+Filosofia do Sistema
+
+O VIME deve transmitir:
+
+ERP Premium
+Organização
+Modernidade
+Rapidez
+Elegância
+Consistência
+Poucos cliques
+Alto reaproveitamento de componentes
+
+Todo componente criado deverá parecer que sempre existiu no sistema.
+
+Nenhuma tela pode possuir aparência diferente das demais.
+
+Stack Oficial
+Next.js
+React
+TailwindCSS
+Lucide React
+Framer Motion
+Arquitetura
+
+Separação obrigatória.
+
+UI
+↓
+
+Componentes do módulo
+↓
+
+Página
+
+↓
+
+Services
+
+↓
+
+Backend
+
+Nunca colocar regra de negócio dentro dos componentes UI.
+
+Componentes UI
+
+Todos ficam em
+
+src/components/ui
+
+Componentes oficiais:
+
+ActionMenu
+Badge
+Button
+Card
+ConfirmDialog
+EmptyState
+FadeIn
+Input
+Loading
+Modal
+Page
+PageContainer
+PageGrid
+PageHeader
+PageSection
+SearchInput
+Select
+StatsCard
+Table
+Textarea
+
+Estes componentes são utilizados por TODOS os módulos.
+
+⭐ NOVO PADRÃO OFICIAL — Menus de Ações
+
+Nunca mais utilizar:
+
+position: absolute
+
+para menus de ações.
+
+❌ Errado
+
+<div
+  className="
+    absolute
+    right-0
+    top-12
+  "
+>
+Obrigatório
+
+Todos os menus de ações utilizarão
+
+ActionMenu.jsx
+
+com
+
+createPortal()
+
+e
+
+position: fixed
+
+Estrutura oficial:
+
+<ActionMenu
+    open={open}
+    position={position}
+    onClose={...}
+>
+
+<MenuButton ... />
+
+<MenuButton ... />
+
+<MenuButton ... />
+
+</ActionMenu>
+
+Isso garante:
+
+menu acima da tabela
+menu acima dos cards
+menu acima dos modais
+sem cortes por overflow
+comportamento igual ao Chrome
+padrão único do sistema
+Componentes de Ações
+
+Cada módulo possui um componente próprio.
+
+Exemplo
+
+KitnetActionsMenu
+
+ContratoActionsMenu
+
+UnidadeActionsMenu
+
+InquilinoActionsMenu
+
+LocadorActionsMenu
+
+SolicitacaoActionsMenu
+
+VistoriaActionsMenu
+
+Todos utilizam internamente
+
+ActionMenu
+
+Nunca criar menus diretamente na tabela.
+
+Estrutura dos módulos
+
+Todo módulo obrigatoriamente possui
+
+ModuloHeader
+
+ModuloStats
+
+ModuloFilters
+
+ModuloTabs
+
+ModuloDashboard
+
+ModuloTable
+
+ModuloCard
+
+ModuloCardList
+
+ModuloModal
+
+ModuloForm
+
+ModuloActionsMenu
+
+page.js
+Fluxo das páginas
+MainLayout
+
+↓
+
+Page
+
+↓
+
+PageContainer
+
+↓
+
+FadeIn
+
+↓
+
+PageHeader
+
+↓
+
+SearchInput
+
+↓
+
+Stats
+
+↓
+
+Filters
+
+↓
+
+Tabs
+
+↓
+
+Dashboard
+
+↓
+
+Table / Cards
+
+↓
+
+Modal
+
+Nenhum módulo pode fugir desta estrutura.
+
+Tables
+
+Sempre utilizar
+
+<Table />
+
+Nunca criar tabelas diretamente.
+
+As colunas utilizam
+
+columns[]
+
+com
+
+render()
+
+para personalizações.
+
+Menus de ações:
+
+KitnetActionsMenu
+
+ContratoActionsMenu
+
+etc.
+Cards
+
+Todos seguem:
+
+rounded-3xl
+
+border-white/10
+
+bg-[#19242b]/90
+
+backdrop-blur-xl
+
+shadow-xl
+
+transition-all
+
+Hover
+
+hover:border-emerald-500/30
+
+hover:-translate-y-1
+
+hover:shadow-2xl
+Inputs
+
+Sempre
+
+Input
+
+Select
+
+Textarea
+
+Nunca usar
+
+<input>
+
+<select>
+
+<textarea>
+
+diretamente nas páginas.
+
+Botões
+
+Sempre
+
+<Button />
+
+Variantes oficiais
+
+primary
+
+secondary
+
+danger
+
+ghost
+Modais
+
+Sempre
+
+<Modal>
+
+Nunca usar div fixa.
+
+Padrão:
+
+max-w-2xl
+
+ou
+
+max-w-3xl
+
+rounded-3xl
+
+max-h-[90vh]
+
+overflow-y-auto
+
+backdrop-blur
+Scroll
+
+Sempre existir em
+
+tabelas
+dashboards
+grids
+cards
+modais
+listas
+
+Nunca deixar conteúdo ultrapassar a tela.
+
+Dashboard
+
+Estrutura
+
+Header
+
+↓
+
+Cards KPI
+
+↓
+
+Filtros
+
+↓
+
+Tabs
+
+↓
+
+Dashboard
+
+↓
+
+Tabela
+
+↓
+
+Modal
+Espaçamento
+
+Escala oficial
+
+4
+
+8
+
+16
+
+24
+
+32
+
+40
+
+48
+
+Tailwind
+
+gap-6
+
+space-y-6
+
+p-6
+
+rounded-3xl
+Ícones
+
+Biblioteca
+
+Lucide React
+
+Tamanhos
+
+18 → menus
+
+20 → padrão
+
+32 → cards
+
+40~48 → EmptyState
+Services
+
+Toda API fica em
+
+src/services
+
+Nunca utilizar
+
+fetch()
+
+axios()
+
+diretamente nas páginas.
+
+Hooks
+
+Toda regra reutilizável
+
+src/hooks
+Backend
+
+Fluxo oficial
+
+Frontend
+
+↓
+
+Service
+
+↓
+
+Controller
+
+↓
+
+Service
+
+↓
+
+Prisma
+
+↓
+
+PostgreSQL
+Ordem de Desenvolvimento
+
+Sempre seguir esta sequência:
+
+Layout
+UI
+Componentes do módulo
+Página
+LocalStorage (quando necessário)
+Integração com API
+Backend
+Prisma
+PostgreSQL
+Integrações externas
+Objetivo Final
+
+Criar um ERP imobiliário premium, consistente, reutilizável e preparado para produção.
+
+Nenhum componente novo poderá fugir deste documento.
+
+📌 Eu ainda acrescentaria uma regra que vai nos salvar MUITO tempo:
+REGRA Nº 1 DO VIME
+
+Se um componente puder ser reutilizado em dois ou mais módulos, ele obrigatoriamente deve ser transformado em componente global (src/components/ui) ou em um padrão oficial reutilizável. Nunca resolver um problema apenas em um módulo.
+
+Foi exatamente isso que aconteceu hoje. Perdemos tempo porque havia um menu específico em Kitnets e outro em Contratos. Com essa regra, qualquer melhoria (como o ActionMenu) é feita uma única vez e reaproveitada no sistema inteiro. Isso vai acelerar muito o desenvolvimento do VIME daqui para frente.

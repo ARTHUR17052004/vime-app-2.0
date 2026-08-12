@@ -19,7 +19,30 @@ export default function VistoriaFiltros({
 
   return (
 
-    <div className="flex flex-wrap gap-3">
+    <div
+      className="
+        rounded-3xl
+        border
+        border-white/10
+        bg-slate-900/80
+        backdrop-blur-xl
+        p-6
+        shadow-xl
+      "
+    >
+
+      <h2
+        className="
+          text-xl
+          font-bold
+          text-white
+          mb-5
+        "
+      >
+        Categoria
+      </h2>
+
+      <div className="flex flex-wrap gap-3">
 
       {filtros.map((filtro) => (
 
@@ -39,6 +62,8 @@ export default function VistoriaFiltros({
         </Button>
 
       ))}
+
+      </div>
 
     </div>
 

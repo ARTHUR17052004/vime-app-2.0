@@ -1,10 +1,23 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
+
+import { SolicitacaoService } from "@/services/solicitacao.service";
+import { AuditoriaService } from "@/services/auditoria.service";
+import SolicitacaoChat from "../../components/solicitacoes/SolicitacaoChat";
+
+function formatarData(data) {
+  return data ? new Date(data).toLocaleString("pt-BR") : "-";
+}
+
+const ACAO_LABEL = {
+  CRIAR: "Solicitação criada",
+  ATUALIZAR: "Solicitação atualizada",
+  EXCLUIR: "Solicitação excluída",
+};
 
 export default function DetalhesSolicitacaoPage() {
 
@@ -13,45 +26,99 @@ export default function DetalhesSolicitacaoPage() {
   const [solicitacao, setSolicitacao] =
     useState(null);
 
+  const [historico, setHistorico] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
+  const [erro, setErro] =
+    useState("");
+
   useEffect(() => {
 
-    const solicitacoes = JSON.parse(
+    async function carregar() {
 
-      localStorage.getItem(
-        "vime-solicitacoes"
-      ) || "[]"
+      try {
 
-    );
+        setCarregando(true);
 
-    const encontrada =
-      solicitacoes.find(
+        const [respostaSolicitacao, respostaAuditoria] = await Promise.all([
+          SolicitacaoService.buscar(params.id),
+          AuditoriaService.listar(),
+        ]);
 
-        (item) =>
+        const dadosSolicitacao =
+          respostaSolicitacao.data || respostaSolicitacao;
 
-          String(item.id) ===
-          String(params.id)
+        setSolicitacao(dadosSolicitacao);
 
-      );
+        const listaAuditoria = Array.isArray(respostaAuditoria)
+          ? respostaAuditoria
+          : respostaAuditoria.data || [];
 
-    setSolicitacao(
-      encontrada
-    );
+        setHistorico(
+          listaAuditoria.filter(
+            (item) =>
+              item.modulo === "SOLICITACOES" &&
+              item.registroId === params.id
+          )
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar solicitação:", err);
+
+        setErro(
+          err.message ||
+          "Erro ao carregar solicitação."
+        );
+
+      } finally {
+
+        setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
 
   }, [params.id]);
 
-  if (!solicitacao) {
+  if (carregando) {
 
     return (
 
       <MainLayout>
 
-        <div className="bg-white rounded-3xl shadow border p-10">
+        <div className="py-32 text-center text-gray-400">
+          Carregando...
+        </div>
 
-          <h1 className="text-3xl font-bold text-gray-900">
+      </MainLayout>
+
+    );
+
+  }
+
+  if (erro || !solicitacao) {
+
+    return (
+
+      <MainLayout>
+
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+
+          <h1 className="text-3xl font-bold text-white">
 
             Solicitação não encontrada
 
           </h1>
+
+          {erro && (
+            <p className="text-red-400 mt-3">{erro}</p>
+          )}
 
         </div>
 
@@ -67,15 +134,15 @@ export default function DetalhesSolicitacaoPage() {
 
     <div className="space-y-8">
 
-      <div className="bg-white rounded-3xl shadow border p-10">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
 
-        <h1 className="text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-white">
 
           {solicitacao.titulo}
 
         </h1>
 
-        <p className="text-gray-600 mt-2">
+        <p className="text-gray-400 mt-2">
 
           Visualização completa da solicitação
 
@@ -83,9 +150,9 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-white rounded-3xl shadow border p-8">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-6">
 
           Dados Gerais
 
@@ -95,11 +162,11 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Número
             </p>
 
-            <h3 className="font-semibold">
+            <h3 className="font-semibold text-white">
               {solicitacao.numero}
             </h3>
 
@@ -107,35 +174,11 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-500">
-              Categoria
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.categoria}
-            </h3>
-
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
-              Prioridade
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.prioridade}
-            </h3>
-
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Status
             </p>
 
-            <h3 className="font-semibold text-green-700">
+            <h3 className="font-semibold text-emerald-400">
               {solicitacao.status}
             </h3>
 
@@ -143,85 +186,47 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Data de abertura
             </p>
 
-            <h3 className="font-semibold">
-              {solicitacao.data}
+            <h3 className="font-semibold text-white">
+              {solicitacao.data
+                ? new Date(solicitacao.data).toLocaleDateString("pt-BR")
+                : "-"}
             </h3>
 
           </div>
 
           <div>
 
-            <p className="text-gray-500">
+            <p className="text-gray-400">
               Prazo
             </p>
 
-            <h3 className="font-semibold">
-              {solicitacao.prazo || "-"}
+            <h3 className="font-semibold text-white">
+              {solicitacao.prazo
+                ? new Date(solicitacao.prazo).toLocaleDateString("pt-BR")
+                : "-"}
             </h3>
 
           </div>
 
           <div>
 
-            <p className="text-gray-500">
-              Unidade
+            <p className="text-gray-400">
+              Criado por
             </p>
 
-            <h3 className="font-semibold">
-              {solicitacao.unidadeNome}
+            <h3 className="font-semibold text-white">
+              {solicitacao.criadoPorNome || "-"}
             </h3>
 
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
-              Kitnet
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.kitnetNome}
-            </h3>
-
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
-              Inquilino
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.inquilino}
-            </h3>
-
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
-              Locador
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.locador || "-"}
-            </h3>
-
-          </div>
-
-          <div>
-
-            <p className="text-gray-500">
-              Responsável
-            </p>
-
-            <h3 className="font-semibold">
-              {solicitacao.responsavel}
-            </h3>
+            {solicitacao.criadoPorPerfil && (
+              <p className="text-gray-500 text-sm mt-0.5">
+                Perfil: {solicitacao.criadoPorPerfil}
+              </p>
+            )}
 
           </div>
 
@@ -229,13 +234,13 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-white rounded-3xl shadow border p-8">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl font-bold text-white mb-4">
           Descrição
         </h2>
 
-        <div className="bg-gray-100 rounded-2xl p-6 text-gray-900">
+        <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
 
           {solicitacao.descricao ||
             "Nenhuma descrição cadastrada."}
@@ -244,13 +249,13 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-white rounded-3xl shadow border p-8">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <h2 className="text-2xl font-bold text-white mb-4">
           Observações
         </h2>
 
-        <div className="bg-gray-100 rounded-2xl p-6 text-gray-900">
+        <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
 
           {solicitacao.observacoes ||
             "Nenhuma observação cadastrada."}
@@ -259,64 +264,57 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-white rounded-3xl shadow border p-8">
+      <SolicitacaoChat
+        solicitacaoId={solicitacao.id}
+        statusAtual={solicitacao.status}
+        onStatusAlterado={(novoStatus) =>
+          setSolicitacao((prev) => ({
+            ...prev,
+            status: novoStatus,
+          }))
+        }
+      />
 
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">
-          Resposta
-        </h2>
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-        <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-gray-900">
-
-          {solicitacao.resposta ||
-            "Nenhuma resposta enviada."}
-
-        </div>
-
-      </div>
-
-      <div className="bg-white rounded-3xl shadow border p-8">
-
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+        <h2 className="text-2xl font-bold text-white mb-6">
           Histórico
         </h2>
 
         <div className="space-y-4">
 
-          {solicitacao.historico?.length ? (
+          {historico.length ? (
 
-            solicitacao.historico
-              .slice()
-              .reverse()
-              .map((item, index) => (
+            historico.map((item) => (
 
-                <div
-                  key={index}
-                  className="
-                    border-l-4
-                    border-green-700
-                    bg-gray-50
-                    rounded-r-2xl
-                    p-5
-                  "
-                >
+              <div
+                key={item.id}
+                className="
+                  border-l-4
+                  border-green-700
+                  bg-white/5
+                  rounded-r-2xl
+                  p-5
+                "
+              >
 
-                  <div className="font-semibold text-gray-900">
-                    {item.descricao}
-                  </div>
-
-                  <div className="text-sm text-gray-600 mt-2">
-                    {item.data}
-                  </div>
-
+                <div className="font-semibold text-white">
+                  {ACAO_LABEL[item.acao] || item.acao}
                 </div>
 
-              ))
+                <div className="text-sm text-gray-400 mt-2">
+                  {formatarData(item.createdAt)}
+                </div>
+
+              </div>
+
+            ))
 
           ) : (
 
-            <div className="border rounded-2xl p-5">
+            <div className="border border-white/10 rounded-2xl p-5">
 
-              <div className="text-gray-700">
+              <div className="text-gray-300">
                 Nenhuma movimentação registrada.
               </div>
 
@@ -327,56 +325,6 @@ export default function DetalhesSolicitacaoPage() {
         </div>
 
       </div>
-
-      {
-
-        solicitacao.anexos?.length > 0 && (
-
-          <div className="bg-white rounded-3xl shadow border p-8">
-
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Anexos
-            </h2>
-
-            <div className="grid md:grid-cols-3 gap-4">
-
-              {
-
-                solicitacao.anexos.map(
-
-                  (arquivo, index) => (
-
-                    <a
-                      key={index}
-                      href={arquivo}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="
-                        border
-                        rounded-2xl
-                        p-6
-                        hover:bg-gray-50
-                        transition
-                      "
-                    >
-
-                      Anexo {index + 1}
-
-                    </a>
-
-                  )
-
-                )
-
-              }
-
-            </div>
-
-          </div>
-
-        )
-
-      }
 
     </div>
 

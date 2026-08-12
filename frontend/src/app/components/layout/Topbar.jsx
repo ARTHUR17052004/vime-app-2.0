@@ -1,8 +1,8 @@
 "use client";
 import { useAuth } from "../../../context/AuthContext";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  Bell,
   Search,
   ChevronDown,
   Menu,
@@ -10,19 +10,17 @@ import {
   LogOut,
   Settings,
 } from "lucide-react";
+import NotificationBell from "../notificacoes/NotificationBell";
 
 export default function Topbar() {
   const { usuario, logout } = useAuth();
+  const router = useRouter();
 
-  const nome =
-    usuario?.nome || "Visitante";
-
-  const perfil =
-    usuario?.perfil || "SEM PERFIL";
-
-  const inicial =
-    nome.charAt(0).toUpperCase();
+  const nome = usuario?.nome || "Visitante";
+  const perfil = usuario?.perfil || "SEM PERFIL";
+  const inicial = nome.charAt(0).toUpperCase();
   const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <header
       className="
@@ -43,7 +41,8 @@ export default function Topbar() {
 
         shadow-[0_12px_40px_rgba(0,0,0,.22)]
 
-        px-7
+        px-3
+        md:px-7
 
         flex
         items-center
@@ -55,8 +54,11 @@ export default function Topbar() {
       {/* ========================= */}
 
       <div className="flex items-center">
-
         <button
+          onClick={() =>
+            window.dispatchEvent(new Event("toggle-sidebar"))
+          }
+          title="Expandir/recolher menu"
           className="
             w-11
             h-11
@@ -74,16 +76,15 @@ export default function Topbar() {
             transition
           "
         >
-          <Menu
-            size={20}
-            className="text-white"
-          />
+          <Menu size={20} className="text-white" />
         </button>
 
-        <div className="ml-5">
-
+        <div className="ml-3 md:ml-5">
           <p
             className="
+              hidden
+              sm:block
+
               text-[10px]
 
               uppercase
@@ -109,9 +110,7 @@ export default function Topbar() {
           >
             VIME 2.0
           </h1>
-
         </div>
-
       </div>
 
       {/* ========================= */}
@@ -119,8 +118,10 @@ export default function Topbar() {
       {/* ========================= */}
 
       <div className="hidden xl:flex">
-
-        <div
+        <button
+          onClick={() =>
+            window.dispatchEvent(new Event("abrir-busca-universal"))
+          }
           className="
             w-90
             h-11
@@ -137,245 +138,215 @@ export default function Topbar() {
             flex
             items-center
             gap-3
+
+            transition
+
+            hover:bg-white/10
+            hover:border-white/20
           "
         >
+          <Search size={17} className="text-gray-400 shrink-0" />
 
-          <Search
-            size={17}
-            className="text-gray-400"
-          />
-
-          <input
-            placeholder="Buscar..."
+          <span
             className="
               flex-1
 
-              bg-transparent
-
-              outline-none
+              text-left
 
               text-sm
 
-              text-white
-
-              placeholder:text-gray-500
+              text-gray-500
             "
-          />
+          >
+            Buscar...
+          </span>
 
-        </div>
+          <kbd
+            className="
+              shrink-0
 
+              rounded-md
+
+              border
+              border-white/10
+
+              bg-white/5
+
+              px-1.5
+              py-0.5
+
+              text-[10px]
+
+              text-gray-500
+            "
+          >
+            Ctrl K
+          </kbd>
+        </button>
       </div>
 
       {/* ========================= */}
       {/* DIREITA */}
       {/* ========================= */}
 
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-2 sm:gap-5">
+        <NotificationBell />
 
-        <button
+        <div
           className="
-            relative
-
             w-10
             h-10
 
             rounded-full
 
-            hover:bg-white/5
+            bg-linear-to-br
+            from-emerald-500
+            to-green-700
 
             flex
             items-center
             justify-center
 
-            transition
+            text-sm
+            font-bold
+            text-white
+
+            shadow-lg
+            shadow-emerald-900/30
           "
         >
+          {inicial}
+        </div>
 
-          <Bell
-            size={18}
-            className="text-white"
-          />
-          <span
-  className="
-    absolute
+        <div className="leading-tight hidden sm:block">
+          <p
+            className="
+              text-[14px]
+              font-semibold
+              text-white
+            "
+          >
+            {nome}
+          </p>
 
-    top-1.5
-    right-1.5
+          <p
+            className="
+              text-[11px]
+              text-gray-400
+            "
+          >
+            {perfil}
+          </p>
+        </div>
 
-    w-2
-    h-2
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="
+              w-8
+              h-8
+              rounded-full
+              flex
+              items-center
+              justify-center
+              hover:bg-white/5
+              transition
+            "
+          >
+            <ChevronDown size={15} className="text-gray-400" />
+          </button>
 
-    rounded-full
+          {menuOpen && (
+            <div
+              className="
+                absolute
+                right-0
+                mt-3
+                w-56
 
-    bg-emerald-400
+                rounded-2xl
 
-    border
-    border-slate-900
-  "
-/>
+                border
+                border-white/10
 
-</button>
+                bg-slate-900/95
 
-<div
-  className="
-    w-10
-    h-10
+                backdrop-blur-xl
 
-    rounded-full
+                shadow-2xl
 
-    bg-linear-to-br
-    from-emerald-500
-    to-green-700
+                overflow-hidden
+              "
+            >
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/perfil");
+                }}
+                className="
+                  w-full
+                  flex
+                  items-center
+                  gap-3
 
-    flex
-    items-center
-    justify-center
+                  px-5
+                  py-4
 
-    text-sm
-    font-bold
-    text-white
+                  text-white
 
-    shadow-lg
-    shadow-emerald-900/30
-  "
->
-  {inicial}
-</div>
+                  hover:bg-white/5
+                "
+              >
+                <User size={17} />
+                Perfil
+              </button>
 
-<div className="leading-tight">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  router.push("/configuracoes");
+                }}
+                className="
+                  w-full
+                  flex
+                  items-center
+                  gap-3
 
-  <p
-    className="
-      text-[14px]
-      font-semibold
-      text-white
-    "
-  >
-    {nome}
-  </p>
+                  px-5
+                  py-4
 
-  <p
-    className="
-      text-[11px]
-      text-gray-400
-    "
-  >
-    {perfil}
-  </p>
+                  text-white
 
-</div>
+                  hover:bg-white/5
+                "
+              >
+                <Settings size={17} />
+                Configurações
+              </button>
 
-<div className="relative">
+              <button
+                onClick={logout}
+                className="
+                  w-full
+                  flex
+                  items-center
+                  gap-3
 
-  <button
-    onClick={() => setMenuOpen(!menuOpen)}
-    className="
-      w-8
-      h-8
-      rounded-full
-      flex
-      items-center
-      justify-center
-      hover:bg-white/5
-      transition
-    "
-  >
-    <ChevronDown
-      size={15}
-      className="text-gray-400"
-    />
-  </button>
+                  px-5
+                  py-4
 
-  {menuOpen && (
+                  text-red-400
 
-    <div
-      className="
-        absolute
-        right-0
-        mt-3
-        w-56
-
-        rounded-2xl
-
-        border
-        border-white/10
-
-        bg-slate-900/95
-
-        backdrop-blur-xl
-
-        shadow-2xl
-
-        overflow-hidden
-      "
-    >
-
-      <button
-        className="
-          w-full
-          flex
-          items-center
-          gap-3
-
-          px-5
-          py-4
-
-          text-white
-
-          hover:bg-white/5
-        "
-      >
-        <User size={17} />
-        Perfil
-      </button>
-
-      <button
-        className="
-          w-full
-          flex
-          items-center
-          gap-3
-
-          px-5
-          py-4
-
-          text-white
-
-          hover:bg-white/5
-        "
-      >
-        <Settings size={17} />
-        Configurações
-      </button>
-
-      <button
-        onClick={logout}
-        className="
-          w-full
-          flex
-          items-center
-          gap-3
-
-          px-5
-          py-4
-
-          text-red-400
-
-          hover:bg-red-500/10
-        "
-      >
-        <LogOut size={17} />
-        Sair
-      </button>
-
-    </div>
-
-  )}
-
-</div>
-
-</div>
-
-</header>
-);
+                  hover:bg-red-500/10
+                "
+              >
+                <LogOut size={17} />
+                Sair
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </header>
+  );
 }

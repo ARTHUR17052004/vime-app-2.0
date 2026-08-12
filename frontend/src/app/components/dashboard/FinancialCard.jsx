@@ -1,88 +1,96 @@
 "use client";
 
-import Card from "../ui/Card";
-import RevenueChart from "../charts/RevenueChart";
+import { useEffect, useState } from "react";
 import { Wallet } from "lucide-react";
+
+import Panel from "../ui/Panel";
+import RevenueChart from "../charts/RevenueChart";
+
 import { formatCurrency } from "@/utils/formatCurrency";
+import { DashboardService } from "@/services/dashboard.service";
+
+const ANO_ATUAL = new Date().getFullYear();
+
+const ANOS = [
+  ANO_ATUAL,
+  ANO_ATUAL - 1,
+  ANO_ATUAL - 2,
+  ANO_ATUAL - 3,
+  ANO_ATUAL - 4,
+];
 
 export default function FinancialCard({ financeiro }) {
   const recebido = financeiro?.recebido ?? 0;
   const pendente = financeiro?.pendente ?? 0;
   const atrasado = financeiro?.atrasado ?? 0;
 
+  const [ano, setAno] = useState(ANO_ATUAL);
+  const [receitasMensais, setReceitasMensais] = useState(undefined);
+
+  useEffect(() => {
+    let ativo = true;
+
+    async function carregar() {
+      try {
+        const dados = await DashboardService.receitasMensais(ano);
+
+        if (ativo) {
+          setReceitasMensais(dados);
+        }
+      } catch (err) {
+        console.error("/dashboard/receitas-mensais", err);
+      }
+    }
+
+    carregar();
+
+    return () => {
+      ativo = false;
+    };
+  }, [ano]);
+
   return (
-    <Card
-      className="
-        h-full
-        flex
-        flex-col
-      "
-    >
-      {/* ========================================= */}
-      {/* HEADER                                    */}
-      {/* ========================================= */}
+    <Panel
+      label="FINANCEIRO"
+      title="Receitas mensais"
+      action={
+        <div className="flex items-center gap-3">
 
-      <div className="flex items-center justify-between mb-10">
-
-        <div>
-
-          <p
-            className="
-              text-[11px]
-              uppercase
-              tracking-[0.32em]
-              text-gray-400
-              mb-2
-            "
-          >
-            Financeiro
-          </p>
-
-          <h2
-            className="
-              text-[36px]
-              font-bold
-              leading-none
-              text-white
-            "
-          >
-            Receitas nos últimos 6 meses
-          </h2>
-
-        </div>
-
-        <div className="flex items-center gap-4">
-
-          <button
+          <select
+            value={ano}
+            onChange={(e) => setAno(Number(e.target.value))}
             className="
               h-10
               px-5
 
-              rounded-2xl
+              rounded-xl
 
-              bg-white/5
+              bg-[#141d27]
 
               border
               border-white/10
 
-              text-sm
+              text-[13px]
               text-gray-300
 
               transition-all
 
-              hover:border-emerald-500/30
-              hover:bg-white/8
+              hover:border-emerald-500/20
             "
           >
-            Este ano ▼
-          </button>
+            {ANOS.map((opcao) => (
+              <option key={opcao} value={opcao}>
+                {opcao}
+              </option>
+            ))}
+          </select>
 
           <div
             className="
-              w-14
-              h-14
+              w-12
+              h-12
 
-              rounded-2xl
+              rounded-xl
 
               flex
               items-center
@@ -95,56 +103,72 @@ export default function FinancialCard({ financeiro }) {
             "
           >
             <Wallet
-              size={26}
-              strokeWidth={1.7}
+              size={22}
               className="text-emerald-400"
             />
           </div>
 
         </div>
+      }
+    >
+
+      <div
+        className="
+          flex-1
+
+          flex
+          flex-col
+
+          gap-8
+
+          px-8
+          pt-4
+          pb-6
+        "
+      >
+
+        {/* GRÁFICO */}
+
+        <div
+          className="
+            rounded-2xl
+
+            overflow-hidden
+          "
+        >
+          <RevenueChart data={receitasMensais} />
+        </div>
+
+        {/* RESUMO */}
+
+        <div className="grid grid-cols-3 gap-6">
+
+          <ResumoFinanceiro
+            titulo="Recebido"
+            valor={formatCurrency(recebido)}
+            legenda="Valor recebido"
+            cor="emerald"
+          />
+
+          <ResumoFinanceiro
+            titulo="Pendente"
+            valor={formatCurrency(pendente)}
+            legenda="A receber"
+            cor="yellow"
+          />
+
+          <ResumoFinanceiro
+            titulo="Atrasado"
+            valor={formatCurrency(atrasado)}
+            legenda="Em atraso"
+            cor="red"
+          />
+
+        </div>
 
       </div>
 
-      {/* ========================================= */}
-      {/* GRÁFICO                                   */}
-      {/* ========================================= */}
-
-      <div className="flex-1 min-h-[320px]">
-
-        <RevenueChart />
-
-      </div>
-
-      {/* ========================================= */}
-      {/* RESUMO                                    */}
-      {/* ========================================= */}
-
-      <div className="grid grid-cols-3 gap-6 mt-10">
-
-        <ResumoFinanceiro
-          titulo="Recebido"
-          valor={formatCurrency(recebido)}
-          legenda="Valor recebido"
-          cor="emerald"
-        />
-
-        <ResumoFinanceiro
-          titulo="Pendente"
-          valor={formatCurrency(pendente)}
-          legenda="A receber"
-          cor="yellow"
-        />
-
-        <ResumoFinanceiro
-          titulo="Atrasado"
-          valor={formatCurrency(atrasado)}
-          legenda="Em atraso"
-          cor="red"
-        />
-
-      </div>
-
-    </Card>
+    </Panel>
   );
 }
 
@@ -156,6 +180,7 @@ function ResumoFinanceiro({
 }) {
 
   const cores = {
+
     emerald: {
       valor: "text-emerald-400",
       legenda: "text-emerald-300",
@@ -170,39 +195,52 @@ function ResumoFinanceiro({
       valor: "text-red-400",
       legenda: "text-red-300",
     },
+
   };
 
   return (
+
     <div
       className="
+        min-h-[120px]
+
         rounded-[18px]
 
         border
-        border-white/5
+        border-white/[0.05]
 
-        bg-white/5
+        bg-[#161f29]
 
-        p-6
+        px-8
+        py-6
+
+        flex
+        flex-col
+        justify-between
 
         transition-all
         duration-300
 
-        hover:bg-white/[0.07]
-        hover:border-white/10
+        hover:border-emerald-500/20
+        hover:bg-[#1a2430]
       "
     >
 
-      <p className="text-sm text-gray-400">
+      <p
+        className="
+          text-[14px]
+          font-medium
+          text-gray-400
+        "
+      >
         {titulo}
       </p>
 
       <h3
         className={`
-          mt-3
-
-          text-[34px]
-          leading-none
+          text-[32px]
           font-bold
+          leading-none
 
           ${cores[cor].valor}
         `}
@@ -212,8 +250,7 @@ function ResumoFinanceiro({
 
       <p
         className={`
-          mt-2
-          text-xs
+          text-[13px]
 
           ${cores[cor].legenda}
         `}
@@ -222,5 +259,7 @@ function ResumoFinanceiro({
       </p>
 
     </div>
+
   );
+
 }

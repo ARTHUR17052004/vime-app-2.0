@@ -46,73 +46,73 @@ export default function SolicitacaoResumo({
 
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
 
-      <div className="bg-white rounded-3xl shadow p-6">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-        <div className="text-gray-500">
+        <div className="text-gray-400">
           Total
         </div>
 
-        <div className="text-4xl font-bold text-gray-900 mt-2">
+        <div className="text-4xl font-bold text-white mt-2">
           {total}
         </div>
 
       </div>
 
-      <div className="bg-blue-50 rounded-3xl shadow p-6">
+      <div className="bg-blue-500/10 border border-blue-500/20 rounded-3xl p-6">
 
-        <div className="text-blue-700">
+        <div className="text-blue-400">
           Solicitadas
         </div>
 
-        <div className="text-4xl font-bold text-blue-700 mt-2">
+        <div className="text-4xl font-bold text-blue-400 mt-2">
           {solicitadas}
         </div>
 
       </div>
 
-      <div className="bg-yellow-50 rounded-3xl shadow p-6">
+      <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-3xl p-6">
 
-        <div className="text-yellow-700">
+        <div className="text-yellow-400">
           Em Cotação
         </div>
 
-        <div className="text-4xl font-bold text-yellow-700 mt-2">
+        <div className="text-4xl font-bold text-yellow-400 mt-2">
           {cotacao}
         </div>
 
       </div>
 
-      <div className="bg-orange-50 rounded-3xl shadow p-6">
+      <div className="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-6">
 
-        <div className="text-orange-700">
+        <div className="text-orange-400">
           Aguardando Compra
         </div>
 
-        <div className="text-4xl font-bold text-orange-700 mt-2">
+        <div className="text-4xl font-bold text-orange-400 mt-2">
           {compra}
         </div>
 
       </div>
 
-      <div className="bg-green-50 rounded-3xl shadow p-6">
+      <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6">
 
-        <div className="text-green-700">
+        <div className="text-emerald-400">
           Atendidas
         </div>
 
-        <div className="text-4xl font-bold text-green-700 mt-2">
+        <div className="text-4xl font-bold text-emerald-400 mt-2">
           {atendidas}
         </div>
 
       </div>
 
-      <div className="bg-red-50 rounded-3xl shadow p-6">
+      <div className="bg-red-500/10 border border-red-500/20 rounded-3xl p-6">
 
-        <div className="text-red-700">
+        <div className="text-red-400">
           Rejeitadas
         </div>
 
-        <div className="text-4xl font-bold text-red-700 mt-2">
+        <div className="text-4xl font-bold text-red-400 mt-2">
           {rejeitadas}
         </div>
 

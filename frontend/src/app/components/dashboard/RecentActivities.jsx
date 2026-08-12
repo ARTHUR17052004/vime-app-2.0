@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Card from "../ui/Card";
 import {
   Bell,
@@ -18,6 +19,21 @@ const statusColor = {
 
   concluida:
     "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+
+  solicitada:
+    "bg-white/10 text-gray-300 border border-white/20",
+
+  "em cotação":
+    "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
+
+  "aguardando compra":
+    "bg-sky-500/20 text-sky-300 border border-sky-500/30",
+
+  atendida:
+    "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
+
+  rejeitada:
+    "bg-red-500/20 text-red-300 border border-red-500/30",
 };
 
 export default function RecentActivities({
@@ -71,7 +87,8 @@ export default function RecentActivities({
 
         </div>
 
-        <button
+        <Link
+          href="/solicitacoes"
           className="
             flex
             items-center
@@ -86,7 +103,7 @@ export default function RecentActivities({
 
           <ChevronRight size={16} />
 
-        </button>
+        </Link>
 
       </div>
 
@@ -94,75 +111,99 @@ export default function RecentActivities({
 
       <div className="flex-1 space-y-5">
 
-        {lista.map((item) => (
+        {lista.map((item) => {
 
-          <div
-            key={item.id}
-            className="
-              flex
-              items-center
-              justify-between
-              gap-5
-            "
-          >
+          const Wrapper = item.link ? Link : "div";
 
-            <div className="flex items-center gap-4">
+          const wrapperProps = item.link
+            ? { href: item.link }
+            : {};
 
-              <div
-                className="
-                  w-11
-                  h-11
-                  rounded-2xl
-                  bg-white/5
-                  border
-                  border-white/10
-                  flex
-                  items-center
-                  justify-center
-                  shrink-0
-                "
-              >
-                <Bell
-                  size={18}
-                  className="text-gray-300"
-                />
+          return (
+
+            <Wrapper
+              key={item.id}
+              {...wrapperProps}
+              className="
+                flex
+                items-center
+                justify-between
+                gap-5
+                -mx-2
+                px-2
+                py-1
+                rounded-xl
+                transition
+                hover:bg-white/5
+              "
+            >
+
+              <div className="flex items-center gap-4">
+
+                <div
+                  className="
+                    w-11
+                    h-11
+                    rounded-2xl
+                    bg-white/5
+                    border
+                    border-white/10
+                    flex
+                    items-center
+                    justify-center
+                    shrink-0
+                  "
+                >
+                  <Bell
+                    size={18}
+                    className="text-gray-300"
+                  />
+                </div>
+
+                <div>
+
+                  <p className="font-medium text-white">
+                    {item.descricao}
+                  </p>
+
+                  <p className="text-sm text-gray-400 mt-1">
+                    {item.link
+                      ? new Date(item.data).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : item.data}
+                  </p>
+
+                </div>
+
               </div>
 
-              <div>
+              {item.status && (
 
-                <p className="font-medium text-white">
-                  {item.descricao}
-                </p>
+                <span
+                  className={`
+                    px-4
+                    py-2
+                    rounded-xl
+                    text-xs
+                    font-semibold
+                    whitespace-nowrap
+                    ${statusColor[item.status.toLowerCase()]}
+                  `}
+                >
+                  {item.status}
+                </span>
 
-                <p className="text-sm text-gray-400 mt-1">
-                  {item.data}
-                </p>
+              )}
 
-              </div>
+            </Wrapper>
 
-            </div>
+          );
 
-            {item.status && (
-
-              <span
-                className={`
-                  px-4
-                  py-2
-                  rounded-xl
-                  text-xs
-                  font-semibold
-                  whitespace-nowrap
-                  ${statusColor[item.status.toLowerCase()]}
-                `}
-              >
-                {item.status}
-              </span>
-
-            )}
-
-          </div>
-
-        ))}
+        })}
 
       </div>
 

@@ -15,16 +15,22 @@ const status = async (req, res) => {
 };
 
 const testarConexao = async (req, res) => {
-  return res.json({
-    success: true,
-    data: await asaasService.testarConexao()
+  const resultado = await asaasService.testarConexao();
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
   });
 };
 
 const buscarWallet = async (req, res) => {
-  return res.json({
-    success: true,
-    data: await asaasService.buscarWallet()
+  const resultado = await asaasService.buscarWallet();
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
   });
 };
 
@@ -53,6 +59,18 @@ const buscarTransacao = async (req, res) => {
 
 };
 
+const enviarCobranca = async (req, res) => {
+
+  const resultado = await asaasService.enviarCobranca(req.params.id);
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado,
+  });
+
+};
+
 const resumo = async (req, res) => {
   return res.json({
     success: true,
@@ -68,6 +86,8 @@ const sincronizar = async (req, res) => {
 };
 
 const AsaasApi = require("../services/AsaasApi");
+const crypto = require("crypto");
+const prisma = require("../config/prisma");
 
 const listarClientes = async (req, res) => {
 
@@ -113,7 +133,88 @@ const criarCobranca = async (req, res) => {
 
 };
 
+const gerarTokenWebhook = async (req, res) => {
+
+  const novoToken = crypto.randomBytes(24).toString("hex");
+
+  const configuracao = await prisma.configuracao.findFirst({
+    orderBy: { id: "asc" },
+  });
+
+  if (!configuracao) {
+    return res.status(400).json({
+      success: false,
+      message: "Cadastre os dados da empresa em Configurações antes de gerar o token do webhook.",
+    });
+  }
+
+  await prisma.configuracao.update({
+    where: { id: configuracao.id },
+    data: { asaasWebhookToken: novoToken },
+  });
+
+  return res.json({
+    success: true,
+    data: { webhookToken: novoToken },
+  });
+
+};
+
+const testarWebhook = async (req, res) => {
+
+  const { apiKey, webhookToken } = await AsaasApi.obterConfig();
+
+  if (!apiKey) {
+    return res.status(400).json({
+      success: false,
+      message: "Configure a API Key do Asaas antes de testar o webhook.",
+      data: { mensagem: "Configure a API Key do Asaas antes de testar o webhook." },
+    });
+  }
+
+  const webhookUrl = process.env.ASAAS_WEBHOOK_URL || `${req.protocol}://${req.get("host")}/asaas/webhook`;
+
+  try {
+
+    await AsaasApi.configurarWebhook(
+      webhookUrl,
+      webhookToken || undefined,
+      ["PAYMENT_RECEIVED", "PAYMENT_OVERDUE", "PAYMENT_REFUNDED"]
+    );
+
+    return res.json({
+      success: true,
+      data: { mensagem: "Webhook registrado com sucesso no Asaas.", url: webhookUrl },
+    });
+
+  } catch (error) {
+
+    return res.status(400).json({
+      success: false,
+      message: error.message || "Não foi possível registrar o webhook no Asaas.",
+      data: { mensagem: error.message || "Não foi possível registrar o webhook no Asaas." },
+    });
+
+  }
+
+};
+
 const webhook = async (req, res) => {
+
+  const { webhookToken } = await AsaasApi.obterConfig();
+
+  if (webhookToken) {
+
+    const tokenRecebido = req.headers["asaas-access-token"];
+
+    if (tokenRecebido !== webhookToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Token de webhook inválido.",
+      });
+    }
+
+  }
 
   const dados = await asaasService.sincronizar(req.body);
 
@@ -128,11 +229,14 @@ module.exports = {
   buscarWallet,
   listarTransacoes,
   buscarTransacao,
+  enviarCobranca,
   resumo,
   sincronizar,
   listarClientes,
   criarCliente,
   listarCobrancas,
   criarCobranca,
+  gerarTokenWebhook,
+  testarWebhook,
   webhook
 };

@@ -12,7 +12,7 @@ export default function FinanceiroInadimplencia({
 
   const inadimplentes = receitas.filter(
     (item) =>
-      item.status === "Atrasado"
+      item.status === "ATRASADA"
   );
 
   const totalEmAberto = inadimplentes.reduce(
@@ -23,7 +23,7 @@ export default function FinanceiroInadimplencia({
 
   const pendentes = receitas.filter(
     (item) =>
-      item.status === "Pendente"
+      item.status === "PENDENTE"
   ).length;
 
   return (

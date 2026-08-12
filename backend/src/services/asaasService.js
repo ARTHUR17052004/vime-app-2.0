@@ -1,34 +1,137 @@
 const prisma = require('../config/prisma');
+const AsaasApi = require('./AsaasApi');
 
 const config = async () => {
+  const { apiKey, ambiente, walletId, webhookToken } = await AsaasApi.obterConfig();
+
   return {
-    ambiente: process.env.ASAAS_ENV || 'sandbox',
-    configurado: !!process.env.ASAAS_API_KEY,
-    apiUrl: process.env.ASAAS_API_URL || null
+    ambiente,
+    configurado: !!apiKey,
+    walletId: walletId || null,
+    webhookConfigurado: !!webhookToken,
   };
 };
 
 const status = async () => {
-  return {
-    online: true,
-    ambiente: process.env.ASAAS_ENV || 'sandbox',
-    configurado: !!process.env.ASAAS_API_KEY
-  };
+  const { apiKey, ambiente } = await AsaasApi.obterConfig();
+
+  if (!apiKey) {
+    return {
+      online: false,
+      ambiente,
+      configurado: false,
+    };
+  }
+
+  try {
+    await AsaasApi.minhaConta();
+
+    return {
+      online: true,
+      ambiente,
+      configurado: true,
+    };
+  } catch (error) {
+    return {
+      online: false,
+      ambiente,
+      configurado: true,
+      erro: error.message,
+    };
+  }
 };
 
 const testarConexao = async () => {
-  return {
-    success: true,
-    mensagem: 'Conexão simulada realizada com sucesso.'
-  };
+
+  const { apiKey } = await AsaasApi.obterConfig();
+
+  if (!apiKey) {
+    return {
+      success: false,
+      mensagem: 'Nenhuma API Key configurada ainda.'
+    };
+  }
+
+  try {
+
+    const conta = await AsaasApi.minhaConta();
+
+    return {
+      success: true,
+      mensagem: 'Conexão realizada com sucesso.',
+      conta: {
+        nome: conta?.name || conta?.email || null,
+        email: conta?.email || null,
+      },
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      mensagem: error.message || 'Não foi possível conectar ao Asaas.'
+    };
+
+  }
+
 };
 
 const buscarWallet = async () => {
-  return {
-    walletId: 'SIMULADO',
-    nome: 'Carteira Principal'
-  };
+
+  const { apiKey } = await AsaasApi.obterConfig();
+
+  if (!apiKey) {
+    return {
+      success: false,
+      mensagem: 'Nenhuma API Key configurada ainda.'
+    };
+  }
+
+  try {
+
+    const conta = await AsaasApi.minhaConta();
+
+    if (!conta?.walletId) {
+      return {
+        success: false,
+        mensagem: 'Não foi possível localizar o Wallet ID desta conta.'
+      };
+    }
+
+    await prisma.configuracao.updateMany({
+      data: {
+        asaasWalletId: conta.walletId,
+      },
+    });
+
+    return {
+      success: true,
+      walletId: conta.walletId,
+      nome: conta?.name || 'Carteira Principal',
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      mensagem: error.message || 'Não foi possível buscar a wallet.'
+    };
+
+  }
+
 };
+
+const mapearTransacao = (receita) => ({
+  id: receita.id,
+  cliente: receita.descricao,
+  valor: receita.valor,
+  vencimento: receita.vencimento,
+  dataPagamento: receita.dataPagamento,
+  formaPagamento: 'PIX',
+  status: receita.status,
+  enviadaAsaas: receita.enviadaAsaas,
+  asaasPaymentId: receita.asaasPaymentId,
+});
 
 const listarTransacoes = async () => {
 
@@ -38,14 +141,7 @@ const listarTransacoes = async () => {
     }
   });
 
-  return receitas.map(receita => ({
-    id: receita.id,
-    cliente: receita.descricao,
-    valor: receita.valor,
-    vencimento: receita.vencimento,
-    formaPagamento: 'PIX',
-    status: receita.status
-  }));
+  return receitas.map(mapearTransacao);
 
 };
 
@@ -59,14 +155,109 @@ const buscarTransacao = async (id) => {
     return null;
   }
 
-  return {
-    id: receita.id,
-    cliente: receita.descricao,
-    valor: receita.valor,
-    vencimento: receita.vencimento,
-    formaPagamento: 'PIX',
-    status: receita.status
-  };
+  return mapearTransacao(receita);
+
+};
+
+const enviarCobranca = async (receitaId) => {
+
+  const { apiKey } = await AsaasApi.obterConfig();
+
+  if (!apiKey) {
+    return {
+      success: false,
+      mensagem: 'Configure a API Key do Asaas antes de enviar cobranças.',
+    };
+  }
+
+  const receita = await prisma.receita.findUnique({
+    where: { id: receitaId },
+    include: {
+      contrato: {
+        include: { inquilino: true },
+      },
+    },
+  });
+
+  if (!receita) {
+    return {
+      success: false,
+      mensagem: 'Receita não encontrada.',
+    };
+  }
+
+  if (receita.asaasPaymentId) {
+    return {
+      success: false,
+      mensagem: 'Esta receita já foi enviada ao Asaas.',
+    };
+  }
+
+  const inquilino = receita.contrato?.inquilino;
+
+  if (!inquilino) {
+    return {
+      success: false,
+      mensagem: 'Esta receita não está vinculada a um contrato com inquilino — não é possível gerar a cobrança.',
+    };
+  }
+
+  try {
+
+    let customerId = inquilino.asaasCustomerId;
+
+    if (!customerId) {
+
+      const cliente = await AsaasApi.criarCliente({
+        name: inquilino.nome,
+        email: inquilino.email,
+        mobilePhone: inquilino.telefone,
+        cpfCnpj: inquilino.cpf,
+      });
+
+      customerId = cliente.id;
+
+      await prisma.inquilino.update({
+        where: { id: inquilino.id },
+        data: { asaasCustomerId: customerId },
+      });
+
+    }
+
+    const cobranca = await AsaasApi.criarCobranca({
+      customer: customerId,
+      billingType: 'PIX',
+      value: receita.valor,
+      dueDate: receita.vencimento
+        ? new Date(receita.vencimento).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10),
+      description: receita.descricao,
+      externalReference: receita.id,
+    });
+
+    const atualizada = await prisma.receita.update({
+      where: { id: receita.id },
+      data: {
+        asaasPaymentId: cobranca.id,
+        asaasCustomerId: customerId,
+        enviadaAsaas: true,
+      },
+    });
+
+    return {
+      success: true,
+      mensagem: 'Cobrança enviada ao Asaas com sucesso.',
+      transacao: mapearTransacao(atualizada),
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      mensagem: error.message || 'Erro ao enviar cobrança ao Asaas.',
+    };
+
+  }
 
 };
 
@@ -169,6 +360,7 @@ module.exports = {
   buscarWallet,
   listarTransacoes,
   buscarTransacao,
+  enviarCobranca,
   resumo,
   sincronizar
 };

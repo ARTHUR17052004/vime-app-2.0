@@ -24,7 +24,13 @@ const resumo = async () => {
     }
   });
 
-  const solicitacoesPendentes = 0;
+  const solicitacoesPendentes = await prisma.solicitacao.count({
+    where: {
+      status: {
+        notIn: ['ATENDIDA', 'REJEITADA']
+      }
+    }
+  });
 
   const receitas = await prisma.receita.findMany({
     where: {
@@ -61,23 +67,30 @@ const resumo = async () => {
   };
 };
 
+const STATUS_ATIVIDADE = {
+  SOLICITADA: 'solicitada',
+  'EM COTAÇÃO': 'em cotação',
+  'AGUARDANDO COMPRA': 'aguardando compra',
+  ATENDIDA: 'atendida',
+  REJEITADA: 'rejeitada'
+};
+
 const atividades = async () => {
 
-  const contratos = await prisma.contrato.findMany({
+  const solicitacoes = await prisma.solicitacao.findMany({
     take: 10,
     orderBy: {
-      createdAt: 'desc'
-    },
-    include: {
-      inquilino: true
+      updatedAt: 'desc'
     }
   });
 
-  return contratos.map(item => ({
+  return solicitacoes.map(item => ({
     id: item.id,
-    tipo: 'CONTRATO',
-    descricao: `Contrato criado para ${item.inquilino.nome}`,
-    data: item.createdAt
+    tipo: 'SOLICITACAO',
+    descricao: `${item.numero} · ${item.titulo}`,
+    data: item.updatedAt,
+    status: STATUS_ATIVIDADE[item.status] || item.status,
+    link: `/solicitacoes/${item.id}`
   }));
 };
 
@@ -133,16 +146,16 @@ const financeiro = async () => {
 
   receitas.forEach(r => {
 
-    if (r.status === 'RECEBIDO')
+    if (r.status === 'PAGA')
       recebido += r.valor;
 
     if (r.status === 'PENDENTE')
       pendente += r.valor;
 
-    if (r.status === 'ATRASADO')
+    if (r.status === 'ATRASADA')
       atrasado += r.valor;
 
-    if (r.status === 'CANCELADO')
+    if (r.status === 'CANCELADA')
       cancelado += r.valor;
 
   });
@@ -155,10 +168,43 @@ const financeiro = async () => {
   };
 };
 
+const MESES = [
+  'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
+  'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+];
+
+const receitasMensais = async (ano) => {
+
+  const receitas = await prisma.receita.findMany({
+    where: {
+      vencimento: {
+        gte: new Date(`${ano}-01-01`),
+        lte: new Date(`${ano}-12-31`)
+      }
+    }
+  });
+
+  const totais = new Array(12).fill(0);
+
+  receitas.forEach(r => {
+    if (!r.vencimento) return;
+
+    const mes = new Date(r.vencimento).getMonth();
+
+    totais[mes] += r.valor;
+  });
+
+  return MESES.map((mes, index) => ({
+    mes,
+    receita: totais[index]
+  }));
+};
+
 module.exports = {
   resumo,
   atividades,
   alertas,
   ocupacao,
-  financeiro
+  financeiro,
+  receitasMensais
 };

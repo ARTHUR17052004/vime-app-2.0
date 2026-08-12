@@ -179,9 +179,9 @@ export default function FinanceiroFluxoCaixa({
 
                     <Badge
                       color={
-                        item.status === "Pago"
+                        item.status === "PAGO"
                           ? "green"
-                          : item.status === "Atrasado"
+                          : item.status === "ATRASADA"
                           ? "red"
                           : "yellow"
                       }

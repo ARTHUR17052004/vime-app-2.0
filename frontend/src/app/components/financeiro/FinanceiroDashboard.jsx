@@ -23,7 +23,7 @@ export default function FinanceiroDashboard({
   const receitasPendentes = receitas
     .filter(
       (item) =>
-        item.status !== "Pago"
+        item.status !== "PAGO"
     )
     .reduce(
       (total, item) =>
@@ -36,49 +36,49 @@ export default function FinanceiroDashboard({
 
       <div className="grid md:grid-cols-4 gap-6">
 
-        <div className="bg-white rounded-3xl shadow p-6">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-          <div className="text-gray-500">
+          <div className="text-gray-400">
             Receita Total
           </div>
 
-          <div className="text-3xl font-bold text-green-700 mt-3">
+          <div className="text-3xl font-bold text-green-400 mt-3">
             R$ {totalReceitas}
           </div>
 
         </div>
 
-        <div className="bg-white rounded-3xl shadow p-6">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-          <div className="text-gray-500">
+          <div className="text-gray-400">
             Despesas Totais
           </div>
 
-          <div className="text-3xl font-bold text-red-600 mt-3">
+          <div className="text-3xl font-bold text-red-400 mt-3">
             R$ {totalDespesas}
           </div>
 
         </div>
 
-        <div className="bg-white rounded-3xl shadow p-6">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-          <div className="text-gray-500">
+          <div className="text-gray-400">
             Lucro Líquido
           </div>
 
-          <div className="text-3xl font-bold text-blue-700 mt-3">
+          <div className="text-3xl font-bold text-blue-400 mt-3">
             R$ {lucroLiquido}
           </div>
 
         </div>
 
-        <div className="bg-white rounded-3xl shadow p-6">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-          <div className="text-gray-500">
+          <div className="text-gray-400">
             Receitas Pendentes
           </div>
 
-          <div className="text-3xl font-bold text-yellow-600 mt-3">
+          <div className="text-3xl font-bold text-yellow-400 mt-3">
             R$ {receitasPendentes}
           </div>
 
@@ -86,9 +86,9 @@ export default function FinanceiroDashboard({
 
       </div>
 
-      <div className="bg-white rounded-3xl shadow p-6">
+      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold text-white mb-6">
           Dashboard Financeiro
         </h2>
 
@@ -96,11 +96,11 @@ export default function FinanceiroDashboard({
 
           <div>
 
-            <div className="font-semibold">
+            <div className="font-semibold text-gray-200">
               Receitas
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-5 mt-2">
+            <div className="w-full bg-white/10 rounded-full h-5 mt-2">
 
               <div
                 className="bg-green-600 h-5 rounded-full"
@@ -115,11 +115,11 @@ export default function FinanceiroDashboard({
 
           <div>
 
-            <div className="font-semibold">
+            <div className="font-semibold text-gray-200">
               Despesas
             </div>
 
-            <div className="w-full bg-gray-200 rounded-full h-5 mt-2">
+            <div className="w-full bg-white/10 rounded-full h-5 mt-2">
 
               <div
                 className="bg-red-600 h-5 rounded-full"

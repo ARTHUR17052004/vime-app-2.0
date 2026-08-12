@@ -1,7 +1,7 @@
 "use client";
 
-// import { jsPDF } from "jspdf";
-// import autoTable from "jspdf-autotable";
+import { exportarPDF, exportarExcel } from "@/utils/exportar";
+
 export default function SolicitacaoRelatorios({
   solicitacoes = [],
 }) {
@@ -41,21 +41,54 @@ export default function SolicitacaoRelatorios({
         "REJEITADA"
     ).length;
 
- function exportarPDF() {
+  const colunas = [
+    "Número",
+    "Título",
+    "Responsável",
+    "Status",
+    "Prazo",
+  ];
 
-  alert(
-    "Teste do botão PDF."
-  );
+  const linhas = solicitacoes.map((item) => [
+    item.numero || "-",
+    item.titulo || "-",
+    item.responsavel || "-",
+    item.status || "-",
+    item.prazo
+      ? new Date(item.prazo).toLocaleDateString("pt-BR")
+      : "-",
+  ]);
 
-}
+  function handleExportarPDF() {
 
-  function exportarExcel() {
+    exportarPDF({
+      titulo: "Relatório de Solicitações",
+      subtitulo: `Total: ${total} · Solicitadas: ${solicitadas} · Em Cotação: ${cotacao} · Aguardando Compra: ${compra} · Atendidas: ${atendidas} · Rejeitadas: ${rejeitadas}`,
+      secoes: [
+        {
+          colunas,
+          linhas,
+        },
+      ],
+      nomeArquivo: "relatorio-solicitacoes",
+    });
 
-  alert(
-    "Teste do botão Excel."
-  );
+  }
 
-}
+  function handleExportarExcel() {
+
+    exportarExcel({
+      abas: [
+        {
+          nome: "Solicitações",
+          colunas,
+          linhas,
+        },
+      ],
+      nomeArquivo: "relatorio-solicitacoes",
+    });
+
+  }
 
   function imprimir() {
 
@@ -65,17 +98,17 @@ export default function SolicitacaoRelatorios({
 
   return (
 
-    <div className="bg-white rounded-3xl shadow border p-8">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
       <div className="flex items-center justify-between mb-8">
 
         <div>
 
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-white">
             Relatórios
           </h2>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-400 mt-1">
             Resumo geral das solicitações
           </p>
 
@@ -87,80 +120,81 @@ export default function SolicitacaoRelatorios({
 
         <div
           className="
-            bg-gray-50
+            bg-white/5
             rounded-2xl
             border
+            border-white/10
             p-6
-            hover:shadow-lg
+            hover:shadow-[0_18px_45px_rgba(0,0,0,.35)]
             transition
           "
         >
 
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-400">
             Total
           </p>
 
-          <h3 className="text-3xl font-bold mt-2">
+          <h3 className="text-3xl font-bold mt-2 text-white">
             {total}
           </h3>
 
         </div>
 
-        <div className="bg-blue-50 rounded-2xl p-6 border">
+        <div className="bg-blue-500/10 rounded-2xl p-6 border border-blue-500/20">
 
-          <p className="text-sm text-blue-700">
+          <p className="text-sm text-blue-400">
             Solicitadas
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-blue-700">
+          <h3 className="text-3xl font-bold mt-2 text-blue-400">
             {solicitadas}
           </h3>
 
         </div>
 
-        <div className="bg-yellow-50 rounded-2xl p-6 border">
+        <div className="bg-yellow-500/10 rounded-2xl p-6 border border-yellow-500/20">
 
-          <p className="text-sm text-yellow-700">
+          <p className="text-sm text-yellow-400">
             Em Cotação
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-yellow-700">
+          <h3 className="text-3xl font-bold mt-2 text-yellow-400">
             {cotacao}
           </h3>
 
         </div>
 
-        <div className="bg-orange-50 rounded-2xl p-6 border">
+        <div className="bg-orange-500/10 rounded-2xl p-6 border border-orange-500/20">
 
-          <p className="text-sm text-orange-700">
+          <p className="text-sm text-orange-400">
             Aguardando Compra
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-orange-700">
+          <h3 className="text-3xl font-bold mt-2 text-orange-400">
             {compra}
           </h3>
 
         </div>
 
-        <div className="bg-green-50 rounded-2xl p-6 border">
+        <div className="bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/20">
 
-          <p className="text-sm text-green-700">
+          <p className="text-sm text-emerald-400">
             Atendidas
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-green-700">
+          <h3 className="text-3xl font-bold mt-2 text-emerald-400">
             {atendidas}
           </h3>
 
         </div>
 
-        <div className="bg-red-50 rounded-2xl p-6 border">
+        <div className="bg-red-500/10 rounded-2xl p-6 border border-red-500/20">
 
-          <p className="text-sm text-red-700">
+          <p className="text-sm text-red-400">
             Rejeitadas
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-red-700">
+          <h3 className="text-3xl font-bold mt-2 text-red-400">
             {rejeitadas}
           </h3>
 
@@ -171,7 +205,7 @@ export default function SolicitacaoRelatorios({
       <div className="grid md:grid-cols-3 gap-6">
 
   <button
-    onClick={exportarPDF}
+    onClick={handleExportarPDF}
     className="
       bg-green-700
       hover:bg-green-800
@@ -185,7 +219,7 @@ export default function SolicitacaoRelatorios({
   </button>
 
   <button
-    onClick={exportarExcel}
+    onClick={handleExportarExcel}
     className="
       bg-green-700
       hover:bg-green-800

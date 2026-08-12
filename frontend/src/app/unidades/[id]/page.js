@@ -4,28 +4,80 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MainLayout from "../../components/layout/MainLayout";
 
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function UnidadeDetalhesPage() {
   const params = useParams();
 
   const [unidade, setUnidade] = useState(null);
 
+  const [loading, setLoading] = useState(true);
+
+  const [erro, setErro] = useState("");
+
   useEffect(() => {
-    const unidades = JSON.parse(
-      localStorage.getItem("vime-unidades") || "[]"
-    );
 
-    const encontrada = unidades.find(
-      (item) => String(item.id) === String(params.id)
-    );
+    async function carregarUnidade() {
 
-    setUnidade(encontrada);
+      try {
+
+        setLoading(true);
+
+        setErro("");
+
+        const resposta = await UnidadeService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        const encontrada = lista.find(
+          (item) => String(item.id) === String(params.id)
+        );
+
+        setUnidade(encontrada || null);
+
+        if (!encontrada) {
+          setErro("Unidade não encontrada.");
+        }
+
+      } catch (err) {
+
+        console.error(err);
+
+        setErro(
+          err.message || "Erro ao carregar unidade."
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    }
+
+    if (params.id) {
+      carregarUnidade();
+    }
+
   }, [params.id]);
 
-  if (!unidade) {
+  if (loading) {
     return (
       <MainLayout>
-        <div className="bg-white rounded-2xl shadow p-8">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-2xl p-8">
           Carregando unidade...
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (erro || !unidade) {
+    return (
+      <MainLayout>
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-red-300 rounded-2xl p-8">
+          {erro || "Unidade não encontrada."}
         </div>
       </MainLayout>
     );
@@ -36,23 +88,23 @@ export default function UnidadeDetalhesPage() {
       <div className="space-y-6">
 
         <div>
-          <h1 className="text-4xl font-bold text-gray-900">
+          <h1 className="text-4xl font-bold text-white">
             {unidade.nome}
           </h1>
 
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-400 mt-2">
             Detalhes completos da unidade
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <div className="bg-white rounded-2xl shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
+            <h2 className="text-xl font-semibold text-white mb-4">
               Informações Gerais
             </h2>
 
-            <div className="space-y-3 text-gray-800">
+            <div className="space-y-3 text-gray-200">
               <p>
                 <strong>Status:</strong>{" "}
                 {unidade.status || "-"}
@@ -80,12 +132,12 @@ export default function UnidadeDetalhesPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-2xl shadow p-6 lg:col-span-2">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6 lg:col-span-2">
+            <h2 className="text-xl font-semibold text-white mb-4">
               Endereço
             </h2>
 
-            <div className="space-y-3 text-gray-800">
+            <div className="space-y-3 text-gray-200">
               <p>
                 {unidade.logradouro || "-"}{" "}
                 {unidade.numero || ""}
@@ -114,23 +166,23 @@ export default function UnidadeDetalhesPage() {
 
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">
             Observações
           </h2>
 
-          <p className="text-gray-700">
+          <p className="text-gray-200">
             {unidade.observacoes ||
               "Nenhuma observação cadastrada."}
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-white mb-4">
             Kitnets
           </h2>
 
-          <p className="text-gray-600">
+          <p className="text-gray-400">
             Módulo será integrado na próxima etapa.
           </p>
         </div>

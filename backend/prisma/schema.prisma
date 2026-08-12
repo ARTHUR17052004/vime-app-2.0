@@ -56,6 +56,7 @@ model Inquilino {
   dataInicioContrato DateTime
   ativo              Boolean    @default(true)
   kitnetId           String
+  asaasCustomerId    String?
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
   contatoEmergencia  String?
@@ -73,12 +74,57 @@ model Inquilino {
 }
 
 model Usuario {
-  id        String   @id @default(uuid())
-  nome      String
-  email     String   @unique
-  senha     String
-  perfil    Perfil
-  ativo     Boolean  @default(true)
+  id String @id @default(uuid())
+
+  nome     String
+  email    String  @unique
+  telefone String?
+
+  senha String
+
+  perfilId String?
+
+  perfil Perfil? @relation(fields: [perfilId], references: [id])
+
+  ativo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  notificacoes Notificacao[]
+}
+
+model Notificacao {
+  id          String   @id @default(uuid())
+
+  usuarioId   String?
+
+  origem      String   // ex: "WHATSAPP", "ASAAS", "CLICKSIGN", "SISTEMA"
+
+  titulo      String
+
+  mensagem    String
+
+  lida        Boolean  @default(false)
+  lidaEm      DateTime?
+
+  createdAt   DateTime @default(now())
+
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+}
+
+model Perfil {
+  id String @id @default(uuid())
+
+  nome      String  @unique
+  descricao String?
+
+  ativo Boolean @default(true)
+
+  permissoes Json?
+
+  usuarios Usuario[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -108,39 +154,67 @@ model Contrato {
 }
 
 model Locador {
-  id                String     @id @default(uuid())
-  nome              String
-  email             String?    @unique
-  telefone          String?
-  cpfCnpj           String?    @unique
-  endereco          String?
-  cidade            String?
-  uf                String?
-  banco             String?
-  agencia           String?
-  conta             String?
-  taxaAdministracao Float?     @default(0)
-  multa             Float?     @default(0)
-  juros             Float?     @default(0)
-  ativo             Boolean    @default(true)
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
-  contratos         Contrato[]
-  unidades          Unidade[]
+  id String @id @default(uuid())
+
+  tipoPessoa String @default("PF")
+
+  nome String
+
+  cpfCnpj String? @unique
+
+  email String? @unique
+
+  telefone String?
+
+  banco String?
+
+  agencia String?
+
+  conta String?
+
+  pix String?
+
+  taxaAdministracao Float? @default(0)
+
+  multa Float? @default(0)
+
+  juros Float? @default(0)
+
+  endereco String?
+
+  cidade String?
+
+  uf String?
+
+  observacoes String?
+
+  ativo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  contratos Contrato[]
+
+  unidades Unidade[]
 }
 
 model Receita {
-  id            String    @id @default(uuid())
-  contratoId    String?
-  categoria     String
-  descricao     String
-  valor         Float
-  vencimento    DateTime?
-  dataPagamento DateTime?
-  status        String    @default("PENDENTE")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  contrato      Contrato? @relation(fields: [contratoId], references: [id])
+  id              String    @id @default(uuid())
+  contratoId      String?
+  categoria       String
+  descricao       String
+  valor           Float
+  vencimento      DateTime?
+  dataPagamento   DateTime?
+  status          String    @default("PENDENTE")
+  asaasPaymentId  String?   @unique
+  asaasCustomerId String?
+  enviadaAsaas    Boolean   @default(false)
+  lembreteEnviadoEm DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  contrato        Contrato? @relation(fields: [contratoId], references: [id])
 }
 
 model Despesa {
@@ -176,9 +250,41 @@ model Solicitacao {
 
   resposta String?
 
+  criadoPorId String?
+
+  criadoPorNome String?
+
+  criadoPorPerfil String?
+
+  mensagens SolicitacaoMensagem[]
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+}
+
+model SolicitacaoMensagem {
+  id String @id @default(uuid())
+
+  solicitacaoId String
+
+  solicitacao Solicitacao @relation(fields: [solicitacaoId], references: [id], onDelete: Cascade)
+
+  autorId String?
+
+  autorNome String
+
+  texto String?
+
+  statusAlterado String?
+
+  anexoNome String?
+
+  anexoTipo String?
+
+  anexoDados String?
+
+  createdAt DateTime @default(now())
 }
 
 model Vistoria {
@@ -188,9 +294,31 @@ model Vistoria {
 
   descricao String?
 
+  unidade String?
+
+  kitnet String?
+
+  categoria String?
+
+  criticidade String?
+
+  periodicidade String?
+
+  responsavel String?
+
   status String @default("PENDENTE")
 
   data DateTime?
+
+  dataUltima DateTime?
+
+  dataProxima DateTime?
+
+  checklist Json?
+
+  fotos Json?
+
+  observacoes String?
 
   createdAt DateTime @default(now())
 
@@ -216,47 +344,175 @@ model Ocorrencia {
 }
 
 model LogSistema {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
   usuarioId   String?
   usuarioNome String?
 
-  modulo      String
-  acao        String
+  modulo String
+  acao   String
 
-  descricao   String?
+  descricao String?
 
-  ip          String?
+  ip String?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Auditoria {
+  id String @id @default(uuid())
 
-  id            String   @id @default(uuid())
+  usuarioId String?
 
-  usuarioId     String?
+  usuarioNome String?
 
-  usuarioNome   String?
+  modulo String
 
-  modulo        String
+  registroId String?
 
-  registroId    String?
-
-  acao          String
+  acao String
 
   valorAnterior Json?
 
-  valorNovo     Json?
+  valorNovo Json?
 
-  ip            String?
+  ip String?
 
-  createdAt     DateTime @default(now())
-
+  createdAt DateTime @default(now())
 }
 
-enum Perfil {
-  ADMINISTRADOR
-  ADMINISTRATIVO
-  ZELADOR
+model ConfiguracaoWhatsapp {
+  id String @id @default(uuid())
+
+  nomeConexao String @default("VIME 2.0")
+
+  numero String?
+
+  token String?
+
+  phoneNumberId String?
+
+  apiUrl String?
+
+  provider String @default("META")
+
+  conectado Boolean @default(false)
+
+  qrCode String?
+
+  webhook String?
+
+  ultimaSincronizacao DateTime?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model WhatsappContato {
+  id String @id @default(uuid())
+
+  nome String?
+
+  telefone String @unique
+
+  foto String?
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  conversas WhatsappConversa[]
+}
+
+model WhatsappConversa {
+  id String @id @default(uuid())
+
+  contatoId String
+
+  ultimaMensagem String?
+
+  ultimaData DateTime?
+
+  naoLidas Int @default(0)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  contato WhatsappContato @relation(fields: [contatoId], references: [id])
+
+  mensagens WhatsappMensagem[]
+}
+
+model WhatsappMensagem {
+  id String @id @default(uuid())
+
+  conversaId String
+
+  mensagemIdMeta String?
+
+  texto String
+
+  tipo String
+
+  status String?
+
+  enviadaPorIA Boolean @default(false)
+
+  createdAt DateTime @default(now())
+
+  conversa WhatsappConversa @relation(fields: [conversaId], references: [id])
+}
+model Configuracao {
+  id               Int      @id @default(autoincrement())
+
+  empresa          String
+  cnpj             String?
+  telefone         String?
+  email            String?
+
+  endereco         String?
+  cidade           String?
+  uf               String?
+  cep              String?
+
+  logo             String?
+  tema             String? @default("claro")
+
+  corPrimaria      String? @default("#F4C430")
+  corSecundaria    String? @default("#1F2937")
+
+  smtpHost         String?
+  smtpPorta        Int?
+  smtpUsuario      String?
+  smtpSenha        String?
+
+  asaasToken            String?
+  asaasAmbiente         String?  @default("sandbox")
+  asaasWalletId         String?
+  asaasWebhookToken     String?
+  asaasTaxaAdministracao Float?  @default(0)
+
+  clicksignToken        String?
+  clicksignAmbiente     String?  @default("sandbox")
+
+  whatsappToken    String?
+  whatsappNumero   String?
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model ModeloDocumento {
+  id String @id @default(uuid())
+
+  tipo String @unique
+
+  nomeArquivo String?
+
+  conteudo String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

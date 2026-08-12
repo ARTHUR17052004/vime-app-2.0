@@ -2,16 +2,16 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
+import { SolicitacaoService } from "@/services/solicitacao.service";
 
-import PageHeader from "../components/common/PageHeader";
+
+import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/common/SearchInput";
 
-import SolicitacaoStats from "../components/solicitacoes/SolicitacaoStats";
-import SolicitacaoFilters from "../components/solicitacoes/SolicitacaoFilters";
 import SolicitacaoTabs from "../components/solicitacoes/SolicitacaoTabs";
 import SolicitacaoCardList from "../components/solicitacoes/SolicitacaoCardList";
 
@@ -25,7 +25,6 @@ import Button from "../components/ui/Button";
 import SolicitacaoModal from "../components/solicitacoes/SolicitacaoModal";
 import SolicitacaoForm from "../components/solicitacoes/SolicitacaoForm";
 import SolicitacaoRelatorios from "../components/solicitacoes/SolicitacaoRelatorios";
-import SolicitacaoRespostaModal from "../components/solicitacoes/SolicitacaoRespostaModal";
 
 export default function SolicitacoesPage() {
 
@@ -38,159 +37,97 @@ export default function SolicitacoesPage() {
   const [solicitacaoEditando, setSolicitacaoEditando] =
     useState(null);
 
-  const [modalRespostaOpen, setModalRespostaOpen] =
-    useState(false);
-
-  const [solicitacaoResposta, setSolicitacaoResposta] =
-    useState(null);
-
   const [carregado, setCarregado] =
     useState(false);
 
   const [abaSelecionada, setAbaSelecionada] =
     useState("todas");
 
-  const [filtroStatus, setFiltroStatus] =
-    useState("Todos");
-
   const [pesquisa, setPesquisa] =
     useState("");
 
-  useEffect(() => {
+  const carregar = useCallback(async () => {
 
-    const dados = JSON.parse(
+    try {
 
-      localStorage.getItem(
-        "vime-solicitacoes"
-      ) || "[]"
+      const resposta = await SolicitacaoService.listar();
 
-    );
+      setSolicitacoes(
+        Array.isArray(resposta) ? resposta : resposta.data || []
+      );
 
-    setSolicitacoes(
-      dados
-    );
+    } catch (err) {
 
-    setCarregado(true);
+      console.error("Erro ao carregar solicitações:", err);
+
+    } finally {
+
+      setCarregado(true);
+
+    }
 
   }, []);
 
   useEffect(() => {
 
-    if (!carregado) return;
+    carregar();
 
-    localStorage.setItem(
+  }, [carregar]);
 
-      "vime-solicitacoes",
-
-      JSON.stringify(
-        solicitacoes
-      )
-
-    );
-
-  }, [solicitacoes, carregado]);
-
-  function salvarSolicitacao(
+  async function salvarSolicitacao(
     dados
   ) {
 
-    const agora =
-      new Date()
-        .toLocaleString(
-          "pt-BR"
+    const payload = {
+      numero: dados.numero,
+      titulo: dados.titulo,
+      descricao: dados.descricao,
+      prazo: dados.prazo || null,
+      observacoes: dados.observacoes,
+    };
+
+    try {
+
+      if (solicitacaoEditando) {
+
+        await SolicitacaoService.atualizar(
+          solicitacaoEditando.id,
+          payload
         );
 
-    if (
-      solicitacaoEditando
-    ) {
+      } else {
 
-      const lista =
-        solicitacoes.map(
-          (item) => {
+        const criada = await SolicitacaoService.criar(payload);
 
-            if (
-              item.id !==
-              solicitacaoEditando.id
-            ) {
+        const solicitacaoCriada = criada.data || criada;
 
-              return item;
+        if (dados.anexo) {
 
+          await SolicitacaoService.enviarMensagem(
+            solicitacaoCriada.id,
+            {
+              texto: null,
+              anexoNome: dados.anexo.nome,
+              anexoTipo: dados.anexo.tipo,
+              anexoDados: dados.anexo.dados,
             }
+          );
 
-            return {
+        }
 
-              ...item,
+      }
 
-              ...dados,
+      await carregar();
 
-              historico: [
-
-                ...(item.historico || []),
-
-                {
-
-                  data: agora,
-
-                  descricao:
-                    "Solicitação editada",
-
-                },
-
-              ],
-
-            };
-
-          }
-        );
-
-      setSolicitacoes(
-        lista
-      );
-
-      setSolicitacaoEditando(
-        null
-      );
+      setSolicitacaoEditando(null);
 
       setModalOpen(false);
 
-      return;
+    } catch (err) {
+
+      alert(err.message || "Erro ao salvar solicitação.");
 
     }
-
-    const nova = {
-
-      id: Date.now(),
-
-      ...dados,
-
-      historico: [
-
-        {
-
-          data: agora,
-
-          descricao:
-            "Solicitação criada",
-
-        },
-
-      ],
-
-    };
-
-    setSolicitacoes(
-
-      (prev) => [
-
-        ...prev,
-
-        nova,
-
-      ]
-
-    );
-
-    setModalOpen(false);
 
   }
 
@@ -206,85 +143,7 @@ export default function SolicitacoesPage() {
 
   }
 
-  function responderSolicitacao(
-    solicitacao
-  ) {
-
-  setSolicitacaoResposta(
-    solicitacao
-  );
-
-  setModalRespostaOpen(
-    true
-  );
-
-}
-  function salvarResposta({
-  resposta,
-  status,
-}) {
-
-  const agora =
-    new Date().toLocaleString(
-      "pt-BR"
-    );
-
-  setSolicitacoes((prev) =>
-
-    prev.map((item) => {
-
-      if (
-        item.id !==
-        solicitacaoResposta.id
-      ) {
-
-        return item;
-
-      }
-
-      return {
-
-        ...item,
-
-        resposta,
-
-        status,
-
-       historico: [
-
-          ...(item.historico || []),
-
-          {
-
-            data: agora,
-
-            descricao:
-              "Resposta enviada",
-
-          },
-
-          {
-
-            data: agora,
-
-            descricao:
-              `Status alterado para ${status}`,
-
-          },
-
-        ],
-
-      };
-
-    })
-  );
-
-setModalRespostaOpen(false);
-
-setSolicitacaoResposta(null);
-
-}
-  function excluirSolicitacao(
+  async function excluirSolicitacao(
     id
   ) {
 
@@ -296,69 +155,19 @@ setSolicitacaoResposta(null);
     if (!confirmar)
       return;
 
-    setSolicitacoes(
+    try {
 
-      (prev) =>
+      await SolicitacaoService.excluir(id);
 
-        prev.filter(
+      await carregar();
 
-          (item) =>
-            item.id !== id
+    } catch (err) {
 
-        )
+      alert(err.message || "Erro ao excluir solicitação.");
 
-    );
+    }
 
   }
-
-  function alterarStatus(
-  id,
-  novoStatus
-) {
-
-  const agora =
-    new Date().toLocaleString(
-      "pt-BR"
-    );
-
-  setSolicitacoes((prev) =>
-
-    prev.map((item) => {
-
-      if (item.id !== id) {
-
-        return item;
-
-      }
-
-      return {
-
-        ...item,
-
-        status: novoStatus,
-
-        historico: [
-
-          ...(item.historico || []),
-
-          {
-
-            data: agora,
-
-            descricao:
-              `Status alterado para ${novoStatus}`,
-
-          },
-
-        ],
-
-      };
-
-    })
-
-  );
-
-}
 
   function novaSolicitacao() {
 
@@ -387,13 +196,6 @@ setSolicitacaoResposta(null);
       return false;
     }
 
-    if (
-      filtroStatus !== "Todos" &&
-      item.status !== filtroStatus
-    ) {
-      return false;
-    }
-
     switch (abaSelecionada) {
 
       case "solicitadas":
@@ -417,7 +219,17 @@ setSolicitacaoResposta(null);
     }
 
   });
-  
+
+  if (!carregado) {
+    return (
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando solicitações...
+        </div>
+      </MainLayout>
+    );
+  }
+
    return (
 
   <MainLayout>
@@ -452,26 +264,9 @@ setSolicitacaoResposta(null);
 
         </FadeIn>
 
-        <FadeIn delay={0.10}>
-
-          <PageSection spacing="xl">
-
-            <SolicitacaoStats
-              solicitacoes={solicitacoes}
-            />
-
-          </PageSection>
-
-        </FadeIn>
-
         <FadeIn delay={0.15}>
 
           <PageSection spacing="lg">
-
-            <SolicitacaoFilters
-              filtroStatus={filtroStatus}
-              setFiltroStatus={setFiltroStatus}
-            />
 
             <SolicitacaoTabs
               abaSelecionada={abaSelecionada}
@@ -490,8 +285,7 @@ setSolicitacaoResposta(null);
               solicitacoes={solicitacoesFiltradas}
               onEdit={editarSolicitacao}
               onDelete={excluirSolicitacao}
-              onAlterarStatus={alterarStatus}
-              onResponder={responderSolicitacao}
+              onAtualizado={carregar}
             />
 
           </PageSection>
@@ -529,16 +323,6 @@ setSolicitacaoResposta(null);
           />
 
         </SolicitacaoModal>
-
-        <SolicitacaoRespostaModal
-          isOpen={modalRespostaOpen}
-          onClose={() => {
-            setModalRespostaOpen(false);
-            setSolicitacaoResposta(null);
-          }}
-          solicitacao={solicitacaoResposta}
-          onSalvar={salvarResposta}
-        />
 
       </PageContainer>
 

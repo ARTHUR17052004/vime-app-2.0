@@ -1,113 +1,166 @@
 "use client";
 
+import layout from "./layout";
 import { dashboard } from "@/theme/dashboardTheme";
 
 export default function Card({
   children,
-
   className = "",
-
   hover = true,
-
   border = true,
-
   padding = "md",
-
   variant = "default",
-
   onClick,
 }) {
+
   const paddings = {
-    sm: "p-4",
-    md: "p-6",
-    lg: "p-8",
+    none: "",
+
+    sm: layout.card.paddingSm || "p-6",
+
+    md: layout.card.padding || "p-8",
+
+    lg: layout.card.paddingLg || "p-10",
   };
 
   const variants = {
-    default: dashboard.card.background,
+
+    default: `
+      bg-gradient-to-br
+      from-[#202a36]/95
+      via-[#1b2430]/96
+      to-[#151c25]/96
+
+      backdrop-blur-[24px]
+    `,
 
     glass: `
-      bg-white/[0.04]
-      backdrop-blur-xl
+      bg-gradient-to-br
+      from-[#202a36]/92
+      via-[#1b2430]/94
+      to-[#151c25]/95
+
+      backdrop-blur-[24px]
     `,
 
     solid: `
-      bg-[#1d2833]
+      bg-[#1b2430]
     `,
   };
 
   return (
-    <div
-      onClick={onClick}
-      style={{
-        borderRadius: `${dashboard.card.radius}px`,
-        boxShadow: dashboard.card.shadow,
-      }}
-      className={`
-        relative
-        overflow-hidden
 
-        transition-all
-        duration-300
+    <div
+
+      onClick={onClick}
+
+      style={{
+        borderRadius: dashboard.card.radius,
+        boxShadow: "0 18px 45px rgba(0,0,0,.45)",
+      }}
+
+      className={`
+
+        relative
+
+        overflow-hidden
 
         ${variants[variant]}
 
-        ${paddings[padding]}
-
         ${
           border
-            ? dashboard.card.border
+            ? "border border-white/[0.07]"
             : ""
         }
 
         ${
           hover
             ? `
+              transition-all
+              duration-300
+
+              hover:border-emerald-400/20
               hover:-translate-y-1
-              hover:scale-[1.01]
-              hover:shadow-2xl
+              hover:shadow-[0_24px_55px_rgba(0,0,0,.55)]
             `
             : ""
         }
 
-        ${
-          onClick
-            ? "cursor-pointer"
-            : ""
-        }
+        ${onClick ? "cursor-pointer" : ""}
 
         ${className}
+
       `}
     >
+
+      {/* brilho */}
+
       <div
+
         className="
           absolute
           inset-x-0
           top-0
           h-px
+
           bg-gradient-to-r
+
           from-transparent
-          via-white/20
+          via-white/12
           to-transparent
+
           pointer-events-none
         "
+
       />
 
+      {/* iluminação */}
+
       <div
+
         className="
           absolute
           inset-0
+
           bg-gradient-to-br
-          from-white/[0.02]
+
+          from-white/[0.03]
           via-transparent
-          to-transparent
+          to-black/25
+
           pointer-events-none
         "
+
       />
 
-      <div className="relative z-10">
+      {/* conteúdo */}
+
+      <div
+
+        className={`
+
+          relative
+
+          z-10
+
+          flex
+          flex-col
+
+          h-full
+          w-full
+
+          ${paddings[padding]}
+
+        `}
+
+      >
+
         {children}
+
       </div>
+
     </div>
+
   );
+
 }

@@ -26,7 +26,10 @@ const buscarPorId = async (req, res) => {
 
 const criar = async (req, res) => {
 
-  const solicitacao = await solicitacaoService.criar(req.body);
+  const solicitacao = await solicitacaoService.criar(
+    req.body,
+    req.usuario
+  );
 
   res.status(201).json(solicitacao);
 

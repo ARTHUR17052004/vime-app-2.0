@@ -7,6 +7,8 @@ import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
 import Button from "../ui/Button";
 
+import { LocadorService } from "@/services/locadores.service";
+
 export default function UnitForm({
   unidade,
   onSave,
@@ -33,6 +35,8 @@ export default function UnitForm({
 
     locador: "",
 
+    locadorId: "",
+
     kitnets: "",
 
     aluguel: "",
@@ -47,6 +51,35 @@ export default function UnitForm({
 
   const [formData, setFormData] =
     useState(initialState);
+
+  const [locadores, setLocadores] =
+    useState([]);
+
+  useEffect(() => {
+
+    async function carregarLocadores() {
+
+      try {
+
+        const resposta = await LocadorService.listar();
+
+        setLocadores(
+          Array.isArray(resposta)
+            ? resposta
+            : resposta.data || []
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar locadores:", err);
+
+      }
+
+    }
+
+    carregarLocadores();
+
+  }, []);
 
   useEffect(() => {
 
@@ -79,6 +112,9 @@ export default function UnitForm({
 
         locador:
           unidade.locador || "",
+
+        locadorId:
+          unidade.locadorId || "",
 
         kitnets:
           unidade.kitnets || "",
@@ -172,6 +208,26 @@ export default function UnitForm({
       buscarCep(value);
 
     }
+
+  }
+
+  function handleChangeLocador(e) {
+
+    const locadorId = e.target.value;
+
+    const selecionado = locadores.find(
+      (item) => item.id === locadorId
+    );
+
+    setFormData((prev) => ({
+
+      ...prev,
+
+      locadorId,
+
+      locador: selecionado?.nome || "",
+
+    }));
 
   }
 
@@ -363,12 +419,26 @@ export default function UnitForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <Input
+          <Select
             label="Locador"
-            name="locador"
-            value={formData.locador}
-            onChange={handleChange}
-          />
+            name="locadorId"
+            value={formData.locadorId}
+            onChange={handleChangeLocador}
+          >
+
+            <option value="">
+              Selecione um locador
+            </option>
+
+            {locadores.map((item) => (
+
+              <option key={item.id} value={item.id}>
+                {item.nome}
+              </option>
+
+            ))}
+
+          </Select>
 
           <Input
             label="Quantidade de Kitnets"

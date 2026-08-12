@@ -1,17 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
+
 export default function InquilinoTable({
   inquilinos,
   onDelete,
   onEdit,
 }) {
+
+  const router = useRouter();
+
   const [menuAberto, setMenuAberto] =
     useState(null);
+
+  const [posicaoMenu, setPosicaoMenu] =
+    useState({ top: 0, left: 0 });
+
+  function abrirMenu(e, id) {
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const larguraMenu = 176;
+
+    let left = rect.right - larguraMenu;
+    let top = rect.bottom + 8;
+
+    if (left + larguraMenu > window.innerWidth - 16) {
+      left = window.innerWidth - larguraMenu - 16;
+    }
+
+    if (left < 16) left = 16;
+
+    setPosicaoMenu({ top, left });
+
+    setMenuAberto(id);
+
+  }
 
   if (inquilinos.length === 0) {
     return (
@@ -19,19 +48,21 @@ export default function InquilinoTable({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-white/[0.07]
+            bg-gradient-to-br
+            from-[#202a36]/95
+            via-[#1b2430]/96
+            to-[#151c25]/96
             backdrop-blur-xl
             p-12
             text-center
-            text-gray-300
           "
         >
-        <h2 className="text-2xl font-semibold text-gray-700 mb-3">
+        <h2 className="text-2xl font-semibold text-white mb-3">
           Módulo Inquilinos
         </h2>
 
-        <p className="text-gray-500">
+        <p className="text-gray-400">
           Nenhum inquilino cadastrado ainda.
         </p>
       </div>
@@ -40,7 +71,7 @@ export default function InquilinoTable({
 
   return (
     <Table>
-      <table className="w-full text-gray-800">
+      <table className="w-full text-gray-200">
         <thead className="border-b border-white/10 text-gray-400 uppercase text-xs tracking-[0.25em]">
           <tr>
             <th
@@ -182,23 +213,24 @@ export default function InquilinoTable({
 
               <td className="px-6 py-5">
                 {inquilino.unidadeNome
-                  ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome}`
+                  ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome || ""}`
                   : inquilino.kitnetNome || "-"}
               </td>
 
               <td className="px-6 py-5">
                 <div>
-                  {inquilino.email}
+                  {inquilino.email || "-"}
                 </div>
 
                 <div className="text-sm text-gray-500">
-                  {inquilino.telefone}
+                  {inquilino.telefone || "-"}
                 </div>
               </td>
 
               <td className="px-6 py-5">
-                {inquilino.dataFimContrato ||
-                  "-"}
+                {inquilino.dataFimContrato
+                  ? new Date(inquilino.dataFimContrato).toLocaleDateString("pt-BR")
+                  : "-"}
               </td>
 
               <td className="px-6 py-5">
@@ -215,15 +247,18 @@ export default function InquilinoTable({
               </Badge>
               </td>
 
-              <td className="px-6 py-5 text-center relative">
+              <td className="px-6 py-5 text-center">
                 <button
-                  onClick={() =>
-                    setMenuAberto(
-                      menuAberto === inquilino.id
-                        ? null
-                        : inquilino.id
-                    )
-                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+
+                    if (menuAberto === inquilino.id) {
+                      setMenuAberto(null);
+                      return;
+                    }
+
+                    abrirMenu(e, inquilino.id);
+                  }}
                   className="
                     w-10
                     h-10
@@ -247,94 +282,77 @@ export default function InquilinoTable({
                   ⋮
                 </button>
 
-                {menuAberto ===
-                  inquilino.id && (
-                  <div
+                <ActionMenu
+                  open={menuAberto === inquilino.id}
+                  position={posicaoMenu}
+                  onClose={() => setMenuAberto(null)}
+                >
+
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      router.push(`/inquilinos/${inquilino.id}`);
+                    }}
                     className="
-                    absolute
-
-                    right-2
-                    top-12
-
-                    w-44
-
-                    rounded-2xl
-
-                    border
-                    border-white/10
-
-                    bg-slate-900/95
-
-                    backdrop-blur-xl
-
-                    shadow-2xl
-
-                    overflow-hidden
-
-                    z-50
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-white/5
+                      text-gray-300
+                      transition
                     "
                   >
-                    <Link
-                      href={`/inquilinos/${inquilino.id}`}
-                      className="
-                        block
-                        px-4
-                        py-3
-                        hover:bg-white/5
-                        text-gray-300
-                        transition
-                      "
-                    >
-                      Visualizar
-                    </Link>
+                    Visualizar
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        onEdit?.(
-                          inquilino
-                        );
+                  <button
+                    onClick={() => {
+                      onEdit?.(
+                        inquilino
+                      );
 
-                        setMenuAberto(
-                          null
-                        );
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        hover:bg-yellow-500/10
-                        text-yellow-400
-                        transition
-                      "
-                    >
-                      Editar
-                    </button>
+                      setMenuAberto(
+                        null
+                      );
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-yellow-500/10
+                      text-yellow-400
+                      transition
+                    "
+                  >
+                    Editar
+                  </button>
 
-                    <button
-                      onClick={() => {
-                        onDelete?.(
-                          inquilino.id
-                        );
+                  <button
+                    onClick={() => {
+                      onDelete?.(
+                        inquilino.id
+                      );
 
-                        setMenuAberto(
-                          null
-                        );
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        hover:bg-red-500/10
-                        text-red-400
-                        transition
-                      "
-                    >
-                      Excluir
-                    </button>
-                  </div>
-                )}
+                      setMenuAberto(
+                        null
+                      );
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      hover:bg-red-500/10
+                      text-red-400
+                      transition
+                    "
+                  >
+                    Excluir
+                  </button>
+
+                </ActionMenu>
               </td>
             </tr>
           ))}

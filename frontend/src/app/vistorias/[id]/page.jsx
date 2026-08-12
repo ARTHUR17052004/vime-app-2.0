@@ -6,6 +6,19 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
 
+import { VistoriaService } from "@/services/vistoria.service";
+import { AuditoriaService } from "@/services/auditoria.service";
+
+function formatarData(data) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : null;
+}
+
+const ACAO_LABEL = {
+  CRIAR: "Vistoria criada",
+  ATUALIZAR: "Vistoria atualizada",
+  EXCLUIR: "Vistoria excluída",
+};
+
 export default function DetalhesVistoriaPage() {
 
   const params = useParams();
@@ -13,25 +26,68 @@ export default function DetalhesVistoriaPage() {
   const [vistoria, setVistoria] =
     useState(null);
 
+  const [historico, setHistorico] =
+    useState([]);
+
+  const [carregando, setCarregando] =
+    useState(true);
+
   useEffect(() => {
 
-    const vistorias = JSON.parse(
-      localStorage.getItem(
-        "vime-vistorias"
-      ) || "[]"
-    );
+    async function carregar() {
 
-    const encontrada =
-      vistorias.find(
-        (item) =>
-          String(item.id) ===
-          String(params.id)
-      );
+      try {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setVistoria(encontrada);
+        setCarregando(true);
+
+        const [respostaVistoria, respostaAuditoria] = await Promise.all([
+          VistoriaService.buscar(params.id),
+          AuditoriaService.listar(),
+        ]);
+
+        setVistoria(respostaVistoria.data || respostaVistoria);
+
+        const listaAuditoria = Array.isArray(respostaAuditoria)
+          ? respostaAuditoria
+          : respostaAuditoria.data || [];
+
+        setHistorico(
+          listaAuditoria.filter(
+            (item) =>
+              item.modulo === "VISTORIAS" &&
+              item.registroId === params.id
+          )
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar vistoria:", err);
+
+      } finally {
+
+        setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
 
   }, [params.id]);
+
+  if (carregando) {
+
+    return (
+
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando...
+        </div>
+      </MainLayout>
+
+    );
+
+  }
 
   if (!vistoria) {
 
@@ -39,9 +95,9 @@ export default function DetalhesVistoriaPage() {
 
       <MainLayout>
 
-        <div className="bg-white rounded-3xl shadow p-10">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
 
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-white">
             Vistoria não encontrada
           </h1>
 
@@ -59,93 +115,86 @@ export default function DetalhesVistoriaPage() {
 
       <div className="space-y-8">
 
-        <div className="bg-white rounded-3xl shadow p-10">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
 
-          <h1 className="text-4xl font-bold text-gray-900">
-            {vistoria.nomeVistoria}
+          <h1 className="text-4xl font-bold text-white">
+            {vistoria.titulo}
           </h1>
 
-          <p className="text-gray-700 mt-2">
+          <p className="text-gray-400 mt-2">
             Informações completas da vistoria
           </p>
 
         </div>
 
-        <div className="bg-white rounded-3xl shadow p-8">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-6">
             Dados da Vistoria
           </h2>
 
           <div className="grid md:grid-cols-3 gap-6">
 
             <div>
-              <p className="text-gray-500">Nome</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.nomeVistoria}
+              <p className="text-gray-400">Categoria</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.categoria || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Categoria</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.categoria}
+              <p className="text-gray-400">Criticidade</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.criticidade || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Criticidade</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.criticidade}
+              <p className="text-gray-400">Responsável</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.responsavel || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Responsável</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.responsavel}
+              <p className="text-gray-400">Periodicidade</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.periodicidade || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Periodicidade</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.periodicidade}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Status</p>
-              <h3 className="font-semibold text-green-700">
+              <p className="text-gray-400">Status</p>
+              <h3 className="font-semibold text-emerald-400">
                 {vistoria.status}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Última Execução</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.dataUltima || "Ainda não executada"}
+              <p className="text-gray-400">Última Execução</p>
+              <h3 className="font-semibold text-white">
+                {formatarData(vistoria.dataUltima) || "Ainda não executada"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Próxima Execução</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.dataProxima}
+              <p className="text-gray-400">Próxima Execução</p>
+              <h3 className="font-semibold text-white">
+                {formatarData(vistoria.dataProxima) || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Unidade</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.unidadeNome}
+              <p className="text-gray-400">Unidade</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.unidade || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-500">Kitnet</p>
-              <h3 className="font-semibold text-gray-900">
-                {vistoria.kitnetNome}
+              <p className="text-gray-400">Kitnet</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.kitnet || "-"}
               </h3>
             </div>
 
@@ -153,13 +202,13 @@ export default function DetalhesVistoriaPage() {
 
         </div>
 
-        <div className="bg-white rounded-3xl shadow p-8">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl font-bold text-white mb-4">
             Observações
           </h2>
 
-          <div className="bg-gray-100 rounded-2xl p-6 text-gray-900">
+          <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
 
             {vistoria.observacoes ||
               "Nenhuma observação cadastrada."}
@@ -170,9 +219,9 @@ export default function DetalhesVistoriaPage() {
 
         {vistoria.fotos?.length > 0 && (
 
-          <div className="bg-white rounded-3xl shadow p-8">
+          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold text-white mb-6">
               Fotos da Vistoria
             </h2>
 
@@ -197,6 +246,7 @@ export default function DetalhesVistoriaPage() {
                       object-cover
                       rounded-2xl
                       border
+                      border-white/10
                       cursor-pointer
                       hover:scale-105
                       transition
@@ -213,49 +263,46 @@ export default function DetalhesVistoriaPage() {
 
         )}
 
-        <div className="bg-white rounded-3xl shadow p-8">
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-6">
             Histórico de Movimentações
           </h2>
 
           <div className="space-y-4">
 
-            {vistoria.historico?.length ? (
+            {historico.length ? (
 
-              vistoria.historico
-                .slice()
-                .reverse()
-                .map((item, index) => (
+              historico.map((item) => (
 
-                  <div
-                    key={index}
-                    className="
-                      border-l-4
-                      border-green-600
-                      bg-gray-50
-                      rounded-r-2xl
-                      p-5
-                    "
-                  >
+                <div
+                  key={item.id}
+                  className="
+                    border-l-4
+                    border-green-600
+                    bg-white/5
+                    rounded-r-2xl
+                    p-5
+                  "
+                >
 
-                    <div className="font-semibold text-gray-900">
-                      {item.descricao}
-                    </div>
-
-                    <div className="text-sm text-gray-600 mt-2">
-                      {item.data}
-                    </div>
-
+                  <div className="font-semibold text-white">
+                    {ACAO_LABEL[item.acao] || item.acao}
                   </div>
 
-                ))
+                  <div className="text-sm text-gray-400 mt-2">
+                    {new Date(item.createdAt).toLocaleString("pt-BR")}
+                  </div>
+
+                </div>
+
+              ))
 
             ) : (
 
-              <div className="border rounded-2xl p-5">
+              <div className="border border-white/10 rounded-2xl p-5">
 
-                <div className="text-gray-700">
+                <div className="text-gray-300">
                   Nenhuma movimentação registrada.
                 </div>
 

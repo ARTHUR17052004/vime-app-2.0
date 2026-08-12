@@ -7,6 +7,8 @@ import Select from "../ui/Select";
 import Button from "../ui/Button";
 import Textarea from "../ui/Textarea";
 
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function KitnetForm({
   onSave,
   onCancel,
@@ -19,39 +21,79 @@ export default function KitnetForm({
     nome: "",
     unidadeId: "",
     unidadeNome: "",
-    metragem: "",
-    status: "Disponível",
-    aluguel: "",
     numero: "",
+    metragem: "",
+    aluguel: "",
+    status: "DISPONIVEL",
     observacoes: "",
   });
 
+  /* ======================================
+     CARREGA UNIDADES
+  ====================================== */
+
   useEffect(() => {
 
-    const unidadesSalvas = JSON.parse(
-      localStorage.getItem("vime-unidades") || "[]"
-    );
+    async function carregarUnidades() {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setUnidades(unidadesSalvas);
+      try {
+
+        const resposta =
+          await UnidadeService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        setUnidades(lista);
+
+      } catch (err) {
+
+        console.error(
+          "Erro ao carregar unidades:",
+          err
+        );
+
+      }
+
+    }
+
+    carregarUnidades();
 
   }, []);
+
+  /* ======================================
+     EDIÇÃO
+  ====================================== */
 
   useEffect(() => {
 
     if (kitnet) {
 
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
 
         nome: kitnet.nome || "",
-        unidadeId: kitnet.unidadeId || "",
-        unidadeNome: kitnet.unidadeNome || "",
-        metragem: kitnet.metragem || "",
-        status: kitnet.status || "Disponível",
-        aluguel: kitnet.aluguel || "",
-        numero: kitnet.numero || "",
-        observacoes: kitnet.observacoes || "",
+
+        unidadeId:
+          kitnet.unidadeId || "",
+
+        unidadeNome:
+          kitnet.unidadeNome || "",
+
+        numero:
+          kitnet.numero || "",
+
+        metragem:
+          kitnet.metragem || "",
+
+        aluguel:
+          kitnet.aluguel || "",
+
+        status:
+          kitnet.status || "DISPONIVEL",
+
+        observacoes:
+          kitnet.observacoes || "",
 
       });
 
@@ -62,10 +104,10 @@ export default function KitnetForm({
         nome: "",
         unidadeId: "",
         unidadeNome: "",
-        metragem: "",
-        status: "Disponível",
-        aluguel: "",
         numero: "",
+        metragem: "",
+        aluguel: "",
+        status: "DISPONIVEL",
         observacoes: "",
 
       });
@@ -73,6 +115,10 @@ export default function KitnetForm({
     }
 
   }, [kitnet]);
+
+  /* ======================================
+     ALTERAÇÃO
+  ====================================== */
 
   function handleChange(e) {
 
@@ -90,7 +136,8 @@ export default function KitnetForm({
 
         unidadeId: value,
 
-        unidadeNome: unidade?.nome || "",
+        unidadeNome:
+          unidade?.nome || "",
 
       }));
 
@@ -108,11 +155,29 @@ export default function KitnetForm({
 
   }
 
+  /* ======================================
+     SALVAR
+  ====================================== */
+
   function handleSubmit(e) {
 
     e.preventDefault();
 
-    onSave(formData);
+    onSave({
+
+      nome: formData.nome,
+
+      unidadeId: formData.unidadeId,
+
+      numero: formData.numero,
+
+      metragem: Number(formData.metragem),
+
+      aluguel: Number(formData.aluguel),
+
+      status: formData.status,
+
+    });
 
   }
 
@@ -141,7 +206,13 @@ export default function KitnetForm({
           required
         >
 
-          <option value="">
+          <option
+            value=""
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
             Selecione...
           </option>
 
@@ -150,10 +221,12 @@ export default function KitnetForm({
             <option
               key={unidade.id}
               value={unidade.id}
+              style={{
+                backgroundColor:"#1d2833",
+                color:"#fff",
+              }}
             >
-
               {unidade.nome}
-
             </option>
 
           ))}
@@ -170,6 +243,7 @@ export default function KitnetForm({
         <Input
           label="Metragem (m²)"
           name="metragem"
+          type="number"
           value={formData.metragem}
           onChange={handleChange}
         />
@@ -177,6 +251,7 @@ export default function KitnetForm({
         <Input
           label="Valor do aluguel"
           name="aluguel"
+          type="number"
           value={formData.aluguel}
           onChange={handleChange}
         />
@@ -188,11 +263,35 @@ export default function KitnetForm({
           onChange={handleChange}
         >
 
-          <option>Disponível</option>
+          <option
+            value="DISPONIVEL"
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
+            Disponível
+          </option>
 
-          <option>Ocupada</option>
+          <option
+            value="OCUPADA"
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
+            Ocupada
+          </option>
 
-          <option>Manutenção</option>
+          <option
+            value="MANUTENCAO"
+            style={{
+              backgroundColor:"#1d2833",
+              color:"#fff",
+            }}
+          >
+            Manutenção
+          </option>
 
         </Select>
 
@@ -206,11 +305,20 @@ export default function KitnetForm({
         onChange={handleChange}
       />
 
-      <div className="flex justify-end gap-4 pt-4 border-t border-white/10">
+      <div
+        className="
+          flex
+          justify-end
+          gap-4
+          pt-4
+          border-t
+          border-white/10
+        "
+      >
 
         <Button
-          variant="secondary"
           type="button"
+          variant="secondary"
           onClick={onCancel}
         >
           Cancelar

@@ -39,9 +39,14 @@ export default function OcorrenciaCard() {
         <div
           key={item.id}
           className="
-            bg-white
+            bg-gradient-to-br
+            from-[#202a36]/95
+            via-[#1b2430]/96
+            to-[#151c25]/96
+            backdrop-blur-xl
+            border
+            border-white/[0.07]
             rounded-3xl
-            shadow
             p-8
           "
         >
@@ -50,19 +55,19 @@ export default function OcorrenciaCard() {
 
             <div className="flex-1">
 
-              <h2 className="text-3xl font-bold text-gray-900">
+              <h2 className="text-3xl font-bold text-white">
                 {item.titulo}
               </h2>
 
-              <div className="text-gray-800 mt-4 text-lg">
+              <div className="text-gray-200 mt-4 text-lg">
                 {item.descricao}
               </div>
 
-              <div className="mt-6 text-gray-700">
+              <div className="mt-6 text-gray-400">
                 {item.categoria}
               </div>
 
-              <div className="text-gray-700">
+              <div className="text-gray-400">
                 Morador: {item.morador}
               </div>
 
@@ -72,10 +77,11 @@ export default function OcorrenciaCard() {
               defaultValue={item.status}
               className="
                 border
+                border-white/10
                 rounded-2xl
                 p-3
-                text-gray-900
-                bg-white
+                text-white
+                bg-white/5
               "
             >
 
@@ -101,18 +107,18 @@ export default function OcorrenciaCard() {
 
           <div
             className="
-              bg-gray-100
+              bg-white/5
               rounded-2xl
               p-5
               mt-6
             "
           >
 
-            <div className="text-gray-700 text-sm">
+            <div className="text-gray-400 text-sm">
               Resposta da Administração
             </div>
 
-            <div className="text-gray-900 mt-3 text-lg">
+            <div className="text-gray-200 mt-3 text-lg">
               {item.resposta}
             </div>
 
@@ -122,12 +128,12 @@ export default function OcorrenciaCard() {
             className="
               mt-6
               border
-              border-gray-300
+              border-white/10
               px-6
               py-3
               rounded-2xl
-              hover:bg-gray-100
-              text-gray-900
+              hover:bg-white/5
+              text-white
               font-medium
             "
           >

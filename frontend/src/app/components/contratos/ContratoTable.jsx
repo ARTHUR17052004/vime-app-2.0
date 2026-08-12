@@ -3,122 +3,202 @@
 import { useState } from "react";
 import Link from "next/link";
 
+import {
+  MoreVertical,
+  Eye,
+  Pencil,
+  Trash2,
+  Download,
+} from "lucide-react";
+
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
 
 export default function ContratoTable({
   contratos = [],
   onEdit,
   onDelete,
+  onBaixarPdf,
 }) {
-  const [menuAberto, setMenuAberto] = useState(null);
 
-  if (contratos.length === 0) {
+  const [menuAberto, setMenuAberto] =
+    useState(null);
+
+  const [menuPosition, setMenuPosition] =
+    useState({
+      top: 0,
+      left: 0,
+    });
+
+  function abrirMenu(e, id) {
+
+  const rect = e.currentTarget.getBoundingClientRect();
+
+  const larguraMenu = 220;
+
+  let left = rect.right - larguraMenu;
+  let top = rect.bottom + 8;
+
+  // evita sair da tela pela direita
+  if (left + larguraMenu > window.innerWidth - 16) {
+    left = window.innerWidth - larguraMenu - 16;
+  }
+
+  // evita ficar muito colado na esquerda
+  if (left < 16) {
+    left = 16;
+  }
+
+  setMenuPosition({
+    top,
+    left,
+  });
+
+  setMenuAberto(id);
+
+}
+
+  if (!contratos.length) {
+
     return (
+
       <div
         className="
-          rounded-[22px]
+          rounded-3xl
           border
-          border-white/5
-          bg-linear-to-br
-          from-[#1b2728]/80
-          via-[#1a242c]/75
-          to-[#151d26]/80
+          border-white/10
+
+          bg-slate-900/80
+
           backdrop-blur-xl
+
+          shadow-xl
+
           p-14
+
           text-center
         "
       >
-        <h2 className="text-2xl font-bold text-white mb-2">
+
+        <h2 className="text-2xl font-bold text-white">
+
           Nenhum contrato cadastrado
+
         </h2>
 
-        <p className="text-gray-400">
-          Cadastre um contrato para começar.
+        <p className="mt-3 text-gray-400">
+
+          Cadastre o primeiro contrato para começar.
+
         </p>
+
       </div>
+
     );
+
   }
 
   return (
-    <Table>
-      <table className="w-full text-gray-200">
 
-        <thead className="border-b border-white/10">
+  <Table>
 
-          <tr>
+    <table className="w-full text-gray-200">
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Inquilino
-            </th>
+      <thead className="border-b border-white/10">
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Unidade
-            </th>
+        <tr>
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Kitnet
-            </th>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Inquilino
+          </th>
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Aluguel
-            </th>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Unidade
+          </th>
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Vencimento
-            </th>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Kitnet
+          </th>
 
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-              Status
-            </th>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Aluguel
+          </th>
 
-            <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-gray-400">
-              Ações
-            </th>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Vencimento
+          </th>
 
-          </tr>
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+            Status
+          </th>
 
-        </thead>
+          <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-gray-400">
+            Ações
+          </th>
 
-        <tbody>
+        </tr>
 
-          {contratos.map((contrato) => (
+      </thead>
 
-            <tr
-              key={contrato.id}
-              className="
-                border-b
-                border-white/5
-                hover:bg-white/5
-                transition
-              "
-            >
+      <tbody>
 
-              <td className="px-6 py-5">
+        {contratos.map((contrato) => (
 
-                <div className="font-semibold">
-                  {contrato.inquilinoNome || "-"}
-                </div>
+          <tr
+            key={contrato.id}
+            className="
+              border-b
+              border-white/5
+              hover:bg-white/5
+              transition-all
+            "
+          >
 
-              </td>
+            <td className="px-6 py-5 font-semibold">
 
-              <td className="px-6 py-5">
-                {contrato.unidadeNome || "-"}
-              </td>
+              {contrato.inquilino?.nome ||
+                contrato.inquilinoNome ||
+                "-"}
 
-              <td className="px-6 py-5">
-                {contrato.kitnetNome || "-"}
-              </td>
+            </td>
 
-              <td className="px-6 py-5">
-                R$ {contrato.valorAluguel || "0,00"}
-              </td>
+            <td className="px-6 py-5">
 
-              <td className="px-6 py-5">
-                Dia {contrato.diaVencimento || "-"}
-              </td>
+              {contrato.unidade?.nome ||
+                contrato.unidadeNome ||
+                "-"}
 
-              <td className="px-6 py-5">
+            </td>
+
+            <td className="px-6 py-5">
+
+              {contrato.kitnet?.nome ||
+                contrato.kitnetNome ||
+                "-"}
+
+            </td>
+
+            <td className="px-6 py-5">
+
+              R$ {Number(
+                contrato.valorAluguel || 0
+              ).toLocaleString(
+                "pt-BR",
+                {
+                  minimumFractionDigits: 2,
+                }
+              )}
+
+            </td>
+
+            <td className="px-6 py-5">
+
+              Dia {contrato.diaVencimento}
+
+            </td>
+
+            <td className="px-6 py-5">
 
               <Badge
                 variant={
@@ -131,110 +211,199 @@ export default function ContratoTable({
                     : "red"
                 }
               >
+
                 {contrato.status}
+
               </Badge>
 
-              </td>
+            </td>
 
-              <td className="px-6 py-5 text-center relative">
+            <td className="px-6 py-5 text-center">
 
-                <button
-                  onClick={() =>
-                    setMenuAberto(
-                      menuAberto === contrato.id
-                        ? null
-                        : contrato.id
-                    )
+              <button
+                onClick={(e) => {
+
+                  if (
+                    menuAberto === contrato.id
+                  ) {
+
+                    setMenuAberto(null);
+
+                    return;
+
                   }
+
+                  abrirMenu(
+                    e,
+                    contrato.id
+                  );
+
+                }}
+                className="
+                  flex
+                  items-center
+                  justify-center
+
+                  w-10
+                  h-10
+
+                  mx-auto
+
+                  rounded-xl
+
+                  bg-white/5
+
+                  hover:bg-white/10
+
+                  transition-all
+                "
+              >
+
+                <MoreVertical
+                  size={18}
+                  className="text-gray-300"
+                />
+
+              </button>
+
+              <ActionMenu
+                open={
+                  menuAberto === contrato.id
+                }
+                position={menuPosition}
+                onClose={() =>
+                  setMenuAberto(null)
+                }
+              >
+                                <Link
+                  href={`/contratos/${contrato.id}`}
                   className="
-                    w-10
-                    h-10
-                    rounded-xl
-                    bg-white/5
-                    hover:bg-white/10
+                    flex
+                    items-center
+                    gap-3
+
+                    px-5
+                    py-3
+
+                    text-gray-300
+
+                    hover:bg-white/5
                     transition
                   "
                 >
-                  ⋮
+
+                  <Eye size={18} />
+
+                  Visualizar
+
+                </Link>
+
+                <button
+                  onClick={() => {
+
+                    setMenuAberto(null);
+
+                    onBaixarPdf?.(contrato.id);
+
+                  }}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+
+                    w-full
+
+                    px-5
+                    py-3
+
+                    text-emerald-400
+
+                    hover:bg-emerald-500/10
+                    transition
+                  "
+                >
+
+                  <Download size={18} />
+
+                  Baixar PDF
+
                 </button>
 
-                {menuAberto === contrato.id && (
+                <button
+                  onClick={() => {
 
-                  <div
-                    className="
-                      absolute
-                      right-2
-                      top-12
-                      w-44
-                      rounded-2xl
-                      border
-                      border-white/10
-                      bg-slate-900
-                      shadow-2xl
-                      overflow-hidden
-                      z-50
-                    "
-                  >
+                    setMenuAberto(null);
 
-                    <Link
-                      href={`/contratos/${contrato.id}`}
-                      className="
-                        block
-                        px-4
-                        py-3
-                        hover:bg-white/5
-                      "
-                    >
-                      Visualizar
-                    </Link>
+                    onEdit?.(contrato);
 
-                    <button
-                      onClick={() => {
-                        onEdit?.(contrato);
-                        setMenuAberto(null);
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        text-yellow-400
-                        hover:bg-yellow-500/10
-                      "
-                    >
-                      Editar
-                    </button>
+                  }}
+                  className="
+                    flex
+                    items-center
+                    gap-3
 
-                    <button
-                      onClick={() => {
-                        onDelete?.(contrato.id);
-                        setMenuAberto(null);
-                      }}
-                      className="
-                        w-full
-                        text-left
-                        px-4
-                        py-3
-                        text-red-400
-                        hover:bg-red-500/10
-                      "
-                    >
-                      Excluir
-                    </button>
+                    w-full
 
-                  </div>
+                    px-5
+                    py-3
 
-                )}
+                    text-yellow-400
 
-              </td>
+                    hover:bg-yellow-500/10
+                    transition
+                  "
+                >
 
-            </tr>
+                  <Pencil size={18} />
 
-          ))}
+                  Editar
 
-        </tbody>
+                </button>
 
-      </table>
-    </Table>
-  );
+                <button
+                  onClick={() => {
+
+                    setMenuAberto(null);
+
+                    onDelete?.(contrato.id);
+
+                  }}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+
+                    w-full
+
+                    px-5
+                    py-3
+
+                    text-red-400
+
+                    hover:bg-red-500/10
+                    transition
+                  "
+                >
+
+                  <Trash2 size={18} />
+
+                  Excluir
+
+                </button>
+
+              </ActionMenu>
+
+            </td>
+
+          </tr>
+
+        ))}
+
+      </tbody>
+
+    </table>
+
+  </Table>
+
+);
 }

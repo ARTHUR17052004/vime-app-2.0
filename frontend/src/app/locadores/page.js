@@ -1,19 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
 
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import PageHeader from "../components/ui/PageHeader";
+import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
+import FadeIn from "../components/ui/FadeIn";
 
 import SearchInput from "../components/common/SearchInput";
 
 import LocadorModal from "../components/locadores/LocadorModal";
 import LocadorForm from "../components/locadores/LocadorForm";
-import LocadorCard from "../components/locadores/LocadorCard";
+import LocadorCardList from "../components/locadores/LocadorCardList";
+
+import { LocadorService } from "@/services/locadores.service";
 
 export default function LocadoresPage() {
 
@@ -21,101 +25,83 @@ export default function LocadoresPage() {
 
   const [locadores, setLocadores] = useState([]);
 
-  const [locadorEditando, setLocadorEditando] =
-    useState(null);
+  const [locadorEditando, setLocadorEditando] = useState(null);
 
-  const [carregado, setCarregado] =
-    useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const [search, setSearch] =
-    useState("");
+  const [error, setError] = useState("");
 
-  useEffect(() => {
+  const [search, setSearch] = useState("");
 
-    const dados = JSON.parse(
+  const carregarLocadores = useCallback(async () => {
 
-      localStorage.getItem(
-        "vime-locadores"
-      ) || "[]"
+    try {
 
-    );
+      setLoading(true);
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocadores(dados);
+      setError("");
 
-    setCarregado(true);
+      const response = await LocadorService.listar();
+
+      setLocadores(response.data || response);
+
+    } catch (err) {
+
+      console.error(err);
+
+      setError("Não foi possível carregar os locadores.");
+
+    } finally {
+
+      setLoading(false);
+
+    }
 
   }, []);
 
   useEffect(() => {
 
-    if (!carregado) return;
+    carregarLocadores();
 
-    localStorage.setItem(
+  }, [carregarLocadores]);
 
-      "vime-locadores",
+  async function salvarLocador(dados) {
 
-      JSON.stringify(locadores)
+    try {
 
-    );
+      if (locadorEditando) {
 
-  }, [locadores, carregado]);
+        await LocadorService.atualizar(
 
-  const salvarLocador = (dados) => {
+          locadorEditando.id,
 
-    if (locadorEditando) {
-
-      const listaAtualizada =
-        locadores.map((item) =>
-
-          item.id === locadorEditando.id
-            ? {
-                ...item,
-                ...dados,
-              }
-            : item
+          dados
 
         );
 
-      setLocadores(listaAtualizada);
+      } else {
+
+        await LocadorService.criar(dados);
+
+      }
+
+      await carregarLocadores();
 
       setLocadorEditando(null);
 
       setModalOpen(false);
 
-      return;
+    } catch (err) {
+
+      console.error(err);
+
+      alert("Erro ao salvar locador.");
 
     }
 
-    const novoLocador = {
+  }
 
-      id: Date.now(),
-
-      ...dados,
-
-    };
-
-    setLocadores((prev) => [
-
-      ...prev,
-
-      novoLocador,
-
-    ]);
-
-    setModalOpen(false);
-
-  };
-
-  const editarLocador = (locador) => {
-
-    setLocadorEditando(locador);
-
-    setModalOpen(true);
-
-  };
-
-  const excluirLocador = (id) => {
+  async function excluirLocador(id) {
 
     const confirmar = window.confirm(
       "Deseja excluir este locador?"
@@ -123,58 +109,72 @@ export default function LocadoresPage() {
 
     if (!confirmar) return;
 
-    setLocadores((prev) =>
+    try {
 
-      prev.filter(
+      await LocadorService.excluir(id);
 
-        (locador) =>
-          locador.id !== id
+      await carregarLocadores();
 
-      )
+    } catch (err) {
 
-    );
+      console.error(err);
 
-  };
+      alert("Erro ao excluir locador.");
 
-  const novoLocador = () => {
+    }
+
+  }
+
+  function editarLocador(locador) {
+
+    setLocadorEditando(locador);
+
+    setModalOpen(true);
+
+  }
+
+  function novoLocador() {
 
     setLocadorEditando(null);
 
     setModalOpen(true);
 
-  };
+  }
 
-  const locadoresFiltrados =
-    locadores.filter((locador) => {
+  const locadoresFiltrados = locadores.filter((locador) => {
 
-      const termo =
-        search.toLowerCase();
+    const termo = search.toLowerCase();
 
-      return (
+    return (
 
-        locador.nome
-          ?.toLowerCase()
-          .includes(termo) ||
+      locador.nome
+        ?.toLowerCase()
+        .includes(termo)
 
-        locador.email
-          ?.toLowerCase()
-          .includes(termo) ||
+      ||
 
-        locador.documento
-          ?.toLowerCase()
-          .includes(termo)
+      locador.email
+        ?.toLowerCase()
+        .includes(termo)
 
-      );
+      ||
 
-    });
+      locador.documento
+        ?.toLowerCase()
+        .includes(termo)
 
+    );
+
+  });
   return (
 
-    <MainLayout>
+  <MainLayout>
 
-      <Page>
+    <Page>
 
-        <PageContainer>
+      <PageContainer>
+
+        <FadeIn>
 
           <PageHeader
             title="Locadores"
@@ -188,54 +188,89 @@ export default function LocadoresPage() {
             }
           />
 
-          <div className="mt-8">
+        </FadeIn>
 
-            <SearchInput
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              placeholder="Pesquisar locador..."
-            />
+        {loading && (
+
+          <div className="mt-10 text-center text-gray-400">
+
+            Carregando locadores...
 
           </div>
 
-          <div className="mt-8">
+        )}
 
-            <LocadorCard
-              locadores={locadoresFiltrados}
-              onDelete={excluirLocador}
-              onEdit={editarLocador}
-            />
+        {error && (
+
+          <div className="mt-10 text-center text-red-400">
+
+            {error}
 
           </div>
 
-          <LocadorModal
-            isOpen={modalOpen}
-            onClose={() => {
+        )}
 
-              setModalOpen(false);
+        {!loading && !error && (
 
-              setLocadorEditando(null);
+          <>
 
-            }}
-          >
+            <FadeIn delay={0.10}>
 
-            <LocadorForm
-              onSave={salvarLocador}
-              locadorEditando={
-                locadorEditando
-              }
-            />
+              <PageSection>
 
-          </LocadorModal>
+                <SearchInput
+                  value={search}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
+                  placeholder="Pesquisar locador..."
+                />
 
-        </PageContainer>
+              </PageSection>
 
-      </Page>
+            </FadeIn>
 
-    </MainLayout>
+            <FadeIn delay={0.20}>
 
-  );
+              <PageSection>
 
+                <LocadorCardList
+                  locadores={locadoresFiltrados}
+                  onDelete={excluirLocador}
+                  onEdit={editarLocador}
+                />
+
+              </PageSection>
+
+            </FadeIn>
+
+          </>
+
+        )}
+
+        <LocadorModal
+          isOpen={modalOpen}
+          onClose={() => {
+
+            setModalOpen(false);
+
+            setLocadorEditando(null);
+
+          }}
+        >
+
+          <LocadorForm
+            onSave={salvarLocador}
+            locadorEditando={locadorEditando}
+          />
+
+        </LocadorModal>
+
+      </PageContainer>
+
+    </Page>
+
+  </MainLayout>
+
+);
 }

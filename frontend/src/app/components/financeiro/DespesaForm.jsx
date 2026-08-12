@@ -15,15 +15,11 @@ export default function DespesaForm({
 
       valor: "",
 
-      status: "Pago",
+      status: "PAGO",
 
-      dataDespesa: "",
+      vencimento: "",
 
       dataPagamento: "",
-
-      fornecedor: "",
-
-      observacoes: "",
     });
 
   useEffect(() => {
@@ -48,14 +44,14 @@ export default function DespesaForm({
   };
 
   const inputStyle =
-    "border border-gray-300 rounded-xl p-3 w-full";
+    "border border-white/10 bg-white/5 text-white rounded-xl p-3 w-full";
 
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-bold">
+      <h2 className="text-3xl font-bold text-white">
         {despesaEditando
           ? "Editar Despesa"
           : "Nova Despesa"}
@@ -105,43 +101,37 @@ export default function DespesaForm({
           onChange={handleChange}
           className={inputStyle}
         >
-          <option>Pago</option>
-          <option>Pendente</option>
+          <option value="PAGO">Pago</option>
+          <option value="PENDENTE">Pendente</option>
         </select>
 
-        <input
-          type="date"
-          name="dataDespesa"
-          value={formData.dataDespesa}
-          onChange={handleChange}
-          className={inputStyle}
-        />
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5">
+            Vencimento
+          </label>
+          <input
+            type="date"
+            name="vencimento"
+            value={formData.vencimento}
+            onChange={handleChange}
+            className={`${inputStyle} w-full`}
+          />
+        </div>
 
-        <input
-          type="date"
-          name="dataPagamento"
-          value={formData.dataPagamento}
-          onChange={handleChange}
-          className={inputStyle}
-        />
-
-        <input
-          name="fornecedor"
-          placeholder="Fornecedor"
-          value={formData.fornecedor}
-          onChange={handleChange}
-          className={inputStyle}
-        />
+        <div>
+          <label className="block text-xs text-gray-500 mb-1.5">
+            Data de Pagamento
+          </label>
+          <input
+            type="date"
+            name="dataPagamento"
+            value={formData.dataPagamento}
+            onChange={handleChange}
+            className={`${inputStyle} w-full`}
+          />
+        </div>
 
       </div>
-
-      <textarea
-        name="observacoes"
-        placeholder="Observações"
-        value={formData.observacoes}
-        onChange={handleChange}
-        className={`${inputStyle} min-h-[120px]`}
-      />
 
       <div className="flex justify-end">
         <button

@@ -1,29 +1,87 @@
-const prisma = require('../config/prisma');
+const prisma = require("../config/prisma");
 
 const listar = () => {
   return prisma.locador.findMany({
     orderBy: {
-      createdAt: 'desc'
-    }
+      createdAt: "desc",
+    },
   });
 };
 
 const criar = (dados) => {
   return prisma.locador.create({
-    data: dados
+    data: {
+      tipoPessoa: dados.tipoPessoa,
+      nome: dados.nome,
+      cpfCnpj: dados.documento,
+      email: dados.email,
+      telefone: dados.telefone,
+      banco: dados.banco,
+      agencia: dados.agencia,
+      conta: dados.conta,
+      pix: dados.pix,
+
+      taxaAdministracao:
+        dados.taxaAdministracao === ""
+          ? 0
+          : Number(dados.taxaAdministracao),
+
+      multa:
+        dados.multa === ""
+          ? 0
+          : Number(dados.multa),
+
+      juros:
+        dados.juros === ""
+          ? 0
+          : Number(dados.juros),
+
+      observacoes: dados.observacoes,
+    },
   });
 };
 
 const atualizar = (id, dados) => {
   return prisma.locador.update({
-    where: { id },
-    data: dados
+    where: {
+      id,
+    },
+    data: {
+      tipoPessoa: dados.tipoPessoa,
+      nome: dados.nome,
+      cpfCnpj: dados.documento,
+      email: dados.email,
+      telefone: dados.telefone,
+      banco: dados.banco,
+      agencia: dados.agencia,
+      conta: dados.conta,
+      pix: dados.pix,
+
+      taxaAdministracao:
+        dados.taxaAdministracao === ""
+          ? 0
+          : Number(dados.taxaAdministracao),
+
+      multa:
+        dados.multa === ""
+          ? 0
+          : Number(dados.multa),
+
+      juros:
+        dados.juros === ""
+          ? 0
+          : Number(dados.juros),
+
+      observacoes: dados.observacoes,
+    },
   });
 };
 
 const remover = (id) => {
   return prisma.locador.delete({
-    where: { id }
+    where: {
+      id,
+    },
   });
 };
 
@@ -31,5 +89,5 @@ module.exports = {
   listar,
   criar,
   atualizar,
-  remover
+  remover,
 };

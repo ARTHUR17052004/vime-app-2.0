@@ -15,46 +15,14 @@ const status = async (req, res) => {
   });
 };
 
-// ==========================
-// DOCUMENTOS (VIME)
-// ==========================
+const testarConexao = async (req, res) => {
 
-const listarDocumentos = async (req, res) => {
+  const resultado = await clicksignService.testarConexao();
 
-  const dados = await clicksignService.listarDocumentos();
-
-  return res.json({
-    success: true,
-    data: dados
-  });
-
-};
-
-const buscarDocumento = async (req, res) => {
-
-  const documento = await clicksignService.buscarDocumento(req.params.id);
-
-  if (!documento) {
-    return res.status(404).json({
-      success: false,
-      message: "Documento não encontrado."
-    });
-  }
-
-  return res.json({
-    success: true,
-    data: documento
-  });
-
-};
-
-const criarDocumento = async (req, res) => {
-
-  const dados = await clicksignService.criarDocumento(req.body);
-
-  return res.status(201).json({
-    success: true,
-    data: dados
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
   });
 
 };
@@ -72,9 +40,11 @@ const enviarDocumento = async (req, res) => {
 
 const sincronizar = async (req, res) => {
 
+  const dados = await clicksignService.sincronizar();
+
   return res.json({
     success: true,
-    data: await clicksignService.sincronizar()
+    data: dados
   });
 
 };
@@ -143,7 +113,7 @@ const enviarAssinatura = async (req, res) => {
 
 const webhook = async (req, res) => {
 
-  const dados = await clicksignService.sincronizar(req.body);
+  const dados = await clicksignService.processarWebhook(req.body);
 
   return res.json(dados);
 
@@ -152,10 +122,8 @@ const webhook = async (req, res) => {
 module.exports = {
   config,
   status,
+  testarConexao,
 
-  listarDocumentos,
-  buscarDocumento,
-  criarDocumento,
   enviarDocumento,
   sincronizar,
 

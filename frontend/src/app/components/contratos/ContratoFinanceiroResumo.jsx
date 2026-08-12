@@ -42,28 +42,28 @@ export default function ContratoFinanceiroResumo({
       titulo: "Aluguel",
       valor: `R$ ${valorAluguel}`,
       icone: DollarSign,
-      cor: "bg-green-100 text-green-700",
+      cor: "bg-emerald-500/10 text-emerald-400",
     },
 
     {
       titulo: "Receita Anual",
       valor: `R$ ${receitaAnual}`,
       icone: TrendingUp,
-      cor: "bg-blue-100 text-blue-700",
+      cor: "bg-sky-500/10 text-sky-400",
     },
 
     {
       titulo: "Meses Restantes",
       valor: mesesRestantes,
       icone: Calendar,
-      cor: "bg-yellow-100 text-yellow-700",
+      cor: "bg-yellow-500/10 text-yellow-400",
     },
 
     {
       titulo: "Status",
       valor: contrato?.status,
       icone: FileText,
-      cor: "bg-gray-100 text-gray-700",
+      cor: "bg-white/5 text-gray-300",
     },
   ];
 
@@ -74,18 +74,18 @@ export default function ContratoFinanceiroResumo({
 
         <div
           key={card.titulo}
-          className="bg-white rounded-3xl shadow p-6"
+          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6"
         >
 
           <div className="flex justify-between items-center">
 
             <div>
 
-              <p className="text-gray-500 text-sm">
+              <p className="text-gray-400 text-sm">
                 {card.titulo}
               </p>
 
-              <h2 className="text-2xl font-bold mt-3">
+              <h2 className="text-2xl font-bold text-white mt-3">
                 {card.valor}
               </h2>
 

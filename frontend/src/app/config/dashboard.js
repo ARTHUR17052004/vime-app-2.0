@@ -7,13 +7,13 @@ const dashboard = {
     radius: "rounded-[22px]",
 
     background:
-      "bg-gradient-to-br from-[#1d262f]/78 via-[#1a212b]/74 to-[#151b24]/80",
+      "bg-gradient-to-br from-[#1d262f]/96 via-[#1a212b]/94 to-[#151b24]/96",
 
     border:
-      "border border-white/[0.06]",
+      "border border-white/[0.10]",
 
     blur:
-      "backdrop-blur-[26px]",
+      "backdrop-blur-md",
 
     shadow:
       "shadow-[0_12px_35px_rgba(0,0,0,.22)]",

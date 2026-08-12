@@ -1,15 +1,17 @@
 "use client";
 
-export default function StepKitnet({
+export default function KitnetStep({
   formData,
   handleChange,
   kitnets,
 }) {
+
   const inputStyle =
-    "border border-gray-300 rounded-xl p-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500";
+    "w-full border border-white/10 rounded-xl p-3 text-white bg-white/5 backdrop-blur placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
 
   const kitnetsDisponiveis =
     kitnets.filter((kitnet) => {
+
       if (
         String(kitnet.id) ===
         String(formData.kitnetId)
@@ -17,16 +19,20 @@ export default function StepKitnet({
         return true;
       }
 
-      return (
-        kitnet.status !== "Ocupada"
-      );
+      return kitnet.status !== "Ocupada";
+
     });
 
   return (
-    <div className="grid gap-4">
+
+    <div className="grid gap-6">
+
       <div>
-        <label className="block text-sm text-gray-600 mb-2">
+
+        <label className="block text-sm font-medium text-gray-400 mb-2">
+
           Kitnet
+
         </label>
 
         <select
@@ -36,37 +42,53 @@ export default function StepKitnet({
           className={inputStyle}
           required
         >
-          <option value="">
+
+          <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+
             Selecione uma Kitnet
+
           </option>
 
-          {kitnetsDisponiveis.map(
-            (kitnet) => (
-              <option
-                key={kitnet.id}
-                value={kitnet.id}
-              >
-                {kitnet.unidadeNome} -{" "}
-                {kitnet.nome}{" "}
-                {kitnet.numero}
-              </option>
-            )
-          )}
+          {kitnetsDisponiveis.map((kitnet) => (
+
+            <option
+              key={kitnet.id}
+              value={kitnet.id}
+              style={{ backgroundColor: "#1d2833", color: "#fff" }}
+            >
+
+              {kitnet.unidade?.nome || kitnet.unidadeNome} • {kitnet.nome} • Nº {kitnet.numero}
+
+            </option>
+
+          ))}
+
         </select>
+
       </div>
 
-      <div className="bg-green-50 border border-green-200 rounded-xl p-4">
-        <p className="text-green-700 font-medium">
-          Vinculação da Kitnet
-        </p>
+      {formData.kitnetId && (
 
-        <p className="text-sm text-green-600 mt-1">
-          Ao salvar o inquilino,
-          a kitnet será marcada
-          como ocupada
-          automaticamente.
-        </p>
-      </div>
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4">
+
+          <p className="font-semibold text-emerald-400">
+
+            Vinculação automática
+
+          </p>
+
+          <p className="mt-2 text-sm text-emerald-300/80">
+
+            Ao concluir o cadastro, esta kitnet será vinculada ao inquilino e seu status será atualizado automaticamente para <strong>Ocupada</strong>.
+
+          </p>
+
+        </div>
+
+      )}
+
     </div>
+
   );
+
 }

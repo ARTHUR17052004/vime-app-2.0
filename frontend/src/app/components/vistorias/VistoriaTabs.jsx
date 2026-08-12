@@ -30,7 +30,19 @@ export default function VistoriaTabs({
 
   return (
 
-    <div className="flex flex-wrap gap-3 mb-8">
+    <div
+      className="
+        rounded-3xl
+        border
+        border-white/10
+        bg-slate-900/80
+        backdrop-blur-xl
+        p-2
+        mb-8
+      "
+    >
+
+      <div className="flex flex-wrap gap-2">
 
       {abas.map((aba) => (
 
@@ -42,9 +54,10 @@ export default function VistoriaTabs({
             )
           }
           className={`
-            px-6
-            py-3
-            rounded-2xl
+            px-5
+            py-2.5
+            rounded-xl
+            text-sm
             font-semibold
             transition-all
             duration-300
@@ -58,12 +71,9 @@ export default function VistoriaTabs({
                   shadow-emerald-500/20
                 `
                 : `
-                  bg-white/5
-                  border
-                  border-white/10
                   text-gray-300
-                  hover:bg-white/10
-                  hover:border-emerald-500/30
+                  hover:bg-white/5
+                  hover:text-white
                 `
             }
           `}
@@ -74,6 +84,8 @@ export default function VistoriaTabs({
         </button>
 
       ))}
+
+      </div>
 
     </div>
 

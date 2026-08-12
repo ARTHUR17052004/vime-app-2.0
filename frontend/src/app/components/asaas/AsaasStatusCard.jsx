@@ -1,43 +1,105 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
+import { AsaasService } from "@/services/asaas.service";
+
 export default function AsaasStatusCard() {
+  const [carregando, setCarregando] = useState(true);
+  const [atualizadoEm, setAtualizadoEm] = useState(null);
+
+  const [dados, setDados] = useState({
+    online: false,
+    configurado: false,
+    ambiente: "sandbox",
+    walletId: null,
+    webhookConfigurado: false,
+  });
+
+  useEffect(() => {
+    carregar();
+  }, []);
+
+  async function carregar() {
+    setCarregando(true);
+
+    try {
+      const [statusResp, configResp] = await Promise.all([
+        AsaasService.status(),
+        AsaasService.config(),
+      ]);
+
+      const status = statusResp.data || statusResp;
+      const config = configResp.data || configResp;
+
+      setDados({
+        online: !!status.online,
+        configurado: !!config.configurado,
+        ambiente: config.ambiente || "sandbox",
+        walletId: config.walletId || null,
+        webhookConfigurado: !!config.webhookConfigurado,
+      });
+
+      setAtualizadoEm(new Date());
+    } catch (err) {
+      console.error("Erro ao carregar status do Asaas:", err);
+    } finally {
+      setCarregando(false);
+    }
+  }
+
   const status = [
     {
       titulo: "API Asaas",
-      valor: "Conectada",
-      cor: "bg-green-500",
+      valor: !dados.configurado
+        ? "Não configurada"
+        : dados.online
+        ? "Conectada"
+        : "Falha na conexão",
+      cor: !dados.configurado
+        ? "bg-gray-500"
+        : dados.online
+        ? "bg-green-500"
+        : "bg-red-500",
     },
     {
       titulo: "Wallet",
-      valor: "Encontrada",
-      cor: "bg-green-500",
-    },
-    {
-      titulo: "Split",
-      valor: "Aguardando",
-      cor: "bg-yellow-400",
+      valor: dados.walletId ? "Encontrada" : "Não encontrada",
+      cor: dados.walletId ? "bg-green-500" : "bg-gray-500",
     },
     {
       titulo: "Webhook",
-      valor: "Configurado",
-      cor: "bg-green-500",
+      valor: dados.webhookConfigurado ? "Configurado" : "Não configurado",
+      cor: dados.webhookConfigurado ? "bg-green-500" : "bg-gray-500",
     },
     {
       titulo: "Ambiente",
-      valor: "Sandbox",
-      cor: "bg-blue-500",
+      valor: dados.ambiente === "producao" ? "Produção" : "Sandbox",
+      cor: dados.ambiente === "producao" ? "bg-emerald-500" : "bg-blue-500",
     },
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
 
-      <div className="px-8 py-6 border-b bg-gray-50">
-        <h2 className="text-2xl font-bold text-gray-800">
-          Status da Integração
-        </h2>
+      <div className="px-8 py-6 border-b border-white/[0.07] flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white">
+            Status da Integração
+          </h2>
 
-        <p className="text-gray-500 mt-1">
-          Acompanhe rapidamente a situação da conexão com o Asaas.
-        </p>
+          <p className="text-gray-400 mt-1">
+            Acompanhe rapidamente a situação da conexão com o Asaas.
+          </p>
+        </div>
+
+        <button
+          onClick={carregar}
+          disabled={carregando}
+          className="text-sm text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+        >
+          {carregando ? "Atualizando..." : "Atualizar"}
+        </button>
       </div>
 
       <div className="p-8 space-y-5">
@@ -55,13 +117,13 @@ export default function AsaasStatusCard() {
                 className={`w-3 h-3 rounded-full ${item.cor}`}
               />
 
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-200">
                 {item.titulo}
               </span>
 
             </div>
 
-            <span className="font-semibold text-gray-800">
+            <span className="font-semibold text-white">
               {item.valor}
             </span>
 
@@ -71,14 +133,16 @@ export default function AsaasStatusCard() {
 
       </div>
 
-      <div className="px-8 py-4 bg-gray-50 border-t flex justify-between">
+      <div className="px-8 py-4 border-t border-white/[0.07] flex justify-between">
 
-        <span className="text-gray-500">
+        <span className="text-gray-400">
           Última verificação
         </span>
 
-        <span className="font-semibold text-green-600">
-          Agora mesmo
+        <span className="font-semibold text-green-400">
+          {atualizadoEm
+            ? atualizadoEm.toLocaleTimeString("pt-BR")
+            : "—"}
         </span>
 
       </div>

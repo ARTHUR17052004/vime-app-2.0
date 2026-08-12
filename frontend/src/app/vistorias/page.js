@@ -4,9 +4,11 @@
 
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import { VistoriaService } from "@/services/vistoria.service";
 
 import VistoriaTabs from "../components/vistorias/VistoriaTabs";
 import VistoriaModal from "../components/vistorias/VistoriaModal";
@@ -46,144 +48,117 @@ export default function VistoriasPage() {
   const [carregado, setCarregado] =
     useState(false);
 
-  useEffect(() => {
-   
-  const dados = JSON.parse(
-    localStorage.getItem(
-      "vime-vistorias"
-    ) || "[]"
-  );
+  const carregar = useCallback(async () => {
 
-  const hoje =
-    new Date()
-      .toISOString()
-      .split("T")[0];
+    try {
 
-  const atualizadas =
-    dados.map((vistoria) => {
+      const resposta = await VistoriaService.listar();
 
-      if (
-        vistoria.status ===
-          "PROGRAMADA" &&
-        vistoria.dataProxima &&
-        vistoria.dataProxima < hoje
-      ) {
+      const dados = Array.isArray(resposta)
+        ? resposta
+        : resposta.data || [];
 
-        return {
+      const hoje = new Date().toISOString().split("T")[0];
+
+      const atualizadas = dados.map((vistoria) => {
+
+        const dataProxima = vistoria.dataProxima
+          ? new Date(vistoria.dataProxima).toISOString().split("T")[0]
+          : "";
+
+        const dataUltima = vistoria.dataUltima
+          ? new Date(vistoria.dataUltima).toISOString().split("T")[0]
+          : "";
+
+        const normalizada = {
           ...vistoria,
-          status:
-            "ATRASADA",
+          nomeVistoria: vistoria.titulo,
+          unidadeNome: vistoria.unidade,
+          kitnetNome: vistoria.kitnet,
+          dataUltima,
+          dataProxima,
         };
-
-      }
-
-      return vistoria;
-
-    });
-
-  setVistorias(
-    atualizadas
-  );
-
-  setCarregado(true);
-
-}, []);
-
-  useEffect(() => {
-
-    if (!carregado) return;
-
-    localStorage.setItem(
-      "vime-vistorias",
-      JSON.stringify(vistorias)
-    );
-
-  }, [vistorias, carregado]);
-
- const salvarVistoria = (
-  dados
-) => {
-
-  const agora =
-    new Date().toLocaleString(
-      "pt-BR"
-    );
-
-  if (vistoriaEditando) {
-
-    const listaAtualizada =
-      vistorias.map((item) => {
 
         if (
-          item.id !==
-          vistoriaEditando.id
+          normalizada.status === "PROGRAMADA" &&
+          dataProxima &&
+          dataProxima < hoje
         ) {
-          return item;
+
+          normalizada.status = "ATRASADA";
+
         }
 
-        return {
-
-          ...item,
-
-          ...dados,
-
-          historico: [
-
-            ...(item.historico || []),
-
-            {
-              data: agora,
-              descricao:
-                "Vistoria editada",
-            },
-
-          ],
-
-        };
+        return normalizada;
 
       });
 
-    setVistorias(
-      listaAtualizada
-    );
+      setVistorias(atualizadas);
 
-    setVistoriaEditando(
-      null
-    );
+    } catch (err) {
+
+      console.error("Erro ao carregar vistorias:", err);
+
+    } finally {
+
+      setCarregado(true);
+
+    }
+
+  }, []);
+
+  useEffect(() => {
+
+    carregar();
+
+  }, [carregar]);
+
+ const salvarVistoria = async (
+  dados
+) => {
+
+  const payload = {
+    titulo: dados.nomeVistoria || dados.titulo,
+    unidade: dados.unidadeNome,
+    kitnet: dados.kitnetNome,
+    categoria: dados.categoria,
+    criticidade: dados.criticidade,
+    periodicidade: dados.periodicidade,
+    responsavel: dados.responsavel,
+    dataUltima: dados.dataUltima || null,
+    dataProxima: dados.dataProxima || null,
+    status: dados.status,
+    checklist: dados.checklist,
+    fotos: dados.fotos,
+    observacoes: dados.observacoes,
+  };
+
+  try {
+
+    if (vistoriaEditando) {
+
+      await VistoriaService.atualizar(
+        vistoriaEditando.id,
+        payload
+      );
+
+    } else {
+
+      await VistoriaService.criar(payload);
+
+    }
+
+    await carregar();
+
+    setVistoriaEditando(null);
 
     setModalOpen(false);
 
-    return;
+  } catch (err) {
+
+    alert(err.message || "Erro ao salvar vistoria.");
 
   }
-
-  const novaVistoria = {
-
-    id: Date.now(),
-
-    ...dados,
-
-    historico: [
-
-      {
-        data: agora,
-        descricao:
-          "Vistoria criada",
-      },
-
-    ],
-
-  };
-
-  setVistorias((prev) => [
-
-    ...prev,
-
-    novaVistoria,
-
-  ]);
-
-  setModalOpen(false);
 
 };
 
@@ -191,15 +166,24 @@ export default function VistoriasPage() {
     vistoria
   ) => {
 
-    setVistoriaEditando(
-      vistoria
-    );
+    setVistoriaEditando({
+      ...vistoria,
+      nomeVistoria: vistoria.titulo,
+      unidadeNome: vistoria.unidade,
+      kitnetNome: vistoria.kitnet,
+      dataUltima: vistoria.dataUltima
+        ? new Date(vistoria.dataUltima).toISOString().split("T")[0]
+        : "",
+      dataProxima: vistoria.dataProxima
+        ? new Date(vistoria.dataProxima).toISOString().split("T")[0]
+        : "",
+    });
 
     setModalOpen(true);
 
   };
 
-  const excluirVistoria = (
+  const excluirVistoria = async (
     id
   ) => {
 
@@ -210,181 +194,102 @@ export default function VistoriasPage() {
 
     if (!confirmar) return;
 
-    setVistorias((prev) =>
-      prev.filter(
-        (vistoria) =>
-          vistoria.id !== id
-      )
-    );
+    try {
+
+      await VistoriaService.excluir(id);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao excluir vistoria.");
+
+    }
 
   };
 
-const concluirVistoria = (
+const concluirVistoria = async (
   id
 ) => {
 
-  setVistorias((prev) =>
-    prev.map((vistoria) => {
-
-      if (
-        vistoria.id !== id
-      ) {
-        return vistoria;
-      }
-
-      const hoje =
-        new Date();
-
-      const proximaData =
-        new Date(hoje);
-
-      switch (
-        vistoria.periodicidade
-      ) {
-
-        case "Semanal":
-          proximaData.setDate(
-            proximaData.getDate() + 7
-          );
-          break;
-
-        case "Quinzenal":
-          proximaData.setDate(
-            proximaData.getDate() + 15
-          );
-          break;
-
-        case "Mensal":
-          proximaData.setMonth(
-            proximaData.getMonth() + 1
-          );
-          break;
-
-        case "Bimestral":
-          proximaData.setMonth(
-            proximaData.getMonth() + 2
-          );
-          break;
-
-        case "Trimestral":
-          proximaData.setMonth(
-            proximaData.getMonth() + 3
-          );
-          break;
-
-        case "Semestral":
-          proximaData.setMonth(
-            proximaData.getMonth() + 6
-          );
-          break;
-
-        case "Anual":
-          proximaData.setFullYear(
-            proximaData.getFullYear() + 1
-          );
-          break;
-
-        default:
-          break;
-
-      }
-
-      const hojeFormatado =
-        hoje
-          .toISOString()
-          .split("T")[0];
-
-      const proximaFormatada =
-        proximaData
-          .toISOString()
-          .split("T")[0];
-
-      const agora =
-        new Date()
-          .toLocaleString(
-            "pt-BR"
-          );
-
-      return {
-
-        ...vistoria,
-
-        status:
-          "PROGRAMADA",
-
-        dataUltima:
-          hojeFormatado,
-
-        dataProxima:
-          proximaFormatada,
-
-        historico: [
-
-          ...(vistoria.historico || []),
-
-          {
-            data: agora,
-            descricao:
-              "Vistoria realizada",
-          },
-
-          {
-            data: agora,
-            descricao:
-              `Próxima execução programada para ${proximaFormatada}`,
-          },
-
-        ],
-
-      };
-
-    })
+  const vistoria = vistorias.find(
+    (item) => item.id === id
   );
+
+  const hoje = new Date();
+
+  const proximaData = new Date(hoje);
+
+  switch (vistoria?.periodicidade) {
+
+    case "Semanal":
+      proximaData.setDate(proximaData.getDate() + 7);
+      break;
+
+    case "Quinzenal":
+      proximaData.setDate(proximaData.getDate() + 15);
+      break;
+
+    case "Mensal":
+      proximaData.setMonth(proximaData.getMonth() + 1);
+      break;
+
+    case "Bimestral":
+      proximaData.setMonth(proximaData.getMonth() + 2);
+      break;
+
+    case "Trimestral":
+      proximaData.setMonth(proximaData.getMonth() + 3);
+      break;
+
+    case "Semestral":
+      proximaData.setMonth(proximaData.getMonth() + 6);
+      break;
+
+    case "Anual":
+      proximaData.setFullYear(proximaData.getFullYear() + 1);
+      break;
+
+    default:
+      break;
+
+  }
+
+  try {
+
+    await VistoriaService.atualizar(id, {
+      status: "PROGRAMADA",
+      dataUltima: hoje.toISOString(),
+      dataProxima: proximaData.toISOString(),
+    });
+
+    await carregar();
+
+  } catch (err) {
+
+    alert(err.message || "Erro ao concluir vistoria.");
+
+  }
 
 };
 
-  const cancelarVistoria = (
+  const cancelarVistoria = async (
   id
 ) => {
 
-  setVistorias((prev) =>
-    prev.map((vistoria) => {
+  try {
 
-      if (
-        vistoria.id !== id
-      ) {
-        return vistoria;
-      }
+    await VistoriaService.atualizar(id, {
+      status: "CANCELADA",
+    });
 
-      const agora =
-        new Date()
-          .toLocaleString(
-            "pt-BR"
-          );
+    await carregar();
 
-      return {
+  } catch (err) {
 
-        ...vistoria,
+    alert(err.message || "Erro ao cancelar vistoria.");
 
-        status:
-          "CANCELADA",
-
-        historico: [
-
-          ...(vistoria.historico || []),
-
-          {
-            data: agora,
-            descricao:
-              "Vistoria cancelada",
-          },
-
-        ],
-
-      };
-
-    })
-  );
+  }
 
 };
 
@@ -438,6 +343,16 @@ const concluirVistoria = (
   }
 
 });
+
+  if (!carregado) {
+    return (
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando vistorias...
+        </div>
+      </MainLayout>
+    );
+  }
 
    return (
 

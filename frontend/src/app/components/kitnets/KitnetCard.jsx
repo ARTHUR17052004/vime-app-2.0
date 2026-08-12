@@ -121,7 +121,7 @@ export default function KitnetCard({
         <InfoRow
           icon={<Building2 size={18} />}
           label="Unidade"
-          value={kitnet.unidadeNome || "-"}
+          value={kitnet.unidade?.nome || kitnet.unidadeNome || "-"}
         />
 
         <InfoRow

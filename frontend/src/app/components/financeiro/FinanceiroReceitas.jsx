@@ -31,15 +31,15 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const corStatus = (status) => {
-    if (status === "Pago") {
-      return "bg-green-100 text-green-700";
+    if (status === "PAGO" || status === "PAGA") {
+      return "bg-emerald-500/10 text-emerald-400";
     }
 
-    if (status === "Atrasado") {
-      return "bg-red-100 text-red-700";
+    if (status === "ATRASADA") {
+      return "bg-red-500/10 text-red-400";
     }
 
-    return "bg-yellow-100 text-yellow-700";
+    return "bg-yellow-500/10 text-yellow-400";
   };
 
   return (
@@ -89,7 +89,7 @@ export default function FinanceiroReceitas({
       </div>
 
       {receitas.length === 0 ? (
-        <div className="text-gray-500">
+        <div className="text-gray-400">
           Nenhuma receita cadastrada.
         </div>
       ) : (
@@ -138,7 +138,7 @@ export default function FinanceiroReceitas({
 
                 <tr
                   key={item.id}
-                  className="border-b"
+                  className="border-b border-white/5 hover:bg-white/5 transition"
                 >
 
                   <td className="py-5">
@@ -154,17 +154,37 @@ export default function FinanceiroReceitas({
                   </td>
 
                   <td>
-                    <Badge
-                      color={
-                        item.status === "Pago"
-                          ? "green"
-                          : item.status === "Atrasado"
-                          ? "red"
-                          : "yellow"
-                      }
-                    >
-                      {item.status}
-                    </Badge>
+                    <div className="flex items-center gap-2 flex-wrap">
+
+                      <Badge
+                        variant={
+                          item.status === "PAGO" || item.status === "PAGA"
+                            ? "emerald"
+                            : item.status === "ATRASADA"
+                            ? "red"
+                            : "yellow"
+                        }
+                      >
+                        {item.status}
+                      </Badge>
+
+                      <Badge
+                        variant={item.enviadaAsaas ? "blue" : "gray"}
+                        size="sm"
+                        title={
+                          item.enviadaAsaas
+                            ? `Sincronizada com Asaas${
+                                item.asaasPaymentId
+                                  ? ` (${item.asaasPaymentId})`
+                                  : ""
+                              }`
+                            : "Ainda não enviada ao Asaas"
+                        }
+                      >
+                        {item.enviadaAsaas ? "Asaas" : "Local"}
+                      </Badge>
+
+                    </div>
                   </td>
 
                   <td className="relative">
@@ -188,10 +208,16 @@ export default function FinanceiroReceitas({
                           absolute
                           right-0
                           top-10
-                          bg-white
+                          bg-gradient-to-br
+                          from-[#202a36]/95
+                          via-[#1b2430]/96
+                          to-[#151c25]/96
+                          backdrop-blur-xl
                           rounded-xl
-                          shadow-xl
+                          shadow-[0_18px_45px_rgba(0,0,0,.35)]
                           border
+                          border-white/[0.07]
+                          text-gray-200
                           w-44
                           z-50
                         "
@@ -208,7 +234,7 @@ export default function FinanceiroReceitas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-gray-100
+                            hover:bg-white/5
                           "
                         >
                           Visualizar
@@ -225,8 +251,8 @@ export default function FinanceiroReceitas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-yellow-50
-                            text-yellow-700
+                            hover:bg-yellow-500/10
+                            text-yellow-400
                           "
                         >
                           Editar
@@ -242,8 +268,8 @@ export default function FinanceiroReceitas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-green-50
-                            text-green-700
+                            hover:bg-green-500/10
+                            text-green-400
                           "
                         >
                           Marcar Pago
@@ -259,8 +285,8 @@ export default function FinanceiroReceitas({
                             text-left
                             px-4
                             py-3
-                            hover:bg-red-50
-                            text-red-700
+                            hover:bg-red-500/10
+                            text-red-400
                           "
                         >
                           Excluir

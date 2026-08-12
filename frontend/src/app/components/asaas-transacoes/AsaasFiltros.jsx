@@ -1,18 +1,47 @@
 "use client";
 
-export default function AsaasFiltros() {
+import { useState } from "react";
+
+const FILTROS_INICIAIS = {
+  busca: "",
+  status: "Todos",
+  forma: "Todas",
+  periodo: "",
+};
+
+export default function AsaasFiltros({ onFiltrar, onLimpar }) {
+
+  const [filtros, setFiltros] =
+    useState(FILTROS_INICIAIS);
+
+  const handleChange = (campo) => (e) => {
+    setFiltros((atual) => ({
+      ...atual,
+      [campo]: e.target.value,
+    }));
+  };
+
+  const aplicarFiltros = () => {
+    onFiltrar?.(filtros);
+  };
+
+  const limparFiltros = () => {
+    setFiltros(FILTROS_INICIAIS);
+    onLimpar?.();
+  };
+
   return (
-    <div className="bg-white rounded-2xl shadow border border-gray-200 p-6">
+    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] p-6">
 
       <div className="flex items-center justify-between mb-6">
 
         <div>
 
-          <h2 className="text-xl font-bold text-gray-800">
+          <h2 className="text-xl font-bold text-white">
             Filtros
           </h2>
 
-          <p className="text-gray-500 mt-1">
+          <p className="text-gray-400 mt-1">
             Localize rapidamente qualquer cobrança.
           </p>
 
@@ -24,31 +53,38 @@ export default function AsaasFiltros() {
 
         <div className="xl:col-span-2">
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Pesquisar
           </label>
 
           <input
             type="text"
-            placeholder="Cliente, CPF, cobrança..."
-            className="w-full border border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+            value={filtros.busca}
+            onChange={handleChange("busca")}
+            onKeyDown={(e) => e.key === "Enter" && aplicarFiltros()}
+            placeholder="Cliente, cobrança..."
+            className="w-full rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-green-600"
           />
 
         </div>
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Status
           </label>
 
-          <select className="w-full border border-gray-300 rounded-xl p-3">
+          <select
+            value={filtros.status}
+            onChange={handleChange("status")}
+            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+          >
 
-            <option>Todos</option>
-            <option>Recebido</option>
-            <option>Pendente</option>
-            <option>Atrasado</option>
-            <option>Cancelado</option>
+            <option className="bg-[#1b2430]">Todos</option>
+            <option className="bg-[#1b2430]">Recebido</option>
+            <option className="bg-[#1b2430]">Pendente</option>
+            <option className="bg-[#1b2430]">Atrasado</option>
+            <option className="bg-[#1b2430]">Cancelado</option>
 
           </select>
 
@@ -56,16 +92,20 @@ export default function AsaasFiltros() {
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
             Forma
           </label>
 
-          <select className="w-full border border-gray-300 rounded-xl p-3">
+          <select
+            value={filtros.forma}
+            onChange={handleChange("forma")}
+            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+          >
 
-            <option>Todas</option>
-            <option>PIX</option>
-            <option>Boleto</option>
-            <option>Cartão</option>
+            <option className="bg-[#1b2430]">Todas</option>
+            <option className="bg-[#1b2430]">PIX</option>
+            <option className="bg-[#1b2430]">Boleto</option>
+            <option className="bg-[#1b2430]">Cartão</option>
 
           </select>
 
@@ -73,13 +113,15 @@ export default function AsaasFiltros() {
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
-            Período
+          <label className="block text-sm font-semibold text-gray-200 mb-2">
+            Vencimento até
           </label>
 
           <input
             type="date"
-            className="w-full border border-gray-300 rounded-xl p-3"
+            value={filtros.periodo}
+            onChange={handleChange("periodo")}
+            className="w-full rounded-xl p-3"
           />
 
         </div>
@@ -87,6 +129,7 @@ export default function AsaasFiltros() {
         <div className="flex items-end gap-3">
 
           <button
+            onClick={aplicarFiltros}
             className="
               flex-1
               bg-green-700
@@ -100,11 +143,13 @@ export default function AsaasFiltros() {
           </button>
 
           <button
+            onClick={limparFiltros}
             className="
               flex-1
               border
-              border-gray-300
-              hover:bg-gray-100
+              border-white/[0.07]
+              text-gray-200
+              hover:bg-white/5
               rounded-xl
               py-3
             "

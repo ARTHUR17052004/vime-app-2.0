@@ -116,11 +116,11 @@ export default function ContratoProximosVencimentos({
                     text-white
                   "
                 >
-                  {contrato.inquilinoNome}
+                  {contrato.inquilino?.nome || contrato.inquilinoNome}
                 </h3>
 
                 <p className="text-gray-400">
-                  {contrato.unidadeNome}
+                  {contrato.unidade?.nome || contrato.unidadeNome}
                 </p>
 
               </div>

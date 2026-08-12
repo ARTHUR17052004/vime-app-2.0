@@ -7,6 +7,9 @@ const login = async (email, senha) => {
   const usuario = await prisma.usuario.findUnique({
     where: {
       email
+    },
+    include: {
+      perfil: true
     }
   });
 
@@ -27,7 +30,7 @@ const login = async (email, senha) => {
     id: usuario.id,
     nome: usuario.nome,
     email: usuario.email,
-    perfil: usuario.perfil
+    perfil: usuario.perfil?.nome
   };
 
   const token = jwt.sign(

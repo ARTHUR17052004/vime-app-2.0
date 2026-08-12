@@ -1,8 +1,14 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import MainLayout from "../components/layout/MainLayout";
+
+import { ReceitaService, DespesaService } from "@/services/financeiro.service";
+
+import FadeIn from "../components/ui/FadeIn";
 
 import FinanceiroModal from "../components/financeiro/FinanceiroModal";
 
@@ -24,6 +30,7 @@ import FinanceiroReceitas from "../components/financeiro/FinanceiroReceitas";
 import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
 import PageHeader from "../components/ui/PageHeader";
+import Button from "../components/ui/Button";
 
 
 export default function FinanceiroPage() {
@@ -44,125 +51,170 @@ export default function FinanceiroPage() {
   const [search, setSearch] =
     useState("");
 
-  useEffect(() => {
-    const receitasSalvas = JSON.parse(
-      localStorage.getItem(
-        "vime-receitas"
-      ) || "[]"
-    );
+  const carregar = useCallback(async () => {
 
-    const despesasSalvas = JSON.parse(
-      localStorage.getItem(
-        "vime-despesas"
-      ) || "[]"
-    );
+    try {
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setReceitas(receitasSalvas);
-    setDespesas(despesasSalvas);
+      const [receitasResp, despesasResp] = await Promise.all([
+        ReceitaService.listar(),
+        DespesaService.listar(),
+      ]);
 
-    setCarregado(true);
+      setReceitas(
+        Array.isArray(receitasResp) ? receitasResp : receitasResp.data || []
+      );
+
+      setDespesas(
+        Array.isArray(despesasResp) ? despesasResp : despesasResp.data || []
+      );
+
+    } catch (err) {
+
+      console.error("Erro ao carregar dados financeiros:", err);
+
+    } finally {
+
+      setCarregado(true);
+
+    }
+
   }, []);
 
   useEffect(() => {
-    if (!carregado) return;
 
-    localStorage.setItem(
-      "vime-receitas",
-      JSON.stringify(receitas)
-    );
+    carregar();
 
-    localStorage.setItem(
-      "vime-despesas",
-      JSON.stringify(despesas)
-    );
-  }, [receitas, despesas, carregado]);
+  }, [carregar]);
 
-  const salvarReceita = (dados) => {
-    setReceitas((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...dados,
-      },
-    ]);
+  const salvarReceita = async (dados) => {
 
-    setModalOpen(false);
+    try {
+
+      await ReceitaService.criar(dados);
+
+      await carregar();
+
+      setModalOpen(false);
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao salvar receita.");
+
+    }
+
   };
 
-  const salvarDespesa = (dados) => {
-    setDespesas((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        ...dados,
-      },
-    ]);
+  const salvarDespesa = async (dados) => {
 
-    setModalOpen(false);
+    try {
+
+      await DespesaService.criar(dados);
+
+      await carregar();
+
+      setModalOpen(false);
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao salvar despesa.");
+
+    }
+
   };
 
-  const excluirReceita = (id) => {
-  if (!window.confirm("Excluir receita?"))
-    return;
+  const excluirReceita = async (id) => {
 
-  setReceitas((prev) =>
-    prev.filter((item) => item.id !== id)
-  );
-};
+    if (!window.confirm("Excluir receita?"))
+      return;
 
-  const excluirDespesa = (id) => {
+    try {
+
+      await ReceitaService.excluir(id);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao excluir receita.");
+
+    }
+
+  };
+
+  const excluirDespesa = async (id) => {
+
     if (!window.confirm("Excluir despesa?"))
       return;
 
-    setDespesas((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
+    try {
+
+      await DespesaService.excluir(id);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao excluir despesa.");
+
+    }
+
   };
 
-  const atualizarReceita = (
+  const atualizarReceita = async (
     id,
     novosDados
   ) => {
-    setReceitas((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              ...novosDados,
-            }
-          : item
-      )
-    );
+
+    try {
+
+      await ReceitaService.atualizar(id, novosDados);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao atualizar receita.");
+
+    }
+
   };
 
-  const atualizarDespesa = (
+  const atualizarDespesa = async (
     id,
     novosDados
   ) => {
-    setDespesas((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              ...novosDados,
-            }
-          : item
-      )
-    );
+
+    try {
+
+      await DespesaService.atualizar(id, novosDados);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao atualizar despesa.");
+
+    }
+
   };
 
-  const marcarReceitaComoPaga = (id) => {
-    setReceitas((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: "Pago",
-            }
-          : item
-      )
-    );
+  const marcarReceitaComoPaga = async (id) => {
+
+    try {
+
+      await ReceitaService.atualizar(id, {
+        status: "PAGO",
+        dataPagamento: new Date().toISOString(),
+      });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao marcar receita como paga.");
+
+    }
+
   };
 
   const receitaPrevista =
@@ -211,6 +263,16 @@ export default function FinanceiroPage() {
 
   });
 
+ if (!carregado) {
+    return (
+      <MainLayout>
+        <div className="py-32 text-center text-gray-400">
+          Carregando dados financeiros...
+        </div>
+      </MainLayout>
+    );
+  }
+
  return (
   <MainLayout>
 
@@ -218,33 +280,60 @@ export default function FinanceiroPage() {
 
   <PageContainer>
 
-    <PageHeader
-      total={receitas.length}
-      onNovaReceita={() => {
-        setTipoModal("receita");
-        setModalOpen(true);
-      }}
-      onNovaDespesa={() => {
-        setTipoModal("despesa");
-        setModalOpen(true);
-      }}
-    />
+    <FadeIn>
+      <PageHeader
+        title="Financeiro"
+        subtitle="Gerencie receitas, despesas e o fluxo de caixa do sistema."
+        count={receitas.length}
+        countLabel="receita(s) cadastrada(s)"
+        actions={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setTipoModal("despesa");
+                setModalOpen(true);
+              }}
+            >
+              + Nova Despesa
+            </Button>
 
-    <FinanceiroStats
-      receitaPrevista={receitaPrevista}
-      totalDespesas={totalDespesas}
-      lucroLiquido={lucroLiquido}
-    />
+            <Button
+              onClick={() => {
+                setTipoModal("receita");
+                setModalOpen(true);
+              }}
+            >
+              + Nova Receita
+            </Button>
+          </>
+        }
+      />
+    </FadeIn>
 
-    <FinanceiroFilters
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-    />
+    <FadeIn delay={0.10}>
+      <FinanceiroStats
+        receitaPrevista={receitaPrevista}
+        totalDespesas={totalDespesas}
+        lucroLiquido={lucroLiquido}
+      />
+    </FadeIn>
 
-    <FinanceiroTabs
-      abaSelecionada={abaSelecionada}
-      setAbaSelecionada={setAbaSelecionada}
-    />
+    <FadeIn delay={0.20}>
+      <FinanceiroFilters
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+    </FadeIn>
+
+    <FadeIn delay={0.25}>
+      <FinanceiroTabs
+        abaSelecionada={abaSelecionada}
+        setAbaSelecionada={setAbaSelecionada}
+      />
+    </FadeIn>
+
+    <FadeIn delay={0.30}>
 
     {abaSelecionada === "visao-geral" && (
       <div className="space-y-8">
@@ -310,6 +399,8 @@ export default function FinanceiroPage() {
     {abaSelecionada === "asaas" && (
       <FinanceiroAsaas />
     )}
+
+    </FadeIn>
 
     <FinanceiroModal
       isOpen={modalOpen}
