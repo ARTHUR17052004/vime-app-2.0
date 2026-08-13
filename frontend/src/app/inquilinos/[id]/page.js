@@ -194,7 +194,7 @@ export default function InquilinoDetalhesPage() {
                 />
 
                 <Info
-                  label="Unidade"
+                  label="Residência"
                   value={inquilino.kitnet?.unidade?.nome || inquilino.unidadeNome || "-"}
                 />
 

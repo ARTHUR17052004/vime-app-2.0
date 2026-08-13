@@ -11,8 +11,8 @@ export default function UnitModal({
     <Modal
       open={isOpen}
       onClose={onClose}
-      title="Unidade"
-      subtitle="Cadastro e gerenciamento da unidade"
+      title="Residência"
+      subtitle="Cadastro e gerenciamento da residência"
       size="xl"
     >
       {children}

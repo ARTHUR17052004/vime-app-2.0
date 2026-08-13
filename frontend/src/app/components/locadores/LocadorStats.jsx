@@ -34,7 +34,7 @@ export default function LocadorStats({
       />
 
       <DashboardStatsCard
-        title="Unidades"
+        title="Residências"
         value={unidades}
         subtitle="Vinculadas"
         icon={Landmark}

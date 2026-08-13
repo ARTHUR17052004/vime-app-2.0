@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
@@ -6,7 +7,9 @@ const auditoriaService = require('./auditoriaService');
 const listar = () => {
   return prisma.vistoria.findMany({
     include: {
-      ocorrencias: true
+      ocorrencias: true,
+      unidade: true,
+      kitnet: true
     },
     orderBy: {
       createdAt: 'desc'
@@ -18,22 +21,27 @@ const buscarPorId = (id) => {
   return prisma.vistoria.findUnique({
     where: { id },
     include: {
-      ocorrencias: true
+      ocorrencias: true,
+      unidade: true,
+      kitnet: true
     }
   });
 };
 
 const converterDatas = (dados) => {
 
-  if (dados.data) dados.data = new Date(dados.data);
-  if (dados.dataUltima) dados.dataUltima = new Date(dados.dataUltima);
-  if (dados.dataProxima) dados.dataProxima = new Date(dados.dataProxima);
+  if (dados.data !== undefined) dados.data = paraDataOuNull(dados.data);
+  if (dados.dataUltima !== undefined) dados.dataUltima = paraDataOuNull(dados.dataUltima);
+  if (dados.dataProxima !== undefined) dados.dataProxima = paraDataOuNull(dados.dataProxima);
+  if (dados.concluidaEm !== undefined) dados.concluidaEm = paraDataOuNull(dados.concluidaEm);
 
   delete dados.id;
   delete dados.createdAt;
   delete dados.updatedAt;
   delete dados.historico;
   delete dados.ocorrencias;
+  delete dados.unidade;
+  delete dados.kitnet;
 
   return dados;
 

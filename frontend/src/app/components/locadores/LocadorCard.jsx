@@ -283,7 +283,7 @@ export default function LocadorCard({
 
               <div className="text-gray-300 font-medium">
 
-                {totalUnidades} unidade(s) vinculada(s)
+                {totalUnidades} residência(s) vinculada(s)
 
               </div>
 

@@ -199,7 +199,7 @@ export default function KitnetForm({
         />
 
         <Select
-          label="Unidade"
+          label="Residência"
           name="unidadeId"
           value={formData.unidadeId}
           onChange={handleChange}

@@ -76,17 +76,6 @@ const encerrar = async (req, res) => {
 
 };
 
-const inadimplente = async (req, res) => {
-
-  const contrato = await contratoService.inadimplente(req.params.id);
-
-  return res.json({
-    success: true,
-    data: contrato
-  });
-
-};
-
 const renovar = async (req, res) => {
 
   const contrato = await contratoService.renovar(
@@ -108,6 +97,5 @@ module.exports = {
   atualizar,
   remover,
   encerrar,
-  inadimplente,
   renovar
 };

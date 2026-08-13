@@ -24,6 +24,7 @@ import ContratoForm from "../components/contratos/ContratoForm";
 import ContratoStats from "../components/contratos/ContratoStats";
 import ContratoFilters from "../components/contratos/ContratoFilters";
 import ContratoTable from "../components/contratos/ContratoTable";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
 import { ModeloDocumentoService } from "@/services/modeloDocumento.service";
@@ -39,6 +40,9 @@ export default function ContratosPage() {
 
   const [filtroSelecionado, setFiltroSelecionado] =
     useState("Todos");
+
+  const [residenciaSelecionada, setResidenciaSelecionada] =
+    useState("");
 
   const [contratos, setContratos] =
     useState([]);
@@ -235,6 +239,12 @@ export default function ContratosPage() {
       if (!busca) return false;
 
       if (
+        residenciaSelecionada &&
+        contrato.unidadeId !== residenciaSelecionada
+      )
+        return false;
+
+      if (
         filtroSelecionado ===
         "Todos"
       )
@@ -324,6 +334,13 @@ export default function ContratosPage() {
                 setFiltroSelecionado
               }
             />
+
+            <div className="mt-4">
+              <ResidenciaFiltro
+                value={residenciaSelecionada}
+                onChange={setResidenciaSelecionada}
+              />
+            </div>
 
           </PageSection>
 

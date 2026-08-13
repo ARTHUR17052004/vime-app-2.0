@@ -39,7 +39,7 @@ const CATALOGO = [
     acoes: ["visualizar", "criar", "editar", "excluir"],
   },
   {
-    modulo: "Unidades",
+    modulo: "Residências",
     chave: "unidades",
     acoes: ["visualizar", "criar", "editar", "excluir"],
   },

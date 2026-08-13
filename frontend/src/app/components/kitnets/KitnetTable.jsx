@@ -40,7 +40,7 @@ export default function KitnetTable({
 
     {
       key: "unidadeNome",
-      title: "Unidade",
+      title: "Residência",
       render: (item) =>
         item.unidade?.nome || item.unidadeNome || "-",
     },

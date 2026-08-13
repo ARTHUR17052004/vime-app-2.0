@@ -4,7 +4,7 @@ export const PLACEHOLDERS_CONTRATO = [
   { chave: "{{locador_nome}}", descricao: "Nome do locador" },
   { chave: "{{inquilino_nome}}", descricao: "Nome do inquilino" },
   { chave: "{{inquilino_cpf}}", descricao: "CPF do inquilino" },
-  { chave: "{{unidade_nome}}", descricao: "Nome da unidade" },
+  { chave: "{{unidade_nome}}", descricao: "Nome da residência" },
   { chave: "{{kitnet_nome}}", descricao: "Nome/número da kitnet" },
   { chave: "{{valor_aluguel}}", descricao: "Valor do aluguel" },
   { chave: "{{dia_vencimento}}", descricao: "Dia de vencimento" },

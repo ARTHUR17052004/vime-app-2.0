@@ -33,7 +33,7 @@ export default function UnitViewModal({
       open={isOpen}
       onClose={onClose}
       title={unidade.nome}
-      subtitle="Informações completas da unidade"
+      subtitle="Informações completas da residência"
       size="xl"
     >
 

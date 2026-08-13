@@ -29,6 +29,8 @@ model Unidade {
   contratos           Contrato[]
   kitnetsRelacionadas Kitnet[]
   locadorRel          Locador?   @relation(fields: [locadorId], references: [id])
+  despesas            Despesa[]
+  vistorias           Vistoria[]
 }
 
 model Kitnet {
@@ -44,7 +46,8 @@ model Kitnet {
   nome       String?
   contratos  Contrato[]
   inquilinos Inquilino[]
-  unidade    Unidade     @relation(fields: [unidadeId], references: [id])
+  unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+  vistorias  Vistoria[]
 }
 
 model Inquilino {
@@ -70,7 +73,7 @@ model Inquilino {
   tipoGarantia       String?
   valorCaucao        Float?
   contratos          Contrato[]
-  kitnet             Kitnet     @relation(fields: [kitnetId], references: [id])
+  kitnet             Kitnet     @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 }
 
 model Usuario {
@@ -146,10 +149,10 @@ model Contrato {
   observacoes    String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  inquilino      Inquilino @relation(fields: [inquilinoId], references: [id])
-  kitnet         Kitnet    @relation(fields: [kitnetId], references: [id])
-  locador        Locador   @relation(fields: [locadorId], references: [id])
-  unidade        Unidade   @relation(fields: [unidadeId], references: [id])
+  inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
+  kitnet         Kitnet    @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
+  locador        Locador   @relation(fields: [locadorId], references: [id], onDelete: Cascade)
+  unidade        Unidade   @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
   receitas       Receita[]
 }
 
@@ -212,6 +215,7 @@ model Receita {
   asaasCustomerId String?
   enviadaAsaas    Boolean   @default(false)
   lembreteEnviadoEm DateTime?
+  fixado          Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   contrato        Contrato? @relation(fields: [contratoId], references: [id])
@@ -225,8 +229,11 @@ model Despesa {
   vencimento    DateTime?
   dataPagamento DateTime?
   status        String    @default("PENDENTE")
+  fixado        Boolean   @default(false)
+  unidadeId     String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  unidade       Unidade?  @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
 }
 
 model Solicitacao {
@@ -294,9 +301,9 @@ model Vistoria {
 
   descricao String?
 
-  unidade String?
+  unidadeId String?
 
-  kitnet String?
+  kitnetId String?
 
   categoria String?
 
@@ -314,15 +321,25 @@ model Vistoria {
 
   dataProxima DateTime?
 
+  concluidaEm DateTime?
+
+  fixado Boolean @default(false)
+
   checklist Json?
 
   fotos Json?
+
+  fotosConclusao Json?
 
   observacoes String?
 
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+
+  unidade Unidade? @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+
+  kitnet Kitnet? @relation(fields: [kitnetId], references: [id], onDelete: SetNull)
 
   ocorrencias Ocorrencia[]
 }
@@ -340,7 +357,7 @@ model Ocorrencia {
 
   updatedAt DateTime @updatedAt
 
-  vistoria Vistoria @relation(fields: [vistoriaId], references: [id])
+  vistoria Vistoria @relation(fields: [vistoriaId], references: [id], onDelete: Cascade)
 }
 
 model LogSistema {

@@ -1,10 +1,14 @@
 const prisma = require('../config/prisma');
+const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 
 const listar = () => {
   return prisma.despesa.findMany({
+    include: {
+      unidade: true
+    },
     orderBy: {
       createdAt: 'desc'
     }
@@ -13,14 +17,17 @@ const listar = () => {
 
 const buscarPorId = (id) => {
   return prisma.despesa.findUnique({
-    where: { id }
+    where: { id },
+    include: {
+      unidade: true
+    }
   });
 };
 
 const criar = async (dados) => {
 
-  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
-  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
+  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
+  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
 
   const despesa = await prisma.despesa.create({
     data: dados
@@ -50,8 +57,8 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
-  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
-  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
+  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
+  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
 
   const anterior = await prisma.despesa.findUnique({
     where: { id }

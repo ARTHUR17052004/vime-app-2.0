@@ -31,10 +31,27 @@ export default function FinanceiroDashboard({
       0
     );
 
+  const hoje = new Date().toISOString().split("T")[0];
+
+  const estaVencido = (item) =>
+    item.vencimento &&
+    item.vencimento.slice(0, 10) < hoje &&
+    item.status !== "PAGO" &&
+    item.status !== "PAGA";
+
+  const totalVencidos =
+    [...receitas, ...despesas]
+      .filter(estaVencido)
+      .reduce(
+        (total, item) =>
+          total + Number(item.valor || 0),
+        0
+      );
+
   return (
     <div className="space-y-8">
 
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid md:grid-cols-3 xl:grid-cols-5 gap-6">
 
         <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
 
@@ -56,6 +73,18 @@ export default function FinanceiroDashboard({
 
           <div className="text-3xl font-bold text-red-400 mt-3">
             R$ {totalDespesas}
+          </div>
+
+        </div>
+
+        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+
+          <div className="text-gray-400">
+            Vencidos
+          </div>
+
+          <div className="text-3xl font-bold text-orange-400 mt-3">
+            R$ {totalVencidos}
           </div>
 
         </div>

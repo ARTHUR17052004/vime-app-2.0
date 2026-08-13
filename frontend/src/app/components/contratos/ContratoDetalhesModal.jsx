@@ -44,7 +44,7 @@ export default function ContratoDetalhesModal({
 
           <div>
             <p className="text-gray-400">
-              Unidade
+              Residência
             </p>
 
             <p className="font-semibold text-white">

@@ -5,10 +5,16 @@ import Link from "next/link";
 import {
   ChevronDown,
   ChevronUp,
-  MoreVertical,
+  Eye,
+  Pencil,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  Pin,
 } from "lucide-react";
 
 import Button from "../ui/Button";
+import { formatDate, formatDateTime } from "@/utils/formatDate";
 
 export default function VistoriaCard({
   vistorias,
@@ -16,12 +22,10 @@ export default function VistoriaCard({
   onDelete,
   onConcluir,
   onCancelar,
+  onFixar,
 }) {
 
   const [aberto, setAberto] =
-    useState(null);
-
-  const [menuAberto, setMenuAberto] =
     useState(null);
 
   if (!vistorias.length) {
@@ -144,6 +148,13 @@ export default function VistoriaCard({
                   {vistoria.nomeVistoria}
                 </h2>
 
+                {vistoria.fixado && (
+                  <Pin
+                    size={18}
+                    className="text-emerald-400 fill-emerald-400"
+                  />
+                )}
+
               </div>
 
               <div className="mt-5 grid md:grid-cols-2 gap-4">
@@ -151,7 +162,7 @@ export default function VistoriaCard({
                 <div>
 
                   <p className="text-xs text-gray-500 uppercase">
-                    Unidade / Kitnet
+                    Residência / Kitnet
                   </p>
 
                   <p className="text-gray-300 mt-1">
@@ -197,7 +208,7 @@ export default function VistoriaCard({
                   </p>
 
                   <p className="text-gray-300 mt-1">
-                    {vistoria.dataProxima}
+                    {formatDate(vistoria.dataProxima)}
                   </p>
 
                 </div>
@@ -210,13 +221,10 @@ export default function VistoriaCard({
 
               <button
                 onClick={() =>
-                  setMenuAberto(
-                    menuAberto === vistoria.id
-                      ? null
-                      : vistoria.id
-                  )
+                  onFixar?.(vistoria.id, !vistoria.fixado)
                 }
-                className="
+                title={vistoria.fixado ? "Desafixar" : "Fixar"}
+                className={`
                   w-10
                   h-10
                   rounded-xl
@@ -225,12 +233,13 @@ export default function VistoriaCard({
                   flex
                   items-center
                   justify-center
-                "
+                  ${vistoria.fixado ? "text-emerald-400" : "text-gray-400"}
+                `}
               >
 
-                <MoreVertical
-                  size={20}
-                  className="text-gray-400"
+                <Pin
+                  size={18}
+                  className={vistoria.fixado ? "fill-emerald-400" : ""}
                 />
 
               </button>
@@ -276,93 +285,132 @@ export default function VistoriaCard({
             </div>
 
           </div>
-                    {menuAberto === vistoria.id && (
 
-            <div
+          <div
+            className="
+              flex
+              flex-wrap
+              gap-3
+              px-7
+              pb-6
+            "
+          >
+
+            <Link
+              href={`/vistorias/${vistoria.id}`}
               className="
-                border-t
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2.5
+                rounded-xl
+                border
                 border-white/10
-                bg-white/[0.03]
+                text-gray-300
+                text-sm
+                font-semibold
+                hover:bg-white/5
+                transition
               "
             >
+              <Eye size={16} />
+              Visualizar
+            </Link>
 
-              <Link
-                href={`/vistorias/${vistoria.id}`}
-                className="
-                  block
-                  px-6
-                  py-4
-                  text-gray-300
-                  hover:bg-white/5
-                  transition
-                "
-              >
-                Visualizar
-              </Link>
+            <button
+              onClick={() => onEdit?.(vistoria)}
+              className="
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2.5
+                rounded-xl
+                border
+                border-yellow-500/20
+                bg-yellow-500/10
+                text-yellow-400
+                text-sm
+                font-semibold
+                hover:bg-yellow-500/20
+                transition
+              "
+            >
+              <Pencil size={16} />
+              Editar
+            </button>
 
-              <button
-                onClick={() => onEdit?.(vistoria)}
-                className="
-                  w-full
-                  text-left
-                  px-6
-                  py-4
-                  text-yellow-400
-                  hover:bg-white/5
-                  transition
-                "
-              >
-                Editar
-              </button>
+            <button
+              onClick={() => onConcluir?.(vistoria.id)}
+              className="
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2.5
+                rounded-xl
+                border
+                border-emerald-500/20
+                bg-emerald-500/10
+                text-emerald-400
+                text-sm
+                font-semibold
+                hover:bg-emerald-500/20
+                transition
+              "
+            >
+              <CheckCircle2 size={16} />
+              Realizar
+            </button>
 
-              <button
-                onClick={() => onConcluir?.(vistoria.id)}
-                className="
-                  w-full
-                  text-left
-                  px-6
-                  py-4
-                  text-emerald-400
-                  hover:bg-white/5
-                  transition
-                "
-              >
-                Realizar
-              </button>
+            <button
+              onClick={() => onCancelar?.(vistoria.id)}
+              className="
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2.5
+                rounded-xl
+                border
+                border-orange-500/20
+                bg-orange-500/10
+                text-orange-400
+                text-sm
+                font-semibold
+                hover:bg-orange-500/20
+                transition
+              "
+            >
+              <XCircle size={16} />
+              Cancelar
+            </button>
 
-              <button
-                onClick={() => onCancelar?.(vistoria.id)}
-                className="
-                  w-full
-                  text-left
-                  px-6
-                  py-4
-                  text-orange-400
-                  hover:bg-white/5
-                  transition
-                "
-              >
-                Cancelar
-              </button>
+            <button
+              onClick={() => onDelete?.(vistoria.id)}
+              className="
+                flex
+                items-center
+                gap-2
+                px-4
+                py-2.5
+                rounded-xl
+                border
+                border-red-500/20
+                bg-red-500/10
+                text-red-400
+                text-sm
+                font-semibold
+                hover:bg-red-500/20
+                transition
+              "
+            >
+              <Trash2 size={16} />
+              Excluir
+            </button>
 
-              <button
-                onClick={() => onDelete?.(vistoria.id)}
-                className="
-                  w-full
-                  text-left
-                  px-6
-                  py-4
-                  text-red-400
-                  hover:bg-white/5
-                  transition
-                "
-              >
-                Excluir
-              </button>
-
-            </div>
-
-          )}
+          </div>
 
           {aberto === vistoria.id && (
 
@@ -408,7 +456,7 @@ export default function VistoriaCard({
                   </p>
 
                   <p className="text-white mt-1">
-                    {vistoria.dataUltima}
+                    {formatDate(vistoria.dataUltima)}
                   </p>
 
                 </div>
@@ -420,7 +468,19 @@ export default function VistoriaCard({
                   </p>
 
                   <p className="text-white mt-1">
-                    {vistoria.dataProxima}
+                    {formatDate(vistoria.dataProxima)}
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <p className="text-xs text-gray-500 uppercase">
+                    Baixa Registrada Em
+                  </p>
+
+                  <p className="text-white mt-1">
+                    {formatDateTime(vistoria.concluidaEm)}
                   </p>
 
                 </div>
@@ -450,6 +510,40 @@ export default function VistoriaCard({
                 </div>
 
               </div>
+
+              {vistoria.fotosConclusao?.length > 0 && (
+
+                <div className="mt-8">
+
+                  <p className="text-xs text-gray-500 uppercase mb-3">
+                    Fotos e Vídeos da Baixa
+                  </p>
+
+                  <div className="grid md:grid-cols-3 gap-4">
+
+                    {vistoria.fotosConclusao.map((midia, index) =>
+                      midia.startsWith("data:video") ? (
+                        <video
+                          key={index}
+                          src={midia}
+                          controls
+                          className="w-full h-40 object-cover rounded-2xl border border-white/10"
+                        />
+                      ) : (
+                        <img
+                          key={index}
+                          src={midia}
+                          alt={`Mídia ${index + 1}`}
+                          className="w-full h-40 object-cover rounded-2xl border border-white/10"
+                        />
+                      )
+                    )}
+
+                  </div>
+
+                </div>
+
+              )}
 
               <div className="flex justify-end mt-8">
 

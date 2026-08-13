@@ -9,7 +9,7 @@ export default function UnitTable({
   if (unidades.length === 0) {
     return (
       <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-xl p-10 text-center text-gray-400">
-        Nenhuma unidade cadastrada.
+        Nenhuma residência cadastrada.
       </div>
     );
   }

@@ -120,7 +120,7 @@ export default function KitnetCard({
 
         <InfoRow
           icon={<Building2 size={18} />}
-          label="Unidade"
+          label="Residência"
           value={kitnet.unidade?.nome || kitnet.unidadeNome || "-"}
         />
 

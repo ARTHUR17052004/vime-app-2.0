@@ -32,7 +32,7 @@ const menuConfig = [
     title: "Imóveis",
     items: [
       {
-        label: "Unidades",
+        label: "Residências",
         href: "/unidades",
         icon: Building2,
       },

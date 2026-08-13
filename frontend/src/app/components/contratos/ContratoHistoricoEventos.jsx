@@ -8,7 +8,6 @@ const ACAO_LABEL = {
   CRIAR: "Contrato criado",
   ATUALIZAR: "Contrato atualizado",
   ENCERRAR: "Contrato encerrado",
-  INADIMPLENTE: "Contrato marcado como inadimplente",
   RENOVAR: "Contrato renovado",
   EXCLUIR: "Contrato excluído",
 };

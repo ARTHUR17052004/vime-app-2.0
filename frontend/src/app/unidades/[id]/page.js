@@ -38,7 +38,7 @@ export default function UnidadeDetalhesPage() {
         setUnidade(encontrada || null);
 
         if (!encontrada) {
-          setErro("Unidade não encontrada.");
+          setErro("Residência não encontrada.");
         }
 
       } catch (err) {
@@ -46,7 +46,7 @@ export default function UnidadeDetalhesPage() {
         console.error(err);
 
         setErro(
-          err.message || "Erro ao carregar unidade."
+          err.message || "Erro ao carregar residência."
         );
 
       } finally {
@@ -67,7 +67,7 @@ export default function UnidadeDetalhesPage() {
     return (
       <MainLayout>
         <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-2xl p-8">
-          Carregando unidade...
+          Carregando residência...
         </div>
       </MainLayout>
     );
@@ -77,7 +77,7 @@ export default function UnidadeDetalhesPage() {
     return (
       <MainLayout>
         <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-red-300 rounded-2xl p-8">
-          {erro || "Unidade não encontrada."}
+          {erro || "Residência não encontrada."}
         </div>
       </MainLayout>
     );
@@ -93,7 +93,7 @@ export default function UnidadeDetalhesPage() {
           </h1>
 
           <p className="text-gray-400 mt-2">
-            Detalhes completos da unidade
+            Detalhes completos da residência
           </p>
         </div>
 

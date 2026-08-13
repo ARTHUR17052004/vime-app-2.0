@@ -99,7 +99,7 @@ export default function DetalhesContratoPage() {
 
           <div>
             <p className="text-gray-400">
-              Unidade
+              Residência
             </p>
 
             <h2 className="font-bold text-2xl text-white">

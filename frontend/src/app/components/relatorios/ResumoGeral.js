@@ -51,7 +51,7 @@ export default function ResumoGeral() {
       setCards([
 
         {
-          titulo: "Unidades",
+          titulo: "Residências",
           valor: unidades.length,
         },
 

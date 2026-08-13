@@ -45,37 +45,6 @@ export default function ContratoStep({
       />
 
       <select
-        name="tipoGarantia"
-        value={formData.tipoGarantia}
-        onChange={handleChange}
-        className={inputStyle}
-      >
-        <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          Tipo de Garantia
-        </option>
-
-        <option value="Caucao" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          Caução
-        </option>
-
-        <option value="Fiador" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          Fiador
-        </option>
-
-        <option value="Seguro" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          Seguro Fiança
-        </option>
-      </select>
-
-      <input
-        name="valorCaucao"
-        placeholder="Valor da Caução"
-        value={formData.valorCaucao}
-        onChange={handleChange}
-        className={inputStyle}
-      />
-
-      <select
         name="indiceReajuste"
         value={formData.indiceReajuste}
         onChange={handleChange}

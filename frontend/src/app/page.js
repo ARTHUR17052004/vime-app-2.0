@@ -84,7 +84,7 @@ export default function Home() {
                     />
 
                     <DashboardStatsCard
-                      title="Unidades"
+                      title="Residências"
                       value={dados?.unidades ?? 0}
                       subtitle="Ativas"
                       icon={Building2}

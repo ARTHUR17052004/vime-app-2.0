@@ -124,7 +124,7 @@ export default function InquilinoCard({
 
         <InfoRow
           icon={<User size={18}/>}
-          label="Unidade"
+          label="Residência"
           value={inquilino.unidadeNome || "-"}
         />
 

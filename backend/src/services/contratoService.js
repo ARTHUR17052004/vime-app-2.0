@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { paraDataOuNull } = require('../utils/data');
 
 const ClicksignApi = require("./ClicksignApi");
 const logService = require("./logService");
@@ -37,8 +38,11 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  if (dados.dataInicio) dados.dataInicio = new Date(dados.dataInicio);
-  if (dados.dataFim) dados.dataFim = new Date(dados.dataFim);
+  if (!dados.dataInicio) {
+    throw new Error('Data de início do contrato é obrigatória.');
+  }
+  dados.dataInicio = new Date(dados.dataInicio);
+  if (dados.dataFim !== undefined) dados.dataFim = paraDataOuNull(dados.dataFim);
 
   const kitnet = await prisma.kitnet.findUnique({
     where: {
@@ -286,8 +290,13 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
-  if (dados.dataInicio) dados.dataInicio = new Date(dados.dataInicio);
-  if (dados.dataFim) dados.dataFim = new Date(dados.dataFim);
+  if (dados.dataInicio !== undefined) {
+    if (!dados.dataInicio) {
+      throw new Error('Data de início do contrato é obrigatória.');
+    }
+    dados.dataInicio = new Date(dados.dataInicio);
+  }
+  if (dados.dataFim !== undefined) dados.dataFim = paraDataOuNull(dados.dataFim);
 
   const anterior = await prisma.contrato.findUnique({
     where: { id }
@@ -469,66 +478,6 @@ const encerrar = async (id) => {
 
 };
 
-const inadimplente = async (id) => {
-
-  const anterior = await prisma.contrato.findUnique({
-    where: { id }
-  });
-
-  const contrato = await prisma.contrato.update({
-    where: { id },
-    data: {
-      status: 'INADIMPLENTE'
-    }
-  });
-
-  await prisma.receita.updateMany({
-    where: {
-      contratoId: contrato.id,
-      status: "PENDENTE"
-    },
-    data: {
-      status: "ATRASADA"
-    }
-  });
-
-  await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
-    modulo: "CONTRATOS",
-    registroId: contrato.id,
-    acao: "INADIMPLENTE",
-    valorAnterior: anterior,
-    valorNovo: contrato
-  });
-
-  await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
-    modulo: "CONTRATOS",
-    acao: "INADIMPLENTE",
-    descricao: `Contrato ${contrato.id} marcado como inadimplente.`
-  });
-
-  await notificacaoService.criar({
-    origem: "SISTEMA",
-    titulo: "Contrato inadimplente",
-    mensagem: `Contrato ${contrato.id} foi marcado como inadimplente.`
-  });
-
-  try {
-    await WhatsappService.enviarMensagem({
-      numero: contrato.inquilino?.telefone,
-      mensagem: "Identificamos um débito em aberto. Entre em contato com a administração."
-    });
-  } catch (whatsappError) {
-    console.error("Erro ao enviar WhatsApp de inadimplência:", whatsappError.message);
-  }
-
-  return contrato;
-
-};
-
 const renovar = async (id, dados) => {
 
   const anterior = await prisma.contrato.findUnique({
@@ -569,6 +518,5 @@ module.exports = {
   atualizar,
   remover,
   encerrar,
-  inadimplente,
   renovar
 };

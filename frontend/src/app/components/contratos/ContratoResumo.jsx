@@ -4,7 +4,6 @@ import {
   FileText,
   CheckCircle2,
   AlertTriangle,
-  Ban,
   DollarSign,
 } from "lucide-react";
 
@@ -19,10 +18,6 @@ export default function ContratoResumo({
 
   const pendentes = contratos.filter(
     (c) => c.status === "PENDENTE"
-  ).length;
-
-  const inadimplentes = contratos.filter(
-    (c) => c.status === "INADIMPLENTE"
   ).length;
 
   const encerrados = contratos.filter(
@@ -47,12 +42,6 @@ export default function ContratoResumo({
       valor: pendentes,
       icon: AlertTriangle,
       color: "yellow",
-    },
-    {
-      titulo: "Inadimplentes",
-      valor: inadimplentes,
-      icon: Ban,
-      color: "red",
     },
     {
       titulo: "Encerrados",
@@ -97,7 +86,7 @@ export default function ContratoResumo({
         grid
         grid-cols-1
         md:grid-cols-2
-        xl:grid-cols-5
+        xl:grid-cols-4
         gap-6
       "
     >

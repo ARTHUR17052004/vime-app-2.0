@@ -12,7 +12,7 @@ import {
 
 const actions = [
   {
-    title: "Nova Unidade",
+    title: "Nova Residência",
     icon: Building2,
     href: "/unidades",
   },

@@ -44,7 +44,7 @@ async function coletarResumo() {
   ]);
 
   return [
-    ["Unidades", unidades.length],
+    ["Residências", unidades.length],
     ["Kitnets", kitnets.length],
     ["Locadores", locadores.length],
     ["Inquilinos", inquilinos.length],

@@ -20,10 +20,6 @@ export default function ContratoRelatorios() {
       descricao: "Histórico de contratos",
     },
     {
-      titulo: "Inadimplência",
-      descricao: "Contratos inadimplentes",
-    },
-    {
       titulo: "Receita Contratada",
       descricao: "Valor total contratado",
     },

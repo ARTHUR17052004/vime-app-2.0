@@ -18,6 +18,7 @@ import LocadorForm from "../components/locadores/LocadorForm";
 import LocadorCardList from "../components/locadores/LocadorCardList";
 
 import { LocadorService } from "@/services/locadores.service";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 export default function LocadoresPage() {
 
@@ -32,6 +33,8 @@ export default function LocadoresPage() {
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+
+  const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
   const carregarLocadores = useCallback(async () => {
 
@@ -145,7 +148,7 @@ export default function LocadoresPage() {
 
     const termo = search.toLowerCase();
 
-    return (
+    const correspondeTexto = (
 
       locador.nome
         ?.toLowerCase()
@@ -164,6 +167,18 @@ export default function LocadoresPage() {
         .includes(termo)
 
     );
+
+    if (!correspondeTexto) return false;
+
+    if (
+      residenciaSelecionada &&
+      !locador.unidades?.some(
+        (unidade) => unidade.id === residenciaSelecionada
+      )
+    )
+      return false;
+
+    return true;
 
   });
   return (
@@ -225,6 +240,13 @@ export default function LocadoresPage() {
                   }
                   placeholder="Pesquisar locador..."
                 />
+
+                <div className="mt-4">
+                  <ResidenciaFiltro
+                    value={residenciaSelecionada}
+                    onChange={setResidenciaSelecionada}
+                  />
+                </div>
 
               </PageSection>
 

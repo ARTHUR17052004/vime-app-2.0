@@ -23,8 +23,8 @@ export default function UnitCardList({
 
         <EmptyState
           icon={<Building2 size={54} />}
-          title="Nenhuma unidade encontrada"
-          description="Cadastre sua primeira unidade para começar o gerenciamento."
+          title="Nenhuma residência encontrada"
+          description="Cadastre sua primeira residência para começar o gerenciamento."
         />
 
       </FadeIn>

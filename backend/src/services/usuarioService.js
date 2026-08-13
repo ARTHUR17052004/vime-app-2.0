@@ -402,9 +402,28 @@ const redefinirSenha = async (
 
     id,
 
-    novaSenha
+    novaSenha,
+
+    senhaAtual
 
 ) => {
+
+    if (senhaAtual !== undefined) {
+
+        const usuario = await prisma.usuario.findUnique({
+            where: { id }
+        });
+
+        const senhaValida = usuario && await bcrypt.compare(
+            senhaAtual,
+            usuario.senha
+        );
+
+        if (!senhaValida) {
+            throw new Error('Senha atual inválida.');
+        }
+
+    }
 
     const senhaHash = await bcrypt.hash(
 

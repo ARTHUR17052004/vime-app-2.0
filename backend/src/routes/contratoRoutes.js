@@ -20,8 +20,6 @@ router.delete('/:id', contratoController.remover);
 
 router.patch('/:id/encerrar', contratoController.encerrar);
 
-router.patch('/:id/inadimplente', contratoController.inadimplente);
-
 router.patch('/:id/renovar', contratoController.renovar);
 
 module.exports = router;

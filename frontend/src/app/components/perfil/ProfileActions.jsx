@@ -1,16 +1,23 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { KeyRound, Settings, LogOut } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
 import Button from "../ui/Button";
+import AlterarSenhaModal from "./AlterarSenhaModal";
 
 import { useAuth } from "../../../context/AuthContext";
 
 export default function ProfileActions() {
   const { logout } = useAuth();
+  const router = useRouter();
+
+  const [senhaModalOpen, setSenhaModalOpen] = useState(false);
 
   return (
+    <>
     <DashboardCard>
 
       <div>
@@ -43,6 +50,7 @@ export default function ProfileActions() {
       <div className="mt-8 space-y-5">
 
         <button
+          onClick={() => setSenhaModalOpen(true)}
           className="
             w-full
 
@@ -86,6 +94,7 @@ export default function ProfileActions() {
         </button>
 
         <button
+          onClick={() => router.push("/configuracoes")}
           className="
             w-full
 
@@ -152,5 +161,11 @@ export default function ProfileActions() {
       </div>
 
     </DashboardCard>
+
+    <AlterarSenhaModal
+      isOpen={senhaModalOpen}
+      onClose={() => setSenhaModalOpen(false)}
+    />
+    </>
   );
 }

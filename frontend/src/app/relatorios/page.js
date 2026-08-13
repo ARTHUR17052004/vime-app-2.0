@@ -22,7 +22,7 @@ export default function RelatoriosPage() {
 
   const modulos = useMemo(
       () => [
-        "Unidades",
+        "Residências",
         "Kitnets",
         "Locadores",
         "Inquilinos",

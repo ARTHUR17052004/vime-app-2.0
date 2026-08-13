@@ -55,8 +55,12 @@ export default function ProfileInfo() {
 
         <InfoItem
           label="Status"
-          value="Ativo"
-          valueClass="text-emerald-400"
+          value={usuario?.ativo === false ? "Inativo" : "Ativo"}
+          valueClass={
+            usuario?.ativo === false
+              ? "text-red-400"
+              : "text-emerald-400"
+          }
         />
 
       </div>

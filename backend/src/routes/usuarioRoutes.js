@@ -14,4 +14,6 @@ router.put('/:id', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioCon
 
 router.delete('/:id', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.remover);
 
+router.post('/:id/redefinir-senha', authMiddleware, usuarioController.redefinirSenha);
+
 module.exports = router;

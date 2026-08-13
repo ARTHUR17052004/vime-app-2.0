@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
@@ -25,8 +26,8 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
-  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
+  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
+  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
 
   const receita = await prisma.receita.create({
     data: dados
@@ -56,8 +57,8 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
-  if (dados.vencimento) dados.vencimento = new Date(dados.vencimento);
-  if (dados.dataPagamento) dados.dataPagamento = new Date(dados.dataPagamento);
+  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
+  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
 
   const anterior = await prisma.receita.findUnique({
     where: { id }

@@ -362,7 +362,7 @@ export default function ContratoForm({
             }}
           >
 
-            Selecione uma Unidade
+            Selecione uma Residência
 
           </option>
 
@@ -546,16 +546,6 @@ export default function ContratoForm({
     }}
   >
     Pendente
-  </option>
-
-  <option
-    value="INADIMPLENTE"
-    style={{
-      backgroundColor: "#1d2833",
-      color: "#fff",
-    }}
-  >
-    Inadimplente
   </option>
 
   <option

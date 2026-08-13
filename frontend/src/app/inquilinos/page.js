@@ -19,6 +19,7 @@ import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
 
 import { InquilinoService } from "../../services/inquilinos.service";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 export default function InquilinosPage() {
 
@@ -36,6 +37,9 @@ export default function InquilinosPage() {
     useState("");
 
   const [search, setSearch] =
+    useState("");
+
+  const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
   /* ==========================================
@@ -194,19 +198,31 @@ export default function InquilinosPage() {
 
     const termo = search.toLowerCase();
 
-    return inquilinos.filter((inquilino) => (
+    return inquilinos.filter((inquilino) => {
 
-      inquilino.nome?.toLowerCase().includes(termo) ||
+      const correspondeTexto =
 
-      inquilino.email?.toLowerCase().includes(termo) ||
+        inquilino.nome?.toLowerCase().includes(termo) ||
 
-      inquilino.telefone?.toLowerCase().includes(termo) ||
+        inquilino.email?.toLowerCase().includes(termo) ||
 
-      inquilino.cpf?.toLowerCase().includes(termo)
+        inquilino.telefone?.toLowerCase().includes(termo) ||
 
-    ));
+        inquilino.cpf?.toLowerCase().includes(termo);
 
-  }, [inquilinos, search]);
+      if (!correspondeTexto) return false;
+
+      if (
+        residenciaSelecionada &&
+        inquilino.kitnet?.unidadeId !== residenciaSelecionada
+      )
+        return false;
+
+      return true;
+
+    });
+
+  }, [inquilinos, search, residenciaSelecionada]);
 
   /* ==========================================
      LOADING
@@ -298,6 +314,13 @@ export default function InquilinosPage() {
                 }
                 placeholder="Pesquisar inquilino..."
               />
+
+              <div className="mt-4">
+                <ResidenciaFiltro
+                  value={residenciaSelecionada}
+                  onChange={setResidenciaSelecionada}
+                />
+              </div>
 
             </PageSection>
 

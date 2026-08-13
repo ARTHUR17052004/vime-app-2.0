@@ -13,6 +13,7 @@ import { VistoriaService } from "@/services/vistoria.service";
 import VistoriaTabs from "../components/vistorias/VistoriaTabs";
 import VistoriaModal from "../components/vistorias/VistoriaModal";
 import VistoriaForm from "../components/vistorias/VistoriaForm";
+import VistoriaConcluirModal from "../components/vistorias/VistoriaConcluirModal";
 import VistoriaRelatorios from "../components/vistorias/VistoriaRelatorios";
 import VistoriaProximasVistorias from "../components/vistorias/VistoriaProximasVistorias";
 import OcorrenciaCard from "../components/vistorias/OcorrenciaCard";
@@ -25,6 +26,7 @@ import SearchInput from "../components/common/SearchInput";
 import VistoriaStats from "../components/vistorias/VistoriaStats";
 import VistoriaFilters from "../components/vistorias/VistoriaFilters";
 import VistoriaCardList from "../components/vistorias/VistoriaCardList";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 export default function VistoriasPage() {
 
   const [modalOpen, setModalOpen] =
@@ -36,6 +38,9 @@ export default function VistoriasPage() {
   const [filtroSelecionado, setFiltroSelecionado] =
     useState("Todos");
 
+  const [residenciaSelecionada, setResidenciaSelecionada] =
+    useState("");
+
   const [search, setSearch] =
     useState("");
   
@@ -43,6 +48,12 @@ export default function VistoriasPage() {
     useState([]);
 
   const [vistoriaEditando, setVistoriaEditando] =
+    useState(null);
+
+  const [concluirModalOpen, setConcluirModalOpen] =
+    useState(false);
+
+  const [vistoriaParaConcluir, setVistoriaParaConcluir] =
     useState(null);
 
   const [carregado, setCarregado] =
@@ -73,8 +84,8 @@ export default function VistoriasPage() {
         const normalizada = {
           ...vistoria,
           nomeVistoria: vistoria.titulo,
-          unidadeNome: vistoria.unidade,
-          kitnetNome: vistoria.kitnet,
+          unidadeNome: vistoria.unidade?.nome || "",
+          kitnetNome: vistoria.kitnet?.nome || vistoria.kitnet?.numero || "",
           dataUltima,
           dataProxima,
         };
@@ -119,8 +130,8 @@ export default function VistoriasPage() {
 
   const payload = {
     titulo: dados.nomeVistoria || dados.titulo,
-    unidade: dados.unidadeNome,
-    kitnet: dados.kitnetNome,
+    unidadeId: dados.unidadeId || null,
+    kitnetId: dados.kitnetId || null,
     categoria: dados.categoria,
     criticidade: dados.criticidade,
     periodicidade: dados.periodicidade,
@@ -169,8 +180,8 @@ export default function VistoriasPage() {
     setVistoriaEditando({
       ...vistoria,
       nomeVistoria: vistoria.titulo,
-      unidadeNome: vistoria.unidade,
-      kitnetNome: vistoria.kitnet,
+      unidadeId: vistoria.unidadeId || "",
+      kitnetId: vistoria.kitnetId || "",
       dataUltima: vistoria.dataUltima
         ? new Date(vistoria.dataUltima).toISOString().split("T")[0]
         : "",
@@ -208,17 +219,32 @@ export default function VistoriasPage() {
 
   };
 
-const concluirVistoria = async (
-  id
-) => {
+const abrirConcluirVistoria = (id) => {
 
   const vistoria = vistorias.find(
     (item) => item.id === id
   );
 
-  const hoje = new Date();
+  setVistoriaParaConcluir(vistoria);
+  setConcluirModalOpen(true);
 
-  const proximaData = new Date(hoje);
+};
+
+const confirmarConcluirVistoria = async (
+  { dataUltima, fotosConclusao }
+) => {
+
+  const vistoria = vistoriaParaConcluir;
+
+  if (!vistoria) return;
+
+  const dataEscolhida = dataUltima
+    ? new Date(dataUltima)
+    : new Date();
+
+  const proximaData = new Date(dataEscolhida);
+
+  let recorrente = true;
 
   switch (vistoria?.periodicidade) {
 
@@ -251,23 +277,45 @@ const concluirVistoria = async (
       break;
 
     default:
+      recorrente = false;
       break;
 
   }
 
   try {
 
-    await VistoriaService.atualizar(id, {
-      status: "PROGRAMADA",
-      dataUltima: hoje.toISOString(),
-      dataProxima: proximaData.toISOString(),
+    await VistoriaService.atualizar(vistoria.id, {
+      status: recorrente ? "PROGRAMADA" : "REALIZADA",
+      dataUltima: dataEscolhida.toISOString(),
+      dataProxima: recorrente ? proximaData.toISOString() : null,
+      concluidaEm: new Date().toISOString(),
+      fotosConclusao,
     });
+
+    await carregar();
+
+    setConcluirModalOpen(false);
+    setVistoriaParaConcluir(null);
+
+  } catch (err) {
+
+    alert(err.message || "Erro ao concluir vistoria.");
+
+  }
+
+};
+
+const fixarVistoria = async (id, fixado) => {
+
+  try {
+
+    await VistoriaService.atualizar(id, { fixado });
 
     await carregar();
 
   } catch (err) {
 
-    alert(err.message || "Erro ao concluir vistoria.");
+    alert(err.message || "Erro ao fixar vistoria.");
 
   }
 
@@ -307,8 +355,8 @@ const concluirVistoria = async (
   const texto = `
     ${vistoria.titulo || ""}
     ${vistoria.categoria || ""}
-    ${vistoria.unidade || ""}
-    ${vistoria.kitnet || ""}
+    ${vistoria.unidadeNome || ""}
+    ${vistoria.kitnetNome || ""}
     ${vistoria.responsavel || ""}
   `.toLowerCase();
 
@@ -322,6 +370,13 @@ const concluirVistoria = async (
   if (
     filtroSelecionado !== "Todos" &&
     vistoria.categoria !== filtroSelecionado
+  ) {
+    return false;
+  }
+
+  if (
+    residenciaSelecionada &&
+    vistoria.unidadeId !== residenciaSelecionada
   ) {
     return false;
   }
@@ -342,7 +397,9 @@ const concluirVistoria = async (
 
   }
 
-});
+}).sort(
+  (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
+);
 
   if (!carregado) {
     return (
@@ -409,6 +466,13 @@ const concluirVistoria = async (
               setFiltroSelecionado={setFiltroSelecionado}
             />
 
+            <div className="mt-4">
+              <ResidenciaFiltro
+                value={residenciaSelecionada}
+                onChange={setResidenciaSelecionada}
+              />
+            </div>
+
             <VistoriaTabs
               abaSelecionada={abaSelecionada}
               setAbaSelecionada={setAbaSelecionada}
@@ -442,8 +506,9 @@ const concluirVistoria = async (
                   vistorias={vistoriasFiltradas}
                   onEdit={editarVistoria}
                   onDelete={excluirVistoria}
-                  onConcluir={concluirVistoria}
+                  onConcluir={abrirConcluirVistoria}
                   onCancelar={cancelarVistoria}
+                  onFixar={fixarVistoria}
                 />
 
               </PageSection>
@@ -492,6 +557,16 @@ const concluirVistoria = async (
           />
 
         </VistoriaModal>
+
+        <VistoriaConcluirModal
+          isOpen={concluirModalOpen}
+          onClose={() => {
+            setConcluirModalOpen(false);
+            setVistoriaParaConcluir(null);
+          }}
+          vistoria={vistoriaParaConcluir}
+          onConfirm={confirmarConcluirVistoria}
+        />
 
       </PageContainer>
 

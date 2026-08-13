@@ -264,7 +264,7 @@ export default function UnitForm({
               font-semibold
             "
           >
-            Dados da Unidade
+            Dados da Residência
           </p>
 
           <h2
@@ -283,7 +283,7 @@ export default function UnitForm({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <Input
-            label="Nome da Unidade"
+            label="Nome da Residência"
             required
             name="nome"
             value={formData.nome}
@@ -331,7 +331,7 @@ export default function UnitForm({
               text-white
             "
           >
-            Localização da Unidade
+            Localização da Residência
           </h2>
 
         </div>
@@ -530,7 +530,7 @@ export default function UnitForm({
 
           onChange={handleChange}
 
-          placeholder="Escreva observações importantes sobre esta unidade..."
+          placeholder="Escreva observações importantes sobre esta residência..."
 
         />
 
@@ -577,7 +577,7 @@ export default function UnitForm({
 
           {unidade
             ? "Salvar Alterações"
-            : "Cadastrar Unidade"}
+            : "Cadastrar Residência"}
 
         </Button>
 

@@ -4,23 +4,52 @@ import { useState } from "react";
 import {
   MoreVertical,
   Wallet,
+  Plus,
+  Pin,
 } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
 
 import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
+
+function MenuButton({ label, danger, success, warning, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        w-full
+        text-left
+        px-4
+        py-3
+        transition
+        ${
+          danger
+            ? "text-red-400 hover:bg-red-500/10"
+            : success
+            ? "text-green-400 hover:bg-green-500/10"
+            : warning
+            ? "text-yellow-400 hover:bg-yellow-500/10"
+            : "text-gray-300 hover:bg-white/5"
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function FinanceiroReceitas({
   receitas,
   onDelete,
   onUpdate,
   onMarcarPago,
+  onFixar,
+  onNovo,
 }) {
-  const [menuAberto, setMenuAberto] =
-    useState(null);
-
   const [receitaSelecionada, setReceitaSelecionada] =
     useState(null);
 
@@ -29,6 +58,26 @@ export default function FinanceiroReceitas({
 
   const [editarOpen, setEditarOpen] =
     useState(false);
+
+  const [menuAberto, setMenuAberto] = useState(null);
+
+  const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
+
+  function abrirMenu(e, id) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const largura = 200;
+
+    let left = rect.right - largura;
+    const top = rect.bottom + 8;
+
+    if (left < 16) left = 16;
+    if (left + largura > window.innerWidth - 16) {
+      left = window.innerWidth - largura - 16;
+    }
+
+    setPosicaoMenu({ top, left });
+    setMenuAberto(id);
+  }
 
   const corStatus = (status) => {
     if (status === "PAGO" || status === "PAGA") {
@@ -48,41 +97,71 @@ export default function FinanceiroReceitas({
 
       <div className="px-6 pt-6">
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
 
-          <div
+          <div className="flex items-center gap-4">
+
+            <div
+              className="
+                w-12
+                h-12
+
+                rounded-2xl
+
+                bg-emerald-500/10
+
+                border
+                border-emerald-500/20
+
+                flex
+                items-center
+                justify-center
+              "
+            >
+
+              <Wallet className="w-6 h-6 text-emerald-400" />
+
+            </div>
+
+            <div>
+
+              <h2 className="text-2xl font-bold text-white">
+                Receitas
+              </h2>
+
+              <p className="text-gray-400">
+                Controle das receitas cadastradas.
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={onNovo}
+            title="Nova Receita"
             className="
-              w-12
-              h-12
+              w-10
+              h-10
 
-              rounded-2xl
-
-              bg-emerald-500/10
-
-              border
-              border-emerald-500/20
+              rounded-xl
 
               flex
               items-center
               justify-center
+
+              bg-emerald-500/10
+              border
+              border-emerald-500/20
+
+              text-emerald-400
+
+              hover:bg-emerald-500/20
+              transition
             "
           >
-
-            <Wallet className="w-6 h-6 text-emerald-400" />
-
-          </div>
-
-          <div>
-
-            <h2 className="text-2xl font-bold text-white">
-              Receitas
-            </h2>
-
-            <p className="text-gray-400">
-              Controle das receitas cadastradas.
-            </p>
-
-          </div>
+            <Plus size={20} />
+          </button>
 
         </div>
 
@@ -142,7 +221,15 @@ export default function FinanceiroReceitas({
                 >
 
                   <td className="py-5">
-                    {item.descricao}
+                    <div className="flex items-center gap-2">
+                      {item.fixado && (
+                        <Pin
+                          size={14}
+                          className="text-emerald-400 fill-emerald-400"
+                        />
+                      )}
+                      {item.descricao}
+                    </div>
                   </td>
 
                   <td>
@@ -187,114 +274,79 @@ export default function FinanceiroReceitas({
                     </div>
                   </td>
 
-                  <td className="relative">
+                  <td>
 
                     <button
-                      onClick={() =>
-                        setMenuAberto(
-                          menuAberto === item.id
-                            ? null
-                            : item.id
-                        )
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        menuAberto === item.id
+                          ? setMenuAberto(null)
+                          : abrirMenu(e, item.id);
+                      }}
+                      className="
+                        w-9
+                        h-9
+                        rounded-lg
+                        flex
+                        items-center
+                        justify-center
+                        hover:bg-white/10
+                        transition
+                      "
                     >
-                      <MoreVertical />
+                      <MoreVertical size={18} />
                     </button>
 
-                    {menuAberto === item.id && (
+                    <ActionMenu
+                      open={menuAberto === item.id}
+                      position={posicaoMenu}
+                      onClose={() => setMenuAberto(null)}
+                    >
+                      <MenuButton
+                        label="Visualizar"
+                        onClick={() => {
+                          setReceitaSelecionada(item);
+                          setVisualizarOpen(true);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                      <div
-                        className="
-                          absolute
-                          right-0
-                          top-10
-                          bg-gradient-to-br
-                          from-[#202a36]/95
-                          via-[#1b2430]/96
-                          to-[#151c25]/96
-                          backdrop-blur-xl
-                          rounded-xl
-                          shadow-[0_18px_45px_rgba(0,0,0,.35)]
-                          border
-                          border-white/[0.07]
-                          text-gray-200
-                          w-44
-                          z-50
-                        "
-                      >
+                      <MenuButton
+                        label="Editar"
+                        warning
+                        onClick={() => {
+                          setReceitaSelecionada(item);
+                          setEditarOpen(true);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                        <button
-                          onClick={() => {
-                            setReceitaSelecionada(item);
-                            setVisualizarOpen(true);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-white/5
-                          "
-                        >
-                          Visualizar
-                        </button>
+                      <MenuButton
+                        label="Marcar Pago"
+                        success
+                        onClick={() => {
+                          onMarcarPago?.(item.id);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                        <button
-                          onClick={() => {
-                            setReceitaSelecionada(item);
-                            setEditarOpen(true);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-yellow-500/10
-                            text-yellow-400
-                          "
-                        >
-                          Editar
-                        </button>
+                      <MenuButton
+                        label={item.fixado ? "Desafixar" : "Fixar"}
+                        onClick={() => {
+                          onFixar?.(item.id, !item.fixado);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                        <button
-                          onClick={() => {
-                            onMarcarPago?.(item.id);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-green-500/10
-                            text-green-400
-                          "
-                        >
-                          Marcar Pago
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            onDelete?.(item.id);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-red-500/10
-                            text-red-400
-                          "
-                        >
-                          Excluir
-                        </button>
-
-                      </div>
-
-                    )}
+                      <MenuButton
+                        label="Excluir"
+                        danger
+                        onClick={() => {
+                          onDelete?.(item.id);
+                          setMenuAberto(null);
+                        }}
+                      />
+                    </ActionMenu>
 
                   </td>
 

@@ -8,10 +8,7 @@ import MainLayout from "../../components/layout/MainLayout";
 
 import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
-
-function formatarData(data) {
-  return data ? new Date(data).toLocaleDateString("pt-BR") : null;
-}
+import { formatDate, formatDateTime } from "@/utils/formatDate";
 
 const ACAO_LABEL = {
   CRIAR: "Vistoria criada",
@@ -173,28 +170,35 @@ export default function DetalhesVistoriaPage() {
             <div>
               <p className="text-gray-400">Última Execução</p>
               <h3 className="font-semibold text-white">
-                {formatarData(vistoria.dataUltima) || "Ainda não executada"}
+                {vistoria.dataUltima ? formatDate(vistoria.dataUltima) : "Ainda não executada"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Próxima Execução</p>
               <h3 className="font-semibold text-white">
-                {formatarData(vistoria.dataProxima) || "-"}
+                {formatDate(vistoria.dataProxima)}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Unidade</p>
+              <p className="text-gray-400">Baixa Registrada Em</p>
               <h3 className="font-semibold text-white">
-                {vistoria.unidade || "-"}
+                {formatDateTime(vistoria.concluidaEm)}
+              </h3>
+            </div>
+
+            <div>
+              <p className="text-gray-400">Residência</p>
+              <h3 className="font-semibold text-white">
+                {vistoria.unidade?.nome || "-"}
               </h3>
             </div>
 
             <div>
               <p className="text-gray-400">Kitnet</p>
               <h3 className="font-semibold text-white">
-                {vistoria.kitnet || "-"}
+                {vistoria.kitnet?.nome || vistoria.kitnet?.numero || "-"}
               </h3>
             </div>
 
@@ -222,40 +226,81 @@ export default function DetalhesVistoriaPage() {
           <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
 
             <h2 className="text-2xl font-bold text-white mb-6">
-              Fotos da Vistoria
+              Fotos e Vídeos da Vistoria
             </h2>
 
             <div className="grid md:grid-cols-3 gap-4">
 
-              {vistoria.fotos.map((foto, index) => (
-
-                <a
-                  key={index}
-                  href={foto}
-                  target="_blank"
-                  rel="noreferrer"
-                  download={`vistoria-${index + 1}.png`}
-                >
-
-                  <img
+              {vistoria.fotos.map((foto, index) =>
+                foto.startsWith("data:video") ? (
+                  <video
+                    key={index}
                     src={foto}
-                    alt={`Foto ${index + 1}`}
-                    className="
-                      w-full
-                      h-52
-                      object-cover
-                      rounded-2xl
-                      border
-                      border-white/10
-                      cursor-pointer
-                      hover:scale-105
-                      transition
-                    "
+                    controls
+                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
                   />
+                ) : (
+                  <a
+                    key={index}
+                    href={foto}
+                    target="_blank"
+                    rel="noreferrer"
+                    download={`vistoria-${index + 1}.png`}
+                  >
 
-                </a>
+                    <img
+                      src={foto}
+                      alt={`Foto ${index + 1}`}
+                      className="
+                        w-full
+                        h-52
+                        object-cover
+                        rounded-2xl
+                        border
+                        border-white/10
+                        cursor-pointer
+                        hover:scale-105
+                        transition
+                      "
+                    />
 
-              ))}
+                  </a>
+                )
+              )}
+
+            </div>
+
+          </div>
+
+        )}
+
+        {vistoria.fotosConclusao?.length > 0 && (
+
+          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+
+            <h2 className="text-2xl font-bold text-white mb-6">
+              Fotos e Vídeos da Baixa
+            </h2>
+
+            <div className="grid md:grid-cols-3 gap-4">
+
+              {vistoria.fotosConclusao.map((midia, index) =>
+                midia.startsWith("data:video") ? (
+                  <video
+                    key={index}
+                    src={midia}
+                    controls
+                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
+                  />
+                ) : (
+                  <img
+                    key={index}
+                    src={midia}
+                    alt={`Mídia ${index + 1}`}
+                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
+                  />
+                )
+              )}
 
             </div>
 

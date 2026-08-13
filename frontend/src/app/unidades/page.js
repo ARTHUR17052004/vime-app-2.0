@@ -67,7 +67,7 @@ export default function UnidadesPage() {
 
       setErro(
         err.message ||
-          "Erro ao carregar unidades."
+          "Erro ao carregar residências."
       );
 
       setUnidades([]);
@@ -142,7 +142,7 @@ export default function UnidadesPage() {
 
       alert(
         err.message ||
-          "Erro ao salvar unidade."
+          "Erro ao salvar residência."
       );
 
     }
@@ -179,7 +179,7 @@ export default function UnidadesPage() {
   const excluirUnidade = async (id) => {
 
     const confirmar = window.confirm(
-      "Deseja realmente excluir esta unidade?"
+      "Deseja realmente excluir esta residência?"
     );
 
     if (!confirmar) return;
@@ -196,7 +196,7 @@ export default function UnidadesPage() {
 
       alert(
         err.message ||
-        "Erro ao excluir unidade."
+        "Erro ao excluir residência."
       );
 
     }
@@ -253,7 +253,7 @@ export default function UnidadesPage() {
 
               <p className="text-gray-400 text-lg">
 
-                Carregando unidades...
+                Carregando residências...
 
               </p>
 
@@ -301,10 +301,10 @@ export default function UnidadesPage() {
           <FadeIn delay={0}>
 
             <PageHeader
-              title="Unidades"
-              subtitle="Gerencie todas as unidades cadastradas."
+              title="Residências"
+              subtitle="Gerencie todas as residências cadastradas."
               count={unidades.length}
-              countLabel="unidade(s) cadastrada(s)"
+              countLabel="residência(s) cadastrada(s)"
               actions={
 
                 <Button
@@ -317,7 +317,7 @@ export default function UnidadesPage() {
                   }}
                 >
 
-                  + Nova Unidade
+                  + Nova Residência
 
                 </Button>
 

@@ -33,8 +33,6 @@ export default function InquilinoForm({
     dataInicioContrato: "",
     dataFimContrato: "",
     prazoContrato: "",
-    tipoGarantia: "",
-    valorCaucao: "",
     indiceReajuste: "",
 
     ativo: true,
@@ -101,12 +99,6 @@ export default function InquilinoForm({
 
       prazoContrato:
         inquilino.prazoContrato || "",
-
-      tipoGarantia:
-        inquilino.tipoGarantia || "",
-
-      valorCaucao:
-        inquilino.valorCaucao || "",
 
       indiceReajuste:
         inquilino.indiceReajuste || "",

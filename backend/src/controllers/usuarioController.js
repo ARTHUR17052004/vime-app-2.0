@@ -208,9 +208,21 @@ const redefinirSenha = async (req, res) => {
 
     try {
 
+        const ehProprioUsuario = req.usuario?.id === req.params.id;
+        const ehAdministrador = req.usuario?.perfil === 'ADMINISTRADOR';
+
+        if (!ehProprioUsuario && !ehAdministrador) {
+            return res.status(403).json({
+                success: false,
+                message: 'Você não tem permissão para alterar esta senha.',
+            });
+        }
+
         const {
 
             novaSenha,
+
+            senhaAtual,
 
         } = req.body;
 
@@ -218,7 +230,9 @@ const redefinirSenha = async (req, res) => {
 
             req.params.id,
 
-            novaSenha
+            novaSenha,
+
+            ehProprioUsuario ? senhaAtual : undefined
 
         );
 
@@ -234,11 +248,11 @@ const redefinirSenha = async (req, res) => {
 
         console.error(error);
 
-        return res.status(500).json({
+        return res.status(400).json({
 
             success: false,
 
-            message: "Erro ao redefinir senha.",
+            message: error.message || "Erro ao redefinir senha.",
 
         });
 

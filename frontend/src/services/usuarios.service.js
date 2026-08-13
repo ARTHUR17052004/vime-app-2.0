@@ -29,11 +29,12 @@ export const UsuarioService = {
     });
   },
 
-  redefinirSenha(id, novaSenha) {
+  redefinirSenha(id, novaSenha, senhaAtual) {
     return api(`/usuarios/${id}/redefinir-senha`, {
       method: "POST",
       body: JSON.stringify({
         novaSenha,
+        senhaAtual,
       }),
     });
   },

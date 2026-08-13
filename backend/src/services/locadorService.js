@@ -2,6 +2,9 @@ const prisma = require("../config/prisma");
 
 const listar = () => {
   return prisma.locador.findMany({
+    include: {
+      unidades: true,
+    },
     orderBy: {
       createdAt: "desc",
     },

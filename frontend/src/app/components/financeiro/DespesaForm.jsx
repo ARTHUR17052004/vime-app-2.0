@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from "react";
 
+import { UnidadeService } from "@/services/unidades.service";
+
 export default function DespesaForm({
   onSave,
   despesaEditando,
 }) {
+  const [residencias, setResidencias] = useState([]);
+
   const [formData, setFormData] =
     useState({
       categoria:
@@ -20,12 +24,32 @@ export default function DespesaForm({
       vencimento: "",
 
       dataPagamento: "",
+
+      unidadeId: "",
     });
+
+  useEffect(() => {
+    async function carregarResidencias() {
+      try {
+        const resposta = await UnidadeService.listar();
+        setResidencias(
+          Array.isArray(resposta) ? resposta : resposta.data || []
+        );
+      } catch (err) {
+        console.error("Erro ao carregar residências:", err);
+      }
+    }
+
+    carregarResidencias();
+  }, []);
 
   useEffect(() => {
     if (despesaEditando) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData(despesaEditando);
+      setFormData({
+        unidadeId: "",
+        ...despesaEditando,
+      });
     }
   }, [despesaEditando]);
 
@@ -103,6 +127,20 @@ export default function DespesaForm({
         >
           <option value="PAGO">Pago</option>
           <option value="PENDENTE">Pendente</option>
+        </select>
+
+        <select
+          name="unidadeId"
+          value={formData.unidadeId || ""}
+          onChange={handleChange}
+          className={inputStyle}
+        >
+          <option value="">Residência (opcional)</option>
+          {residencias.map((residencia) => (
+            <option key={residencia.id} value={residencia.id}>
+              {residencia.nome}
+            </option>
+          ))}
         </select>
 
         <div>

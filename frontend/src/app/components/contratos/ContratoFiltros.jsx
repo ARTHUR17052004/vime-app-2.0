@@ -8,7 +8,6 @@ export default function ContratoFiltros({
     "Todos",
     "Ativos",
     "Pendentes",
-    "Inadimplentes",
     "Encerrados",
   ];
 

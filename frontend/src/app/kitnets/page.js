@@ -25,6 +25,7 @@ import DashboardStatsCard from "../components/dashboard/DashboardStatsCard";
 import KitnetModal from "../components/kitnets/KitnetModal";
 import KitnetForm from "../components/kitnets/KitnetForm";
 import KitnetTable from "../components/kitnets/KitnetTable";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 export default function KitnetsPage() {
 
@@ -37,6 +38,8 @@ export default function KitnetsPage() {
   const [erro, setErro] = useState("");
 
   const [kitnetEditando, setKitnetEditando] = useState(null);
+
+  const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
   /* ==========================================
      CARREGAR DADOS
@@ -172,6 +175,12 @@ export default function KitnetsPage() {
 
   ).length;
 
+  const kitnetsFiltradas = residenciaSelecionada
+    ? kitnets.filter(
+        (k) => k.unidadeId === residenciaSelecionada
+      )
+    : kitnets;
+
   if (loading) {
 
     return (
@@ -284,12 +293,25 @@ export default function KitnetsPage() {
 
         </FadeIn>
 
+        <FadeIn delay={0.15}>
+
+          <PageSection>
+
+            <ResidenciaFiltro
+              value={residenciaSelecionada}
+              onChange={setResidenciaSelecionada}
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
         <FadeIn delay={0.20}>
 
           <PageSection spacing="xxl">
 
             <KitnetTable
-              kitnets={kitnets}
+              kitnets={kitnetsFiltradas}
               onEdit={editarKitnet}
               onDelete={excluirKitnet}
             />

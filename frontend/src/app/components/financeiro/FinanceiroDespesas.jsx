@@ -4,22 +4,49 @@ import { useState } from "react";
 import {
   MoreVertical,
   TrendingDown,
+  Plus,
+  Pin,
 } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
 
 import DespesaVisualizarModal from "./DespesaVisualizarModal";
 import DespesaEditarModal from "./DespesaEditarModal";
+
+function MenuButton({ label, danger, warning, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`
+        w-full
+        text-left
+        px-4
+        py-3
+        transition
+        ${
+          danger
+            ? "text-red-400 hover:bg-red-500/10"
+            : warning
+            ? "text-yellow-400 hover:bg-yellow-500/10"
+            : "text-gray-300 hover:bg-white/5"
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
+}
 
 export default function FinanceiroDespesas({
   despesas,
   onDelete,
   onUpdate,
+  onFixar,
+  onNovo,
 }) {
-  const [menuAberto, setMenuAberto] =
-    useState(null);
-
   const [despesaSelecionada, setDespesaSelecionada] =
     useState(null);
 
@@ -28,6 +55,26 @@ export default function FinanceiroDespesas({
 
   const [editarOpen, setEditarOpen] =
     useState(false);
+
+  const [menuAberto, setMenuAberto] = useState(null);
+
+  const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
+
+  function abrirMenu(e, id) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const largura = 200;
+
+    let left = rect.right - largura;
+    const top = rect.bottom + 8;
+
+    if (left < 16) left = 16;
+    if (left + largura > window.innerWidth - 16) {
+      left = window.innerWidth - largura - 16;
+    }
+
+    setPosicaoMenu({ top, left });
+    setMenuAberto(id);
+  }
 
   const corStatus = (status) => {
     if (status === "PAGO") {
@@ -48,35 +95,65 @@ export default function FinanceiroDespesas({
 
       <div className="px-6 pt-6">
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-4">
 
-          <div
+          <div className="flex items-center gap-4">
+
+            <div
+              className="
+                w-12
+                h-12
+                rounded-2xl
+                bg-red-500/10
+                border
+                border-red-500/20
+                flex
+                items-center
+                justify-center
+              "
+            >
+              <TrendingDown className="w-6 h-6 text-red-400" />
+            </div>
+
+            <div>
+
+              <h2 className="text-2xl font-bold text-white">
+                Despesas
+              </h2>
+
+              <p className="text-gray-400">
+                Controle das despesas cadastradas.
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={onNovo}
+            title="Nova Despesa"
             className="
-              w-12
-              h-12
-              rounded-2xl
-              bg-red-500/10
-              border
-              border-red-500/20
+              w-10
+              h-10
+
+              rounded-xl
+
               flex
               items-center
               justify-center
+
+              bg-red-500/10
+              border
+              border-red-500/20
+
+              text-red-400
+
+              hover:bg-red-500/20
+              transition
             "
           >
-            <TrendingDown className="w-6 h-6 text-red-400" />
-          </div>
-
-          <div>
-
-            <h2 className="text-2xl font-bold text-white">
-              Despesas
-            </h2>
-
-            <p className="text-gray-400">
-              Controle das despesas cadastradas.
-            </p>
-
-          </div>
+            <Plus size={20} />
+          </button>
 
         </div>
 
@@ -144,7 +221,15 @@ export default function FinanceiroDespesas({
                 >
 
                   <td className="py-5">
-                    {item.descricao}
+                    <div className="flex items-center gap-2">
+                      {item.fixado && (
+                        <Pin
+                          size={14}
+                          className="text-red-400 fill-red-400"
+                        />
+                      )}
+                      {item.descricao}
+                    </div>
                   </td>
 
                   <td>
@@ -171,97 +256,70 @@ export default function FinanceiroDespesas({
 
                   </td>
 
-                  <td className="relative">
+                  <td>
 
                     <button
-                      onClick={() =>
-                        setMenuAberto(
-                          menuAberto === item.id
-                            ? null
-                            : item.id
-                        )
-                      }
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        menuAberto === item.id
+                          ? setMenuAberto(null)
+                          : abrirMenu(e, item.id);
+                      }}
+                      className="
+                        w-9
+                        h-9
+                        rounded-lg
+                        flex
+                        items-center
+                        justify-center
+                        hover:bg-white/10
+                        transition
+                      "
                     >
-                      <MoreVertical />
+                      <MoreVertical size={18} />
                     </button>
 
-                    {menuAberto === item.id && (
+                    <ActionMenu
+                      open={menuAberto === item.id}
+                      position={posicaoMenu}
+                      onClose={() => setMenuAberto(null)}
+                    >
+                      <MenuButton
+                        label="Visualizar"
+                        onClick={() => {
+                          setDespesaSelecionada(item);
+                          setVisualizarOpen(true);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                      <div
-                        className="
-                          absolute
-                          right-0
-                          top-10
-                          bg-gradient-to-br
-                          from-[#202a36]/95
-                          via-[#1b2430]/96
-                          to-[#151c25]/96
-                          backdrop-blur-xl
-                          rounded-xl
-                          shadow-[0_18px_45px_rgba(0,0,0,.35)]
-                          border
-                          border-white/[0.07]
-                          text-gray-200
-                          w-44
-                          z-50
-                        "
-                      >
+                      <MenuButton
+                        label="Editar"
+                        warning
+                        onClick={() => {
+                          setDespesaSelecionada(item);
+                          setEditarOpen(true);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                        <button
-                          onClick={() => {
-                            setDespesaSelecionada(item);
-                            setVisualizarOpen(true);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-white/5
-                          "
-                        >
-                          Visualizar
-                        </button>
+                      <MenuButton
+                        label={item.fixado ? "Desafixar" : "Fixar"}
+                        onClick={() => {
+                          onFixar?.(item.id, !item.fixado);
+                          setMenuAberto(null);
+                        }}
+                      />
 
-                        <button
-                          onClick={() => {
-                            setDespesaSelecionada(item);
-                            setEditarOpen(true);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-yellow-500/10
-                            text-yellow-400
-                          "
-                        >
-                          Editar
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            onDelete?.(item.id);
-                            setMenuAberto(null);
-                          }}
-                          className="
-                            w-full
-                            text-left
-                            px-4
-                            py-3
-                            hover:bg-red-500/10
-                            text-red-400
-                          "
-                        >
-                          Excluir
-                        </button>
-
-                      </div>
-
-                    )}
+                      <MenuButton
+                        label="Excluir"
+                        danger
+                        onClick={() => {
+                          onDelete?.(item.id);
+                          setMenuAberto(null);
+                        }}
+                      />
+                    </ActionMenu>
 
                   </td>
 

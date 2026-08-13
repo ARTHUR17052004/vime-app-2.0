@@ -31,6 +31,7 @@ import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
 import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
+import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 
 export default function FinanceiroPage() {
@@ -49,6 +50,9 @@ export default function FinanceiroPage() {
     useState("visao-geral");
 
   const [search, setSearch] =
+    useState("");
+
+  const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
   const carregar = useCallback(async () => {
@@ -198,6 +202,38 @@ export default function FinanceiroPage() {
 
   };
 
+  const fixarReceita = async (id, fixado) => {
+
+    try {
+
+      await ReceitaService.atualizar(id, { fixado });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao fixar receita.");
+
+    }
+
+  };
+
+  const fixarDespesa = async (id, fixado) => {
+
+    try {
+
+      await DespesaService.atualizar(id, { fixado });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao fixar despesa.");
+
+    }
+
+  };
+
   const marcarReceitaComoPaga = async (id) => {
 
     try {
@@ -243,11 +279,19 @@ export default function FinanceiroPage() {
       ${item.kitnet || ""}
     `.toLowerCase();
 
-    return texto.includes(
-      search.toLowerCase()
-    );
+    if (!texto.includes(search.toLowerCase())) return false;
 
-  });
+    if (
+      residenciaSelecionada &&
+      item.contrato?.unidadeId !== residenciaSelecionada
+    )
+      return false;
+
+    return true;
+
+  }).sort(
+    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
+  );
 
   const despesasFiltradas = despesas.filter((item) => {
 
@@ -257,11 +301,19 @@ export default function FinanceiroPage() {
       ${item.fornecedor || ""}
     `.toLowerCase();
 
-    return texto.includes(
-      search.toLowerCase()
-    );
+    if (!texto.includes(search.toLowerCase())) return false;
 
-  });
+    if (
+      residenciaSelecionada &&
+      item.unidadeId !== residenciaSelecionada
+    )
+      return false;
+
+    return true;
+
+  }).sort(
+    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
+  );
 
  if (!carregado) {
     return (
@@ -324,6 +376,13 @@ export default function FinanceiroPage() {
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />
+
+      <div className="mt-4">
+        <ResidenciaFiltro
+          value={residenciaSelecionada}
+          onChange={setResidenciaSelecionada}
+        />
+      </div>
     </FadeIn>
 
     <FadeIn delay={0.25}>
@@ -339,21 +398,31 @@ export default function FinanceiroPage() {
       <div className="space-y-8">
 
         <FinanceiroDashboard
-          receitas={receitas}
-          despesas={despesas}
+          receitas={receitasFiltradas}
+          despesas={despesasFiltradas}
         />
 
         <FinanceiroReceitas
-          receitas={receitas}
+          receitas={receitasFiltradas}
           onDelete={excluirReceita}
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
+          onFixar={fixarReceita}
+          onNovo={() => {
+            setTipoModal("receita");
+            setModalOpen(true);
+          }}
         />
 
         <FinanceiroDespesas
-          despesas={despesas}
+          despesas={despesasFiltradas}
           onDelete={excluirDespesa}
           onUpdate={atualizarDespesa}
+          onFixar={fixarDespesa}
+          onNovo={() => {
+            setTipoModal("despesa");
+            setModalOpen(true);
+          }}
         />
 
         <FinanceiroProximosVencimentos
@@ -374,18 +443,28 @@ export default function FinanceiroPage() {
 
     {abaSelecionada === "receitas" && (
       <FinanceiroReceitas
-        receitas={receitas}
+        receitas={receitasFiltradas}
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
+        onFixar={fixarReceita}
+        onNovo={() => {
+          setTipoModal("receita");
+          setModalOpen(true);
+        }}
       />
     )}
 
     {abaSelecionada === "despesas" && (
       <FinanceiroDespesas
-        despesas={despesas}
+        despesas={despesasFiltradas}
         onDelete={excluirDespesa}
         onUpdate={atualizarDespesa}
+        onFixar={fixarDespesa}
+        onNovo={() => {
+          setTipoModal("despesa");
+          setModalOpen(true);
+        }}
       />
     )}
 

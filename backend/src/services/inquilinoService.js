@@ -1,10 +1,17 @@
 const prisma = require('../config/prisma');
+const { paraDataOuNull } = require('../utils/data');
 
 const sanitizar = (dados) => {
 
-  if (dados.dataNascimento) dados.dataNascimento = new Date(dados.dataNascimento);
-  if (dados.dataInicioContrato) dados.dataInicioContrato = new Date(dados.dataInicioContrato);
-  if (dados.dataFimContrato) dados.dataFimContrato = new Date(dados.dataFimContrato);
+  if (dados.dataNascimento !== undefined) dados.dataNascimento = paraDataOuNull(dados.dataNascimento);
+  if (dados.dataFimContrato !== undefined) dados.dataFimContrato = paraDataOuNull(dados.dataFimContrato);
+
+  if (dados.dataInicioContrato !== undefined) {
+    if (!dados.dataInicioContrato) {
+      throw new Error('Data de início do contrato é obrigatória.');
+    }
+    dados.dataInicioContrato = new Date(dados.dataInicioContrato);
+  }
 
   if (dados.prazoContrato !== undefined && dados.prazoContrato !== "") {
     dados.prazoContrato = Number(dados.prazoContrato);

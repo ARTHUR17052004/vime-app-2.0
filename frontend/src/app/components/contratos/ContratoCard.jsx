@@ -18,7 +18,6 @@ export default function ContratoCard({
   onEdit,
   onEncerrar,
   onRenovar,
-  onMarcarInadimplente,
 }) {
 
   const [menuAberto, setMenuAberto] =
@@ -73,9 +72,6 @@ export default function ContratoCard({
 
           ENCERRADO:
             "bg-gray-500/15 text-gray-300 border border-gray-500/20",
-
-          INADIMPLENTE:
-            "bg-red-500/15 text-red-400 border border-red-500/20",
 
         };
 
@@ -269,28 +265,6 @@ export default function ContratoCard({
                   "
                 >
                   Renovar
-                </button>
-
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onMarcarInadimplente?.(
-                      contrato.id
-                    );
-                  }}
-                  className="
-                    w-full
-                    text-left
-
-                    px-4
-                    py-3
-
-                    text-orange-400
-
-                    hover:bg-orange-500/10
-                  "
-                >
-                  Marcar Inadimplente
                 </button>
 
                 <button

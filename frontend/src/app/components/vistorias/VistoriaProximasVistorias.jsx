@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDate } from "@/utils/formatDate";
+
 export default function VistoriaProximasVistorias({
   vistorias,
 }) {
@@ -130,7 +132,7 @@ export default function VistoriaProximasVistorias({
                       <div className="font-semibold text-emerald-400">
 
                         {
-                          vistoria.dataProxima
+                          formatDate(vistoria.dataProxima)
                         }
 
                       </div>

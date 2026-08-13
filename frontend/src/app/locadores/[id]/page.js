@@ -224,7 +224,7 @@ export default function DetalhesLocadorPage() {
 
           <div>
             <p className="text-gray-400">
-              Unidades Vinculadas
+              Residências Vinculadas
             </p>
 
             <h2 className="font-bold text-2xl text-white">

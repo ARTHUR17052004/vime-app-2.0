@@ -40,7 +40,7 @@ export default function OccupancyCard({ ocupacao }) {
               leading-none
             "
           >
-            Unidades por status
+            Residências por status
           </h2>
 
         </div>

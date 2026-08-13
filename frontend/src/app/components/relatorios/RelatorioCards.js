@@ -7,7 +7,7 @@ export default function RelatorioCards() {
   const relatorios = [
 
     {
-      nome: "Unidades",
+      nome: "Residências",
       link: "/unidades",
     },
 

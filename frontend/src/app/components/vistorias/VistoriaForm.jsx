@@ -7,14 +7,20 @@ import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
 
+import { UnidadeService } from "@/services/unidades.service";
+import { KitnetService } from "@/services/kitnets.service";
+
 export default function VistoriaForm({
   onSave,
   vistoriaEditando,
 }) {
 
+  const [residencias, setResidencias] = useState([]);
+  const [kitnets, setKitnets] = useState([]);
+
   const [formData, setFormData] = useState({
-    unidadeNome: "",
-    kitnetNome: "",
+    unidadeId: "",
+    kitnetId: "",
 
     nomeVistoria: "",
 
@@ -48,6 +54,62 @@ export default function VistoriaForm({
 
   useEffect(() => {
 
+    async function carregarResidencias() {
+
+      try {
+
+        const resposta = await UnidadeService.listar();
+
+        setResidencias(
+          Array.isArray(resposta) ? resposta : resposta.data || []
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar residências:", err);
+
+      }
+
+    }
+
+    carregarResidencias();
+
+  }, []);
+
+  useEffect(() => {
+
+    async function carregarKitnets() {
+
+      try {
+
+        const resposta = await KitnetService.listar();
+
+        const lista = Array.isArray(resposta)
+          ? resposta
+          : resposta.data || [];
+
+        setKitnets(
+          formData.unidadeId
+            ? lista.filter(
+                (kitnet) => kitnet.unidadeId === formData.unidadeId
+              )
+            : lista
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar kitnets:", err);
+
+      }
+
+    }
+
+    carregarKitnets();
+
+  }, [formData.unidadeId]);
+
+  useEffect(() => {
+
     if (vistoriaEditando) {
 
       setFormData({
@@ -62,9 +124,23 @@ export default function VistoriaForm({
 
   const handleChange = (e) => {
 
+    const { name, value } = e.target;
+
+    if (name === "unidadeId") {
+
+      setFormData((prev) => ({
+        ...prev,
+        unidadeId: value,
+        kitnetId: "",
+      }));
+
+      return;
+
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
 
   };
@@ -103,15 +179,29 @@ export default function VistoriaForm({
         <div>
 
           <label className="font-semibold text-gray-300">
-            Unidade
+            Residência
           </label>
 
-          <Input
-            name="unidadeNome"
-            value={formData.unidadeNome}
+          <Select
+            name="unidadeId"
+            value={formData.unidadeId}
             onChange={handleChange}
             className={input}
-          />
+          >
+            <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+              Selecione...
+            </option>
+
+            {residencias.map((residencia) => (
+              <option
+                key={residencia.id}
+                value={residencia.id}
+                style={{ backgroundColor: "#1d2833", color: "#fff" }}
+              >
+                {residencia.nome}
+              </option>
+            ))}
+          </Select>
 
         </div>
 
@@ -121,12 +211,26 @@ export default function VistoriaForm({
             Kitnet
           </label>
 
-          <Input
-            name="kitnetNome"
-            value={formData.kitnetNome}
+          <Select
+            name="kitnetId"
+            value={formData.kitnetId}
             onChange={handleChange}
             className={input}
-          />
+          >
+            <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+              Selecione...
+            </option>
+
+            {kitnets.map((kitnet) => (
+              <option
+                key={kitnet.id}
+                value={kitnet.id}
+                style={{ backgroundColor: "#1d2833", color: "#fff" }}
+              >
+                {kitnet.nome || `APT ${kitnet.numero}`}
+              </option>
+            ))}
+          </Select>
 
         </div>
 
@@ -419,13 +523,13 @@ export default function VistoriaForm({
 <div>
 
   <label className="font-bold text-gray-300 text-lg block mb-4">
-    Fotos da Vistoria
+    Fotos e Vídeos da Vistoria
   </label>
 
   <Input
     type="file"
     multiple
-    accept="image/*"
+    accept="image/*,video/*"
     className={input}
     onChange={(e) => {
 
@@ -463,23 +567,37 @@ export default function VistoriaForm({
 
     <div className="grid md:grid-cols-3 gap-4 mt-6">
 
-      {formData.fotos.map((foto, index) => (
-
-        <img
-          key={index}
-          src={foto}
-          alt={`Foto ${index}`}
-          className="
-            w-full
-            h-40
-            object-cover
-            rounded-2xl
-            border
-            border-white/10
-          "
-        />
-
-      ))}
+      {formData.fotos.map((foto, index) =>
+        foto.startsWith("data:video") ? (
+          <video
+            key={index}
+            src={foto}
+            controls
+            className="
+              w-full
+              h-40
+              object-cover
+              rounded-2xl
+              border
+              border-white/10
+            "
+          />
+        ) : (
+          <img
+            key={index}
+            src={foto}
+            alt={`Foto ${index}`}
+            className="
+              w-full
+              h-40
+              object-cover
+              rounded-2xl
+              border
+              border-white/10
+            "
+          />
+        )
+      )}
 
     </div>
 

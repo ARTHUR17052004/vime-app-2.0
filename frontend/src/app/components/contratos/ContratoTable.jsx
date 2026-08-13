@@ -114,7 +114,7 @@ export default function ContratoTable({
           </th>
 
           <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
-            Unidade
+            Residência
           </th>
 
           <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
