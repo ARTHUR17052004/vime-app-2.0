@@ -91,6 +91,9 @@ model Usuario {
 
   ativo Boolean @default(true)
 
+  resetSenhaToken    String?   @unique
+  resetSenhaExpiraEm DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

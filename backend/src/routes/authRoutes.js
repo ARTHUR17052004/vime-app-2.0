@@ -9,6 +9,10 @@ router.post('/login', authController.login);
 
 router.post('/logout', authController.logout);
 
+router.post('/esqueci-senha', authController.esqueciSenha);
+
+router.post('/redefinir-senha', authController.redefinirSenha);
+
 router.get('/me', authMiddleware, authController.me);
 
 module.exports = router;

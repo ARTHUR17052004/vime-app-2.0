@@ -10,4 +10,18 @@ export const AuthService = {
       }),
     });
   },
+
+  esqueciSenha(email) {
+    return api("/auth/esqueci-senha", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+  },
+
+  redefinirSenha(token, novaSenha) {
+    return api("/auth/redefinir-senha", {
+      method: "POST",
+      body: JSON.stringify({ token, novaSenha }),
+    });
+  },
 };

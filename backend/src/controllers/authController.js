@@ -58,8 +58,54 @@ const me = async (req, res) => {
 
 };
 
+const esqueciSenha = async (req, res) => {
+  try {
+
+    const { email } = req.body;
+
+    await authService.solicitarRedefinicaoSenha(email);
+
+    return res.status(200).json({
+      success: true,
+      message: "E-mail de redefinição enviado com sucesso.",
+    });
+
+  } catch (error) {
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+const redefinirSenha = async (req, res) => {
+  try {
+
+    const { token, novaSenha } = req.body;
+
+    await authService.redefinirSenha(token, novaSenha);
+
+    return res.status(200).json({
+      success: true,
+      message: "Senha redefinida com sucesso.",
+    });
+
+  } catch (error) {
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
 module.exports = {
   login,
   logout,
-  me
+  me,
+  esqueciSenha,
+  redefinirSenha,
 };

@@ -184,6 +184,8 @@ export default function LoginForm() {
 
           type="button"
 
+          onClick={() => router.push("/esqueci-senha")}
+
           className="
             text-emerald-400
 
