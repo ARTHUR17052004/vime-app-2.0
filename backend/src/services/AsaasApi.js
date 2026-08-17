@@ -72,7 +72,11 @@ class AsaasApi {
 
           access_token: apiKey,
 
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+
+          // Sem User-Agent customizado, o CloudFront da Asaas rejeita a
+          // requisição com um 403 genérico antes de chegar na API deles.
+          "User-Agent": "VIME-2.0 (contato@vimesistema.online)"
 
         },
 
