@@ -7,6 +7,7 @@ const auditoriaService = require("./auditoriaService");
 const AsaasApi = require("./AsaasApi");
 const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
+const contratoDocumentoService = require("./contratoDocumentoService");
 
 const listar = () => {
   return prisma.contrato.findMany({
@@ -191,18 +192,53 @@ const criar = async (dados) => {
 
   try {
 
-    await ClicksignApi.criarDocumento({
-      contratoId: contrato.id,
-      nome: `Contrato ${contrato.id}`,
-      arquivo: "contrato.pdf"
+    const conteudoBase64 = await contratoDocumentoService.gerarContratoPdfBase64({
+      ...contrato,
+      locador,
+      unidade,
+      kitnet,
+      inquilino
     });
 
-    await ClicksignApi.enviarAssinatura(
-      contrato.id,
-      {
-        email: inquilino.email
+    const documentoCriado = await ClicksignApi.criarDocumento({
+      document: {
+        path: `/contrato-${contrato.id}.pdf`,
+        content_base64: conteudoBase64,
+        auto_close: true
       }
-    );
+    });
+
+    const documentKey =
+      documentoCriado?.document?.key ||
+      documentoCriado?.key ||
+      null;
+
+    if (documentKey) {
+
+      await prisma.contrato.update({
+        where: { id: contrato.id },
+        data: { clicksignDocumentKey: documentKey }
+      });
+
+      const signatarioCriado = await ClicksignApi.criarSignatario({
+        email: inquilino.email,
+        phone_number: inquilino.telefone,
+        auth_mode: "email",
+        name: inquilino.nome
+      });
+
+      const signerKey =
+        signatarioCriado?.signer?.key ||
+        signatarioCriado?.key ||
+        null;
+
+      if (signerKey) {
+        await ClicksignApi.criarLista(documentKey, signerKey, {
+          message: `Olá ${inquilino.nome}, segue seu contrato de locação para assinatura.`
+        });
+      }
+
+    }
 
     await AsaasApi.criarCliente({
       name: inquilino.nome,

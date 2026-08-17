@@ -61,7 +61,7 @@ export default function KitnetDetalhesPage() {
         <Page>
           <PageContainer>
             <div className="flex justify-center py-32">
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--text-subtle)] text-lg">
                 Carregando kitnet...
               </p>
             </div>
@@ -128,12 +128,9 @@ export default function KitnetDetalhesPage() {
               rounded-3xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-gradient-to-br
-              from-[#1b2728]/80
-              via-[#1a242c]/75
-              to-[#151d26]/80
+              bg-[var(--surface)]
 
               backdrop-blur-xl
 
@@ -218,7 +215,7 @@ function InfoRow({
         py-6
 
         border-b
-        border-white/5
+        border-[var(--border-token)]
 
         last:border-none
       "
@@ -229,7 +226,7 @@ function InfoRow({
 
       <div className="flex-1">
 
-        <p className="text-sm text-gray-400">
+        <p className="text-sm text-[var(--text-subtle)]">
           {label}
         </p>
 
@@ -264,7 +261,7 @@ function InfoRow({
 
               font-semibold
 
-              text-white
+              text-[var(--text)]
 
               ${
                 multiline

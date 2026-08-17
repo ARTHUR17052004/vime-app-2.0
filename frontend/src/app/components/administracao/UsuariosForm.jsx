@@ -106,11 +106,11 @@ export default function UsuariosForm({
       className="space-y-8"
     >
       <div>
-        <h2 className="text-3xl font-black text-white">
+        <h2 className="text-3xl font-black text-[var(--text)]">
           {usuario ? "Editar Usuário" : "Novo Usuário"}
         </h2>
 
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-[var(--text-subtle)]">
           Configure o acesso do usuário ao sistema.
         </p>
       </div>
@@ -181,7 +181,7 @@ export default function UsuariosForm({
       </div>
 
       <div className="flex">
-        <label className="flex items-center gap-3 text-white">
+        <label className="flex items-center gap-3 text-[var(--text)]">
           <input
             type="checkbox"
             name="ativo"
@@ -199,7 +199,7 @@ export default function UsuariosForm({
           justify-end
           gap-4
           border-t
-          border-white/10
+          border-[var(--border-token)]
           pt-6
         "
       >

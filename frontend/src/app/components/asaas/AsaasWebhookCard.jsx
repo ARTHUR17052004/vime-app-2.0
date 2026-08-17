@@ -74,15 +74,15 @@ export default function AsaasWebhookCard() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)]">
 
-      <div className="px-8 py-6 border-b border-white/[0.07]">
+      <div className="px-8 py-6 border-b border-[var(--border-token)]">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
           Webhook do Asaas
         </h2>
 
-        <p className="text-gray-400 mt-2">
+        <p className="text-[var(--text-subtle)] mt-2">
           Configure esta URL dentro do painel do Asaas para que o
           VIME receba automaticamente os eventos de pagamento.
         </p>
@@ -91,7 +91,7 @@ export default function AsaasWebhookCard() {
 
       <div className="p-8">
 
-        <label className="block text-sm font-semibold text-gray-200 mb-3">
+        <label className="block text-sm font-semibold text-[var(--text-1)] mb-3">
           URL do Webhook
         </label>
 
@@ -103,11 +103,11 @@ export default function AsaasWebhookCard() {
             className="
               flex-1
               border
-              border-white/[0.07]
+              border-[var(--border-token)]
               rounded-xl
               p-3
-              bg-white/5
-              text-white
+              bg-[var(--surface-2)]
+              text-[var(--text)]
             "
           />
 
@@ -117,7 +117,7 @@ export default function AsaasWebhookCard() {
               px-5
               rounded-xl
               bg-blue-600
-              text-white
+              text-[var(--text)]
               hover:bg-blue-700
             "
           >
@@ -135,7 +135,7 @@ export default function AsaasWebhookCard() {
               bg-green-700
               hover:bg-green-800
               disabled:opacity-50
-              text-white
+              text-[var(--text)]
               rounded-xl
               py-3
             "
@@ -154,7 +154,7 @@ export default function AsaasWebhookCard() {
             className="
               bg-purple-700
               hover:bg-purple-800
-              text-white
+              text-[var(--text)]
               rounded-xl
               py-3
             "
@@ -167,11 +167,11 @@ export default function AsaasWebhookCard() {
             disabled={gerando}
             className="
               border
-              border-white/[0.07]
+              border-[var(--border-token)]
               rounded-xl
               py-3
-              text-gray-200
-              hover:bg-white/5
+              text-[var(--text-1)]
+              hover:bg-[var(--surface-2)]
               disabled:opacity-50
             "
           >
@@ -182,13 +182,13 @@ export default function AsaasWebhookCard() {
 
       </div>
 
-      <div className="border-t border-white/[0.07] px-8 py-4">
+      <div className="border-t border-[var(--border-token)] px-8 py-4">
 
         <div className="flex items-center gap-3">
 
           <div className={`w-3 h-3 rounded-full ${corBola[status.tipo]}`} />
 
-          <span className="font-medium text-gray-200">
+          <span className="font-medium text-[var(--text-1)]">
             {status.texto}
           </span>
 

@@ -40,7 +40,7 @@ export default function WhatsappConversations({
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#101827]
         shadow-xl
         h-[650px]
@@ -48,9 +48,9 @@ export default function WhatsappConversations({
       "
     >
 
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-[var(--border-token)]">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
 
           Conversas
 
@@ -63,7 +63,7 @@ export default function WhatsappConversations({
             items-center
             gap-3
             rounded-xl
-            bg-white/5
+            bg-[var(--surface-2)]
             px-4
             py-3
           "
@@ -71,7 +71,7 @@ export default function WhatsappConversations({
 
           <Search
             size={18}
-            className="text-gray-400"
+            className="text-[var(--text-subtle)]"
           />
 
           <input
@@ -88,8 +88,8 @@ export default function WhatsappConversations({
               flex-1
               bg-transparent
               outline-none
-              text-white
-              placeholder:text-gray-500
+              text-[var(--text)]
+              placeholder:text-[var(--text-faint)]
             "
 
           />
@@ -110,7 +110,7 @@ export default function WhatsappConversations({
               justify-center
               h-full
               text-center
-              text-gray-400
+              text-[var(--text-subtle)]
             "
           >
 
@@ -150,9 +150,9 @@ export default function WhatsappConversations({
               w-full
               p-4
               border-b
-              border-white/5
+              border-[var(--border-token)]
               transition-all
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
               text-left
 
               ${
@@ -175,7 +175,7 @@ export default function WhatsappConversations({
                   flex
                   items-center
                   justify-center
-                  text-white
+                  text-[var(--text)]
                   font-bold
                 "
               >
@@ -190,13 +190,13 @@ export default function WhatsappConversations({
 
                 <div className="flex justify-between">
 
-                  <strong className="text-white">
+                  <strong className="text-[var(--text)]">
 
                     {conversa.nome}
 
                   </strong>
 
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-[var(--text-subtle)]">
 
                     {conversa.horario}
 
@@ -207,7 +207,7 @@ export default function WhatsappConversations({
                 <p
                   className="
                     text-sm
-                    text-gray-400
+                    text-[var(--text-subtle)]
                     truncate
                   "
                 >
@@ -230,7 +230,7 @@ export default function WhatsappConversations({
                     items-center
                     justify-center
                     text-xs
-                    text-white
+                    text-[var(--text)]
                     px-2
                   "
                 >

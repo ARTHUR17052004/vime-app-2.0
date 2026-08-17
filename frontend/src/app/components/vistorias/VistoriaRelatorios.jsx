@@ -30,9 +30,9 @@ export default function VistoriaRelatorios({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
         Relatórios
 
@@ -40,21 +40,21 @@ export default function VistoriaRelatorios({
 
       <div className="grid md:grid-cols-4 gap-4">
 
-        <div className="border border-white/10 rounded-2xl p-5">
+        <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Total
           </div>
 
-          <div className="text-3xl font-bold text-white mt-2">
+          <div className="text-3xl font-bold text-[var(--text)] mt-2">
             {total}
           </div>
 
         </div>
 
-        <div className="border border-white/10 rounded-2xl p-5">
+        <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Programadas
           </div>
 
@@ -64,9 +64,9 @@ export default function VistoriaRelatorios({
 
         </div>
 
-        <div className="border border-white/10 rounded-2xl p-5">
+        <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Realizadas
           </div>
 
@@ -76,9 +76,9 @@ export default function VistoriaRelatorios({
 
         </div>
 
-        <div className="border border-white/10 rounded-2xl p-5">
+        <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Atrasadas
           </div>
 

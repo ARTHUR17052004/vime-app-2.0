@@ -1,11 +1,14 @@
 "use client";
 
+import { useTheme } from "../../../context/ThemeContext";
+
 export default function DashboardHeader({
   usuario = "Arthur",
   modulo = "Dashboard",
   sistema = "2.0",
   ultimaAtualizacao,
 }) {
+  const { mensagemBoasVindas } = useTheme();
   const hora = new Date().getHours();
 
   let saudacao = "Boa noite";
@@ -42,7 +45,7 @@ export default function DashboardHeader({
               xl:text-[52px]
               font-extrabold
               tracking-tight
-              text-white
+              text-[var(--text)]
               leading-none
             "
           >
@@ -54,7 +57,7 @@ export default function DashboardHeader({
             className="
               mt-3
               text-base
-              text-gray-300
+              text-[var(--text-muted)]
               capitalize
               font-medium
             "
@@ -63,8 +66,14 @@ export default function DashboardHeader({
           </p>
 
           {ultimaAtualizacao && (
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="mt-2 text-sm text-[var(--text-subtle)]">
               Atualizado em {ultimaAtualizacao}
+            </p>
+          )}
+
+          {mensagemBoasVindas && (
+            <p className="mt-2 text-sm text-emerald-300/90">
+              {mensagemBoasVindas}
             </p>
           )}
 

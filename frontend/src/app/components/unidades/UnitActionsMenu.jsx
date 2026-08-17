@@ -80,10 +80,10 @@ export default function UnitActionsMenu({
 
           rounded-xl
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
           border
-          border-white/10
+          border-[var(--border-token)]
 
           hover:border-emerald-500/30
 
@@ -97,7 +97,7 @@ export default function UnitActionsMenu({
 
         <EllipsisVertical
           size={18}
-          className="text-gray-300"
+          className="text-[var(--text-muted)]"
         />
 
       </button>
@@ -118,7 +118,7 @@ export default function UnitActionsMenu({
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
             bg-[#19242b]/95
 
@@ -236,7 +236,7 @@ function MenuButton({
               hover:bg-red-500/10
             `
             : `
-              text-gray-200
+              text-[var(--text-1)]
 
               hover:bg-emerald-500/10
             `

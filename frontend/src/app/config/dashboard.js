@@ -7,10 +7,10 @@ const dashboard = {
     radius: "rounded-[22px]",
 
     background:
-      "bg-gradient-to-br from-[#1d262f]/96 via-[#1a212b]/94 to-[#151b24]/96",
+      "bg-[var(--surface)]",
 
     border:
-      "border border-white/[0.10]",
+      "border border-[var(--border-token)]",
 
     blur:
       "backdrop-blur-md",
@@ -58,10 +58,10 @@ const dashboard = {
 
   section: {
     title:
-      "text-[28px] font-bold tracking-tight text-white",
+      "text-[28px] font-bold tracking-tight text-[var(--text)]",
 
     label:
-      "text-[11px] uppercase tracking-[0.34em] text-gray-500",
+      "text-[11px] uppercase tracking-[0.34em] text-[var(--text-faint)]",
   },
 
   /* ===========================================
@@ -78,13 +78,13 @@ const dashboard = {
       "flex flex-col justify-center",
 
     title:
-      "text-[13px] font-medium text-gray-400",
+      "text-[13px] font-medium text-[var(--text-subtle)]",
 
     value:
-      "mt-2 text-[40px] font-bold leading-none text-white",
+      "mt-2 text-[40px] font-bold leading-none text-[var(--text)]",
 
     subtitle:
-      "mt-2 text-[13px] text-gray-500",
+      "mt-2 text-[13px] text-[var(--text-faint)]",
 
     iconBox:
       `

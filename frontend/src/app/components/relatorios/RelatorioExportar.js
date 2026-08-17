@@ -132,15 +132,15 @@ export default function RelatorioExportar() {
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
         Exportações
 
       </h2>
 
-      <p className="text-gray-400 -mt-4 mb-6">
+      <p className="text-[var(--text-subtle)] -mt-4 mb-6">
         Resumo geral com o total de registros de cada módulo do sistema.
       </p>
 
@@ -153,7 +153,7 @@ export default function RelatorioExportar() {
             bg-green-700
             hover:bg-green-800
             disabled:opacity-50
-            text-white
+            text-[var(--text)]
             rounded-2xl
             p-5
             transition
@@ -171,7 +171,7 @@ export default function RelatorioExportar() {
             bg-green-700
             hover:bg-green-800
             disabled:opacity-50
-            text-white
+            text-[var(--text)]
             rounded-2xl
             p-5
             transition
@@ -187,7 +187,7 @@ export default function RelatorioExportar() {
           className="
             bg-gray-800
             hover:bg-black
-            text-white
+            text-[var(--text)]
             rounded-2xl
             p-5
             transition

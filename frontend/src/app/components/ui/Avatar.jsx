@@ -37,7 +37,7 @@ export default function Avatar({
             object-cover
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
             shadow-xl
             shadow-emerald-950/30
@@ -60,10 +60,10 @@ export default function Avatar({
             justify-center
 
             font-bold
-            text-white
+            text-[var(--text)]
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
             shadow-xl
             shadow-emerald-950/30

@@ -29,7 +29,7 @@ export default function LogoCard({
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
@@ -37,11 +37,11 @@ export default function LogoCard({
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
             Logo do Sistema
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
             Defina a identidade visual da empresa.
           </p>
         </div>
@@ -53,10 +53,10 @@ export default function LogoCard({
           type="button"
           onClick={() => inputRef.current?.click()}
           className="
-            rounded-2xl border border-dashed border-white/10
-            bg-slate-800/50 h-48
+            rounded-2xl border border-dashed border-[var(--border-token)]
+            bg-[var(--surface-2)] h-48
             flex flex-col items-center justify-center
-            text-gray-400
+            text-[var(--text-subtle)]
             hover:border-emerald-500/40 hover:text-emerald-400
             transition-all
             overflow-hidden
@@ -92,14 +92,14 @@ export default function LogoCard({
         <div className="space-y-4">
 
           <div>
-            <label className="text-gray-300 text-sm">
+            <label className="text-[var(--text-muted)] text-sm">
               Nome da Empresa
             </label>
 
             <input
               value={dados.empresa || ""}
               onChange={(e) => onChange("empresa", e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
+              className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
               placeholder="VIME APP"
             />
           </div>
@@ -110,7 +110,7 @@ export default function LogoCard({
             className="
               mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700
               disabled:opacity-50 disabled:cursor-not-allowed
-              transition px-6 py-3 text-white
+              transition px-6 py-3 text-[var(--text)]
             "
           >
             {salvando ? "Salvando..." : "Salvar Alterações"}

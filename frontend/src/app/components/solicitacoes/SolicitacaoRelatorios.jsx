@@ -98,17 +98,17 @@ export default function SolicitacaoRelatorios({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
       <div className="flex items-center justify-between mb-8">
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Relatórios
           </h2>
 
-          <p className="text-gray-400 mt-1">
+          <p className="text-[var(--text-subtle)] mt-1">
             Resumo geral das solicitações
           </p>
 
@@ -120,21 +120,21 @@ export default function SolicitacaoRelatorios({
 
         <div
           className="
-            bg-white/5
+            bg-[var(--surface-2)]
             rounded-2xl
             border
-            border-white/10
+            border-[var(--border-token)]
             p-6
             hover:shadow-[0_18px_45px_rgba(0,0,0,.35)]
             transition
           "
         >
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
             Total
           </p>
 
-          <h3 className="text-3xl font-bold mt-2 text-white">
+          <h3 className="text-3xl font-bold mt-2 text-[var(--text)]">
             {total}
           </h3>
 
@@ -209,7 +209,7 @@ export default function SolicitacaoRelatorios({
     className="
       bg-green-700
       hover:bg-green-800
-      text-white
+      text-[var(--text)]
       rounded-2xl
       p-5
       transition
@@ -223,7 +223,7 @@ export default function SolicitacaoRelatorios({
     className="
       bg-green-700
       hover:bg-green-800
-      text-white
+      text-[var(--text)]
       rounded-2xl
       p-5
       transition
@@ -237,7 +237,7 @@ export default function SolicitacaoRelatorios({
     className="
       bg-gray-800
       hover:bg-black
-      text-white
+      text-[var(--text)]
       rounded-2xl
       p-5
       transition

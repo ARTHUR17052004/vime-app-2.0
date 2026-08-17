@@ -25,7 +25,7 @@ export default function Button({
       hover:via-emerald-400
       hover:to-green-400
 
-      text-white
+      text-[var(--text)]
 
       border
       border-emerald-400/30
@@ -38,15 +38,15 @@ export default function Button({
     `,
 
     secondary: `
-      bg-white/5
-      hover:bg-white/10
+      bg-[var(--surface-2)]
+      hover:bg-[var(--surface-3)]
 
       border
-      border-white/10
+      border-[var(--border-token)]
 
-      text-white
+      text-[var(--text)]
 
-      hover:border-white/20
+      hover:border-[var(--border-strong)]
     `,
 
     danger: `
@@ -60,7 +60,7 @@ export default function Button({
       border
       border-red-500/30
 
-      text-white
+      text-[var(--text)]
 
       shadow-lg
       shadow-red-950/30
@@ -96,7 +96,7 @@ export default function Button({
       border
       border-sky-500/30
 
-      text-white
+      text-[var(--text)]
 
       shadow-lg
       shadow-sky-950/30
@@ -105,14 +105,14 @@ export default function Button({
     ghost: `
       bg-transparent
 
-      hover:bg-white/5
+      hover:bg-[var(--surface-2)]
 
       border
-      border-white/10
+      border-[var(--border-token)]
 
-      hover:border-white/20
+      hover:border-[var(--border-strong)]
 
-      text-gray-300
+      text-[var(--text-muted)]
     `,
   };
 
@@ -185,7 +185,7 @@ export default function Button({
                 hover:via-emerald-300
                 hover:to-green-400
 
-                text-white
+                text-[var(--text)]
 
                 shadow-lg
                 shadow-emerald-500/20

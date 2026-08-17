@@ -26,6 +26,19 @@ const buscarPorId = async (req, res, next) => {
   }
 };
 
+const buscarPublica = async (req, res, next) => {
+  try {
+    const configuracao = await configuracaoService.buscarPublica();
+
+    return res.json({
+      success: true,
+      data: configuracao,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const criar = async (req, res, next) => {
   try {
     const configuracao = await configuracaoService.criar(req.body);
@@ -71,6 +84,7 @@ const excluir = async (req, res, next) => {
 module.exports = {
   listar,
   buscarPorId,
+  buscarPublica,
   criar,
   atualizar,
   excluir,

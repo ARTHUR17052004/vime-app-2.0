@@ -126,7 +126,7 @@ export default function DocumentosCard() {
   });
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       {/* Cabeçalho */}
 
@@ -134,7 +134,7 @@ export default function DocumentosCard() {
 
         <div>
 
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text)]">
 
             <FileText className="text-emerald-400" size={26} />
 
@@ -153,7 +153,7 @@ export default function DocumentosCard() {
         <button
           onClick={abrirSeletorArquivo}
           disabled={enviando}
-          className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-[var(--text)] transition hover:bg-emerald-700 disabled:opacity-50"
         >
           <Plus size={18} />
           Novo Documento
@@ -164,7 +164,7 @@ export default function DocumentosCard() {
       <input
         ref={inputRef}
         type="file"
-        accept="application/pdf"
+        accept="application/pdf,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         multiple
         onChange={enviarArquivos}
         className="hidden"
@@ -195,7 +195,7 @@ export default function DocumentosCard() {
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Pesquisar documento..."
-          className="w-full rounded-2xl border border-white/10 bg-slate-800/40 py-3 pl-11 pr-4 text-white outline-none transition focus:border-emerald-500"
+          className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] py-3 pl-11 pr-4 text-[var(--text)] outline-none transition focus:border-emerald-500"
         />
 
       </div>
@@ -204,7 +204,7 @@ export default function DocumentosCard() {
 
       <div
         onClick={abrirSeletorArquivo}
-        className="mb-8 cursor-pointer rounded-3xl border-2 border-dashed border-white/10 bg-slate-800/30 p-10 text-center transition hover:border-emerald-500/40"
+        className="mb-8 cursor-pointer rounded-3xl border-2 border-dashed border-[var(--border-token)] bg-[var(--surface-2)] p-10 text-center transition hover:border-emerald-500/40"
       >
 
         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10">
@@ -217,7 +217,7 @@ export default function DocumentosCard() {
 
         </div>
 
-        <h3 className="text-xl font-semibold text-white">
+        <h3 className="text-xl font-semibold text-[var(--text)]">
 
           Adicionar documentos
 
@@ -225,14 +225,14 @@ export default function DocumentosCard() {
 
         <p className="mt-2 text-slate-400">
 
-          Clique aqui ou arraste arquivos PDF para envio.
+          Clique aqui ou arraste arquivos PDF ou Word (.doc/.docx) para envio.
 
         </p>
 
         <button
           onClick={(e) => { e.stopPropagation(); abrirSeletorArquivo(); }}
           disabled={enviando}
-          className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-white transition hover:bg-emerald-700 disabled:opacity-50"
+          className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-[var(--text)] transition hover:bg-emerald-700 disabled:opacity-50"
         >
           {enviando ? "Enviando..." : "Selecionar Arquivos"}
         </button>
@@ -254,12 +254,12 @@ export default function DocumentosCard() {
 
             <div
               key={doc.key || doc.id || index}
-              className="flex flex-col gap-4 rounded-2xl border border-white/10 bg-slate-800/40 p-5 lg:flex-row lg:items-center lg:justify-between"
+              className="flex flex-col gap-4 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5 lg:flex-row lg:items-center lg:justify-between"
             >
 
               <div>
 
-                <h3 className="font-semibold text-white">
+                <h3 className="font-semibold text-[var(--text)]">
 
                   {doc.filename || doc.key || "Documento"}
 
@@ -279,7 +279,7 @@ export default function DocumentosCard() {
 
                   <button
                     onClick={() => visualizar(doc)}
-                    className="rounded-xl bg-slate-700 p-2 text-white hover:bg-slate-600"
+                    className="rounded-xl bg-slate-700 p-2 text-[var(--text)] hover:bg-slate-600"
                   >
 
                     <Eye size={18} />
@@ -288,7 +288,7 @@ export default function DocumentosCard() {
 
                   <button
                     onClick={() => excluir(doc)}
-                    className="rounded-xl bg-red-600 p-2 text-white hover:bg-red-700"
+                    className="rounded-xl bg-red-600 p-2 text-[var(--text)] hover:bg-red-700"
                   >
 
                     <Trash2 size={18} />

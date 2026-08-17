@@ -28,8 +28,8 @@ export default function ContratoTabs({
       className="
         rounded-3xl
         border
-        border-white/10
-        bg-white/5
+        border-[var(--border-token)]
+        bg-[var(--surface-2)]
         backdrop-blur-xl
         p-2
       "
@@ -56,14 +56,14 @@ export default function ContratoTabs({
                 abaSelecionada === aba.id
                   ? `
                     bg-emerald-500
-                    text-white
+                    text-[var(--text)]
                     shadow-lg
                     shadow-emerald-500/20
                   `
                   : `
-                    text-gray-300
-                    hover:bg-white/5
-                    hover:text-white
+                    text-[var(--text-muted)]
+                    hover:bg-[var(--surface-2)]
+                    hover:text-[var(--text)]
                   `
               }
             `}

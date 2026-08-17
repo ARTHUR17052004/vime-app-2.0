@@ -64,11 +64,11 @@ const eventos = [
 
 export default function EventosCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="mb-6">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
           Eventos Automáticos
         </h2>
 
@@ -88,7 +88,7 @@ export default function EventosCard() {
 
             <div
               key={index}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4"
+              className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4"
             >
 
               <div className="flex items-center gap-4">
@@ -104,7 +104,7 @@ export default function EventosCard() {
 
                 <div>
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
                     {evento.titulo}
                   </h3>
 
@@ -142,7 +142,7 @@ export default function EventosCard() {
 
       <div className="mt-6 flex justify-end">
 
-        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-700">
+        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-emerald-700">
 
           Salvar Eventos
 

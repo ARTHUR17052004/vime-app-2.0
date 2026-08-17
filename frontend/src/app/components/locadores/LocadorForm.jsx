@@ -104,18 +104,18 @@ export default function LocadorForm({
     rounded-2xl
 
     border
-    border-white/10
+    border-[var(--border-token)]
 
-    bg-white/5
+    bg-[var(--surface-2)]
 
     backdrop-blur
 
     px-4
     py-3
 
-    text-white
+    text-[var(--text)]
 
-    placeholder:text-gray-400
+    placeholder:text-[var(--text-subtle)]
 
     transition-all
 
@@ -139,7 +139,7 @@ export default function LocadorForm({
 
       <div className="space-y-2">
 
-        <h2 className="text-3xl font-bold text-white">
+        <h2 className="text-3xl font-bold text-[var(--text)]">
 
           {
 
@@ -153,7 +153,7 @@ export default function LocadorForm({
 
         </h2>
 
-        <p className="text-gray-400">
+        <p className="text-[var(--text-subtle)]">
 
           Dados do proprietário
 
@@ -165,7 +165,7 @@ export default function LocadorForm({
 
       <div className="space-y-4">
 
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-[var(--text)]">
 
           Informações Gerais
 
@@ -270,7 +270,7 @@ export default function LocadorForm({
 
       <div className="space-y-4">
 
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-[var(--text)]">
 
           Dados Bancários
 
@@ -453,7 +453,7 @@ export default function LocadorForm({
 
       <div className="space-y-4">
 
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-[var(--text)]">
 
           Configurações Financeiras
 
@@ -493,7 +493,7 @@ export default function LocadorForm({
 
       <div className="space-y-4">
 
-        <h3 className="text-lg font-semibold text-white">
+        <h3 className="text-lg font-semibold text-[var(--text)]">
 
           Observações
 
@@ -517,7 +517,7 @@ export default function LocadorForm({
           justify-end
 
           border-t
-          border-white/10
+          border-[var(--border-token)]
 
           pt-6
         "
@@ -534,7 +534,7 @@ export default function LocadorForm({
             py-3
 
             font-semibold
-            text-white
+            text-[var(--text)]
 
             transition-all
 

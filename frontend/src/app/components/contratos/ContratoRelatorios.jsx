@@ -64,13 +64,13 @@ export default function ContratoRelatorios() {
             className="
               text-3xl
               font-black
-              text-white
+              text-[var(--text)]
             "
           >
             Relatórios
           </h2>
 
-          <p className="text-gray-400">
+          <p className="text-[var(--text-subtle)]">
             Exportação de PDF e Excel (em breve)
           </p>
 
@@ -90,16 +90,16 @@ export default function ContratoRelatorios() {
               rounded-2xl
 
               border
-              border-white/5
+              border-[var(--border-token)]
 
-              bg-white/[0.03]
+              bg-[var(--surface-2)]
 
               p-6
 
               transition-all
               duration-300
 
-              hover:bg-white/[0.05]
+              hover:bg-[var(--surface-2)]
               hover:-translate-y-1
             "
           >
@@ -112,13 +112,13 @@ export default function ContratoRelatorios() {
                   className="
                     text-lg
                     font-bold
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {item.titulo}
                 </h3>
 
-                <p className="mt-2 text-gray-400">
+                <p className="mt-2 text-[var(--text-subtle)]">
                   {item.descricao}
                 </p>
 

@@ -4,7 +4,7 @@ import { Settings } from "lucide-react";
 
 export default function ConfiguracoesHeader() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-4">
 
@@ -19,13 +19,13 @@ export default function ConfiguracoesHeader() {
 
         <div>
 
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-[var(--text)]">
 
             Configurações
 
           </h1>
 
-          <p className="text-gray-400 mt-1">
+          <p className="text-[var(--text-subtle)] mt-1">
 
             Gerencie todas as configurações gerais do VIME APP.
 

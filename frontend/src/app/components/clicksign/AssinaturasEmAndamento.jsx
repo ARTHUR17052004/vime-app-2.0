@@ -29,7 +29,7 @@ const documentos = [
 
 export default function AssinaturasEmAndamento() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -40,7 +40,7 @@ export default function AssinaturasEmAndamento() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
 
             Assinaturas em andamento
 
@@ -62,7 +62,7 @@ export default function AssinaturasEmAndamento() {
 
           <div
             key={index}
-            className="rounded-2xl border border-white/10 bg-slate-800/40 p-5"
+            className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5"
           >
 
             <div className="flex justify-between items-center">
@@ -74,7 +74,7 @@ export default function AssinaturasEmAndamento() {
                   className="text-emerald-400"
                 />
 
-                <span className="font-semibold text-white">
+                <span className="font-semibold text-[var(--text)]">
 
                   {doc.nome}
 

@@ -99,11 +99,11 @@ export default function FinanceiroRelatorios({
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Relatórios
             </h2>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Exportação de informações financeiras.
             </p>
 
@@ -120,13 +120,13 @@ export default function FinanceiroRelatorios({
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/[0.02]
+            bg-[var(--surface-2)]
 
             p-6
 
-            hover:bg-white/[0.04]
+            hover:bg-[var(--surface-2)]
 
             transition
           "
@@ -136,13 +136,13 @@ export default function FinanceiroRelatorios({
 
             <FileBarChart className="w-6 h-6 text-red-400" />
 
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className="text-xl font-semibold text-[var(--text)]">
               Relatório PDF
             </h3>
 
           </div>
 
-          <p className="text-gray-400 mb-6">
+          <p className="text-[var(--text-subtle)] mb-6">
             Exportar receitas, despesas e fluxo de caixa.
           </p>
 
@@ -184,13 +184,13 @@ export default function FinanceiroRelatorios({
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/[0.02]
+            bg-[var(--surface-2)]
 
             p-6
 
-            hover:bg-white/[0.04]
+            hover:bg-[var(--surface-2)]
 
             transition
           "
@@ -200,13 +200,13 @@ export default function FinanceiroRelatorios({
 
             <FileSpreadsheet className="w-6 h-6 text-emerald-400" />
 
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className="text-xl font-semibold text-[var(--text)]">
               Relatório Excel
             </h3>
 
           </div>
 
-          <p className="text-gray-400 mb-6">
+          <p className="text-[var(--text-subtle)] mb-6">
             Exportar planilhas financeiras.
           </p>
 

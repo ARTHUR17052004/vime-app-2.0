@@ -50,7 +50,7 @@ export default function SolicitacaoResponder({
             block
             text-sm
             font-semibold
-            text-gray-300
+            text-[var(--text-muted)]
             mb-2
           "
         >
@@ -70,12 +70,12 @@ export default function SolicitacaoResponder({
           className="
             w-full
             border
-            border-white/10
+            border-[var(--border-token)]
             rounded-2xl
             px-4
             py-3
-            bg-white/5
-            text-white
+            bg-[var(--surface-2)]
+            text-[var(--text)]
           "
         />
 
@@ -88,7 +88,7 @@ export default function SolicitacaoResponder({
             block
             text-sm
             font-semibold
-            text-gray-300
+            text-[var(--text-muted)]
             mb-2
           "
         >
@@ -107,12 +107,12 @@ export default function SolicitacaoResponder({
           className="
             w-full
             border
-            border-white/10
+            border-[var(--border-token)]
             rounded-2xl
             px-4
             py-3
-            bg-white/5
-            text-white
+            bg-[var(--surface-2)]
+            text-[var(--text)]
           "
         >
 
@@ -170,7 +170,7 @@ export default function SolicitacaoResponder({
             py-3
             rounded-2xl
             bg-green-700
-            text-white
+            text-[var(--text)]
             hover:bg-green-800
           "
         >

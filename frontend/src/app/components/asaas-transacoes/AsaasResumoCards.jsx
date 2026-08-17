@@ -52,7 +52,7 @@ export default function AsaasResumoCards({ transacoes = [] }) {
 
         <div
           key={card.titulo}
-          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden"
+          className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden"
         >
 
           <div
@@ -61,11 +61,11 @@ export default function AsaasResumoCards({ transacoes = [] }) {
 
           <div className="p-6">
 
-            <p className="text-gray-400 text-sm">
+            <p className="text-[var(--text-subtle)] text-sm">
               {card.titulo}
             </p>
 
-            <h2 className="text-3xl font-bold text-white mt-3">
+            <h2 className="text-3xl font-bold text-[var(--text)] mt-3">
               {card.valor}
             </h2>
 

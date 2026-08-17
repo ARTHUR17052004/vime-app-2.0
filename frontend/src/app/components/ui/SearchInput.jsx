@@ -17,7 +17,7 @@ export default function SearchInput({
           left-4
           top-1/2
           -translate-y-1/2
-          text-gray-400
+          text-[var(--text-subtle)]
         "
       />
 
@@ -33,9 +33,9 @@ export default function SearchInput({
           py-3
           rounded-2xl
           border
-          border-white/10
-          bg-white/5
-          text-white
+          border-[var(--border-token)]
+          bg-[var(--surface-2)]
+          text-[var(--text)]
           outline-none
           transition-all
           focus:border-emerald-500/50

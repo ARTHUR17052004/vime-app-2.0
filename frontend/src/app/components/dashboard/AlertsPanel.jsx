@@ -38,7 +38,7 @@ export default function AlertsPanel({
               uppercase
               tracking-[0.30em]
               text-[11px]
-              text-gray-400
+              text-[var(--text-subtle)]
               mb-2
             "
           >
@@ -49,7 +49,7 @@ export default function AlertsPanel({
             className="
               text-4xl
               font-bold
-              text-white
+              text-[var(--text)]
               leading-none
             "
           >
@@ -122,7 +122,7 @@ export default function AlertsPanel({
 
                 <h3
                   className="
-                    text-white
+                    text-[var(--text)]
                     font-semibold
                   "
                 >
@@ -133,7 +133,7 @@ export default function AlertsPanel({
                   className="
                     mt-1
                     text-sm
-                    text-gray-400
+                    text-[var(--text-subtle)]
                     max-w-md
                   "
                 >
@@ -147,7 +147,7 @@ export default function AlertsPanel({
             <span
               className="
                 text-sm
-                text-gray-500
+                text-[var(--text-faint)]
                 whitespace-nowrap
               "
             >

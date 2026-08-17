@@ -90,17 +90,17 @@ export default function PerfilModal({
 
     rounded-2xl
 
-    bg-white/5
+    bg-[var(--surface-2)]
 
     border
 
-    border-white/10
+    border-[var(--border-token)]
 
     px-4
 
     py-3
 
-    text-white
+    text-[var(--text)]
 
     outline-none
 
@@ -130,7 +130,7 @@ export default function PerfilModal({
 
         <div>
 
-          <h2 className="text-3xl font-black text-white">
+          <h2 className="text-3xl font-black text-[var(--text)]">
 
             {
 
@@ -144,7 +144,7 @@ export default function PerfilModal({
 
           </h2>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-[var(--text-subtle)] mt-2">
 
             Cadastro de perfis de acesso.
 
@@ -194,7 +194,7 @@ export default function PerfilModal({
 
               gap-3
 
-              text-white
+              text-[var(--text)]
 
             "
 
@@ -224,7 +224,7 @@ export default function PerfilModal({
 
             border-t
 
-            border-white/10
+            border-[var(--border-token)]
 
             pt-6
 
@@ -252,9 +252,9 @@ export default function PerfilModal({
 
               rounded-2xl
 
-              bg-white/10
+              bg-[var(--surface-3)]
 
-              text-white
+              text-[var(--text)]
 
             "
 
@@ -278,7 +278,7 @@ export default function PerfilModal({
 
               bg-emerald-600
 
-              text-white
+              text-[var(--text)]
 
               font-bold
 

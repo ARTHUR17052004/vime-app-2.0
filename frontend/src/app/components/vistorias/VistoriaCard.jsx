@@ -36,11 +36,8 @@ export default function VistoriaCard({
         className="
           rounded-[22px]
           border
-          border-white/10
-          bg-gradient-to-br
-          from-[#202a36]/95
-          via-[#1b2430]/96
-          to-[#151c25]/96
+          border-[var(--border-token)]
+          bg-[var(--surface)]
           backdrop-blur-xl
           p-10
           text-center
@@ -51,7 +48,7 @@ export default function VistoriaCard({
           className="
             text-2xl
             font-bold
-            text-white
+            text-[var(--text)]
           "
         >
           Nenhuma vistoria cadastrada
@@ -97,11 +94,8 @@ export default function VistoriaCard({
           className="
             rounded-[22px]
             border
-            border-white/10
-            bg-gradient-to-br
-            from-[#202a36]/95
-            via-[#1b2430]/96
-            to-[#151c25]/96
+            border-[var(--border-token)]
+            bg-[var(--surface)]
             backdrop-blur-xl
             overflow-hidden
             transition-all
@@ -142,7 +136,7 @@ export default function VistoriaCard({
                   className="
                     text-2xl
                     font-bold
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {vistoria.nomeVistoria}
@@ -161,11 +155,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Residência / Kitnet
                   </p>
 
-                  <p className="text-gray-300 mt-1">
+                  <p className="text-[var(--text-muted)] mt-1">
 
                     {vistoria.unidadeNome}
 
@@ -179,11 +173,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Responsável
                   </p>
 
-                  <p className="text-gray-300 mt-1">
+                  <p className="text-[var(--text-muted)] mt-1">
                     {vistoria.responsavel}
                   </p>
 
@@ -191,11 +185,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Periodicidade
                   </p>
 
-                  <p className="text-gray-300 mt-1">
+                  <p className="text-[var(--text-muted)] mt-1">
                     {vistoria.periodicidade}
                   </p>
 
@@ -203,11 +197,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Próxima Execução
                   </p>
 
-                  <p className="text-gray-300 mt-1">
+                  <p className="text-[var(--text-muted)] mt-1">
                     {formatDate(vistoria.dataProxima)}
                   </p>
 
@@ -228,12 +222,12 @@ export default function VistoriaCard({
                   w-10
                   h-10
                   rounded-xl
-                  hover:bg-white/5
+                  hover:bg-[var(--surface-2)]
                   transition
                   flex
                   items-center
                   justify-center
-                  ${vistoria.fixado ? "text-emerald-400" : "text-gray-400"}
+                  ${vistoria.fixado ? "text-emerald-400" : "text-[var(--text-subtle)]"}
                 `}
               >
 
@@ -256,7 +250,7 @@ export default function VistoriaCard({
                   w-10
                   h-10
                   rounded-xl
-                  hover:bg-white/5
+                  hover:bg-[var(--surface-2)]
                   transition
                   flex
                   items-center
@@ -268,14 +262,14 @@ export default function VistoriaCard({
 
                   <ChevronUp
                     size={20}
-                    className="text-gray-400"
+                    className="text-[var(--text-subtle)]"
                   />
 
                 ) : (
 
                   <ChevronDown
                     size={20}
-                    className="text-gray-400"
+                    className="text-[var(--text-subtle)]"
                   />
 
                 )}
@@ -306,11 +300,11 @@ export default function VistoriaCard({
                 py-2.5
                 rounded-xl
                 border
-                border-white/10
-                text-gray-300
+                border-[var(--border-token)]
+                text-[var(--text-muted)]
                 text-sm
                 font-semibold
-                hover:bg-white/5
+                hover:bg-[var(--surface-2)]
                 transition
               "
             >
@@ -417,8 +411,8 @@ export default function VistoriaCard({
             <div
               className="
                 border-t
-                border-white/10
-                bg-white/[0.02]
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
                 p-7
               "
             >
@@ -427,11 +421,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Categoria
                   </p>
 
-                  <p className="text-white mt-1">
+                  <p className="text-[var(--text)] mt-1">
                     {vistoria.categoria}
                   </p>
 
@@ -439,11 +433,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Criticidade
                   </p>
 
-                  <p className="text-white mt-1">
+                  <p className="text-[var(--text)] mt-1">
                     {vistoria.criticidade}
                   </p>
 
@@ -451,11 +445,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Última Execução
                   </p>
 
-                  <p className="text-white mt-1">
+                  <p className="text-[var(--text)] mt-1">
                     {formatDate(vistoria.dataUltima)}
                   </p>
 
@@ -463,11 +457,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Próxima Execução
                   </p>
 
-                  <p className="text-white mt-1">
+                  <p className="text-[var(--text)] mt-1">
                     {formatDate(vistoria.dataProxima)}
                   </p>
 
@@ -475,11 +469,11 @@ export default function VistoriaCard({
 
                 <div>
 
-                  <p className="text-xs text-gray-500 uppercase">
+                  <p className="text-xs text-[var(--text-faint)] uppercase">
                     Baixa Registrada Em
                   </p>
 
-                  <p className="text-white mt-1">
+                  <p className="text-[var(--text)] mt-1">
                     {formatDateTime(vistoria.concluidaEm)}
                   </p>
 
@@ -489,7 +483,7 @@ export default function VistoriaCard({
 
               <div className="mt-8">
 
-                <p className="text-xs text-gray-500 uppercase">
+                <p className="text-xs text-[var(--text-faint)] uppercase">
                   Observações
                 </p>
 
@@ -498,10 +492,10 @@ export default function VistoriaCard({
                     mt-3
                     rounded-2xl
                     border
-                    border-white/10
-                    bg-white/5
+                    border-[var(--border-token)]
+                    bg-[var(--surface-2)]
                     p-5
-                    text-gray-300
+                    text-[var(--text-muted)]
                     leading-7
                   "
                 >
@@ -515,7 +509,7 @@ export default function VistoriaCard({
 
                 <div className="mt-8">
 
-                  <p className="text-xs text-gray-500 uppercase mb-3">
+                  <p className="text-xs text-[var(--text-faint)] uppercase mb-3">
                     Fotos e Vídeos da Baixa
                   </p>
 
@@ -527,14 +521,14 @@ export default function VistoriaCard({
                           key={index}
                           src={midia}
                           controls
-                          className="w-full h-40 object-cover rounded-2xl border border-white/10"
+                          className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
                         />
                       ) : (
                         <img
                           key={index}
                           src={midia}
                           alt={`Mídia ${index + 1}`}
-                          className="w-full h-40 object-cover rounded-2xl border border-white/10"
+                          className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
                         />
                       )
                     )}

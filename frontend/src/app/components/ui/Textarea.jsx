@@ -21,15 +21,15 @@ export default function Textarea({
 }) {
   const variants = {
     default: `
-      bg-white/[0.04]
+      bg-[var(--surface-2)]
       backdrop-blur-xl
-      border-white/10
+      border-[var(--border-token)]
     `,
 
     glass: `
-      bg-white/[0.06]
+      bg-[var(--surface-2)]
       backdrop-blur-2xl
-      border-white/15
+      border-[var(--border-token)]
     `,
   };
 
@@ -50,7 +50,7 @@ export default function Textarea({
             text-sm
             font-semibold
 
-            text-gray-300
+            text-[var(--text-muted)]
           "
         >
           {label}
@@ -73,9 +73,9 @@ export default function Textarea({
 
           ${variants[variant]}
 
-          text-white
+          text-[var(--text)]
 
-          placeholder:text-gray-500
+          placeholder:text-[var(--text-faint)]
 
           px-4
           py-3
@@ -117,7 +117,7 @@ export default function Textarea({
       />
 
       {helperText && !error && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-[var(--text-faint)]">
           {helperText}
         </p>
       )}

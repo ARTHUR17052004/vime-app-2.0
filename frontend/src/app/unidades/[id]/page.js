@@ -66,7 +66,7 @@ export default function UnidadeDetalhesPage() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-2xl p-8">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-[var(--text-1)] rounded-2xl p-8">
           Carregando residência...
         </div>
       </MainLayout>
@@ -76,7 +76,7 @@ export default function UnidadeDetalhesPage() {
   if (erro || !unidade) {
     return (
       <MainLayout>
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-red-300 rounded-2xl p-8">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-red-300 rounded-2xl p-8">
           {erro || "Residência não encontrada."}
         </div>
       </MainLayout>
@@ -88,23 +88,23 @@ export default function UnidadeDetalhesPage() {
       <div className="space-y-6">
 
         <div>
-          <h1 className="text-4xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-[var(--text)]">
             {unidade.nome}
           </h1>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-[var(--text-subtle)] mt-2">
             Detalhes completos da residência
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-2xl p-6">
+            <h2 className="text-xl font-semibold text-[var(--text)] mb-4">
               Informações Gerais
             </h2>
 
-            <div className="space-y-3 text-gray-200">
+            <div className="space-y-3 text-[var(--text-1)]">
               <p>
                 <strong>Status:</strong>{" "}
                 {unidade.status || "-"}
@@ -132,12 +132,12 @@ export default function UnidadeDetalhesPage() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6 lg:col-span-2">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-2xl p-6 lg:col-span-2">
+            <h2 className="text-xl font-semibold text-[var(--text)] mb-4">
               Endereço
             </h2>
 
-            <div className="space-y-3 text-gray-200">
+            <div className="space-y-3 text-[var(--text-1)]">
               <p>
                 {unidade.logradouro || "-"}{" "}
                 {unidade.numero || ""}
@@ -166,23 +166,23 @@ export default function UnidadeDetalhesPage() {
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-[var(--text)] mb-4">
             Observações
           </h2>
 
-          <p className="text-gray-200">
+          <p className="text-[var(--text-1)]">
             {unidade.observacoes ||
               "Nenhuma observação cadastrada."}
           </p>
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6">
-          <h2 className="text-xl font-semibold text-white mb-4">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-2xl p-6">
+          <h2 className="text-xl font-semibold text-[var(--text)] mb-4">
             Kitnets
           </h2>
 
-          <p className="text-gray-400">
+          <p className="text-[var(--text-subtle)]">
             Módulo será integrado na próxima etapa.
           </p>
         </div>

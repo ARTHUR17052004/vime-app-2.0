@@ -119,14 +119,14 @@ export default function WhatsappActions({
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#101827]
         p-6
         shadow-xl
       "
     >
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
         Ações
 
@@ -186,7 +186,7 @@ export default function WhatsappActions({
 
         <div className="flex flex-col items-center gap-6">
 
-          <p className="text-center text-gray-300">
+          <p className="text-center text-[var(--text-muted)]">
 
             Escaneie este QR Code com o WhatsApp.
 
@@ -200,7 +200,7 @@ export default function WhatsappActions({
               className="
                 rounded-xl
                 border
-                border-white/10
+                border-[var(--border-token)]
                 bg-white
                 p-4
                 w-72

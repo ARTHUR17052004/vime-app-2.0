@@ -31,17 +31,17 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
   };
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] p-6">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] p-6">
 
       <div className="flex items-center justify-between mb-6">
 
         <div>
 
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-[var(--text)]">
             Filtros
           </h2>
 
-          <p className="text-gray-400 mt-1">
+          <p className="text-[var(--text-subtle)] mt-1">
             Localize rapidamente qualquer cobrança.
           </p>
 
@@ -53,7 +53,7 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
 
         <div className="xl:col-span-2">
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Pesquisar
           </label>
 
@@ -70,14 +70,14 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Status
           </label>
 
           <select
             value={filtros.status}
             onChange={handleChange("status")}
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
           >
 
             <option className="bg-[#1b2430]">Todos</option>
@@ -92,14 +92,14 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Forma
           </label>
 
           <select
             value={filtros.forma}
             onChange={handleChange("forma")}
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
           >
 
             <option className="bg-[#1b2430]">Todas</option>
@@ -113,7 +113,7 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Vencimento até
           </label>
 
@@ -134,7 +134,7 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
               flex-1
               bg-green-700
               hover:bg-green-800
-              text-white
+              text-[var(--text)]
               rounded-xl
               py-3
             "
@@ -147,9 +147,9 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
             className="
               flex-1
               border
-              border-white/[0.07]
-              text-gray-200
-              hover:bg-white/5
+              border-[var(--border-token)]
+              text-[var(--text-1)]
+              hover:bg-[var(--surface-2)]
               rounded-xl
               py-3
             "

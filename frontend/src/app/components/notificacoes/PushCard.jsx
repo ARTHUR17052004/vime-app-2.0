@@ -37,7 +37,7 @@ const configuracoes = [
 
 export default function PushCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -52,7 +52,7 @@ export default function PushCard() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Notificações Push
           </h2>
 
@@ -74,7 +74,7 @@ export default function PushCard() {
 
             <div
               key={index}
-              className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4"
+              className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4"
             >
 
               <div className="flex items-center gap-4">
@@ -90,7 +90,7 @@ export default function PushCard() {
 
                 <div>
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
                     {item.titulo}
                   </h3>
 
@@ -128,7 +128,7 @@ export default function PushCard() {
 
       <div className="mt-6 flex justify-end">
 
-        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-700">
+        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-emerald-700">
 
           Salvar Configurações
 

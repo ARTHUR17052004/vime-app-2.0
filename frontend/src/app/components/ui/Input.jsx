@@ -33,15 +33,15 @@ export default function Input({
 
   const variants = {
     default: `
-      bg-white/[0.04]
+      bg-[var(--surface-2)]
       backdrop-blur-xl
-      border-white/10
+      border-[var(--border-token)]
     `,
 
     glass: `
-      bg-white/[0.06]
+      bg-[var(--surface-2)]
       backdrop-blur-2xl
-      border-white/15
+      border-[var(--border-token)]
     `,
   };
 
@@ -62,7 +62,7 @@ export default function Input({
             text-sm
             font-semibold
 
-            text-gray-300
+            text-[var(--text-muted)]
           "
         >
           {label}
@@ -82,7 +82,7 @@ export default function Input({
               left-4
               top-1/2
               -translate-y-1/2
-              text-gray-500
+              text-[var(--text-faint)]
             "
           >
             {leftIcon}
@@ -103,9 +103,9 @@ export default function Input({
 
             ${variants[variant]}
 
-            text-white
+            text-[var(--text)]
 
-            placeholder:text-gray-500
+            placeholder:text-[var(--text-faint)]
 
             outline-none
 
@@ -162,7 +162,7 @@ export default function Input({
               right-4
               top-1/2
               -translate-y-1/2
-              text-gray-500
+              text-[var(--text-faint)]
             "
           >
             {rightIcon}
@@ -172,7 +172,7 @@ export default function Input({
       </div>
 
       {helperText && !error && (
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-[var(--text-faint)]">
           {helperText}
         </p>
       )}

@@ -95,12 +95,20 @@ const enviarDocumento = async (dados) => {
 
     for (const signatario of dados.signatarios) {
 
-      const resultado = await ClicksignApi.adicionarSignatario(
-        documentoKey,
-        signatario
-      );
+      const signatarioCriado = await ClicksignApi.criarSignatario(signatario);
 
-      signatariosAdicionados.push(resultado);
+      const signerKey =
+        signatarioCriado?.signer?.key ||
+        signatarioCriado?.key ||
+        null;
+
+      const lista = signerKey
+        ? await ClicksignApi.criarLista(documentoKey, signerKey, {
+            message: dados?.mensagem
+          })
+        : null;
+
+      signatariosAdicionados.push({ signatarioCriado, lista });
 
     }
 
@@ -128,7 +136,7 @@ const processarWebhook = async (evento) => {
 
   const documento = await prisma.contrato.findFirst({
     where: {
-      id: evento.document?.key
+      clicksignDocumentKey: evento.document?.key
     }
   });
 

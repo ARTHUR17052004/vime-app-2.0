@@ -76,7 +76,7 @@ export default function WebhookCard() {
   const conectado = !!statusApi?.configurado;
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -91,7 +91,7 @@ export default function WebhookCard() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
 
             Webhooks
 
@@ -123,14 +123,14 @@ export default function WebhookCard() {
               type="text"
               readOnly
               value={WEBHOOK_URL}
-              className="flex-1 rounded-l-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none"
+              className="flex-1 rounded-l-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none"
             />
 
             <button
               onClick={copiarUrl}
-              className="rounded-r-2xl border-y border-r border-white/10 bg-slate-700 px-4 hover:bg-slate-600"
+              className="rounded-r-2xl border-y border-r border-[var(--border-token)] bg-slate-700 px-4 hover:bg-slate-600"
             >
-              <Copy size={18} className="text-white" />
+              <Copy size={18} className="text-[var(--text)]" />
             </button>
 
           </div>
@@ -155,7 +155,7 @@ export default function WebhookCard() {
 
               <div
                 key={index}
-                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-slate-300"
+                className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-slate-300"
               >
 
                 {evento}
@@ -176,7 +176,7 @@ export default function WebhookCard() {
           className={`rounded-2xl border p-4 ${
             conectado
               ? "border-emerald-500/20 bg-emerald-500/10"
-              : "border-white/10 bg-slate-800/40"
+              : "border-[var(--border-token)] bg-[var(--surface-2)]"
           }`}
         >
 
@@ -190,7 +190,7 @@ export default function WebhookCard() {
 
             <div>
 
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-[var(--text)]">
 
                 Status da Integração
 
@@ -229,7 +229,7 @@ export default function WebhookCard() {
         <button
           onClick={testarWebhook}
           disabled={testando}
-          className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-800 px-5 py-3 text-white transition hover:border-emerald-500 disabled:opacity-50"
+          className="flex items-center gap-2 rounded-2xl border border-[var(--border-token)] bg-slate-800 px-5 py-3 text-[var(--text)] transition hover:border-emerald-500 disabled:opacity-50"
         >
 
           <CheckCircle2 size={18} />

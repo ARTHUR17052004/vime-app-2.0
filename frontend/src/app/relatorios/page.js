@@ -99,9 +99,9 @@ export default function RelatoriosPage() {
 
             <PageSection spacing="lg">
 
-              <div className="rounded-[22px] border border-white/5 bg-linear-to-br from-[#1b2728]/80 via-[#1a242c]/75 to-[#151d26]/80 backdrop-blur-xl p-6">
+              <div className="rounded-[22px] border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6">
 
-                <h2 className="text-xl font-bold text-white mb-5">
+                <h2 className="text-xl font-bold text-[var(--text)] mb-5">
 
                   Resultado da Pesquisa
 
@@ -134,7 +134,7 @@ export default function RelatoriosPage() {
 
                   ) : (
 
-                    <span className="text-gray-400">
+                    <span className="text-[var(--text-subtle)]">
 
                       Nenhum módulo encontrado.
 

@@ -47,7 +47,7 @@ export default function QuickActions() {
             uppercase
             tracking-[0.30em]
             text-[11px]
-            text-gray-400
+            text-[var(--text-subtle)]
             mb-2
           "
         >
@@ -58,7 +58,7 @@ export default function QuickActions() {
           className="
             text-4xl
             font-bold
-            text-white
+            text-[var(--text)]
             leading-none
           "
         >
@@ -84,8 +84,8 @@ export default function QuickActions() {
                 group
                 rounded-2xl
                 border
-                border-white/10
-                bg-white/5
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
                 p-5
 
                 transition-all
@@ -133,7 +133,7 @@ export default function QuickActions() {
                   text-left
                   text-sm
                   font-semibold
-                  text-white
+                  text-[var(--text)]
                 "
               >
                 {item.title}

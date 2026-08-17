@@ -21,7 +21,7 @@ const statusColor = {
     "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30",
 
   solicitada:
-    "bg-white/10 text-gray-300 border border-white/20",
+    "bg-[var(--surface-3)] text-[var(--text-muted)] border border-[var(--border-strong)]",
 
   "em cotação":
     "bg-yellow-500/20 text-yellow-300 border border-yellow-500/30",
@@ -67,7 +67,7 @@ export default function RecentActivities({
               uppercase
               tracking-[0.30em]
               text-[11px]
-              text-gray-400
+              text-[var(--text-subtle)]
               mb-2
             "
           >
@@ -78,7 +78,7 @@ export default function RecentActivities({
             className="
               text-4xl
               font-bold
-              text-white
+              text-[var(--text)]
               leading-none
             "
           >
@@ -134,7 +134,7 @@ export default function RecentActivities({
                 py-1
                 rounded-xl
                 transition
-                hover:bg-white/5
+                hover:bg-[var(--surface-2)]
               "
             >
 
@@ -145,9 +145,9 @@ export default function RecentActivities({
                     w-11
                     h-11
                     rounded-2xl
-                    bg-white/5
+                    bg-[var(--surface-2)]
                     border
-                    border-white/10
+                    border-[var(--border-token)]
                     flex
                     items-center
                     justify-center
@@ -156,17 +156,17 @@ export default function RecentActivities({
                 >
                   <Bell
                     size={18}
-                    className="text-gray-300"
+                    className="text-[var(--text-muted)]"
                   />
                 </div>
 
                 <div>
 
-                  <p className="font-medium text-white">
+                  <p className="font-medium text-[var(--text)]">
                     {item.descricao}
                   </p>
 
-                  <p className="text-sm text-gray-400 mt-1">
+                  <p className="text-sm text-[var(--text-subtle)] mt-1">
                     {item.link
                       ? new Date(item.data).toLocaleString("pt-BR", {
                           day: "2-digit",

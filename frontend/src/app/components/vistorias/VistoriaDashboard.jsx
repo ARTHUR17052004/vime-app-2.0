@@ -50,11 +50,8 @@ export default function VistoriaDashboard({
       className="
         rounded-[22px]
         border
-        border-white/10
-        bg-gradient-to-br
-        from-[#202a36]/95
-        via-[#1b2430]/96
-        to-[#151c25]/96
+        border-[var(--border-token)]
+        bg-[var(--surface)]
         backdrop-blur-xl
         p-8
       "
@@ -64,7 +61,7 @@ export default function VistoriaDashboard({
         className="
           text-3xl
           font-bold
-          text-white
+          text-[var(--text)]
           mb-8
         "
       >
@@ -80,8 +77,8 @@ export default function VistoriaDashboard({
             className="
               rounded-2xl
               border
-              border-white/10
-              bg-white/[0.03]
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               p-6
             "
           >
@@ -108,7 +105,7 @@ export default function VistoriaDashboard({
             <p
               className="
                 mt-5
-                text-gray-300
+                text-[var(--text-muted)]
                 text-lg
               "
             >

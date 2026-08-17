@@ -75,7 +75,7 @@ export default function AdministracaoCard({
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#19242b]/90
         backdrop-blur-xl
         shadow-xl
@@ -95,7 +95,7 @@ export default function AdministracaoCard({
             className="
               text-lg
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             {title}
@@ -107,7 +107,7 @@ export default function AdministracaoCard({
               className="
                 mt-1
                 text-sm
-                text-gray-400
+                text-[var(--text-subtle)]
               "
             >
               {subtitle}
@@ -159,7 +159,7 @@ export default function AdministracaoCard({
 
             text-4xl
             font-black
-            text-white
+            text-[var(--text)]
           "
         >
           {value}

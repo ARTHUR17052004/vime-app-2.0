@@ -45,15 +45,15 @@ export default function AsaasTutorial() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)]">
 
-      <div className="px-8 py-6 border-b border-white/[0.07]">
+      <div className="px-8 py-6 border-b border-[var(--border-token)]">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
           Guia de Configuração
         </h2>
 
-        <p className="text-gray-400 mt-2">
+        <p className="text-[var(--text-subtle)] mt-2">
           Siga as etapas abaixo para concluir corretamente a integração com o Asaas.
         </p>
 
@@ -69,10 +69,10 @@ export default function AsaasTutorial() {
               flex
               gap-5
               border
-              border-white/[0.07]
+              border-[var(--border-token)]
               rounded-2xl
               p-5
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
               transition
             "
           >
@@ -83,7 +83,7 @@ export default function AsaasTutorial() {
                 h-14
                 rounded-full
                 bg-green-700
-                text-white
+                text-[var(--text)]
                 flex
                 items-center
                 justify-center
@@ -97,11 +97,11 @@ export default function AsaasTutorial() {
 
             <div>
 
-              <h3 className="font-bold text-lg text-white">
+              <h3 className="font-bold text-lg text-[var(--text)]">
                 {passo.titulo}
               </h3>
 
-              <p className="text-gray-400 mt-1">
+              <p className="text-[var(--text-subtle)] mt-1">
                 {passo.descricao}
               </p>
 
@@ -113,7 +113,7 @@ export default function AsaasTutorial() {
 
       </div>
 
-      <div className="border-t border-white/[0.07] bg-green-500/10 px-8 py-5">
+      <div className="border-t border-[var(--border-token)] bg-green-500/10 px-8 py-5">
 
         <p className="text-green-400 font-semibold">
           ✔ Após concluir todas as etapas, sua integração estará pronta para utilização no VIME.

@@ -90,7 +90,7 @@ export default function ActionMenu({
         rounded-2xl
 
         border
-        border-white/10
+        border-[var(--border-token)]
 
         bg-[#1a242c]/98
 

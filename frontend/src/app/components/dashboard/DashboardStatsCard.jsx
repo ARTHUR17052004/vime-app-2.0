@@ -35,7 +35,7 @@ export default function DashboardStatsCard({
               font-semibold
               uppercase
               tracking-[0.18em]
-              text-gray-400
+              text-[var(--text-subtle)]
             "
           >
             {title}
@@ -48,7 +48,7 @@ export default function DashboardStatsCard({
               leading-none
               font-black
               tracking-tight
-              text-white
+              text-[var(--text)]
             "
           >
             {value}
@@ -59,7 +59,7 @@ export default function DashboardStatsCard({
               className="
                 mt-3
                 text-sm
-                text-gray-500
+                text-[var(--text-faint)]
               "
             >
               {subtitle}

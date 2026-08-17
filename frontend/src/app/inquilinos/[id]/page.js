@@ -74,7 +74,7 @@ export default function InquilinoDetalhesPage() {
 
             <div className="flex justify-center py-32">
 
-              <p className="text-gray-400">
+              <p className="text-[var(--text-subtle)]">
 
                 Carregando...
 
@@ -279,13 +279,13 @@ function Info({ label, value }) {
 
     <div>
 
-      <p className="text-sm text-gray-400">
+      <p className="text-sm text-[var(--text-subtle)]">
 
         {label}
 
       </p>
 
-      <p className="text-lg font-semibold text-white">
+      <p className="text-lg font-semibold text-[var(--text)]">
 
         {value || "-"}
 

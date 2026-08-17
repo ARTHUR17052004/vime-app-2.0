@@ -60,11 +60,11 @@ export default function FinanceiroFluxoCaixa({
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Fluxo de Caixa
             </h2>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Histórico completo de movimentações.
             </p>
 
@@ -76,7 +76,7 @@ export default function FinanceiroFluxoCaixa({
 
       {movimentos.length === 0 ? (
 
-        <div className="px-6 py-12 text-center text-gray-400">
+        <div className="px-6 py-12 text-center text-[var(--text-subtle)]">
           Nenhum lançamento encontrado.
         </div>
 
@@ -84,14 +84,14 @@ export default function FinanceiroFluxoCaixa({
 
         <div className="overflow-x-auto mt-6">
 
-          <table className="w-full text-gray-200">
+          <table className="w-full text-[var(--text-1)]">
 
             <thead
               className="
                 border-b
-                border-white/10
+                border-[var(--border-token)]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 uppercase
 
@@ -135,9 +135,9 @@ export default function FinanceiroFluxoCaixa({
                   key={`${item.tipo}-${item.id}`}
                   className="
                     border-b
-                    border-white/5
+                    border-[var(--border-token)]
 
-                    hover:bg-white/5
+                    hover:bg-[var(--surface-2)]
 
                     transition
                   "

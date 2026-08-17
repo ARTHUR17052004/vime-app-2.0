@@ -30,6 +30,9 @@ export default function InquilinosPage() {
   const [inquilinoEditando, setInquilinoEditando] =
     useState(null);
 
+  const [gerarContratoAutomatico, setGerarContratoAutomatico] =
+    useState(true);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -112,11 +115,20 @@ export default function InquilinosPage() {
 
       } else {
 
-        await InquilinoService.criar(
+        const resposta = await InquilinoService.criar({
 
-          dados
+          ...dados,
 
-        );
+          gerarContratoAutomatico,
+
+        });
+
+        const avisoContrato =
+          (resposta?.data || resposta)?.avisoContrato;
+
+        if (avisoContrato) {
+          alert(avisoContrato);
+        }
 
       }
 
@@ -186,6 +198,18 @@ export default function InquilinosPage() {
 
     setInquilinoEditando(null);
 
+    setGerarContratoAutomatico(true);
+
+    setModalOpen(true);
+
+  };
+
+  const adicionarInquilino = () => {
+
+    setInquilinoEditando(null);
+
+    setGerarContratoAutomatico(false);
+
     setModalOpen(true);
 
   };
@@ -240,7 +264,7 @@ export default function InquilinosPage() {
 
             <div className="flex justify-center items-center py-32">
 
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--text-subtle)] text-lg">
 
                 Carregando inquilinos...
 
@@ -295,9 +319,18 @@ export default function InquilinosPage() {
               count={inquilinos.length}
               countLabel="inquilino(s) cadastrado(s)"
               actions={
-                <Button onClick={novoInquilino}>
-                  + Novo Inquilino
-                </Button>
+                <div className="flex gap-3">
+                  <Button
+                    variant="secondary"
+                    onClick={adicionarInquilino}
+                  >
+                    + Adicionar Inquilino
+                  </Button>
+
+                  <Button onClick={novoInquilino}>
+                    + Novo Inquilino
+                  </Button>
+                </div>
               }
             />
 
@@ -362,6 +395,25 @@ export default function InquilinosPage() {
 
             }}
           >
+
+            {!inquilinoEditando && (
+
+              <p
+                className={`
+                  mb-4 rounded-xl border px-4 py-3 text-sm
+                  ${
+                    gerarContratoAutomatico
+                      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                      : "border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text-subtle)]"
+                  }
+                `}
+              >
+                {gerarContratoAutomatico
+                  ? "O contrato será gerado e enviado para assinatura automaticamente ao salvar."
+                  : "Este cadastro não vai gerar contrato automático."}
+              </p>
+
+            )}
 
             <InquilinoForm
               onSave={salvarInquilino}

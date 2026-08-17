@@ -312,7 +312,7 @@ export default function KitnetForm({
           gap-4
           pt-4
           border-t
-          border-white/10
+          border-[var(--border-token)]
         "
       >
 

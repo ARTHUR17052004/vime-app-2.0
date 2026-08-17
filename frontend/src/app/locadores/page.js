@@ -207,7 +207,7 @@ export default function LocadoresPage() {
 
         {loading && (
 
-          <div className="mt-10 text-center text-gray-400">
+          <div className="mt-10 text-center text-[var(--text-subtle)]">
 
             Carregando locadores...
 

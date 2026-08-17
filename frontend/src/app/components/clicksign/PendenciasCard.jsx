@@ -51,13 +51,13 @@ export default function PendenciasCard() {
   const visiveis = mostrarTodos ? pendentes : pendentes.slice(0, 4);
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center justify-between mb-6">
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
 
             Pendências
 
@@ -100,7 +100,7 @@ export default function PendenciasCard() {
 
               <div
                 key={doc.key || doc.id || index}
-                className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4 transition hover:border-emerald-500/30"
+                className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30"
               >
 
                 <div className="flex items-center gap-4">
@@ -116,7 +116,7 @@ export default function PendenciasCard() {
 
                   <div>
 
-                    <h3 className="font-semibold text-white">
+                    <h3 className="font-semibold text-[var(--text)]">
 
                       {doc.filename || doc.key || "Documento"}
 

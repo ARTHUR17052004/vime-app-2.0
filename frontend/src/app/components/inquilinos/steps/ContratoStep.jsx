@@ -5,13 +5,13 @@ export default function ContratoStep({
   handleChange,
 }) {
   const inputStyle =
-    "border border-white/10 rounded-xl p-3 text-white bg-white/5 backdrop-blur placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
+    "border border-[var(--border-token)] rounded-xl p-3 text-[var(--text)] bg-[var(--surface-2)] backdrop-blur placeholder:text-[var(--text-subtle)] focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
 
   return (
     <div className="grid grid-cols-2 gap-4">
 
       <div>
-        <label className="block text-xs text-gray-400 mb-1.5">
+        <label className="block text-xs text-[var(--text-subtle)] mb-1.5">
           Início do Contrato
         </label>
         <input
@@ -24,7 +24,7 @@ export default function ContratoStep({
       </div>
 
       <div>
-        <label className="block text-xs text-gray-400 mb-1.5">
+        <label className="block text-xs text-[var(--text-subtle)] mb-1.5">
           Fim do Contrato
         </label>
         <input
@@ -69,7 +69,7 @@ export default function ContratoStep({
         </p>
 
         <p className="text-sm text-emerald-300/80 mt-1">
-          Futuramente esta etapa será integrada ao Clicksign para geração e assinatura automática.
+          Ao salvar, o contrato é gerado a partir do modelo cadastrado e enviado para assinatura na Clicksign.
         </p>
       </div>
 

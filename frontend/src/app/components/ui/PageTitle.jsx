@@ -12,7 +12,7 @@ export default function PageTitle({
           text-4xl
           font-bold
           tracking-tight
-          text-white
+          text-[var(--text)]
         "
       >
         {title}
@@ -22,7 +22,7 @@ export default function PageTitle({
         <p
           className="
             mt-2
-            text-gray-400
+            text-[var(--text-subtle)]
             text-base
           "
         >

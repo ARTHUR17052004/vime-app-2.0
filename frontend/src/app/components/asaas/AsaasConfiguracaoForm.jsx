@@ -141,14 +141,14 @@ export default function AsaasConfiguracaoForm() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)]">
 
-      <div className="px-8 py-6 border-b border-white/[0.07]">
-        <h2 className="text-2xl font-bold text-white">
+      <div className="px-8 py-6 border-b border-[var(--border-token)]">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
           Configuração da Integração
         </h2>
 
-        <p className="text-gray-400 mt-2">
+        <p className="text-[var(--text-subtle)] mt-2">
           Configure sua conta Asaas para utilização no VIME.
         </p>
       </div>
@@ -156,7 +156,7 @@ export default function AsaasConfiguracaoForm() {
       <div className="p-8 grid md:grid-cols-2 gap-6">
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Ambiente
           </label>
 
@@ -164,7 +164,7 @@ export default function AsaasConfiguracaoForm() {
             value={dados.ambiente}
             onChange={(e) => alterar("ambiente", e.target.value)}
             disabled={carregando}
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
           >
             <option value="sandbox">Sandbox</option>
             <option value="producao">Produção</option>
@@ -172,7 +172,7 @@ export default function AsaasConfiguracaoForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Wallet ID
           </label>
 
@@ -180,14 +180,14 @@ export default function AsaasConfiguracaoForm() {
             value={dados.walletId}
             onChange={(e) => alterar("walletId", e.target.value)}
             disabled={carregando}
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
             placeholder="Wallet do proprietário"
           />
         </div>
 
         <div className="md:col-span-2">
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             API Key
           </label>
 
@@ -198,7 +198,7 @@ export default function AsaasConfiguracaoForm() {
               value={dados.apiKey}
               onChange={(e) => alterar("apiKey", e.target.value)}
               disabled={carregando}
-              className="flex-1 border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+              className="flex-1 border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
               placeholder="$aact_prod..."
             />
 
@@ -206,7 +206,7 @@ export default function AsaasConfiguracaoForm() {
               onClick={() =>
                 setMostrarApi(!mostrarApi)
               }
-              className="px-5 rounded-xl border border-white/[0.07] text-gray-200 hover:bg-white/5"
+              className="px-5 rounded-xl border border-[var(--border-token)] text-[var(--text-1)] hover:bg-[var(--surface-2)]"
             >
               {mostrarApi ? "Ocultar" : "Mostrar"}
             </button>
@@ -216,7 +216,7 @@ export default function AsaasConfiguracaoForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Taxa Administrativa (%)
           </label>
 
@@ -224,21 +224,22 @@ export default function AsaasConfiguracaoForm() {
             value={dados.taxaAdministracao}
             onChange={(e) => alterar("taxaAdministracao", e.target.value)}
             disabled={carregando}
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-white"
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
             placeholder="10"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Token do Webhook
           </label>
 
           <input
             value={dados.webhookToken}
-            readOnly
-            className="w-full border border-white/[0.07] rounded-xl p-3 bg-white/5 text-gray-400"
-            placeholder="Gerado na aba Webhook"
+            onChange={(e) => alterar("webhookToken", e.target.value)}
+            disabled={carregando}
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
+            placeholder="Gerado na aba Webhook (ou cole aqui um token próprio)"
           />
         </div>
 
@@ -258,7 +259,7 @@ export default function AsaasConfiguracaoForm() {
         </div>
       )}
 
-      <div className="border-t border-white/[0.07] px-8 py-6 flex flex-wrap gap-4">
+      <div className="border-t border-[var(--border-token)] px-8 py-6 flex flex-wrap gap-4">
 
         <button
           onClick={testarConexao}
@@ -267,7 +268,7 @@ export default function AsaasConfiguracaoForm() {
           bg-blue-600
           hover:bg-blue-700
           disabled:opacity-50
-          text-white
+          text-[var(--text)]
           px-6
           py-3
           rounded-xl
@@ -283,7 +284,7 @@ export default function AsaasConfiguracaoForm() {
           bg-purple-600
           hover:bg-purple-700
           disabled:opacity-50
-          text-white
+          text-[var(--text)]
           px-6
           py-3
           rounded-xl
@@ -299,7 +300,7 @@ export default function AsaasConfiguracaoForm() {
           bg-green-700
           hover:bg-green-800
           disabled:opacity-50
-          text-white
+          text-[var(--text)]
           px-6
           py-3
           rounded-xl

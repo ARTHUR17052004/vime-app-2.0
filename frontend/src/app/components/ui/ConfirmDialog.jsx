@@ -31,7 +31,7 @@ export default function ConfirmDialog({
     >
       <p
         className="
-          text-gray-300
+          text-[var(--text-muted)]
           leading-relaxed
         "
       >

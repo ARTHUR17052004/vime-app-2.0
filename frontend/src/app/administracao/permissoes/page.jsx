@@ -262,11 +262,11 @@ export default function PermissoesPage() {
 
               <div>
 
-                <h1 className="text-5xl font-black text-white">
+                <h1 className="text-5xl font-black text-[var(--text)]">
                   Permissões
                 </h1>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Controle de acesso por perfil
                 </p>
 
@@ -278,9 +278,9 @@ export default function PermissoesPage() {
                   px-5
                   py-3
                   rounded-xl
-                  bg-white/10
-                  hover:bg-white/20
-                  text-white
+                  bg-[var(--surface-3)]
+                  hover:bg-[var(--surface-3)]
+                  text-[var(--text)]
                   flex
                   items-center
                   gap-2
@@ -330,7 +330,7 @@ export default function PermissoesPage() {
           {loading ? (
 
             <Card>
-              <p className="text-gray-400 text-center py-10">
+              <p className="text-[var(--text-subtle)] text-center py-10">
                 Carregando...
               </p>
             </Card>
@@ -338,7 +338,7 @@ export default function PermissoesPage() {
           ) : !perfilAtual ? (
 
             <Card>
-              <p className="text-gray-400 text-center py-10">
+              <p className="text-[var(--text-subtle)] text-center py-10">
                 Nenhum perfil cadastrado ainda.
               </p>
             </Card>
@@ -369,7 +369,7 @@ export default function PermissoesPage() {
                           className="text-emerald-400"
                         />
 
-                        <h3 className="text-lg font-bold text-white">
+                        <h3 className="text-lg font-bold text-[var(--text)]">
                           {modulo.modulo}
                         </h3>
 
@@ -404,7 +404,7 @@ export default function PermissoesPage() {
                               flex
                               items-center
                               gap-3
-                              text-gray-300
+                              text-[var(--text-muted)]
                               cursor-pointer
                             "
                           >

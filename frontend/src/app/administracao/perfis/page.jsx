@@ -168,11 +168,11 @@ export default function PerfisPage() {
 
                 <div>
 
-                    <h1 className="text-5xl font-black text-white">
+                    <h1 className="text-5xl font-black text-[var(--text)]">
                     Perfis
                     </h1>
 
-                    <p className="text-gray-400">
+                    <p className="text-[var(--text-subtle)]">
                     Gerenciamento de Perfis
                     </p>
 
@@ -186,9 +186,9 @@ export default function PerfisPage() {
                         px-5
                         py-3
                         rounded-xl
-                        bg-white/10
-                        hover:bg-white/20
-                        text-white
+                        bg-[var(--surface-3)]
+                        hover:bg-[var(--surface-3)]
+                        text-[var(--text)]
                         flex
                         items-center
                         gap-2
@@ -209,7 +209,7 @@ export default function PerfisPage() {
                         rounded-xl
                         bg-emerald-500
                         hover:bg-emerald-600
-                        text-white
+                        text-[var(--text)]
                         font-bold
                     "
                     >
@@ -226,7 +226,7 @@ export default function PerfisPage() {
 
             <input
 
-              className="w-full rounded-xl bg-white/5 p-3"
+              className="w-full rounded-xl bg-[var(--surface-2)] p-3"
 
               placeholder="Pesquisar..."
 

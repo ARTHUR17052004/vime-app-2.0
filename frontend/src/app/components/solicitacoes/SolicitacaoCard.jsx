@@ -19,7 +19,7 @@ import { usePermissao } from "@/hooks/usePermissao";
 const STATUS_CONFIG = {
   SOLICITADA: {
     badge: "gray",
-    borda: "border-white/15",
+    borda: "border-[var(--border-token)]",
   },
   "EM COTAÇÃO": {
     badge: "yellow",
@@ -83,17 +83,14 @@ export default function SolicitacaoCard({
         className="
           rounded-3xl
           border
-          border-white/10
-          bg-gradient-to-br
-          from-[#202a36]/95
-          via-[#1b2430]/96
-          to-[#151c25]/96
+          border-[var(--border-token)]
+          bg-[var(--surface)]
           backdrop-blur-xl
           p-10
           text-center
         "
       >
-        <p className="text-gray-400">
+        <p className="text-[var(--text-subtle)]">
           Nenhuma solicitação encontrada.
         </p>
       </div>
@@ -116,10 +113,7 @@ export default function SolicitacaoCard({
               rounded-2xl
               border
               ${config.borda}
-              bg-gradient-to-br
-              from-[#202a36]/95
-              via-[#1b2430]/96
-              to-[#151c25]/96
+              bg-[var(--surface)]
               backdrop-blur-xl
               p-6
               transition-all
@@ -133,10 +127,10 @@ export default function SolicitacaoCard({
               <div className="flex-1 min-w-[280px] grid sm:grid-cols-2 xl:grid-cols-5 gap-5">
 
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <p className="text-xs text-[var(--text-faint)] uppercase tracking-wide">
                     Data
                   </p>
-                  <p className="text-white mt-1 text-sm">
+                  <p className="text-[var(--text)] mt-1 text-sm">
                     {item.data
                       ? new Date(item.data).toLocaleDateString("pt-BR")
                       : "-"}
@@ -144,33 +138,33 @@ export default function SolicitacaoCard({
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <p className="text-xs text-[var(--text-faint)] uppercase tracking-wide">
                     {item.numero}
                   </p>
-                  <p className="text-white font-semibold mt-1">
+                  <p className="text-[var(--text)] font-semibold mt-1">
                     {item.titulo}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <p className="text-xs text-[var(--text-faint)] uppercase tracking-wide">
                     Criado por
                   </p>
-                  <p className="text-white mt-1 text-sm">
+                  <p className="text-[var(--text)] mt-1 text-sm">
                     {item.criadoPorNome || "-"}
                   </p>
                   {item.criadoPorPerfil && (
-                    <p className="text-gray-500 text-xs mt-0.5">
+                    <p className="text-[var(--text-faint)] text-xs mt-0.5">
                       {item.criadoPorPerfil}
                     </p>
                   )}
                 </div>
 
                 <div className="xl:col-span-1">
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">
+                  <p className="text-xs text-[var(--text-faint)] uppercase tracking-wide">
                     Descrição
                   </p>
-                  <p className="text-gray-300 mt-1 text-sm line-clamp-2">
+                  <p className="text-[var(--text-muted)] mt-1 text-sm line-clamp-2">
                     {item.descricao || "Sem descrição."}
                   </p>
                 </div>
@@ -202,8 +196,8 @@ export default function SolicitacaoCard({
                   w-10
                   h-10
                   rounded-xl
-                  bg-white/5
-                  hover:bg-white/10
+                  bg-[var(--surface-2)]
+                  hover:bg-[var(--surface-3)]
                   flex
                   items-center
                   justify-center
@@ -211,7 +205,7 @@ export default function SolicitacaoCard({
                   shrink-0
                 "
               >
-                <MoreVertical size={18} className="text-gray-300" />
+                <MoreVertical size={18} className="text-[var(--text-muted)]" />
               </button>
 
               <ActionMenu
@@ -232,8 +226,8 @@ export default function SolicitacaoCard({
                     gap-3
                     px-5
                     py-3
-                    text-gray-300
-                    hover:bg-white/5
+                    text-[var(--text-muted)]
+                    hover:bg-[var(--surface-2)]
                     transition
                   "
                 >

@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
+const contratoService = require('./contratoService');
 
 const sanitizar = (dados) => {
 
@@ -67,6 +68,9 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
+  const gerarContratoAutomatico = dados.gerarContratoAutomatico === true;
+  delete dados.gerarContratoAutomatico;
+
   dados = sanitizar(dados);
 
   const inquilino = await prisma.inquilino.create({
@@ -83,7 +87,59 @@ const criar = async (dados) => {
     }
   });
 
-  return inquilino;
+  let avisoContrato = null;
+
+  if (gerarContratoAutomatico) {
+
+    try {
+
+      const kitnet = await prisma.kitnet.findUnique({
+        where: { id: inquilino.kitnetId }
+      });
+
+      const unidade = kitnet
+        ? await prisma.unidade.findUnique({ where: { id: kitnet.unidadeId } })
+        : null;
+
+      if (!unidade || !unidade.locadorId) {
+
+        avisoContrato =
+          'Inquilino cadastrado, mas o contrato automático não foi gerado: a unidade não tem um locador vinculado.';
+
+      } else {
+
+        const dataInicio = new Date(inquilino.dataInicioContrato);
+
+        await contratoService.criar({
+          locadorId: unidade.locadorId,
+          unidadeId: unidade.id,
+          kitnetId: kitnet.id,
+          inquilinoId: inquilino.id,
+          dataInicio: inquilino.dataInicioContrato,
+          dataFim: inquilino.dataFimContrato || undefined,
+          valorAluguel: kitnet.aluguel,
+          diaVencimento: unidade.vencimento || dataInicio.getDate(),
+          indiceReajuste: inquilino.indiceReajuste || null,
+        });
+
+      }
+
+    } catch (erroContrato) {
+
+      console.error(
+        'Erro ao gerar contrato automático para novo inquilino:',
+        erroContrato.message
+      );
+
+      avisoContrato =
+        erroContrato.message ||
+        'Inquilino cadastrado, mas não foi possível gerar o contrato automático.';
+
+    }
+
+  }
+
+  return { ...inquilino, avisoContrato };
 };
 
 const atualizar = async (id, dados) => {

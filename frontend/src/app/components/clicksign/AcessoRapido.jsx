@@ -91,9 +91,9 @@ export default function AcessoRapido() {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
-      <h2 className="mb-6 text-xl font-bold text-white">
+      <h2 className="mb-6 text-xl font-bold text-[var(--text)]">
 
         ⚡ Ações Rápidas
 
@@ -111,7 +111,7 @@ export default function AcessoRapido() {
               key={index}
               onClick={() => executar(item)}
               disabled={item.acao === "sincronizar" && sincronizando}
-              className="group flex w-full items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4 transition hover:border-emerald-500/30 hover:bg-slate-800 disabled:opacity-50"
+              className="group flex w-full items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30 hover:bg-slate-800 disabled:opacity-50"
             >
 
               <div className="flex items-center gap-4">
@@ -129,7 +129,7 @@ export default function AcessoRapido() {
 
                 <div className="text-left">
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
 
                     {item.titulo}
 
@@ -166,7 +166,7 @@ export default function AcessoRapido() {
 
         <button
           onClick={() => irPara("clicksign-token")}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 font-medium text-white transition hover:bg-emerald-700"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 font-medium text-[var(--text)] transition hover:bg-emerald-700"
         >
 
           <Settings2 size={18} />

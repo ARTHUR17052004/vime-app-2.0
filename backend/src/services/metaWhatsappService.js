@@ -38,17 +38,40 @@ class MetaWhatsappService {
       );
     }
 
-    const response = await axios({
-      method: "POST",
-      url: `https://graph.facebook.com/v23.0/${phoneId}${endpoint}`,
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      data: body,
-    });
+    try {
 
-    return response.data;
+      const response = await axios({
+        method: "POST",
+        url: `https://graph.facebook.com/v23.0/${phoneId}${endpoint}`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        data: body,
+      });
+
+      return response.data;
+
+    } catch (error) {
+
+      console.error("Erro Meta WhatsApp:");
+
+      if (error.response) {
+
+        console.error(error.response.data);
+
+        throw new Error(
+          error.response.data?.error?.message ||
+          "Erro ao comunicar com a Meta Cloud API."
+        );
+
+      }
+
+      throw new Error(
+        error.message || "Erro desconhecido na Meta Cloud API."
+      );
+
+    }
 
   }
 

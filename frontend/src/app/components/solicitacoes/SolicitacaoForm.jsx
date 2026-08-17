@@ -129,12 +129,12 @@ export default function SolicitacaoForm({
     w-full
     rounded-xl
     border
-    border-white/10
-    bg-white/5
+    border-[var(--border-token)]
+    bg-[var(--surface-2)]
     px-4
     py-3
-    text-white
-    placeholder:text-gray-500
+    text-[var(--text)]
+    placeholder:text-[var(--text-faint)]
     outline-none
     focus:border-emerald-500
   `;
@@ -148,7 +148,7 @@ export default function SolicitacaoForm({
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Número
         </label>
 
@@ -156,14 +156,14 @@ export default function SolicitacaoForm({
           readOnly
           name="numero"
           value={form.numero}
-          className={`${input} bg-white/10`}
+          className={`${input} bg-[var(--surface-3)]`}
         />
 
       </div>
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Título
         </label>
 
@@ -179,7 +179,7 @@ export default function SolicitacaoForm({
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Descrição
         </label>
 
@@ -200,7 +200,7 @@ export default function SolicitacaoForm({
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Prazo
         </label>
 
@@ -216,7 +216,7 @@ export default function SolicitacaoForm({
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Observações
         </label>
 
@@ -237,7 +237,7 @@ export default function SolicitacaoForm({
 
       <div>
 
-        <label className="block text-sm font-semibold text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
           Anexo
         </label>
 
@@ -250,21 +250,21 @@ export default function SolicitacaoForm({
               justify-between
               rounded-xl
               border
-              border-white/10
-              bg-white/5
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               px-4
               py-3
             "
           >
 
-            <span className="text-sm text-gray-300 truncate">
+            <span className="text-sm text-[var(--text-muted)] truncate">
               📎 {anexo.nome}
             </span>
 
             <button
               type="button"
               onClick={removerArquivo}
-              className="text-gray-400 hover:text-red-400 transition"
+              className="text-[var(--text-subtle)] hover:text-red-400 transition"
             >
               <X size={18} />
             </button>
@@ -283,14 +283,14 @@ export default function SolicitacaoForm({
               rounded-xl
               border
               border-dashed
-              border-white/15
-              bg-white/5
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               px-4
               py-3
               text-sm
-              text-gray-400
-              hover:bg-white/10
-              hover:text-gray-200
+              text-[var(--text-subtle)]
+              hover:bg-[var(--surface-3)]
+              hover:text-[var(--text-1)]
               transition
             "
           >

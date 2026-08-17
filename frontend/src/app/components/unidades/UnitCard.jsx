@@ -72,7 +72,7 @@ export default function UnitCard({
               tracking-tight
               leading-none
 
-              text-white
+              text-[var(--text)]
             "
           >
             {unidade.nome}
@@ -143,7 +143,7 @@ export default function UnitCard({
 
       {/* DIVISOR */}
 
-      <div className="my-7 border-t border-white/10" />
+      <div className="my-7 border-t border-[var(--border-token)]" />
 
       {/* RODAPÉ */}
 
@@ -177,7 +177,7 @@ function InfoRow({
   icon,
   label,
   value,
-  valueClass = "text-white",
+  valueClass = "text-[var(--text)]",
 }) {
   return (
     <div
@@ -214,7 +214,7 @@ function InfoRow({
 
       <span
         className="
-          text-gray-300
+          text-[var(--text-muted)]
           text-[15px]
           font-medium
         "

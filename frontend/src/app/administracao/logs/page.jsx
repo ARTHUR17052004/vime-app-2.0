@@ -121,11 +121,11 @@ export default function LogsPage() {
 
               <div>
 
-                <h1 className="text-5xl font-black text-white">
+                <h1 className="text-5xl font-black text-[var(--text)]">
                   Logs do Sistema
                 </h1>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Registro de eventos e atividades
                 </p>
 
@@ -137,9 +137,9 @@ export default function LogsPage() {
                   px-5
                   py-3
                   rounded-xl
-                  bg-white/10
-                  hover:bg-white/20
-                  text-white
+                  bg-[var(--surface-3)]
+                  hover:bg-[var(--surface-3)]
+                  text-[var(--text)]
                   flex
                   items-center
                   gap-2

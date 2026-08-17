@@ -251,7 +251,7 @@ export default function UnidadesPage() {
 
             <div className="flex justify-center items-center py-32">
 
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--text-subtle)] text-lg">
 
                 Carregando residências...
 

@@ -100,7 +100,7 @@ export default function UsuarioDetalhesPage() {
 
             <div className="flex justify-center py-32">
 
-              <p className="text-gray-400">
+              <p className="text-[var(--text-subtle)]">
 
                 Carregando usuário...
 
@@ -198,7 +198,7 @@ export default function UsuarioDetalhesPage() {
 
                   border
 
-                  border-white/10
+                  border-[var(--border-token)]
 
                   bg-[#19242b]/90
 
@@ -226,7 +226,7 @@ export default function UsuarioDetalhesPage() {
 
                     border-b
 
-                    border-white/10
+                    border-[var(--border-token)]
 
                   "
 
@@ -266,13 +266,13 @@ export default function UsuarioDetalhesPage() {
 
                   <div>
 
-                    <h2 className="text-3xl font-black text-white">
+                    <h2 className="text-3xl font-black text-[var(--text)]">
 
                       {usuario.nome}
 
                     </h2>
 
-                    <p className="text-gray-400">
+                    <p className="text-[var(--text-subtle)]">
 
                       {usuario.email}
 
@@ -386,9 +386,9 @@ function InfoCard({
 
         border
 
-        border-white/10
+        border-[var(--border-token)]
 
-        bg-white/5
+        bg-[var(--surface-2)]
 
         p-5
 
@@ -404,7 +404,7 @@ function InfoCard({
 
         </div>
 
-        <span className="text-gray-400">
+        <span className="text-[var(--text-subtle)]">
 
           {titulo}
 
@@ -412,7 +412,7 @@ function InfoCard({
 
       </div>
 
-      <h3 className="text-xl font-bold text-white">
+      <h3 className="text-xl font-bold text-[var(--text)]">
 
         {valor}
 

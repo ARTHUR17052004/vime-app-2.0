@@ -73,7 +73,7 @@ export default function AlterarSenhaModal({ isOpen, onClose }) {
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
             Senha Atual
           </label>
           <input
@@ -82,14 +82,14 @@ export default function AlterarSenhaModal({ isOpen, onClose }) {
             onChange={(e) => setSenhaAtual(e.target.value)}
             required
             className="
-              w-full rounded-xl border border-white/10 bg-white/5
-              px-4 py-3 text-white outline-none focus:border-emerald-500
+              w-full rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)]
+              px-4 py-3 text-[var(--text)] outline-none focus:border-emerald-500
             "
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
             Nova Senha
           </label>
           <input
@@ -98,14 +98,14 @@ export default function AlterarSenhaModal({ isOpen, onClose }) {
             onChange={(e) => setNovaSenha(e.target.value)}
             required
             className="
-              w-full rounded-xl border border-white/10 bg-white/5
-              px-4 py-3 text-white outline-none focus:border-emerald-500
+              w-full rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)]
+              px-4 py-3 text-[var(--text)] outline-none focus:border-emerald-500
             "
           />
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
             Confirmar Nova Senha
           </label>
           <input
@@ -114,8 +114,8 @@ export default function AlterarSenhaModal({ isOpen, onClose }) {
             onChange={(e) => setConfirmarSenha(e.target.value)}
             required
             className="
-              w-full rounded-xl border border-white/10 bg-white/5
-              px-4 py-3 text-white outline-none focus:border-emerald-500
+              w-full rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)]
+              px-4 py-3 text-[var(--text)] outline-none focus:border-emerald-500
             "
           />
         </div>

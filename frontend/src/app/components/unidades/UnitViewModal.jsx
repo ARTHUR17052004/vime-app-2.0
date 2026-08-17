@@ -7,11 +7,11 @@ function Info({ label, value }) {
   return (
     <Card className="p-5">
 
-      <p className="text-xs uppercase tracking-[0.18em] text-gray-500">
+      <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-faint)]">
         {label}
       </p>
 
-      <p className="mt-2 text-base font-semibold text-white">
+      <p className="mt-2 text-base font-semibold text-[var(--text)]">
         {value || "-"}
       </p>
 
@@ -109,13 +109,13 @@ export default function UnitViewModal({
 
         <Card className="p-6">
 
-          <p className="text-xs uppercase tracking-[0.18em] text-gray-500">
+          <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-faint)]">
 
             Observações
 
           </p>
 
-          <p className="mt-3 whitespace-pre-wrap leading-7 text-gray-300">
+          <p className="mt-3 whitespace-pre-wrap leading-7 text-[var(--text-muted)]">
 
             {unidade.observacoes ||
               "Nenhuma observação cadastrada."}

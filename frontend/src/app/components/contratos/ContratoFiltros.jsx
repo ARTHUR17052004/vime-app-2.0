@@ -16,8 +16,8 @@ export default function ContratoFiltros({
       className="
         rounded-3xl
         border
-        border-white/10
-        bg-slate-900/80
+        border-[var(--border-token)]
+        bg-[var(--surface)]
         backdrop-blur-xl
         p-6
         shadow-xl
@@ -28,7 +28,7 @@ export default function ContratoFiltros({
         className="
           text-xl
           font-bold
-          text-white
+          text-[var(--text)]
           mb-5
         "
       >
@@ -53,8 +53,8 @@ export default function ContratoFiltros({
 
               ${
                 filtroSelecionado === filtro
-                  ? "bg-emerald-600 text-white shadow-lg"
-                  : "bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-emerald-600 text-[var(--text)] shadow-lg"
+                  : "bg-[var(--surface-2)] text-[var(--text-muted)] hover:bg-[var(--surface-3)] hover:text-[var(--text)]"
               }
             `}
           >

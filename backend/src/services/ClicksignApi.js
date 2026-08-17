@@ -60,17 +60,17 @@ class ClicksignApi {
 
     try {
 
+      const separador = endpoint.includes("?") ? "&" : "?";
+
       const response = await axios({
 
         method,
 
-        url: `${baseURL}${endpoint}`,
+        // API v1 da Clicksign autentica via query string "access_token",
+        // não via header Authorization.
+        url: `${baseURL}${endpoint}${separador}access_token=${apiKey}`,
 
         headers: {
-
-          // API da Clicksign espera Bearer token (diferente do Asaas,
-          // que usa o header "access_token")
-          Authorization: `Bearer ${apiKey}`,
 
           "Content-Type": "application/json"
 
@@ -152,22 +152,32 @@ class ClicksignApi {
 
   }
 
-  async adicionarSignatario(documentoId, signatario) {
+  // Fluxo real da API v1 da Clicksign para colocar um documento para
+  // assinar: 1) criar o signatário (retorna um "key" próprio dele),
+  // 2) vincular esse signatário ao documento através de uma "lista".
+  async criarSignatario(signatario) {
 
     return this.request(
       "POST",
-      `/documents/${documentoId}/signers`,
-      signatario
+      "/signers",
+      { signer: signatario }
     );
 
   }
 
-  async enviarAssinatura(id, assinatura) {
+  async criarLista(documentKey, signerKey, opcoes = {}) {
 
     return this.request(
       "POST",
-      `/documents/${id}/sign`,
-      assinatura
+      "/lists",
+      {
+        list: {
+          document_key: documentKey,
+          signer_key: signerKey,
+          sign_as: opcoes.signAs || "sign",
+          message: opcoes.message
+        }
+      }
     );
 
   }

@@ -345,7 +345,7 @@ export default function UsuariosPage() {
 
             <div className="flex items-center justify-center py-32">
 
-              <p className="text-gray-400 text-lg">
+              <p className="text-[var(--text-subtle)] text-lg">
 
                 Carregando usuários...
 

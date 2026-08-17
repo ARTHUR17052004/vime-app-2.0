@@ -28,7 +28,7 @@ export default function ProfileInfo() {
             mt-2
             text-2xl
             font-bold
-            text-white
+            text-[var(--text)]
           "
         >
           Dados da Conta
@@ -72,7 +72,7 @@ export default function ProfileInfo() {
 function InfoItem({
   label,
   value,
-  valueClass = "text-white",
+  valueClass = "text-[var(--text)]",
 }) {
   return (
     <div>
@@ -82,7 +82,7 @@ function InfoItem({
           text-xs
           uppercase
           tracking-wider
-          text-gray-500
+          text-[var(--text-faint)]
         "
       >
         {label}
@@ -95,9 +95,9 @@ function InfoItem({
           rounded-2xl
 
           border
-          border-white/10
+          border-[var(--border-token)]
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
           px-5
           py-4

@@ -22,7 +22,7 @@ export default function VimePageHeader({
               md:text-6xl
               font-black
               tracking-tight
-              text-white
+              text-[var(--text)]
             "
           >
             {title}
@@ -34,7 +34,7 @@ export default function VimePageHeader({
                 mt-2
                 text-base
                 md:text-2xl
-                text-gray-300
+                text-[var(--text-muted)]
               "
             >
               {subtitle}

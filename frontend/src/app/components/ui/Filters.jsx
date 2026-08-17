@@ -11,8 +11,8 @@ export default function Filters({
       className={`
         rounded-3xl
         border
-        border-white/10
-        bg-slate-900/80
+        border-[var(--border-token)]
+        bg-[var(--surface)]
         backdrop-blur-xl
         p-6
         shadow-xl
@@ -46,14 +46,14 @@ export default function Filters({
                   ? `
                     bg-emerald-600
                     border-emerald-600
-                    text-white
+                    text-[var(--text)]
                     shadow-lg
                   `
                   : `
-                    bg-white/5
-                    border-white/10
-                    text-gray-300
-                    hover:bg-white/10
+                    bg-[var(--surface-2)]
+                    border-[var(--border-token)]
+                    text-[var(--text-muted)]
+                    hover:bg-[var(--surface-3)]
                     hover:border-emerald-500/50
                     hover:text-emerald-400
                   `

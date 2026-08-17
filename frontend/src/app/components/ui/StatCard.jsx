@@ -68,7 +68,7 @@ export default function StatCard({
 
         <div>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
             {title}
           </p>
 
@@ -84,7 +84,7 @@ export default function StatCard({
           </h2>
 
           {subtitle && (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-[var(--text-faint)] mt-2">
               {subtitle}
             </p>
           )}

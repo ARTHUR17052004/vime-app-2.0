@@ -19,7 +19,7 @@ export default function ClicksignHeader() {
 
                 <div>
 
-                    <h1 className="text-4xl font-bold text-white">
+                    <h1 className="text-4xl font-bold text-[var(--text)]">
                         Clicksign
                     </h1>
 

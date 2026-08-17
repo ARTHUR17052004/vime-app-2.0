@@ -77,7 +77,7 @@ export default function DetalhesVistoriaPage() {
     return (
 
       <MainLayout>
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando...
         </div>
       </MainLayout>
@@ -92,9 +92,9 @@ export default function DetalhesVistoriaPage() {
 
       <MainLayout>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-[var(--text)]">
             Vistoria não encontrada
           </h1>
 
@@ -112,92 +112,92 @@ export default function DetalhesVistoriaPage() {
 
       <div className="space-y-8">
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-          <h1 className="text-4xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-[var(--text)]">
             {vistoria.titulo}
           </h1>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-[var(--text-subtle)] mt-2">
             Informações completas da vistoria
           </p>
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-white mb-6">
+          <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
             Dados da Vistoria
           </h2>
 
           <div className="grid md:grid-cols-3 gap-6">
 
             <div>
-              <p className="text-gray-400">Categoria</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Categoria</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.categoria || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Criticidade</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Criticidade</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.criticidade || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Responsável</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Responsável</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.responsavel || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Periodicidade</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Periodicidade</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.periodicidade || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Status</p>
+              <p className="text-[var(--text-subtle)]">Status</p>
               <h3 className="font-semibold text-emerald-400">
                 {vistoria.status}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Última Execução</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Última Execução</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.dataUltima ? formatDate(vistoria.dataUltima) : "Ainda não executada"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Próxima Execução</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Próxima Execução</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {formatDate(vistoria.dataProxima)}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Baixa Registrada Em</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Baixa Registrada Em</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {formatDateTime(vistoria.concluidaEm)}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Residência</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Residência</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.unidade?.nome || "-"}
               </h3>
             </div>
 
             <div>
-              <p className="text-gray-400">Kitnet</p>
-              <h3 className="font-semibold text-white">
+              <p className="text-[var(--text-subtle)]">Kitnet</p>
+              <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.kitnet?.nome || vistoria.kitnet?.numero || "-"}
               </h3>
             </div>
@@ -206,13 +206,13 @@ export default function DetalhesVistoriaPage() {
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="text-2xl font-bold text-[var(--text)] mb-4">
             Observações
           </h2>
 
-          <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
+          <div className="bg-[var(--surface-2)] rounded-2xl p-6 text-[var(--text-1)]">
 
             {vistoria.observacoes ||
               "Nenhuma observação cadastrada."}
@@ -223,9 +223,9 @@ export default function DetalhesVistoriaPage() {
 
         {vistoria.fotos?.length > 0 && (
 
-          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+          <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
               Fotos e Vídeos da Vistoria
             </h2>
 
@@ -237,7 +237,7 @@ export default function DetalhesVistoriaPage() {
                     key={index}
                     src={foto}
                     controls
-                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
+                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
                   />
                 ) : (
                   <a
@@ -257,7 +257,7 @@ export default function DetalhesVistoriaPage() {
                         object-cover
                         rounded-2xl
                         border
-                        border-white/10
+                        border-[var(--border-token)]
                         cursor-pointer
                         hover:scale-105
                         transition
@@ -276,9 +276,9 @@ export default function DetalhesVistoriaPage() {
 
         {vistoria.fotosConclusao?.length > 0 && (
 
-          <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+          <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-            <h2 className="text-2xl font-bold text-white mb-6">
+            <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
               Fotos e Vídeos da Baixa
             </h2>
 
@@ -290,14 +290,14 @@ export default function DetalhesVistoriaPage() {
                     key={index}
                     src={midia}
                     controls
-                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
+                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
                   />
                 ) : (
                   <img
                     key={index}
                     src={midia}
                     alt={`Mídia ${index + 1}`}
-                    className="w-full h-52 object-cover rounded-2xl border border-white/10"
+                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
                   />
                 )
               )}
@@ -308,9 +308,9 @@ export default function DetalhesVistoriaPage() {
 
         )}
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-          <h2 className="text-2xl font-bold text-white mb-6">
+          <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
             Histórico de Movimentações
           </h2>
 
@@ -325,17 +325,17 @@ export default function DetalhesVistoriaPage() {
                   className="
                     border-l-4
                     border-green-600
-                    bg-white/5
+                    bg-[var(--surface-2)]
                     rounded-r-2xl
                     p-5
                   "
                 >
 
-                  <div className="font-semibold text-white">
+                  <div className="font-semibold text-[var(--text)]">
                     {ACAO_LABEL[item.acao] || item.acao}
                   </div>
 
-                  <div className="text-sm text-gray-400 mt-2">
+                  <div className="text-sm text-[var(--text-subtle)] mt-2">
                     {new Date(item.createdAt).toLocaleString("pt-BR")}
                   </div>
 
@@ -345,9 +345,9 @@ export default function DetalhesVistoriaPage() {
 
             ) : (
 
-              <div className="border border-white/10 rounded-2xl p-5">
+              <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-                <div className="text-gray-300">
+                <div className="text-[var(--text-muted)]">
                   Nenhuma movimentação registrada.
                 </div>
 

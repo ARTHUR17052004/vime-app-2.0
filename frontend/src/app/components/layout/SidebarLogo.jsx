@@ -1,6 +1,10 @@
 "use client";
 
+import { useTheme } from "../../../context/ThemeContext";
+
 export default function SidebarLogo({ collapsed }) {
+  const { nomeSistema, nomeEmpresa } = useTheme();
+
   return (
     <div
       className="
@@ -10,7 +14,7 @@ export default function SidebarLogo({ collapsed }) {
         items-center
         justify-between
         border-b
-        border-white/10
+        border-[var(--border-token)]
       "
     >
       {!collapsed && (
@@ -21,10 +25,10 @@ export default function SidebarLogo({ collapsed }) {
               text-3xl
               font-black
               tracking-wide
-              text-white
+              text-[var(--text)]
             "
           >
-            VIME
+            {nomeSistema || "VIME"}
           </h1>
 
           <p
@@ -36,7 +40,7 @@ export default function SidebarLogo({ collapsed }) {
               mt-1
             "
           >
-            PROPERTY MANAGEMENT
+            {nomeEmpresa || "PROPERTY MANAGEMENT"}
           </p>
 
         </div>

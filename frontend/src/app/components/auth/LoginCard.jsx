@@ -2,8 +2,11 @@
 
 import LoginLogo from "./LoginLogo";
 import LoginForm from "./LoginForm";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function LoginCard() {
+  const { textoLogin, textoRodape } = useTheme();
+
   return (
     <div
       className="
@@ -57,7 +60,7 @@ export default function LoginCard() {
             text-gray-300
           "
         >
-          Entre na sua conta para acessar o sistema
+          {textoLogin || "Entre na sua conta para acessar o sistema"}
         </p>
 
       </div>
@@ -88,7 +91,7 @@ export default function LoginCard() {
           text-gray-400
         "
       >
-        © 2026 VIME 2.0 • Todos os direitos reservados
+        {textoRodape || "© 2026 VIME 2.0 • Todos os direitos reservados"}
       </div>
 
     </div>

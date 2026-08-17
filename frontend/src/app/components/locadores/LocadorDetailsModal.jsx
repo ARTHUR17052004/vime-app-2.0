@@ -36,13 +36,13 @@ export default function LocadorDetailsModal({
 
         <div>
 
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-3xl font-bold text-[var(--text)]">
 
             Detalhes do Locador
 
           </h2>
 
-          <p className="mt-2 text-gray-400">
+          <p className="mt-2 text-[var(--text-subtle)]">
 
             Informações completas do proprietário.
 
@@ -56,13 +56,13 @@ export default function LocadorDetailsModal({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-[var(--border-token)]
+            bg-[var(--surface-2)]
             p-6
           "
         >
 
-          <h3 className="mb-6 text-xl font-semibold text-white">
+          <h3 className="mb-6 text-xl font-semibold text-[var(--text)]">
 
             Dados Gerais
 
@@ -79,13 +79,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Nome
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.nome}
 
@@ -104,13 +104,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   CPF / CNPJ
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.documento || locador.cpfCnpj || "-"}
 
@@ -129,13 +129,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   E-mail
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.email || "-"}
 
@@ -154,13 +154,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Telefone
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.telefone || "-"}
 
@@ -179,13 +179,13 @@ export default function LocadorDetailsModal({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-[var(--border-token)]
+            bg-[var(--surface-2)]
             p-6
           "
         >
 
-          <h3 className="mb-6 text-xl font-semibold text-white">
+          <h3 className="mb-6 text-xl font-semibold text-[var(--text)]">
 
             Dados Bancários
 
@@ -202,13 +202,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Banco
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.banco || "-"}
 
@@ -227,13 +227,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Agência
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.agencia || "-"}
 
@@ -252,13 +252,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Conta
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.conta || "-"}
 
@@ -277,13 +277,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   PIX
 
                 </p>
 
-                <p className="text-white font-medium break-all">
+                <p className="text-[var(--text)] font-medium break-all">
 
                   {locador.pix || "-"}
 
@@ -303,13 +303,13 @@ export default function LocadorDetailsModal({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-[var(--border-token)]
+            bg-[var(--surface-2)]
             p-6
           "
         >
 
-          <h3 className="mb-6 text-xl font-semibold text-white">
+          <h3 className="mb-6 text-xl font-semibold text-[var(--text)]">
 
             Configurações Financeiras
 
@@ -326,13 +326,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Taxa Administração
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.taxaAdministracao || 0}%
 
@@ -351,13 +351,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Multa
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.multa || 0}%
 
@@ -376,13 +376,13 @@ export default function LocadorDetailsModal({
 
               <div>
 
-                <p className="text-sm text-gray-400">
+                <p className="text-sm text-[var(--text-subtle)]">
 
                   Juros
 
                 </p>
 
-                <p className="text-white font-medium">
+                <p className="text-[var(--text)] font-medium">
 
                   {locador.juros || 0}% a.m.
 
@@ -402,8 +402,8 @@ export default function LocadorDetailsModal({
           className="
             rounded-3xl
             border
-            border-white/10
-            bg-white/5
+            border-[var(--border-token)]
+            bg-[var(--surface-2)]
             p-6
           "
         >
@@ -415,7 +415,7 @@ export default function LocadorDetailsModal({
               size={20}
             />
 
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className="text-xl font-semibold text-[var(--text)]">
 
               Observações
 
@@ -423,7 +423,7 @@ export default function LocadorDetailsModal({
 
           </div>
 
-          <p className="text-gray-300 whitespace-pre-wrap">
+          <p className="text-[var(--text-muted)] whitespace-pre-wrap">
 
             {locador.observacoes || "Nenhuma observação cadastrada."}
 

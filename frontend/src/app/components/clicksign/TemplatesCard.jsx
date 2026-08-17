@@ -6,13 +6,13 @@ import {
 
 export default function TemplatesCard() {
   return (
-    <div id="clicksign-templates" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div id="clicksign-templates" className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
 
         <div>
 
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text)]">
 
             <LayoutTemplate
               size={25}
@@ -41,7 +41,7 @@ export default function TemplatesCard() {
 
       </div>
 
-      <div className="rounded-2xl border border-white/10 bg-slate-800/40 p-8 text-center">
+      <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-8 text-center">
 
         <p className="text-slate-400">
 

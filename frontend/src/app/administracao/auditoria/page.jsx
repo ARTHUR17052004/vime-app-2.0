@@ -151,11 +151,11 @@ export default function AuditoriaPage() {
 
               <div>
 
-                <h1 className="text-5xl font-black text-white">
+                <h1 className="text-5xl font-black text-[var(--text)]">
                   Auditoria
                 </h1>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Histórico de alterações no sistema
                 </p>
 
@@ -167,9 +167,9 @@ export default function AuditoriaPage() {
                   px-5
                   py-3
                   rounded-xl
-                  bg-white/10
-                  hover:bg-white/20
-                  text-white
+                  bg-[var(--surface-3)]
+                  hover:bg-[var(--surface-3)]
+                  text-[var(--text)]
                   flex
                   items-center
                   gap-2
@@ -237,17 +237,17 @@ export default function AuditoriaPage() {
 
                 <div>
 
-                  <p className="text-sm text-gray-400 mb-2">
+                  <p className="text-sm text-[var(--text-subtle)] mb-2">
                     Valor Anterior
                   </p>
 
                   <pre
                     className="
                       rounded-xl
-                      bg-black/30
+                      bg-[var(--surface-inset)]
                       p-4
                       text-xs
-                      text-gray-300
+                      text-[var(--text-muted)]
                       overflow-x-auto
                       whitespace-pre-wrap
                     "
@@ -261,17 +261,17 @@ export default function AuditoriaPage() {
 
                 <div>
 
-                  <p className="text-sm text-gray-400 mb-2">
+                  <p className="text-sm text-[var(--text-subtle)] mb-2">
                     Valor Novo
                   </p>
 
                   <pre
                     className="
                       rounded-xl
-                      bg-black/30
+                      bg-[var(--surface-inset)]
                       p-4
                       text-xs
-                      text-gray-300
+                      text-[var(--text-muted)]
                       overflow-x-auto
                       whitespace-pre-wrap
                     "

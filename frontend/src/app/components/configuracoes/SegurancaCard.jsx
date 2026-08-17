@@ -11,7 +11,7 @@ import {
 
 export default function SegurancaCard() {
   return (
-    <div id="secao-seguranca" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div id="secao-seguranca" className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -26,11 +26,11 @@ export default function SegurancaCard() {
 
         <div>
 
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
             Segurança
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
             Controle as políticas de acesso do sistema.
           </p>
 
@@ -40,7 +40,7 @@ export default function SegurancaCard() {
 
       <div className="space-y-5">
 
-        <div className="flex justify-between items-center rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="flex justify-between items-center rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <div className="flex gap-4 items-center">
 
@@ -48,11 +48,11 @@ export default function SegurancaCard() {
 
             <div>
 
-              <h3 className="text-white font-medium">
+              <h3 className="text-[var(--text)] font-medium">
                 Exigir senha forte
               </h3>
 
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--text-subtle)]">
                 Obriga senhas com maior nível de segurança.
               </p>
 
@@ -64,7 +64,7 @@ export default function SegurancaCard() {
 
         </div>
 
-        <div className="flex justify-between items-center rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="flex justify-between items-center rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <div className="flex gap-4 items-center">
 
@@ -72,11 +72,11 @@ export default function SegurancaCard() {
 
             <div>
 
-              <h3 className="text-white font-medium">
+              <h3 className="text-[var(--text)] font-medium">
                 Autenticação em Dois Fatores
               </h3>
 
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--text-subtle)]">
                 Exigir confirmação adicional no login.
               </p>
 
@@ -88,7 +88,7 @@ export default function SegurancaCard() {
 
         </div>
 
-        <div className="flex justify-between items-center rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="flex justify-between items-center rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <div className="flex gap-4 items-center">
 
@@ -96,11 +96,11 @@ export default function SegurancaCard() {
 
             <div>
 
-              <h3 className="text-white font-medium">
+              <h3 className="text-[var(--text)] font-medium">
                 Logout Automático
               </h3>
 
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--text-subtle)]">
                 Encerrar sessão após período sem uso.
               </p>
 
@@ -108,7 +108,7 @@ export default function SegurancaCard() {
 
           </div>
 
-          <select className="rounded-xl border border-white/10 bg-slate-900 p-2 text-white">
+          <select className="rounded-xl border border-[var(--border-token)] bg-slate-900 p-2 text-[var(--text)]">
 
             <option>15 min</option>
             <option>30 min</option>
@@ -119,7 +119,7 @@ export default function SegurancaCard() {
 
         </div>
 
-        <div className="flex justify-between items-center rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="flex justify-between items-center rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <div className="flex gap-4 items-center">
 
@@ -127,11 +127,11 @@ export default function SegurancaCard() {
 
             <div>
 
-              <h3 className="text-white font-medium">
+              <h3 className="text-[var(--text)] font-medium">
                 Permitir Login Mobile
               </h3>
 
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-[var(--text-subtle)]">
                 Autoriza acesso por smartphones.
               </p>
 
@@ -162,7 +162,7 @@ export default function SegurancaCard() {
 
             </h3>
 
-            <p className="text-sm text-gray-300 mt-1">
+            <p className="text-sm text-[var(--text-muted)] mt-1">
 
               Ative a autenticação em dois fatores para aumentar a segurança do sistema.
 
@@ -174,7 +174,7 @@ export default function SegurancaCard() {
 
       </div>
 
-      <button className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white">
+      <button className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-[var(--text)]">
 
         Salvar Configurações
 

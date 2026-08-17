@@ -41,7 +41,7 @@ const historico = [
 
 export default function HistoricoCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -56,13 +56,13 @@ export default function HistoricoCard() {
 
         <div>
 
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
 
             Histórico
 
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
 
             Últimas alterações realizadas no sistema.
 
@@ -82,7 +82,7 @@ export default function HistoricoCard() {
 
             <div
               key={item.titulo}
-              className="flex items-center gap-5 rounded-2xl border border-white/10 bg-slate-800/60 p-5 hover:border-emerald-500/30 transition-all"
+              className="flex items-center gap-5 rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5 hover:border-emerald-500/30 transition-all"
             >
 
               <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center">
@@ -96,13 +96,13 @@ export default function HistoricoCard() {
 
               <div className="flex-1">
 
-                <h3 className="text-white font-medium">
+                <h3 className="text-[var(--text)] font-medium">
 
                   {item.titulo}
 
                 </h3>
 
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-sm text-[var(--text-subtle)] mt-1">
 
                   {item.usuario}
 
@@ -110,7 +110,7 @@ export default function HistoricoCard() {
 
               </div>
 
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-[var(--text-faint)]">
 
                 {item.data}
 

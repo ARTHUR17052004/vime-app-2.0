@@ -53,9 +53,9 @@ export default function FinanceiroDashboard({
 
       <div className="grid md:grid-cols-3 xl:grid-cols-5 gap-6">
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Receita Total
           </div>
 
@@ -65,9 +65,9 @@ export default function FinanceiroDashboard({
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Despesas Totais
           </div>
 
@@ -77,9 +77,9 @@ export default function FinanceiroDashboard({
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Vencidos
           </div>
 
@@ -89,9 +89,9 @@ export default function FinanceiroDashboard({
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Lucro Líquido
           </div>
 
@@ -101,9 +101,9 @@ export default function FinanceiroDashboard({
 
         </div>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-          <div className="text-gray-400">
+          <div className="text-[var(--text-subtle)]">
             Receitas Pendentes
           </div>
 
@@ -115,9 +115,9 @@ export default function FinanceiroDashboard({
 
       </div>
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
-        <h2 className="text-2xl font-bold text-white mb-6">
+        <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
           Dashboard Financeiro
         </h2>
 
@@ -125,11 +125,11 @@ export default function FinanceiroDashboard({
 
           <div>
 
-            <div className="font-semibold text-gray-200">
+            <div className="font-semibold text-[var(--text-1)]">
               Receitas
             </div>
 
-            <div className="w-full bg-white/10 rounded-full h-5 mt-2">
+            <div className="w-full bg-[var(--surface-3)] rounded-full h-5 mt-2">
 
               <div
                 className="bg-green-600 h-5 rounded-full"
@@ -144,11 +144,11 @@ export default function FinanceiroDashboard({
 
           <div>
 
-            <div className="font-semibold text-gray-200">
+            <div className="font-semibold text-[var(--text-1)]">
               Despesas
             </div>
 
-            <div className="w-full bg-white/10 rounded-full h-5 mt-2">
+            <div className="w-full bg-[var(--surface-3)] rounded-full h-5 mt-2">
 
               <div
                 className="bg-red-600 h-5 rounded-full"

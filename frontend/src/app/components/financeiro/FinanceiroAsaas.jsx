@@ -72,11 +72,11 @@ export default function FinanceiroAsaas() {
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Integração Asaas
             </h2>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Recursos financeiros e integrações do Asaas.
             </p>
 
@@ -95,13 +95,13 @@ export default function FinanceiroAsaas() {
               rounded-2xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/[0.02]
+              bg-[var(--surface-2)]
 
               p-6
 
-              hover:bg-white/[0.04]
+              hover:bg-[var(--surface-2)]
 
               transition
             "
@@ -111,13 +111,13 @@ export default function FinanceiroAsaas() {
 
               <card.icon className="w-6 h-6 text-violet-400" />
 
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-[var(--text)]">
                 {card.titulo}
               </h3>
 
             </div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               {card.descricao}
             </p>
 
@@ -129,9 +129,9 @@ export default function FinanceiroAsaas() {
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/[0.02]
+            bg-[var(--surface-2)]
 
             p-6
           "
@@ -141,7 +141,7 @@ export default function FinanceiroAsaas() {
 
             <CircleAlert className="w-6 h-6 text-yellow-400" />
 
-            <h3 className="text-xl font-semibold text-white">
+            <h3 className="text-xl font-semibold text-[var(--text)]">
               Status
             </h3>
 

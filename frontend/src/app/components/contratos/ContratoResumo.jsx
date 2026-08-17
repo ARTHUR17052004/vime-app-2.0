@@ -74,9 +74,9 @@ export default function ContratoResumo({
       text: "text-red-400",
     },
     gray: {
-      bg: "bg-white/5",
-      border: "border-white/10",
-      text: "text-gray-300",
+      bg: "bg-[var(--surface-2)]",
+      border: "border-[var(--border-token)]",
+      text: "text-[var(--text-muted)]",
     },
   };
 
@@ -111,7 +111,7 @@ export default function ContratoResumo({
                     text-xs
                     uppercase
                     tracking-[0.18em]
-                    text-gray-400
+                    text-[var(--text-subtle)]
                     font-semibold
                   "
                 >
@@ -123,7 +123,7 @@ export default function ContratoResumo({
                     mt-3
                     text-4xl
                     font-black
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {card.valor}

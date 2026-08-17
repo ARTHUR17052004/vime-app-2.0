@@ -47,7 +47,7 @@ export default function InquilinoCard({
 
         <div>
 
-          <h2 className="text-[32px] font-black text-white">
+          <h2 className="text-[32px] font-black text-[var(--text)]">
             {inquilino.nome}
           </h2>
 
@@ -106,7 +106,7 @@ export default function InquilinoCard({
 
       </div>
 
-      <div className="my-7 border-t border-white/10"/>
+      <div className="my-7 border-t border-[var(--border-token)]"/>
 
       <div className="space-y-6">
 
@@ -140,7 +140,7 @@ function InfoRow({
   icon,
   label,
   value,
-  valueClass="text-white",
+  valueClass="text-[var(--text)]",
 }){
 
   return(
@@ -171,7 +171,7 @@ function InfoRow({
         {icon}
       </div>
 
-      <span className="text-gray-300 text-[15px] font-medium">
+      <span className="text-[var(--text-muted)] text-[15px] font-medium">
         {label}
       </span>
 

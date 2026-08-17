@@ -88,13 +88,13 @@ export default function AsaasWizard() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] p-8">
 
-      <h2 className="text-2xl font-bold text-white">
+      <h2 className="text-2xl font-bold text-[var(--text)]">
         Assistente de Configuração
       </h2>
 
-      <p className="text-gray-400 mt-2 mb-8">
+      <p className="text-[var(--text-subtle)] mt-2 mb-8">
         {carregando
           ? "Verificando o progresso da integração..."
           : passo5
@@ -114,17 +114,17 @@ export default function AsaasWizard() {
             <div className="flex flex-col items-center">
 
               <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white transition-colors
-                ${etapa.concluido ? "bg-green-600" : "bg-white/10"}`}
+                className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-[var(--text)] transition-colors
+                ${etapa.concluido ? "bg-green-600" : "bg-[var(--surface-3)]"}`}
               >
                 {etapa.concluido ? <Check size={20} /> : etapa.numero}
               </div>
 
-              <span className="mt-3 font-semibold text-white">
+              <span className="mt-3 font-semibold text-[var(--text)]">
                 {etapa.titulo}
               </span>
 
-              <span className="text-xs text-gray-400 text-center mt-1">
+              <span className="text-xs text-[var(--text-subtle)] text-center mt-1">
                 {etapa.descricao}
               </span>
 
@@ -133,7 +133,7 @@ export default function AsaasWizard() {
             {index < etapas.length - 1 && (
               <div
                 className={`flex-1 h-1 mx-4 rounded transition-colors ${
-                  etapa.concluido ? "bg-green-600" : "bg-white/10"
+                  etapa.concluido ? "bg-green-600" : "bg-[var(--surface-3)]"
                 }`}
               />
             )}

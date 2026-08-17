@@ -8,7 +8,7 @@ import {
 
 export default function HorariosCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -23,7 +23,7 @@ export default function HorariosCard() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Horários de Envio
           </h2>
 
@@ -46,7 +46,7 @@ export default function HorariosCard() {
           <input
             type="time"
             defaultValue="08:00"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500"
           />
 
         </div>
@@ -60,7 +60,7 @@ export default function HorariosCard() {
           <input
             type="time"
             defaultValue="18:00"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500"
           />
 
         </div>
@@ -88,7 +88,7 @@ export default function HorariosCard() {
             ].map((dia) => (
               <button
                 key={dia}
-                className="rounded-xl border border-white/10 bg-slate-800/40 px-4 py-2 text-white transition hover:border-emerald-500 hover:bg-slate-700"
+                className="rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] px-4 py-2 text-[var(--text)] transition hover:border-emerald-500 hover:bg-slate-700"
               >
                 {dia}
               </button>
@@ -111,7 +111,7 @@ export default function HorariosCard() {
           <input
             type="number"
             defaultValue="5"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500"
           />
 
         </div>
@@ -124,7 +124,7 @@ export default function HorariosCard() {
           O sistema bloqueará envios fora dos horários configurados.
         </p>
 
-        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-700">
+        <button className="rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-emerald-700">
 
           Salvar Horários
 

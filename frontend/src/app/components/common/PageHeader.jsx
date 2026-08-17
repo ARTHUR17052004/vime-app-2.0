@@ -22,7 +22,7 @@ export default function PageHeader({
             text-6xl
             font-black
             tracking-tight
-            text-white
+            text-[var(--text)]
           "
         >
           {title}
@@ -33,7 +33,7 @@ export default function PageHeader({
             className="
               mt-2
               text-2xl
-              text-gray-300
+              text-[var(--text-muted)]
             "
           >
             {subtitle}

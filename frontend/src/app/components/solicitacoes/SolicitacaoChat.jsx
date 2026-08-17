@@ -164,9 +164,9 @@ export default function SolicitacaoChat({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
         Conversa
       </h2>
 
@@ -182,13 +182,13 @@ export default function SolicitacaoChat({
 
         {carregando ? (
 
-          <p className="text-gray-400 text-center py-10">
+          <p className="text-[var(--text-subtle)] text-center py-10">
             Carregando...
           </p>
 
         ) : mensagens.length === 0 ? (
 
-          <p className="text-gray-400 text-center py-10">
+          <p className="text-[var(--text-subtle)] text-center py-10">
             Nenhuma mensagem ainda. Comece a conversa abaixo.
           </p>
 
@@ -217,18 +217,18 @@ export default function SolicitacaoChat({
                     ${
                       minhaMensagem
                         ? "bg-emerald-600/20 border border-emerald-500/20"
-                        : "bg-white/5 border border-white/10"
+                        : "bg-[var(--surface-2)] border border-[var(--border-token)]"
                     }
                   `}
                 >
 
                   <div className="flex items-center gap-2 flex-wrap">
 
-                    <span className="font-semibold text-white text-sm">
+                    <span className="font-semibold text-[var(--text)] text-sm">
                       {msg.autorNome}
                     </span>
 
-                    <span className="text-gray-500 text-xs">
+                    <span className="text-[var(--text-faint)] text-xs">
                       {new Date(msg.createdAt).toLocaleString("pt-BR")}
                     </span>
 
@@ -259,7 +259,7 @@ export default function SolicitacaoChat({
                   )}
 
                   {msg.texto && (
-                    <p className="mt-2 text-gray-200 whitespace-pre-wrap">
+                    <p className="mt-2 text-[var(--text-1)] whitespace-pre-wrap">
                       {msg.texto}
                     </p>
                   )}
@@ -276,13 +276,13 @@ export default function SolicitacaoChat({
                         gap-3
                         rounded-xl
                         border
-                        border-white/10
-                        bg-black/20
+                        border-[var(--border-token)]
+                        bg-[var(--surface-inset)]
                         px-4
                         py-3
                         text-sm
                         text-emerald-300
-                        hover:bg-black/30
+                        hover:bg-[var(--surface-inset)]
                         transition
                       "
                     >
@@ -335,14 +335,14 @@ export default function SolicitacaoChat({
               justify-between
               rounded-xl
               border
-              border-white/10
-              bg-white/5
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               px-4
               py-3
             "
           >
 
-            <span className="text-sm text-gray-300 truncate">
+            <span className="text-sm text-[var(--text-muted)] truncate">
               📎 {anexo.nome} ({formatarTamanho(anexo.dados)})
             </span>
 
@@ -354,7 +354,7 @@ export default function SolicitacaoChat({
                   inputArquivoRef.current.value = "";
                 }
               }}
-              className="text-gray-400 hover:text-red-400 transition"
+              className="text-[var(--text-subtle)] hover:text-red-400 transition"
             >
               <X size={18} />
             </button>
@@ -372,12 +372,12 @@ export default function SolicitacaoChat({
             w-full
             rounded-2xl
             border
-            border-white/10
-            bg-white/5
+            border-[var(--border-token)]
+            bg-[var(--surface-2)]
             px-5
             py-4
-            text-white
-            placeholder:text-gray-500
+            text-[var(--text)]
+            placeholder:text-[var(--text-faint)]
             outline-none
             focus:border-emerald-500
             resize-none
@@ -397,13 +397,13 @@ export default function SolicitacaoChat({
                 gap-2
                 rounded-xl
                 border
-                border-white/10
-                bg-white/5
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
                 px-4
                 py-3
                 text-sm
-                text-gray-300
-                hover:bg-white/10
+                text-[var(--text-muted)]
+                hover:bg-[var(--surface-3)]
                 transition
               "
             >
@@ -426,12 +426,12 @@ export default function SolicitacaoChat({
                 className="
                   rounded-xl
                   border
-                  border-white/10
-                  bg-white/5
+                  border-[var(--border-token)]
+                  bg-[var(--surface-2)]
                   px-4
                   py-3
                   text-sm
-                  text-white
+                  text-[var(--text)]
                   outline-none
                   focus:border-emerald-500
                 "
@@ -475,7 +475,7 @@ export default function SolicitacaoChat({
               py-3
               text-sm
               font-semibold
-              text-white
+              text-[var(--text)]
               transition
             "
           >

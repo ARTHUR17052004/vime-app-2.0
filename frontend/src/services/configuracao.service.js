@@ -8,6 +8,12 @@ export const ConfiguracaoService = {
 
   },
 
+  buscarPublica() {
+
+    return api("/configuracoes/publica");
+
+  },
+
   criar(dados) {
 
     return api("/configuracoes", {

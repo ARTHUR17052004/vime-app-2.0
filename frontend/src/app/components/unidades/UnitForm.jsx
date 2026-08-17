@@ -272,7 +272,7 @@ export default function UnitForm({
               mt-2
               text-2xl
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             Informações principais
@@ -328,7 +328,7 @@ export default function UnitForm({
               mt-2
               text-2xl
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             Localização da Residência
@@ -409,7 +409,7 @@ export default function UnitForm({
               mt-2
               text-2xl
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             Informações administrativas
@@ -510,7 +510,7 @@ export default function UnitForm({
               mt-2
               text-2xl
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             Informações adicionais
@@ -545,7 +545,7 @@ export default function UnitForm({
           pt-8
 
           border-t
-          border-white/10
+          border-[var(--border-token)]
 
           flex
           items-center

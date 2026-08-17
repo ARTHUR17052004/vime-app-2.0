@@ -47,13 +47,13 @@ export default function HistoricoCard() {
   }, []);
 
   return (
-    <div id="clicksign-historico" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div id="clicksign-historico" className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="mb-6 flex items-center justify-between">
 
         <div>
 
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text)]">
 
             <History
               size={25}
@@ -112,9 +112,9 @@ export default function HistoricoCard() {
 
                 </div>
 
-                <div className="flex-1 rounded-2xl border border-white/10 bg-slate-800/30 p-4">
+                <div className="flex-1 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4">
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
 
                     {info.titulo}
 

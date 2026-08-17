@@ -52,17 +52,17 @@ export default function IntegracoesCard({
   ];
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="mb-8">
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
 
           Integrações
 
         </h2>
 
-        <p className="text-gray-400 mt-1">
+        <p className="text-[var(--text-subtle)] mt-1">
 
           Serviços conectados ao VIME APP.
 
@@ -87,7 +87,7 @@ export default function IntegracoesCard({
 
             <div
               key={item.nome}
-              className="rounded-3xl border border-white/10 bg-slate-800/60 hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-xl transition-all p-6"
+              className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-xl transition-all p-6"
             >
 
               <div className="flex items-start justify-between">
@@ -104,7 +104,7 @@ export default function IntegracoesCard({
                   className={`px-3 py-1 rounded-full text-xs ${
                     item.conectado
                       ? "bg-emerald-500/15 text-emerald-400"
-                      : "bg-white/10 text-gray-300"
+                      : "bg-[var(--surface-3)] text-[var(--text-muted)]"
                   }`}
                 >
 
@@ -114,13 +114,13 @@ export default function IntegracoesCard({
 
               </div>
 
-              <h3 className="text-lg font-semibold text-white mt-5">
+              <h3 className="text-lg font-semibold text-[var(--text)] mt-5">
 
                 {item.nome}
 
               </h3>
 
-              <p className="text-sm text-gray-400 mt-2">
+              <p className="text-sm text-[var(--text-subtle)] mt-2">
 
                 {item.descricao}
 
@@ -132,7 +132,7 @@ export default function IntegracoesCard({
                 className="
                   mt-6 w-full rounded-2xl bg-emerald-600 hover:bg-emerald-700
                   disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-emerald-600
-                  transition-all py-3 flex items-center justify-center gap-2 font-medium text-white
+                  transition-all py-3 flex items-center justify-center gap-2 font-medium text-[var(--text)]
                 "
               >
 

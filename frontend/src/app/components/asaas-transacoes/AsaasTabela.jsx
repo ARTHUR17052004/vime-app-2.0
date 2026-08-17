@@ -51,7 +51,7 @@ const badge = (status) => {
       return "bg-red-500/10 text-red-400 border border-red-500/20";
 
     default:
-      return "bg-white/5 text-gray-300 border border-white/10";
+      return "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-token)]";
   }
 };
 
@@ -65,11 +65,11 @@ export default function AsaasTabela({
 }) {
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden">
 
-      <div className="px-6 py-5 border-b border-white/[0.07]">
+      <div className="px-6 py-5 border-b border-[var(--border-token)]">
 
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold text-[var(--text)]">
           Cobranças
         </h2>
 
@@ -79,31 +79,31 @@ export default function AsaasTabela({
 
         <table className="w-full">
 
-          <thead className="bg-white/5">
+          <thead className="bg-[var(--surface-2)]">
 
             <tr>
 
-              <th className="text-left p-4 text-gray-300">
+              <th className="text-left p-4 text-[var(--text-muted)]">
                 Cliente
               </th>
 
-              <th className="text-left p-4 text-gray-300">
+              <th className="text-left p-4 text-[var(--text-muted)]">
                 Valor
               </th>
 
-              <th className="text-left p-4 text-gray-300">
+              <th className="text-left p-4 text-[var(--text-muted)]">
                 Vencimento
               </th>
 
-              <th className="text-left p-4 text-gray-300">
+              <th className="text-left p-4 text-[var(--text-muted)]">
                 Forma
               </th>
 
-              <th className="text-left p-4 text-gray-300">
+              <th className="text-left p-4 text-[var(--text-muted)]">
                 Status
               </th>
 
-              <th className="text-right p-4 text-gray-300">
+              <th className="text-right p-4 text-[var(--text-muted)]">
                 Ações
               </th>
 
@@ -115,7 +115,7 @@ export default function AsaasTabela({
 
             {loading && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray-400">
+                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
                   Carregando cobranças...
                 </td>
               </tr>
@@ -123,7 +123,7 @@ export default function AsaasTabela({
 
             {!loading && transacoes.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-gray-400">
+                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
                   Nenhuma cobrança encontrada.
                 </td>
               </tr>
@@ -133,16 +133,16 @@ export default function AsaasTabela({
 
               <tr
                 key={item.id}
-                className="border-t border-white/[0.07] hover:bg-white/5"
+                className="border-t border-[var(--border-token)] hover:bg-[var(--surface-2)]"
               >
 
                 <td className="p-4">
 
-                  <div className="font-semibold text-white">
+                  <div className="font-semibold text-[var(--text)]">
                     {item.cliente}
                   </div>
 
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-[var(--text-subtle)]">
                     {item.enviadaAsaas
                       ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
                       : "Ainda não enviada ao Asaas"}
@@ -150,15 +150,15 @@ export default function AsaasTabela({
 
                 </td>
 
-                <td className="p-4 font-semibold text-white">
+                <td className="p-4 font-semibold text-[var(--text)]">
                   {formatarValor(item.valor)}
                 </td>
 
-                <td className="p-4 text-gray-300">
+                <td className="p-4 text-[var(--text-muted)]">
                   {formatarData(item.vencimento)}
                 </td>
 
-                <td className="p-4 text-gray-300">
+                <td className="p-4 text-[var(--text-muted)]">
                   {item.formaPagamento || "-"}
                 </td>
 
@@ -185,9 +185,9 @@ export default function AsaasTabela({
                         py-2
                         rounded-lg
                         border
-                        border-white/[0.07]
-                        text-gray-200
-                        hover:bg-white/5
+                        border-[var(--border-token)]
+                        text-[var(--text-1)]
+                        hover:bg-[var(--surface-2)]
                       "
                     >
                       Visualizar
@@ -201,7 +201,7 @@ export default function AsaasTabela({
                         rounded-lg
                         bg-green-700
                         hover:bg-green-800
-                        text-white
+                        text-[var(--text)]
                       "
                     >
                       Detalhes
@@ -219,7 +219,7 @@ export default function AsaasTabela({
                           hover:bg-sky-700
                           disabled:opacity-50
                           disabled:cursor-not-allowed
-                          text-white
+                          text-[var(--text)]
                         "
                       >
                         {enviandoId === item.id
@@ -242,9 +242,9 @@ export default function AsaasTabela({
 
       </div>
 
-      <div className="px-6 py-4 border-t border-white/[0.07] flex justify-between items-center">
+      <div className="px-6 py-4 border-t border-[var(--border-token)] flex justify-between items-center">
 
-        <span className="text-gray-400 text-sm">
+        <span className="text-[var(--text-subtle)] text-sm">
           Exibindo {transacoes.length} cobrança(s)
         </span>
 

@@ -59,13 +59,13 @@ export default function WhatsappConfigCard({
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#101827]
         p-8
         shadow-xl
       "
     >
-      <h2 className="mb-6 text-2xl font-bold text-white">
+      <h2 className="mb-6 text-2xl font-bold text-[var(--text)]">
         Configuração da Conexão
       </h2>
 
@@ -152,9 +152,15 @@ export default function WhatsappConfigCard({
 
       </div>
 
-      <p className="mt-4 text-sm text-gray-500">
+      <p className="mt-4 text-sm text-[var(--text-faint)]">
         O Phone Number ID e o Access Token são obtidos no painel do{" "}
         <strong>Meta for Developers</strong>, dentro do seu app do WhatsApp Business API.
+      </p>
+
+      <p className="mt-2 text-sm text-yellow-500">
+        Atenção: um token temporário do Meta expira em 24 horas. Para uma conexão
+        permanente, gere um token de <strong>Usuário do Sistema</strong> (System User)
+        sem expiração no Meta Business Suite.
       </p>
 
       <div className="mt-8 flex gap-4 flex-wrap">

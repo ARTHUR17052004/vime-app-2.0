@@ -116,13 +116,13 @@ export default function WhatsappChat({ conversa }) {
         className="
           rounded-3xl
           border
-          border-white/10
+          border-[var(--border-token)]
           bg-[#101827]
           h-[650px]
           flex
           items-center
           justify-center
-          text-gray-400
+          text-[var(--text-subtle)]
         "
       >
 
@@ -140,7 +140,7 @@ export default function WhatsappChat({ conversa }) {
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#101827]
         shadow-xl
         h-[650px]
@@ -153,7 +153,7 @@ export default function WhatsappChat({ conversa }) {
         className="
           p-6
           border-b
-          border-white/10
+          border-[var(--border-token)]
           flex
           items-center
           gap-4
@@ -169,7 +169,7 @@ export default function WhatsappChat({ conversa }) {
             flex
             items-center
             justify-center
-            text-white
+            text-[var(--text)]
             font-bold
           "
         >
@@ -180,13 +180,13 @@ export default function WhatsappChat({ conversa }) {
 
         <div>
 
-          <h2 className="text-xl font-bold text-white">
+          <h2 className="text-xl font-bold text-[var(--text)]">
 
             {conversa.nome}
 
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
 
             {conversa.numero}
 
@@ -267,9 +267,9 @@ export default function WhatsappChat({ conversa }) {
 
                 {msg.tipo === "enviada"
 
-                  ? <User size={18} className="text-white"/>
+                  ? <User size={18} className="text-[var(--text)]"/>
 
-                  : <Bot size={18} className="text-white"/>}
+                  : <Bot size={18} className="text-[var(--text)]"/>}
 
               </div>
 
@@ -284,7 +284,7 @@ export default function WhatsappChat({ conversa }) {
 
                   py-4
 
-                  text-white
+                  text-[var(--text)]
 
                   ${msg.tipo === "enviada"
 
@@ -302,7 +302,7 @@ export default function WhatsappChat({ conversa }) {
                     mt-2
                     text-right
                     text-xs
-                    text-white/70
+                    text-[var(--text)]
                   "
                 >
 
@@ -325,7 +325,7 @@ export default function WhatsappChat({ conversa }) {
       <div
         className="
           border-t
-          border-white/10
+          border-[var(--border-token)]
           p-5
         "
       >
@@ -351,12 +351,12 @@ export default function WhatsappChat({ conversa }) {
             className="
               flex-1
               rounded-xl
-              bg-white/5
+              bg-[var(--surface-2)]
               px-5
               py-4
-              text-white
+              text-[var(--text)]
               outline-none
-              placeholder:text-gray-500
+              placeholder:text-[var(--text-faint)]
             "
 
           />
@@ -384,7 +384,7 @@ export default function WhatsappChat({ conversa }) {
 
             <SendHorizontal
               size={22}
-              className="text-white"
+              className="text-[var(--text)]"
             />
 
           </button>

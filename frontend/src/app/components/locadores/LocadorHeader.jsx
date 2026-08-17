@@ -38,7 +38,7 @@ export default function LocadorHeader({
               className="
                 text-5xl
                 font-black
-                text-white
+                text-[var(--text)]
               "
             >
               Locadores
@@ -46,7 +46,7 @@ export default function LocadorHeader({
 
             <p
               className="
-                text-gray-400
+                text-[var(--text-subtle)]
                 text-lg
               "
             >

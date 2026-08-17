@@ -41,6 +41,11 @@ const PADRAO = {
   tema: "claro",
   corPrimaria: "#10B981",
   corSecundaria: "#1E293B",
+  nomeSistema: "",
+  nomeEmpresa: "",
+  textoLogin: "",
+  textoRodape: "",
+  mensagemBoasVindas: "",
   smtpHost: "",
   smtpPorta: "",
   smtpUsuario: "",
@@ -140,7 +145,7 @@ export default function ConfiguracoesPage() {
   if (carregando) {
     return (
       <MainLayout>
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando configurações...
         </div>
       </MainLayout>
@@ -190,6 +195,7 @@ export default function ConfiguracoesPage() {
                 dados={dados}
                 onChange={alterar}
                 onSalvar={salvar}
+                salvando={salvando}
               />
 
               <SistemaCard />

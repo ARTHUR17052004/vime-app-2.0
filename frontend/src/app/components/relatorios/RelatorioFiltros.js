@@ -9,13 +9,13 @@ export default function RelatorioFiltros({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6 mb-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6 mb-8">
 
       <div className="grid md:grid-cols-2 gap-6">
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
 
             Pesquisar módulo
 
@@ -47,7 +47,7 @@ export default function RelatorioFiltros({
             className="
               w-full
               bg-gray-800
-              text-white
+              text-[var(--text)]
               rounded-2xl
               py-3
               hover:bg-black

@@ -37,7 +37,7 @@ export default function AdministracaoAlerts({
           className="
             text-xl
             font-bold
-            text-white
+            text-[var(--text)]
           "
         >
 
@@ -79,7 +79,7 @@ export default function AdministracaoAlerts({
 
             <p
               className="
-                text-gray-400
+                text-[var(--text-subtle)]
                 mt-1
               "
             >

@@ -45,13 +45,13 @@ export default function AssinantesCard() {
   );
 
   return (
-    <div id="clicksign-assinantes" className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div id="clicksign-assinantes" className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center justify-between mb-6">
 
         <div>
 
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text)]">
 
             <Users
               size={25}
@@ -85,7 +85,7 @@ export default function AssinantesCard() {
 
             <div
               key={index}
-              className="rounded-2xl border border-white/10 bg-slate-800/40 p-5 transition hover:border-emerald-500/30"
+              className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5 transition hover:border-emerald-500/30"
             >
 
               <div className="flex items-center gap-4">
@@ -98,7 +98,7 @@ export default function AssinantesCard() {
 
                 <div>
 
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-[var(--text)]">
 
                     {assinante.name || "Sem nome"}
 

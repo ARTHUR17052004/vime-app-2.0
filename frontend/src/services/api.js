@@ -38,6 +38,22 @@ export async function api(endpoint, options = {}) {
     throw new Error("A API não retornou um JSON válido.");
   }
 
+  if (response.status === 401 && endpoint !== "/auth/login") {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("vime-remember");
+
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
+    }
+
+    throw new Error(
+      data.message || "Sessão expirada. Faça login novamente."
+    );
+  }
+
   if (!response.ok) {
     throw new Error(data.message || "Erro na API");
   }

@@ -2,9 +2,14 @@
 
 import { Wand2 } from "lucide-react";
 
-export default function PersonalizacaoCard() {
+export default function PersonalizacaoCard({
+  dados = {},
+  onChange = () => {},
+  onSalvar = () => {},
+  salvando = false,
+}) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -19,13 +24,13 @@ export default function PersonalizacaoCard() {
 
         <div>
 
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
 
             Personalização
 
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
 
             Customize a identidade visual do sistema.
 
@@ -39,14 +44,16 @@ export default function PersonalizacaoCard() {
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Nome do Sistema
 
           </label>
 
           <input
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
+            value={dados.nomeSistema || ""}
+            onChange={(e) => onChange("nomeSistema", e.target.value)}
+            className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
             placeholder="VIME APP 2.0"
           />
 
@@ -54,14 +61,16 @@ export default function PersonalizacaoCard() {
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Nome da Empresa
 
           </label>
 
           <input
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
+            value={dados.nomeEmpresa || ""}
+            onChange={(e) => onChange("nomeEmpresa", e.target.value)}
+            className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
             placeholder="Minha Imobiliária"
           />
 
@@ -73,14 +82,16 @@ export default function PersonalizacaoCard() {
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Texto da Tela de Login
 
           </label>
 
           <input
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
+            value={dados.textoLogin || ""}
+            onChange={(e) => onChange("textoLogin", e.target.value)}
+            className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
             placeholder="Bem-vindo ao VIME APP"
           />
 
@@ -88,14 +99,16 @@ export default function PersonalizacaoCard() {
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Texto do Rodapé
 
           </label>
 
           <input
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white"
+            value={dados.textoRodape || ""}
+            onChange={(e) => onChange("textoRodape", e.target.value)}
+            className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
             placeholder="© VIME APP 2026"
           />
 
@@ -105,15 +118,17 @@ export default function PersonalizacaoCard() {
 
       <div className="mt-5">
 
-        <label className="text-sm text-gray-300">
+        <label className="text-sm text-[var(--text-muted)]">
 
           Mensagem de Boas-vindas
 
         </label>
 
         <textarea
+          value={dados.mensagemBoasVindas || ""}
+          onChange={(e) => onChange("mensagemBoasVindas", e.target.value)}
           rows={4}
-          className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-3 text-white resize-none"
+          className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] resize-none"
           placeholder="Escreva uma mensagem para aparecer na tela inicial..."
         />
 
@@ -121,29 +136,37 @@ export default function PersonalizacaoCard() {
 
       <div className="mt-8 rounded-2xl border border-dashed border-emerald-500/30 bg-emerald-500/5 p-5">
 
-        <h3 className="text-white font-semibold">
+        <h3 className="text-[var(--text)] font-semibold">
 
           Pré-visualização
 
         </h3>
 
-        <p className="text-sm text-gray-400 mt-2">
+        <p className="text-sm text-[var(--text-subtle)] mt-2">
 
-          VIME APP 2.0
+          {dados.nomeSistema || "VIME APP 2.0"}
 
         </p>
 
-        <p className="text-xs text-gray-500 mt-1">
+        <p className="text-xs text-[var(--text-faint)] mt-1">
 
-          Bem-vindo ao sistema de gestão imobiliária.
+          {dados.mensagemBoasVindas || "Bem-vindo ao sistema de gestão imobiliária."}
 
         </p>
 
       </div>
 
-      <button className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white">
+      <button
+        onClick={onSalvar}
+        disabled={salvando}
+        className="
+          mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
+          disabled:opacity-50 disabled:cursor-not-allowed
+          transition px-6 py-3 text-[var(--text)]
+        "
+      >
 
-        Salvar Personalização
+        {salvando ? "Salvando..." : "Salvar Personalização"}
 
       </button>
 

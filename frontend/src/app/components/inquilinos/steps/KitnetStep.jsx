@@ -7,7 +7,7 @@ export default function KitnetStep({
 }) {
 
   const inputStyle =
-    "w-full border border-white/10 rounded-xl p-3 text-white bg-white/5 backdrop-blur placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
+    "w-full border border-[var(--border-token)] rounded-xl p-3 text-[var(--text)] bg-[var(--surface-2)] backdrop-blur placeholder:text-[var(--text-subtle)] focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
 
   const kitnetsDisponiveis =
     kitnets.filter((kitnet) => {
@@ -29,7 +29,7 @@ export default function KitnetStep({
 
       <div>
 
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-[var(--text-subtle)] mb-2">
 
           Kitnet
 

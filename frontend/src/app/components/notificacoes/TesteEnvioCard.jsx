@@ -16,7 +16,7 @@ export default function TesteEnvioCard() {
 
   return (
 
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -31,7 +31,7 @@ export default function TesteEnvioCard() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
 
             Teste de Envio
 
@@ -60,7 +60,7 @@ export default function TesteEnvioCard() {
           <input
             type="text"
             placeholder="(99) 99999-9999"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500"
           />
 
         </div>
@@ -76,7 +76,7 @@ export default function TesteEnvioCard() {
           <input
             type="email"
             placeholder="usuario@email.com"
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500"
           />
 
         </div>
@@ -93,7 +93,7 @@ export default function TesteEnvioCard() {
             rows={5}
             value={mensagem}
             onChange={(e) => setMensagem(e.target.value)}
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none transition focus:border-emerald-500 resize-none"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none transition focus:border-emerald-500 resize-none"
           />
 
         </div>
@@ -102,7 +102,7 @@ export default function TesteEnvioCard() {
 
       <div className="mt-8 grid gap-3 md:grid-cols-3">
 
-        <button className="flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 font-medium text-white transition hover:bg-green-700">
+        <button className="flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-green-700">
 
           <MessageCircle size={20} />
 
@@ -110,7 +110,7 @@ export default function TesteEnvioCard() {
 
         </button>
 
-        <button className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700">
+        <button className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-blue-700">
 
           <Mail size={20} />
 
@@ -118,7 +118,7 @@ export default function TesteEnvioCard() {
 
         </button>
 
-        <button className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-700">
+        <button className="flex items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 font-medium text-[var(--text)] transition hover:bg-emerald-700">
 
           <Bell size={20} />
 

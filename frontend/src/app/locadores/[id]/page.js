@@ -79,7 +79,7 @@ export default function DetalhesLocadorPage() {
   if (loading) {
     return (
       <MainLayout>
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-[var(--text-1)] rounded-3xl p-10">
           Carregando locador...
         </div>
       </MainLayout>
@@ -89,7 +89,7 @@ export default function DetalhesLocadorPage() {
   if (!locador) {
     return (
       <MainLayout>
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-[var(--text-1)] rounded-3xl p-10">
           Locador não encontrado.
         </div>
       </MainLayout>
@@ -98,24 +98,24 @@ export default function DetalhesLocadorPage() {
 
   return (
     <MainLayout>
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-        <h1 className="text-4xl font-bold text-white mb-2">
+        <h1 className="text-4xl font-bold text-[var(--text)] mb-2">
           {locador.nome}
         </h1>
 
-        <p className="text-gray-400 mb-10">
+        <p className="text-[var(--text-subtle)] mb-10">
           Detalhes do Locador
         </p>
 
         <div className="grid md:grid-cols-2 gap-10">
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Tipo
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.tipoPessoa === "PJ"
                 ? "Pessoa Jurídica"
                 : "Pessoa Física"}
@@ -123,111 +123,111 @@ export default function DetalhesLocadorPage() {
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Documento
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.documento || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               E-mail
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.email || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Telefone
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.telefone || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Banco
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.banco || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Agência
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.agencia || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Conta
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.conta || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Chave PIX
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.pix || "-"}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Taxa Administração
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.taxaAdministracao || 0}%
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Multa
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.multa || 0}%
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Juros
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {locador.juros || 0}% a.m.
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Residências Vinculadas
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {totalUnidades}
             </h2>
           </div>
@@ -235,11 +235,11 @@ export default function DetalhesLocadorPage() {
         </div>
 
         <div className="mt-10">
-          <p className="text-gray-400 mb-2">
+          <p className="text-[var(--text-subtle)] mb-2">
             Observações
           </p>
 
-          <div className="bg-white/5 border border-white/10 text-gray-200 rounded-2xl p-6">
+          <div className="bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text-1)] rounded-2xl p-6">
             {locador.observacoes ||
               "Nenhuma observação cadastrada."}
           </div>

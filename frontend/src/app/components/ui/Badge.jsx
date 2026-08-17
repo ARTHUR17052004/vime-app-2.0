@@ -34,9 +34,9 @@ export default function Badge({
     `,
 
     gray: `
-      bg-white/5
-      text-gray-300
-      border border-white/10
+      bg-[var(--surface-2)]
+      text-[var(--text-muted)]
+      border border-[var(--border-token)]
     `,
   };
 

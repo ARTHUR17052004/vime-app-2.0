@@ -129,7 +129,7 @@ export default function TokenCard() {
   const conectado = !!statusApi?.configurado;
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center gap-3 mb-6">
 
@@ -144,7 +144,7 @@ export default function TokenCard() {
 
         <div>
 
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
 
             Integração Clicksign
 
@@ -166,7 +166,7 @@ export default function TokenCard() {
           className={`rounded-2xl border p-4 ${
             conectado
               ? "border-emerald-500/20 bg-emerald-500/10"
-              : "border-white/10 bg-slate-800/40"
+              : "border-[var(--border-token)] bg-[var(--surface-2)]"
           }`}
         >
 
@@ -178,7 +178,7 @@ export default function TokenCard() {
               <WifiOff size={18} className="text-slate-400" />
             )}
 
-            <span className="font-medium text-white">
+            <span className="font-medium text-[var(--text)]">
 
               {carregando
                 ? "Carregando..."
@@ -192,7 +192,7 @@ export default function TokenCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/40 p-4">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4">
 
           <span className="text-slate-400 text-sm">
 
@@ -200,7 +200,7 @@ export default function TokenCard() {
 
           </span>
 
-          <p className="mt-1 text-white font-semibold capitalize">
+          <p className="mt-1 text-[var(--text)] font-semibold capitalize">
 
             {dados.ambiente}
 
@@ -224,7 +224,7 @@ export default function TokenCard() {
             value={dados.ambiente}
             onChange={(e) => alterar("ambiente", e.target.value)}
             disabled={carregando}
-            className="w-full rounded-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none"
           >
             <option value="sandbox">Sandbox</option>
             <option value="producao">Produção</option>
@@ -248,14 +248,14 @@ export default function TokenCard() {
               onChange={(e) => alterar("apiKey", e.target.value)}
               disabled={carregando}
               placeholder="Token de acesso da Clicksign"
-              className="flex-1 rounded-l-2xl border border-white/10 bg-slate-800/40 p-3 text-white outline-none"
+              className="flex-1 rounded-l-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none"
             />
 
             <button
               onClick={() => setMostrarToken(!mostrarToken)}
-              className="rounded-r-2xl border-y border-r border-white/10 bg-slate-700 px-4 hover:bg-slate-600"
+              className="rounded-r-2xl border-y border-r border-[var(--border-token)] bg-slate-700 px-4 hover:bg-slate-600"
             >
-              {mostrarToken ? <EyeOff size={18} className="text-white" /> : <Eye size={18} className="text-white" />}
+              {mostrarToken ? <EyeOff size={18} className="text-[var(--text)]" /> : <Eye size={18} className="text-[var(--text)]" />}
             </button>
 
           </div>
@@ -281,7 +281,7 @@ export default function TokenCard() {
         <button
           onClick={testarConexao}
           disabled={testando || carregando}
-          className="flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-800 px-5 py-3 text-white hover:border-emerald-500 transition disabled:opacity-50"
+          className="flex items-center gap-2 rounded-2xl border border-[var(--border-token)] bg-slate-800 px-5 py-3 text-[var(--text)] hover:border-emerald-500 transition disabled:opacity-50"
         >
           <RefreshCw size={18} className={testando ? "animate-spin" : ""} />
           {testando ? "Testando..." : "Testar Conexão"}
@@ -290,7 +290,7 @@ export default function TokenCard() {
         <button
           onClick={salvar}
           disabled={salvando || carregando}
-          className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-white hover:bg-emerald-700 transition disabled:opacity-50"
+          className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-[var(--text)] hover:bg-emerald-700 transition disabled:opacity-50"
         >
           <Save size={18} />
           {salvando ? "Salvando..." : "Salvar"}
@@ -309,7 +309,7 @@ export default function TokenCard() {
 
           <div>
 
-            <p className="font-medium text-white">
+            <p className="font-medium text-[var(--text)]">
 
               Integração segura
 

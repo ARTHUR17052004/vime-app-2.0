@@ -30,8 +30,8 @@ const origemConfig = {
   },
   SISTEMA: {
     icon: Bell,
-    color: "text-gray-300",
-    bg: "bg-white/5",
+    color: "text-[var(--text-muted)]",
+    bg: "bg-[var(--surface-2)]",
   },
 };
 
@@ -82,14 +82,14 @@ export default function NotificationBell() {
           w-10
           h-10
           rounded-full
-          hover:bg-white/5
+          hover:bg-[var(--surface-2)]
           flex
           items-center
           justify-center
           transition
         "
       >
-        <Bell size={18} className="text-white" />
+        <Bell size={18} className="text-[var(--text)]" />
 
         {total > 0 && (
           <span
@@ -116,7 +116,7 @@ export default function NotificationBell() {
 
               text-[10px]
               font-bold
-              text-white
+              text-[var(--text)]
             "
           >
             {total > 9 ? "9+" : total}
@@ -140,9 +140,9 @@ export default function NotificationBell() {
               rounded-2xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-slate-900/95
+              bg-[var(--surface)]
 
               backdrop-blur-xl
 
@@ -163,10 +163,10 @@ export default function NotificationBell() {
                 py-4
 
                 border-b
-                border-white/10
+                border-[var(--border-token)]
               "
             >
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-[var(--text)]">
                 Notificações
               </p>
 
@@ -196,7 +196,7 @@ export default function NotificationBell() {
 
             <div className="max-h-96 overflow-y-auto">
               {loading && (
-                <div className="px-5 py-10 text-center text-sm text-gray-500">
+                <div className="px-5 py-10 text-center text-sm text-[var(--text-faint)]">
                   Carregando...
                 </div>
               )}
@@ -239,11 +239,11 @@ export default function NotificationBell() {
                     <Bell size={20} />
                   </div>
 
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-medium text-[var(--text)]">
                     Sem notificações
                   </p>
 
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-[var(--text-faint)]">
                     Você está em dia por aqui.
                   </p>
                 </div>
@@ -273,9 +273,9 @@ export default function NotificationBell() {
                         text-left
 
                         border-b
-                        border-white/5
+                        border-[var(--border-token)]
 
-                        hover:bg-white/5
+                        hover:bg-[var(--surface-2)]
 
                         transition
                       "
@@ -301,15 +301,15 @@ export default function NotificationBell() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-white truncate">
+                        <p className="text-[13px] font-semibold text-[var(--text)] truncate">
                           {notificacao.titulo}
                         </p>
 
-                        <p className="mt-0.5 text-xs text-gray-400 line-clamp-2">
+                        <p className="mt-0.5 text-xs text-[var(--text-subtle)] line-clamp-2">
                           {notificacao.mensagem}
                         </p>
 
-                        <p className="mt-1.5 text-[11px] text-gray-500">
+                        <p className="mt-1.5 text-[11px] text-[var(--text-faint)]">
                           {formatarTempo(notificacao.createdAt)}
                         </p>
                       </div>
@@ -351,10 +351,10 @@ export default function NotificationBell() {
 
                 text-emerald-400
 
-                hover:bg-white/5
+                hover:bg-[var(--surface-2)]
 
                 border-t
-                border-white/10
+                border-[var(--border-token)]
 
                 transition
               "

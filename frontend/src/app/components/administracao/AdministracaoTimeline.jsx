@@ -36,7 +36,7 @@ export default function AdministracaoTimeline({
         className="
           text-xl
           font-bold
-          text-white
+          text-[var(--text)]
           mb-6
         "
       >
@@ -90,13 +90,13 @@ export default function AdministracaoTimeline({
 
               <div>
 
-                <p className="text-white">
+                <p className="text-[var(--text)]">
 
                   {item.titulo}
 
                 </p>
 
-                <p className="text-gray-400 text-sm">
+                <p className="text-[var(--text-subtle)] text-sm">
 
                   {item.descricao}
 

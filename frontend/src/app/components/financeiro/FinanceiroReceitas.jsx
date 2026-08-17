@@ -33,7 +33,7 @@ function MenuButton({ label, danger, success, warning, onClick }) {
             ? "text-green-400 hover:bg-green-500/10"
             : warning
             ? "text-yellow-400 hover:bg-yellow-500/10"
-            : "text-gray-300 hover:bg-white/5"
+            : "text-[var(--text-muted)] hover:bg-[var(--surface-2)]"
         }
       `}
     >
@@ -125,11 +125,11 @@ export default function FinanceiroReceitas({
 
             <div>
 
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--text)]">
                 Receitas
               </h2>
 
-              <p className="text-gray-400">
+              <p className="text-[var(--text-subtle)]">
                 Controle das receitas cadastradas.
               </p>
 
@@ -168,20 +168,20 @@ export default function FinanceiroReceitas({
       </div>
 
       {receitas.length === 0 ? (
-        <div className="text-gray-400">
+        <div className="text-[var(--text-subtle)]">
           Nenhuma receita cadastrada.
         </div>
       ) : (
         <div className="overflow-x-auto mt-6">
 
-          <table className="w-full text-gray-200">
+          <table className="w-full text-[var(--text-1)]">
 
             <thead
               className="
                 border-b
-                border-white/10
+                border-[var(--border-token)]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 uppercase
 
@@ -217,7 +217,7 @@ export default function FinanceiroReceitas({
 
                 <tr
                   key={item.id}
-                  className="border-b border-white/5 hover:bg-white/5 transition"
+                  className="border-b border-[var(--border-token)] hover:bg-[var(--surface-2)] transition"
                 >
 
                   <td className="py-5">
@@ -290,7 +290,7 @@ export default function FinanceiroReceitas({
                         flex
                         items-center
                         justify-center
-                        hover:bg-white/10
+                        hover:bg-[var(--surface-3)]
                         transition
                       "
                     >

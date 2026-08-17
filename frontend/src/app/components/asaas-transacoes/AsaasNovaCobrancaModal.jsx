@@ -136,7 +136,7 @@ export default function AsaasNovaCobrancaModal({
   };
 
   const inputStyle =
-    "border border-white/[0.07] bg-white/5 text-white rounded-xl p-3 w-full focus:outline-none focus:ring-2 focus:ring-green-600";
+    "border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full focus:outline-none focus:ring-2 focus:ring-green-600";
 
   return (
     <Modal
@@ -159,7 +159,7 @@ export default function AsaasNovaCobrancaModal({
         )}
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Contrato (inquilino)
           </label>
 
@@ -183,7 +183,7 @@ export default function AsaasNovaCobrancaModal({
             ))}
           </select>
 
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-[var(--text-faint)] mt-1">
             Necessário para enviar a cobrança ao Asaas (o inquilino do contrato
             vira o cliente da cobrança).
           </p>
@@ -192,7 +192,7 @@ export default function AsaasNovaCobrancaModal({
         <div className="grid md:grid-cols-2 gap-5">
 
           <div>
-            <label className="block text-sm font-semibold text-gray-200 mb-2">
+            <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
               Categoria
             </label>
 
@@ -209,7 +209,7 @@ export default function AsaasNovaCobrancaModal({
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-200 mb-2">
+            <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
               Valor
             </label>
 
@@ -227,7 +227,7 @@ export default function AsaasNovaCobrancaModal({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Descrição
           </label>
 
@@ -241,7 +241,7 @@ export default function AsaasNovaCobrancaModal({
         </div>
 
         <div>
-          <label className="block text-sm font-semibold text-gray-200 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
             Vencimento
           </label>
 
@@ -261,12 +261,12 @@ export default function AsaasNovaCobrancaModal({
             onClick={onClose}
             className="
               border
-              border-white/[0.07]
-              text-gray-200
+              border-[var(--border-token)]
+              text-[var(--text-1)]
               rounded-xl
               px-5
               py-3
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
             "
           >
             Cancelar
@@ -280,7 +280,7 @@ export default function AsaasNovaCobrancaModal({
               hover:bg-green-800
               disabled:opacity-50
               disabled:cursor-not-allowed
-              text-white
+              text-[var(--text)]
               rounded-xl
               px-5
               py-3

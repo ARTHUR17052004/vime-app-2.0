@@ -10,7 +10,7 @@ export default function SectionTitle({
       </h2>
 
       {subtitle && (
-        <p className="text-gray-500 mt-1">
+        <p className="text-[var(--text-faint)] mt-1">
           {subtitle}
         </p>
       )}

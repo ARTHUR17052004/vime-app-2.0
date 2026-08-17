@@ -262,11 +262,11 @@ export default function ContratoForm({
     w-full
     rounded-xl
     border
-    border-white/10
-    bg-white/5
+    border-[var(--border-token)]
+    bg-[var(--surface-2)]
     px-4
     py-3
-    text-white
+    text-[var(--text)]
     outline-none
     transition-all
     focus:border-emerald-500
@@ -285,7 +285,7 @@ export default function ContratoForm({
           className="
             text-3xl
             font-black
-            text-white
+            text-[var(--text)]
           "
         >
 
@@ -297,7 +297,7 @@ export default function ContratoForm({
 
         </h2>
 
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-[var(--text-subtle)]">
 
           Preencha as informações do contrato.
 
@@ -468,7 +468,7 @@ export default function ContratoForm({
 
         <div>
 
-          <label className="mb-1.5 block text-sm text-gray-400">
+          <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
             Data de Criação do Contrato
           </label>
 
@@ -485,7 +485,7 @@ export default function ContratoForm({
 
         <div>
 
-          <label className="mb-1.5 block text-sm text-gray-400">
+          <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
             Data Final do Contrato
           </label>
 
@@ -650,7 +650,7 @@ export default function ContratoForm({
     justify-end
     gap-4
     border-t
-    border-white/10
+    border-[var(--border-token)]
     pt-6
   "
 >

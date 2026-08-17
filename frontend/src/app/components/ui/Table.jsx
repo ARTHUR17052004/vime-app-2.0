@@ -33,12 +33,9 @@ export default function Table({
         className="
           rounded-[22px]
           border
-          border-white/5
+          border-[var(--border-token)]
 
-          bg-gradient-to-br
-          from-[#1b2728]/80
-          via-[#1a242c]/75
-          to-[#151d26]/80
+          bg-[var(--surface)]
 
           backdrop-blur-xl
 
@@ -48,7 +45,7 @@ export default function Table({
         "
       >
 
-        <p className="text-gray-400">
+        <p className="text-[var(--text-subtle)]">
 
           Carregando...
 
@@ -72,12 +69,9 @@ export default function Table({
           rounded-[22px]
 
           border
-          border-white/5
+          border-[var(--border-token)]
 
-          bg-gradient-to-br
-          from-[#1b2728]/80
-          via-[#1a242c]/75
-          to-[#151d26]/80
+          bg-[var(--surface)]
 
           backdrop-blur-xl
 
@@ -104,7 +98,7 @@ export default function Table({
           <div
             className="
               border-t
-              border-white/5
+              border-[var(--border-token)]
 
               px-6
               py-4
@@ -133,12 +127,9 @@ export default function Table({
         rounded-[22px]
 
         border
-        border-white/5
+        border-[var(--border-token)]
 
-        bg-gradient-to-br
-        from-[#1b2728]/80
-        via-[#1a242c]/75
-        to-[#151d26]/80
+        bg-[var(--surface)]
 
         backdrop-blur-xl
 
@@ -186,10 +177,10 @@ export default function Table({
 
                     font-semibold
 
-                    text-gray-400
+                    text-[var(--text-subtle)]
 
                     border-b
-                    border-white/5
+                    border-[var(--border-token)]
 
                     ${
                       compact
@@ -222,7 +213,7 @@ export default function Table({
 
                     text-center
 
-                    text-gray-500
+                    text-[var(--text-faint)]
                   "
                 >
 
@@ -248,7 +239,7 @@ export default function Table({
 
                     border-b
 
-                    border-white/[0.03]
+                    border-[var(--border-token)]
 
                     ${
                       onRowClick
@@ -259,7 +250,7 @@ export default function Table({
                     ${
                       striped &&
                       index % 2 === 1
-                        ? "bg-white/[0.015]"
+                        ? "bg-[var(--surface-2)]"
                         : ""
                     }
 
@@ -280,7 +271,7 @@ export default function Table({
                       className={`
                         whitespace-nowrap
 
-                        text-gray-200
+                        text-[var(--text-1)]
 
                         ${
                           compact
@@ -317,7 +308,7 @@ export default function Table({
         <div
           className="
             border-t
-            border-white/5
+            border-[var(--border-token)]
 
             px-6
             py-4

@@ -8,7 +8,7 @@ export default function UnitTable({
 }) {
   if (unidades.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-xl p-10 text-center text-gray-400">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-xl p-10 text-center text-[var(--text-subtle)]">
         Nenhuma residência cadastrada.
       </div>
     );
@@ -19,11 +19,11 @@ export default function UnitTable({
       {unidades.map((unidade) => (
         <div
           key={unidade.id}
-          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-6 transition hover:border-emerald-400/20"
+          className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-2xl p-6 transition hover:border-emerald-400/20"
         >
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="text-2xl font-bold text-[var(--text)]">
                 {unidade.nome}
               </h2>
 
@@ -40,12 +40,12 @@ export default function UnitTable({
               </span>
             </div>
 
-            <button className="text-gray-400 text-xl hover:text-white">
+            <button className="text-[var(--text-subtle)] text-xl hover:text-[var(--text)]">
               ⋮
             </button>
           </div>
 
-          <div className="space-y-3 text-gray-400">
+          <div className="space-y-3 text-[var(--text-subtle)]">
             <p>
               📍 {unidade.endereco || "-"}
               {unidade.numero
@@ -63,9 +63,9 @@ export default function UnitTable({
             </p>
           </div>
 
-          <div className="border-t border-white/10 my-4"></div>
+          <div className="border-t border-[var(--border-token)] my-4"></div>
 
-          <div className="space-y-2 text-gray-300">
+          <div className="space-y-2 text-[var(--text-muted)]">
             <p>
               🏠 Kitnets: {unidade.kitnets || 0}
             </p>

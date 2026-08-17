@@ -52,7 +52,7 @@ export default function RelatorioCards() {
 
     <div className="mb-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
         Relatórios Disponíveis
 
@@ -65,19 +65,16 @@ export default function RelatorioCards() {
           <div
             key={item.nome}
             className="
-              bg-gradient-to-br
-              from-[#202a36]/95
-              via-[#1b2430]/96
-              to-[#151c25]/96
+              bg-[var(--surface)]
               backdrop-blur-xl
               border
-              border-white/[0.07]
+              border-[var(--border-token)]
               rounded-3xl
               p-6
             "
           >
 
-            <h3 className="text-xl font-bold text-white mb-6">
+            <h3 className="text-xl font-bold text-[var(--text)] mb-6">
 
               {item.nome}
 
@@ -90,7 +87,7 @@ export default function RelatorioCards() {
                 w-full
                 text-center
                 bg-green-700
-                text-white
+                text-[var(--text)]
                 py-3
                 rounded-2xl
                 hover:bg-green-800

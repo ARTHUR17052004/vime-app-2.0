@@ -49,7 +49,7 @@ export default function DetalhesContratoPage() {
   if (carregando) {
     return (
       <MainLayout>
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando...
         </div>
       </MainLayout>
@@ -59,7 +59,7 @@ export default function DetalhesContratoPage() {
   if (!contrato) {
     return (
       <MainLayout>
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] text-gray-200 rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-[var(--text-1)] rounded-3xl p-10">
           Contrato não encontrado.
         </div>
       </MainLayout>
@@ -75,50 +75,50 @@ export default function DetalhesContratoPage() {
         contrato={contrato}
       />
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-        <h1 className="text-4xl font-bold text-white">
+        <h1 className="text-4xl font-bold text-[var(--text)]">
           Contrato
         </h1>
 
-        <p className="text-gray-400 mb-10">
+        <p className="text-[var(--text-subtle)] mb-10">
           Detalhes do contrato
         </p>
 
         <div className="grid md:grid-cols-2 gap-8">
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Inquilino
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.inquilino?.nome || contrato.inquilinoNome}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Residência
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.unidade?.nome || contrato.unidadeNome}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Kitnet
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.kitnet?.nome || contrato.kitnetNome}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Valor do aluguel
             </p>
 
@@ -128,11 +128,11 @@ export default function DetalhesContratoPage() {
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Data início
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.dataInicio
                 ? new Date(contrato.dataInicio).toLocaleDateString("pt-BR")
                 : "-"}
@@ -140,11 +140,11 @@ export default function DetalhesContratoPage() {
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Data fim
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.dataFim
                 ? new Date(contrato.dataFim).toLocaleDateString("pt-BR")
                 : "Indeterminado"}
@@ -152,47 +152,47 @@ export default function DetalhesContratoPage() {
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Garantia
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.tipoGarantia}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Caução
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               R$ {contrato.valorCaucao}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Reajuste
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               {contrato.indiceReajuste}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Dia vencimento
             </p>
 
-            <h2 className="font-bold text-2xl text-white">
+            <h2 className="font-bold text-2xl text-[var(--text)]">
               Dia {contrato.diaVencimento}
             </h2>
           </div>
 
           <div>
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Status
             </p>
 
@@ -226,13 +226,13 @@ export default function DetalhesContratoPage() {
         contrato={contrato}
       />
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-        <p className="text-gray-400 mb-4">
+        <p className="text-[var(--text-subtle)] mb-4">
           Observações
         </p>
 
-        <div className="bg-white/5 border border-white/10 text-gray-200 rounded-2xl p-6">
+        <div className="bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text-1)] rounded-2xl p-6">
 
           {
             contrato.observacoes ||

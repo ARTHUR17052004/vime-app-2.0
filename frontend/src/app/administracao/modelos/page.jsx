@@ -110,11 +110,11 @@ export default function ModelosDocumentoPage() {
 
               <div>
 
-                <h1 className="text-5xl font-black text-white">
+                <h1 className="text-5xl font-black text-[var(--text)]">
                   Modelo de Contrato
                 </h1>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Editável — usado para gerar o PDF automaticamente ao criar um contrato
                 </p>
 
@@ -126,9 +126,9 @@ export default function ModelosDocumentoPage() {
                   px-5
                   py-3
                   rounded-xl
-                  bg-white/10
-                  hover:bg-white/20
-                  text-white
+                  bg-[var(--surface-3)]
+                  hover:bg-[var(--surface-3)]
+                  text-[var(--text)]
                   flex
                   items-center
                   gap-2
@@ -145,7 +145,7 @@ export default function ModelosDocumentoPage() {
           {carregando ? (
 
             <Card>
-              <p className="text-gray-400 text-center py-10">
+              <p className="text-[var(--text-subtle)] text-center py-10">
                 Carregando...
               </p>
             </Card>
@@ -164,7 +164,7 @@ export default function ModelosDocumentoPage() {
 
                       <FileText size={18} className="text-emerald-400" />
 
-                      <h2 className="text-lg font-bold text-white">
+                      <h2 className="text-lg font-bold text-[var(--text)]">
                         Texto do Modelo
                       </h2>
 
@@ -178,10 +178,10 @@ export default function ModelosDocumentoPage() {
                         w-full
                         rounded-2xl
                         border
-                        border-white/10
-                        bg-black/20
+                        border-[var(--border-token)]
+                        bg-[var(--surface-inset)]
                         p-4
-                        text-white
+                        text-[var(--text)]
                         text-sm
                         font-mono
                         outline-none
@@ -213,11 +213,11 @@ export default function ModelosDocumentoPage() {
 
                   <Card>
 
-                    <h2 className="text-lg font-bold text-white mb-4">
+                    <h2 className="text-lg font-bold text-[var(--text)] mb-4">
                       Campos disponíveis
                     </h2>
 
-                    <p className="text-sm text-gray-400 mb-5">
+                    <p className="text-sm text-[var(--text-subtle)] mb-5">
                       Use estes marcadores no texto — eles são substituídos
                       automaticamente pelos dados de cada contrato.
                     </p>
@@ -231,8 +231,8 @@ export default function ModelosDocumentoPage() {
                           className="
                             rounded-xl
                             border
-                            border-white/10
-                            bg-white/5
+                            border-[var(--border-token)]
+                            bg-[var(--surface-2)]
                             p-3
                           "
                         >
@@ -241,7 +241,7 @@ export default function ModelosDocumentoPage() {
                             {item.chave}
                           </code>
 
-                          <p className="text-gray-400 text-xs mt-1">
+                          <p className="text-[var(--text-subtle)] text-xs mt-1">
                             {item.descricao}
                           </p>
 

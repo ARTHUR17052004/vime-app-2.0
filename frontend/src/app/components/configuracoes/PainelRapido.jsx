@@ -63,17 +63,17 @@ export default function PainelRapido() {
   }
 
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="mb-6">
 
-        <h2 className="text-xl font-semibold text-white">
+        <h2 className="text-xl font-semibold text-[var(--text)]">
 
           Acesso Rápido
 
         </h2>
 
-        <p className="text-gray-400 text-sm mt-1">
+        <p className="text-[var(--text-subtle)] text-sm mt-1">
 
           Principais configurações do sistema.
 
@@ -92,7 +92,7 @@ export default function PainelRapido() {
             <button
               key={item.titulo}
               onClick={() => acessar(item)}
-              className="w-full rounded-2xl border border-white/10 bg-slate-800/70 hover:border-emerald-500/30 hover:-translate-y-1 transition-all p-5 text-left"
+              className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] hover:border-emerald-500/30 hover:-translate-y-1 transition-all p-5 text-left"
             >
 
               <div className="flex justify-between items-center">
@@ -110,13 +110,13 @@ export default function PainelRapido() {
 
                   <div>
 
-                    <h3 className="text-white font-semibold">
+                    <h3 className="text-[var(--text)] font-semibold">
 
                       {item.titulo}
 
                     </h3>
 
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm text-[var(--text-subtle)]">
 
                       {item.descricao}
 
@@ -128,7 +128,7 @@ export default function PainelRapido() {
 
                 <ArrowRight
                   size={18}
-                  className="text-gray-500"
+                  className="text-[var(--text-faint)]"
                 />
 
               </div>

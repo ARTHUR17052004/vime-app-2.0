@@ -23,8 +23,8 @@ export default function VistoriaFiltros({
       className="
         rounded-3xl
         border
-        border-white/10
-        bg-slate-900/80
+        border-[var(--border-token)]
+        bg-[var(--surface)]
         backdrop-blur-xl
         p-6
         shadow-xl
@@ -35,7 +35,7 @@ export default function VistoriaFiltros({
         className="
           text-xl
           font-bold
-          text-white
+          text-[var(--text)]
           mb-5
         "
       >

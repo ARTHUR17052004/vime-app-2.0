@@ -40,11 +40,11 @@ export default function FinanceiroProximosVencimentos({
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Próximos Vencimentos
             </h2>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Receitas aguardando pagamento.
             </p>
 
@@ -58,7 +58,7 @@ export default function FinanceiroProximosVencimentos({
 
         {vencimentos.length === 0 ? (
 
-          <div className="text-center text-gray-400 py-10">
+          <div className="text-center text-[var(--text-subtle)] py-10">
             Nenhum vencimento pendente.
           </div>
 
@@ -74,9 +74,9 @@ export default function FinanceiroProximosVencimentos({
                   rounded-2xl
 
                   border
-                  border-white/10
+                  border-[var(--border-token)]
 
-                  bg-white/[0.02]
+                  bg-[var(--surface-2)]
 
                   p-5
 
@@ -84,7 +84,7 @@ export default function FinanceiroProximosVencimentos({
                   items-center
                   justify-between
 
-                  hover:bg-white/[0.04]
+                  hover:bg-[var(--surface-2)]
 
                   transition
                 "
@@ -92,15 +92,15 @@ export default function FinanceiroProximosVencimentos({
 
                 <div>
 
-                  <h3 className="text-lg font-semibold text-white">
+                  <h3 className="text-lg font-semibold text-[var(--text)]">
                     {item.unidade || item.descricao}
                   </h3>
 
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-[var(--text-subtle)]">
                     {item.categoria}
                   </p>
 
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-[var(--text-faint)] mt-1">
                     Vencimento: {item.vencimento
                       ? new Date(item.vencimento).toLocaleDateString("pt-BR")
                       : "-"}

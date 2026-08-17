@@ -80,15 +80,15 @@ export default function AsaasStatusCard() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07] overflow-hidden">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden">
 
-      <div className="px-8 py-6 border-b border-white/[0.07] flex items-center justify-between">
+      <div className="px-8 py-6 border-b border-[var(--border-token)] flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Status da Integração
           </h2>
 
-          <p className="text-gray-400 mt-1">
+          <p className="text-[var(--text-subtle)] mt-1">
             Acompanhe rapidamente a situação da conexão com o Asaas.
           </p>
         </div>
@@ -117,13 +117,13 @@ export default function AsaasStatusCard() {
                 className={`w-3 h-3 rounded-full ${item.cor}`}
               />
 
-              <span className="font-medium text-gray-200">
+              <span className="font-medium text-[var(--text-1)]">
                 {item.titulo}
               </span>
 
             </div>
 
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-[var(--text)]">
               {item.valor}
             </span>
 
@@ -133,9 +133,9 @@ export default function AsaasStatusCard() {
 
       </div>
 
-      <div className="px-8 py-4 border-t border-white/[0.07] flex justify-between">
+      <div className="px-8 py-4 border-t border-[var(--border-token)] flex justify-between">
 
-        <span className="text-gray-400">
+        <span className="text-[var(--text-subtle)]">
           Última verificação
         </span>
 

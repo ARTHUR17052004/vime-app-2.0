@@ -33,8 +33,8 @@ export default function VistoriaResumo({
     {
       titulo: "Total",
       valor: total,
-      cor: "text-white",
-      fundo: "bg-white/10",
+      cor: "text-[var(--text)]",
+      fundo: "bg-[var(--surface-3)]",
     },
 
     {
@@ -71,11 +71,8 @@ export default function VistoriaResumo({
           className="
             rounded-[22px]
             border
-            border-white/10
-            bg-gradient-to-br
-            from-[#202a36]/95
-            via-[#1b2430]/96
-            to-[#151c25]/96
+            border-[var(--border-token)]
+            bg-[var(--surface)]
             backdrop-blur-xl
             p-6
             transition-all
@@ -89,7 +86,7 @@ export default function VistoriaResumo({
 
             <div>
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-[var(--text-subtle)] text-sm">
                 {card.titulo}
               </p>
 

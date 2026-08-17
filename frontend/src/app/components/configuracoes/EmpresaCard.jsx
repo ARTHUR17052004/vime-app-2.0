@@ -13,7 +13,7 @@ export default function EmpresaCard({
   salvando = false,
 }) {
   return (
-    <Card className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <Card className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       {/* Cabeçalho */}
 
@@ -26,11 +26,11 @@ export default function EmpresaCard({
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
             Informações da Empresa
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
             Dados utilizados em contratos, documentos e relatórios.
           </p>
         </div>

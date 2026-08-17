@@ -157,12 +157,12 @@ export default function VistoriaForm({
     w-full
     rounded-xl
     border
-    border-white/10
-    bg-white/5
+    border-[var(--border-token)]
+    bg-[var(--surface-2)]
     px-4
     py-3
-    text-white
-    placeholder:text-gray-500
+    text-[var(--text)]
+    placeholder:text-[var(--text-faint)]
     outline-none
     focus:border-emerald-500
   `;
@@ -178,7 +178,7 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-300">
+          <label className="font-semibold text-[var(--text-muted)]">
             Residência
           </label>
 
@@ -207,7 +207,7 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-300">
+          <label className="font-semibold text-[var(--text-muted)]">
             Kitnet
           </label>
 
@@ -238,7 +238,7 @@ export default function VistoriaForm({
 
       <div>
 
-        <label className="font-semibold text-gray-300">
+        <label className="font-semibold text-[var(--text-muted)]">
           Nome da Vistoria
         </label>
 
@@ -256,7 +256,7 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-300">
+          <label className="font-semibold text-[var(--text-muted)]">
             Categoria
           </label>
 
@@ -280,7 +280,7 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-300">
+          <label className="font-semibold text-[var(--text-muted)]">
             Criticidade
           </label>
 
@@ -306,7 +306,7 @@ export default function VistoriaForm({
 
         <div>
 
-          <label className="font-semibold text-gray-300">
+          <label className="font-semibold text-[var(--text-muted)]">
             Periodicidade
           </label>
 
@@ -331,7 +331,7 @@ export default function VistoriaForm({
 
       <div>
 
-  <label className="font-semibold text-gray-300">
+  <label className="font-semibold text-[var(--text-muted)]">
     Responsável
   </label>
 
@@ -351,7 +351,7 @@ export default function VistoriaForm({
 
   <div>
 
-    <label className="font-semibold text-gray-300">
+    <label className="font-semibold text-[var(--text-muted)]">
       Data Última
     </label>
 
@@ -367,7 +367,7 @@ export default function VistoriaForm({
 
   <div>
 
-    <label className="font-semibold text-gray-300">
+    <label className="font-semibold text-[var(--text-muted)]">
       Data Próxima
     </label>
 
@@ -385,7 +385,7 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-semibold text-gray-300">
+  <label className="font-semibold text-[var(--text-muted)]">
     Status
   </label>
 
@@ -408,13 +408,13 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-semibold text-gray-300 block mb-4">
+  <label className="font-semibold text-[var(--text-muted)] block mb-4">
     Checklist da Vistoria
   </label>
 
   <div className="grid md:grid-cols-2 gap-4">
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.portao}
@@ -431,7 +431,7 @@ export default function VistoriaForm({
       <span>Portão</span>
     </label>
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.telhado}
@@ -448,7 +448,7 @@ export default function VistoriaForm({
       <span>Telhado</span>
     </label>
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.caixaAgua}
@@ -465,7 +465,7 @@ export default function VistoriaForm({
       <span>Caixa de Água</span>
     </label>
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.extintores}
@@ -482,7 +482,7 @@ export default function VistoriaForm({
       <span>Extintores</span>
     </label>
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.iluminacao}
@@ -499,7 +499,7 @@ export default function VistoriaForm({
       <span>Iluminação</span>
     </label>
 
-    <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-4 text-gray-300">
+    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
       <input
         type="checkbox"
         checked={formData.checklist.corredores}
@@ -522,7 +522,7 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-bold text-gray-300 text-lg block mb-4">
+  <label className="font-bold text-[var(--text-muted)] text-lg block mb-4">
     Fotos e Vídeos da Vistoria
   </label>
 
@@ -579,7 +579,7 @@ export default function VistoriaForm({
               object-cover
               rounded-2xl
               border
-              border-white/10
+              border-[var(--border-token)]
             "
           />
         ) : (
@@ -593,7 +593,7 @@ export default function VistoriaForm({
               object-cover
               rounded-2xl
               border
-              border-white/10
+              border-[var(--border-token)]
             "
           />
         )
@@ -607,7 +607,7 @@ export default function VistoriaForm({
 
 <div>
 
-  <label className="font-semibold text-gray-300">
+  <label className="font-semibold text-[var(--text-muted)]">
     Observações
   </label>
 

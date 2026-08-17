@@ -28,12 +28,9 @@ export default function EmptyState({
           rounded-3xl
 
           border
-          border-white/5
+          border-[var(--border-token)]
 
-          bg-gradient-to-br
-          from-[#1b2728]/80
-          via-[#1a242c]/75
-          to-[#151d26]/80
+          bg-[var(--surface)]
 
           backdrop-blur-xl
 
@@ -91,7 +88,7 @@ export default function EmptyState({
 
             font-bold
 
-            text-white
+            text-[var(--text)]
 
           "
 
@@ -111,7 +108,7 @@ export default function EmptyState({
 
             leading-7
 
-            text-gray-400
+            text-[var(--text-subtle)]
 
           "
 

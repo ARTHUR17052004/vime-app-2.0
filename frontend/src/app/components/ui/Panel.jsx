@@ -40,7 +40,7 @@ export default function Panel({
             mb-8
 
             border-b
-            border-white/[0.05]
+            border-[var(--border-token)]
 
             ${headerClassName}
           `}
@@ -98,7 +98,7 @@ export default function Panel({
                     text-[11px]
                     uppercase
                     tracking-[0.34em]
-                    text-gray-500
+                    text-[var(--text-faint)]
 
                     mb-2
                   "
@@ -115,7 +115,7 @@ export default function Panel({
                     text-[34px]
                     font-bold
                     leading-tight
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {title}
@@ -129,7 +129,7 @@ export default function Panel({
                   className="
                     mt-2
                     text-[14px]
-                    text-gray-400
+                    text-[var(--text-subtle)]
                   "
                 >
                   {subtitle}
@@ -190,7 +190,7 @@ export default function Panel({
             pt-6
 
             border-t
-            border-white/[0.05]
+            border-[var(--border-token)]
 
             ${footerClassName}
           `}

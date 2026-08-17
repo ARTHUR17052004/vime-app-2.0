@@ -28,7 +28,7 @@ export default function FinanceiroTabs({
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-2 mb-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-2 mb-8">
 
       <div className="flex gap-2 flex-wrap">
 
@@ -47,8 +47,8 @@ export default function FinanceiroTabs({
               transition
               ${
                 abaSelecionada === aba.id
-                  ? "bg-green-700 text-white"
-                  : "text-gray-400 hover:bg-white/5"
+                  ? "bg-green-700 text-[var(--text)]"
+                  : "text-[var(--text-subtle)] hover:bg-[var(--surface-2)]"
               }
             `}
           >

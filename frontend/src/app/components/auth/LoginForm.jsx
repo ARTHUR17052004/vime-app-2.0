@@ -13,8 +13,8 @@ export default function LoginForm() {
 
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState("admin@vime.com");
-  const [senha, setSenha] = useState("123456");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
 
   const [lembrar, setLembrar] = useState(true);
 

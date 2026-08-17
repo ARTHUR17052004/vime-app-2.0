@@ -43,7 +43,7 @@ const templates = [
 
 export default function TemplatesCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="flex items-center justify-between mb-6">
 
@@ -60,7 +60,7 @@ export default function TemplatesCard() {
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Templates
             </h2>
 
@@ -72,7 +72,7 @@ export default function TemplatesCard() {
 
         </div>
 
-        <button className="rounded-2xl bg-emerald-600 px-5 py-3 text-white hover:bg-emerald-700 transition">
+        <button className="rounded-2xl bg-emerald-600 px-5 py-3 text-[var(--text)] hover:bg-emerald-700 transition">
 
           Novo Template
 
@@ -86,12 +86,12 @@ export default function TemplatesCard() {
 
           <div
             key={index}
-            className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4"
+            className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4"
           >
 
             <div>
 
-              <h3 className="font-semibold text-white">
+              <h3 className="font-semibold text-[var(--text)]">
                 {item.nome}
               </h3>
 
@@ -111,19 +111,19 @@ export default function TemplatesCard() {
 
               </span>
 
-              <button className="rounded-xl bg-slate-700 p-2 text-white hover:bg-slate-600 transition">
+              <button className="rounded-xl bg-slate-700 p-2 text-[var(--text)] hover:bg-slate-600 transition">
 
                 <Eye size={18} />
 
               </button>
 
-              <button className="rounded-xl bg-slate-700 p-2 text-white hover:bg-slate-600 transition">
+              <button className="rounded-xl bg-slate-700 p-2 text-[var(--text)] hover:bg-slate-600 transition">
 
                 <Pencil size={18} />
 
               </button>
 
-              <button className="rounded-xl bg-slate-700 p-2 text-white hover:bg-slate-600 transition">
+              <button className="rounded-xl bg-slate-700 p-2 text-[var(--text)] hover:bg-slate-600 transition">
 
                 <Copy size={18} />
 

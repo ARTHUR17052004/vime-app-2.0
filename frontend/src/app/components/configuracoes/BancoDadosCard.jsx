@@ -11,7 +11,7 @@ import {
 
 export default function BancoDadosCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -26,13 +26,13 @@ export default function BancoDadosCard() {
 
         <div>
 
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
 
             Banco de Dados
 
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
 
             Informações da conexão e desempenho do PostgreSQL.
 
@@ -44,11 +44,11 @@ export default function BancoDadosCard() {
 
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <Wifi className="text-emerald-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Status
 
@@ -62,17 +62,17 @@ export default function BancoDadosCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <Activity className="text-cyan-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Ping
 
           </p>
 
-          <h3 className="text-white font-semibold mt-1">
+          <h3 className="text-[var(--text)] font-semibold mt-1">
 
             18 ms
 
@@ -80,17 +80,17 @@ export default function BancoDadosCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <HardDrive className="text-yellow-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Espaço Utilizado
 
           </p>
 
-          <h3 className="text-white font-semibold mt-1">
+          <h3 className="text-[var(--text)] font-semibold mt-1">
 
             2.4 GB
 
@@ -98,17 +98,17 @@ export default function BancoDadosCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <Clock3 className="text-purple-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Última Sincronização
 
           </p>
 
-          <h3 className="text-white font-semibold mt-1">
+          <h3 className="text-[var(--text)] font-semibold mt-1">
 
             Agora mesmo
 
@@ -116,17 +116,17 @@ export default function BancoDadosCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <Database className="text-pink-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Banco
 
           </p>
 
-          <h3 className="text-white font-semibold mt-1">
+          <h3 className="text-[var(--text)] font-semibold mt-1">
 
             PostgreSQL
 
@@ -134,17 +134,17 @@ export default function BancoDadosCard() {
 
         </div>
 
-        <div className="rounded-2xl border border-white/10 bg-slate-800/60 p-5">
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5">
 
           <RefreshCcw className="text-orange-400 mb-3" />
 
-          <p className="text-gray-400 text-sm">
+          <p className="text-[var(--text-subtle)] text-sm">
 
             Último Backup
 
           </p>
 
-          <h3 className="text-white font-semibold mt-1">
+          <h3 className="text-[var(--text)] font-semibold mt-1">
 
             Hoje • 03:00
 
@@ -156,7 +156,7 @@ export default function BancoDadosCard() {
 
       <div className="flex flex-wrap gap-4 mt-8">
 
-        <button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-white">
+        <button className="rounded-xl bg-emerald-600 hover:bg-emerald-700 transition px-6 py-3 text-[var(--text)]">
 
           Atualizar Informações
 

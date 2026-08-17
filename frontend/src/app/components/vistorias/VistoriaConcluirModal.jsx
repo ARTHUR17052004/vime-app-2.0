@@ -55,7 +55,7 @@ export default function VistoriaConcluirModal({
     >
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
             Data em que foi realizada
           </label>
 
@@ -67,25 +67,25 @@ export default function VistoriaConcluirModal({
               w-full
               rounded-xl
               border
-              border-white/10
-              bg-white/5
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               px-4
               py-3
-              text-white
+              text-[var(--text)]
               outline-none
               focus:border-emerald-500
             "
           />
 
           {data && (
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="text-xs text-[var(--text-faint)] mt-2">
               Será registrada como {formatDate(data)}
             </p>
           )}
         </div>
 
         <div>
-          <label className="flex items-center gap-2 text-sm font-semibold text-gray-300 mb-2">
+          <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] mb-2">
             <ImageIcon size={16} />
             Fotos e vídeos da execução (opcional)
           </label>
@@ -99,11 +99,11 @@ export default function VistoriaConcluirModal({
               w-full
               rounded-xl
               border
-              border-white/10
-              bg-white/5
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
               px-4
               py-3
-              text-white
+              text-[var(--text)]
               text-sm
             "
           />
@@ -116,14 +116,14 @@ export default function VistoriaConcluirModal({
                     key={index}
                     src={midia}
                     controls
-                    className="w-full h-24 object-cover rounded-xl border border-white/10"
+                    className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
                   />
                 ) : (
                   <img
                     key={index}
                     src={midia}
                     alt={`Mídia ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-xl border border-white/10"
+                    className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
                   />
                 )
               )}

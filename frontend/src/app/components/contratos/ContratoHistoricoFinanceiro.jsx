@@ -50,21 +50,21 @@ export default function ContratoHistoricoFinanceiro({
   }, [contratoId]);
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
         Histórico Financeiro
       </h2>
 
       {carregando ? (
 
-        <div className="text-gray-400">
+        <div className="text-[var(--text-subtle)]">
           Carregando...
         </div>
 
       ) : receitasContrato.length === 0 ? (
 
-        <div className="text-gray-400">
+        <div className="text-[var(--text-subtle)]">
           Nenhuma movimentação encontrada.
         </div>
 
@@ -79,7 +79,7 @@ export default function ContratoHistoricoFinanceiro({
                 key={receita.id}
                 className="
                   border
-                  border-white/10
+                  border-[var(--border-token)]
                   rounded-2xl
                   p-5
                   flex
@@ -90,11 +90,11 @@ export default function ContratoHistoricoFinanceiro({
 
                 <div>
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
                     {receita.descricao}
                   </h3>
 
-                  <div className="text-sm text-gray-400">
+                  <div className="text-sm text-[var(--text-subtle)]">
                     {receita.categoria}
                   </div>
 

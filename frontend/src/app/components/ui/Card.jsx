@@ -26,19 +26,13 @@ export default function Card({
   const variants = {
 
     default: `
-      bg-gradient-to-br
-      from-[#202a36]/95
-      via-[#1b2430]/96
-      to-[#151c25]/96
+      bg-[var(--surface)]
 
       backdrop-blur-[24px]
     `,
 
     glass: `
-      bg-gradient-to-br
-      from-[#202a36]/92
-      via-[#1b2430]/94
-      to-[#151c25]/95
+      bg-[var(--surface)]
 
       backdrop-blur-[24px]
     `,
@@ -69,7 +63,7 @@ export default function Card({
 
         ${
           border
-            ? "border border-white/[0.07]"
+            ? "border border-[var(--border-token)]"
             : ""
         }
 

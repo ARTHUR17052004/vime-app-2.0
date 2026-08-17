@@ -68,10 +68,10 @@ export default function FinancialCard({ financeiro }) {
               bg-[#141d27]
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
               text-[13px]
-              text-gray-300
+              text-[var(--text-muted)]
 
               transition-all
 
@@ -207,7 +207,7 @@ function ResumoFinanceiro({
         rounded-[18px]
 
         border
-        border-white/[0.05]
+        border-[var(--border-token)]
 
         bg-[#161f29]
 
@@ -230,7 +230,7 @@ function ResumoFinanceiro({
         className="
           text-[14px]
           font-medium
-          text-gray-400
+          text-[var(--text-subtle)]
         "
       >
         {titulo}

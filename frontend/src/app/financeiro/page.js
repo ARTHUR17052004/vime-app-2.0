@@ -318,7 +318,7 @@ export default function FinanceiroPage() {
  if (!carregado) {
     return (
       <MainLayout>
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando dados financeiros...
         </div>
       </MainLayout>

@@ -29,7 +29,7 @@ export default function MainLayout({ children }) {
           fixed
           inset-0
           -z-10
-          bg-black/45
+          bg-[var(--surface-inset)]
           backdrop-blur-sm
         "
       />

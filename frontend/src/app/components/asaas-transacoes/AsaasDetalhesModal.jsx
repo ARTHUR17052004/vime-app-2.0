@@ -58,12 +58,12 @@ export default function AsaasDetalhesModal({
 
       <div className="-m-8">
 
-        <div className="px-8 pt-2 pb-5 border-b border-white/[0.07]">
-          <h2 className="text-2xl font-bold text-white">
+        <div className="px-8 pt-2 pb-5 border-b border-[var(--border-token)]">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Detalhes da Cobrança
           </h2>
 
-          <p className="text-gray-400 mt-1">
+          <p className="text-[var(--text-subtle)] mt-1">
             Visualização completa das informações da transação.
           </p>
         </div>
@@ -73,27 +73,27 @@ export default function AsaasDetalhesModal({
           <div className="grid md:grid-cols-2 gap-6">
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Cliente
               </label>
 
-              <p className="mt-2 font-semibold text-white">
+              <p className="mt-2 font-semibold text-[var(--text)]">
                 {transacao.cliente || "-"}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 ID Asaas
               </label>
 
-              <p className="mt-2 font-semibold text-white break-all">
+              <p className="mt-2 font-semibold text-[var(--text)] break-all">
                 {transacao.asaasPaymentId || "Ainda não enviada"}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Valor
               </label>
 
@@ -103,7 +103,7 @@ export default function AsaasDetalhesModal({
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Status
               </label>
 
@@ -115,41 +115,41 @@ export default function AsaasDetalhesModal({
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Forma de Pagamento
               </label>
 
-              <p className="mt-2 text-gray-200">
+              <p className="mt-2 text-[var(--text-1)]">
                 {transacao.formaPagamento || "-"}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Vencimento
               </label>
 
-              <p className="mt-2 text-gray-200">
+              <p className="mt-2 text-[var(--text-1)]">
                 {formatarData(transacao.vencimento)}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Data de Pagamento
               </label>
 
-              <p className="mt-2 text-gray-200">
+              <p className="mt-2 text-[var(--text-1)]">
                 {formatarData(transacao.dataPagamento)}
               </p>
             </div>
 
             <div>
-              <label className="text-sm font-semibold text-gray-400">
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
                 Sincronizada com Asaas
               </label>
 
-              <p className="mt-2 text-gray-200">
+              <p className="mt-2 text-[var(--text-1)]">
                 {transacao.enviadaAsaas ? "Sim" : "Não"}
               </p>
             </div>
@@ -158,18 +158,18 @@ export default function AsaasDetalhesModal({
 
         </div>
 
-        <div className="border-t border-white/[0.07] px-8 py-5 flex justify-end gap-4">
+        <div className="border-t border-[var(--border-token)] px-8 py-5 flex justify-end gap-4">
 
           <button
             onClick={onClose}
             className="
             border
-            border-white/[0.07]
-            text-gray-200
+            border-[var(--border-token)]
+            text-[var(--text-1)]
             rounded-xl
             px-5
             py-3
-            hover:bg-white/5
+            hover:bg-[var(--surface-2)]
             "
           >
             Fechar

@@ -48,8 +48,8 @@ const origemConfig = {
   },
   SISTEMA: {
     icon: Bell,
-    color: "text-gray-300",
-    bg: "bg-white/5",
+    color: "text-[var(--text-muted)]",
+    bg: "bg-[var(--surface-2)]",
     badge: "gray",
   },
 };
@@ -78,7 +78,7 @@ function NotificacaoItem({ notificacao, onMarcarComoLida, lida }) {
         py-5
 
         border-b
-        border-white/5
+        border-[var(--border-token)]
 
         last:border-b-0
       "
@@ -105,7 +105,7 @@ function NotificacaoItem({ notificacao, onMarcarComoLida, lida }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-[15px] font-semibold text-white">
+          <p className="text-[15px] font-semibold text-[var(--text)]">
             {notificacao.titulo}
           </p>
 
@@ -114,11 +114,11 @@ function NotificacaoItem({ notificacao, onMarcarComoLida, lida }) {
           </Badge>
         </div>
 
-        <p className="mt-1.5 text-sm text-gray-400">
+        <p className="mt-1.5 text-sm text-[var(--text-subtle)]">
           {notificacao.mensagem}
         </p>
 
-        <p className="mt-2 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-[var(--text-faint)]">
           {formatarData(notificacao.createdAt)}
         </p>
       </div>
@@ -191,9 +191,9 @@ export default function NotificacoesPage() {
       <FadeIn delay={0}>
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Notificações</h1>
+            <h1 className="text-3xl font-bold text-[var(--text)]">Notificações</h1>
 
-            <p className="mt-1 text-sm text-gray-400">
+            <p className="mt-1 text-sm text-[var(--text-subtle)]">
               Acompanhe os avisos gerados pelo sistema e integrações.
             </p>
           </div>
@@ -214,10 +214,10 @@ export default function NotificacoesPage() {
       <FadeIn delay={0.10}>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
           <Card padding="sm">
-            <p className="text-xs uppercase tracking-widest text-gray-400">
+            <p className="text-xs uppercase tracking-widest text-[var(--text-subtle)]">
               Não lidas
             </p>
-            <p className="mt-2 text-3xl font-bold text-white">
+            <p className="mt-2 text-3xl font-bold text-[var(--text)]">
               {naoLidas.length}
             </p>
           </Card>
@@ -231,12 +231,12 @@ export default function NotificacoesPage() {
             return (
               <Card key={valor} padding="sm">
                 <div className="flex items-center justify-between">
-                  <p className="text-xs uppercase tracking-widest text-gray-400">
+                  <p className="text-xs uppercase tracking-widest text-[var(--text-subtle)]">
                     {label}
                   </p>
                   <Icone size={16} className={config.color} />
                 </div>
-                <p className="mt-2 text-3xl font-bold text-white">{qtd}</p>
+                <p className="mt-2 text-3xl font-bold text-[var(--text)]">{qtd}</p>
               </Card>
             );
           })}
@@ -263,7 +263,7 @@ export default function NotificacoesPage() {
                 ${
                   aba === "nao-lidas"
                     ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                    : "text-gray-400 hover:text-white"
+                    : "text-[var(--text-subtle)] hover:text-[var(--text)]"
                 }
               `}
             >
@@ -286,7 +286,7 @@ export default function NotificacoesPage() {
                 ${
                   aba === "historico"
                     ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                    : "text-gray-400 hover:text-white"
+                    : "text-[var(--text-subtle)] hover:text-[var(--text)]"
                 }
               `}
             >
@@ -314,8 +314,8 @@ export default function NotificacoesPage() {
 
                   ${
                     origemFiltro === valor
-                      ? "bg-white/10 text-white border-white/20"
-                      : "text-gray-400 border-white/10 hover:text-white"
+                      ? "bg-[var(--surface-3)] text-[var(--text)] border-[var(--border-strong)]"
+                      : "text-[var(--text-subtle)] border-[var(--border-token)] hover:text-[var(--text)]"
                   }
                 `}
               >
@@ -330,7 +330,7 @@ export default function NotificacoesPage() {
       <FadeIn delay={0.30}>
         <Card padding="none">
           {carregandoAtual && (
-            <div className="py-16 text-center text-sm text-gray-500">
+            <div className="py-16 text-center text-sm text-[var(--text-faint)]">
               Carregando...
             </div>
           )}

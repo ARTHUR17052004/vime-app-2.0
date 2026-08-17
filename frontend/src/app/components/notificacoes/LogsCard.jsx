@@ -48,7 +48,7 @@ function StatusIcon({ status }) {
 
 export default function LogsCard() {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
 
       <div className="mb-6 flex items-center justify-between">
 
@@ -65,7 +65,7 @@ export default function LogsCard() {
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Histórico de Envios
             </h2>
 
@@ -77,7 +77,7 @@ export default function LogsCard() {
 
         </div>
 
-        <button className="flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-white transition hover:bg-red-700">
+        <button className="flex items-center gap-2 rounded-2xl bg-red-600 px-4 py-3 text-[var(--text)] transition hover:bg-red-700">
 
           <Trash2 size={18} />
 
@@ -93,7 +93,7 @@ export default function LogsCard() {
 
           <div
             key={index}
-            className="flex items-center justify-between rounded-2xl border border-white/10 bg-slate-800/40 p-4"
+            className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4"
           >
 
             <div className="flex items-center gap-4">
@@ -102,7 +102,7 @@ export default function LogsCard() {
 
               <div>
 
-                <h3 className="font-semibold text-white">
+                <h3 className="font-semibold text-[var(--text)]">
 
                   {log.destinatario}
 
@@ -136,7 +136,7 @@ export default function LogsCard() {
                 {log.status}
               </span>
 
-              <button className="rounded-xl bg-slate-700 p-2 text-white transition hover:bg-slate-600">
+              <button className="rounded-xl bg-slate-700 p-2 text-[var(--text)] transition hover:bg-slate-600">
 
                 <Eye size={18} />
 

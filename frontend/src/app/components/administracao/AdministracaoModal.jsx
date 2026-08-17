@@ -42,7 +42,7 @@ export default function AdministracaoModal({
                 className="
                   text-3xl
                   font-black
-                  text-white
+                  text-[var(--text)]
                 "
               >
 
@@ -57,7 +57,7 @@ export default function AdministracaoModal({
               <p
                 className="
                   mt-2
-                  text-gray-400
+                  text-[var(--text-subtle)]
                 "
               >
 

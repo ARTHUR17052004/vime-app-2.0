@@ -38,9 +38,9 @@ export default function ResidenciaFiltro({
         rounded-2xl
 
         border
-        border-white/10
+        border-[var(--border-token)]
 
-        bg-white/5
+        bg-[var(--surface-2)]
 
         px-5
 
@@ -60,7 +60,7 @@ export default function ResidenciaFiltro({
 
           outline-none
 
-          text-white
+          text-[var(--text)]
 
           text-sm
         "

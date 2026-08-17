@@ -13,11 +13,82 @@
 
   --primary: #12d98b;
   --primary-dark: #0ca76b;
+  --secondary: #1f2937;
 
   --glass: rgba(18, 28, 36, .56);
   --glass-border: rgba(255,255,255,.08);
 
   --card-radius:22px;
+
+  /* ============ TOKENS DE TEMA ============
+     Valores padrão = exatamente o visual escuro atual
+     (zero mudança pra quem já usa o app assim). O tema
+     "claro" sobrescreve tudo abaixo via [data-theme="light"]. */
+
+  --overlay-bg: linear-gradient(rgba(7,14,10,.52), rgba(7,14,10,.58));
+
+  --surface: rgba(15, 23, 42, .80);
+  --surface-2: rgba(255, 255, 255, .05);
+  --surface-3: rgba(255, 255, 255, .10);
+  --surface-inset: rgba(0, 0, 0, .20);
+
+  --border-token: rgba(255, 255, 255, .10);
+  --border-strong: rgba(255, 255, 255, .20);
+
+  --text: #ffffff;
+  --text-1: #e5e7eb;
+  --text-muted: #d1d5db;
+  --text-subtle: #9ca3af;
+  --text-faint: #6b7280;
+  --text-faint-2: #4b5563;
+
+  --input-bg: rgba(255, 255, 255, .05);
+  --input-border: rgba(255, 255, 255, .08);
+  --input-text: #ffffff;
+  --input-placeholder: #aab2b8;
+
+  --select-option-bg: #151c25;
+
+  --glass-grad-1: rgba(34,44,58,.78);
+  --glass-grad-2: rgba(15,20,31,.66);
+  --glass-border-2: rgba(255,255,255,.07);
+
+}
+
+:root[data-theme="light"] {
+
+  color-scheme: light;
+
+  --background: #f4f6f5;
+  --foreground: #0f172a;
+
+  --overlay-bg: linear-gradient(rgba(244,246,245,.86), rgba(244,246,245,.92));
+
+  --surface: rgba(255, 255, 255, .92);
+  --surface-2: rgba(15, 23, 42, .04);
+  --surface-3: rgba(15, 23, 42, .07);
+  --surface-inset: rgba(15, 23, 42, .06);
+
+  --border-token: rgba(15, 23, 42, .12);
+  --border-strong: rgba(15, 23, 42, .20);
+
+  --text: #0f172a;
+  --text-1: #1e293b;
+  --text-muted: #334155;
+  --text-subtle: #64748b;
+  --text-faint: #64748b;
+  --text-faint-2: #94a3b8;
+
+  --input-bg: rgba(15, 23, 42, .035);
+  --input-border: rgba(15, 23, 42, .12);
+  --input-text: #0f172a;
+  --input-placeholder: #7c8794;
+
+  --select-option-bg: #ffffff;
+
+  --glass-grad-1: rgba(255,255,255,.86);
+  --glass-grad-2: rgba(241,245,244,.78);
+  --glass-border-2: rgba(15,23,42,.08);
 
 }
 
@@ -61,19 +132,13 @@
 
 body{
 
-  color:white;
+  color:var(--text);
 
   font-family:var(--font-geist-sans),sans-serif;
 
   background:
 
-    linear-gradient(
-
-      rgba(7,14,10,.52),
-
-      rgba(7,14,10,.58)
-
-    ),
+    var(--overlay-bg),
 
     url("/images/backgrounds/default.jpg");
 
@@ -136,9 +201,9 @@ body{
 
       145deg,
 
-      rgba(34,44,58,.78),
+      var(--glass-grad-1),
 
-      rgba(15,20,31,.66)
+      var(--glass-grad-2)
 
     );
 
@@ -146,7 +211,7 @@ body{
 
   -webkit-backdrop-filter:blur(26px);
 
-  border:1px solid rgba(255,255,255,.07);
+  border:1px solid var(--glass-border-2);
 
   border-radius:22px;
 
@@ -250,11 +315,11 @@ body{
 
 input{
 
-  background:rgba(255,255,255,.05)!important;
+  background:var(--input-bg)!important;
 
-  border:1px solid rgba(255,255,255,.08)!important;
+  border:1px solid var(--input-border)!important;
 
-  color:white!important;
+  color:var(--input-text)!important;
 
   transition:.25s;
 
@@ -274,17 +339,17 @@ input:focus{
 
 input::placeholder{
 
-  color:#aab2b8;
+  color:var(--input-placeholder);
 
 }
 
 select{
 
-  background:rgba(255,255,255,.05)!important;
+  background:var(--input-bg)!important;
 
-  border:1px solid rgba(255,255,255,.08)!important;
+  border:1px solid var(--input-border)!important;
 
-  color:white!important;
+  color:var(--input-text)!important;
 
   transition:.25s;
 
@@ -304,9 +369,9 @@ select:focus{
 
 select option{
 
-  background:#151c25;
+  background:var(--select-option-bg);
 
-  color:white;
+  color:var(--input-text);
 
 }
 
@@ -350,7 +415,7 @@ a{
 
 table{
 
-  color:white;
+  color:var(--text);
 
 }
 

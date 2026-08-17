@@ -15,8 +15,8 @@ export default function SidebarSearch({ collapsed }) {
           h-12
           rounded-2xl
           border
-          border-white/10
-          bg-white/5
+          border-[var(--border-token)]
+          bg-[var(--surface-2)]
 
           flex
           items-center
@@ -29,7 +29,7 @@ export default function SidebarSearch({ collapsed }) {
 
         <Search
           size={18}
-          className="text-gray-400"
+          className="text-[var(--text-subtle)]"
         />
 
         <input
@@ -38,8 +38,8 @@ export default function SidebarSearch({ collapsed }) {
             flex-1
             bg-transparent
             outline-none
-            text-white
-            placeholder:text-gray-500
+            text-[var(--text)]
+            placeholder:text-[var(--text-faint)]
           "
         />
 

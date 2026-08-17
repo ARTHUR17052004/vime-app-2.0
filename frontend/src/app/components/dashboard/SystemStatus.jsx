@@ -58,7 +58,7 @@ export default function SystemStatus() {
             uppercase
             tracking-[0.30em]
             text-[11px]
-            text-gray-400
+            text-[var(--text-subtle)]
             mb-2
           "
         >
@@ -69,7 +69,7 @@ export default function SystemStatus() {
           className="
             text-4xl
             font-bold
-            text-white
+            text-[var(--text)]
             leading-none
           "
         >
@@ -96,8 +96,8 @@ export default function SystemStatus() {
                 justify-between
                 rounded-2xl
                 border
-                border-white/10
-                bg-white/5
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
                 px-5
                 py-4
 
@@ -105,7 +105,7 @@ export default function SystemStatus() {
                 duration-300
 
                 hover:border-emerald-500/30
-                hover:bg-white/8
+                hover:bg-[var(--surface-2)]
               "
             >
 
@@ -136,11 +136,11 @@ export default function SystemStatus() {
 
                 <div>
 
-                  <h3 className="font-semibold text-white">
+                  <h3 className="font-semibold text-[var(--text)]">
                     {item.nome}
                   </h3>
 
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-[var(--text-subtle)]">
                     {item.descricao}
                   </p>
 

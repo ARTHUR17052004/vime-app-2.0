@@ -46,7 +46,7 @@ export default function Loading({
         className="
           text-sm
           font-medium
-          text-gray-400
+          text-[var(--text-subtle)]
           animate-pulse
         "
       >

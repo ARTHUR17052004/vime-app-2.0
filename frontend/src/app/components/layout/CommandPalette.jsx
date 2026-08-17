@@ -138,7 +138,7 @@ export default function CommandPalette() {
         items-start
         justify-center
 
-        bg-black/60
+        bg-[var(--surface-inset)]
         backdrop-blur-md
 
         pt-[12vh]
@@ -164,12 +164,9 @@ export default function CommandPalette() {
           rounded-[26px]
 
           border
-          border-white/[0.07]
+          border-[var(--border-token)]
 
-          bg-gradient-to-br
-          from-[#202a36]/97
-          via-[#1b2430]/98
-          to-[#151c25]/98
+          bg-[var(--surface)]
 
           backdrop-blur-3xl
 
@@ -194,12 +191,12 @@ export default function CommandPalette() {
             h-16
 
             border-b
-            border-white/5
+            border-[var(--border-token)]
 
             shrink-0
           "
         >
-          <Search size={18} className="text-gray-400 shrink-0" />
+          <Search size={18} className="text-[var(--text-subtle)] shrink-0" />
 
           <input
             ref={inputRef}
@@ -219,9 +216,9 @@ export default function CommandPalette() {
 
               text-[15px]
 
-              text-white
+              text-[var(--text)]
 
-              placeholder:text-gray-500
+              placeholder:text-[var(--text-faint)]
             "
           />
 
@@ -232,16 +229,16 @@ export default function CommandPalette() {
               rounded-md
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/5
+              bg-[var(--surface-2)]
 
               px-2
               py-1
 
               text-[11px]
 
-              text-gray-400
+              text-[var(--text-subtle)]
             "
           >
             Esc
@@ -251,7 +248,7 @@ export default function CommandPalette() {
         <div className="flex-1 overflow-y-auto py-2">
           {paginasFiltradas.length > 0 && (
             <div className="px-3 py-2">
-              <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">
+              <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-faint)]">
                 Páginas
               </p>
 
@@ -269,12 +266,12 @@ export default function CommandPalette() {
 
           {query.trim().length >= 2 && (
             <div className="px-3 py-2">
-              <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-500">
+              <p className="px-3 pb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-faint)]">
                 {carregando ? "Buscando..." : "Resultados"}
               </p>
 
               {!carregando && resultadosDados.length === 0 && (
-                <p className="px-3 py-3 text-sm text-gray-500">
+                <p className="px-3 py-3 text-sm text-[var(--text-faint)]">
                   Nenhum resultado encontrado para "{query}".
                 </p>
               )}
@@ -296,7 +293,7 @@ export default function CommandPalette() {
           )}
 
           {query.trim().length < 2 && paginasFiltradas.length === 0 && (
-            <p className="px-6 py-8 text-center text-sm text-gray-500">
+            <p className="px-6 py-8 text-center text-sm text-[var(--text-faint)]">
               Digite para buscar em todo o sistema.
             </p>
           )}
@@ -312,10 +309,10 @@ export default function CommandPalette() {
             h-11
 
             border-t
-            border-white/5
+            border-[var(--border-token)]
 
             text-[11px]
-            text-gray-500
+            text-[var(--text-faint)]
 
             shrink-0
           "
@@ -359,7 +356,7 @@ function ResultRow({ item, ativo, onHover, onClick }) {
 
         transition-colors
 
-        ${ativo ? "bg-emerald-500/10" : "hover:bg-white/5"}
+        ${ativo ? "bg-emerald-500/10" : "hover:bg-[var(--surface-2)]"}
       `}
     >
       <div
@@ -375,19 +372,19 @@ function ResultRow({ item, ativo, onHover, onClick }) {
 
           shrink-0
 
-          ${ativo ? "bg-emerald-500/15 text-emerald-400" : "bg-white/5 text-gray-400"}
+          ${ativo ? "bg-emerald-500/15 text-emerald-400" : "bg-[var(--surface-2)] text-[var(--text-subtle)]"}
         `}
       >
         {Icon ? <Icon size={16} /> : <Search size={14} />}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-white">
+        <p className="truncate text-sm font-medium text-[var(--text)]">
           {item.titulo}
         </p>
 
         {item.subtitulo && (
-          <p className="truncate text-xs text-gray-500">
+          <p className="truncate text-xs text-[var(--text-faint)]">
             {item.subtitulo}
           </p>
         )}
@@ -399,7 +396,7 @@ function ResultRow({ item, ativo, onHover, onClick }) {
 
           rounded-md
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
           px-2
           py-1
@@ -409,7 +406,7 @@ function ResultRow({ item, ativo, onHover, onClick }) {
           uppercase
           tracking-wide
 
-          text-gray-400
+          text-[var(--text-subtle)]
         "
       >
         {item.label}

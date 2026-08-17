@@ -59,21 +59,21 @@ export default function ContratoHistoricoEventos({
   }, [contrato.id]);
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
         Histórico de Eventos
       </h2>
 
       {carregando ? (
 
-        <div className="text-gray-400">
+        <div className="text-[var(--text-subtle)]">
           Carregando...
         </div>
 
       ) : eventosContrato.length === 0 ? (
 
-        <div className="text-gray-400">
+        <div className="text-[var(--text-subtle)]">
           Nenhum evento encontrado.
         </div>
 
@@ -88,17 +88,17 @@ export default function ContratoHistoricoEventos({
                 key={evento.id}
                 className="
                   border
-                  border-white/10
+                  border-[var(--border-token)]
                   rounded-2xl
                   p-5
                 "
               >
 
-                <div className="text-white font-semibold">
+                <div className="text-[var(--text)] font-semibold">
                   {ACAO_LABEL[evento.acao] || evento.acao}
                 </div>
 
-                <div className="text-sm text-gray-400 mt-2">
+                <div className="text-sm text-[var(--text-subtle)] mt-2">
                   {new Date(evento.createdAt).toLocaleString("pt-BR")}
                 </div>
 

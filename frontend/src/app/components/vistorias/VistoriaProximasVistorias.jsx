@@ -52,9 +52,9 @@ export default function VistoriaProximasVistorias({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-      <h2 className="text-2xl font-bold text-white mb-6">
+      <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
         Próximas Execuções
 
@@ -63,7 +63,7 @@ export default function VistoriaProximasVistorias({
       {proximas.length ===
       0 ? (
 
-        <p className="text-gray-300">
+        <p className="text-[var(--text-muted)]">
           Nenhuma vistoria cadastrada.
         </p>
 
@@ -87,7 +87,7 @@ export default function VistoriaProximasVistorias({
                   }
                   className="
                     border
-                    border-white/10
+                    border-[var(--border-token)]
                     rounded-2xl
                     p-5
                   "
@@ -97,7 +97,7 @@ export default function VistoriaProximasVistorias({
 
                     <div>
 
-                      <h3 className="font-bold text-white text-lg">
+                      <h3 className="font-bold text-[var(--text)] text-lg">
 
                         {
                           vistoria.nomeVistoria
@@ -105,7 +105,7 @@ export default function VistoriaProximasVistorias({
 
                       </h3>
 
-                      <div className="text-gray-400 mt-1">
+                      <div className="text-[var(--text-subtle)] mt-1">
 
                         Responsável:
                         {" "}
@@ -115,7 +115,7 @@ export default function VistoriaProximasVistorias({
 
                       </div>
 
-                      <div className="text-gray-400">
+                      <div className="text-[var(--text-subtle)]">
 
                         Periodicidade:
                         {" "}
@@ -137,7 +137,7 @@ export default function VistoriaProximasVistorias({
 
                       </div>
 
-                      <div className="text-sm text-gray-400 mt-1">
+                      <div className="text-sm text-[var(--text-subtle)] mt-1">
 
                         {dias > 0
                           ? `${dias} dia(s)`

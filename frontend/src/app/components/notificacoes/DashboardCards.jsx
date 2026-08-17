@@ -39,7 +39,7 @@ export default function DashboardCards() {
         return (
           <div
             key={index}
-            className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl p-6 shadow-xl transition-all hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-2xl"
+            className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl transition-all hover:-translate-y-1 hover:border-emerald-500/30 hover:shadow-2xl"
           >
             <div className="flex items-center justify-between">
               <div>
@@ -47,7 +47,7 @@ export default function DashboardCards() {
                   {card.titulo}
                 </p>
 
-                <h2 className="mt-2 text-3xl font-bold text-white">
+                <h2 className="mt-2 text-3xl font-bold text-[var(--text)]">
                   {card.valor}
                 </h2>
               </div>

@@ -48,21 +48,18 @@ export default function InquilinoTable({
           className="
             rounded-3xl
             border
-            border-white/[0.07]
-            bg-gradient-to-br
-            from-[#202a36]/95
-            via-[#1b2430]/96
-            to-[#151c25]/96
+            border-[var(--border-token)]
+            bg-[var(--surface)]
             backdrop-blur-xl
             p-12
             text-center
           "
         >
-        <h2 className="text-2xl font-semibold text-white mb-3">
+        <h2 className="text-2xl font-semibold text-[var(--text)] mb-3">
           Módulo Inquilinos
         </h2>
 
-        <p className="text-gray-400">
+        <p className="text-[var(--text-subtle)]">
           Nenhum inquilino cadastrado ainda.
         </p>
       </div>
@@ -71,8 +68,8 @@ export default function InquilinoTable({
 
   return (
     <Table>
-      <table className="w-full text-gray-200">
-        <thead className="border-b border-white/10 text-gray-400 uppercase text-xs tracking-[0.25em]">
+      <table className="w-full text-[var(--text-1)]">
+        <thead className="border-b border-[var(--border-token)] text-[var(--text-subtle)] uppercase text-xs tracking-[0.25em]">
           <tr>
             <th
               className="
@@ -85,7 +82,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -104,7 +101,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -123,7 +120,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -142,7 +139,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -161,7 +158,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -180,7 +177,7 @@ export default function InquilinoTable({
 
                 tracking-[0.22em]
 
-                text-gray-400
+                text-[var(--text-subtle)]
 
                 font-semibold
               "
@@ -196,8 +193,8 @@ export default function InquilinoTable({
               key={inquilino.id}
               className="
               border-b
-              border-white/5
-              hover:bg-white/5
+              border-[var(--border-token)]
+              hover:bg-[var(--surface-2)]
               transition
               "
             >
@@ -206,7 +203,7 @@ export default function InquilinoTable({
                   {inquilino.nome}
                 </div>
 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-[var(--text-faint)]">
                   CPF: {inquilino.cpf}
                 </div>
               </td>
@@ -222,7 +219,7 @@ export default function InquilinoTable({
                   {inquilino.email || "-"}
                 </div>
 
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-[var(--text-faint)]">
                   {inquilino.telefone || "-"}
                 </div>
               </td>
@@ -265,9 +262,9 @@ export default function InquilinoTable({
 
                     rounded-xl
 
-                    bg-white/5
+                    bg-[var(--surface-2)]
 
-                    hover:bg-white/10
+                    hover:bg-[var(--surface-3)]
 
                     transition
 
@@ -275,7 +272,7 @@ export default function InquilinoTable({
                     items-center
                     justify-center
 
-                    text-white
+                    text-[var(--text)]
                     text-xl
                   "
                 >
@@ -298,8 +295,8 @@ export default function InquilinoTable({
                       text-left
                       px-4
                       py-3
-                      hover:bg-white/5
-                      text-gray-300
+                      hover:bg-[var(--surface-2)]
+                      text-[var(--text-muted)]
                       transition
                     "
                   >

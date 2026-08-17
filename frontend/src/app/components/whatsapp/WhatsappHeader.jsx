@@ -12,7 +12,7 @@ export default function WhatsappHeader() {
 
         <div>
 
-          <h1 className="flex items-center gap-3 text-4xl font-black text-white">
+          <h1 className="flex items-center gap-3 text-4xl font-black text-[var(--text)]">
 
             <MessageCircle
               size={38}
@@ -23,7 +23,7 @@ export default function WhatsappHeader() {
 
           </h1>
 
-          <p className="mt-2 text-gray-400">
+          <p className="mt-2 text-[var(--text-subtle)]">
 
             Central de atendimento, automações e integração com WhatsApp.
 

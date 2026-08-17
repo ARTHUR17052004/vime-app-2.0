@@ -101,15 +101,15 @@ export default function AsaasDiagnostico() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-[24px] rounded-2xl border border-white/[0.07]">
+    <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)]">
 
-      <div className="px-8 py-6 border-b border-white/[0.07] flex items-center justify-between">
+      <div className="px-8 py-6 border-b border-[var(--border-token)] flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-2xl font-bold text-[var(--text)]">
             Diagnóstico da Integração
           </h2>
 
-          <p className="text-gray-400 mt-2">
+          <p className="text-[var(--text-subtle)] mt-2">
             Verifique rapidamente a saúde da integração com o Asaas.
           </p>
         </div>
@@ -134,10 +134,10 @@ export default function AsaasDiagnostico() {
               justify-between
               items-center
               border
-              border-white/[0.07]
+              border-[var(--border-token)]
               rounded-xl
               p-4
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
               transition
             "
           >
@@ -148,13 +148,13 @@ export default function AsaasDiagnostico() {
                 className={`w-3 h-3 rounded-full ${item.cor}`}
               />
 
-              <span className="font-semibold text-gray-200">
+              <span className="font-semibold text-[var(--text-1)]">
                 {item.nome}
               </span>
 
             </div>
 
-            <span className="font-semibold text-white">
+            <span className="font-semibold text-[var(--text)]">
               {item.status}
             </span>
 
@@ -170,9 +170,9 @@ export default function AsaasDiagnostico() {
 
       </div>
 
-      <div className="border-t border-white/[0.07] px-8 py-5 flex justify-between">
+      <div className="border-t border-[var(--border-token)] px-8 py-5 flex justify-between">
 
-        <span className="text-gray-400">
+        <span className="text-[var(--text-subtle)]">
           Última sincronização
         </span>
 

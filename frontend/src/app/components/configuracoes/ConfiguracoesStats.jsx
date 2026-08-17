@@ -47,20 +47,20 @@ export default function ConfiguracoesStats() {
 
                     <div
                         key={item.titulo}
-                        className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6 hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-2xl transition-all"
+                        className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6 hover:border-emerald-500/30 hover:-translate-y-1 hover:shadow-2xl transition-all"
                     >
 
                         <div className="flex items-center justify-between">
 
                             <div>
 
-                                <p className="text-gray-400 text-sm">
+                                <p className="text-[var(--text-subtle)] text-sm">
 
                                     {item.titulo}
 
                                 </p>
 
-                                <h2 className="text-2xl font-bold text-white mt-2">
+                                <h2 className="text-2xl font-bold text-[var(--text)] mt-2">
 
                                     {item.valor}
 

@@ -31,7 +31,7 @@ export default function PrimaryButton({
         from-emerald-600
         to-emerald-500
 
-        text-white
+        text-[var(--text)]
         font-semibold
 
         shadow-lg

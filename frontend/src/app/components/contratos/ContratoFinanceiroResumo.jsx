@@ -63,7 +63,7 @@ export default function ContratoFinanceiroResumo({
       titulo: "Status",
       valor: contrato?.status,
       icone: FileText,
-      cor: "bg-white/5 text-gray-300",
+      cor: "bg-[var(--surface-2)] text-[var(--text-muted)]",
     },
   ];
 
@@ -74,18 +74,18 @@ export default function ContratoFinanceiroResumo({
 
         <div
           key={card.titulo}
-          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6"
+          className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6"
         >
 
           <div className="flex justify-between items-center">
 
             <div>
 
-              <p className="text-gray-400 text-sm">
+              <p className="text-[var(--text-subtle)] text-sm">
                 {card.titulo}
               </p>
 
-              <h2 className="text-2xl font-bold text-white mt-3">
+              <h2 className="text-2xl font-bold text-[var(--text)] mt-3">
                 {card.valor}
               </h2>
 

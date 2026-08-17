@@ -147,6 +147,7 @@ model Contrato {
   indiceReajuste String?
   status         String    @default("ATIVO")
   observacoes    String?
+  clicksignDocumentKey String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
@@ -499,6 +500,12 @@ model Configuracao {
 
   corPrimaria      String? @default("#F4C430")
   corSecundaria    String? @default("#1F2937")
+
+  nomeSistema        String?
+  nomeEmpresa        String?
+  textoLogin         String?
+  textoRodape        String?
+  mensagemBoasVindas String?
 
   smtpHost         String?
   smtpPorta        Int?

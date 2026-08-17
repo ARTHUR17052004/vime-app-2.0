@@ -15,7 +15,7 @@ export default function TemaCard({
   salvando = false,
 }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-slate-900/80 backdrop-blur-xl shadow-xl p-6">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
 
       <div className="flex items-center gap-3 mb-8">
 
@@ -30,13 +30,13 @@ export default function TemaCard({
 
         <div>
 
-          <h2 className="text-xl font-semibold text-white">
+          <h2 className="text-xl font-semibold text-[var(--text)]">
 
             Tema do Sistema
 
           </h2>
 
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-[var(--text-subtle)]">
 
             Escolha a aparência do VIME APP.
 
@@ -63,8 +63,8 @@ export default function TemaCard({
                 rounded-2xl border p-6 transition-all
                 ${
                   ativo
-                    ? "border-emerald-500 bg-slate-800/70"
-                    : "border-white/10 bg-slate-800/70 hover:border-emerald-500/40"
+                    ? "border-emerald-500 bg-[var(--surface)]"
+                    : "border-[var(--border-token)] bg-[var(--surface)] hover:border-emerald-500/40"
                 }
               `}
             >
@@ -74,7 +74,7 @@ export default function TemaCard({
                 className={`mx-auto ${tema.color}`}
               />
 
-              <p className="mt-4 text-white font-medium">
+              <p className="mt-4 text-[var(--text)] font-medium">
 
                 {tema.label}
 
@@ -92,7 +92,7 @@ export default function TemaCard({
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Cor Principal
 
@@ -102,14 +102,14 @@ export default function TemaCard({
             type="color"
             value={dados.corPrimaria || "#10b981"}
             onChange={(e) => onChange("corPrimaria", e.target.value)}
-            className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-transparent cursor-pointer"
+            className="mt-2 h-12 w-full rounded-xl border border-[var(--border-token)] bg-transparent cursor-pointer"
           />
 
         </div>
 
         <div>
 
-          <label className="text-sm text-gray-300">
+          <label className="text-sm text-[var(--text-muted)]">
 
             Cor Secundária
 
@@ -119,7 +119,7 @@ export default function TemaCard({
             type="color"
             value={dados.corSecundaria || "#1e293b"}
             onChange={(e) => onChange("corSecundaria", e.target.value)}
-            className="mt-2 h-12 w-full rounded-xl border border-white/10 bg-transparent cursor-pointer"
+            className="mt-2 h-12 w-full rounded-xl border border-[var(--border-token)] bg-transparent cursor-pointer"
           />
 
         </div>
@@ -132,7 +132,7 @@ export default function TemaCard({
         className="
           mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
           disabled:opacity-50 disabled:cursor-not-allowed
-          transition px-6 py-3 text-white
+          transition px-6 py-3 text-[var(--text)]
         "
       >
 

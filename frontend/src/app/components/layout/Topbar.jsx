@@ -33,9 +33,9 @@ export default function Topbar() {
         rounded-[26px]
 
         border
-        border-white/10
+        border-[var(--border-token)]
 
-        bg-slate-900/45
+        bg-[var(--surface)]
 
         backdrop-blur-3xl
 
@@ -65,18 +65,18 @@ export default function Topbar() {
 
             rounded-2xl
 
-            bg-white/5
+            bg-[var(--surface-2)]
 
             flex
             items-center
             justify-center
 
-            hover:bg-white/10
+            hover:bg-[var(--surface-3)]
 
             transition
           "
         >
-          <Menu size={20} className="text-white" />
+          <Menu size={20} className="text-[var(--text)]" />
         </button>
 
         <div className="ml-3 md:ml-5">
@@ -91,7 +91,7 @@ export default function Topbar() {
 
               tracking-[0.38em]
 
-              text-gray-400
+              text-[var(--text-subtle)]
             "
           >
             Dashboard
@@ -105,7 +105,7 @@ export default function Topbar() {
 
               font-bold
 
-              text-white
+              text-[var(--text)]
             "
           >
             VIME 2.0
@@ -129,9 +129,9 @@ export default function Topbar() {
             rounded-xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/5
+            bg-[var(--surface-2)]
 
             px-4
 
@@ -141,11 +141,11 @@ export default function Topbar() {
 
             transition
 
-            hover:bg-white/10
-            hover:border-white/20
+            hover:bg-[var(--surface-3)]
+            hover:border-[var(--border-strong)]
           "
         >
-          <Search size={17} className="text-gray-400 shrink-0" />
+          <Search size={17} className="text-[var(--text-subtle)] shrink-0" />
 
           <span
             className="
@@ -155,7 +155,7 @@ export default function Topbar() {
 
               text-sm
 
-              text-gray-500
+              text-[var(--text-faint)]
             "
           >
             Buscar...
@@ -168,16 +168,16 @@ export default function Topbar() {
               rounded-md
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/5
+              bg-[var(--surface-2)]
 
               px-1.5
               py-0.5
 
               text-[10px]
 
-              text-gray-500
+              text-[var(--text-faint)]
             "
           >
             Ctrl K
@@ -209,7 +209,7 @@ export default function Topbar() {
 
             text-sm
             font-bold
-            text-white
+            text-[var(--text)]
 
             shadow-lg
             shadow-emerald-900/30
@@ -223,7 +223,7 @@ export default function Topbar() {
             className="
               text-[14px]
               font-semibold
-              text-white
+              text-[var(--text)]
             "
           >
             {nome}
@@ -232,7 +232,7 @@ export default function Topbar() {
           <p
             className="
               text-[11px]
-              text-gray-400
+              text-[var(--text-subtle)]
             "
           >
             {perfil}
@@ -249,11 +249,11 @@ export default function Topbar() {
               flex
               items-center
               justify-center
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
               transition
             "
           >
-            <ChevronDown size={15} className="text-gray-400" />
+            <ChevronDown size={15} className="text-[var(--text-subtle)]" />
           </button>
 
           {menuOpen && (
@@ -267,9 +267,9 @@ export default function Topbar() {
                 rounded-2xl
 
                 border
-                border-white/10
+                border-[var(--border-token)]
 
-                bg-slate-900/95
+                bg-[var(--surface)]
 
                 backdrop-blur-xl
 
@@ -292,9 +292,9 @@ export default function Topbar() {
                   px-5
                   py-4
 
-                  text-white
+                  text-[var(--text)]
 
-                  hover:bg-white/5
+                  hover:bg-[var(--surface-2)]
                 "
               >
                 <User size={17} />
@@ -315,9 +315,9 @@ export default function Topbar() {
                   px-5
                   py-4
 
-                  text-white
+                  text-[var(--text)]
 
-                  hover:bg-white/5
+                  hover:bg-[var(--surface-2)]
                 "
               >
                 <Settings size={17} />

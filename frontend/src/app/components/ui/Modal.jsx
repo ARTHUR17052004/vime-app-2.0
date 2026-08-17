@@ -80,7 +80,7 @@ export default function Modal({
         items-center
         justify-center
 
-        bg-black/60
+        bg-[var(--surface-inset)]
 
         backdrop-blur-md
 
@@ -109,12 +109,9 @@ export default function Modal({
           rounded-[26px]
 
           border
-          border-white/5
+          border-[var(--border-token)]
 
-          bg-gradient-to-br
-          from-[#1b2728]/90
-          via-[#1a242c]/88
-          to-[#151d26]/90
+          bg-[var(--surface)]
 
           backdrop-blur-3xl
 
@@ -134,7 +131,7 @@ export default function Modal({
               justify-between
 
               border-b
-              border-white/5
+              border-[var(--border-token)]
 
               px-8
               py-6
@@ -147,7 +144,7 @@ export default function Modal({
                   className="
                     text-3xl
                     font-bold
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {title}
@@ -159,7 +156,7 @@ export default function Modal({
                   className="
                     mt-2
                     text-sm
-                    text-gray-400
+                    text-[var(--text-subtle)]
                   "
                 >
                   {subtitle}
@@ -181,12 +178,12 @@ export default function Modal({
 
                   rounded-xl
 
-                  bg-white/5
+                  bg-[var(--surface-2)]
 
                   border
-                  border-white/5
+                  border-[var(--border-token)]
 
-                  text-gray-400
+                  text-[var(--text-subtle)]
 
                   transition-all
                   duration-300
@@ -221,7 +218,7 @@ export default function Modal({
           <div
             className="
               border-t
-              border-white/5
+              border-[var(--border-token)]
 
               px-8
               py-5

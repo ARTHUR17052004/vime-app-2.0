@@ -17,11 +17,11 @@ export default function SolicitacaoFiltros({
 
   return (
 
-    <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6 mb-8">
+    <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6 mb-8">
 
       <div className="flex items-center justify-between mb-6">
 
-        <h2 className="text-xl font-bold text-white">
+        <h2 className="text-xl font-bold text-[var(--text)]">
           Filtros
         </h2>
 
@@ -32,9 +32,9 @@ export default function SolicitacaoFiltros({
             py-2
             rounded-xl
             border
-            border-white/10
-            text-gray-300
-            hover:bg-white/5
+            border-[var(--border-token)]
+            text-[var(--text-muted)]
+            hover:bg-[var(--surface-2)]
             transition
           "
         >
@@ -47,7 +47,7 @@ export default function SolicitacaoFiltros({
 
         <div>
 
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">
             Pesquisar
           </label>
 
@@ -74,7 +74,7 @@ export default function SolicitacaoFiltros({
 
         <div>
 
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-[var(--text-muted)] mb-2">
             Status
           </label>
 

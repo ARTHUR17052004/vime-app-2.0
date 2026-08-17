@@ -35,9 +35,9 @@ export default function LocadorFilters({
           rounded-2xl
 
           border
-          border-white/10
+          border-[var(--border-token)]
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
           px-5
 
@@ -46,7 +46,7 @@ export default function LocadorFilters({
       >
         <Search
           size={20}
-          className="text-gray-400"
+          className="text-[var(--text-subtle)]"
         />
 
         <input
@@ -64,9 +64,9 @@ export default function LocadorFilters({
 
             outline-none
 
-            text-white
+            text-[var(--text)]
 
-            placeholder:text-gray-500
+            placeholder:text-[var(--text-faint)]
           "
         />
       </div>

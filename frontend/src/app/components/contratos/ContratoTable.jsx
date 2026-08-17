@@ -67,9 +67,9 @@ export default function ContratoTable({
         className="
           rounded-3xl
           border
-          border-white/10
+          border-[var(--border-token)]
 
-          bg-slate-900/80
+          bg-[var(--surface)]
 
           backdrop-blur-xl
 
@@ -81,13 +81,13 @@ export default function ContratoTable({
         "
       >
 
-        <h2 className="text-2xl font-bold text-white">
+        <h2 className="text-2xl font-bold text-[var(--text)]">
 
           Nenhum contrato cadastrado
 
         </h2>
 
-        <p className="mt-3 text-gray-400">
+        <p className="mt-3 text-[var(--text-subtle)]">
 
           Cadastre o primeiro contrato para começar.
 
@@ -103,37 +103,37 @@ export default function ContratoTable({
 
   <Table>
 
-    <table className="w-full text-gray-200">
+    <table className="w-full text-[var(--text-1)]">
 
-      <thead className="border-b border-white/10">
+      <thead className="border-b border-[var(--border-token)]">
 
         <tr>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Inquilino
           </th>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Residência
           </th>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Kitnet
           </th>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Aluguel
           </th>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Vencimento
           </th>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Status
           </th>
 
-          <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-gray-400">
+          <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Ações
           </th>
 
@@ -149,8 +149,8 @@ export default function ContratoTable({
             key={contrato.id}
             className="
               border-b
-              border-white/5
-              hover:bg-white/5
+              border-[var(--border-token)]
+              hover:bg-[var(--surface-2)]
               transition-all
             "
           >
@@ -251,9 +251,9 @@ export default function ContratoTable({
 
                   rounded-xl
 
-                  bg-white/5
+                  bg-[var(--surface-2)]
 
-                  hover:bg-white/10
+                  hover:bg-[var(--surface-3)]
 
                   transition-all
                 "
@@ -261,7 +261,7 @@ export default function ContratoTable({
 
                 <MoreVertical
                   size={18}
-                  className="text-gray-300"
+                  className="text-[var(--text-muted)]"
                 />
 
               </button>
@@ -285,9 +285,9 @@ export default function ContratoTable({
                     px-5
                     py-3
 
-                    text-gray-300
+                    text-[var(--text-muted)]
 
-                    hover:bg-white/5
+                    hover:bg-[var(--surface-2)]
                     transition
                   "
                 >

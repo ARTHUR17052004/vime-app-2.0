@@ -58,11 +58,11 @@ export default function FinanceiroInadimplencia({
 
           <div>
 
-            <h2 className="text-2xl font-bold text-white">
+            <h2 className="text-2xl font-bold text-[var(--text)]">
               Inadimplência
             </h2>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Controle de recebimentos em atraso.
             </p>
 
@@ -81,15 +81,15 @@ export default function FinanceiroInadimplencia({
               rounded-2xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/[0.02]
+              bg-[var(--surface-2)]
 
               p-5
             "
           >
 
-            <div className="text-gray-400">
+            <div className="text-[var(--text-subtle)]">
               Total em Aberto
             </div>
 
@@ -104,15 +104,15 @@ export default function FinanceiroInadimplencia({
               rounded-2xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/[0.02]
+              bg-[var(--surface-2)]
 
               p-5
             "
           >
 
-            <div className="text-gray-400">
+            <div className="text-[var(--text-subtle)]">
               Pendentes
             </div>
 
@@ -127,15 +127,15 @@ export default function FinanceiroInadimplencia({
               rounded-2xl
 
               border
-              border-white/10
+              border-[var(--border-token)]
 
-              bg-white/[0.02]
+              bg-[var(--surface-2)]
 
               p-5
             "
           >
 
-            <div className="text-gray-400">
+            <div className="text-[var(--text-subtle)]">
               Atrasados
             </div>
 
@@ -149,7 +149,7 @@ export default function FinanceiroInadimplencia({
 
         {inadimplentes.length === 0 ? (
 
-          <div className="text-center text-gray-400 py-10">
+          <div className="text-center text-[var(--text-subtle)] py-10">
             Nenhum inadimplente encontrado.
           </div>
 
@@ -165,23 +165,23 @@ export default function FinanceiroInadimplencia({
                   rounded-2xl
 
                   border
-                  border-white/10
+                  border-[var(--border-token)]
 
-                  bg-white/[0.02]
+                  bg-[var(--surface-2)]
 
                   p-5
 
-                  hover:bg-white/[0.04]
+                  hover:bg-[var(--surface-2)]
 
                   transition
                 "
               >
 
-                <h3 className="text-lg font-semibold text-white">
+                <h3 className="text-lg font-semibold text-[var(--text)]">
                   {item.unidade || item.descricao}
                 </h3>
 
-                <p className="text-gray-400 mt-1">
+                <p className="text-[var(--text-subtle)] mt-1">
                   {item.categoria}
                 </p>
 

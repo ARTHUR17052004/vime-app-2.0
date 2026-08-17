@@ -32,14 +32,14 @@ export default function InquilinoActionsMenu({
           items-center
           justify-center
 
-          hover:bg-white/5
+          hover:bg-[var(--surface-2)]
           transition
         "
       >
 
         <MoreVertical
           size={18}
-          className="text-gray-400"
+          className="text-[var(--text-subtle)]"
         />
 
       </button>
@@ -57,9 +57,9 @@ export default function InquilinoActionsMenu({
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-slate-900/95
+            bg-[var(--surface)]
 
             backdrop-blur-xl
 
@@ -78,9 +78,9 @@ export default function InquilinoActionsMenu({
               px-4
               py-3
 
-              text-gray-300
+              text-[var(--text-muted)]
 
-              hover:bg-white/5
+              hover:bg-[var(--surface-2)]
 
               transition
             "

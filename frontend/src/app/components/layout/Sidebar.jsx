@@ -11,8 +11,10 @@ import {
 import { useEffect, useRef, useState } from "react";
 
 import menuConfig from "../../config/menuConfig";
+import { useTheme } from "../../../context/ThemeContext";
 
 export default function Sidebar() {
+  const { textoRodape } = useTheme();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -77,7 +79,7 @@ export default function Sidebar() {
           inset-0
           z-30
 
-          bg-black/60
+          bg-black/20
           backdrop-blur-sm
 
           md:hidden
@@ -136,7 +138,7 @@ export default function Sidebar() {
     items-center
 
     border-b
-    border-white/5
+    border-white/10
 
     ${collapsed ? "flex-col justify-center gap-2 px-2" : "justify-between px-5"}
   `}
@@ -344,7 +346,7 @@ export default function Sidebar() {
               </p>
 
             )}
-            
+
             <div className="space-y-1.5">
 
   {section.items.map((item) => {
@@ -483,7 +485,7 @@ export default function Sidebar() {
 {/* FOOTER */}
 {/* ========================= */}
 
-<div className="border-t border-white/5 p-4">
+<div className="border-t border-white/10 p-4">
 
   <div
     className="
@@ -492,7 +494,7 @@ export default function Sidebar() {
       bg-white/5
 
       border
-      border-white/5
+      border-white/10
 
       p-3
     "
@@ -534,7 +536,7 @@ export default function Sidebar() {
 
     {!collapsed && (
 
-      <div className="mt-3 border-t border-white/5 pt-2">
+      <div className="mt-3 border-t border-white/10 pt-2">
 
         <div className="flex items-center gap-2">
 
@@ -547,7 +549,7 @@ export default function Sidebar() {
         </div>
 
         <p className="mt-2 text-center text-[10px] text-gray-600">
-          VIME 2.0.0
+          {textoRodape || "VIME 2.0.0"}
         </p>
 
       </div>

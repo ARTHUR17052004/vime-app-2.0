@@ -122,9 +122,9 @@ export default function UsuariosActionsMenu({
 
           rounded-xl
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
-          hover:bg-white/10
+          hover:bg-[var(--surface-3)]
 
           transition-all
         "
@@ -135,7 +135,7 @@ export default function UsuariosActionsMenu({
 
           size={18}
 
-          className="text-gray-300"
+          className="text-[var(--text-muted)]"
 
         />
 
@@ -319,8 +319,8 @@ function MenuButton({
               hover:bg-red-500/10
             `
             : `
-              text-gray-300
-              hover:bg-white/5
+              text-[var(--text-muted)]
+              hover:bg-[var(--surface-2)]
             `
         }
       `}

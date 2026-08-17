@@ -92,7 +92,7 @@ export default function DetalhesSolicitacaoPage() {
 
       <MainLayout>
 
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando...
         </div>
 
@@ -108,9 +108,9 @@ export default function DetalhesSolicitacaoPage() {
 
       <MainLayout>
 
-        <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-          <h1 className="text-3xl font-bold text-white">
+          <h1 className="text-3xl font-bold text-[var(--text)]">
 
             Solicitação não encontrada
 
@@ -134,15 +134,15 @@ export default function DetalhesSolicitacaoPage() {
 
     <div className="space-y-8">
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-10">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
-        <h1 className="text-4xl font-bold text-white">
+        <h1 className="text-4xl font-bold text-[var(--text)]">
 
           {solicitacao.titulo}
 
         </h1>
 
-        <p className="text-gray-400 mt-2">
+        <p className="text-[var(--text-subtle)] mt-2">
 
           Visualização completa da solicitação
 
@@ -150,9 +150,9 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-white mb-6">
+        <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
 
           Dados Gerais
 
@@ -162,11 +162,11 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Número
             </p>
 
-            <h3 className="font-semibold text-white">
+            <h3 className="font-semibold text-[var(--text)]">
               {solicitacao.numero}
             </h3>
 
@@ -174,7 +174,7 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Status
             </p>
 
@@ -186,11 +186,11 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Data de abertura
             </p>
 
-            <h3 className="font-semibold text-white">
+            <h3 className="font-semibold text-[var(--text)]">
               {solicitacao.data
                 ? new Date(solicitacao.data).toLocaleDateString("pt-BR")
                 : "-"}
@@ -200,11 +200,11 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Prazo
             </p>
 
-            <h3 className="font-semibold text-white">
+            <h3 className="font-semibold text-[var(--text)]">
               {solicitacao.prazo
                 ? new Date(solicitacao.prazo).toLocaleDateString("pt-BR")
                 : "-"}
@@ -214,16 +214,16 @@ export default function DetalhesSolicitacaoPage() {
 
           <div>
 
-            <p className="text-gray-400">
+            <p className="text-[var(--text-subtle)]">
               Criado por
             </p>
 
-            <h3 className="font-semibold text-white">
+            <h3 className="font-semibold text-[var(--text)]">
               {solicitacao.criadoPorNome || "-"}
             </h3>
 
             {solicitacao.criadoPorPerfil && (
-              <p className="text-gray-500 text-sm mt-0.5">
+              <p className="text-[var(--text-faint)] text-sm mt-0.5">
                 Perfil: {solicitacao.criadoPorPerfil}
               </p>
             )}
@@ -234,13 +234,13 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-white mb-4">
+        <h2 className="text-2xl font-bold text-[var(--text)] mb-4">
           Descrição
         </h2>
 
-        <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
+        <div className="bg-[var(--surface-2)] rounded-2xl p-6 text-[var(--text-1)]">
 
           {solicitacao.descricao ||
             "Nenhuma descrição cadastrada."}
@@ -249,13 +249,13 @@ export default function DetalhesSolicitacaoPage() {
 
       </div>
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-white mb-4">
+        <h2 className="text-2xl font-bold text-[var(--text)] mb-4">
           Observações
         </h2>
 
-        <div className="bg-white/5 rounded-2xl p-6 text-gray-200">
+        <div className="bg-[var(--surface-2)] rounded-2xl p-6 text-[var(--text-1)]">
 
           {solicitacao.observacoes ||
             "Nenhuma observação cadastrada."}
@@ -275,9 +275,9 @@ export default function DetalhesSolicitacaoPage() {
         }
       />
 
-      <div className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-8">
+      <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
-        <h2 className="text-2xl font-bold text-white mb-6">
+        <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
           Histórico
         </h2>
 
@@ -292,17 +292,17 @@ export default function DetalhesSolicitacaoPage() {
                 className="
                   border-l-4
                   border-green-700
-                  bg-white/5
+                  bg-[var(--surface-2)]
                   rounded-r-2xl
                   p-5
                 "
               >
 
-                <div className="font-semibold text-white">
+                <div className="font-semibold text-[var(--text)]">
                   {ACAO_LABEL[item.acao] || item.acao}
                 </div>
 
-                <div className="text-sm text-gray-400 mt-2">
+                <div className="text-sm text-[var(--text-subtle)] mt-2">
                   {formatarData(item.createdAt)}
                 </div>
 
@@ -312,9 +312,9 @@ export default function DetalhesSolicitacaoPage() {
 
           ) : (
 
-            <div className="border border-white/10 rounded-2xl p-5">
+            <div className="border border-[var(--border-token)] rounded-2xl p-5">
 
-              <div className="text-gray-300">
+              <div className="text-[var(--text-muted)]">
                 Nenhuma movimentação registrada.
               </div>
 

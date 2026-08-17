@@ -36,14 +36,11 @@ export default function SearchInput({
 
         rounded-2xl
 
-        bg-gradient-to-br
-        from-[#202a36]/95
-        via-[#1b2430]/96
-        to-[#151c25]/96
+        bg-[var(--surface)]
         backdrop-blur-xl
 
         border
-        border-white/[0.07]
+        border-[var(--border-token)]
 
         px-5
 
@@ -54,7 +51,7 @@ export default function SearchInput({
         transition-all
         duration-300
 
-        hover:border-white/20
+        hover:border-[var(--border-strong)]
 
         focus-within:border-emerald-500/50
         focus-within:ring-2
@@ -68,7 +65,7 @@ export default function SearchInput({
       <Search
         size={18}
         className="
-          text-gray-400
+          text-[var(--text-subtle)]
           transition-colors
           duration-300
 
@@ -90,9 +87,9 @@ export default function SearchInput({
 
           outline-none
 
-          text-white
+          text-[var(--text)]
 
-          placeholder:text-gray-500
+          placeholder:text-[var(--text-faint)]
 
           disabled:cursor-not-allowed
         "
@@ -112,12 +109,12 @@ export default function SearchInput({
 
             rounded-full
 
-            text-gray-500
+            text-[var(--text-faint)]
 
             transition-all
 
-            hover:bg-white/10
-            hover:text-white
+            hover:bg-[var(--surface-3)]
+            hover:text-[var(--text)]
           "
         >
           <X size={16} />

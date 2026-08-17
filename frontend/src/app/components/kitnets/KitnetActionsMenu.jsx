@@ -94,10 +94,10 @@ export default function KitnetActionsMenu({
 
           rounded-xl
 
-          bg-white/5
+          bg-[var(--surface-2)]
 
           border
-          border-white/10
+          border-[var(--border-token)]
 
           hover:bg-emerald-500/10
           hover:border-emerald-500/30
@@ -108,7 +108,7 @@ export default function KitnetActionsMenu({
 
         <EllipsisVertical
           size={18}
-          className="text-gray-300"
+          className="text-[var(--text-muted)]"
         />
 
       </button>
@@ -206,8 +206,8 @@ function MenuButton({
               hover:bg-red-500/10
             `
             : `
-              text-gray-200
-              hover:bg-white/5
+              text-[var(--text-1)]
+              hover:bg-[var(--surface-2)]
             `
         }
       `}

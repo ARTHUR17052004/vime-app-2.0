@@ -39,13 +39,10 @@ export default function OcorrenciaCard() {
         <div
           key={item.id}
           className="
-            bg-gradient-to-br
-            from-[#202a36]/95
-            via-[#1b2430]/96
-            to-[#151c25]/96
+            bg-[var(--surface)]
             backdrop-blur-xl
             border
-            border-white/[0.07]
+            border-[var(--border-token)]
             rounded-3xl
             p-8
           "
@@ -55,19 +52,19 @@ export default function OcorrenciaCard() {
 
             <div className="flex-1">
 
-              <h2 className="text-3xl font-bold text-white">
+              <h2 className="text-3xl font-bold text-[var(--text)]">
                 {item.titulo}
               </h2>
 
-              <div className="text-gray-200 mt-4 text-lg">
+              <div className="text-[var(--text-1)] mt-4 text-lg">
                 {item.descricao}
               </div>
 
-              <div className="mt-6 text-gray-400">
+              <div className="mt-6 text-[var(--text-subtle)]">
                 {item.categoria}
               </div>
 
-              <div className="text-gray-400">
+              <div className="text-[var(--text-subtle)]">
                 Morador: {item.morador}
               </div>
 
@@ -77,11 +74,11 @@ export default function OcorrenciaCard() {
               defaultValue={item.status}
               className="
                 border
-                border-white/10
+                border-[var(--border-token)]
                 rounded-2xl
                 p-3
-                text-white
-                bg-white/5
+                text-[var(--text)]
+                bg-[var(--surface-2)]
               "
             >
 
@@ -107,18 +104,18 @@ export default function OcorrenciaCard() {
 
           <div
             className="
-              bg-white/5
+              bg-[var(--surface-2)]
               rounded-2xl
               p-5
               mt-6
             "
           >
 
-            <div className="text-gray-400 text-sm">
+            <div className="text-[var(--text-subtle)] text-sm">
               Resposta da Administração
             </div>
 
-            <div className="text-gray-200 mt-3 text-lg">
+            <div className="text-[var(--text-1)] mt-3 text-lg">
               {item.resposta}
             </div>
 
@@ -128,12 +125,12 @@ export default function OcorrenciaCard() {
             className="
               mt-6
               border
-              border-white/10
+              border-[var(--border-token)]
               px-6
               py-3
               rounded-2xl
-              hover:bg-white/5
-              text-white
+              hover:bg-[var(--surface-2)]
+              text-[var(--text)]
               font-medium
             "
           >

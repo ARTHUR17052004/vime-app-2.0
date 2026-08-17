@@ -404,7 +404,7 @@ const fixarVistoria = async (id, fixado) => {
   if (!carregado) {
     return (
       <MainLayout>
-        <div className="py-32 text-center text-gray-400">
+        <div className="py-32 text-center text-[var(--text-subtle)]">
           Carregando vistorias...
         </div>
       </MainLayout>

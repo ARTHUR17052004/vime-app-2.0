@@ -106,10 +106,10 @@ export default function ResumoGeral() {
 
         <div
           key={card.titulo}
-          className="bg-gradient-to-br from-[#202a36]/95 via-[#1b2430]/96 to-[#151c25]/96 backdrop-blur-xl border border-white/[0.07] rounded-3xl p-6"
+          className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6"
         >
 
-          <p className="text-gray-400">
+          <p className="text-[var(--text-subtle)]">
             {card.titulo}
           </p>
 

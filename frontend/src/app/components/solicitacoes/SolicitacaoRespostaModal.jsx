@@ -53,12 +53,12 @@ export default function SolicitacaoRespostaModal({
     w-full
     rounded-xl
     border
-    border-white/10
-    bg-white/5
+    border-[var(--border-token)]
+    bg-[var(--surface-2)]
     px-4
     py-3
-    text-white
-    placeholder:text-gray-500
+    text-[var(--text)]
+    placeholder:text-[var(--text-faint)]
     outline-none
     focus:border-emerald-500
   `;
@@ -78,7 +78,7 @@ export default function SolicitacaoRespostaModal({
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
 
             Resposta
 
@@ -102,7 +102,7 @@ export default function SolicitacaoRespostaModal({
 
         <div>
 
-          <label className="block text-sm font-semibold text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
 
             Novo Status
 

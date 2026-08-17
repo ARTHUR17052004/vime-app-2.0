@@ -38,14 +38,14 @@ export default function ReceitaForm({
   };
 
   const inputStyle =
-    "border border-white/10 bg-white/5 text-white rounded-xl p-3 w-full";
+    "border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full";
 
   return (
     <form
       onSubmit={handleSubmit}
       className="space-y-6"
     >
-      <h2 className="text-3xl font-bold text-white">
+      <h2 className="text-3xl font-bold text-[var(--text)]">
         {receitaEditando
           ? "Editar Receita"
           : "Nova Receita"}
@@ -95,7 +95,7 @@ export default function ReceitaForm({
         </select>
 
         <div>
-          <label className="block text-xs text-gray-500 mb-1.5">
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
             Vencimento
           </label>
           <input
@@ -108,7 +108,7 @@ export default function ReceitaForm({
         </div>
 
         <div>
-          <label className="block text-xs text-gray-500 mb-1.5">
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
             Data de Pagamento
           </label>
           <input
@@ -127,7 +127,7 @@ export default function ReceitaForm({
         <button
           className="
             bg-green-700
-            text-white
+            text-[var(--text)]
             px-6
             py-3
             rounded-xl

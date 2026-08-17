@@ -36,7 +36,7 @@ export default function ProfileCard() {
 
             text-5xl
             font-bold
-            text-white
+            text-[var(--text)]
 
             shadow-xl
             shadow-emerald-900/40
@@ -52,13 +52,13 @@ export default function ProfileCard() {
             text-2xl
             font-bold
 
-            text-white
+            text-[var(--text)]
           "
         >
           {nome}
         </h2>
 
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-[var(--text-subtle)]">
           {email}
         </p>
 
@@ -96,9 +96,9 @@ export default function ProfileCard() {
 
       </div>
 
-      <div className="mt-10 border-t border-white/10 pt-8">
+      <div className="mt-10 border-t border-[var(--border-token)] pt-8">
 
-        <div className="flex items-center gap-3 text-gray-300">
+        <div className="flex items-center gap-3 text-[var(--text-muted)]">
 
           <UserCircle2 size={20} />
 

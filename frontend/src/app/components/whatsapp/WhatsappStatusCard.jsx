@@ -18,14 +18,14 @@ export default function WhatsappStatusCard({ dados }) {
       className="
         rounded-3xl
         border
-        border-white/10
+        border-[var(--border-token)]
         bg-[#101827]
         p-6
         shadow-xl
       "
     >
 
-      <h2 className="mb-6 text-xl font-bold text-white">
+      <h2 className="mb-6 text-xl font-bold text-[var(--text)]">
 
         Status da Conexão
 
@@ -57,13 +57,13 @@ export default function WhatsappStatusCard({ dados }) {
 
           <div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
 
               Situação
 
             </p>
 
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-[var(--text)]">
 
               {
 
@@ -105,13 +105,13 @@ export default function WhatsappStatusCard({ dados }) {
 
           <div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
 
               Credenciais da API
 
             </p>
 
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-[var(--text)]">
 
               {
 
@@ -138,13 +138,13 @@ export default function WhatsappStatusCard({ dados }) {
 
           <div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
 
               Número
 
             </p>
 
-            <p className="text-white">
+            <p className="text-[var(--text)]">
 
               {
 
@@ -169,13 +169,13 @@ export default function WhatsappStatusCard({ dados }) {
 
           <div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
 
               Provider
 
             </p>
 
-            <p className="text-white">
+            <p className="text-[var(--text)]">
 
               {
 
@@ -200,13 +200,13 @@ export default function WhatsappStatusCard({ dados }) {
 
           <div>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
 
               Última sincronização
 
             </p>
 
-            <p className="text-white">
+            <p className="text-[var(--text)]">
 
               {
 

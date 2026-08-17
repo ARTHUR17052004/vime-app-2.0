@@ -25,7 +25,7 @@ export default function OccupancyCard({ ocupacao }) {
               text-[11px]
               uppercase
               tracking-[0.30em]
-              text-gray-400
+              text-[var(--text-subtle)]
               mb-2
             "
           >
@@ -36,7 +36,7 @@ export default function OccupancyCard({ ocupacao }) {
             className="
               text-4xl
               font-bold
-              text-white
+              text-[var(--text)]
               leading-none
             "
           >
@@ -101,14 +101,14 @@ export default function OccupancyCard({ ocupacao }) {
               mt-8
               pt-6
               border-t
-              border-white/10
+              border-[var(--border-token)]
               flex
               items-center
               justify-between
             "
           >
 
-            <span className="text-gray-400">
+            <span className="text-[var(--text-subtle)]">
               Taxa de ocupação
             </span>
 
@@ -155,7 +155,7 @@ function ItemLegenda({
           `}
         />
 
-        <span className="text-gray-300">
+        <span className="text-[var(--text-muted)]">
           {titulo}
         </span>
 
@@ -165,7 +165,7 @@ function ItemLegenda({
         className="
           text-3xl
           font-bold
-          text-white
+          text-[var(--text)]
         "
       >
         {valor}

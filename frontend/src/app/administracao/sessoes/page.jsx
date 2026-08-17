@@ -80,11 +80,11 @@ export default function SessoesPage() {
 
               <div>
 
-                <h1 className="text-5xl font-black text-white">
+                <h1 className="text-5xl font-black text-[var(--text)]">
                   Sessões
                 </h1>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Usuários conectados agora em tempo real
                 </p>
 
@@ -98,9 +98,9 @@ export default function SessoesPage() {
                     px-5
                     py-3
                     rounded-xl
-                    bg-white/10
-                    hover:bg-white/20
-                    text-white
+                    bg-[var(--surface-3)]
+                    hover:bg-[var(--surface-3)]
+                    text-[var(--text)]
                     flex
                     items-center
                     gap-2
@@ -116,9 +116,9 @@ export default function SessoesPage() {
                     px-5
                     py-3
                     rounded-xl
-                    bg-white/10
-                    hover:bg-white/20
-                    text-white
+                    bg-[var(--surface-3)]
+                    hover:bg-[var(--surface-3)]
+                    text-[var(--text)]
                     flex
                     items-center
                     gap-2
@@ -158,7 +158,7 @@ export default function SessoesPage() {
             {loading ? (
 
               <Card>
-                <p className="text-gray-400 text-center py-10">
+                <p className="text-[var(--text-subtle)] text-center py-10">
                   Carregando...
                 </p>
               </Card>
@@ -166,7 +166,7 @@ export default function SessoesPage() {
             ) : sessoes.length === 0 ? (
 
               <Card>
-                <p className="text-gray-400 text-center py-10">
+                <p className="text-[var(--text-subtle)] text-center py-10">
                   Nenhum usuário conectado agora.
                 </p>
               </Card>
@@ -183,15 +183,15 @@ export default function SessoesPage() {
 
                       <div>
 
-                        <h3 className="text-lg font-bold text-white">
+                        <h3 className="text-lg font-bold text-[var(--text)]">
                           {sessao.nome}
                         </h3>
 
-                        <p className="text-gray-400 text-sm mt-1">
+                        <p className="text-[var(--text-subtle)] text-sm mt-1">
                           {sessao.email}
                         </p>
 
-                        <p className="text-gray-500 text-xs mt-1">
+                        <p className="text-[var(--text-faint)] text-xs mt-1">
                           {sessao.perfil}
                         </p>
 
@@ -207,7 +207,7 @@ export default function SessoesPage() {
 
                     </div>
 
-                    <p className="text-gray-500 text-xs mt-5">
+                    <p className="text-[var(--text-faint)] text-xs mt-5">
                       Conectado desde{" "}
                       {new Date(sessao.conectadoEm).toLocaleTimeString("pt-BR")}
                     </p>

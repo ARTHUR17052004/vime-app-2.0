@@ -49,13 +49,13 @@ export default function ContratoProximosVencimentos({
             className="
               text-3xl
               font-black
-              text-white
+              text-[var(--text)]
             "
           >
             Próximos Vencimentos
           </h2>
 
-          <p className="text-gray-400">
+          <p className="text-[var(--text-subtle)]">
             Contratos ativos ordenados por vencimento
           </p>
 
@@ -71,7 +71,7 @@ export default function ContratoProximosVencimentos({
 
             text-center
 
-            text-gray-500
+            text-[var(--text-faint)]
           "
         >
           Nenhum contrato ativo.
@@ -93,9 +93,9 @@ export default function ContratoProximosVencimentos({
                 rounded-2xl
 
                 border
-                border-white/5
+                border-[var(--border-token)]
 
-                bg-white/[0.02]
+                bg-[var(--surface-2)]
 
                 px-6
                 py-5
@@ -103,7 +103,7 @@ export default function ContratoProximosVencimentos({
                 transition-all
                 duration-300
 
-                hover:bg-white/[0.05]
+                hover:bg-[var(--surface-2)]
               "
             >
 
@@ -113,13 +113,13 @@ export default function ContratoProximosVencimentos({
                   className="
                     text-lg
                     font-bold
-                    text-white
+                    text-[var(--text)]
                   "
                 >
                   {contrato.inquilino?.nome || contrato.inquilinoNome}
                 </h3>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   {contrato.unidade?.nome || contrato.unidadeNome}
                 </p>
 
@@ -137,7 +137,7 @@ export default function ContratoProximosVencimentos({
                   R$ {contrato.valorAluguel}
                 </p>
 
-                <p className="text-gray-400">
+                <p className="text-[var(--text-subtle)]">
                   Dia {contrato.diaVencimento}
                 </p>
 

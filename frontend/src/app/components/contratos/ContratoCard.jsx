@@ -33,16 +33,16 @@ export default function ContratoCard({
 
           <FileText
             size={56}
-            className="mx-auto text-gray-600"
+            className="mx-auto text-[var(--text-faint-2)]"
           />
 
-          <h2 className="mt-6 text-2xl font-bold text-white">
+          <h2 className="mt-6 text-2xl font-bold text-[var(--text)]">
 
             Nenhum contrato encontrado
 
           </h2>
 
-          <p className="mt-3 text-gray-400">
+          <p className="mt-3 text-[var(--text-subtle)]">
 
             Cadastre o primeiro contrato para começar.
 
@@ -71,7 +71,7 @@ export default function ContratoCard({
             "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
 
           ENCERRADO:
-            "bg-gray-500/15 text-gray-300 border border-gray-500/20",
+            "bg-gray-500/15 text-[var(--text-muted)] border border-gray-500/20",
 
         };
 
@@ -128,19 +128,19 @@ export default function ContratoCard({
                     className="
                       text-2xl
                       font-bold
-                      text-white
+                      text-[var(--text)]
                     "
                   >
                     {contrato.inquilino?.nome || contrato.inquilinoNome}
                   </h2>
 
-                  <p className="text-gray-400 mt-1">
+                  <p className="text-[var(--text-subtle)] mt-1">
 
                     {contrato.unidade?.nome || contrato.unidadeNome}
 
                   </p>
 
-                  <p className="text-gray-500 text-sm">
+                  <p className="text-[var(--text-faint)] text-sm">
 
                     {contrato.kitnet?.nome || contrato.kitnetNome}
 
@@ -168,13 +168,13 @@ export default function ContratoCard({
                   items-center
                   justify-center
 
-                  hover:bg-white/5
+                  hover:bg-[var(--surface-2)]
                   transition
                 "
               >
 
                 <MoreVertical
-                  className="text-gray-400"
+                  className="text-[var(--text-subtle)]"
                   size={20}
                 />
 
@@ -198,9 +198,9 @@ export default function ContratoCard({
                   rounded-2xl
 
                   border
-                  border-white/10
+                  border-[var(--border-token)]
 
-                  bg-slate-900/95
+                  bg-[var(--surface)]
 
                   backdrop-blur-xl
 
@@ -219,9 +219,9 @@ export default function ContratoCard({
                     px-4
                     py-3
 
-                    text-gray-300
+                    text-[var(--text-muted)]
 
-                    hover:bg-white/5
+                    hover:bg-[var(--surface-2)]
                   "
                 >
                   Visualizar
@@ -315,7 +315,7 @@ export default function ContratoCard({
 
             <div className="mt-8 space-y-5">
 
-              <div className="flex items-center gap-3 text-gray-300">
+              <div className="flex items-center gap-3 text-[var(--text-muted)]">
 
                 <DollarSign
                   size={18}
@@ -330,7 +330,7 @@ export default function ContratoCard({
 
               </div>
 
-              <div className="flex items-center gap-3 text-gray-300">
+              <div className="flex items-center gap-3 text-[var(--text-muted)]">
 
                 <Calendar
                   size={18}
@@ -353,7 +353,7 @@ export default function ContratoCard({
 
             </div>
 
-            <div className="my-7 border-t border-white/10" />
+            <div className="my-7 border-t border-[var(--border-token)]" />
 
             <span
               className={`

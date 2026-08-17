@@ -10,7 +10,7 @@ export default function NotificacoesHeader() {
       </div>
 
       <div>
-        <h1 className="text-4xl font-bold text-white">
+        <h1 className="text-4xl font-bold text-[var(--text)]">
           Notificações
         </h1>
 

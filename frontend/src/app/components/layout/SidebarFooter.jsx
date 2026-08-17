@@ -3,14 +3,14 @@
 
 export default function SidebarFooter({ collapsed }) {
   return (
-    <div className="border-t border-white/10 p-5">
+    <div className="border-t border-[var(--border-token)] p-5">
 
       <div
         className="
           rounded-3xl
           border
-          border-white/10
-          bg-white/3
+          border-[var(--border-token)]
+          bg-[var(--surface-2)]
           p-4
         "
       >
@@ -33,7 +33,7 @@ export default function SidebarFooter({ collapsed }) {
 
             <div className="flex-1">
 
-              <h3 className="font-semibold text-white">
+              <h3 className="font-semibold text-[var(--text)]">
                 Arthur
               </h3>
 
@@ -53,7 +53,7 @@ export default function SidebarFooter({ collapsed }) {
 
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
 
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-[var(--text-subtle)]">
               Sistema Online
             </span>
 

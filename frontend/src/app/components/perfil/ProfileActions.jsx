@@ -39,7 +39,7 @@ export default function ProfileActions() {
             mt-2
             text-2xl
             font-bold
-            text-white
+            text-[var(--text)]
           "
         >
           Ações da Conta
@@ -61,14 +61,14 @@ export default function ProfileActions() {
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/5
+            bg-[var(--surface-2)]
 
             px-6
             py-5
 
-            hover:bg-white/10
+            hover:bg-[var(--surface-3)]
 
             transition
           "
@@ -81,11 +81,11 @@ export default function ProfileActions() {
 
           <div className="text-left">
 
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-[var(--text)]">
               Alterar Senha
             </p>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
               Atualize sua senha de acesso.
             </p>
 
@@ -105,14 +105,14 @@ export default function ProfileActions() {
             rounded-2xl
 
             border
-            border-white/10
+            border-[var(--border-token)]
 
-            bg-white/5
+            bg-[var(--surface-2)]
 
             px-6
             py-5
 
-            hover:bg-white/10
+            hover:bg-[var(--surface-3)]
 
             transition
           "
@@ -125,11 +125,11 @@ export default function ProfileActions() {
 
           <div className="text-left">
 
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-[var(--text)]">
               Configurações
             </p>
 
-            <p className="text-sm text-gray-400">
+            <p className="text-sm text-[var(--text-subtle)]">
               Preferências do sistema.
             </p>
 

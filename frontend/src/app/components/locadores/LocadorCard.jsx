@@ -104,7 +104,7 @@ export default function LocadorCard({
 
                 <div>
 
-                  <h2 className="font-bold text-2xl text-white">
+                  <h2 className="font-bold text-2xl text-[var(--text)]">
 
                     {locador.nome}
 
@@ -143,7 +143,7 @@ export default function LocadorCard({
                 }
               >
 
-                <MoreVertical className="text-gray-500" />
+                <MoreVertical className="text-[var(--text-faint)]" />
 
               </button>
 
@@ -160,8 +160,8 @@ export default function LocadorCard({
                   overflow-hidden
                   rounded-2xl
                   border
-                  border-white/10
-                  bg-slate-900/95
+                  border-[var(--border-token)]
+                  bg-[var(--surface)]
                   backdrop-blur-xl
                   shadow-2xl
                   z-50
@@ -182,7 +182,7 @@ export default function LocadorCard({
                     px-4
                     py-3
                     text-sm
-                    text-white
+                    text-[var(--text)]
                     hover:bg-emerald-500/10
                     transition-all
                   "
@@ -203,7 +203,7 @@ export default function LocadorCard({
                     px-4
                     py-3
                     text-sm
-                    text-white
+                    text-[var(--text)]
                     hover:bg-emerald-500/10
                     transition-all
                   "
@@ -225,7 +225,7 @@ export default function LocadorCard({
                     px-4
                     py-3
                     text-sm
-                    text-white
+                    text-[var(--text)]
                     hover:bg-red-500/10
                     transition-all
                   "
@@ -239,7 +239,7 @@ export default function LocadorCard({
 
             )}
 
-            <div className="mt-6 space-y-3 text-gray-300">
+            <div className="mt-6 space-y-3 text-[var(--text-muted)]">
 
               <div className="flex items-center gap-3">
 
@@ -279,9 +279,9 @@ export default function LocadorCard({
 
             </div>
 
-            <div className="my-7 border-t border-white/5 pt-5">
+            <div className="my-7 border-t border-[var(--border-token)] pt-5">
 
-              <div className="text-gray-300 font-medium">
+              <div className="text-[var(--text-muted)] font-medium">
 
                 {totalUnidades} residência(s) vinculada(s)
 
