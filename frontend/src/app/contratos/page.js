@@ -27,8 +27,6 @@ import ContratoTable from "../components/contratos/ContratoTable";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
-import { ModeloDocumentoService } from "@/services/modeloDocumento.service";
-import { gerarContratoPdf, MODELO_PADRAO_CONTRATO } from "@/utils/gerarContratoPdf";
 
 export default function ContratosPage() {
 
@@ -143,23 +141,22 @@ export default function ContratosPage() {
 
     try {
 
-      const [respostaContrato, respostaModelo] = await Promise.all([
-        ContratoService.buscar(contratoId),
-        ModeloDocumentoService.buscar("CONTRATO"),
-      ]);
+      const blob = await ContratoService.baixarPdf(contratoId);
 
-      const contratoCompleto = respostaContrato.data || respostaContrato;
-
-      const modelo = respostaModelo.data;
-
-      gerarContratoPdf(
-        modelo?.conteudo || MODELO_PADRAO_CONTRATO,
-        contratoCompleto
-      );
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `contrato-${contratoId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
 
     } catch (err) {
 
       console.error("Erro ao gerar PDF do contrato:", err);
+
+      alert(err.message || "Erro ao gerar PDF do contrato.");
 
     }
 

@@ -1,4 +1,5 @@
 const contratoService = require('../services/contratoService');
+const contratoDocumentoService = require('../services/contratoDocumentoService');
 
 const listar = async (req, res) => {
 
@@ -26,6 +27,33 @@ const buscarPorId = async (req, res) => {
     success: true,
     data: contrato
   });
+
+};
+
+const baixarPdf = async (req, res) => {
+
+  const contrato = await contratoService.buscarPorId(req.params.id);
+
+  if (!contrato) {
+    return res.status(404).json({
+      success: false,
+      message: 'Contrato não encontrado.'
+    });
+  }
+
+  const base64 = await contratoDocumentoService.gerarContratoPdfBase64(contrato);
+
+  const buffer = Buffer.from(base64, 'base64');
+
+  const nomeInquilino = (contrato.inquilino?.nome || 'contrato')
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-');
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="contrato-${nomeInquilino}.pdf"`);
+
+  return res.send(buffer);
 
 };
 
@@ -93,6 +121,7 @@ const renovar = async (req, res) => {
 module.exports = {
   listar,
   buscarPorId,
+  baixarPdf,
   criar,
   atualizar,
   remover,

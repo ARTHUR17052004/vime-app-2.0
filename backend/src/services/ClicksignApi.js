@@ -90,10 +90,23 @@ class ClicksignApi {
 
         console.error(error.response.data);
 
-        throw new Error(
-          error.response.data.message ||
-          "Erro ao comunicar com a Clicksign."
-        );
+        const status = error.response.status;
+
+        let mensagem =
+          error.response.data?.message ||
+          (Array.isArray(error.response.data?.errors)
+            ? error.response.data.errors.join(" ")
+            : null);
+
+        if (!mensagem && status === 403) {
+          mensagem =
+            "A Clicksign recusou essa ação (permissão negada). Documentos em rascunho (sem nenhum signatário) só podem ser removidos direto pelo site da Clicksign.";
+        }
+
+        const erro = new Error(mensagem || "Erro ao comunicar com a Clicksign.");
+        erro.status = status && status < 500 ? status : 502;
+
+        throw erro;
 
       }
 

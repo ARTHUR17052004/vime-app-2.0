@@ -12,6 +12,8 @@ router.get('/', contratoController.listar);
 
 router.get('/:id', contratoController.buscarPorId);
 
+router.get('/:id/pdf', contratoController.baixarPdf);
+
 router.post('/', contratoController.criar);
 
 router.put('/:id', contratoController.atualizar);
