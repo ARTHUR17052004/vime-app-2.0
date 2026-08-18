@@ -43,6 +43,7 @@ export default function DocumentosCard() {
   const [arquivosSelecionados, setArquivosSelecionados] = useState([]);
   const [signatarioNome, setSignatarioNome] = useState("");
   const [signatarioEmail, setSignatarioEmail] = useState("");
+  const [linksAssinatura, setLinksAssinatura] = useState([]);
 
   async function carregar() {
     setCarregando(true);
@@ -80,6 +81,7 @@ export default function DocumentosCard() {
     setArquivosSelecionados([]);
     setSignatarioNome("");
     setSignatarioEmail("");
+    setLinksAssinatura([]);
     if (inputRef.current) inputRef.current.value = "";
   }
 
@@ -102,11 +104,13 @@ export default function DocumentosCard() {
     setEnviando(true);
     setErro(null);
 
+    const links = [];
+
     try {
       for (const arquivo of arquivosSelecionados) {
         const conteudoBase64 = await lerArquivoComoBase64(arquivo);
 
-        await ClicksignService.enviarDocumento({
+        const resposta = await ClicksignService.enviarDocumento({
           nome: arquivo.name,
           conteudoBase64,
           mensagem: `Olá ${signatarioNome}, segue o documento "${arquivo.name}" para assinatura.`,
@@ -118,10 +122,24 @@ export default function DocumentosCard() {
             },
           ],
         });
+
+        const dados = resposta?.data || resposta;
+
+        const url = dados?.signatariosAdicionados?.[0]?.lista?.list?.url;
+
+        if (url) {
+          links.push({ arquivo: arquivo.name, url });
+        }
       }
 
       await carregar();
-      fecharModal();
+
+      if (links.length) {
+        setLinksAssinatura(links);
+      } else {
+        fecharModal();
+      }
+
     } catch (err) {
       setErro(err.message || "Erro ao enviar documento para a Clicksign.");
     } finally {
@@ -345,72 +363,112 @@ export default function DocumentosCard() {
         persistent={enviando}
       >
 
-        <div className="space-y-5">
+        {linksAssinatura.length > 0 ? (
 
-          {erro && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
-              {erro}
+          <div className="space-y-5">
+
+            <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">
+              Documento enviado! A Clicksign já notificou {signatarioEmail} por e-mail. Você também pode compartilhar o link direto abaixo.
             </div>
-          )}
 
-          <div>
-            <label className="text-sm text-[var(--text-muted)]">
-              Nome do signatário
-            </label>
-            <input
-              value={signatarioNome}
-              onChange={(e) => setSignatarioNome(e.target.value)}
-              placeholder="Nome completo"
-              className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
-            />
-          </div>
+            {linksAssinatura.map((item) => (
+              <div key={item.url} className="space-y-2">
+                <label className="text-sm text-[var(--text-muted)]">
+                  {item.arquivo}
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    readOnly
+                    value={item.url}
+                    onClick={(e) => e.target.select()}
+                    className="flex-1 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] text-sm"
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigator.clipboard.writeText(item.url)}
+                  >
+                    Copiar
+                  </Button>
+                </div>
+              </div>
+            ))}
 
-          <div>
-            <label className="text-sm text-[var(--text-muted)]">
-              E-mail do signatário
-            </label>
-            <input
-              type="email"
-              value={signatarioEmail}
-              onChange={(e) => setSignatarioEmail(e.target.value)}
-              placeholder="email@exemplo.com"
-              className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
-            />
-          </div>
-
-          <p className="text-xs text-slate-500">
-            A Clicksign vai enviar o link de assinatura diretamente para esse e-mail.
-          </p>
-
-          <div className="flex gap-3">
-
-            <Button
-              variant="secondary"
-              fullWidth
-              onClick={fecharModal}
-              disabled={enviando}
-            >
-              Cancelar
-            </Button>
-
-            <Button
-              fullWidth
-              onClick={confirmarEnvio}
-              disabled={enviando}
-            >
-              {enviando ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  Enviando...
-                </>
-              ) : (
-                "Enviar para assinatura"
-              )}
+            <Button fullWidth onClick={fecharModal}>
+              Concluir
             </Button>
 
           </div>
 
-        </div>
+        ) : (
+
+          <div className="space-y-5">
+
+            {erro && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+                {erro}
+              </div>
+            )}
+
+            <div>
+              <label className="text-sm text-[var(--text-muted)]">
+                Nome do signatário
+              </label>
+              <input
+                value={signatarioNome}
+                onChange={(e) => setSignatarioNome(e.target.value)}
+                placeholder="Nome completo"
+                className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
+              />
+            </div>
+
+            <div>
+              <label className="text-sm text-[var(--text-muted)]">
+                E-mail do signatário
+              </label>
+              <input
+                type="email"
+                value={signatarioEmail}
+                onChange={(e) => setSignatarioEmail(e.target.value)}
+                placeholder="email@exemplo.com"
+                className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
+              />
+            </div>
+
+            <p className="text-xs text-slate-500">
+              A Clicksign vai enviar o link de assinatura diretamente para esse e-mail.
+            </p>
+
+            <div className="flex gap-3">
+
+              <Button
+                variant="secondary"
+                fullWidth
+                onClick={fecharModal}
+                disabled={enviando}
+              >
+                Cancelar
+              </Button>
+
+              <Button
+                fullWidth
+                onClick={confirmarEnvio}
+                disabled={enviando}
+              >
+                {enviando ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Enviando...
+                  </>
+                ) : (
+                  "Enviar para assinatura"
+                )}
+              </Button>
+
+            </div>
+
+          </div>
+
+        )}
 
       </Modal>
 

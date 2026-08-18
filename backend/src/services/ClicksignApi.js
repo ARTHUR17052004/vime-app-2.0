@@ -107,6 +107,27 @@ class ClicksignApi {
 
   async criarDocumento(documento) {
 
+    const doc = documento?.document;
+
+    if (doc?.content_base64 && !doc.content_base64.startsWith("data:")) {
+
+      // A Clicksign exige o mimetype embutido no content_base64
+      // (data:<mimetype>;base64,<conteudo>) — sem isso ela rejeita com
+      // "MimeType não informado no campo content_base64".
+      const extensao = (doc.path || "").split(".").pop()?.toLowerCase();
+
+      const mimeTypes = {
+        pdf: "application/pdf",
+        doc: "application/msword",
+        docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      };
+
+      const mimeType = mimeTypes[extensao] || "application/pdf";
+
+      doc.content_base64 = `data:${mimeType};base64,${doc.content_base64}`;
+
+    }
+
     return this.request(
       "POST",
       "/documents",
@@ -157,10 +178,19 @@ class ClicksignApi {
   // 2) vincular esse signatário ao documento através de uma "lista".
   async criarSignatario(signatario) {
 
+    // A Clicksign espera "auths" como array (ex: ["email"]) — não
+    // "auth_mode" como string única.
+    const { auth_mode, ...resto } = signatario || {};
+
+    const signerNormalizado = {
+      ...resto,
+      auths: signatario?.auths || (auth_mode ? [auth_mode] : ["email"]),
+    };
+
     return this.request(
       "POST",
       "/signers",
-      { signer: signatario }
+      { signer: signerNormalizado }
     );
 
   }

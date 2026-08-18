@@ -146,11 +146,10 @@ const criar = async (dados) => {
     );
   }
 
-  if (kitnet.ocupada) {
-    throw new Error(
-      'Esta kitnet já possui um contrato ativo.'
-    );
-  }
+  // Não checamos kitnet.ocupada aqui: esse flag é marcado assim que um
+  // inquilino é vinculado (inquilinoService.criar), antes de chegar
+  // neste ponto — checar aqui sempre barraria a criação. A checagem
+  // real de contrato duplicado já é feita acima via `contratoKitnet`.
 
   if (dados.valorAluguel <= 0) {
     throw new Error(
