@@ -166,9 +166,12 @@ class ClicksignApi {
 
   async cancelarDocumento(id) {
 
+    // A Clicksign não permite DELETE de documento não finalizado — o
+    // jeito certo é mudar o status pra "canceled" via PATCH.
     return this.request(
-      "DELETE",
-      `/documents/${id}`
+      "PATCH",
+      `/documents/${id}`,
+      { document: { status: "canceled" } }
     );
 
   }
