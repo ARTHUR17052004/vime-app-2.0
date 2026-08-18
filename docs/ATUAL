@@ -497,3 +497,31 @@ E o restante é justamente o tipo de coisa que só aparece quando começamos a u
 Então sim: podemos começar os testes agora.
 
 E eu sugiro que a partir daqui a gente trate o vimesistema.online como o ambiente oficial de homologação, enquanto o desenvolvimento continua localmente. Quando encontrarmos um problema, corrigimos no código, testamos local, fazemos deploy e validamos novamente no endereço oficial.
+
+Resumindo com clareza: parte eu faço, parte só você (ou quem tiver acesso à VPS) consegue fazer.
+
+O que eu faço sozinho:
+
+Edito o código e publico no GitHub (git commit + git push) — isso já fica pronto, sem você precisar fazer nada.
+Mudanças direto no banco de dados (migrações, ajustes de dados) — eu tenho acesso direto ao mesmo banco de produção daqui, então aplico sem precisar de você.
+O que só você consegue fazer:
+Eu não tenho acesso remoto à sua VPS (não consigo abrir terminal nela daqui). Então, toda vez que eu publicar uma mudança que precisa "chegar" no site, alguém com acesso à VPS precisa rodar isso:
+
+
+cd /var/www/vime-app-2.0
+git pull origin main
+
+# Backend (só se eu avisar que mudou algo no backend):
+cd backend
+npm install
+npx prisma generate
+pm2 restart vime-backend
+
+# Frontend (só se eu avisar que mudou algo no frontend):
+cd ../frontend
+npm install
+npm run build
+pm2 restart vime-frontend
+Pode rodar esse bloco inteiro sempre, sem medo — os passos que não têm nada novo pra fazer (tipo npm install sem dependência nova) só terminam rápido e não quebram nada.
+
+Se quiser eliminar essa etapa manual de vez: dá pra configurar um "deploy automático" na sua própria VPS (um webhook que escuta o GitHub e roda esse script sozinho a cada push, do jeito que o Render já faz automaticamente). Eu te ajudo a montar isso, mas também precisaria que você rodasse os comandos de configuração inicial no terminal da VPS (ainda não tenho como fazer isso remotamente). Quer que eu te passe o passo a passo pra isso também?

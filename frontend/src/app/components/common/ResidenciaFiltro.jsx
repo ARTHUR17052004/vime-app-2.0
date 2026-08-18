@@ -67,7 +67,7 @@ export default function ResidenciaFiltro({
       >
         <option
           value=""
-          style={{ backgroundColor: "#1d2833", color: "#fff" }}
+          style={{ backgroundColor: "#1d2833", color: "#020000" }}
         >
           Todas as residências
         </option>
