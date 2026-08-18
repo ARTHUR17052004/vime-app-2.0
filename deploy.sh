@@ -6,6 +6,10 @@ set -e
 cd /var/www/vime-app-2.0
 
 echo "==> Baixando código novo..."
+# package-lock.json muda sozinho toda vez que "npm install" roda na VPS
+# (plataforma diferente de onde foi gerado) e isso trava o pull em
+# silêncio. Descarta essa modificação local antes de puxar, sempre.
+git checkout -- backend/package-lock.json frontend/package-lock.json 2>/dev/null || true
 git pull origin main
 
 echo "==> Backend..."
