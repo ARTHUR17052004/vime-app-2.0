@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 
 import { ClicksignService } from "@/services/clicksign.service";
+import Modal from "../ui/Modal";
+import Button from "../ui/Button";
 
 function extrairDocumentos(resposta) {
   const data = resposta?.data || resposta;
@@ -37,6 +39,11 @@ export default function DocumentosCard() {
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
 
+  const [modalAberto, setModalAberto] = useState(false);
+  const [arquivosSelecionados, setArquivosSelecionados] = useState([]);
+  const [signatarioNome, setSignatarioNome] = useState("");
+  const [signatarioEmail, setSignatarioEmail] = useState("");
+
   async function carregar() {
     setCarregando(true);
     setErro(null);
@@ -60,6 +67,22 @@ export default function DocumentosCard() {
     inputRef.current?.click();
   }
 
+  function arquivosEscolhidos(event) {
+    const arquivos = Array.from(event.target.files || []);
+    if (!arquivos.length) return;
+
+    setArquivosSelecionados(arquivos);
+    setModalAberto(true);
+  }
+
+  function fecharModal() {
+    setModalAberto(false);
+    setArquivosSelecionados([]);
+    setSignatarioNome("");
+    setSignatarioEmail("");
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
   function lerArquivoComoBase64(arquivo) {
     return new Promise((resolve, reject) => {
       const leitor = new FileReader();
@@ -69,29 +92,40 @@ export default function DocumentosCard() {
     });
   }
 
-  async function enviarArquivos(event) {
-    const arquivos = Array.from(event.target.files || []);
-    if (!arquivos.length) return;
+  async function confirmarEnvio() {
+
+    if (!signatarioNome.trim() || !signatarioEmail.trim()) {
+      setErro("Informe o nome e o e-mail de quem vai assinar o documento.");
+      return;
+    }
 
     setEnviando(true);
     setErro(null);
 
     try {
-      for (const arquivo of arquivos) {
+      for (const arquivo of arquivosSelecionados) {
         const conteudoBase64 = await lerArquivoComoBase64(arquivo);
 
         await ClicksignService.enviarDocumento({
           nome: arquivo.name,
           conteudoBase64,
+          mensagem: `Olá ${signatarioNome}, segue o documento "${arquivo.name}" para assinatura.`,
+          signatarios: [
+            {
+              name: signatarioNome,
+              email: signatarioEmail,
+              auth_mode: "email",
+            },
+          ],
         });
       }
 
       await carregar();
+      fecharModal();
     } catch (err) {
       setErro(err.message || "Erro ao enviar documento para a Clicksign.");
     } finally {
       setEnviando(false);
-      if (inputRef.current) inputRef.current.value = "";
     }
   }
 
@@ -166,7 +200,7 @@ export default function DocumentosCard() {
         type="file"
         accept="application/pdf,.pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         multiple
-        onChange={enviarArquivos}
+        onChange={arquivosEscolhidos}
         className="hidden"
       />
 
@@ -176,7 +210,7 @@ export default function DocumentosCard() {
         </div>
       )}
 
-      {erro && (
+      {erro && !modalAberto && (
         <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
           {erro}
         </div>
@@ -209,11 +243,7 @@ export default function DocumentosCard() {
 
         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10">
 
-          {enviando ? (
-            <Loader2 size={36} className="animate-spin text-emerald-400" />
-          ) : (
-            <Upload size={36} className="text-emerald-400" />
-          )}
+          <Upload size={36} className="text-emerald-400" />
 
         </div>
 
@@ -231,10 +261,9 @@ export default function DocumentosCard() {
 
         <button
           onClick={(e) => { e.stopPropagation(); abrirSeletorArquivo(); }}
-          disabled={enviando}
-          className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-[var(--text)] transition hover:bg-emerald-700 disabled:opacity-50"
+          className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-[var(--text)] transition hover:bg-emerald-700"
         >
-          {enviando ? "Enviando..." : "Selecionar Arquivos"}
+          Selecionar Arquivos
         </button>
 
       </div>
@@ -305,6 +334,90 @@ export default function DocumentosCard() {
 
         </div>
       )}
+
+      {/* Modal: signatário do documento */}
+
+      <Modal
+        open={modalAberto}
+        onClose={enviando ? undefined : fecharModal}
+        title="Quem vai assinar?"
+        subtitle={
+          arquivosSelecionados.length === 1
+            ? arquivosSelecionados[0]?.name
+            : `${arquivosSelecionados.length} arquivo(s) selecionado(s)`
+        }
+        size="sm"
+        persistent={enviando}
+      >
+
+        <div className="space-y-5">
+
+          {erro && (
+            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm text-red-400">
+              {erro}
+            </div>
+          )}
+
+          <div>
+            <label className="text-sm text-[var(--text-muted)]">
+              Nome do signatário
+            </label>
+            <input
+              value={signatarioNome}
+              onChange={(e) => setSignatarioNome(e.target.value)}
+              placeholder="Nome completo"
+              className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
+            />
+          </div>
+
+          <div>
+            <label className="text-sm text-[var(--text-muted)]">
+              E-mail do signatário
+            </label>
+            <input
+              type="email"
+              value={signatarioEmail}
+              onChange={(e) => setSignatarioEmail(e.target.value)}
+              placeholder="email@exemplo.com"
+              className="mt-2 w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)]"
+            />
+          </div>
+
+          <p className="text-xs text-slate-500">
+            A Clicksign vai enviar o link de assinatura diretamente para esse e-mail.
+          </p>
+
+          <div className="flex gap-3">
+
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={fecharModal}
+              disabled={enviando}
+            >
+              Cancelar
+            </Button>
+
+            <Button
+              fullWidth
+              onClick={confirmarEnvio}
+              disabled={enviando}
+            >
+              {enviando ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  Enviando...
+                </>
+              ) : (
+                "Enviar para assinatura"
+              )}
+            </Button>
+
+          </div>
+
+        </div>
+
+      </Modal>
 
     </div>
   );

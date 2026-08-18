@@ -74,7 +74,9 @@ app.use(
   })
 );
 app.use(morgan("dev"));
-app.use(express.json());
+// Padrão do Express é 100kb — pequeno demais pra PDFs/DOCX em base64
+// (upload de documentos pra Clicksign, geração de contrato, etc.)
+app.use(express.json({ limit: "25mb" }));
 app.use(cookieParser());
 
 app.get("/health", (req, res) => {
