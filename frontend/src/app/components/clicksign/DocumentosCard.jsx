@@ -141,17 +141,12 @@ export default function DocumentosCard() {
     }
   }
 
-  async function visualizar(doc) {
+  function visualizar(doc) {
     const id = doc.key || doc.id;
     if (!id) return;
 
-    try {
-      const resposta = await ClicksignService.buscarDocumento(id);
-      console.log("Documento Clicksign:", resposta);
-      alert("Detalhes do documento impressos no console.");
-    } catch (err) {
-      setErro(err.message || "Erro ao buscar documento.");
-    }
+    // Assinatura acontece no site da Clicksign — abre o documento lá.
+    window.open(`https://app.clicksign.com/documents/${id}`, "_blank");
   }
 
   const documentosFiltrados = documentos.filter((doc) => {

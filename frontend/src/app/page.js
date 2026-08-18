@@ -31,6 +31,14 @@ import PageGrid from "./components/ui/PageGrid";
 import { useDashboard } from "../hooks/useDashboard";
 
 export default function Home() {
+  return (
+    <ProtectedRoute>
+      <DashboardConteudo />
+    </ProtectedRoute>
+  );
+}
+
+function DashboardConteudo() {
   const {
     dados,
     loading,
@@ -46,7 +54,7 @@ export default function Home() {
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <MainLayout>
         <Page>
           <PageContainer>
@@ -184,6 +192,6 @@ export default function Home() {
           </PageContainer>
         </Page>
       </MainLayout>
-    </ProtectedRoute>
+    </>
   );
 }

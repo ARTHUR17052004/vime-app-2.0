@@ -179,7 +179,7 @@ const testarWebhook = async (req, res) => {
     await AsaasApi.configurarWebhook(
       webhookUrl,
       webhookToken || undefined,
-      ["PAYMENT_RECEIVED", "PAYMENT_OVERDUE", "PAYMENT_REFUNDED"]
+      ["PAYMENT_RECEIVED", "PAYMENT_OVERDUE", "PAYMENT_REFUNDED", "PAYMENT_DELETED", "PAYMENT_RESTORED"]
     );
 
     return res.json({

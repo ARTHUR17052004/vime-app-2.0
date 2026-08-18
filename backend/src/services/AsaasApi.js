@@ -40,6 +40,7 @@ class AsaasApi {
       walletId: configuracao?.asaasWalletId || "",
       webhookToken: configuracao?.asaasWebhookToken || "",
       configuracaoId: configuracao?.id || null,
+      email: configuracao?.email?.trim() || process.env.ASAAS_WEBHOOK_EMAIL || "",
     };
 
   }
@@ -235,12 +236,20 @@ class AsaasApi {
 
   async configurarWebhook(url, token, eventos) {
 
+    const { email } = await this.obterConfig();
+
+    if (!email) {
+      throw new Error(
+        "Configure o e-mail da empresa em Configurações antes de registrar o webhook — a Asaas exige um e-mail de contato para notificações."
+      );
+    }
+
     return this.request(
       "PUT",
       "/webhook",
       {
         url,
-        email: undefined,
+        email,
         enabled: true,
         interrupted: false,
         apiVersion: 3,

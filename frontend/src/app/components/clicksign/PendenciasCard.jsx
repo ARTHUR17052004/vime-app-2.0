@@ -100,7 +100,13 @@ export default function PendenciasCard() {
 
               <div
                 key={doc.key || doc.id || index}
-                className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30"
+                onClick={() => {
+                  const id = doc.key || doc.id;
+                  if (id) {
+                    window.open(`https://app.clicksign.com/documents/${id}`, "_blank");
+                  }
+                }}
+                className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30 cursor-pointer"
               >
 
                 <div className="flex items-center gap-4">

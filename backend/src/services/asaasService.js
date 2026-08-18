@@ -345,6 +345,32 @@ const sincronizar = async (evento) => {
 
       break;
 
+    case "PAYMENT_DELETED":
+
+      await prisma.receita.update({
+        where: {
+          id: receita.id
+        },
+        data: {
+          status: "CANCELADA"
+        }
+      });
+
+      break;
+
+    case "PAYMENT_RESTORED":
+
+      await prisma.receita.update({
+        where: {
+          id: receita.id
+        },
+        data: {
+          status: "PENDENTE"
+        }
+      });
+
+      break;
+
   }
 
   return {
