@@ -232,9 +232,20 @@ const criar = async (dados) => {
         null;
 
       if (signerKey) {
-        await ClicksignApi.criarLista(documentKey, signerKey, {
+
+        const listaCriada = await ClicksignApi.criarLista(documentKey, signerKey, {
           message: `Olá ${inquilino.nome}, segue seu contrato de locação para assinatura.`
         });
+
+        const signingUrl = listaCriada?.list?.url || null;
+
+        if (signingUrl) {
+          await prisma.contrato.update({
+            where: { id: contrato.id },
+            data: { clicksignSigningUrl: signingUrl }
+          });
+        }
+
       }
 
     }

@@ -101,10 +101,10 @@ export default function PendenciasCard() {
               <div
                 key={doc.key || doc.id || index}
                 onClick={() => {
-                  const id = doc.key || doc.id;
-                  if (id) {
-                    window.open(`https://app.clicksign.com/documents/${id}`, "_blank");
-                  }
+                  // A Clicksign não expõe um link direto pro documento
+                  // aqui (só na hora que a lista/assinatura é criada) —
+                  // manda pro painel deles pra não cair em link quebrado.
+                  window.open("https://app.clicksign.com", "_blank");
                 }}
                 className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30 cursor-pointer"
               >

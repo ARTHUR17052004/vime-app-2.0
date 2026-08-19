@@ -151,6 +151,7 @@ model Contrato {
   status         String    @default("ATIVO")
   observacoes    String?
   clicksignDocumentKey String?
+  clicksignSigningUrl  String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)

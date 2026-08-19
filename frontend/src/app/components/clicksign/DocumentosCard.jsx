@@ -159,12 +159,11 @@ export default function DocumentosCard() {
     }
   }
 
-  function visualizar(doc) {
-    const id = doc.key || doc.id;
-    if (!id) return;
-
-    // Assinatura acontece no site da Clicksign — abre o documento lá.
-    window.open(`https://app.clicksign.com/documents/${id}`, "_blank");
+  function visualizar() {
+    // A Clicksign não expõe um link direto pro documento por aqui (só
+    // no momento em que a lista/assinatura é criada) — manda pro
+    // painel deles pra não cair em link quebrado.
+    window.open("https://app.clicksign.com", "_blank");
   }
 
   const documentosFiltrados = documentos.filter((doc) => {
@@ -328,14 +327,19 @@ export default function DocumentosCard() {
 
                   </button>
 
-                  <button
-                    onClick={() => excluir(doc)}
-                    className="rounded-xl bg-red-600 p-2 text-[var(--text)] hover:bg-red-700"
-                  >
+                  {doc.status === "running" && (
 
-                    <Trash2 size={18} />
+                    <button
+                      onClick={() => excluir(doc)}
+                      title="Cancelar assinatura"
+                      className="rounded-xl bg-red-600 p-2 text-[var(--text)] hover:bg-red-700"
+                    >
 
-                  </button>
+                      <Trash2 size={18} />
+
+                    </button>
+
+                  )}
 
                 </div>
 

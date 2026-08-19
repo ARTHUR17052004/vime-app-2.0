@@ -11,6 +11,7 @@ import ContratoStep from "./steps/ContratoStep";
 export default function InquilinoForm({
   onSave,
   inquilino,
+  salvando = false,
 }) {
 
   const [step, setStep] = useState(1);
@@ -148,6 +149,8 @@ export default function InquilinoForm({
 
     e.preventDefault();
 
+    if (salvando) return;
+
     const kitnetSelecionada =
       kitnets.find(
 
@@ -281,11 +284,14 @@ export default function InquilinoForm({
 
           <button
             type="submit"
-            className="bg-emerald-600 hover:bg-emerald-700 text-[var(--text)] px-6 py-3 rounded-lg font-semibold transition-all"
+            disabled={salvando}
+            className="bg-emerald-600 hover:bg-emerald-700 text-[var(--text)] px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {inquilino
-              ? "Salvar Alterações"
-              : "Salvar Inquilino"}
+            {salvando
+              ? "Salvando..."
+              : inquilino
+                ? "Salvar Alterações"
+                : "Salvar Inquilino"}
           </button>
 
         )}

@@ -227,6 +227,28 @@ export default function ContratoCard({
                   Visualizar
                 </Link>
 
+                {contrato.clicksignSigningUrl && (
+
+                  <a
+                    href={contrato.clicksignSigningUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuAberto(null)}
+                    className="
+                      block
+                      px-4
+                      py-3
+
+                      text-sky-400
+
+                      hover:bg-sky-500/10
+                    "
+                  >
+                    Assinar na Clicksign
+                  </a>
+
+                )}
+
                 <button
                   onClick={() => {
                     setMenuAberto(null);

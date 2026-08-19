@@ -9,6 +9,7 @@ import {
   Pencil,
   Trash2,
   Download,
+  PenLine,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -328,6 +329,36 @@ export default function ContratoTable({
                   Baixar PDF
 
                 </button>
+
+                {contrato.clicksignSigningUrl && (
+
+                  <a
+                    href={contrato.clicksignSigningUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => setMenuAberto(null)}
+                    className="
+                      flex
+                      items-center
+                      gap-3
+
+                      px-5
+                      py-3
+
+                      text-sky-400
+
+                      hover:bg-sky-500/10
+                      transition
+                    "
+                  >
+
+                    <PenLine size={18} />
+
+                    Assinar na Clicksign
+
+                  </a>
+
+                )}
 
                 <button
                   onClick={() => {

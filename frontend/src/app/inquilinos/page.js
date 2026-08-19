@@ -33,6 +33,9 @@ export default function InquilinosPage() {
   const [gerarContratoAutomatico, setGerarContratoAutomatico] =
     useState(true);
 
+  const [salvandoInquilino, setSalvandoInquilino] =
+    useState(false);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -101,6 +104,10 @@ export default function InquilinosPage() {
 
   const salvarInquilino = async (dados) => {
 
+    if (salvandoInquilino) return;
+
+    setSalvandoInquilino(true);
+
     try {
 
       if (inquilinoEditando) {
@@ -149,6 +156,10 @@ export default function InquilinosPage() {
         "Erro ao salvar inquilino."
 
       );
+
+    } finally {
+
+      setSalvandoInquilino(false);
 
     }
 
@@ -418,6 +429,7 @@ export default function InquilinosPage() {
             <InquilinoForm
               onSave={salvarInquilino}
               inquilino={inquilinoEditando}
+              salvando={salvandoInquilino}
             />
 
           </InquilinoModal>
