@@ -54,7 +54,14 @@ export default function PendenciasCard() {
   // Só "running" conta como pendência de verdade — bate com a aba "Em
   // processo" do painel da própria Clicksign. Rascunho (nunca enviado)
   // e cancelado não são "aguardando assinatura".
-  const pendentes = documentos.filter((doc) => doc.status === "running");
+  const pendentes = documentos
+    .filter((doc) => doc.status === "running")
+    .sort((a, b) => {
+      const dataA = new Date(a.uploaded_at || a.created_at || 0).getTime();
+      const dataB = new Date(b.uploaded_at || b.created_at || 0).getTime();
+      return dataB - dataA;
+    });
+
   const visiveis = mostrarTodos ? pendentes : pendentes.slice(0, 4);
 
   return (

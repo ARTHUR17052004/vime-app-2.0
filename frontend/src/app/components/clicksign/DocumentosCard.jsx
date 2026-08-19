@@ -40,6 +40,7 @@ export default function DocumentosCard() {
   const [carregando, setCarregando] = useState(true);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState(null);
+  const [mostrarTodos, setMostrarTodos] = useState(false);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [arquivosSelecionados, setArquivosSelecionados] = useState([]);
@@ -173,10 +174,22 @@ export default function DocumentosCard() {
     }
   }
 
-  const documentosFiltrados = documentos.filter((doc) => {
-    const nome = doc.filename || doc.key || "";
-    return nome.toLowerCase().includes(busca.toLowerCase());
-  });
+  const LIMITE_INICIAL = 5;
+
+  const documentosFiltrados = documentos
+    .filter((doc) => {
+      const nome = doc.filename || doc.key || "";
+      return nome.toLowerCase().includes(busca.toLowerCase());
+    })
+    .sort((a, b) => {
+      const dataA = new Date(a.uploaded_at || a.created_at || 0).getTime();
+      const dataB = new Date(b.uploaded_at || b.created_at || 0).getTime();
+      return dataB - dataA;
+    });
+
+  const documentosVisiveis = mostrarTodos
+    ? documentosFiltrados
+    : documentosFiltrados.slice(0, LIMITE_INICIAL);
 
   return (
     <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-6 shadow-xl">
@@ -305,7 +318,7 @@ export default function DocumentosCard() {
       ) : (
         <div className="space-y-4">
 
-          {documentosFiltrados.map((doc, index) => (
+          {documentosVisiveis.map((doc, index) => (
 
             <div
               key={doc.key || doc.id || index}
@@ -362,6 +375,19 @@ export default function DocumentosCard() {
             </div>
 
           ))}
+
+          {documentosFiltrados.length > LIMITE_INICIAL && (
+
+            <button
+              onClick={() => setMostrarTodos(!mostrarTodos)}
+              className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] py-3 text-sm font-semibold text-emerald-400 transition hover:bg-[var(--surface-3)]"
+            >
+              {mostrarTodos
+                ? "Ver menos"
+                : `Ver mais (${documentosFiltrados.length - LIMITE_INICIAL} restante${documentosFiltrados.length - LIMITE_INICIAL > 1 ? "s" : ""})`}
+            </button>
+
+          )}
 
         </div>
       )}
