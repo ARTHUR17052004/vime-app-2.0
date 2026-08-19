@@ -39,7 +39,10 @@ export default function DashboardCards() {
   }, []);
 
   const concluidos = documentos.filter((d) => d.finished || d.status === "closed").length;
-  const aguardando = documentos.filter((d) => !d.finished && d.status !== "closed" && d.status !== "canceled").length;
+  // Só "running" conta como aguardando assinatura de verdade — bate
+  // com o painel da própria Clicksign. Rascunho (nunca enviado) não é
+  // "aguardando" ninguém, e cancelado obviamente também não.
+  const aguardando = documentos.filter((d) => d.status === "running").length;
 
   const cards = [
     {

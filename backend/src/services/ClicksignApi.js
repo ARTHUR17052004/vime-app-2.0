@@ -167,6 +167,25 @@ class ClicksignApi {
 
   }
 
+  // Baixa o arquivo de verdade (o PDF com a assinatura/autenticação da
+  // Clicksign já aplicada), não só os metadados. A URL de download que
+  // eles devolvem expira em poucos minutos, então busca sempre na hora.
+  async baixarArquivoDocumento(id) {
+
+    const resposta = await this.buscarDocumento(id);
+
+    const url = resposta?.document?.downloads?.original_file_url;
+
+    if (!url) {
+      throw new Error("A Clicksign não retornou um link de download para esse documento.");
+    }
+
+    const download = await axios.get(url, { responseType: "arraybuffer" });
+
+    return Buffer.from(download.data);
+
+  }
+
   async atualizarDocumento(id, documento) {
 
     return this.request(

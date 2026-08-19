@@ -1,5 +1,6 @@
 const contratoService = require('../services/contratoService');
 const contratoDocumentoService = require('../services/contratoDocumentoService');
+const ClicksignApi = require('../services/ClicksignApi');
 
 const listar = async (req, res) => {
 
@@ -41,17 +42,37 @@ const baixarPdf = async (req, res) => {
     });
   }
 
-  const base64 = await contratoDocumentoService.gerarContratoPdfBase64(contrato);
+  let buffer;
+  let assinado = false;
 
-  const buffer = Buffer.from(base64, 'base64');
+  // Se já foi enviado pra Clicksign, tenta baixar o arquivo real de lá
+  // (com a autenticação/assinatura deles aplicada). Se não der — ainda
+  // não foi assinado, ou algo falhou — cai pro PDF gerado pelo VIME.
+  if (contrato.clicksignDocumentKey) {
+
+    try {
+      buffer = await ClicksignApi.baixarArquivoDocumento(contrato.clicksignDocumentKey);
+      assinado = true;
+    } catch (err) {
+      console.error('Não foi possível baixar o arquivo da Clicksign, usando o gerado pelo VIME:', err.message);
+    }
+
+  }
+
+  if (!buffer) {
+    const base64 = await contratoDocumentoService.gerarContratoPdfBase64(contrato);
+    buffer = Buffer.from(base64, 'base64');
+  }
 
   const nomeInquilino = (contrato.inquilino?.nome || 'contrato')
     .toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-');
 
+  const sufixo = assinado ? '-assinado' : '';
+
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="contrato-${nomeInquilino}.pdf"`);
+  res.setHeader('Content-Disposition', `attachment; filename="contrato-${nomeInquilino}${sufixo}.pdf"`);
 
   return res.send(buffer);
 

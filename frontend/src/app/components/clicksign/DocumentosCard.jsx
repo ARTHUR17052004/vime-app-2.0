@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { ClicksignService } from "@/services/clicksign.service";
+import { obterLinkClicksign } from "@/utils/clicksignLink";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 
@@ -26,7 +27,8 @@ function statusLegivel(doc) {
   if (doc.finished || doc.status === "closed") return "Concluído";
   if (doc.status === "canceled") return "Cancelado";
   if (doc.status === "running") return "Aguardando Assinatura";
-  return doc.status || "Aguardando Assinatura";
+  if (doc.status === "draft") return "Rascunho (sem signatário)";
+  return doc.status || "Rascunho";
 }
 
 export default function DocumentosCard() {
@@ -159,11 +161,16 @@ export default function DocumentosCard() {
     }
   }
 
-  function visualizar() {
-    // A Clicksign não expõe um link direto pro documento por aqui (só
-    // no momento em que a lista/assinatura é criada) — manda pro
-    // painel deles pra não cair em link quebrado.
-    window.open("https://app.clicksign.com", "_blank");
+  async function visualizar(doc) {
+    const id = doc.key || doc.id;
+    if (!id) return;
+
+    try {
+      const url = await obterLinkClicksign(id);
+      window.open(url, "_blank");
+    } catch (err) {
+      setErro(err.message || "Não foi possível abrir o documento na Clicksign.");
+    }
   }
 
   const documentosFiltrados = documentos.filter((doc) => {

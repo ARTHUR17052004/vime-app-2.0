@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { ClicksignService } from "@/services/clicksign.service";
+import { obterLinkClicksign } from "@/utils/clicksignLink";
 
 function extrairDocumentos(resposta) {
   const data = resposta?.data || resposta;
@@ -23,6 +24,9 @@ function infoStatus(doc) {
   }
   if (doc.finished || doc.status === "closed") {
     return { texto: "Concluído", cor: "text-emerald-400", icone: CheckCircle2 };
+  }
+  if (doc.status === "draft") {
+    return { texto: "Rascunho (não enviado)", cor: "text-[var(--text-faint)]", icone: Clock3 };
   }
   return { texto: "Aguardando Assinatura", cor: "text-yellow-400", icone: Clock3 };
 }
@@ -47,7 +51,10 @@ export default function PendenciasCard() {
     carregar();
   }, []);
 
-  const pendentes = documentos.filter((doc) => !doc.finished && doc.status !== "closed");
+  // Só "running" conta como pendência de verdade — bate com a aba "Em
+  // processo" do painel da própria Clicksign. Rascunho (nunca enviado)
+  // e cancelado não são "aguardando assinatura".
+  const pendentes = documentos.filter((doc) => doc.status === "running");
   const visiveis = mostrarTodos ? pendentes : pendentes.slice(0, 4);
 
   return (
@@ -100,11 +107,15 @@ export default function PendenciasCard() {
 
               <div
                 key={doc.key || doc.id || index}
-                onClick={() => {
-                  // A Clicksign não expõe um link direto pro documento
-                  // aqui (só na hora que a lista/assinatura é criada) —
-                  // manda pro painel deles pra não cair em link quebrado.
-                  window.open("https://app.clicksign.com", "_blank");
+                onClick={async () => {
+                  const id = doc.key || doc.id;
+                  if (!id) return;
+                  try {
+                    const url = await obterLinkClicksign(id);
+                    window.open(url, "_blank");
+                  } catch {
+                    window.open("https://app.clicksign.com", "_blank");
+                  }
                 }}
                 className="flex items-center justify-between rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 transition hover:border-emerald-500/30 cursor-pointer"
               >
