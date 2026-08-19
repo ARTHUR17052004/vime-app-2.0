@@ -149,7 +149,7 @@ model Contrato {
   tipoGarantia   String?
   valorCaucao    Float?
   indiceReajuste String?
-  status         String    @default("ATIVO")
+  status         String    @default("PENDENTE")
   observacoes    String?
   clicksignDocumentKey String?
   clicksignSigningUrl  String?

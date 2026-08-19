@@ -84,17 +84,23 @@ const criar = async (dados) => {
     throw new Error('Inquilino não encontrado.');
   }
 
+  // "PENDENTE" entra na checagem junto de "ATIVO": um contrato recém-criado
+  // fica pendente até a assinatura na Clicksign, mas já ocupa a kitnet/o
+  // inquilino nesse meio-tempo — sem isso dava pra criar dois contratos
+  // pro mesmo inquilino/kitnet enquanto o primeiro ainda esperava assinatura.
+  const statusEmVigor = { in: ["ATIVO", "PENDENTE"] };
+
   const contratoAtivo = await prisma.contrato.findFirst({
     where: {
       inquilinoId: dados.inquilinoId,
-      status: "ATIVO"
+      status: statusEmVigor
     }
   });
 
   const contratoKitnet = await prisma.contrato.findFirst({
     where: {
       kitnetId: dados.kitnetId,
-      status: "ATIVO"
+      status: statusEmVigor
     }
   });
 
@@ -108,7 +114,7 @@ const criar = async (dados) => {
     where: {
       unidadeId: dados.unidadeId,
       kitnetId: dados.kitnetId,
-      status: "ATIVO"
+      status: statusEmVigor
     }
   });
 

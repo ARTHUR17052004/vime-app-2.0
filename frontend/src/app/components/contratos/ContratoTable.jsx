@@ -203,7 +203,7 @@ export default function ContratoTable({
 
               <Badge
                 variant={
-                  contrato.status === "ATIVO"
+                  contrato.status === "ATIVO" || contrato.status === "ASSINADO"
                     ? "emerald"
                     : contrato.status === "PENDENTE"
                     ? "yellow"

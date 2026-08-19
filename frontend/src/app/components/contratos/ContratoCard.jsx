@@ -67,6 +67,9 @@ export default function ContratoCard({
           ATIVO:
             "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
 
+          ASSINADO:
+            "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20",
+
           PENDENTE:
             "bg-yellow-500/15 text-yellow-400 border border-yellow-500/20",
 

@@ -134,9 +134,14 @@ const processarWebhook = async (evento) => {
     };
   }
 
+  const nomeEvento = evento.event?.name;
+  const documentKey = evento.document?.key;
+
+  console.log(`[Clicksign Webhook] evento="${nomeEvento}" documentKey="${documentKey}"`);
+
   const documento = await prisma.contrato.findFirst({
     where: {
-      clicksignDocumentKey: evento.document?.key
+      clicksignDocumentKey: documentKey
     },
     include: {
       kitnet: true,
@@ -145,13 +150,12 @@ const processarWebhook = async (evento) => {
   });
 
   if (!documento) {
+    console.log(`[Clicksign Webhook] Nenhum contrato local com clicksignDocumentKey="${documentKey}".`);
     return {
       success: false,
       message: "Contrato não encontrado."
     };
   }
-
-  const nomeEvento = evento.event?.name;
 
   // A Clicksign v1 não manda um evento chamado "signature_finished" — o
   // nome real depende de como o documento foi fechado: "close" (fechado
@@ -165,12 +169,18 @@ const processarWebhook = async (evento) => {
 
     case eventosDeAssinaturaCompleta.includes(nomeEvento):
 
+      console.log(`[Clicksign Webhook] Contrato ${documento.id} confirmado como assinado.`);
+
+      // Vai para "ATIVO" (não "ASSINADO") porque é esse o status que o
+      // resto do sistema já reconhece como "contrato vigente" — filtros
+      // de dashboard, contagem de vencimentos e a checagem de contrato
+      // duplicado em contratoService.criar todos olham para "ATIVO".
       await prisma.contrato.update({
         where: {
           id: documento.id
         },
         data: {
-          status: "ASSINADO"
+          status: "ATIVO"
         }
       });
 
@@ -186,7 +196,7 @@ const processarWebhook = async (evento) => {
 
       if (!jaExiste) {
 
-        await prisma.receita.create({
+        const receitaCriada = await prisma.receita.create({
           data: {
             contratoId: documento.id,
             inquilinoId: documento.inquilinoId,
@@ -197,6 +207,12 @@ const processarWebhook = async (evento) => {
             status: "PENDENTE"
           }
         });
+
+        console.log(`[Clicksign Webhook] Receita ${receitaCriada.id} criada para o contrato ${documento.id}.`);
+
+      } else {
+
+        console.log(`[Clicksign Webhook] Receita já existia para o contrato ${documento.id}, nada a fazer.`);
 
       }
 
