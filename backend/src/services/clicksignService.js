@@ -151,9 +151,19 @@ const processarWebhook = async (evento) => {
     };
   }
 
-  switch (evento.event?.name) {
+  const nomeEvento = evento.event?.name;
 
-    case "signature_finished":
+  // A Clicksign v1 não manda um evento chamado "signature_finished" — o
+  // nome real depende de como o documento foi fechado: "close" (fechado
+  // manualmente ou quando todos assinam) ou "auto_close" (fechamento
+  // automático, que é o que usamos em criarDocumento com auto_close:true).
+  // "document_closed" aparece na lista de eventos configuráveis do painel
+  // como sinônimo. Tratamos os três como "documento assinado".
+  const eventosDeAssinaturaCompleta = ["close", "auto_close", "document_closed"];
+
+  switch (true) {
+
+    case eventosDeAssinaturaCompleta.includes(nomeEvento):
 
       await prisma.contrato.update({
         where: {
@@ -192,7 +202,7 @@ const processarWebhook = async (evento) => {
 
       break;
 
-    case "document_cancelled":
+    case nomeEvento === "cancel":
 
       await prisma.contrato.update({
         where: {
