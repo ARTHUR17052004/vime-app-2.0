@@ -1,4 +1,4 @@
-const axios = require("axios");
+const https = require("https");
 
 const prisma = require("../config/prisma");
 
@@ -61,52 +61,93 @@ class AsaasApi {
 
     }
 
+    // O WAF/CloudFront da Asaas bloqueia (403 genérico, sem chegar na
+    // API deles) requisições feitas via axios, mesmo com headers
+    // idênticos — mas aceita o módulo "https" nativo do Node numa
+    // chamada idêntica. Por isso essa chamada usa https.request direto
+    // (as outras integrações, como Clicksign, continuam com axios sem
+    // problema — esse bloqueio é específico da Asaas).
     try {
 
-      const response = await axios({
-
-        method,
-
-        url: `${baseURL}${endpoint}`,
-
-        headers: {
-
-          access_token: apiKey,
-
-          "Content-Type": "application/json",
-
-          // Sem User-Agent customizado, o CloudFront da Asaas rejeita a
-          // requisição com um 403 genérico antes de chegar na API deles.
-          "User-Agent": "VIME-2.0 (contato@vimesistema.online)"
-
-        },
-
-        data: body
-
-      });
-
-      return response.data;
+      return await this.requestNativo(method, baseURL, endpoint, apiKey, body);
 
     } catch (error) {
 
-      console.error("Erro Asaas:");
+      console.error("Erro Asaas:", error.message);
 
-      if (error.response) {
-
-        console.error(error.response.data);
-
-        throw new Error(
-          error.response.data.errors?.[0]?.description ||
-          "Erro ao comunicar com o Asaas."
-        );
-
-      }
-
-      throw new Error(
-        error.message || "Erro desconhecido no Asaas."
-      );
+      throw error;
 
     }
+
+  }
+
+  requestNativo(method, baseURL, endpoint, apiKey, body) {
+
+    return new Promise((resolve, reject) => {
+
+      const url = new URL(`${baseURL}${endpoint}`);
+
+      const payload = body ? JSON.stringify(body) : null;
+
+      const headers = {
+        access_token: apiKey,
+        "Content-Type": "application/json",
+        "User-Agent": "VIME-2.0 (contato@vimesistema.online)",
+      };
+
+      if (payload) {
+        headers["Content-Length"] = Buffer.byteLength(payload);
+      }
+
+      const req = https.request(
+        {
+          hostname: url.hostname,
+          path: `${url.pathname}${url.search}`,
+          method,
+          headers,
+        },
+        (res) => {
+
+          let data = "";
+          res.on("data", (chunk) => { data += chunk; });
+
+          res.on("end", () => {
+
+            let json = {};
+
+            try {
+              json = data ? JSON.parse(data) : {};
+            } catch {
+              return reject(new Error("A Asaas não retornou um JSON válido."));
+            }
+
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              return resolve(json);
+            }
+
+            console.error("Erro Asaas (resposta):", json);
+
+            const mensagem =
+              json.errors?.[0]?.description ||
+              json.message ||
+              `Erro ao comunicar com a Asaas (HTTP ${res.statusCode}).`;
+
+            reject(new Error(mensagem));
+
+          });
+
+        }
+      );
+
+      req.on("error", (err) => {
+        reject(new Error(err.message || "Erro desconhecido na Asaas."));
+      });
+
+      if (payload) req.write(payload);
+
+      req.end();
+
+    });
 
   }
 
