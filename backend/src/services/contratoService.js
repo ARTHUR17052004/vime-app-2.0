@@ -312,7 +312,7 @@ const criar = async (dados) => {
       id: dados.inquilinoId
     },
     data: {
-      status: "ATIVO"
+      ativo: true
     }
   });
 
