@@ -167,7 +167,7 @@ export default function FinanceiroDespesas({
 
       ) : (
 
-        <div className="overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6 px-6 pb-6">
 
           <table className="w-full text-[var(--text-1)]">
 

@@ -82,7 +82,7 @@ export default function FinanceiroFluxoCaixa({
 
       ) : (
 
-        <div className="overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6 px-6 pb-6">
 
           <table className="w-full text-[var(--text-1)]">
 
@@ -166,11 +166,13 @@ export default function FinanceiroFluxoCaixa({
                   </td>
 
                   <td
-                    className={
-                      item.tipo === "Receita"
-                        ? "font-semibold text-emerald-400"
-                        : "font-semibold text-red-400"
-                    }
+                    className={`font-semibold ${
+                      item.status === "ATRASADA"
+                        ? "text-red-400"
+                        : item.tipo === "Receita"
+                        ? "text-emerald-400"
+                        : "text-red-400"
+                    }`}
                   >
                     R$ {item.valor}
                   </td>

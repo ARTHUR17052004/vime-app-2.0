@@ -172,7 +172,7 @@ export default function FinanceiroReceitas({
           Nenhuma receita cadastrada.
         </div>
       ) : (
-        <div className="overflow-x-auto mt-6">
+        <div className="overflow-x-auto mt-6 px-6 pb-6">
 
           <table className="w-full text-[var(--text-1)]">
 
@@ -236,7 +236,15 @@ export default function FinanceiroReceitas({
                     {item.categoria}
                   </td>
 
-                  <td className="font-semibold text-emerald-400">
+                  <td
+                    className={`font-semibold ${
+                      item.status === "ATRASADA"
+                        ? "text-red-400"
+                        : item.status === "PAGO" || item.status === "PAGA"
+                        ? "text-emerald-400"
+                        : "text-yellow-400"
+                    }`}
+                  >
                     R$ {item.valor}
                   </td>
 
