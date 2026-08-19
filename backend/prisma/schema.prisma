@@ -218,6 +218,7 @@ model Receita {
   vencimento      DateTime?
   dataPagamento   DateTime?
   status          String    @default("PENDENTE")
+  formaPagamento  String?
   asaasPaymentId  String?   @unique
   asaasCustomerId String?
   enviadaAsaas    Boolean   @default(false)

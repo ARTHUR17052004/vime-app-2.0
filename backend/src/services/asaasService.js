@@ -127,7 +127,7 @@ const mapearTransacao = (receita) => ({
   valor: receita.valor,
   vencimento: receita.vencimento,
   dataPagamento: receita.dataPagamento,
-  formaPagamento: 'PIX',
+  formaPagamento: receita.formaPagamento || (receita.enviadaAsaas ? 'BOLETO' : '-'),
   status: receita.status,
   enviadaAsaas: receita.enviadaAsaas,
   asaasPaymentId: receita.asaasPaymentId,
@@ -211,11 +211,15 @@ const enviarCobranca = async (receitaId) => {
 
     if (!customerId) {
 
+      // O cadastro de inquilino não tem máscara no telefone/CPF, então
+      // pode chegar aqui formatado ("(11) 98765-4321", "111.222.333-44").
+      // A Asaas recusa esses campos com qualquer caractere que não seja
+      // dígito.
       const cliente = await AsaasApi.criarCliente({
         name: inquilino.nome,
         email: inquilino.email,
-        mobilePhone: inquilino.telefone,
-        cpfCnpj: inquilino.cpf,
+        mobilePhone: (inquilino.telefone || '').replace(/\D/g, ''),
+        cpfCnpj: (inquilino.cpf || '').replace(/\D/g, ''),
       });
 
       customerId = cliente.id;
@@ -229,7 +233,10 @@ const enviarCobranca = async (receitaId) => {
 
     const cobranca = await AsaasApi.criarCobranca({
       customer: customerId,
-      billingType: 'PIX',
+      // BOLETO em vez de PIX: a conta Asaas em uso ainda não está
+      // aprovada para PIX (a API recusa com "invalid_billingType" nesse
+      // caso). Boleto é aprovado por padrão em qualquer conta Asaas.
+      billingType: 'BOLETO',
       value: receita.valor,
       dueDate: receita.vencimento
         ? new Date(receita.vencimento).toISOString().slice(0, 10)
@@ -244,6 +251,7 @@ const enviarCobranca = async (receitaId) => {
         asaasPaymentId: cobranca.id,
         asaasCustomerId: customerId,
         enviadaAsaas: true,
+        formaPagamento: cobranca.billingType || 'BOLETO',
       },
     });
 

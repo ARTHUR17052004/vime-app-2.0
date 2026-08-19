@@ -168,7 +168,7 @@ export default function FinanceiroReceitas({
       </div>
 
       {receitas.length === 0 ? (
-        <div className="text-[var(--text-subtle)]">
+        <div className="px-6 pb-6 text-[var(--text-subtle)]">
           Nenhuma receita cadastrada.
         </div>
       ) : (
