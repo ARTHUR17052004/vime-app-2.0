@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+import { InquilinoService } from "../../../services/inquilinos.service";
+
 export default function ReceitaForm({
   onSave,
   receitaEditando,
@@ -14,12 +16,42 @@ export default function ReceitaForm({
       status: "PENDENTE",
       vencimento: "",
       dataPagamento: "",
+      inquilinoId: "",
     });
+
+  const [inquilinos, setInquilinos] = useState([]);
+
+  useEffect(() => {
+
+    async function carregarInquilinos() {
+
+      try {
+
+        const resposta = await InquilinoService.listar();
+
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setInquilinos(lista);
+
+      } catch (err) {
+
+        console.error("Erro ao carregar inquilinos:", err);
+
+      }
+
+    }
+
+    carregarInquilinos();
+
+  }, []);
 
   useEffect(() => {
     if (receitaEditando) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setFormData(receitaEditando);
+      setFormData({
+        ...receitaEditando,
+        inquilinoId: receitaEditando.inquilinoId || "",
+      });
     }
   }, [receitaEditando]);
 
@@ -34,7 +66,17 @@ export default function ReceitaForm({
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    onSave(formData);
+    onSave({
+      id: formData.id,
+      categoria: formData.categoria,
+      descricao: formData.descricao,
+      valor: formData.valor,
+      status: formData.status,
+      vencimento: formData.vencimento,
+      dataPagamento: formData.dataPagamento,
+      inquilinoId: formData.inquilinoId || null,
+      contratoId: formData.contratoId || undefined,
+    });
   };
 
   const inputStyle =
@@ -64,6 +106,25 @@ export default function ReceitaForm({
           <option>Taxa</option>
           <option>Outros</option>
         </select>
+
+        <div>
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Inquilino (opcional — necessário pra enviar ao Asaas se não houver contrato)
+          </label>
+          <select
+            name="inquilinoId"
+            value={formData.inquilinoId}
+            onChange={handleChange}
+            className={inputStyle}
+          >
+            <option value="">Nenhum (vinculado só pelo contrato, se houver)</option>
+            {inquilinos.map((inq) => (
+              <option key={inq.id} value={inq.id}>
+                {inq.nome}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <input
           name="descricao"

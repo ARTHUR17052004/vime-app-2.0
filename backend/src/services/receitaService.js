@@ -21,6 +21,7 @@ const sanitizar = (dados) => {
   delete dados.createdAt;
   delete dados.updatedAt;
   delete dados.contrato;
+  delete dados.inquilino;
 
   return dados;
 
@@ -29,7 +30,8 @@ const sanitizar = (dados) => {
 const listar = () => {
   return prisma.receita.findMany({
     include: {
-      contrato: true
+      contrato: { include: { inquilino: true } },
+      inquilino: true
     },
     orderBy: {
       createdAt: 'desc'
@@ -41,7 +43,8 @@ const buscarPorId = (id) => {
   return prisma.receita.findUnique({
     where: { id },
     include: {
-      contrato: true
+      contrato: { include: { inquilino: true } },
+      inquilino: true
     }
   });
 };

@@ -176,6 +176,7 @@ const enviarCobranca = async (receitaId) => {
       contrato: {
         include: { inquilino: true },
       },
+      inquilino: true,
     },
   });
 
@@ -193,12 +194,14 @@ const enviarCobranca = async (receitaId) => {
     };
   }
 
-  const inquilino = receita.contrato?.inquilino;
+  // Cobrança pode vir de um contrato (aluguel) ou vinculada direto a um
+  // inquilino (ex: multa avulsa, sem precisar de contrato).
+  const inquilino = receita.inquilino || receita.contrato?.inquilino;
 
   if (!inquilino) {
     return {
       success: false,
-      mensagem: 'Esta receita não está vinculada a um contrato com inquilino — não é possível gerar a cobrança.',
+      mensagem: 'Esta receita não está vinculada a um inquilino — não é possível gerar a cobrança.',
     };
   }
 

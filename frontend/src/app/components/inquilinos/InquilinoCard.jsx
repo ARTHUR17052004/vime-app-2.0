@@ -113,7 +113,7 @@ export default function InquilinoCard({
         <InfoRow
           icon={<Home size={18}/>}
           label="Kitnet"
-          value={inquilino.kitnetNome || "-"}
+          value={inquilino.kitnet?.nome || inquilino.kitnet?.numero || inquilino.kitnetNome || "-"}
         />
 
         <InfoRow
@@ -125,7 +125,7 @@ export default function InquilinoCard({
         <InfoRow
           icon={<User size={18}/>}
           label="Residência"
-          value={inquilino.unidadeNome || "-"}
+          value={inquilino.kitnet?.unidade?.nome || inquilino.unidadeNome || "-"}
         />
 
       </div>

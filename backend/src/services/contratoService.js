@@ -4,7 +4,6 @@ const { paraDataOuNull } = require('../utils/data');
 const ClicksignApi = require("./ClicksignApi");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
-const AsaasApi = require("./AsaasApi");
 const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
@@ -250,19 +249,11 @@ const criar = async (dados) => {
 
     }
 
-    await AsaasApi.criarCliente({
-      name: inquilino.nome,
-      email: inquilino.email,
-      cpfCnpj: inquilino.cpf,
-      phone: inquilino.telefone
-    });
-
-    await AsaasApi.criarCobranca({
-      customer: inquilino.cpf,
-      billingType: "BOLETO",
-      value: contrato.valorAluguel,
-      dueDate: contrato.dataInicio
-    });
+    // Cobrança NÃO é gerada aqui de propósito: só depois que o
+    // inquilino assinar o contrato de verdade (ver
+    // clicksignService.processarWebhook, evento "signature_finished").
+    // Asaas/Financeiro não devem cobrar por um contrato que ainda nem
+    // foi aceito.
 
     await WhatsappService.enviarMensagem({
       numero: inquilino.telefone,
@@ -286,16 +277,8 @@ const criar = async (dados) => {
     descricao: `Documento do contrato ${contrato.id} enviado.`
   });
 
-  await prisma.receita.create({
-    data: {
-      contratoId: contrato.id,
-      categoria: 'Aluguel',
-      descricao: `Aluguel - ${kitnet.numero}`,
-      valor: contrato.valorAluguel,
-      vencimento: contrato.dataInicio,
-      status: 'PENDENTE'
-    }
-  });
+  // A receita/cobrança do aluguel é criada só depois que o contrato
+  // for assinado de verdade (ver processarWebhook -> "signature_finished").
 
   await prisma.kitnet.update({
     where: {

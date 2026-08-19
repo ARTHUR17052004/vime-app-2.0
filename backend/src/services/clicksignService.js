@@ -137,6 +137,10 @@ const processarWebhook = async (evento) => {
   const documento = await prisma.contrato.findFirst({
     where: {
       clicksignDocumentKey: evento.document?.key
+    },
+    include: {
+      kitnet: true,
+      inquilino: true
     }
   });
 
@@ -159,6 +163,32 @@ const processarWebhook = async (evento) => {
           status: "ASSINADO"
         }
       });
+
+      // Cobrança do aluguel só nasce aqui — depois que o contrato foi
+      // assinado de verdade. Se o webhook chegar duplicado (a Clicksign
+      // pode reenviar), não cria a mesma receita duas vezes.
+      const jaExiste = await prisma.receita.findFirst({
+        where: {
+          contratoId: documento.id,
+          categoria: "Aluguel"
+        }
+      });
+
+      if (!jaExiste) {
+
+        await prisma.receita.create({
+          data: {
+            contratoId: documento.id,
+            inquilinoId: documento.inquilinoId,
+            categoria: "Aluguel",
+            descricao: `Aluguel - ${documento.kitnet?.numero || documento.kitnet?.nome || ""}`,
+            valor: documento.valorAluguel,
+            vencimento: documento.dataInicio,
+            status: "PENDENTE"
+          }
+        });
+
+      }
 
       break;
 

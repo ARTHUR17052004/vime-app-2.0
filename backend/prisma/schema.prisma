@@ -73,6 +73,7 @@ model Inquilino {
   tipoGarantia       String?
   valorCaucao        Float?
   contratos          Contrato[]
+  receitas           Receita[]
   kitnet             Kitnet     @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 }
 
@@ -210,6 +211,7 @@ model Locador {
 model Receita {
   id              String    @id @default(uuid())
   contratoId      String?
+  inquilinoId     String?
   categoria       String
   descricao       String
   valor           Float
@@ -224,6 +226,7 @@ model Receita {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   contrato        Contrato? @relation(fields: [contratoId], references: [id])
+  inquilino       Inquilino? @relation(fields: [inquilinoId], references: [id])
 }
 
 model Despesa {

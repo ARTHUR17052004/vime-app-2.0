@@ -209,9 +209,17 @@ export default function InquilinoTable({
               </td>
 
               <td className="px-6 py-5">
-                {inquilino.unidadeNome
-                  ? `${inquilino.unidadeNome} - ${inquilino.kitnetNome || ""}`
-                  : inquilino.kitnetNome || "-"}
+                {(() => {
+                  const nomeUnidade =
+                    inquilino.kitnet?.unidade?.nome || inquilino.unidadeNome;
+                  const nomeKitnet =
+                    inquilino.kitnet?.nome ||
+                    inquilino.kitnet?.numero ||
+                    inquilino.kitnetNome;
+
+                  if (nomeUnidade && nomeKitnet) return `${nomeUnidade} - ${nomeKitnet}`;
+                  return nomeKitnet || nomeUnidade || "-";
+                })()}
               </td>
 
               <td className="px-6 py-5">
