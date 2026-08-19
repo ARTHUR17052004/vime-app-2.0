@@ -24,6 +24,7 @@ import ContratoForm from "../components/contratos/ContratoForm";
 import ContratoStats from "../components/contratos/ContratoStats";
 import ContratoFilters from "../components/contratos/ContratoFilters";
 import ContratoTable from "../components/contratos/ContratoTable";
+import ContratoClicksignOrfaos from "../components/contratos/ContratoClicksignOrfaos";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
@@ -372,12 +373,16 @@ export default function ContratosPage() {
 
             ) : abaSelecionada === "contratos" ? (
 
-              <ContratoTable
-                contratos={contratosFiltrados}
-                onEdit={editarContrato}
-                onDelete={excluirContrato}
-                onBaixarPdf={gerarPdfContrato}
-              />
+              <>
+                <ContratoTable
+                  contratos={contratosFiltrados}
+                  onEdit={editarContrato}
+                  onDelete={excluirContrato}
+                  onBaixarPdf={gerarPdfContrato}
+                />
+
+                <ContratoClicksignOrfaos contratosLocais={contratos} />
+              </>
 
             ) : abaSelecionada === "vencimentos" ? (
 

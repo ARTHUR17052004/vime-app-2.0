@@ -80,6 +80,13 @@ export default function SearchInput({
         placeholder={placeholder}
         autoFocus={autoFocus}
         disabled={disabled}
+        autoComplete="off"
+        autoCorrect="off"
+        autoCapitalize="off"
+        spellCheck={false}
+        name="busca-vime"
+        data-lpignore="true"
+        data-1p-ignore
         className="
           flex-1
 

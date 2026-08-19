@@ -28,6 +28,8 @@ router.post("/documentos", clicksignController.criarDocumentoApi);
 
 router.get("/documentos/:id", clicksignController.buscarDocumentoApi);
 
+router.get("/documentos/:id/baixar", clicksignController.baixarArquivoDocumento);
+
 router.delete("/documentos/:id", clicksignController.cancelarDocumento);
 
 router.post(

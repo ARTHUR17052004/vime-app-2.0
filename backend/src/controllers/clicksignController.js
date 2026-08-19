@@ -86,6 +86,17 @@ const buscarDocumentoApi = async (req, res) => {
 
 };
 
+const baixarArquivoDocumento = async (req, res) => {
+
+  const buffer = await ClicksignApi.baixarArquivoDocumento(req.params.id);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="documento-clicksign.pdf"`);
+
+  return res.send(buffer);
+
+};
+
 const cancelarDocumento = async (req, res) => {
 
   const dados = await ClicksignApi.cancelarDocumento(req.params.id);
@@ -130,6 +141,7 @@ module.exports = {
   listarDocumentosApi,
   criarDocumentoApi,
   buscarDocumentoApi,
+  baixarArquivoDocumento,
   cancelarDocumento,
   enviarAssinatura,
   webhook

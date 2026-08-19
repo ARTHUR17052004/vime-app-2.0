@@ -558,6 +558,16 @@ export default function ContratoForm({
     Encerrado
   </option>
 
+  <option
+    value="ASSINADO"
+    style={{
+      backgroundColor: "#1d2833",
+      color: "#fff",
+    }}
+  >
+    Assinado
+  </option>
+
 </select>
 
 </div>

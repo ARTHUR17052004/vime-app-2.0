@@ -248,6 +248,13 @@ export default function DocumentosCard() {
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Pesquisar documento..."
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
+          name="busca-documentos-clicksign"
+          data-lpignore="true"
+          data-1p-ignore
           className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] py-3 pl-11 pr-4 text-[var(--text)] outline-none transition focus:border-emerald-500"
         />
 
