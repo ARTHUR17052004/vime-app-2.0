@@ -4,6 +4,28 @@ const { paraDataOuNull } = require('../utils/data');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 
+const sanitizar = (dados) => {
+
+  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
+  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
+
+  if (dados.valor !== undefined) {
+    const valor = Number(String(dados.valor).replace(',', '.'));
+    if (Number.isNaN(valor)) {
+      throw new Error('Valor inválido.');
+    }
+    dados.valor = valor;
+  }
+
+  delete dados.id;
+  delete dados.createdAt;
+  delete dados.updatedAt;
+  delete dados.unidade;
+
+  return dados;
+
+};
+
 const listar = () => {
   return prisma.despesa.findMany({
     include: {
@@ -26,8 +48,7 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
-  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
+  dados = sanitizar(dados);
 
   const despesa = await prisma.despesa.create({
     data: dados
@@ -57,8 +78,7 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
-  if (dados.vencimento !== undefined) dados.vencimento = paraDataOuNull(dados.vencimento);
-  if (dados.dataPagamento !== undefined) dados.dataPagamento = paraDataOuNull(dados.dataPagamento);
+  dados = sanitizar(dados);
 
   const anterior = await prisma.despesa.findUnique({
     where: { id }
