@@ -247,18 +247,22 @@ class WhatsappService {
     const configuracao =
       await this.obterConfiguracao();
 
+    // Espaço em branco colado sem querer (comum ao copiar o Phone Number
+    // ID/token do Meta for Developers) quebra a URL da Graph API depois.
+    const limpar = (v) => (typeof v === "string" ? v.trim() : v);
+
     return await prisma.configuracaoWhatsapp.update({
       where: {
         id: configuracao.id,
       },
       data: {
-        nomeConexao: dados.nomeConexao,
-        numero: dados.numero,
+        nomeConexao: limpar(dados.nomeConexao),
+        numero: limpar(dados.numero),
         provider: dados.provider,
-        webhook: dados.webhook,
-        token: dados.token,
-        phoneNumberId: dados.phoneNumberId,
-        apiUrl: dados.apiUrl,
+        webhook: limpar(dados.webhook),
+        token: limpar(dados.token),
+        phoneNumberId: limpar(dados.phoneNumberId),
+        apiUrl: limpar(dados.apiUrl),
       },
     });
   }
