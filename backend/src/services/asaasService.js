@@ -233,10 +233,11 @@ const enviarCobranca = async (receitaId) => {
 
     const cobranca = await AsaasApi.criarCobranca({
       customer: customerId,
-      // BOLETO em vez de PIX: a conta Asaas em uso ainda não está
-      // aprovada para PIX (a API recusa com "invalid_billingType" nesse
-      // caso). Boleto é aprovado por padrão em qualquer conta Asaas.
-      billingType: 'BOLETO',
+      // UNDEFINED deixa o próprio inquilino escolher a forma de pagamento
+      // (Pix, boleto ou cartão) na hora de pagar, dentre o que a conta
+      // Asaas em uso tiver aprovado. Evita travar tudo de novo se um dia
+      // a conta perder aprovação de algum método específico.
+      billingType: 'UNDEFINED',
       value: receita.valor,
       dueDate: receita.vencimento
         ? new Date(receita.vencimento).toISOString().slice(0, 10)
