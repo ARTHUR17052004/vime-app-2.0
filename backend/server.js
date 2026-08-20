@@ -42,6 +42,11 @@ const errorMiddleware = require("./src/middlewares/errorMiddleware");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Atrás de proxy reverso (HTTPS termina antes de chegar no Node): sem
+// isso, req.protocol sempre volta "http", mesmo em requisições https reais.
+// Isso já causou o webhook da Asaas ser registrado como http:// por engano.
+app.set("trust proxy", 1);
+
 /* ===========================
    CORS
 =========================== */
