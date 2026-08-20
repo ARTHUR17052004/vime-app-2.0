@@ -79,8 +79,23 @@ export default function ContratoClicksignOrfaos({ contratosLocais = [] }) {
   async function abrir(doc) {
     const id = doc.key || doc.id;
     if (!id) return;
-    const url = await obterLinkClicksign(id);
-    window.open(url, "_blank");
+
+    // A listagem já traz o link do documento — evita uma segunda chamada
+    // à Clicksign que falha sempre que o documento já foi cancelado ou
+    // removido de lá (comum nesses órfãos antigos).
+    if (doc.links?.self) {
+      window.open(`https://app.clicksign.com${doc.links.self}`, "_blank");
+      return;
+    }
+
+    try {
+      const url = await obterLinkClicksign(id);
+      window.open(url, "_blank");
+    } catch (err) {
+      alert(
+        "Não foi possível abrir esse documento na Clicksign agora — provavelmente porque ele já foi cancelado ou removido de lá. Você ainda pode baixar o PDF pelo botão \"Baixar\"."
+      );
+    }
   }
 
   async function baixar(doc) {

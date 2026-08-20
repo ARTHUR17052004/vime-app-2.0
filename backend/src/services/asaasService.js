@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const AsaasApi = require('./AsaasApi');
+const notificacaoService = require('./notificacaoService');
 
 const config = async () => {
   const { apiKey, ambiente, walletId, webhookToken } = await AsaasApi.obterConfig();
@@ -307,7 +308,11 @@ const sincronizar = async (evento) => {
   const receita = await prisma.receita.findFirst({
     where: {
       id: payment.externalReference
-    }
+    },
+    include: {
+      inquilino: true,
+      contrato: { include: { inquilino: true } },
+    },
   });
 
   if (!receita) {
@@ -316,6 +321,8 @@ const sincronizar = async (evento) => {
       mensagem: "Receita não encontrada."
     };
   }
+
+  const nomeInquilino = receita.inquilino?.nome || receita.contrato?.inquilino?.nome || "";
 
   switch (evento.event) {
 
@@ -331,6 +338,12 @@ const sincronizar = async (evento) => {
         }
       });
 
+      await notificacaoService.criar({
+        origem: "ASAAS",
+        titulo: "Cobrança paga",
+        mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
+      });
+
       break;
 
     case "PAYMENT_OVERDUE":
@@ -342,6 +355,12 @@ const sincronizar = async (evento) => {
         data: {
           status: "ATRASADA"
         }
+      });
+
+      await notificacaoService.criar({
+        origem: "ASAAS",
+        titulo: "Cobrança atrasada",
+        mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`,
       });
 
       break;
