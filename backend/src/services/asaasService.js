@@ -92,9 +92,12 @@ const buscarWallet = async () => {
     const conta = await AsaasApi.minhaConta();
 
     if (!conta?.walletId) {
+      // A Asaas não expõe o Wallet ID em nenhum endpoint da API v3 (nem
+      // /myAccount, nem nenhum outro) — só existe no painel deles mesmo.
       return {
         success: false,
-        mensagem: 'Não foi possível localizar o Wallet ID desta conta.'
+        mensagem:
+          'A Asaas não disponibiliza o Wallet ID pela API. Copie direto no painel deles: Integrações (canto superior direito) → aba Início → seção "Wallet ID" (o valor começa com "wal_").'
       };
     }
 
