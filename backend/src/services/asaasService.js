@@ -357,23 +357,34 @@ const sincronizar = async (evento) => {
 
   switch (evento.event) {
 
+    // CONFIRMED = pagamento identificado mas ainda não creditado na
+    // conta (comum em boleto, some dias antes de RECEIVED); RECEIVED =
+    // já creditado. Tratamos os dois como "pago" pro locador — é o que
+    // a própria Asaas mostra como "Confirmada" no painel deles.
+    case "PAYMENT_CONFIRMED":
     case "PAYMENT_RECEIVED":
 
-      await prisma.receita.update({
-        where: {
-          id: receita.id
-        },
-        data: {
-          status: "PAGA",
-          dataPagamento: new Date()
-        }
-      });
+      // Evita notificar duas vezes quando CONFIRMED e RECEIVED chegam
+      // pro mesmo pagamento (comum em boleto).
+      if (receita.status !== "PAGA") {
 
-      await notificacaoService.criar({
-        origem: "ASAAS",
-        titulo: "Cobrança paga",
-        mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
-      });
+        await prisma.receita.update({
+          where: {
+            id: receita.id
+          },
+          data: {
+            status: "PAGA",
+            dataPagamento: new Date()
+          }
+        });
+
+        await notificacaoService.criar({
+          origem: "ASAAS",
+          titulo: "Cobrança paga",
+          mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
+        });
+
+      }
 
       break;
 
