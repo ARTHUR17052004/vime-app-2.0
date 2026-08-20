@@ -60,6 +60,7 @@ export default function AsaasTabela({
   loading = false,
   onVisualizar,
   onDetalhes,
+  onEditar,
   onEnviar,
   enviandoId,
 }) {
@@ -206,6 +207,23 @@ export default function AsaasTabela({
                     >
                       Detalhes
                     </button>
+
+                    {!item.enviadaAsaas && (
+                      <button
+                        onClick={() => onEditar?.(item)}
+                        className="
+                          px-4
+                          py-2
+                          rounded-lg
+                          border
+                          border-yellow-500/30
+                          text-yellow-400
+                          hover:bg-yellow-500/10
+                        "
+                      >
+                        Editar
+                      </button>
+                    )}
 
                     {!item.enviadaAsaas && (
                       <button

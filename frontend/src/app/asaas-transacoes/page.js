@@ -18,9 +18,11 @@ import AsaasFiltros from "../components/asaas-transacoes/AsaasFiltros";
 import AsaasTabela from "../components/asaas-transacoes/AsaasTabela";
 import AsaasExportar from "../components/asaas-transacoes/AsaasExportar";
 import AsaasDetalhesModal from "../components/asaas-transacoes/AsaasDetalhesModal";
+import AsaasEditarModal from "../components/asaas-transacoes/AsaasEditarModal";
 import AsaasNovaCobrancaModal from "../components/asaas-transacoes/AsaasNovaCobrancaModal";
 
 import { AsaasService } from "@/services/asaas.service";
+import { ReceitaService } from "@/services/financeiro.service";
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
@@ -50,6 +52,12 @@ export default function AsaasTransacoesPage() {
     useState(false);
 
   const [novaCobrancaOpen, setNovaCobrancaOpen] =
+    useState(false);
+
+  const [editarOpen, setEditarOpen] =
+    useState(false);
+
+  const [salvandoEdicao, setSalvandoEdicao] =
     useState(false);
 
   async function carregarTransacoes() {
@@ -112,6 +120,39 @@ export default function AsaasTransacoesPage() {
 
     setTransacaoSelecionada(transacao);
     setDetalhesOpen(true);
+
+  }
+
+  function abrirEdicao(transacao) {
+
+    setTransacaoSelecionada(transacao);
+    setEditarOpen(true);
+
+  }
+
+  async function salvarEdicao(id, dados) {
+
+    try {
+
+      setSalvandoEdicao(true);
+
+      await ReceitaService.atualizar(id, dados);
+
+      setEditarOpen(false);
+
+      await carregarTransacoes();
+
+    } catch (error) {
+
+      console.error("Erro ao editar cobrança:", error);
+
+      alert(error.message || "Erro ao salvar a cobrança.");
+
+    } finally {
+
+      setSalvandoEdicao(false);
+
+    }
 
   }
 
@@ -224,6 +265,7 @@ export default function AsaasTransacoesPage() {
               loading={loading}
               onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
+              onEditar={abrirEdicao}
               onEnviar={enviarCobranca}
               enviandoId={enviandoId}
             />
@@ -246,6 +288,14 @@ export default function AsaasTransacoesPage() {
           open={detalhesOpen}
           onClose={() => setDetalhesOpen(false)}
           transacao={transacaoSelecionada}
+        />
+
+        <AsaasEditarModal
+          open={editarOpen}
+          onClose={() => setEditarOpen(false)}
+          transacaoOriginal={transacaoSelecionada}
+          onSave={salvarEdicao}
+          salvando={salvandoEdicao}
         />
 
         <AsaasNovaCobrancaModal

@@ -17,6 +17,17 @@ const sanitizar = (dados) => {
     dados.valor = valor;
   }
 
+  const paraNumeroOuNull = (v) => {
+    if (v === '' || v === null || v === undefined) return null;
+    const n = Number(String(v).replace(',', '.'));
+    return Number.isNaN(n) ? null : n;
+  };
+
+  if (dados.descontoValor !== undefined) dados.descontoValor = paraNumeroOuNull(dados.descontoValor);
+  if (dados.descontoDias !== undefined) dados.descontoDias = dados.descontoDias === '' || dados.descontoDias === null ? null : parseInt(dados.descontoDias, 10);
+  if (dados.multaValor !== undefined) dados.multaValor = paraNumeroOuNull(dados.multaValor);
+  if (dados.jurosValor !== undefined) dados.jurosValor = paraNumeroOuNull(dados.jurosValor);
+
   delete dados.id;
   delete dados.createdAt;
   delete dados.updatedAt;

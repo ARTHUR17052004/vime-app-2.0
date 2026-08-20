@@ -219,6 +219,10 @@ model Receita {
   dataPagamento   DateTime?
   status          String    @default("PENDENTE")
   formaPagamento  String?
+  descontoValor   Float?
+  descontoDias    Int?
+  multaValor      Float?
+  jurosValor      Float?
   asaasPaymentId  String?   @unique
   asaasCustomerId String?
   enviadaAsaas    Boolean   @default(false)

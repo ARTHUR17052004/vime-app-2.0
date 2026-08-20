@@ -135,6 +135,10 @@ const mapearTransacao = (receita) => ({
   status: receita.status,
   enviadaAsaas: receita.enviadaAsaas,
   asaasPaymentId: receita.asaasPaymentId,
+  descontoValor: receita.descontoValor,
+  descontoDias: receita.descontoDias,
+  multaValor: receita.multaValor,
+  jurosValor: receita.jurosValor,
 });
 
 const listarTransacoes = async () => {
@@ -235,7 +239,7 @@ const enviarCobranca = async (receitaId) => {
 
     }
 
-    const cobranca = await AsaasApi.criarCobranca({
+    const payload = {
       customer: customerId,
       // Fixado em BOLETO por pedido explícito: por enquanto o Pix não
       // deve ser oferecido, independentemente de estar liberado na conta
@@ -247,7 +251,34 @@ const enviarCobranca = async (receitaId) => {
         : new Date().toISOString().slice(0, 10),
       description: receita.descricao,
       externalReference: receita.id,
-    });
+    };
+
+    // Desconto/multa/juros são opcionais — só vão no payload se a
+    // receita tiver sido configurada com esses valores antes do envio
+    // (tela de Asaas Transações -> Editar).
+    if (receita.descontoValor) {
+      payload.discount = {
+        value: receita.descontoValor,
+        dueDateLimitDays: receita.descontoDias || 0,
+        type: 'FIXED',
+      };
+    }
+
+    if (receita.multaValor) {
+      payload.fine = {
+        value: receita.multaValor,
+        type: 'PERCENTAGE',
+      };
+    }
+
+    if (receita.jurosValor) {
+      payload.interest = {
+        value: receita.jurosValor,
+        type: 'PERCENTAGE',
+      };
+    }
+
+    const cobranca = await AsaasApi.criarCobranca(payload);
 
     const atualizada = await prisma.receita.update({
       where: { id: receita.id },
