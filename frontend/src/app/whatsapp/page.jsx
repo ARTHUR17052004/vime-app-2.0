@@ -14,6 +14,7 @@ import { socket } from "../../services/socket";
 import WhatsappHeader from "../components/whatsapp/WhatsappHeader";
 import WhatsappStatusCard from "../components/whatsapp/WhatsappStatusCard";
 import WhatsappConfigCard from "../components/whatsapp/WhatsappConfigCard";
+import WhatsappAssistenteCard from "../components/whatsapp/WhatsappAssistenteCard";
 import WhatsappActions from "../components/whatsapp/WhatsappActions";
 import WhatsappConversations from "../components/whatsapp/WhatsappConversations";
 import WhatsappChat from "../components/whatsapp/WhatsappChat";
@@ -213,6 +214,19 @@ export default function WhatsappPage() {
                 </div>
 
               </div>
+
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.15}>
+
+            <PageSection spacing="xl">
+
+              <WhatsappAssistenteCard
+                dados={configuracao}
+                onAtualizar={carregar}
+              />
 
             </PageSection>
 

@@ -20,8 +20,9 @@ async function encontrarInquilinoPeloNumero(numeroWhatsapp) {
   const alvo = normalizarTelefoneBR(numeroWhatsapp);
   if (!alvo) return null;
 
+  // telefone é obrigatório no cadastro de Inquilino (não aceita null),
+  // então não precisa de filtro -- só busca todos e compara normalizado.
   const inquilinos = await prisma.inquilino.findMany({
-    where: { telefone: { not: null } },
     include: { kitnet: true },
   });
 
