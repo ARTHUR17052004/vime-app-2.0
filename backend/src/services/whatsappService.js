@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const axios = require("axios");
 const metaWhatsappService = require("./metaWhatsappService");
+const assistenteWhatsappService = require("./assistenteWhatsappService");
 const { getIO } = require("../socket");
 
 const USAR_MOCK =
@@ -184,7 +185,7 @@ class WhatsappService {
       return {
         id: conversa.id,
         nome: conversa.contato.nome,
-        numero: conversa.contato.numero,
+        numero: conversa.contato.telefone,
         online: conversa.contato.online,
         naoLidas: conversa.naoLidas,
         ultimaMensagem: ultima?.texto || "",
@@ -235,7 +236,15 @@ class WhatsappService {
   ========================================== */
 
   async configuracao() {
-    return await this.obterConfiguracao();
+    const configuracao = await this.obterConfiguracao();
+
+    // A chave da IA nunca volta pro navegador -- só um indicador se já
+    // tem uma salva, pra não deixar o segredo trafegando/visível à toa.
+    return {
+      ...configuracao,
+      iaApiKey: undefined,
+      iaApiKeyConfigurada: !!configuracao.iaApiKey,
+    };
   }
 
   /* ==========================================
@@ -263,6 +272,11 @@ class WhatsappService {
         token: limpar(dados.token),
         phoneNumberId: limpar(dados.phoneNumberId),
         apiUrl: limpar(dados.apiUrl),
+        ...(dados.iaAtivo !== undefined ? { iaAtivo: dados.iaAtivo === true } : {}),
+        // Só grava a chave da IA se o campo veio preenchido -- assim o
+        // formulário pode deixá-la sempre em branco na tela (por
+        // segurança) sem apagar a chave já salva a cada "Salvar".
+        ...(limpar(dados.iaApiKey) ? { iaApiKey: limpar(dados.iaApiKey) } : {}),
       },
     });
   }
@@ -394,6 +408,46 @@ class WhatsappService {
             },
           },
         });
+
+        // Assistente IA: só responde automaticamente se estiver ativado
+        // e o número bater com um inquilino cadastrado. Erros aqui não
+        // devem derrubar o webhook — a mensagem já foi salva de
+        // qualquer forma, um humano consegue responder pela tela normal.
+        try {
+
+          const respostaIA = await assistenteWhatsappService.processarMensagemRecebida({
+            numeroWhatsapp: numero,
+            textoMensagem: texto,
+          });
+
+          if (respostaIA) {
+
+            await metaWhatsappService.enviarMensagem(numero, respostaIA);
+
+            await prisma.whatsappMensagem.create({
+              data: {
+                conversaId: conversa.id,
+                texto: respostaIA,
+                tipo: "enviada",
+                status: "enviada",
+              },
+            });
+
+            await prisma.whatsappConversa.update({
+              where: { id: conversa.id },
+              data: {
+                ultimaMensagem: respostaIA,
+                ultimaData: new Date(),
+              },
+            });
+
+          }
+
+        } catch (erroIA) {
+
+          console.error("Erro ao gerar resposta do assistente IA:", erroIA.message);
+
+        }
       }
 
       const io = getIO();

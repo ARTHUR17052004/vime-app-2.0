@@ -434,6 +434,10 @@ model ConfiguracaoWhatsapp {
 
   ultimaSincronizacao DateTime?
 
+  iaAtivo Boolean @default(false)
+
+  iaApiKey String?
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
