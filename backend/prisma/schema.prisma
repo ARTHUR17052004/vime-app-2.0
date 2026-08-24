@@ -92,6 +92,8 @@ model Usuario {
 
   ativo Boolean @default(true)
 
+  foto String?
+
   resetSenhaToken    String?   @unique
   resetSenhaExpiraEm DateTime?
 

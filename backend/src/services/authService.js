@@ -64,7 +64,10 @@ const login = async (email, senha) => {
 
   return {
     token,
-    usuario: payload
+    // O JWT fica enxuto de propósito (payload assinado) -- a foto (base64,
+    // pode ser grande) só vai na resposta HTTP pro front guardar, nunca
+    // dentro do token/cookie.
+    usuario: { ...payload, foto: usuario.foto || null }
   };
 
 };

@@ -12,8 +12,11 @@ import { useEffect, useRef, useState } from "react";
 
 import menuConfig from "../../config/menuConfig";
 import { useTheme } from "../../../context/ThemeContext";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function Sidebar() {
+
+  const { usuario } = useAuth();
   const { textoRodape } = useTheme();
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -339,7 +342,7 @@ export default function Sidebar() {
 
                   tracking-[0.1em]
 
-                  text-gray-300
+                  text-emerald-400
                 "
               >
                 {"-> "}{section.title}
@@ -502,30 +505,54 @@ export default function Sidebar() {
 
     <div className="flex items-center gap-3">
 
-      <img
-        src="https://ui-avatars.com/api/?name=Arthur&background=16a34a&color=fff"
-        alt="Arthur"
-        draggable={false}
-        loading="lazy"
+      <div
         className="
           w-10
           h-10
           rounded-full
           border
           border-emerald-400
+
+          bg-linear-to-br
+          from-emerald-500
+          to-green-700
+
+          flex
+          items-center
+          justify-center
+
+          text-sm
+          font-bold
+          text-white
+
+          overflow-hidden
+
+          shrink-0
         "
-      />
+      >
+        {usuario?.foto ? (
+          <img
+            src={usuario.foto}
+            alt={usuario?.nome || "Usuário"}
+            draggable={false}
+            loading="lazy"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          (usuario?.nome || "?").charAt(0).toUpperCase()
+        )}
+      </div>
 
       {!collapsed && (
 
         <div className="leading-tight">
 
           <p className="text-sm font-semibold text-white">
-            Arthur
+            {usuario?.nome || "Visitante"}
           </p>
 
           <p className="text-xs text-emerald-400">
-            Administrador
+            {usuario?.perfil || "SEM PERFIL"}
           </p>
 
         </div>

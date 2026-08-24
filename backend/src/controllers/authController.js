@@ -59,16 +59,16 @@ const me = async (req, res) => {
 
 };
 
-// Edição do próprio perfil (nome/email) -- diferente de
+// Edição do próprio perfil (nome/email/foto) -- diferente de
 // usuarioController.atualizar, que é só pra admin gerenciar outras
 // contas. Aqui só deixa mexer no que é seguro o próprio usuário mudar
 // sozinho: nada de perfil/permissão/status.
 const atualizarMe = async (req, res) => {
   try {
 
-    const { nome, email } = req.body;
+    const { nome, email, foto } = req.body;
 
-    const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email });
+    const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email, foto });
 
     // authService.login() devolve o perfil já achatado em string (o
     // que o front espera em usuario.perfil) -- mantém consistente aqui.

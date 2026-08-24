@@ -213,9 +213,19 @@ export default function Topbar() {
 
             shadow-lg
             shadow-emerald-900/30
+
+            overflow-hidden
           "
         >
-          {inicial}
+          {usuario?.foto ? (
+            <img
+              src={usuario.foto}
+              alt={nome}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            inicial
+          )}
         </div>
 
         <div className="leading-tight hidden sm:block">

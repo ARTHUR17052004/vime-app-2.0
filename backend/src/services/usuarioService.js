@@ -225,6 +225,8 @@ const atualizar = async (id, dados) => {
 
         ativo: dados.ativo,
 
+        foto: dados.foto,
+
     };
 
     if (dados.perfilId) {

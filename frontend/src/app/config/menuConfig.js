@@ -18,7 +18,7 @@ import {
 
 const menuConfig = [
   {
-    title: "Dashboard",
+    title: "Menu",
     items: [
       {
         label: "Dashboard",
