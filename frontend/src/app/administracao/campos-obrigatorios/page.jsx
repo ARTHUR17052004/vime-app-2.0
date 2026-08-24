@@ -38,6 +38,16 @@ const MODULOS = [
       { campo: "vencimento", label: "Dia de Vencimento" },
     ],
   },
+  {
+    chave: "inquilino",
+    nome: "Inquilinos",
+    campos: [
+      { campo: "cpf", label: "CPF" },
+      { campo: "dataNascimento", label: "Data de Nascimento" },
+      { campo: "contatoEmergencia", label: "Contato de Emergência" },
+      { campo: "telefoneEmergencia", label: "Telefone de Emergência" },
+    ],
+  },
 ];
 
 export default function CamposObrigatoriosPage() {

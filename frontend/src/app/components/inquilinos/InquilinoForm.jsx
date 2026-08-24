@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { KitnetService } from "../../../services/kitnets.service";
+import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
 
 import DadosPessoaisStep from "./steps/DadosPessoaisStep";
 import KitnetStep from "./steps/KitnetStep";
@@ -17,6 +18,8 @@ export default function InquilinoForm({
   const [step, setStep] = useState(1);
 
   const [kitnets, setKitnets] = useState([]);
+
+  const [obrigatorios, setObrigatorios] = useState(new Set());
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -64,7 +67,28 @@ export default function InquilinoForm({
 
     }
 
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("inquilino");
+
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
     carregarKitnets();
+    carregarObrigatorios();
 
   }, []);
 
@@ -229,6 +253,7 @@ export default function InquilinoForm({
         <DadosPessoaisStep
           formData={formData}
           handleChange={handleChange}
+          obrigatorios={obrigatorios}
         />
 
       )}

@@ -49,6 +49,10 @@ const rotulosPadrao = {
   kitnets: 'Quantidade de Kitnets',
   aluguel: 'Valor do Aluguel',
   vencimento: 'Dia de Vencimento',
+  cpf: 'CPF',
+  dataNascimento: 'Data de Nascimento',
+  contatoEmergencia: 'Contato de Emergência',
+  telefoneEmergencia: 'Telefone de Emergência',
 };
 
 // Lança erro listando os campos configurados como obrigatórios para o

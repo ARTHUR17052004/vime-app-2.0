@@ -1,8 +1,16 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
+const { validarCpf } = require('../utils/cpf');
 const contratoService = require('./contratoService');
+const campoObrigatorioService = require('./campoObrigatorioService');
 
 const sanitizar = (dados) => {
+
+  if (dados.cpf) {
+    if (!validarCpf(dados.cpf)) {
+      throw new Error('CPF inválido.');
+    }
+  }
 
   if (dados.dataNascimento !== undefined) dados.dataNascimento = paraDataOuNull(dados.dataNascimento);
   if (dados.dataFimContrato !== undefined) dados.dataFimContrato = paraDataOuNull(dados.dataFimContrato);
@@ -72,6 +80,8 @@ const criar = async (dados) => {
   delete dados.gerarContratoAutomatico;
 
   dados = sanitizar(dados);
+
+  await campoObrigatorioService.validar('inquilino', dados);
 
   const inquilino = await prisma.inquilino.create({
     data: dados

@@ -36,33 +36,6 @@ export default function ContratoStep({
         />
       </div>
 
-      <input
-        name="prazoContrato"
-        placeholder="Prazo (meses)"
-        value={formData.prazoContrato}
-        onChange={handleChange}
-        className={inputStyle}
-      />
-
-      <select
-        name="indiceReajuste"
-        value={formData.indiceReajuste}
-        onChange={handleChange}
-        className={inputStyle}
-      >
-        <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          Índice de Reajuste
-        </option>
-
-        <option value="IGPM" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          IGPM
-        </option>
-
-        <option value="IPCA" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-          IPCA
-        </option>
-      </select>
-
       <div className="col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
         <p className="font-semibold text-emerald-400">
           Contrato automático
