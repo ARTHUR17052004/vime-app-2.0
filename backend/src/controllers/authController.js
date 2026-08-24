@@ -70,11 +70,16 @@ const atualizarMe = async (req, res) => {
 
     const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email, foto });
 
-    // authService.login() devolve o perfil já achatado em string (o
-    // que o front espera em usuario.perfil) -- mantém consistente aqui.
+    // authService.login() devolve o perfil já achatado em string e as
+    // permissões resolvidas (o que o front espera em usuario.perfil /
+    // usuario.permissoes) -- mantém consistente aqui.
     return res.status(200).json({
       success: true,
-      data: { ...usuario, perfil: usuario.perfil?.nome },
+      data: {
+        ...usuario,
+        perfil: usuario.perfil?.nome,
+        permissoes: usuario.perfil?.permissoes || [],
+      },
     });
 
   } catch (error) {

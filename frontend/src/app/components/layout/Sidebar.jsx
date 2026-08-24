@@ -42,6 +42,32 @@ export default function Sidebar() {
     setMobileOpen(false);
   }, [pathname]);
 
+  // Administrador vê tudo; os demais só o que o perfil deles libera em
+  // Administração → Permissões. Item sem `permissao`/`permissoes`
+  // fica sempre visível (ex: Dashboard, Notificações).
+  const ehAdministrador = usuario?.perfil === "ADMINISTRADOR";
+  const permissoesUsuario = usuario?.permissoes || [];
+
+  function podeVer(item) {
+
+    if (ehAdministrador) return true;
+    if (!item.permissao && !item.permissoes) return true;
+
+    if (item.permissoes) {
+      return item.permissoes.some((p) => permissoesUsuario.includes(p));
+    }
+
+    return permissoesUsuario.includes(item.permissao);
+
+  }
+
+  const menuVisivel = menuConfig
+    .map((section) => ({
+      ...section,
+      items: section.items.filter(podeVer),
+    }))
+    .filter((section) => section.items.length > 0);
+
   function toggleSidebar() {
     const value = !collapsed;
 
@@ -324,7 +350,7 @@ export default function Sidebar() {
         `}
       >
 
-        {menuConfig.map((section) => (
+        {menuVisivel.map((section) => (
 
           <div key={section.title}>
 
