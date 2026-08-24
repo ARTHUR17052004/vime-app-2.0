@@ -317,7 +317,7 @@ export default function Sidebar() {
           px-3
           py-4
 
-          ${collapsed ? "space-y-2" : "space-y-8"}
+          ${collapsed ? "space-y-2" : "space-y-10"}
         `}
       >
 
@@ -329,7 +329,7 @@ export default function Sidebar() {
 
               <p
                 className="
-                  mb-3
+                  mb-4
 
                   px-5
 
@@ -339,10 +339,10 @@ export default function Sidebar() {
 
                   tracking-[0.1em]
 
-                  text-gray-400
+                  text-gray-300
                 "
               >
-                {section.title}
+                {"-> "}{section.title}
               </p>
 
             )}
