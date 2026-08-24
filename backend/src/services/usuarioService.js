@@ -1,8 +1,12 @@
 const prisma = require("../config/prisma");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
+const emailService = require("./emailService");
+
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://vimesistema.online';
 
 const semSenha = (usuario) => {
 
@@ -491,11 +495,47 @@ const enviarAcesso = async (id) => {
 
     }
 
+    // Reaproveita o mesmo mecanismo de "esqueci minha senha" -- o link
+    // leva pra tela de redefinir/definir senha, que serve igual pra
+    // primeiro acesso e pra reset. Manda o e-mail antes de gravar o
+    // token: se o SMTP falhar, não fica um token válido no banco que
+    // ninguém recebeu por e-mail.
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiraEm = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 dias
+    const link = `${FRONTEND_URL}/redefinir-senha?token=${token}`;
+
+    await emailService.enviarEmail({
+        para: usuario.email,
+        assunto: 'Seu acesso ao VIME',
+        texto: `Olá, ${usuario.nome}. Você foi cadastrado no VIME. Para definir sua senha e acessar o sistema, entre em: ${link} (link válido por 7 dias).`,
+        html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color:#0f172a;">Bem-vindo(a) ao VIME</h2>
+        <p>Olá, ${usuario.nome}.</p>
+        <p>Você foi cadastrado(a) no sistema. Clique abaixo para definir sua senha e acessar:</p>
+        <p>
+          <a href="${link}" style="display:inline-block;padding:12px 24px;background:#10b981;color:#fff;text-decoration:none;border-radius:8px;font-weight:bold;">
+            Definir senha e acessar
+          </a>
+        </p>
+        <p style="color:#64748b;font-size:13px;">Este link é válido por 7 dias.</p>
+      </div>
+    `,
+    });
+
+    await prisma.usuario.update({
+        where: { id: usuario.id },
+        data: {
+            resetSenhaToken: token,
+            resetSenhaExpiraEm: expiraEm,
+        },
+    });
+
     return {
 
         success: true,
 
-        message: "Convite preparado para envio.",
+        message: "Convite enviado por e-mail.",
 
     };
 
