@@ -211,6 +211,28 @@ export default function ContratoForm({
 
     }
 
+    if (name === "dataInicio") {
+
+      setFormData((prev) => {
+
+        const novo = { ...prev, dataInicio: value };
+
+        // Sugere a data final automaticamente (4 meses após o início)
+        // só se o usuário ainda não tiver escolhido uma própria.
+        if (value && !prev.dataFim) {
+          const data = new Date(value);
+          data.setMonth(data.getMonth() + 4);
+          novo.dataFim = data.toISOString().slice(0, 10);
+        }
+
+        return novo;
+
+      });
+
+      return;
+
+    }
+
     setFormData((prev) => ({
 
       ...prev,

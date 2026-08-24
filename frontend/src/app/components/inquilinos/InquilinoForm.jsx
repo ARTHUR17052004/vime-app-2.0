@@ -144,16 +144,30 @@ export default function InquilinoForm({
       checked,
     } = e.target;
 
-    setFormData((prev) => ({
+    setFormData((prev) => {
 
-      ...prev,
+      const novo = {
+        ...prev,
+        [name]:
+          type === "checkbox"
+            ? checked
+            : value,
+      };
 
-      [name]:
-        type === "checkbox"
-          ? checked
-          : value,
+      // Data final sugerida automaticamente (4 meses após o início),
+      // só quando o campo ainda estiver vazio -- não sobrescreve se o
+      // usuário já escolheu uma data própria.
+      if (name === "dataInicioContrato" && value && !prev.dataFimContrato) {
 
-    }));
+        const data = new Date(value);
+        data.setMonth(data.getMonth() + 4);
+        novo.dataFimContrato = data.toISOString().slice(0, 10);
+
+      }
+
+      return novo;
+
+    });
 
   }
 

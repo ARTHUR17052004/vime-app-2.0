@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import Table from "../ui/Table";
+import { formatarProximoVencimento } from "../../../utils/vencimento";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
 
@@ -195,7 +196,7 @@ export default function ContratoTable({
 
             <td className="px-6 py-5">
 
-              Dia {contrato.diaVencimento}
+              {formatarProximoVencimento(contrato.diaVencimento)}
 
             </td>
 

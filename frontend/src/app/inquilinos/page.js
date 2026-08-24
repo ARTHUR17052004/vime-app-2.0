@@ -17,6 +17,7 @@ import InquilinoStats from "../components/inquilinos/InquilinoStats";
 import InquilinoTable from "../components/inquilinos/InquilinoTable";
 import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
+import ExplicacaoInquilinoModal from "../components/inquilinos/ExplicacaoInquilinoModal";
 
 import { InquilinoService } from "../../services/inquilinos.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
@@ -24,6 +25,8 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 export default function InquilinosPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [explicacaoOpen, setExplicacaoOpen] = useState(false);
 
   const [inquilinos, setInquilinos] = useState([]);
 
@@ -205,7 +208,17 @@ export default function InquilinosPage() {
 
   };
 
+  const abrirExplicacao = () => {
+
+    setInquilinoEditando(null);
+
+    setExplicacaoOpen(true);
+
+  };
+
   const novoInquilino = () => {
+
+    setExplicacaoOpen(false);
 
     setInquilinoEditando(null);
 
@@ -216,6 +229,8 @@ export default function InquilinosPage() {
   };
 
   const adicionarInquilino = () => {
+
+    setExplicacaoOpen(false);
 
     setInquilinoEditando(null);
 
@@ -333,12 +348,12 @@ export default function InquilinosPage() {
                 <div className="flex gap-3">
                   <Button
                     variant="secondary"
-                    onClick={adicionarInquilino}
+                    onClick={abrirExplicacao}
                   >
                     + Adicionar Inquilino
                   </Button>
 
-                  <Button onClick={novoInquilino}>
+                  <Button onClick={abrirExplicacao}>
                     + Novo Inquilino
                   </Button>
                 </div>
@@ -395,6 +410,13 @@ export default function InquilinosPage() {
             </PageSection>
 
           </FadeIn>
+
+          <ExplicacaoInquilinoModal
+            isOpen={explicacaoOpen}
+            onClose={() => setExplicacaoOpen(false)}
+            onEscolherNovo={novoInquilino}
+            onEscolherAdicionar={adicionarInquilino}
+          />
 
           <InquilinoModal
             isOpen={modalOpen}

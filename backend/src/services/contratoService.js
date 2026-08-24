@@ -8,6 +8,37 @@ const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 
+// Nome de arquivo legível pro documento no Clicksign -- antes ficava
+// "contrato-<uuid>.pdf", sem nenhuma relação visível com o inquilino.
+const slugificarNomeArquivo = (nome) => {
+  return (nome || 'inquilino')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-zA-Z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .toLowerCase();
+};
+
+// A tela de edição pré-preenche o formulário espalhando o contrato
+// inteiro (que vem com locador/unidade/kitnet/inquilino/receitas
+// aninhados), e reenvia tudo isso no salvar -- sem isso o
+// prisma.contrato.update() quebra com "Unknown argument" pros campos
+// de relação.
+const sanitizar = (dados) => {
+
+  delete dados.id;
+  delete dados.createdAt;
+  delete dados.updatedAt;
+  delete dados.locador;
+  delete dados.unidade;
+  delete dados.kitnet;
+  delete dados.inquilino;
+  delete dados.receitas;
+
+  return dados;
+
+};
+
 const listar = () => {
   return prisma.contrato.findMany({
     include: {
@@ -42,7 +73,15 @@ const criar = async (dados) => {
     throw new Error('Data de início do contrato é obrigatória.');
   }
   dados.dataInicio = new Date(dados.dataInicio);
-  if (dados.dataFim !== undefined) dados.dataFim = paraDataOuNull(dados.dataFim);
+  dados.dataFim = dados.dataFim !== undefined ? paraDataOuNull(dados.dataFim) : null;
+
+  // Sem data final informada, o contrato vale por 4 meses a partir do
+  // início -- valor padrão, ainda editável em Contratos depois.
+  if (!dados.dataFim) {
+    const fimPadrao = new Date(dados.dataInicio);
+    fimPadrao.setMonth(fimPadrao.getMonth() + 4);
+    dados.dataFim = fimPadrao;
+  }
 
   const kitnet = await prisma.kitnet.findUnique({
     where: {
@@ -206,7 +245,7 @@ const criar = async (dados) => {
 
     const documentoCriado = await ClicksignApi.criarDocumento({
       document: {
-        path: `/contrato-${contrato.id}.pdf`,
+        path: `/contrato-${slugificarNomeArquivo(inquilino.nome)}.pdf`,
         content_base64: conteudoBase64,
         auto_close: true
       }
@@ -326,6 +365,8 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  dados = sanitizar(dados);
+
   if (dados.dataInicio !== undefined) {
     if (!dados.dataInicio) {
       throw new Error('Data de início do contrato é obrigatória.');
@@ -337,6 +378,22 @@ const atualizar = async (id, dados) => {
   const anterior = await prisma.contrato.findUnique({
     where: { id }
   });
+
+  if (dados.inquilinoId && dados.inquilinoId !== anterior?.inquilinoId) {
+
+    const contratoAtivo = await prisma.contrato.findFirst({
+      where: {
+        inquilinoId: dados.inquilinoId,
+        status: { in: ["ATIVO", "PENDENTE"] },
+        id: { not: id },
+      }
+    });
+
+    if (contratoAtivo) {
+      throw new Error("Este inquilino já possui um contrato ativo.");
+    }
+
+  }
 
   const contrato = await prisma.contrato.update({
     where: { id },
