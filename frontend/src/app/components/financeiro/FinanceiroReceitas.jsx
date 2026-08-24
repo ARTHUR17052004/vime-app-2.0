@@ -200,6 +200,22 @@ export default function FinanceiroReceitas({
                 </th>
 
                 <th className="text-left">
+                  Inquilino
+                </th>
+
+                <th className="text-left">
+                  Residencial
+                </th>
+
+                <th className="text-left">
+                  Kitnet
+                </th>
+
+                <th className="text-left">
+                  Vencimento
+                </th>
+
+                <th className="text-left">
                   Valor
                 </th>
 
@@ -213,7 +229,13 @@ export default function FinanceiroReceitas({
 
             <tbody>
 
-              {receitas.map((item) => (
+              {receitas.map((item) => {
+
+                const inquilino = item.inquilino || item.contrato?.inquilino;
+                const unidade = item.contrato?.unidade || item.inquilino?.kitnet?.unidade;
+                const kitnet = item.contrato?.kitnet || item.inquilino?.kitnet;
+
+                return (
 
                 <tr
                   key={item.id}
@@ -234,6 +256,24 @@ export default function FinanceiroReceitas({
 
                   <td>
                     {item.categoria}
+                  </td>
+
+                  <td className="text-[var(--text-subtle)]">
+                    {inquilino?.nome || "-"}
+                  </td>
+
+                  <td className="text-[var(--text-subtle)]">
+                    {unidade?.nome || "-"}
+                  </td>
+
+                  <td className="text-[var(--text-subtle)]">
+                    {kitnet?.nome || kitnet?.numero || "-"}
+                  </td>
+
+                  <td className="text-[var(--text-subtle)]">
+                    {item.vencimento
+                      ? new Date(item.vencimento).toLocaleDateString("pt-BR")
+                      : "-"}
                   </td>
 
                   <td
@@ -360,7 +400,9 @@ export default function FinanceiroReceitas({
 
                 </tr>
 
-              ))}
+                );
+
+              })}
 
             </tbody>
 

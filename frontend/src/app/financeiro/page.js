@@ -55,6 +55,10 @@ export default function FinanceiroPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
+  const [dataDe, setDataDe] = useState("");
+
+  const [dataAte, setDataAte] = useState("");
+
   const carregar = useCallback(async () => {
 
     try {
@@ -270,6 +274,20 @@ export default function FinanceiroPage() {
   const lucroLiquido =
     receitaPrevista - totalDespesas;
 
+  const dentroDoIntervalo = (data) => {
+
+    if (!dataDe && !dataAte) return true;
+    if (!data) return false;
+
+    const valor = new Date(data).getTime();
+
+    if (dataDe && valor < new Date(dataDe).getTime()) return false;
+    if (dataAte && valor > new Date(dataAte).getTime() + 86399999) return false;
+
+    return true;
+
+  };
+
   const receitasFiltradas = receitas.filter((item) => {
 
     const texto = `
@@ -286,6 +304,8 @@ export default function FinanceiroPage() {
       item.contrato?.unidadeId !== residenciaSelecionada
     )
       return false;
+
+    if (!dentroDoIntervalo(item.vencimento)) return false;
 
     return true;
 
@@ -308,6 +328,8 @@ export default function FinanceiroPage() {
       item.unidadeId !== residenciaSelecionada
     )
       return false;
+
+    if (!dentroDoIntervalo(item.vencimento)) return false;
 
     return true;
 
@@ -377,11 +399,56 @@ export default function FinanceiroPage() {
         onChange={(e) => setSearch(e.target.value)}
       />
 
-      <div className="mt-4">
-        <ResidenciaFiltro
-          value={residenciaSelecionada}
-          onChange={setResidenciaSelecionada}
-        />
+      <div className="mt-4 flex flex-col md:flex-row gap-4">
+
+        <div className="flex-1">
+          <ResidenciaFiltro
+            value={residenciaSelecionada}
+            onChange={setResidenciaSelecionada}
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Data de
+            </label>
+            <input
+              type="date"
+              value={dataDe}
+              onChange={(e) => setDataDe(e.target.value)}
+              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              até
+            </label>
+            <input
+              type="date"
+              value={dataAte}
+              onChange={(e) => setDataAte(e.target.value)}
+              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3"
+            />
+          </div>
+
+          {(dataDe || dataAte) && (
+            <button
+              type="button"
+              onClick={() => {
+                setDataDe("");
+                setDataAte("");
+              }}
+              className="mt-6 text-xs text-[var(--text-faint)] hover:text-[var(--text)] underline"
+            >
+              Limpar
+            </button>
+          )}
+
+        </div>
+
       </div>
     </FadeIn>
 
@@ -426,16 +493,16 @@ export default function FinanceiroPage() {
         />
 
         <FinanceiroProximosVencimentos
-          receitas={receitas}
+          receitas={receitasFiltradas}
         />
 
         <FinanceiroInadimplencia
-          receitas={receitas}
+          receitas={receitasFiltradas}
         />
 
         <FinanceiroRelatorios
-          receitas={receitas}
-          despesas={despesas}
+          receitas={receitasFiltradas}
+          despesas={despesasFiltradas}
         />
 
       </div>
@@ -470,8 +537,8 @@ export default function FinanceiroPage() {
 
     {abaSelecionada === "fluxo-caixa" && (
       <FinanceiroFluxoCaixa
-        receitas={receitas}
-        despesas={despesas}
+        receitas={receitasFiltradas}
+        despesas={despesasFiltradas}
       />
     )}
 

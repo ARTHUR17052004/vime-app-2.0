@@ -44,6 +44,8 @@ export default function UnitForm({
 
     vencimento: "10",
 
+    dataInicioCobranca: "",
+
     status: "Ativa",
 
     observacoes: "",
@@ -149,6 +151,11 @@ export default function UnitForm({
 
         vencimento:
           unidade.vencimento || "10",
+
+        dataInicioCobranca:
+          unidade.dataInicioCobranca
+            ? String(unidade.dataInicioCobranca).slice(0, 10)
+            : "",
 
         status:
           unidade.status || "Ativa",
@@ -496,6 +503,21 @@ export default function UnitForm({
             value={formData.vencimento}
             onChange={handleChange}
           />
+
+          <div>
+            <Input
+              label="Data de Início da Cobrança"
+              type="date"
+              name="dataInicioCobranca"
+              value={formData.dataInicioCobranca}
+              onChange={handleChange}
+            />
+            <p className="mt-1.5 text-xs text-[var(--text-faint)]">
+              A partir dessa data o sistema gera a cobrança do aluguel sozinho, todo
+              mês (só cobra a próxima quando a anterior já estiver paga). Deixe em
+              branco para começar já.
+            </p>
+          </div>
 
           <Select
             label="Status"

@@ -241,10 +241,10 @@ const enviarCobranca = async (receitaId) => {
 
     const payload = {
       customer: customerId,
-      // Fixado em BOLETO por pedido explícito: por enquanto o Pix não
-      // deve ser oferecido, independentemente de estar liberado na conta
-      // Asaas ou não.
-      billingType: 'BOLETO',
+      // UNDEFINED oferece Pix e Boleto juntos (o inquilino escolhe na
+      // hora de pagar) -- pedido explícito depois que o Pix foi
+      // liberado na conta Asaas.
+      billingType: 'UNDEFINED',
       value: receita.valor,
       dueDate: receita.vencimento
         ? new Date(receita.vencimento).toISOString().slice(0, 10)

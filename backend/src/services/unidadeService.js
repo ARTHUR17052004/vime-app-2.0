@@ -26,6 +26,12 @@ const sanitizar = (dados) => {
     dados.locadorId = null;
   }
 
+  if (dados.dataInicioCobranca !== undefined) {
+    dados.dataInicioCobranca = dados.dataInicioCobranca
+      ? new Date(dados.dataInicioCobranca)
+      : null;
+  }
+
   delete dados.id;
   delete dados.createdAt;
   delete dados.updatedAt;

@@ -41,8 +41,8 @@ const sanitizar = (dados) => {
 const listar = () => {
   return prisma.receita.findMany({
     include: {
-      contrato: { include: { inquilino: true } },
-      inquilino: true
+      contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
+      inquilino: { include: { kitnet: { include: { unidade: true } } } }
     },
     orderBy: {
       createdAt: 'desc'
@@ -54,8 +54,8 @@ const buscarPorId = (id) => {
   return prisma.receita.findUnique({
     where: { id },
     include: {
-      contrato: { include: { inquilino: true } },
-      inquilino: true
+      contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
+      inquilino: { include: { kitnet: { include: { unidade: true } } } }
     }
   });
 };

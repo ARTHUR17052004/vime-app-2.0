@@ -60,6 +60,12 @@ export default function AsaasTransacoesPage() {
   const [salvandoEdicao, setSalvandoEdicao] =
     useState(false);
 
+  const [selecionados, setSelecionados] =
+    useState(new Set());
+
+  const [enviandoLote, setEnviandoLote] =
+    useState(false);
+
   async function carregarTransacoes() {
 
     try {
@@ -113,6 +119,61 @@ export default function AsaasTransacoesPage() {
       setEnviandoId(null);
 
     }
+
+  }
+
+  function alternarSelecionado(id) {
+
+    setSelecionados((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(id)) {
+        novo.delete(id);
+      } else {
+        novo.add(id);
+      }
+      return novo;
+    });
+
+  }
+
+  function alternarTodos(ids) {
+
+    setSelecionados((atual) => {
+      const todosJaSelecionados = ids.every((id) => atual.has(id));
+      return todosJaSelecionados ? new Set() : new Set(ids);
+    });
+
+  }
+
+  async function enviarSelecionados() {
+
+    setEnviandoLote(true);
+
+    let sucesso = 0;
+    let falha = 0;
+
+    for (const id of selecionados) {
+
+      try {
+        await AsaasService.enviarCobranca(id);
+        sucesso++;
+      } catch (error) {
+        console.error(`Erro ao enviar cobrança ${id} ao Asaas:`, error);
+        falha++;
+      }
+
+    }
+
+    setSelecionados(new Set());
+    setEnviandoLote(false);
+
+    await carregarTransacoes();
+
+    alert(
+      falha > 0
+        ? `${sucesso} cobrança(s) enviada(s). ${falha} falharam (confira o status delas na lista).`
+        : `${sucesso} cobrança(s) enviada(s) ao Asaas com sucesso.`
+    );
 
   }
 
@@ -268,6 +329,11 @@ export default function AsaasTransacoesPage() {
               onEditar={abrirEdicao}
               onEnviar={enviarCobranca}
               enviandoId={enviandoId}
+              selecionados={selecionados}
+              onAlternarSelecionado={alternarSelecionado}
+              onAlternarTodos={alternarTodos}
+              onEnviarSelecionados={enviarSelecionados}
+              enviandoLote={enviandoLote}
             />
 
           </PageSection>

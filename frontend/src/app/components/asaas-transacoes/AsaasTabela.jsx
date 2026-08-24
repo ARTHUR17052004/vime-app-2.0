@@ -63,7 +63,16 @@ export default function AsaasTabela({
   onEditar,
   onEnviar,
   enviandoId,
+  selecionados = new Set(),
+  onAlternarSelecionado,
+  onAlternarTodos,
+  onEnviarSelecionados,
+  enviandoLote = false,
 }) {
+
+  const enviaveis = transacoes.filter((t) => !t.enviadaAsaas);
+  const todosSelecionados =
+    enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
   return (
     <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden">
@@ -83,6 +92,15 @@ export default function AsaasTabela({
           <thead className="bg-[var(--surface-2)]">
 
             <tr>
+
+              <th className="p-4 w-10">
+                <input
+                  type="checkbox"
+                  checked={todosSelecionados}
+                  onChange={() => onAlternarTodos?.(enviaveis.map((t) => t.id))}
+                  disabled={enviaveis.length === 0}
+                />
+              </th>
 
               <th className="text-left p-4 text-[var(--text-muted)]">
                 Cliente
@@ -116,7 +134,7 @@ export default function AsaasTabela({
 
             {loading && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
+                <td colSpan={7} className="p-8 text-center text-[var(--text-subtle)]">
                   Carregando cobranças...
                 </td>
               </tr>
@@ -124,7 +142,7 @@ export default function AsaasTabela({
 
             {!loading && transacoes.length === 0 && (
               <tr>
-                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
+                <td colSpan={7} className="p-8 text-center text-[var(--text-subtle)]">
                   Nenhuma cobrança encontrada.
                 </td>
               </tr>
@@ -136,6 +154,16 @@ export default function AsaasTabela({
                 key={item.id}
                 className="border-t border-[var(--border-token)] hover:bg-[var(--surface-2)]"
               >
+
+                <td className="p-4">
+                  {!item.enviadaAsaas && (
+                    <input
+                      type="checkbox"
+                      checked={selecionados.has(item.id)}
+                      onChange={() => onAlternarSelecionado?.(item.id)}
+                    />
+                  )}
+                </td>
 
                 <td className="p-4">
 
@@ -260,11 +288,34 @@ export default function AsaasTabela({
 
       </div>
 
-      <div className="px-6 py-4 border-t border-[var(--border-token)] flex justify-between items-center">
+      <div className="px-6 py-4 border-t border-[var(--border-token)] flex justify-between items-center flex-wrap gap-3">
 
         <span className="text-[var(--text-subtle)] text-sm">
           Exibindo {transacoes.length} cobrança(s)
+          {selecionados.size > 0 && ` • ${selecionados.size} selecionada(s)`}
         </span>
+
+        {selecionados.size > 0 && (
+          <button
+            onClick={() => onEnviarSelecionados?.()}
+            disabled={enviandoLote}
+            className="
+              px-5
+              py-2.5
+              rounded-lg
+              bg-sky-600
+              hover:bg-sky-700
+              disabled:opacity-50
+              disabled:cursor-not-allowed
+              text-[var(--text)]
+              font-semibold
+            "
+          >
+            {enviandoLote
+              ? "Enviando..."
+              : `Enviar ${selecionados.size} selecionada(s) ao Asaas`}
+          </button>
+        )}
 
       </div>
 
