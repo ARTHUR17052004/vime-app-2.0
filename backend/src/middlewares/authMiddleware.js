@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const prisma = require("../config/prisma");
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   const token =
     req.cookies?.token ||
     req.headers.authorization?.replace("Bearer ", "");
@@ -19,6 +20,26 @@ const authMiddleware = (req, res, next) => {
     );
 
     req.usuario = decoded;
+
+    // Modo manutenção: só o Administrador continua passando -- todo o
+    // resto (mesmo já logado) é barrado até ele desligar de novo.
+    if (decoded.perfil !== "ADMINISTRADOR") {
+
+      const configuracao = await prisma.configuracao.findFirst({
+        orderBy: { id: "asc" },
+      });
+
+      if (configuracao?.manutencaoAtiva) {
+        return res.status(503).json({
+          success: false,
+          manutencao: true,
+          message:
+            configuracao.manutencaoMensagem ||
+            "O sistema está em manutenção no momento. Tente novamente em breve.",
+        });
+      }
+
+    }
 
     next();
   } catch (err) {

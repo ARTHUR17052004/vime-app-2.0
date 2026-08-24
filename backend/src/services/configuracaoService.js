@@ -33,6 +33,8 @@ const buscarPublica = async () => {
     textoLogin: configuracao?.textoLogin || null,
     textoRodape: configuracao?.textoRodape || null,
     mensagemBoasVindas: configuracao?.mensagemBoasVindas || null,
+    manutencaoAtiva: configuracao?.manutencaoAtiva || false,
+    manutencaoMensagem: configuracao?.manutencaoMensagem || null,
   };
 };
 

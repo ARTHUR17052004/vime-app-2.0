@@ -7,23 +7,94 @@ import {
 } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
+import { exportarPDF, exportarExcel } from "@/utils/exportar";
 
-export default function ContratoRelatorios() {
+function formatarData(data) {
+  return data ? new Date(data).toLocaleDateString("pt-BR") : "-";
+}
+
+function formatarValor(valor) {
+  return Number(valor || 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
+
+function linhaContrato(c) {
+  return [
+    c.inquilino?.nome || c.inquilinoNome || "-",
+    c.unidade?.nome || c.unidadeNome || "-",
+    c.kitnet?.nome || c.kitnet?.numero || c.kitnetNome || "-",
+    formatarValor(c.valorAluguel),
+    formatarData(c.dataInicio),
+    formatarData(c.dataFim),
+  ];
+}
+
+const COLUNAS = ["Inquilino", "Residência", "Kitnet", "Aluguel", "Início", "Fim"];
+
+export default function ContratoRelatorios({
+  contratos = [],
+}) {
+
+  const ativos = contratos.filter((c) => c.status === "ATIVO");
+  const encerrados = contratos.filter((c) => c.status === "ENCERRADO");
+  const receitaTotal = ativos.reduce(
+    (soma, c) => soma + Number(c.valorAluguel || 0),
+    0
+  );
 
   const relatorios = [
     {
       titulo: "Contratos Ativos",
       descricao: "Lista de contratos ativos",
+      dados: ativos,
+      arquivo: "contratos-ativos",
     },
     {
       titulo: "Contratos Encerrados",
       descricao: "Histórico de contratos",
+      dados: encerrados,
+      arquivo: "contratos-encerrados",
     },
     {
       titulo: "Receita Contratada",
-      descricao: "Valor total contratado",
+      descricao: `Valor total contratado: ${formatarValor(receitaTotal)}`,
+      dados: ativos,
+      arquivo: "receita-contratada",
     },
   ];
+
+  function exportarPdfRelatorio(relatorio) {
+
+    exportarPDF({
+      titulo: relatorio.titulo,
+      subtitulo: relatorio.descricao,
+      secoes: [
+        {
+          colunas: COLUNAS,
+          linhas: relatorio.dados.map(linhaContrato),
+        },
+      ],
+      nomeArquivo: relatorio.arquivo,
+    });
+
+  }
+
+  function exportarExcelRelatorio(relatorio) {
+
+    exportarExcel({
+      abas: [
+        {
+          nome: relatorio.titulo,
+          colunas: COLUNAS,
+          linhas: relatorio.dados.map(linhaContrato),
+        },
+      ],
+      nomeArquivo: relatorio.arquivo,
+    });
+
+  }
 
   return (
 
@@ -71,7 +142,7 @@ export default function ContratoRelatorios() {
           </h2>
 
           <p className="text-[var(--text-subtle)]">
-            Exportação de PDF e Excel (em breve)
+            Exportação de PDF e Excel
           </p>
 
         </div>
@@ -122,6 +193,10 @@ export default function ContratoRelatorios() {
                   {item.descricao}
                 </p>
 
+                <p className="mt-1 text-xs text-[var(--text-faint)]">
+                  {item.dados.length} registro(s)
+                </p>
+
               </div>
 
               <div
@@ -151,41 +226,87 @@ export default function ContratoRelatorios() {
 
             </div>
 
-            <button
-              className="
-                mt-8
+            <div className="mt-8 flex gap-3">
 
-                flex
-                items-center
-                gap-2
+              <button
+                onClick={() => exportarPdfRelatorio(item)}
+                disabled={item.dados.length === 0}
+                className="
+                  flex
+                  items-center
+                  gap-2
 
-                rounded-xl
+                  rounded-xl
 
-                border
-                border-emerald-500/20
+                  border
+                  border-emerald-500/20
 
-                bg-emerald-500/10
+                  bg-emerald-500/10
 
-                px-5
-                py-3
+                  px-5
+                  py-3
 
-                text-sm
-                font-semibold
+                  text-sm
+                  font-semibold
 
-                text-emerald-400
+                  text-emerald-400
 
-                transition-all
-                duration-300
+                  transition-all
+                  duration-300
 
-                hover:bg-emerald-500/20
-              "
-            >
+                  hover:bg-emerald-500/20
 
-              <Download size={16} />
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                "
+              >
 
-              Exportar
+                <Download size={16} />
 
-            </button>
+                PDF
+
+              </button>
+
+              <button
+                onClick={() => exportarExcelRelatorio(item)}
+                disabled={item.dados.length === 0}
+                className="
+                  flex
+                  items-center
+                  gap-2
+
+                  rounded-xl
+
+                  border
+                  border-sky-500/20
+
+                  bg-sky-500/10
+
+                  px-5
+                  py-3
+
+                  text-sm
+                  font-semibold
+
+                  text-sky-400
+
+                  transition-all
+                  duration-300
+
+                  hover:bg-sky-500/20
+
+                  disabled:opacity-40
+                  disabled:cursor-not-allowed
+                "
+              >
+
+                <FileSpreadsheet size={16} />
+
+                Excel
+
+              </button>
+
+            </div>
 
           </div>
 

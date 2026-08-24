@@ -31,6 +31,22 @@ const login = async (email, senha) => {
     throw new Error('Senha inválida.');
   }
 
+  // Modo manutenção: ninguém além do Administrador consegue nem logar.
+  if (usuario.perfil?.nome !== 'ADMINISTRADOR') {
+
+    const configuracao = await prisma.configuracao.findFirst({
+      orderBy: { id: 'asc' },
+    });
+
+    if (configuracao?.manutencaoAtiva) {
+      throw new Error(
+        configuracao.manutencaoMensagem ||
+        'O sistema está em manutenção no momento. Tente novamente em breve.'
+      );
+    }
+
+  }
+
   const payload = {
     id: usuario.id,
     nome: usuario.nome,

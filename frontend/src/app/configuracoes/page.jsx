@@ -54,6 +54,8 @@ const PADRAO = {
   clicksignToken: "",
   whatsappToken: "",
   whatsappNumero: "",
+  manutencaoAtiva: false,
+  manutencaoMensagem: "",
 };
 
 export default function ConfiguracoesPage() {
@@ -215,7 +217,12 @@ export default function ConfiguracoesPage() {
 
               <BackupCard />
 
-              <SegurancaCard />
+              <SegurancaCard
+                dados={dados}
+                onChange={alterar}
+                onSalvar={salvar}
+                salvando={salvando}
+              />
 
               <LicencaCard />
 

@@ -38,6 +38,19 @@ export async function api(endpoint, options = {}) {
     throw new Error("A API não retornou um JSON válido.");
   }
 
+  if (data.manutencao === true) {
+    if (
+      typeof window !== "undefined" &&
+      window.location.pathname !== "/manutencao"
+    ) {
+      window.location.href = "/manutencao";
+    }
+
+    throw new Error(
+      data.message || "O sistema está em manutenção no momento."
+    );
+  }
+
   if (response.status === 401 && endpoint !== "/auth/login") {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");
