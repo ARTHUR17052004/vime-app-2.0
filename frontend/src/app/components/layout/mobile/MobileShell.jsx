@@ -35,12 +35,15 @@ export default function MobileShell({ children }) {
         "
       />
 
-      <div className="flex flex-col min-h-screen">
+      <div className="flex flex-col h-screen">
         <MobileTopbar />
 
         <main
           className="
             flex-1
+            min-h-0
+
+            overflow-y-auto
 
             px-4
             pt-4

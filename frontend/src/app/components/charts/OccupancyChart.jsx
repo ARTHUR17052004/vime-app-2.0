@@ -7,25 +7,14 @@ import {
   Cell,
 } from "recharts";
 
-const data = [
-  {
-    name: "Ocupadas",
-    value: 24,
-    color: "#10b981",
-  },
-  {
-    name: "Vagas",
-    value: 8,
-    color: "#f59e0b",
-  },
-  {
-    name: "Manutenção",
-    value: 2,
-    color: "#ef4444",
-  },
-];
+export default function OccupancyChart({ ocupadas = 0, vazias = 0 }) {
+  const data = [
+    { name: "Ocupadas", value: ocupadas, color: "#10b981" },
+    { name: "Vagas", value: vazias, color: "#f59e0b" },
+  ];
 
-export default function OccupancyChart() {
+  const semDados = ocupadas === 0 && vazias === 0;
+
   return (
     <div className="w-44 h-44">
 
@@ -34,16 +23,16 @@ export default function OccupancyChart() {
         <PieChart>
 
           <Pie
-            data={data}
+            data={semDados ? [{ name: "Sem dados", value: 1, color: "#334155" }] : data}
             innerRadius={48}
             outerRadius={68}
-            paddingAngle={4}
+            paddingAngle={semDados ? 0 : 4}
             dataKey="value"
             stroke="none"
             animationDuration={900}
           >
 
-            {data.map((item) => (
+            {(semDados ? [{ name: "Sem dados", value: 1, color: "#334155" }] : data).map((item) => (
               <Cell
                 key={item.name}
                 fill={item.color}

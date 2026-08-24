@@ -1,5 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { Tv } from "lucide-react";
+
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function DashboardHeader({
@@ -9,6 +12,7 @@ export default function DashboardHeader({
   sistema = "2.0",
   ultimaAtualizacao,
 }) {
+  const router = useRouter();
   const { mensagemBoasVindas } = useTheme();
   const hora = new Date().getHours();
 
@@ -105,6 +109,42 @@ export default function DashboardHeader({
         {/* DIREITA */}
 
         <div className="text-right select-none pt-4">
+
+          <button
+            onClick={() => router.push("/tv")}
+            title="Abrir Modo TV"
+            className="
+              mb-3
+              inline-flex
+              items-center
+              gap-2
+
+              rounded-full
+
+              border
+              border-emerald-500/30
+
+              bg-emerald-500/10
+
+              px-4
+              py-2
+
+              text-[12px]
+              font-semibold
+              uppercase
+              tracking-[0.15em]
+
+              text-emerald-400
+
+              transition
+
+              hover:bg-emerald-500/20
+              hover:border-emerald-500/50
+            "
+          >
+            <Tv size={15} />
+            Modo TV
+          </button>
 
           <p
             className="

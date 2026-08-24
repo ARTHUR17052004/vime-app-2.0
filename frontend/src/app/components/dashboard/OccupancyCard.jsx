@@ -70,7 +70,7 @@ export default function OccupancyCard({ ocupacao }) {
 
       <div className="flex-1 flex items-center justify-between gap-10">
 
-        <OccupancyChart />
+        <OccupancyChart ocupadas={ocupadas} vazias={vagas} />
 
         <div className="flex-1">
 
@@ -86,12 +86,6 @@ export default function OccupancyCard({ ocupacao }) {
               cor="bg-amber-400"
               titulo="Vagas"
               valor={vagas}
-            />
-
-            <ItemLegenda
-              cor="bg-red-400"
-              titulo="Manutenção"
-              valor={2}
             />
 
           </div>
