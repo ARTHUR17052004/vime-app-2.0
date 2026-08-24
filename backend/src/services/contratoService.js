@@ -417,7 +417,7 @@ const remover = async (id) => {
       id: contrato.inquilinoId
     },
     data: {
-      status: "INATIVO"
+      ativo: false
     }
   });
 
@@ -460,7 +460,7 @@ const encerrar = async (id) => {
       id: contrato.inquilinoId
     },
     data: {
-      status: "INATIVO"
+      ativo: false
     }
   });
 

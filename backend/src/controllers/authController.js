@@ -1,4 +1,5 @@
 const authService = require('../services/authService');
+const usuarioService = require('../services/usuarioService');
 
 // Em produção, front (vimesistema.online) e back (onrender.com) são domínios
 // diferentes — cookie cross-site só é enviado pelo navegador com
@@ -58,6 +59,34 @@ const me = async (req, res) => {
 
 };
 
+// Edição do próprio perfil (nome/email) -- diferente de
+// usuarioController.atualizar, que é só pra admin gerenciar outras
+// contas. Aqui só deixa mexer no que é seguro o próprio usuário mudar
+// sozinho: nada de perfil/permissão/status.
+const atualizarMe = async (req, res) => {
+  try {
+
+    const { nome, email } = req.body;
+
+    const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email });
+
+    // authService.login() devolve o perfil já achatado em string (o
+    // que o front espera em usuario.perfil) -- mantém consistente aqui.
+    return res.status(200).json({
+      success: true,
+      data: { ...usuario, perfil: usuario.perfil?.nome },
+    });
+
+  } catch (error) {
+
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
 const esqueciSenha = async (req, res) => {
   try {
 
@@ -106,6 +135,7 @@ module.exports = {
   login,
   logout,
   me,
+  atualizarMe,
   esqueciSenha,
   redefinirSenha,
 };

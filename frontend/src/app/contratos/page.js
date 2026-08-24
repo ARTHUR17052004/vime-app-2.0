@@ -192,7 +192,7 @@ export default function ContratosPage() {
         error
       );
 
-      alert("Erro ao excluir contrato.");
+      alert(error.message || "Erro ao excluir contrato.");
 
     }
 

@@ -15,4 +15,6 @@ router.post('/redefinir-senha', authController.redefinirSenha);
 
 router.get('/me', authMiddleware, authController.me);
 
+router.put('/me', authMiddleware, authController.atualizarMe);
+
 module.exports = router;

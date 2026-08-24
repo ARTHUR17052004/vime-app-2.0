@@ -24,4 +24,11 @@ export const AuthService = {
       body: JSON.stringify({ token, novaSenha }),
     });
   },
+
+  atualizarPerfil(dados) {
+    return api("/auth/me", {
+      method: "PUT",
+      body: JSON.stringify(dados),
+    });
+  },
 };
