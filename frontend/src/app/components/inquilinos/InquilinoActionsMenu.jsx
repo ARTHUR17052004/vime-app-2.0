@@ -4,6 +4,8 @@ import Link from "next/link";
 import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 
+import ActionMenu from "../ui/ActionMenu";
+
 export default function InquilinoActionsMenu({
   inquilino,
   onEdit,
@@ -13,6 +15,29 @@ export default function InquilinoActionsMenu({
   const [open, setOpen] =
     useState(false);
 
+  const [position, setPosition] =
+    useState({ top: 0, left: 0 });
+
+  function abrirMenu(e) {
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const largura = 176;
+
+    let left = rect.right - largura;
+    const top = rect.bottom + 8;
+
+    if (left + largura > window.innerWidth - 16) {
+      left = window.innerWidth - largura - 16;
+    }
+
+    if (left < 16) left = 16;
+
+    setPosition({ top, left });
+    setOpen(true);
+
+  }
+
   return (
 
     <div className="relative">
@@ -20,7 +45,13 @@ export default function InquilinoActionsMenu({
       <button
         onClick={(e) => {
           e.stopPropagation();
-          setOpen(!open);
+
+          if (open) {
+            setOpen(false);
+            return;
+          }
+
+          abrirMenu(e);
         }}
         className="
           w-10
@@ -44,97 +75,74 @@ export default function InquilinoActionsMenu({
 
       </button>
 
-      {open && (
+      <ActionMenu
+        open={open}
+        position={position}
+        onClose={() => setOpen(false)}
+      >
 
-        <div
+        <Link
+          href={`/inquilinos/${inquilino.id}`}
           className="
-            absolute
-            right-0
-            top-12
+            block
+            px-4
+            py-3
 
-            w-44
+            text-[var(--text-muted)]
 
-            rounded-2xl
+            hover:bg-[var(--surface-2)]
 
-            border
-            border-[var(--border-token)]
-
-            bg-[var(--surface)]
-
-            backdrop-blur-xl
-
-            shadow-2xl
-
-            overflow-hidden
-
-            z-50
+            transition
           "
         >
+          Visualizar
+        </Link>
 
-          <Link
-            href={`/inquilinos/${inquilino.id}`}
-            className="
-              block
-              px-4
-              py-3
+        <button
+          onClick={() => {
+            onEdit?.(inquilino);
+            setOpen(false);
+          }}
+          className="
+            w-full
+            text-left
 
-              text-[var(--text-muted)]
+            px-4
+            py-3
 
-              hover:bg-[var(--surface-2)]
+            text-yellow-400
 
-              transition
-            "
-          >
-            Visualizar
-          </Link>
+            hover:bg-yellow-500/10
 
-          <button
-            onClick={() => {
-              onEdit?.(inquilino);
-              setOpen(false);
-            }}
-            className="
-              w-full
-              text-left
+            transition
+          "
+        >
+          Editar
+        </button>
 
-              px-4
-              py-3
+        <button
+          onClick={() => {
+            onDelete?.(inquilino.id);
+            setOpen(false);
+          }}
+          className="
+            w-full
+            text-left
 
-              text-yellow-400
+            px-4
+            py-3
 
-              hover:bg-yellow-500/10
+            text-red-400
 
-              transition
-            "
-          >
-            Editar
-          </button>
+            hover:bg-red-500/10
 
-          <button
-            onClick={() => {
-              onDelete?.(inquilino.id);
-              setOpen(false);
-            }}
-            className="
-              w-full
-              text-left
+            transition
+          "
+        >
+          Excluir
+        </button>
 
-              px-4
-              py-3
-
-              text-red-400
-
-              hover:bg-red-500/10
-
-              transition
-            "
-          >
-            Excluir
-          </button>
-
-        </div>
-
-      )}
+      </ActionMenu>
 
     </div>
 

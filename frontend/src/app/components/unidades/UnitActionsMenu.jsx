@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   EllipsisVertical,
@@ -8,6 +8,8 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+
+import ActionMenu from "../ui/ActionMenu";
 
 export default function UnitActionsMenu({
   unidade,
@@ -18,35 +20,28 @@ export default function UnitActionsMenu({
 
   const [open, setOpen] = useState(false);
 
-  const ref = useRef(null);
+  const [position, setPosition] =
+    useState({ top: 0, left: 0 });
 
-  useEffect(() => {
+  function abrirMenu(e) {
 
-    function handleClick(e) {
+    const rect = e.currentTarget.getBoundingClientRect();
 
-      if (
-        ref.current &&
-        !ref.current.contains(e.target)
-      ) {
+    const largura = 208;
 
-        setOpen(false);
+    let left = rect.right - largura;
+    const top = rect.bottom + 8;
 
-      }
-
+    if (left + largura > window.innerWidth - 16) {
+      left = window.innerWidth - largura - 16;
     }
 
-    document.addEventListener(
-      "mousedown",
-      handleClick
-    );
+    if (left < 16) left = 16;
 
-    return () =>
-      document.removeEventListener(
-        "mousedown",
-        handleClick
-      );
+    setPosition({ top, left });
+    setOpen(true);
 
-  }, []);
+  }
 
   function close() {
     setOpen(false);
@@ -54,10 +49,7 @@ export default function UnitActionsMenu({
 
   return (
 
-    <div
-      ref={ref}
-      className="relative"
-    >
+    <div className="relative">
 
       <button
 
@@ -65,7 +57,12 @@ export default function UnitActionsMenu({
 
           e.stopPropagation();
 
-          setOpen(!open);
+          if (open) {
+            close();
+            return;
+          }
+
+          abrirMenu(e);
 
         }}
 
@@ -102,91 +99,63 @@ export default function UnitActionsMenu({
 
       </button>
 
-      {open && (
+      <ActionMenu
+        open={open}
+        position={position}
+        onClose={close}
+      >
 
-        <div
+        <MenuButton
 
-          className="
+          icon={<Eye size={17} />}
 
-            absolute
+          label="Visualizar"
 
-            right-0
-            top-12
+          onClick={() => {
 
-            w-52
+            onView(unidade);
 
-            rounded-2xl
+            close();
 
-            border
-            border-[var(--border-token)]
+          }}
 
-            bg-[#19242b]/95
+        />
 
-            backdrop-blur-xl
+        <MenuButton
 
-            shadow-2xl
+          icon={<Pencil size={17} />}
 
-            overflow-hidden
+          label="Editar"
 
-            z-50
+          onClick={() => {
 
-          "
+            onEdit(unidade);
 
-        >
+            close();
 
-          <MenuButton
+          }}
 
-            icon={<Eye size={17} />}
+        />
 
-            label="Visualizar"
+        <MenuButton
 
-            onClick={() => {
+          danger
 
-              onView(unidade);
+          icon={<Trash2 size={17} />}
 
-              close();
+          label="Excluir"
 
-            }}
+          onClick={() => {
 
-          />
+            onDelete(unidade.id);
 
-          <MenuButton
+            close();
 
-            icon={<Pencil size={17} />}
+          }}
 
-            label="Editar"
+        />
 
-            onClick={() => {
-
-              onEdit(unidade);
-
-              close();
-
-            }}
-
-          />
-
-          <MenuButton
-
-            danger
-
-            icon={<Trash2 size={17} />}
-
-            label="Excluir"
-
-            onClick={() => {
-
-              onDelete(unidade.id);
-
-              close();
-
-            }}
-
-          />
-
-        </div>
-
-      )}
+      </ActionMenu>
 
     </div>
 
