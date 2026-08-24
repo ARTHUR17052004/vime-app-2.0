@@ -558,3 +558,19 @@ model ModeloDocumento {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// Config de "quais campos são obrigatórios" por módulo, definida em
+// Administração. Sem linha aqui = campo opcional (comportamento atual).
+model CampoObrigatorio {
+  id String @id @default(uuid())
+
+  modulo String
+  campo  String
+
+  obrigatorio Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([modulo, campo])
+}

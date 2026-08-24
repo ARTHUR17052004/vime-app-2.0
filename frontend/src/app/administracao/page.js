@@ -9,6 +9,7 @@ import {
   Activity,
   History,
   FileText,
+  ListChecks,
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
@@ -346,6 +347,30 @@ export default function AdministracaoPage() {
                   >
 
                     Abrir Modelos
+
+                  </Button>
+
+                </AdministracaoCard>
+
+                <AdministracaoCard
+
+                  title="Campos Obrigatórios"
+
+                  subtitle="Defina o que é obrigatório em cada cadastro"
+
+                >
+
+                  <Button
+
+                    className="w-full"
+
+                    onClick={() =>
+                      router.push("/administracao/campos-obrigatorios")
+                    }
+
+                  >
+
+                    Abrir Campos Obrigatórios
 
                   </Button>
 

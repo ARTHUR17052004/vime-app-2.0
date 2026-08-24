@@ -20,7 +20,25 @@ const buscarPorId = (id) => {
   });
 };
 
-const criar = (dados) => {
+const criar = async (dados) => {
+
+  const unidade = await prisma.unidade.findUnique({
+    where: { id: dados.unidadeId }
+  });
+
+  if (unidade) {
+
+    const existentes = await prisma.kitnet.count({
+      where: { unidadeId: dados.unidadeId }
+    });
+
+    if (existentes >= unidade.kitnets) {
+      throw new Error(
+        `Esta residência já tem o limite de ${unidade.kitnets} kitnet(s) cadastrado(s). Aumente a quantidade em Residências para adicionar mais.`
+      );
+    }
+
+  }
 
   return prisma.kitnet.create({
     data: dados

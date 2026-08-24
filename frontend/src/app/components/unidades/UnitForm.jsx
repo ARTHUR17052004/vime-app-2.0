@@ -8,6 +8,7 @@ import Textarea from "../ui/Textarea";
 import Button from "../ui/Button";
 
 import { LocadorService } from "@/services/locadores.service";
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 
 export default function UnitForm({
   unidade,
@@ -55,6 +56,9 @@ export default function UnitForm({
   const [locadores, setLocadores] =
     useState([]);
 
+  const [obrigatorios, setObrigatorios] =
+    useState(new Set());
+
   useEffect(() => {
 
     async function carregarLocadores() {
@@ -77,7 +81,28 @@ export default function UnitForm({
 
     }
 
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("residencia");
+
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar campos obrigatórios:", err);
+
+      }
+
+    }
+
     carregarLocadores();
+    carregarObrigatorios();
 
   }, []);
 
@@ -293,6 +318,7 @@ export default function UnitForm({
 
           <Input
             label="CEP"
+            required={obrigatorios.has("cep")}
             name="cep"
             value={formData.cep}
             onChange={handleChange}
@@ -340,6 +366,7 @@ export default function UnitForm({
 
           <Input
             label="Logradouro"
+            required={obrigatorios.has("logradouro")}
             name="logradouro"
             value={formData.logradouro}
             onChange={handleChange}
@@ -347,6 +374,7 @@ export default function UnitForm({
 
           <Input
             label="Número"
+            required={obrigatorios.has("numero")}
             name="numero"
             value={formData.numero}
             onChange={handleChange}
@@ -354,6 +382,7 @@ export default function UnitForm({
 
           <Input
             label="Complemento"
+            required={obrigatorios.has("complemento")}
             name="complemento"
             value={formData.complemento}
             onChange={handleChange}
@@ -361,6 +390,7 @@ export default function UnitForm({
 
           <Input
             label="Bairro"
+            required={obrigatorios.has("bairro")}
             name="bairro"
             value={formData.bairro}
             onChange={handleChange}
@@ -368,6 +398,7 @@ export default function UnitForm({
 
           <Input
             label="Cidade"
+            required={obrigatorios.has("cidade")}
             name="cidade"
             value={formData.cidade}
             onChange={handleChange}
@@ -375,6 +406,7 @@ export default function UnitForm({
 
           <Input
             label="UF"
+            required={obrigatorios.has("uf")}
             name="uf"
             value={formData.uf}
             onChange={handleChange}
@@ -421,6 +453,7 @@ export default function UnitForm({
 
           <Select
             label="Locador"
+            required={obrigatorios.has("locadorId")}
             name="locadorId"
             value={formData.locadorId}
             onChange={handleChangeLocador}
@@ -442,6 +475,7 @@ export default function UnitForm({
 
           <Input
             label="Quantidade de Kitnets"
+            required={obrigatorios.has("kitnets")}
             name="kitnets"
             value={formData.kitnets}
             onChange={handleChange}
@@ -449,6 +483,7 @@ export default function UnitForm({
 
           <Input
             label="Valor do Aluguel"
+            required={obrigatorios.has("aluguel")}
             name="aluguel"
             value={formData.aluguel}
             onChange={handleChange}
@@ -456,6 +491,7 @@ export default function UnitForm({
 
           <Input
             label="Dia do Vencimento"
+            required={obrigatorios.has("vencimento")}
             name="vencimento"
             value={formData.vencimento}
             onChange={handleChange}

@@ -16,6 +16,13 @@ const errorMiddleware = (err, req, res, next) => {
         });
     }
 
+    if (err.code === 'P2003') {
+        return res.status(400).json({
+            success: false,
+            message: 'Um dos campos selecionados não corresponde a um registro válido (ex.: locador, kitnet ou unidade inexistente).'
+        });
+    }
+
     return res.status(err.status || 500).json({
         success: false,
         message: err.message || 'Erro interno do servidor.'

@@ -36,6 +36,7 @@ const notificacaoRoutes = require("./src/routes/notificacaoRoutes");
 const buscaRoutes = require("./src/routes/buscaRoutes");
 const configuracaoRoutes = require("./src/routes/configuracaoRoutes");
 const modeloDocumentoRoutes = require("./src/routes/modeloDocumentoRoutes");
+const campoObrigatorioRoutes = require("./src/routes/campoObrigatorioRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -119,6 +120,7 @@ app.use("/notificacoes", notificacaoRoutes);
 app.use("/busca", buscaRoutes);
 app.use("/configuracoes", configuracaoRoutes);
 app.use("/modelos-documento", modeloDocumentoRoutes);
+app.use("/campos-obrigatorios", campoObrigatorioRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
