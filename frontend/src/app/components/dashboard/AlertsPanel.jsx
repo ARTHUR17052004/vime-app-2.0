@@ -82,15 +82,30 @@ export default function AlertsPanel({
 
       <div className="flex-1 space-y-6">
 
-        {lista.map((item) => (
+        {lista.map((item) => {
 
-          <div
+          const Wrapper = item.link ? Link : "div";
+          const wrapperProps = item.link ? { href: item.link } : {};
+
+          return (
+
+          <Wrapper
             key={item.id}
+            {...wrapperProps}
             className="
               flex
               items-start
               justify-between
               gap-5
+
+              -mx-2
+              px-2
+              py-1
+              rounded-xl
+
+              transition
+
+              hover:bg-[var(--surface-2)]
             "
           >
 
@@ -154,9 +169,11 @@ export default function AlertsPanel({
               {item.data}
             </span>
 
-          </div>
+          </Wrapper>
 
-        ))}
+          );
+
+        })}
 
       </div>
 

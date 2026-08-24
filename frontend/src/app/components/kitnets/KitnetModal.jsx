@@ -19,6 +19,7 @@ export default function KitnetModal({
           : "Nova Kitnet"
       }
       subtitle="Cadastre ou atualize as informações da kitnet."
+      closeOnOverlay={false}
     >
       {children}
     </Modal>

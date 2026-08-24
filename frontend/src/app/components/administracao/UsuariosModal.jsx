@@ -14,6 +14,7 @@ export default function UsuariosModal({
       open={isOpen}
       onClose={onClose}
       size="lg"
+      closeOnOverlay={false}
     >
       <UsuariosForm
         usuario={usuario}

@@ -13,6 +13,7 @@ export default function VistoriaModal({
       onClose={onClose}
       title="Vistoria"
       size="xl"
+      closeOnOverlay={false}
     >
       {children}
     </Modal>

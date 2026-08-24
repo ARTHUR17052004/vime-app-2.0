@@ -96,18 +96,61 @@ const atividades = async () => {
 
 const alertas = async () => {
 
-  const inadimplentes = await prisma.contrato.count({
+  const lista = [];
+
+  const hoje = new Date();
+
+  const em10Dias = new Date();
+  em10Dias.setDate(em10Dias.getDate() + 10);
+
+  const contratosVencendo = await prisma.contrato.findMany({
     where: {
-      status: 'INADIMPLENTE'
+      status: 'ATIVO',
+      dataFim: {
+        not: null,
+        gte: hoje,
+        lte: em10Dias
+      }
+    },
+    include: {
+      inquilino: true,
+      kitnet: true
+    },
+    orderBy: {
+      dataFim: 'asc'
     }
   });
 
-  const lista = [];
+  contratosVencendo.forEach((contrato) => {
 
-  if (inadimplentes > 0) {
+    const dias = Math.max(
+      0,
+      Math.ceil((new Date(contrato.dataFim) - hoje) / (1000 * 60 * 60 * 24))
+    );
+
     lista.push({
-      tipo: 'INADIMPLENCIA',
-      titulo: `${inadimplentes} contrato(s) inadimplente(s)`
+      id: `contrato-vencendo-${contrato.id}`,
+      titulo: `Contrato de ${contrato.inquilino?.nome || 'inquilino'} vence em ${dias} dia(s)`,
+      descricao: `Kitnet ${contrato.kitnet?.nome || contrato.kitnet?.numero || '-'} — vencimento em ${new Date(contrato.dataFim).toLocaleDateString('pt-BR')}.`,
+      data: new Date(contrato.dataFim).toLocaleDateString('pt-BR'),
+      link: `/contratos/${contrato.id}`
+    });
+
+  });
+
+  const cobrancasAtrasadas = await prisma.receita.count({
+    where: {
+      status: 'ATRASADA'
+    }
+  });
+
+  if (cobrancasAtrasadas > 0) {
+    lista.push({
+      id: 'cobrancas-atrasadas',
+      titulo: `${cobrancasAtrasadas} cobrança(s) atrasada(s)`,
+      descricao: 'Confira em Financeiro quais receitas estão em atraso.',
+      data: '',
+      link: '/financeiro'
     });
   }
 

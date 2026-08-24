@@ -15,6 +15,7 @@ export default function SolicitacaoModal({
       title={title}
       subtitle="Preencha as informações da solicitação."
       size="xl"
+      closeOnOverlay={false}
     >
       {children}
     </Modal>

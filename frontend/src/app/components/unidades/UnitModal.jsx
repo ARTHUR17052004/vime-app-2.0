@@ -14,6 +14,7 @@ export default function UnitModal({
       title="Residência"
       subtitle="Cadastro e gerenciamento da residência"
       size="xl"
+      closeOnOverlay={false}
     >
       {children}
     </Modal>

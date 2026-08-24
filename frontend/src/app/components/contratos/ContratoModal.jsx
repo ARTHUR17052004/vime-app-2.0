@@ -12,6 +12,7 @@ export default function ContratoModal({
       open={isOpen}
       onClose={onClose}
       size="xl"
+      closeOnOverlay={false}
     >
       {children}
     </Modal>
