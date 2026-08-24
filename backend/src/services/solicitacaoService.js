@@ -56,7 +56,8 @@ const criar = async (dados, autor) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Nova solicitação",
-    mensagem: `${solicitacao.criadoPorNome || "Alguém"} criou a solicitação "${solicitacao.titulo}" (${solicitacao.numero}).`
+    mensagem: `${solicitacao.criadoPorNome || "Alguém"} criou a solicitação "${solicitacao.titulo}" (${solicitacao.numero}).`,
+    link: `/solicitacoes/${solicitacao.id}`
   });
 
   return solicitacao;

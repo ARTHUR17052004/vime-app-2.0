@@ -29,6 +29,7 @@ import PageSection from "./components/ui/PageSection";
 import PageGrid from "./components/ui/PageGrid";
 
 import { useDashboard } from "../hooks/useDashboard";
+import { useAuth } from "../context/AuthContext";
 
 export default function Home() {
   return (
@@ -44,6 +45,9 @@ function DashboardConteudo() {
     loading,
     erro,
   } = useDashboard();
+
+  const { usuario } = useAuth();
+  const primeiroNome = usuario?.nome?.split(" ")[0] || "Visitante";
 
   if (loading) {
     return (
@@ -68,7 +72,10 @@ function DashboardConteudo() {
               className="space-y-8"
             >
               <FadeIn delay={0}>
-                <DashboardHeader />
+                <DashboardHeader
+                  usuario={primeiroNome}
+                  perfil={usuario?.perfil}
+                />
               </FadeIn>
 
               {erro && (

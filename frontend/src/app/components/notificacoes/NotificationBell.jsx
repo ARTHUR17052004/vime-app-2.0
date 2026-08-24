@@ -259,7 +259,14 @@ export default function NotificationBell() {
                   return (
                     <button
                       key={notificacao.id}
-                      onClick={() => marcarComoLida(notificacao.id)}
+                      onClick={() => {
+                        marcarComoLida(notificacao.id);
+
+                        if (notificacao.link) {
+                          setAberto(false);
+                          router.push(notificacao.link);
+                        }
+                      }}
                       className="
                         w-full
 

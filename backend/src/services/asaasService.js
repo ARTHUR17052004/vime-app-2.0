@@ -382,6 +382,7 @@ const sincronizar = async (evento) => {
           origem: "ASAAS",
           titulo: "Cobrança paga",
           mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
+          link: "/asaas-transacoes",
         });
 
       }
@@ -403,6 +404,7 @@ const sincronizar = async (evento) => {
         origem: "ASAAS",
         titulo: "Cobrança atrasada",
         mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`,
+        link: "/asaas-transacoes",
       });
 
       break;

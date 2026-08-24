@@ -316,7 +316,8 @@ const criar = async (dados) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Novo contrato criado",
-    mensagem: `Contrato de ${inquilino.nome} na kitnet ${kitnet.numero} foi criado.`
+    mensagem: `Contrato de ${inquilino.nome} na kitnet ${kitnet.numero} foi criado.`,
+    link: `/contratos/${contrato.id}`
   });
 
   return contrato;
@@ -497,7 +498,8 @@ const encerrar = async (id) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Contrato encerrado",
-    mensagem: `Contrato ${contrato.id} foi encerrado.`
+    mensagem: `Contrato ${contrato.id} foi encerrado.`,
+    link: `/contratos/${contrato.id}`
   });
 
   try {

@@ -49,6 +49,7 @@ const criar = async (solicitacaoId, dados, autor) => {
       origem: "SISTEMA",
       titulo: "Solicitação classificada",
       mensagem: `${autorNome} classificou ${referencia} como ${dados.statusAlterado}.`,
+      link: `/solicitacoes/${solicitacaoId}`,
     });
 
   } else {
@@ -57,6 +58,7 @@ const criar = async (solicitacaoId, dados, autor) => {
       origem: "SISTEMA",
       titulo: "Nova resposta em solicitação",
       mensagem: `${autorNome} respondeu ${referencia}.`,
+      link: `/solicitacoes/${solicitacaoId}`,
     });
 
   }

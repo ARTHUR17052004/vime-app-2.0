@@ -3,7 +3,8 @@
 import { useTheme } from "../../../context/ThemeContext";
 
 export default function DashboardHeader({
-  usuario = "Arthur",
+  usuario = "Visitante",
+  perfil,
   modulo = "Dashboard",
   sistema = "2.0",
   ultimaAtualizacao,
@@ -52,6 +53,28 @@ export default function DashboardHeader({
             {saudacao}, {usuario}
             <span className="ml-3">👋</span>
           </h1>
+
+          {perfil && (
+            <span
+              className="
+                mt-2
+                inline-block
+                rounded-full
+                bg-emerald-500/10
+                border
+                border-emerald-500/20
+                px-3
+                py-1
+                text-[11px]
+                font-semibold
+                uppercase
+                tracking-[0.2em]
+                text-emerald-400
+              "
+            >
+              {perfil}
+            </span>
+          )}
 
           <p
             className="

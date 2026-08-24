@@ -112,6 +112,8 @@ model Notificacao {
 
   mensagem    String
 
+  link        String?
+
   lida        Boolean  @default(false)
   lidaEm      DateTime?
 

@@ -333,13 +333,15 @@ export default function Sidebar() {
 
                   px-5
 
-                  text-[16px]
+                  text-[11px]
                   font-semibold
                   uppercase
 
-                  tracking-[0.45em]
+                  tracking-[0.18em]
 
                   text-gray-500
+
+                  whitespace-nowrap
                 "
               >
                 {section.title}

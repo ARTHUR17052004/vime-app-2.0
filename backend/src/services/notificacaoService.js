@@ -6,7 +6,7 @@ const { getIO } = require("../socket");
    whatsapp, asaas, clicksign, sistema)
 ========================================== */
 
-const criar = async ({ usuarioId, origem, titulo, mensagem }) => {
+const criar = async ({ usuarioId, origem, titulo, mensagem, link }) => {
 
   const notificacao = await prisma.notificacao.create({
     data: {
@@ -14,6 +14,7 @@ const criar = async ({ usuarioId, origem, titulo, mensagem }) => {
       origem,
       titulo,
       mensagem,
+      link: link || null,
     },
   });
 
