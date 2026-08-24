@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const campoObrigatorioService = require("./campoObrigatorioService");
 
 const listar = () => {
   return prisma.locador.findMany({
@@ -11,7 +12,10 @@ const listar = () => {
   });
 };
 
-const criar = (dados) => {
+const criar = async (dados) => {
+
+  await campoObrigatorioService.validar('locador', dados);
+
   return prisma.locador.create({
     data: {
       tipoPessoa: dados.tipoPessoa,

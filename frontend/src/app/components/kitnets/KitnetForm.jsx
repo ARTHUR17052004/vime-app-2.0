@@ -8,6 +8,7 @@ import Button from "../ui/Button";
 import Textarea from "../ui/Textarea";
 
 import { UnidadeService } from "@/services/unidades.service";
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 
 export default function KitnetForm({
   onSave,
@@ -16,6 +17,8 @@ export default function KitnetForm({
 }) {
 
   const [unidades, setUnidades] = useState([]);
+
+  const [obrigatorios, setObrigatorios] = useState(new Set());
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -58,7 +61,27 @@ export default function KitnetForm({
 
     }
 
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("kitnet");
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
     carregarUnidades();
+    carregarObrigatorios();
 
   }, []);
 
@@ -177,6 +200,8 @@ export default function KitnetForm({
 
       status: formData.status,
 
+      observacoes: formData.observacoes,
+
     });
 
   }
@@ -235,6 +260,7 @@ export default function KitnetForm({
 
         <Input
           label="Número"
+          required={obrigatorios.has("numero")}
           name="numero"
           value={formData.numero}
           onChange={handleChange}
@@ -242,6 +268,7 @@ export default function KitnetForm({
 
         <Input
           label="Metragem (m²)"
+          required={obrigatorios.has("metragem")}
           name="metragem"
           type="number"
           value={formData.metragem}
@@ -250,6 +277,7 @@ export default function KitnetForm({
 
         <Input
           label="Valor do aluguel"
+          required={obrigatorios.has("aluguel")}
           name="aluguel"
           type="number"
           value={formData.aluguel}

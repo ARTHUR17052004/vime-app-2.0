@@ -7,10 +7,39 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
 
+import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
+
 export default function SolicitacaoForm({
   onSave,
   solicitacaoEditando,
 }) {
+
+  const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  useEffect(() => {
+
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("solicitacao");
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarObrigatorios();
+
+  }, []);
 
   const [form, setForm] = useState({
 
@@ -164,7 +193,7 @@ export default function SolicitacaoForm({
       <div>
 
         <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
-          Título
+          Título{obrigatorios.has("titulo") && <span className="text-red-400"> *</span>}
         </label>
 
         <Input
@@ -173,6 +202,7 @@ export default function SolicitacaoForm({
           onChange={alterarCampo}
           placeholder="Ex.: Troca de chuveiro"
           className={input}
+          required={obrigatorios.has("titulo")}
         />
 
       </div>
@@ -180,7 +210,7 @@ export default function SolicitacaoForm({
       <div>
 
         <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
-          Descrição
+          Descrição{obrigatorios.has("descricao") && <span className="text-red-400"> *</span>}
         </label>
 
         <Textarea
@@ -194,6 +224,7 @@ export default function SolicitacaoForm({
             min-h-[160px]
             resize-none
           `}
+          required={obrigatorios.has("descricao")}
         />
 
       </div>
@@ -201,7 +232,7 @@ export default function SolicitacaoForm({
       <div>
 
         <label className="block text-sm font-semibold text-[var(--text-muted)] mb-2">
-          Prazo
+          Prazo{obrigatorios.has("prazo") && <span className="text-red-400"> *</span>}
         </label>
 
         <Input
@@ -210,6 +241,7 @@ export default function SolicitacaoForm({
           value={form.prazo}
           onChange={alterarCampo}
           className={input}
+          required={obrigatorios.has("prazo")}
         />
 
       </div>

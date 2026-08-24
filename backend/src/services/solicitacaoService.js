@@ -3,6 +3,7 @@ const prisma = require('../config/prisma');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const notificacaoService = require('./notificacaoService');
+const campoObrigatorioService = require('./campoObrigatorioService');
 
 const listar = () => {
   return prisma.solicitacao.findMany({
@@ -19,6 +20,8 @@ const buscarPorId = (id) => {
 };
 
 const criar = async (dados, autor) => {
+
+  await campoObrigatorioService.validar('solicitacao', dados);
 
   dados.data = new Date();
 

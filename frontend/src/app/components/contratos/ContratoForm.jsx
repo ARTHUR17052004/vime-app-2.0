@@ -10,12 +10,41 @@ import { LocadorService } from "@/services/locadores.service";
 import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
 import { InquilinoService } from "@/services/inquilinos.service";
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 
 export default function ContratoForm({
   onSave,
   onCancel,
   contrato,
 }) {
+
+  const [obrigatorios, setObrigatorios] =
+    useState(new Set());
+
+  useEffect(() => {
+
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("contrato");
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarObrigatorios();
+
+  }, []);
 
   const [locadores, setLocadores] =
     useState([]);
@@ -517,6 +546,7 @@ export default function ContratoForm({
             name="dataFim"
             value={formData.dataFim}
             onChange={alterarCampo}
+            required={obrigatorios.has("dataFim")}
           />
 
         </div>
@@ -601,6 +631,7 @@ export default function ContratoForm({
     value={formData.tipoGarantia}
     onChange={alterarCampo}
     className={input}
+    required={obrigatorios.has("tipoGarantia")}
   >
 
     <option
@@ -652,6 +683,7 @@ export default function ContratoForm({
     placeholder="Valor da Caução"
     value={formData.valorCaucao}
     onChange={alterarCampo}
+    required={obrigatorios.has("valorCaucao")}
   />
 
   <input
@@ -660,6 +692,7 @@ export default function ContratoForm({
     placeholder="Índice de Reajuste"
     value={formData.indiceReajuste}
     onChange={alterarCampo}
+    required={obrigatorios.has("indiceReajuste")}
   />
 
 </div>

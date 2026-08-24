@@ -7,6 +7,7 @@ const auditoriaService = require("./auditoriaService");
 const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
+const campoObrigatorioService = require("./campoObrigatorioService");
 
 // Nome de arquivo legível pro documento no Clicksign -- antes ficava
 // "contrato-<uuid>.pdf", sem nenhuma relação visível com o inquilino.
@@ -68,6 +69,8 @@ const buscarPorId = (id) => {
 };
 
 const criar = async (dados) => {
+
+  await campoObrigatorioService.validar('contrato', dados);
 
   if (!dados.dataInicio) {
     throw new Error('Data de início do contrato é obrigatória.');

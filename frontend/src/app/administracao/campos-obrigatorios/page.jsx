@@ -48,6 +48,49 @@ const MODULOS = [
       { campo: "telefoneEmergencia", label: "Telefone de Emergência" },
     ],
   },
+  {
+    chave: "kitnet",
+    nome: "Kitnets",
+    campos: [
+      { campo: "numero", label: "Número" },
+      { campo: "metragem", label: "Metragem" },
+      { campo: "aluguel", label: "Valor do Aluguel" },
+    ],
+  },
+  {
+    chave: "locador",
+    nome: "Locadores",
+    campos: [
+      { campo: "email", label: "E-mail" },
+      { campo: "telefone", label: "Telefone" },
+      { campo: "banco", label: "Banco" },
+      { campo: "agencia", label: "Agência" },
+      { campo: "conta", label: "Conta" },
+      { campo: "pix", label: "Chave PIX" },
+      { campo: "taxaAdministracao", label: "Taxa de Administração" },
+      { campo: "multa", label: "Multa" },
+      { campo: "juros", label: "Juros" },
+    ],
+  },
+  {
+    chave: "contrato",
+    nome: "Contratos",
+    campos: [
+      { campo: "dataFim", label: "Data Final do Contrato" },
+      { campo: "tipoGarantia", label: "Tipo de Garantia" },
+      { campo: "valorCaucao", label: "Valor da Caução" },
+      { campo: "indiceReajuste", label: "Índice de Reajuste" },
+    ],
+  },
+  {
+    chave: "solicitacao",
+    nome: "Solicitações",
+    campos: [
+      { campo: "titulo", label: "Título" },
+      { campo: "descricao", label: "Descrição" },
+      { campo: "prazo", label: "Prazo" },
+    ],
+  },
 ];
 
 export default function CamposObrigatoriosPage() {

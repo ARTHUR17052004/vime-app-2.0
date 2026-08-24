@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const campoObrigatorioService = require('./campoObrigatorioService');
 
 const listar = () => {
   return prisma.kitnet.findMany({
@@ -21,6 +22,8 @@ const buscarPorId = (id) => {
 };
 
 const criar = async (dados) => {
+
+  await campoObrigatorioService.validar('kitnet', dados);
 
   const unidade = await prisma.unidade.findUnique({
     where: { id: dados.unidadeId }

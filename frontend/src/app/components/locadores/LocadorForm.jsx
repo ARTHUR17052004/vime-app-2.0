@@ -2,10 +2,39 @@
 
 import { useEffect, useState } from "react";
 
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+
 export default function LocadorForm({
   onSave,
   locadorEditando,
 }) {
+
+  const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  useEffect(() => {
+
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("locador");
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarObrigatorios();
+
+  }, []);
 
   const [formData, setFormData] = useState({
 
@@ -228,7 +257,7 @@ export default function LocadorForm({
 
             className={inputStyle}
 
-            required
+            required={true}
 
           />
 
@@ -246,6 +275,8 @@ export default function LocadorForm({
 
             className={inputStyle}
 
+            required={obrigatorios.has("email")}
+
           />
 
           <input
@@ -259,6 +290,8 @@ export default function LocadorForm({
             onChange={handleChange}
 
             className={inputStyle}
+
+            required={obrigatorios.has("telefone")}
 
           />
 
@@ -287,6 +320,8 @@ export default function LocadorForm({
             onChange={handleChange}
 
             className={inputStyle}
+
+            required={obrigatorios.has("banco")}
 
           >
 
@@ -427,6 +462,7 @@ export default function LocadorForm({
             value={formData.agencia}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("agencia")}
           />
 
           <input
@@ -435,6 +471,7 @@ export default function LocadorForm({
             value={formData.conta}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("conta")}
           />
 
           <input
@@ -443,6 +480,7 @@ export default function LocadorForm({
             value={formData.pix}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("pix")}
           />
 
         </div>
@@ -467,6 +505,7 @@ export default function LocadorForm({
             value={formData.taxaAdministracao}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("taxaAdministracao")}
           />
 
           <input
@@ -475,6 +514,7 @@ export default function LocadorForm({
             value={formData.multa}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("multa")}
           />
 
           <input
@@ -483,6 +523,7 @@ export default function LocadorForm({
             value={formData.juros}
             onChange={handleChange}
             className={inputStyle}
+            required={obrigatorios.has("juros")}
           />
 
         </div>
