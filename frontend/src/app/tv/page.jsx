@@ -131,8 +131,6 @@ function TvConteudo() {
         h-screen
 
         overflow-hidden
-
-        bg-[#050b08]
       "
     >
       <div
@@ -143,12 +141,11 @@ function TvConteudo() {
           bg-cover
           bg-center
           bg-no-repeat
-          opacity-40
         "
         style={{ backgroundImage: "url('/images/background.jpg')" }}
       />
 
-      <div className="fixed inset-0 -z-10 bg-gradient-to-b from-[#050b08]/95 via-[#050b08]/90 to-[#050b08]" />
+      <div className="fixed inset-0 -z-10 bg-[var(--surface-inset)] backdrop-blur-sm" />
 
       <div className="relative h-full flex flex-col px-10 py-8 xl:px-16 xl:py-10">
 
@@ -167,7 +164,7 @@ function TvConteudo() {
             />
 
             <div>
-              <h1 className="text-3xl font-black text-white leading-none">
+              <h1 className="text-3xl font-black text-[var(--text)] leading-none">
                 VIME <span className="text-emerald-400">2.0</span>
               </h1>
               <p className="mt-1.5 text-[13px] uppercase tracking-[0.3em] text-emerald-400/80 font-semibold">
@@ -188,10 +185,10 @@ function TvConteudo() {
 
           <div className="flex items-center gap-8">
             <div className="text-right">
-              <p className="text-5xl font-black text-white tabular-nums leading-none">
+              <p className="text-5xl font-black text-[var(--text)] tabular-nums leading-none">
                 {horaFormatada}
               </p>
-              <p className="mt-1.5 text-sm text-gray-400 capitalize">
+              <p className="mt-1.5 text-sm text-[var(--text-subtle)] capitalize">
                 {dataFormatada}
               </p>
             </div>
@@ -206,21 +203,21 @@ function TvConteudo() {
               <button
                 onClick={alternarTelaCheia}
                 title={telaCheia ? "Sair da tela cheia" : "Tela cheia"}
-                className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 flex items-center justify-center transition"
+                className="w-11 h-11 rounded-xl bg-[var(--surface-2)] border border-[var(--border-token)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
               >
                 {telaCheia ? (
-                  <Minimize size={18} className="text-white" />
+                  <Minimize size={18} className="text-[var(--text)]" />
                 ) : (
-                  <Maximize size={18} className="text-white" />
+                  <Maximize size={18} className="text-[var(--text)]" />
                 )}
               </button>
 
               <button
                 onClick={() => router.push("/")}
                 title="Sair do Modo TV"
-                className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center transition"
+                className="w-11 h-11 rounded-xl bg-[var(--surface-2)] border border-[var(--border-token)] hover:bg-red-500/20 hover:border-red-500/30 flex items-center justify-center transition"
               >
-                <X size={18} className="text-white" />
+                <X size={18} className="text-[var(--text)]" />
               </button>
             </div>
           </div>
@@ -274,14 +271,14 @@ function TvConteudo() {
           className="mt-8 flex-1 min-h-0 grid grid-cols-12 gap-6"
         >
 
-          <div className="col-span-8 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 flex flex-col min-h-0">
+          <div className="col-span-8 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
 
             <div className="flex items-center justify-between shrink-0">
               <div>
                 <p className="text-[12px] uppercase tracking-[0.3em] text-emerald-400/80 font-semibold">
                   Financeiro
                 </p>
-                <h2 className="mt-1 text-2xl font-bold text-white">
+                <h2 className="mt-1 text-2xl font-bold text-[var(--text)]">
                   Receitas mensais
                 </h2>
               </div>
@@ -303,14 +300,14 @@ function TvConteudo() {
 
           </div>
 
-          <div className="col-span-4 rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 flex flex-col min-h-0">
+          <div className="col-span-4 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
 
             <div className="flex items-center justify-between shrink-0">
               <div>
                 <p className="text-[12px] uppercase tracking-[0.3em] text-emerald-400/80 font-semibold">
                   Ocupação
                 </p>
-                <h2 className="mt-1 text-2xl font-bold text-white">
+                <h2 className="mt-1 text-2xl font-bold text-[var(--text)]">
                   Residências
                 </h2>
               </div>
@@ -332,8 +329,8 @@ function TvConteudo() {
               </div>
             </div>
 
-            <div className="shrink-0 pt-5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-sm text-gray-400">Taxa de ocupação</span>
+            <div className="shrink-0 pt-5 border-t border-[var(--border-token)] flex items-center justify-between">
+              <span className="text-sm text-[var(--text-subtle)]">Taxa de ocupação</span>
               <span className="text-3xl font-black text-emerald-400 tabular-nums">
                 <AnimatedNumber value={ocupacao?.percentual ?? 0} formatador={(v) => `${v}%`} />
               </span>
@@ -343,7 +340,7 @@ function TvConteudo() {
 
         </motion.div>
 
-        <p className="mt-6 text-center text-[12px] text-gray-500 shrink-0">
+        <p className="mt-6 text-center text-[12px] text-[var(--text-faint)] shrink-0">
           {ultimaAtualizacao
             ? `Atualizado às ${ultimaAtualizacao.toLocaleTimeString("pt-BR")} · próxima atualização automática`
             : "Carregando dados ao vivo..."}
@@ -356,17 +353,17 @@ function TvConteudo() {
 
 function TvStatCard({ titulo, subtitulo, valor, icon: Icon }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-7 flex items-center justify-between">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-7 flex items-center justify-between">
       <div>
-        <p className="text-[13px] uppercase tracking-[0.2em] text-gray-400 font-semibold">
+        <p className="text-[13px] uppercase tracking-[0.2em] text-[var(--text-subtle)] font-semibold">
           {titulo}
         </p>
 
-        <p className="mt-3 text-5xl font-black text-white tabular-nums leading-none">
+        <p className="mt-3 text-5xl font-black text-[var(--text)] tabular-nums leading-none">
           <AnimatedNumber value={valor} />
         </p>
 
-        <p className="mt-2 text-sm text-gray-500">{subtitulo}</p>
+        <p className="mt-2 text-sm text-[var(--text-faint)]">{subtitulo}</p>
       </div>
 
       <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
@@ -386,8 +383,8 @@ function TvResumoFinanceiro({ titulo, valor, cor }) {
   const animado = useAnimatedNumber(Math.round(Number(valor || 0)));
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 px-6 py-5">
-      <p className="text-[12px] text-gray-400 font-medium">{titulo}</p>
+    <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] px-6 py-5">
+      <p className="text-[12px] text-[var(--text-subtle)] font-medium">{titulo}</p>
       <p className={`mt-1.5 text-2xl font-bold tabular-nums ${cores[cor]}`}>
         {formatCurrency(animado)}
       </p>
@@ -400,9 +397,9 @@ function TvLegendaItem({ cor, titulo, valor }) {
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         <span className={`w-3 h-3 rounded-full ${cor}`} />
-        <span className="text-gray-300">{titulo}</span>
+        <span className="text-[var(--text-muted)]">{titulo}</span>
       </div>
-      <span className="text-2xl font-bold text-white tabular-nums">
+      <span className="text-2xl font-bold text-[var(--text)] tabular-nums">
         <AnimatedNumber value={valor} />
       </span>
     </div>
