@@ -135,7 +135,8 @@ export default function NotificationBell() {
               absolute
               right-0
               mt-3
-              w-96
+              w-[calc(100vw-2rem)]
+              sm:w-96
 
               rounded-2xl
 

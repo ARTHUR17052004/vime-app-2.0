@@ -3,8 +3,16 @@
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import CommandPalette from "./CommandPalette";
+import MobileShell from "./mobile/MobileShell";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 
 export default function MainLayout({ children }) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <MobileShell>{children}</MobileShell>;
+  }
+
   return (
     <div className="relative min-h-screen overflow-hidden">
 
