@@ -167,6 +167,23 @@ model Contrato {
   receitas       Receita[]
 }
 
+// Signatários que entram automaticamente em TODO contrato novo enviado
+// à Clicksign (ex: representante da imobiliária, testemunha fixa),
+// além do inquilino e de quem for adicionado manualmente naquele
+// contrato específico.
+model SignatarioFixo {
+  id        String   @id @default(uuid())
+  nome      String
+  email     String
+  telefone  String?
+  authMode  String   @default("email")
+  signAs    String   @default("sign")
+  ativo     Boolean  @default(true)
+  ordem     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Locador {
   id String @id @default(uuid())
 

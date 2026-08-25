@@ -15,6 +15,7 @@ import TokenCard from "../components/clicksign/TokenCard";
 import WebhookCard from "../components/clicksign/WebhookCard";
 import AssinantesCard from "../components/clicksign/AssinantesCard";
 import AcessoRapido from "../components/clicksign/AcessoRapido";
+import SignatariosFixosCard from "../components/clicksign/SignatariosFixosCard";
 
 export default function ClicksignPage() {
   return (
@@ -73,6 +74,14 @@ export default function ClicksignPage() {
             </div>
 
           </div>
+
+        </FadeIn>
+
+        {/* SIGNATÁRIOS FIXOS */}
+
+        <FadeIn delay={0.33}>
+
+          <SignatariosFixosCard />
 
         </FadeIn>
 

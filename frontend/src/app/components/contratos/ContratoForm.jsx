@@ -4,6 +4,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { Plus, Trash2 } from "lucide-react";
+
 import Button from "../ui/Button";
 
 import { LocadorService } from "@/services/locadores.service";
@@ -60,6 +62,26 @@ export default function ContratoForm({
 
   const [salvando, setSalvando] =
     useState(false);
+
+  // Signatários extras só deste contrato (além do inquilino e dos
+  // signatários fixos configurados em Clicksign > Signatários Fixos,
+  // que entram automaticamente em todo contrato novo).
+  const [signatariosExtras, setSignatariosExtras] =
+    useState([]);
+
+  function adicionarSignatarioExtra() {
+    setSignatariosExtras((old) => [...old, { nome: "", email: "", telefone: "" }]);
+  }
+
+  function alterarSignatarioExtra(indice, campo, valor) {
+    setSignatariosExtras((old) =>
+      old.map((s, i) => (i === indice ? { ...s, [campo]: valor } : s))
+    );
+  }
+
+  function removerSignatarioExtra(indice) {
+    setSignatariosExtras((old) => old.filter((_, i) => i !== indice));
+  }
 
   const [formData, setFormData] =
     useState({
@@ -294,6 +316,10 @@ export default function ContratoForm({
 
         dataFim:
           formData.dataFim || null,
+
+        ...(contrato ? {} : {
+          signatariosExtras: signatariosExtras.filter((s) => s.nome && s.email),
+        }),
 
       });
 
@@ -696,6 +722,83 @@ export default function ContratoForm({
   />
 
 </div>
+
+{!contrato && (
+
+  <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5">
+
+    <div className="flex items-center justify-between mb-1">
+
+      <div>
+        <p className="font-medium text-[var(--text)]">
+          Signatários adicionais
+        </p>
+        <p className="text-sm text-[var(--text-subtle)]">
+          Além do inquilino e dos signatários fixos configurados em Clicksign, você pode incluir mais alguém só neste contrato.
+        </p>
+      </div>
+
+      <button
+        type="button"
+        onClick={adicionarSignatarioExtra}
+        className="flex shrink-0 items-center gap-2 rounded-xl border border-[var(--border-token)] bg-[var(--surface)] px-4 py-2.5 text-sm text-[var(--text)] hover:border-emerald-500/50 transition"
+      >
+        <Plus size={16} />
+        Adicionar
+      </button>
+
+    </div>
+
+    {signatariosExtras.length > 0 && (
+
+      <div className="mt-4 space-y-3">
+
+        {signatariosExtras.map((signatario, indice) => (
+
+          <div key={indice} className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto] items-center">
+
+            <input
+              className={input}
+              placeholder="Nome"
+              value={signatario.nome}
+              onChange={(e) => alterarSignatarioExtra(indice, "nome", e.target.value)}
+            />
+
+            <input
+              className={input}
+              type="email"
+              placeholder="E-mail"
+              value={signatario.email}
+              onChange={(e) => alterarSignatarioExtra(indice, "email", e.target.value)}
+            />
+
+            <input
+              className={input}
+              placeholder="Telefone (opcional)"
+              value={signatario.telefone}
+              onChange={(e) => alterarSignatarioExtra(indice, "telefone", e.target.value)}
+            />
+
+            <button
+              type="button"
+              onClick={() => removerSignatarioExtra(indice)}
+              title="Remover"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--border-token)] text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition"
+            >
+              <Trash2 size={16} />
+            </button>
+
+          </div>
+
+        ))}
+
+      </div>
+
+    )}
+
+  </div>
+
+)}
 
 <textarea
   name="observacoes"

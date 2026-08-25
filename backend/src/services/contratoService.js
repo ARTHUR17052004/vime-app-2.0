@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
 
 const ClicksignApi = require("./ClicksignApi");
+const signatarioFixoService = require("./signatarioFixoService");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 const WhatsappService = require("./whatsappService");
@@ -18,6 +19,35 @@ const slugificarNomeArquivo = (nome) => {
     .trim()
     .replace(/\s+/g, '-')
     .toLowerCase();
+};
+
+// Cria o signatário na Clicksign e vincula ao documento (fluxo
+// signer -> list da API v1). Usado tanto pro inquilino quanto pelos
+// signatários fixos/extras -- cada chamada é independente, então um
+// signatário com e-mail inválido não derruba os outros.
+const adicionarSignatarioAoDocumento = async (documentKey, dadosSignatario, mensagem) => {
+
+  const signatarioCriado = await ClicksignApi.criarSignatario({
+    email: dadosSignatario.email,
+    phone_number: dadosSignatario.telefone || dadosSignatario.phone_number,
+    auth_mode: dadosSignatario.authMode || dadosSignatario.auth_mode || "email",
+    name: dadosSignatario.nome || dadosSignatario.name
+  });
+
+  const signerKey =
+    signatarioCriado?.signer?.key ||
+    signatarioCriado?.key ||
+    null;
+
+  if (!signerKey) {
+    return null;
+  }
+
+  return ClicksignApi.criarLista(documentKey, signerKey, {
+    signAs: dadosSignatario.signAs || dadosSignatario.sign_as || "sign",
+    message: mensagem
+  });
+
 };
 
 // A tela de edição pré-preenche o formulário espalhando o contrato
@@ -69,6 +99,14 @@ const buscarPorId = (id) => {
 };
 
 const criar = async (dados) => {
+
+  // Signatários extras deste contrato específico (além do inquilino e
+  // dos signatários fixos, que entram em todos os contratos) -- não é
+  // campo do model Contrato, então sai do payload antes do create.
+  const signatariosExtras = Array.isArray(dados.signatariosExtras)
+    ? dados.signatariosExtras
+    : [];
+  delete dados.signatariosExtras;
 
   await campoObrigatorioService.validar('contrato', dados);
 
@@ -266,33 +304,49 @@ const criar = async (dados) => {
         data: { clicksignDocumentKey: documentKey }
       });
 
-      const signatarioCriado = await ClicksignApi.criarSignatario({
-        email: inquilino.email,
-        phone_number: inquilino.telefone,
-        auth_mode: "email",
-        name: inquilino.nome
-      });
+      const listaInquilino = await adicionarSignatarioAoDocumento(
+        documentKey,
+        { email: inquilino.email, telefone: inquilino.telefone, nome: inquilino.nome },
+        `Olá ${inquilino.nome}, segue seu contrato de locação para assinatura.`
+      );
 
-      const signerKey =
-        signatarioCriado?.signer?.key ||
-        signatarioCriado?.key ||
-        null;
+      const signingUrl = listaInquilino?.list?.url || null;
 
-      if (signerKey) {
-
-        const listaCriada = await ClicksignApi.criarLista(documentKey, signerKey, {
-          message: `Olá ${inquilino.nome}, segue seu contrato de locação para assinatura.`
+      if (signingUrl) {
+        await prisma.contrato.update({
+          where: { id: contrato.id },
+          data: { clicksignSigningUrl: signingUrl }
         });
+      }
 
-        const signingUrl = listaCriada?.list?.url || null;
+      // Signatários fixos (configurados em Clicksign > Signatários
+      // Fixos) entram automaticamente em todo contrato. Cada um é
+      // independente -- um falhar não derruba os outros nem o contrato.
+      const signatariosFixos = await signatarioFixoService.listarAtivos();
 
-        if (signingUrl) {
-          await prisma.contrato.update({
-            where: { id: contrato.id },
-            data: { clicksignSigningUrl: signingUrl }
-          });
+      for (const fixo of signatariosFixos) {
+        try {
+          await adicionarSignatarioAoDocumento(
+            documentKey,
+            fixo,
+            `Olá ${fixo.nome}, segue o contrato de locação de ${inquilino.nome} para assinatura.`
+          );
+        } catch (erroFixo) {
+          console.error(`Erro ao adicionar signatário fixo "${fixo.nome}" ao contrato ${contrato.id}:`, erroFixo.message);
         }
+      }
 
+      // Signatários extras enviados só para este contrato.
+      for (const extra of signatariosExtras) {
+        try {
+          await adicionarSignatarioAoDocumento(
+            documentKey,
+            extra,
+            `Olá ${extra.nome}, segue o contrato de locação de ${inquilino.nome} para assinatura.`
+          );
+        } catch (erroExtra) {
+          console.error(`Erro ao adicionar signatário extra "${extra.nome}" ao contrato ${contrato.id}:`, erroExtra.message);
+        }
       }
 
     }
