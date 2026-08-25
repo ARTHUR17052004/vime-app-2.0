@@ -6,6 +6,7 @@ const verificarCobrancas = require("./verificarCobrancasJob");
 const verificarNotificacoes = require("./verificarNotificacoesJob");
 const gerarCobrancasRecorrentes = require("./gerarCobrancasRecorrentesJob");
 const lembreteVencimento = require("./lembreteVencimentoJob");
+const notificarVencimentoContrato = require("./notificarVencimentoContratoJob");
 
 const iniciarJobs = () => {
 
@@ -16,6 +17,8 @@ const iniciarJobs = () => {
     await verificarVencimentos();
 
     await verificarContratos();
+
+    await notificarVencimentoContrato();
 
     await verificarCobrancas();
 

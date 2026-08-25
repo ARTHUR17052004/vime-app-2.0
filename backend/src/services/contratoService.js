@@ -21,6 +21,47 @@ const slugificarNomeArquivo = (nome) => {
     .toLowerCase();
 };
 
+const DIAS_ALERTA_VENCIMENTO = 10;
+
+// Notifica (uma única vez por contrato) quando o contrato está a até
+// DIAS_ALERTA_VENCIMENTO dias do fim. Chamado tanto na hora de criar o
+// contrato (pra já avisar se ele já nascer perto do vencimento) quanto
+// pelo job diário que varre os contratos já em andamento.
+const notificarSeVencimentoProximo = async (contrato) => {
+
+  if (!contrato.dataFim || !['ATIVO', 'PENDENTE'].includes(contrato.status)) return;
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const fim = new Date(contrato.dataFim);
+  fim.setHours(0, 0, 0, 0);
+
+  const diasRestantes = Math.round((fim - hoje) / (1000 * 60 * 60 * 24));
+
+  if (diasRestantes < 0 || diasRestantes > DIAS_ALERTA_VENCIMENTO) return;
+
+  const link = `/contratos/${contrato.id}`;
+
+  const jaNotificado = await prisma.notificacao.findFirst({
+    where: { link, titulo: 'Contrato próximo do vencimento' }
+  });
+
+  if (jaNotificado) return;
+
+  const inquilino = contrato.inquilino || await prisma.inquilino.findUnique({
+    where: { id: contrato.inquilinoId }
+  });
+
+  await notificacaoService.criar({
+    origem: 'SISTEMA',
+    titulo: 'Contrato próximo do vencimento',
+    mensagem: `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`} (${fim.toLocaleDateString('pt-BR')}).`,
+    link
+  });
+
+};
+
 // Cria o signatário na Clicksign e vincula ao documento (fluxo
 // signer -> list da API v1). Usado tanto pro inquilino quanto pelos
 // signatários fixos/extras -- cada chamada é independente, então um
@@ -416,6 +457,12 @@ const criar = async (dados) => {
     link: `/contratos/${contrato.id}`
   });
 
+  try {
+    await notificarSeVencimentoProximo({ ...contrato, inquilino });
+  } catch (erroNotificacao) {
+    console.error("Erro ao notificar vencimento próximo do contrato recém-criado:", erroNotificacao.message);
+  }
+
   return contrato;
 
 };
@@ -669,5 +716,6 @@ module.exports = {
   atualizar,
   remover,
   encerrar,
-  renovar
+  renovar,
+  notificarSeVencimentoProximo
 };

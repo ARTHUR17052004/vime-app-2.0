@@ -310,7 +310,7 @@ export default function UsuarioDetalhesPage() {
 
                     titulo="Perfil"
 
-                    valor={usuario.perfil}
+                    valor={usuario.perfil?.nome || "-"}
 
                   />
 

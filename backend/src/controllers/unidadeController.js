@@ -11,6 +11,13 @@ const criar = async (req, res) => {
 };
 
 const atualizar = async (req, res) => {
+
+  if (req.usuario?.perfil !== 'ADMINISTRADOR') {
+    return res.status(403).json({
+      message: 'Apenas o Administrador pode editar uma residência depois de criada.'
+    });
+  }
+
   const unidade = await unidadeService.atualizar(
     req.params.id,
     req.body
@@ -20,6 +27,13 @@ const atualizar = async (req, res) => {
 };
 
 const remover = async (req, res) => {
+
+  if (req.usuario?.perfil !== 'ADMINISTRADOR') {
+    return res.status(403).json({
+      message: 'Apenas o Administrador pode excluir uma residência depois de criada.'
+    });
+  }
+
   await unidadeService.remover(req.params.id);
 
   res.json({

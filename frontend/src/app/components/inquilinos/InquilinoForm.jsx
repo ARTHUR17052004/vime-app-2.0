@@ -9,6 +9,39 @@ import DadosPessoaisStep from "./steps/DadosPessoaisStep";
 import KitnetStep from "./steps/KitnetStep";
 import ContratoStep from "./steps/ContratoStep";
 
+// Campos que aparecem em cada etapa -- usado pra validar só o que já
+// está visível quando o usuário clica em "Continuar", em vez de deixar
+// pra descobrir campo faltando só no fim (etapa 3).
+const CAMPOS_POR_STEP = {
+  1: ["nome", "email", "telefone", "cpf", "rg", "dataNascimento", "enderecoAnterior", "contatoEmergencia", "telefoneEmergencia"],
+  2: ["kitnetId"],
+  3: ["dataInicioContrato", "dataFimContrato", "prazoContrato", "indiceReajuste", "tipoGarantia", "valorCaucao"],
+};
+
+// Estruturalmente necessários pro cadastro/contrato automático
+// funcionarem, independente do que o admin configurar em Campos
+// Obrigatórios.
+const SEMPRE_OBRIGATORIOS = new Set(["nome", "email", "telefone", "kitnetId", "dataInicioContrato"]);
+
+const ROTULOS = {
+  nome: "Nome Completo",
+  email: "E-mail",
+  telefone: "Telefone",
+  cpf: "CPF",
+  rg: "RG",
+  dataNascimento: "Data de Nascimento",
+  enderecoAnterior: "Endereço Anterior",
+  contatoEmergencia: "Contato de Emergência",
+  telefoneEmergencia: "Telefone de Emergência",
+  kitnetId: "Kitnet",
+  dataInicioContrato: "Início do Contrato",
+  dataFimContrato: "Fim do Contrato",
+  prazoContrato: "Prazo do Contrato",
+  indiceReajuste: "Índice de Reajuste",
+  tipoGarantia: "Tipo de Garantia",
+  valorCaucao: "Valor da Caução",
+};
+
 export default function InquilinoForm({
   onSave,
   inquilino,
@@ -20,6 +53,8 @@ export default function InquilinoForm({
   const [kitnets, setKitnets] = useState([]);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  const [erroStep, setErroStep] = useState("");
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -38,6 +73,8 @@ export default function InquilinoForm({
     dataFimContrato: "",
     prazoContrato: "",
     indiceReajuste: "",
+    tipoGarantia: "",
+    valorCaucao: "",
 
     ativo: true,
   });
@@ -128,6 +165,12 @@ export default function InquilinoForm({
       indiceReajuste:
         inquilino.indiceReajuste || "",
 
+      tipoGarantia:
+        inquilino.tipoGarantia || "",
+
+      valorCaucao:
+        inquilino.valorCaucao || "",
+
       ativo:
         inquilino.ativo ?? true,
 
@@ -143,6 +186,8 @@ export default function InquilinoForm({
       type,
       checked,
     } = e.target;
+
+    setErroStep("");
 
     setFormData((prev) => {
 
@@ -171,13 +216,49 @@ export default function InquilinoForm({
 
   }
 
+  function validarStep(numero) {
+
+    const campos = CAMPOS_POR_STEP[numero] || [];
+
+    const faltando = campos.filter((campo) => {
+
+      const exigido = SEMPRE_OBRIGATORIOS.has(campo) || obrigatorios.has(campo);
+
+      if (!exigido) return false;
+
+      const valor = formData[campo];
+
+      return valor === undefined || valor === null || valor === "";
+
+    });
+
+    if (faltando.length > 0) {
+
+      setErroStep(
+        `Preencha os campos obrigatórios: ${faltando.map((c) => ROTULOS[c] || c).join(", ")}.`
+      );
+
+      return false;
+
+    }
+
+    setErroStep("");
+
+    return true;
+
+  }
+
   function proximoStep() {
+
+    if (!validarStep(step)) return;
 
     setStep((prev) => prev + 1);
 
   }
 
   function voltarStep() {
+
+    setErroStep("");
 
     setStep((prev) => prev - 1);
 
@@ -188,6 +269,8 @@ export default function InquilinoForm({
     e.preventDefault();
 
     if (salvando) return;
+
+    if (!validarStep(3)) return;
 
     const kitnetSelecionada =
       kitnets.find(
@@ -287,7 +370,16 @@ export default function InquilinoForm({
         <ContratoStep
           formData={formData}
           handleChange={handleChange}
+          obrigatorios={obrigatorios}
         />
+
+      )}
+
+      {erroStep && (
+
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+          {erroStep}
+        </div>
 
       )}
 

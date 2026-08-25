@@ -32,6 +32,7 @@ export default function KitnetStep({
         <label className="block text-sm font-medium text-[var(--text-subtle)] mb-2">
 
           Kitnet
+          <span className="ml-1 text-red-400">*</span>
 
         </label>
 

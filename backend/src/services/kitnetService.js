@@ -29,7 +29,13 @@ const criar = async (dados) => {
     where: { id: dados.unidadeId }
   });
 
-  if (unidade) {
+  if (!unidade) {
+    throw new Error('Residência não encontrada.');
+  }
+
+  // unidade.kitnets é o limite cadastrado pra essa residência -- sem
+  // limite definido (null/0), não há teto a aplicar aqui.
+  if (unidade.kitnets) {
 
     const existentes = await prisma.kitnet.count({
       where: { unidadeId: dados.unidadeId }
@@ -37,7 +43,7 @@ const criar = async (dados) => {
 
     if (existentes >= unidade.kitnets) {
       throw new Error(
-        `Esta residência já tem o limite de ${unidade.kitnets} kitnet(s) cadastrado(s). Aumente a quantidade em Residências para adicionar mais.`
+        `Não é possível criar uma kitnet fora do limite da residência: "${unidade.nome}" já tem ${existentes} de ${unidade.kitnets} kitnet(s) cadastradas. Para adicionar mais, aumente a "Quantidade de Kitnets" em Residências.`
       );
     }
 

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import ActionMenu from "../ui/ActionMenu";
+import { useAuth } from "../../../context/AuthContext";
 
 export default function UnitActionsMenu({
   unidade,
@@ -17,6 +18,9 @@ export default function UnitActionsMenu({
   onEdit,
   onDelete,
 }) {
+
+  const { usuario } = useAuth();
+  const ehAdministrador = usuario?.perfil === "ADMINISTRADOR";
 
   const [open, setOpen] = useState(false);
 
@@ -129,9 +133,14 @@ export default function UnitActionsMenu({
 
           onClick={() => {
 
-            onEdit(unidade);
-
             close();
+
+            if (!ehAdministrador) {
+              alert("Apenas o Administrador pode editar uma residência depois de criada.");
+              return;
+            }
+
+            onEdit(unidade);
 
           }}
 
@@ -147,9 +156,14 @@ export default function UnitActionsMenu({
 
           onClick={() => {
 
-            onDelete(unidade.id);
-
             close();
+
+            if (!ehAdministrador) {
+              alert("Apenas o Administrador pode excluir uma residência depois de criada.");
+              return;
+            }
+
+            onDelete(unidade.id);
 
           }}
 

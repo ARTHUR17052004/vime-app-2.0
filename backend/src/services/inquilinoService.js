@@ -130,6 +130,8 @@ const criar = async (dados) => {
           valorAluguel: kitnet.aluguel,
           diaVencimento: unidade.vencimento || dataInicio.getDate(),
           indiceReajuste: inquilino.indiceReajuste || null,
+          tipoGarantia: inquilino.tipoGarantia || null,
+          valorCaucao: inquilino.valorCaucao || null,
         });
 
       }
