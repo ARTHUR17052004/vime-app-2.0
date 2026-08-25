@@ -508,6 +508,7 @@ export default function UnitForm({
             <Input
               label="Data de Início da Cobrança"
               type="date"
+              required={obrigatorios.has("dataInicioCobranca")}
               name="dataInicioCobranca"
               value={formData.dataInicioCobranca}
               onChange={handleChange}
@@ -521,6 +522,7 @@ export default function UnitForm({
 
           <Select
             label="Status"
+            required={obrigatorios.has("status")}
             name="status"
             value={formData.status}
             onChange={handleChange}
@@ -579,6 +581,8 @@ export default function UnitForm({
         <Textarea
 
           label="Observações"
+
+          required={obrigatorios.has("observacoes")}
 
           name="observacoes"
 

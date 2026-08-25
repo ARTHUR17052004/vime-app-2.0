@@ -286,6 +286,7 @@ export default function KitnetForm({
 
         <Select
           label="Status"
+          required={obrigatorios.has("status")}
           name="status"
           value={formData.status}
           onChange={handleChange}
@@ -327,6 +328,7 @@ export default function KitnetForm({
 
       <Textarea
         label="Observações"
+        required={obrigatorios.has("observacoes")}
         rows={5}
         name="observacoes"
         value={formData.observacoes}

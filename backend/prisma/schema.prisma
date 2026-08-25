@@ -45,6 +45,7 @@ model Kitnet {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   nome       String?
+  observacoes String?
   contratos  Contrato[]
   inquilinos Inquilino[]
   unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
