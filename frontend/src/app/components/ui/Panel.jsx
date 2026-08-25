@@ -34,10 +34,13 @@ export default function Panel({
             items-center
             justify-between
 
-            gap-10
+            gap-4
+            sm:gap-10
 
-            pb-8
-            mb-8
+            pb-5
+            mb-5
+            sm:pb-8
+            sm:mb-8
 
             border-b
             border-[var(--border-token)]
@@ -51,7 +54,8 @@ export default function Panel({
             className="
               flex
               items-center
-              gap-6
+              gap-3
+              sm:gap-6
 
               flex-1
             "
@@ -60,8 +64,10 @@ export default function Panel({
 
               <div
                 className="
-                  w-14
-                  h-14
+                  w-11
+                  h-11
+                  sm:w-14
+                  sm:h-14
 
                   rounded-2xl
 
@@ -112,7 +118,8 @@ export default function Panel({
 
                 <h2
                   className="
-                    text-[34px]
+                    text-[22px]
+                    sm:text-[34px]
                     font-bold
                     leading-tight
                     text-[var(--text)]
@@ -172,7 +179,8 @@ export default function Panel({
           flex
           flex-col
 
-          gap-8
+          gap-5
+          sm:gap-8
 
           ${contentClassName}
         `}

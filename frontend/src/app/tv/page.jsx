@@ -130,7 +130,8 @@ function TvConteudo() {
         min-h-screen
         h-screen
 
-        overflow-hidden
+        overflow-y-auto
+        overflow-x-hidden
       "
     >
       <div
@@ -147,48 +148,48 @@ function TvConteudo() {
 
       <div className="fixed inset-0 -z-10 bg-[var(--surface-inset)] backdrop-blur-sm" />
 
-      <div className="relative h-full flex flex-col px-10 py-8 xl:px-16 xl:py-10">
+      <div className="relative min-h-full flex flex-col px-5 py-6 sm:px-10 sm:py-8 xl:px-16 xl:py-10">
 
         {/* ========================= */}
         {/* TOPO */}
         {/* ========================= */}
 
-        <div className="flex items-center justify-between shrink-0">
+        <div className="flex items-center justify-between flex-wrap gap-4 shrink-0">
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-3 sm:gap-5">
             <img
               src="/images/logo-vime.jpeg"
               alt="VIME"
-              className="w-14 h-14 rounded-2xl object-contain"
+              className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl object-contain"
               draggable={false}
             />
 
             <div>
-              <h1 className="text-3xl font-black text-[var(--text)] leading-none">
+              <h1 className="text-xl sm:text-3xl font-black text-[var(--text)] leading-none">
                 VIME <span className="text-emerald-400">2.0</span>
               </h1>
-              <p className="mt-1.5 text-[13px] uppercase tracking-[0.3em] text-emerald-400/80 font-semibold">
+              <p className="mt-1.5 text-[11px] sm:text-[13px] uppercase tracking-[0.3em] text-emerald-400/80 font-semibold">
                 Painel ao vivo
               </p>
             </div>
 
-            <div className="ml-4 flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-2">
+            <div className="ml-1 sm:ml-4 flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 sm:px-4 sm:py-2">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
               </span>
-              <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-emerald-300">
+              <span className="text-[11px] sm:text-[12px] font-bold uppercase tracking-[0.2em] text-emerald-300">
                 Ao vivo
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 sm:gap-8">
             <div className="text-right">
-              <p className="text-5xl font-black text-[var(--text)] tabular-nums leading-none">
+              <p className="text-3xl sm:text-5xl font-black text-[var(--text)] tabular-nums leading-none">
                 {horaFormatada}
               </p>
-              <p className="mt-1.5 text-sm text-[var(--text-subtle)] capitalize">
+              <p className="mt-1.5 text-xs sm:text-sm text-[var(--text-subtle)] capitalize">
                 {dataFormatada}
               </p>
             </div>
@@ -232,7 +233,7 @@ function TvConteudo() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mt-10 grid grid-cols-4 gap-6 shrink-0"
+          className="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 shrink-0"
         >
           <TvStatCard
             titulo="Inquilinos"
@@ -268,10 +269,10 @@ function TvConteudo() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-8 flex-1 min-h-0 grid grid-cols-12 gap-6"
+          className="mt-8 flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6"
         >
 
-          <div className="col-span-8 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
+          <div className="col-span-1 lg:col-span-8 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
 
             <div className="flex items-center justify-between shrink-0">
               <div>
@@ -292,7 +293,7 @@ function TvConteudo() {
               <RevenueChart data={receitasMensais.length ? receitasMensais : undefined} />
             </div>
 
-            <div className="grid grid-cols-3 gap-5 shrink-0">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 shrink-0">
               <TvResumoFinanceiro titulo="Recebido" valor={financeiro?.recebido} cor="emerald" />
               <TvResumoFinanceiro titulo="Pendente" valor={financeiro?.pendente} cor="yellow" />
               <TvResumoFinanceiro titulo="Atrasado" valor={financeiro?.atrasado} cor="red" />
@@ -300,7 +301,7 @@ function TvConteudo() {
 
           </div>
 
-          <div className="col-span-4 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
+          <div className="col-span-1 lg:col-span-4 rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-8 flex flex-col min-h-0">
 
             <div className="flex items-center justify-between shrink-0">
               <div>

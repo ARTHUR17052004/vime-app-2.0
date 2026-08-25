@@ -10,6 +10,8 @@ import {
   Tooltip,
 } from "recharts";
 
+import { useIsMobile } from "@/hooks/useIsMobile";
+
 const mockData = [
   { mes: "Jan", receita: 18000 },
   { mes: "Fev", receita: 26000 },
@@ -28,14 +30,18 @@ function formatarValor(valor) {
 }
 
 export default function RevenueChart({ data = mockData }) {
+  const isMobile = useIsMobile();
+
   return (
     <div
       className="
         w-full
 
-        h-[280px]
+        h-[220px]
+        sm:h-[280px]
 
-        px-6
+        px-2
+        sm:px-6
         pt-4
         pb-6
       "
@@ -45,8 +51,8 @@ export default function RevenueChart({ data = mockData }) {
           data={data}
           margin={{
             top: 25,
-            right: 20,
-            left: 10,
+            right: isMobile ? 4 : 20,
+            left: isMobile ? -12 : 10,
             bottom: 15,
           }}
         >
@@ -82,9 +88,10 @@ export default function RevenueChart({ data = mockData }) {
             dataKey="mes"
             tickLine={false}
             axisLine={false}
+            interval={isMobile ? 1 : 0}
             tick={{
               fill: "#94a3b8",
-              fontSize: 13,
+              fontSize: isMobile ? 11 : 13,
             }}
           />
 

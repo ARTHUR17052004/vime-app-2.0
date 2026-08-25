@@ -15,6 +15,8 @@ import ActionMenu from "../ui/ActionMenu";
 import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
 
+import { useIsMobile } from "@/hooks/useIsMobile";
+
 function MenuButton({ label, danger, success, warning, onClick }) {
   return (
     <button
@@ -63,6 +65,8 @@ export default function FinanceiroReceitas({
 
   const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
 
+  const isMobile = useIsMobile();
+
   function abrirMenu(e, id) {
     const rect = e.currentTarget.getBoundingClientRect();
     const largura = 200;
@@ -77,6 +81,61 @@ export default function FinanceiroReceitas({
 
     setPosicaoMenu({ top, left });
     setMenuAberto(id);
+  }
+
+  function renderMenu(item) {
+    return (
+      <ActionMenu
+        open={menuAberto === item.id}
+        position={posicaoMenu}
+        onClose={() => setMenuAberto(null)}
+      >
+        <MenuButton
+          label="Visualizar"
+          onClick={() => {
+            setReceitaSelecionada(item);
+            setVisualizarOpen(true);
+            setMenuAberto(null);
+          }}
+        />
+
+        <MenuButton
+          label="Editar"
+          warning
+          onClick={() => {
+            setReceitaSelecionada(item);
+            setEditarOpen(true);
+            setMenuAberto(null);
+          }}
+        />
+
+        <MenuButton
+          label="Marcar Pago"
+          success
+          onClick={() => {
+            onMarcarPago?.(item.id);
+            setMenuAberto(null);
+          }}
+        />
+
+        <MenuButton
+          label={item.fixado ? "Desafixar" : "Fixar"}
+          onClick={() => {
+            onFixar?.(item.id, !item.fixado);
+            setMenuAberto(null);
+          }}
+        />
+
+        <MenuButton
+          label="Excluir"
+          danger
+          onClick={() => {
+            onDelete?.(item.id);
+            setMenuAberto(null);
+          }}
+        />
+      </ActionMenu>
+    );
   }
 
   const corStatus = (status) => {
@@ -171,6 +230,127 @@ export default function FinanceiroReceitas({
         <div className="px-6 pb-6 text-[var(--text-subtle)]">
           Nenhuma receita cadastrada.
         </div>
+      ) : isMobile ? (
+
+        <div className="mt-6 px-4 pb-6 space-y-3">
+
+          {receitas.map((item) => {
+
+            const inquilino = item.inquilino || item.contrato?.inquilino;
+            const unidade = item.contrato?.unidade || item.inquilino?.kitnet?.unidade;
+            const kitnet = item.contrato?.kitnet || item.inquilino?.kitnet;
+
+            return (
+
+              <div
+                key={item.id}
+                className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4"
+              >
+
+                <div className="flex items-start justify-between gap-3">
+
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 min-w-0">
+                      {item.fixado && (
+                        <Pin size={13} className="text-emerald-400 fill-emerald-400 shrink-0" />
+                      )}
+                      <p className="font-semibold text-[var(--text)] truncate">
+                        {item.descricao}
+                      </p>
+                    </div>
+
+                    <p className="mt-1 text-sm text-[var(--text-subtle)] truncate">
+                      {item.categoria}
+                      {inquilino?.nome ? ` · ${inquilino.nome}` : ""}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      menuAberto === item.id
+                        ? setMenuAberto(null)
+                        : abrirMenu(e, item.id);
+                    }}
+                    className="
+                      w-9
+                      h-9
+                      shrink-0
+                      rounded-lg
+                      flex
+                      items-center
+                      justify-center
+                      hover:bg-[var(--surface-3)]
+                      transition
+                    "
+                  >
+                    <MoreVertical size={18} />
+                  </button>
+
+                  {renderMenu(item)}
+
+                </div>
+
+                <div className="mt-3 flex items-center justify-between text-sm text-[var(--text-subtle)]">
+                  <span className="truncate">
+                    {unidade?.nome || "-"}
+                    {kitnet?.nome || kitnet?.numero ? ` · ${kitnet?.nome || kitnet?.numero}` : ""}
+                  </span>
+
+                  <span className="shrink-0">
+                    {item.vencimento
+                      ? new Date(item.vencimento).toLocaleDateString("pt-BR")
+                      : "-"}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between">
+
+                  <span
+                    className={`text-xl font-bold ${
+                      item.status === "ATRASADA"
+                        ? "text-red-400"
+                        : item.status === "PAGO" || item.status === "PAGA"
+                        ? "text-emerald-400"
+                        : "text-yellow-400"
+                    }`}
+                  >
+                    R$ {item.valor}
+                  </span>
+
+                  <div className="flex items-center gap-2">
+
+                    <Badge
+                      variant={
+                        item.status === "PAGO" || item.status === "PAGA"
+                          ? "emerald"
+                          : item.status === "ATRASADA"
+                          ? "red"
+                          : "yellow"
+                      }
+                    >
+                      {item.status}
+                    </Badge>
+
+                    <Badge
+                      variant={item.enviadaAsaas ? "blue" : "gray"}
+                      size="sm"
+                    >
+                      {item.enviadaAsaas ? "Asaas" : "Local"}
+                    </Badge>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            );
+
+          })}
+
+        </div>
+
       ) : (
         <div className="overflow-x-auto mt-6 px-6 pb-6">
 
@@ -191,35 +371,35 @@ export default function FinanceiroReceitas({
               "
             >
               <tr>
-                <th className="text-left py-4">
+                <th className="text-left py-4 pr-4">
                   Descrição
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Categoria
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Inquilino
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Residencial
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Kitnet
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Vencimento
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Valor
                 </th>
 
-                <th className="text-left">
+                <th className="text-left pr-4">
                   Status
                 </th>
 
@@ -242,7 +422,7 @@ export default function FinanceiroReceitas({
                   className="border-b border-[var(--border-token)] hover:bg-[var(--surface-2)] transition"
                 >
 
-                  <td className="py-5">
+                  <td className="py-5 pr-4">
                     <div className="flex items-center gap-2">
                       {item.fixado && (
                         <Pin
@@ -254,30 +434,30 @@ export default function FinanceiroReceitas({
                     </div>
                   </td>
 
-                  <td>
+                  <td className="pr-4">
                     {item.categoria}
                   </td>
 
-                  <td className="text-[var(--text-subtle)]">
+                  <td className="text-[var(--text-subtle)] pr-4">
                     {inquilino?.nome || "-"}
                   </td>
 
-                  <td className="text-[var(--text-subtle)]">
+                  <td className="text-[var(--text-subtle)] pr-4">
                     {unidade?.nome || "-"}
                   </td>
 
-                  <td className="text-[var(--text-subtle)]">
+                  <td className="text-[var(--text-subtle)] pr-4">
                     {kitnet?.nome || kitnet?.numero || "-"}
                   </td>
 
-                  <td className="text-[var(--text-subtle)]">
+                  <td className="text-[var(--text-subtle)] pr-4">
                     {item.vencimento
                       ? new Date(item.vencimento).toLocaleDateString("pt-BR")
                       : "-"}
                   </td>
 
                   <td
-                    className={`font-semibold ${
+                    className={`font-semibold pr-4 ${
                       item.status === "ATRASADA"
                         ? "text-red-400"
                         : item.status === "PAGO" || item.status === "PAGA"
@@ -288,7 +468,7 @@ export default function FinanceiroReceitas({
                     R$ {item.valor}
                   </td>
 
-                  <td>
+                  <td className="pr-4">
                     <div className="flex items-center gap-2 flex-wrap">
 
                       <Badge
@@ -345,56 +525,7 @@ export default function FinanceiroReceitas({
                       <MoreVertical size={18} />
                     </button>
 
-                    <ActionMenu
-                      open={menuAberto === item.id}
-                      position={posicaoMenu}
-                      onClose={() => setMenuAberto(null)}
-                    >
-                      <MenuButton
-                        label="Visualizar"
-                        onClick={() => {
-                          setReceitaSelecionada(item);
-                          setVisualizarOpen(true);
-                          setMenuAberto(null);
-                        }}
-                      />
-
-                      <MenuButton
-                        label="Editar"
-                        warning
-                        onClick={() => {
-                          setReceitaSelecionada(item);
-                          setEditarOpen(true);
-                          setMenuAberto(null);
-                        }}
-                      />
-
-                      <MenuButton
-                        label="Marcar Pago"
-                        success
-                        onClick={() => {
-                          onMarcarPago?.(item.id);
-                          setMenuAberto(null);
-                        }}
-                      />
-
-                      <MenuButton
-                        label={item.fixado ? "Desafixar" : "Fixar"}
-                        onClick={() => {
-                          onFixar?.(item.id, !item.fixado);
-                          setMenuAberto(null);
-                        }}
-                      />
-
-                      <MenuButton
-                        label="Excluir"
-                        danger
-                        onClick={() => {
-                          onDelete?.(item.id);
-                          setMenuAberto(null);
-                        }}
-                      />
-                    </ActionMenu>
+                    {renderMenu(item)}
 
                   </td>
 

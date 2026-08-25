@@ -22,9 +22,11 @@ const layout = {
 
   card: {
 
-    padding: "p-8",
+    padding: "p-5 sm:p-8",
 
-    paddingSm: "p-7",
+    paddingSm: "p-4 sm:p-7",
+
+    paddingLg: "p-6 sm:p-10",
 
     radius: "rounded-[22px]",
 

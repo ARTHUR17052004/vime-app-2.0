@@ -27,8 +27,10 @@ export default function LoginCard() {
 
         shadow-[0_30px_90px_rgba(0,0,0,.45)]
 
-        px-10
-        py-12
+        px-6
+        py-8
+        sm:px-10
+        sm:py-12
       "
     >
       {/* LOGO */}
@@ -37,11 +39,12 @@ export default function LoginCard() {
 
       {/* TÍTULO */}
 
-      <div className="mt-12 text-center">
+      <div className="mt-8 sm:mt-12 text-center">
 
         <h2
           className="
-            text-4xl
+            text-3xl
+            sm:text-4xl
             font-black
             text-white
           "
@@ -67,7 +70,7 @@ export default function LoginCard() {
 
       {/* FORM */}
 
-      <div className="mt-10">
+      <div className="mt-7 sm:mt-10">
 
         <LoginForm />
 
@@ -77,7 +80,8 @@ export default function LoginCard() {
 
       <div
         className="
-          mt-12
+          mt-8
+          sm:mt-12
 
           border-t
           border-white/10

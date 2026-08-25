@@ -119,9 +119,11 @@ export default function FinancialCard({ financeiro }) {
           flex
           flex-col
 
-          gap-8
+          gap-5
+          sm:gap-8
 
-          px-8
+          px-3
+          sm:px-8
           pt-4
           pb-6
         "
@@ -141,7 +143,7 @@ export default function FinancialCard({ financeiro }) {
 
         {/* RESUMO */}
 
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6">
 
           <ResumoFinanceiro
             titulo="Recebido"
@@ -202,7 +204,8 @@ function ResumoFinanceiro({
 
     <div
       className="
-        min-h-[120px]
+        min-h-[100px]
+        sm:min-h-[120px]
 
         rounded-[18px]
 
@@ -211,8 +214,10 @@ function ResumoFinanceiro({
 
         bg-[#161f29]
 
-        px-8
-        py-6
+        px-5
+        py-4
+        sm:px-8
+        sm:py-6
 
         flex
         flex-col
@@ -238,7 +243,8 @@ function ResumoFinanceiro({
 
       <h3
         className={`
-          text-[32px]
+          text-[24px]
+          sm:text-[32px]
           font-bold
           leading-none
 

@@ -44,7 +44,7 @@ export default function LoginInput({
           border
           border-white/10
 
-          bg-white/5
+          bg-black/30
 
           backdrop-blur-xl
 
