@@ -49,16 +49,14 @@ export default function EsqueciSenhaPage() {
     <main className="relative min-h-screen overflow-hidden">
       <LoginBackground />
 
+      <div className="relative z-10 h-screen overflow-y-auto">
       <section
         className="
-          relative
-          z-10
-
           flex
           items-center
           justify-center
 
-          min-h-screen
+          min-h-full
 
           px-6
           py-12
@@ -198,6 +196,7 @@ export default function EsqueciSenhaPage() {
 
         </div>
       </section>
+      </div>
     </main>
   );
 }

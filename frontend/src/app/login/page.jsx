@@ -8,23 +8,22 @@ export default function LoginPage() {
     <main className="relative min-h-screen overflow-hidden">
       <LoginBackground />
 
-      <section
-        className="
-          relative
-          z-10
+      <div className="relative z-10 h-screen overflow-y-auto">
+        <section
+          className="
+            flex
+            items-center
+            justify-center
 
-          flex
-          items-center
-          justify-center
+            min-h-full
 
-          min-h-screen
-
-          px-6
-          py-12
-        "
-      >
-        <LoginCard />
-      </section>
+            px-6
+            py-12
+          "
+        >
+          <LoginCard />
+        </section>
+      </div>
     </main>
   );
 }

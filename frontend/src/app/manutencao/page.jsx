@@ -55,17 +55,15 @@ export default function ManutencaoPage() {
     <main className="relative min-h-screen overflow-hidden">
       <LoginBackground />
 
+      <div className="relative z-10 h-screen overflow-y-auto">
       <section
         className="
-          relative
-          z-10
-
           flex
           flex-col
           items-center
           justify-center
 
-          min-h-screen
+          min-h-full
 
           px-6
           py-12
@@ -128,6 +126,7 @@ export default function ManutencaoPage() {
         </p>
 
       </section>
+      </div>
     </main>
   );
 
