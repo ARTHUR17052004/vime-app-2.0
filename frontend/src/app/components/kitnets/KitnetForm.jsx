@@ -9,6 +9,21 @@ import Textarea from "../ui/Textarea";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+
+const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "status", "observacoes"];
+
+const SEMPRE_OBRIGATORIOS = new Set(["nome", "unidadeId", "numero", "metragem", "aluguel"]);
+
+const ROTULOS = {
+  nome: "Nome da Kitnet",
+  unidadeId: "Residência",
+  numero: "Número",
+  metragem: "Metragem",
+  aluguel: "Valor do Aluguel",
+  status: "Status",
+  observacoes: "Observações",
+};
 
 export default function KitnetForm({
   onSave,
@@ -19,6 +34,8 @@ export default function KitnetForm({
   const [unidades, setUnidades] = useState([]);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  const [erro, setErro] = useState("");
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -147,6 +164,8 @@ export default function KitnetForm({
 
     const { name, value } = e.target;
 
+    setErro("");
+
     if (name === "unidadeId") {
 
       const unidade = unidades.find(
@@ -186,6 +205,17 @@ export default function KitnetForm({
 
     e.preventDefault();
 
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
     onSave({
 
       nome: formData.nome,
@@ -210,6 +240,7 @@ export default function KitnetForm({
 
     <form
       onSubmit={handleSubmit}
+      noValidate
       className="space-y-8"
     >
 
@@ -334,6 +365,12 @@ export default function KitnetForm({
         value={formData.observacoes}
         onChange={handleChange}
       />
+
+      {erro && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+          {erro}
+        </div>
+      )}
 
       <div
         className="

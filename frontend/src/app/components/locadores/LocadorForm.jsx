@@ -3,6 +3,29 @@
 import { useEffect, useState } from "react";
 
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+
+const CAMPOS = [
+  "nome", "documento", "email", "telefone", "banco", "agencia", "conta", "pix",
+  "taxaAdministracao", "multa", "juros", "observacoes",
+];
+
+const SEMPRE_OBRIGATORIOS = new Set(["nome", "documento"]);
+
+const ROTULOS = {
+  nome: "Nome Completo",
+  documento: "CPF/CNPJ",
+  email: "E-mail",
+  telefone: "Telefone",
+  banco: "Banco",
+  agencia: "Agência",
+  conta: "Conta",
+  pix: "Chave PIX",
+  taxaAdministracao: "Taxa de Administração",
+  multa: "Multa",
+  juros: "Juros",
+  observacoes: "Observações",
+};
 
 export default function LocadorForm({
   onSave,
@@ -10,6 +33,8 @@ export default function LocadorForm({
 }) {
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
 
@@ -111,6 +136,8 @@ export default function LocadorForm({
 
     const { name, value } = e.target;
 
+    setErro("");
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -121,6 +148,17 @@ export default function LocadorForm({
   function handleSubmit(e) {
 
     e.preventDefault();
+
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
 
     onSave(formData);
 
@@ -161,6 +199,7 @@ export default function LocadorForm({
 
     <form
       onSubmit={handleSubmit}
+      noValidate
       className="space-y-6"
     >
 
@@ -549,6 +588,12 @@ export default function LocadorForm({
         />
 
       </div>
+
+      {erro && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+          {erro}
+        </div>
+      )}
 
       {/* Rodapé */}
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { KitnetService } from "../../../services/kitnets.service";
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
 
 import DadosPessoaisStep from "./steps/DadosPessoaisStep";
 import KitnetStep from "./steps/KitnetStep";
@@ -220,26 +221,13 @@ export default function InquilinoForm({
 
     const campos = CAMPOS_POR_STEP[numero] || [];
 
-    const faltando = campos.filter((campo) => {
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
-      const exigido = SEMPRE_OBRIGATORIOS.has(campo) || obrigatorios.has(campo);
-
-      if (!exigido) return false;
-
-      const valor = formData[campo];
-
-      return valor === undefined || valor === null || valor === "";
-
-    });
+    const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
 
     if (faltando.length > 0) {
-
-      setErroStep(
-        `Preencha os campos obrigatórios: ${faltando.map((c) => ROTULOS[c] || c).join(", ")}.`
-      );
-
+      setErroStep(mensagemCamposFaltando(faltando));
       return false;
-
     }
 
     setErroStep("");
@@ -304,6 +292,7 @@ export default function InquilinoForm({
 
     <form
       onSubmit={handleSubmit}
+      noValidate
       className="space-y-8"
     >
 

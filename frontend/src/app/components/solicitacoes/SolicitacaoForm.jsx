@@ -8,6 +8,16 @@ import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
 
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
+
+const CAMPOS = ["titulo", "descricao", "prazo", "observacoes"];
+
+const ROTULOS = {
+  titulo: "Título",
+  descricao: "Descrição",
+  prazo: "Prazo",
+  observacoes: "Observações",
+};
 
 export default function SolicitacaoForm({
   onSave,
@@ -15,6 +25,8 @@ export default function SolicitacaoForm({
 }) {
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
+
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
 
@@ -100,6 +112,7 @@ export default function SolicitacaoForm({
   }, [solicitacaoEditando]);
 
   function alterarCampo(e) {
+    setErro("");
     setForm((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -147,6 +160,15 @@ export default function SolicitacaoForm({
 
     e.preventDefault();
 
+    const faltando = obterCamposFaltando(CAMPOS, form, obrigatorios, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
     onSave({
       ...form,
       anexo,
@@ -172,6 +194,7 @@ export default function SolicitacaoForm({
 
     <form
       onSubmit={salvar}
+      noValidate
       className="space-y-8"
     >
 
@@ -340,6 +363,12 @@ export default function SolicitacaoForm({
         />
 
       </div>
+
+      {erro && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+          {erro}
+        </div>
+      )}
 
       <div className="flex justify-end pt-2">
 

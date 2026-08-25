@@ -9,12 +9,40 @@ import Button from "../ui/Button";
 
 import { LocadorService } from "@/services/locadores.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+
+const CAMPOS = [
+  "nome", "cep", "logradouro", "numero", "complemento", "bairro", "cidade", "uf",
+  "locadorId", "kitnets", "aluguel", "vencimento", "dataInicioCobranca", "status", "observacoes",
+];
+
+const SEMPRE_OBRIGATORIOS = new Set(["nome", "cidade", "uf", "locadorId", "kitnets"]);
+
+const ROTULOS = {
+  nome: "Nome da Residência",
+  cep: "CEP",
+  logradouro: "Logradouro",
+  numero: "Número",
+  complemento: "Complemento",
+  bairro: "Bairro",
+  cidade: "Cidade",
+  uf: "UF",
+  locadorId: "Locador",
+  kitnets: "Quantidade de Kitnets",
+  aluguel: "Valor do Aluguel",
+  vencimento: "Dia de Vencimento",
+  dataInicioCobranca: "Data de Início da Cobrança",
+  status: "Status",
+  observacoes: "Observações",
+};
 
 export default function UnitForm({
   unidade,
   onSave,
   onCancel,
 }) {
+
+  const [erro, setErro] = useState("");
 
   const initialState = {
 
@@ -227,6 +255,8 @@ export default function UnitForm({
       value,
     } = e.target;
 
+    setErro("");
+
     setFormData((prev) => ({
 
       ...prev,
@@ -251,6 +281,8 @@ export default function UnitForm({
       (item) => item.id === locadorId
     );
 
+    setErro("");
+
     setFormData((prev) => ({
 
       ...prev,
@@ -267,6 +299,17 @@ export default function UnitForm({
 
     e.preventDefault();
 
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
     onSave(formData);
 
   }
@@ -276,6 +319,8 @@ export default function UnitForm({
     <form
 
       onSubmit={handleSubmit}
+
+      noValidate
 
       className="space-y-10"
 
@@ -597,6 +642,12 @@ export default function UnitForm({
         />
 
       </section>
+
+      {erro && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+          {erro}
+        </div>
+      )}
 
       {/* ===================================== */}
       {/* BOTÕES */}

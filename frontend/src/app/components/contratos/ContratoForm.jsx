@@ -13,6 +13,30 @@ import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
 import { InquilinoService } from "@/services/inquilinos.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+
+const CAMPOS = [
+  "locadorId", "unidadeId", "kitnetId", "inquilinoId", "dataInicio", "dataFim",
+  "valorAluguel", "diaVencimento", "tipoGarantia", "valorCaucao", "indiceReajuste",
+];
+
+const SEMPRE_OBRIGATORIOS = new Set([
+  "locadorId", "unidadeId", "kitnetId", "inquilinoId", "dataInicio", "valorAluguel", "diaVencimento",
+]);
+
+const ROTULOS = {
+  locadorId: "Locador",
+  unidadeId: "Residência",
+  kitnetId: "Kitnet",
+  inquilinoId: "Inquilino",
+  dataInicio: "Data de Criação do Contrato",
+  dataFim: "Data Final do Contrato",
+  valorAluguel: "Valor do Aluguel",
+  diaVencimento: "Dia do Vencimento",
+  tipoGarantia: "Tipo de Garantia",
+  valorCaucao: "Valor da Caução",
+  indiceReajuste: "Índice de Reajuste",
+};
 
 export default function ContratoForm({
   onSave,
@@ -22,6 +46,8 @@ export default function ContratoForm({
 
   const [obrigatorios, setObrigatorios] =
     useState(new Set());
+
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
 
@@ -208,6 +234,8 @@ export default function ContratoForm({
 
     const { name, value } = e.target;
 
+    setErro("");
+
     if (name === "locadorId") {
 
       setFormData((prev) => ({
@@ -298,6 +326,17 @@ export default function ContratoForm({
 
     e.preventDefault();
 
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
     setSalvando(true);
 
     try {
@@ -353,6 +392,7 @@ export default function ContratoForm({
 
     <form
       onSubmit={salvar}
+      noValidate
       className="space-y-8"
     >
 
@@ -811,6 +851,12 @@ export default function ContratoForm({
     resize-none
   `}
 />
+
+{erro && (
+  <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+    {erro}
+  </div>
+)}
 
 <div
   className="
