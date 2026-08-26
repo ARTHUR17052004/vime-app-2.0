@@ -194,6 +194,10 @@ class ClicksignApiV3 {
     return this.request("POST", `/envelopes/${envelopeId}/notifications`, {
       data: {
         type: "notifications",
+        // A API rejeita com "attributes deve ser informado(a)" sem essa
+        // chave, mesmo que "message" seja null (usa o texto padrão da
+        // Clicksign).
+        attributes: { message: null },
       },
     });
 
