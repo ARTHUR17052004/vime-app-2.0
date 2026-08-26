@@ -11,6 +11,7 @@ import {
   Download,
   PenLine,
   Send,
+  RefreshCw,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -24,6 +25,7 @@ export default function ContratoTable({
   onDelete,
   onBaixarPdf,
   onEnviarClicksign,
+  onRenovar,
 }) {
 
   const [menuAberto, setMenuAberto] =
@@ -397,6 +399,37 @@ export default function ContratoTable({
                   </a>
 
                 )}
+
+                <button
+                  onClick={() => {
+
+                    setMenuAberto(null);
+
+                    onRenovar?.(contrato.id);
+
+                  }}
+                  className="
+                    flex
+                    items-center
+                    gap-3
+
+                    w-full
+
+                    px-5
+                    py-3
+
+                    text-emerald-400
+
+                    hover:bg-emerald-500/10
+                    transition
+                  "
+                >
+
+                  <RefreshCw size={18} />
+
+                  Renovar
+
+                </button>
 
                 <button
                   onClick={() => {

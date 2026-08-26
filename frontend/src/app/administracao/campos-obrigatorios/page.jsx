@@ -47,8 +47,6 @@ const MODULOS = [
       { campo: "contatoEmergencia", label: "Contato de Emergência" },
       { campo: "telefoneEmergencia", label: "Telefone de Emergência" },
       { campo: "dataFimContrato", label: "Data Final do Contrato" },
-      { campo: "prazoContrato", label: "Prazo do Contrato" },
-      { campo: "indiceReajuste", label: "Índice de Reajuste" },
       { campo: "tipoGarantia", label: "Tipo de Garantia" },
       { campo: "valorCaucao", label: "Valor da Caução" },
     ],

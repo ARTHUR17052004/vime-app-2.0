@@ -121,7 +121,10 @@ class ClicksignApiV3 {
         attributes: {
           template: {
             key: templateKey,
-            data: dados,
+            // A Clicksign espera "data" como string JSON (não um objeto
+            // aninhado) -- ver exemplo oficial em "Criar Documento por
+            // Modelo" na documentação da API v3.
+            data: JSON.stringify(dados),
           },
           filename: nomeArquivo,
         },

@@ -201,6 +201,33 @@ export default function ContratosPage() {
     }
 
   }
+
+  async function renovarContrato(id) {
+
+    const confirmar = window.confirm(
+      "Renovar este contrato por mais 4 meses a partir de hoje?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+
+      await ContratoService.renovar(id);
+
+      await carregarContratos();
+
+    } catch (error) {
+
+      console.error(
+        "Erro ao renovar contrato:",
+        error
+      );
+
+      alert(error.message || "Erro ao renovar contrato.");
+
+    }
+
+  }
     const contratosFiltrados = contratos.filter(
     (contrato) => {
 
@@ -384,6 +411,7 @@ export default function ContratosPage() {
                   onDelete={excluirContrato}
                   onBaixarPdf={gerarPdfContrato}
                   onEnviarClicksign={setDemonstrativoContratoId}
+                  onRenovar={renovarContrato}
                 />
 
                 <ContratoClicksignOrfaos contratosLocais={contratos} />

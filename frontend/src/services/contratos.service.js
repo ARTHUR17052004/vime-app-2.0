@@ -63,4 +63,10 @@ export const ContratoService = {
       body: JSON.stringify({ signatariosExtras }),
     });
   },
+
+  renovar(id) {
+    return api(`/contratos/${id}/renovar`, {
+      method: "PATCH",
+    });
+  },
 };

@@ -88,11 +88,15 @@ const rotulosPadrao = {
 // Lança erro listando os campos configurados como obrigatórios para o
 // módulo que vieram vazios em `dados`. Não faz nada se o módulo não
 // tiver nenhuma configuração salva (comportamento atual, sem trava).
-const validar = async (modulo, dados) => {
+const validar = async (modulo, dados, opcoes = {}) => {
+
+  const { ignorar = [] } = opcoes;
 
   const configurados = await listarPorModulo(modulo);
 
-  const obrigatorios = configurados.filter((c) => c.obrigatorio);
+  const obrigatorios = configurados.filter(
+    (c) => c.obrigatorio && !ignorar.includes(c.campo)
+  );
 
   if (obrigatorios.length === 0) return;
 

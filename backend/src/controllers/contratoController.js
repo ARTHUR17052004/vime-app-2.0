@@ -129,8 +129,7 @@ const encerrar = async (req, res) => {
 const renovar = async (req, res) => {
 
   const contrato = await contratoService.renovar(
-    req.params.id,
-    req.body
+    req.params.id
   );
 
   return res.json({

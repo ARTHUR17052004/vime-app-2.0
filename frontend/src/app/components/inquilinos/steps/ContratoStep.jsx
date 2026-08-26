@@ -45,27 +45,13 @@ export default function ContratoStep({
         />
       </Campo>
 
-      <Campo label="Prazo do Contrato (meses)" obrigatorio={obrigatorios.has("prazoContrato")}>
+      <Campo label="Prazo do Contrato (meses)">
         <input
           type="number"
-          min={1}
           name="prazoContrato"
-          placeholder="Ex: 12"
           value={formData.prazoContrato}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("prazoContrato")}
-        />
-      </Campo>
-
-      <Campo label="Índice de Reajuste" obrigatorio={obrigatorios.has("indiceReajuste")}>
-        <input
-          name="indiceReajuste"
-          placeholder="Ex: IGPM, IPCA"
-          value={formData.indiceReajuste}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("indiceReajuste")}
+          className={`${inputStyle} opacity-70 cursor-not-allowed`}
+          readOnly
         />
       </Campo>
 

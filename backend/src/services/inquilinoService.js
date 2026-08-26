@@ -133,6 +133,10 @@ const criar = async (dados) => {
           indiceReajuste: inquilino.indiceReajuste || null,
           tipoGarantia: inquilino.tipoGarantia || null,
           valorCaucao: inquilino.valorCaucao || null,
+          // Índice de Reajuste não tem mais campo na etapa 3 do cadastro
+          // de inquilino -- não trava a criação automática do contrato
+          // por causa dele, mesmo que "Contratos" o exija.
+          ignorarObrigatorios: ['indiceReajuste'],
         });
 
         contratoId = contrato.id;

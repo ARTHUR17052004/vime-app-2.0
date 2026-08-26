@@ -128,19 +128,19 @@ const criar = async (dados) => {
   // payload antes do create, se vier.
   delete dados.signatariosExtras;
 
-  // Contratos gerados automaticamente a partir de "Novo Inquilino" pulam
-  // essa validação de propósito: agora existe o demonstrativo + envio
-  // manual à Clicksign depois, então um campo como Tipo de Garantia
-  // faltando não deve travar a criação do inquilino/contrato inteiro no
-  // meio do cadastro -- o usuário pode completar isso editando o
-  // contrato antes de enviar. Quem cria contrato pela tela "Novo
-  // Contrato" direto continua vendo a validação normalmente (o
-  // formulário já mostra os asteriscos e valida antes de enviar).
+  // O cadastro de Inquilino já exige na etapa 3 os mesmos campos que
+  // "Contratos" marca como obrigatórios, então o contrato automático
+  // normalmente chega aqui completo. `ignorarObrigatorios` cobre o caso
+  // de um campo (ex.: Índice de Reajuste) não ter mais entrada nenhuma
+  // naquele formulário -- não faz sentido travar por ele; dá pra
+  // completar depois editando o contrato.
   const pularValidacaoObrigatorios = dados.pularValidacaoObrigatorios === true;
+  const ignorarObrigatorios = dados.ignorarObrigatorios || [];
   delete dados.pularValidacaoObrigatorios;
+  delete dados.ignorarObrigatorios;
 
   if (!pularValidacaoObrigatorios) {
-    await campoObrigatorioService.validar('contrato', dados);
+    await campoObrigatorioService.validar('contrato', dados, { ignorar: ignorarObrigatorios });
   }
 
   if (!dados.dataInicio) {
@@ -583,15 +583,29 @@ const encerrar = async (id) => {
 
 };
 
-const renovar = async (id, dados) => {
+// Prazo padrão de renovação: sempre 4 meses a partir do dia em que o
+// usuário clica em "Renovar" (não a partir do fim do contrato anterior
+// -- combinado com o usuário: a renovação conta da data do clique).
+const MESES_RENOVACAO = 4;
+
+const renovar = async (id) => {
 
   const anterior = await prisma.contrato.findUnique({
     where: { id }
   });
 
+  if (!anterior) {
+    throw new Error('Contrato não encontrado.');
+  }
+
+  const novaDataFim = somarMeses(new Date(), MESES_RENOVACAO);
+
   const contrato = await prisma.contrato.update({
     where: { id },
-    data: dados
+    data: {
+      dataFim: novaDataFim,
+      status: 'ATIVO',
+    }
   });
 
   await auditoriaService.registrar({
@@ -695,7 +709,12 @@ const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
     envelopeId,
     templateKey,
     dadosModelo,
-    `Contrato - ${slugificarNomeArquivo(contrato.inquilino.nome)}.pdf`
+    // A Clicksign exige extensão .docx pro filename de documento gerado
+    // por Modelo (o Modelo em si é um .docx com {{placeholders}}) --
+    // usar .pdf aqui é rejeitado com "filename não está em um formato
+    // válido". O arquivo final que os signatários recebem/assinam
+    // continua sendo processado normalmente pela Clicksign.
+    `Contrato-${slugificarNomeArquivo(contrato.inquilino.nome)}.docx`
   );
 
   if (!documentId) {
