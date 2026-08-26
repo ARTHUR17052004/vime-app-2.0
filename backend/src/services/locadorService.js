@@ -48,7 +48,10 @@ const criar = async (dados) => {
   });
 };
 
-const atualizar = (id, dados) => {
+const atualizar = async (id, dados) => {
+
+  await campoObrigatorioService.validar('locador', dados);
+
   return prisma.locador.update({
     where: {
       id,

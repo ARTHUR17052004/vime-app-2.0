@@ -169,6 +169,8 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
+  await campoObrigatorioService.validar('inquilino', dados);
+
   const inquilino = await prisma.inquilino.update({
     where: { id },
     data: dados

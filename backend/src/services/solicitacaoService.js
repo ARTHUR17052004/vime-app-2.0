@@ -69,6 +69,8 @@ const criar = async (dados, autor) => {
 
 const atualizar = async (id, dados) => {
 
+  await campoObrigatorioService.validar('solicitacao', dados);
+
   if (dados.data) dados.data = new Date(dados.data);
   if (dados.prazo) dados.prazo = new Date(dados.prazo);
 

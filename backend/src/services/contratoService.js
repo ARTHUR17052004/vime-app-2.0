@@ -378,6 +378,8 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
+  await campoObrigatorioService.validar('contrato', dados);
+
   if (dados.dataInicio !== undefined) {
     if (!dados.dataInicio) {
       throw new Error('Data de início do contrato é obrigatória.');

@@ -94,10 +94,15 @@ const criar = async (dados) => {
 
 };
 
-const atualizar = (id, dados) => {
+const atualizar = async (id, dados) => {
+
+  dados = sanitizar(dados);
+
+  await campoObrigatorioService.validar('residencia', dados);
+
   return prisma.unidade.update({
     where: { id },
-    data: sanitizar(dados)
+    data: dados
   });
 };
 

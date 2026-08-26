@@ -55,7 +55,10 @@ const criar = async (dados) => {
 
 };
 
-const atualizar = (id, dados) => {
+const atualizar = async (id, dados) => {
+
+  await campoObrigatorioService.validar('kitnet', dados);
+
   return prisma.kitnet.update({
     where: { id },
     data: dados
