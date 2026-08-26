@@ -10,6 +10,7 @@ import {
   Trash2,
   Download,
   PenLine,
+  Send,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -22,6 +23,7 @@ export default function ContratoTable({
   onEdit,
   onDelete,
   onBaixarPdf,
+  onEnviarClicksign,
 }) {
 
   const [menuAberto, setMenuAberto] =
@@ -330,6 +332,41 @@ export default function ContratoTable({
                   Baixar PDF
 
                 </button>
+
+                {!contrato.clicksignEnvelopeId && (
+
+                  <button
+                    onClick={() => {
+
+                      setMenuAberto(null);
+
+                      onEnviarClicksign?.(contrato.id);
+
+                    }}
+                    className="
+                      flex
+                      items-center
+                      gap-3
+
+                      w-full
+
+                      px-5
+                      py-3
+
+                      text-sky-400
+
+                      hover:bg-sky-500/10
+                      transition
+                    "
+                  >
+
+                    <Send size={18} />
+
+                    Enviar à Clicksign
+
+                  </button>
+
+                )}
 
                 {contrato.clicksignSigningUrl && (
 

@@ -158,7 +158,9 @@ model Contrato {
   status         String    @default("PENDENTE")
   observacoes    String?
   clicksignDocumentKey String?
+  clicksignEnvelopeId  String?
   clicksignSigningUrl  String?
+  clicksignEnviadoEm   DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
@@ -559,6 +561,7 @@ model Configuracao {
 
   clicksignToken        String?
   clicksignAmbiente     String?  @default("sandbox")
+  clicksignTemplateKey  String?
 
   whatsappToken    String?
   whatsappNumero   String?

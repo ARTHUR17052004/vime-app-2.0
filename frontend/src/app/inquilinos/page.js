@@ -18,6 +18,7 @@ import InquilinoTable from "../components/inquilinos/InquilinoTable";
 import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
 import ExplicacaoInquilinoModal from "../components/inquilinos/ExplicacaoInquilinoModal";
+import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
 
 import { InquilinoService } from "../../services/inquilinos.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
@@ -38,6 +39,9 @@ export default function InquilinosPage() {
 
   const [salvandoInquilino, setSalvandoInquilino] =
     useState(false);
+
+  const [demonstrativoContratoId, setDemonstrativoContratoId] =
+    useState(null);
 
   const [loading, setLoading] =
     useState(true);
@@ -133,11 +137,12 @@ export default function InquilinosPage() {
 
         });
 
-        const avisoContrato =
-          (resposta?.data || resposta)?.avisoContrato;
+        const dadosResposta = resposta?.data || resposta;
 
-        if (avisoContrato) {
-          alert(avisoContrato);
+        if (dadosResposta?.avisoContrato) {
+          alert(dadosResposta.avisoContrato);
+        } else if (dadosResposta?.contratoId) {
+          setDemonstrativoContratoId(dadosResposta.contratoId);
         }
 
       }
@@ -442,7 +447,7 @@ export default function InquilinosPage() {
                 `}
               >
                 {gerarContratoAutomatico
-                  ? "O contrato será gerado e enviado para assinatura automaticamente ao salvar."
+                  ? "O contrato será gerado automaticamente ao salvar. Você vai poder conferir o demonstrativo antes de enviar para assinatura."
                   : "Este cadastro não vai gerar contrato automático."}
               </p>
 
@@ -455,6 +460,12 @@ export default function InquilinosPage() {
             />
 
           </InquilinoModal>
+
+          <ContratoDemonstrativoModal
+            open={!!demonstrativoContratoId}
+            contratoId={demonstrativoContratoId}
+            onClose={() => setDemonstrativoContratoId(null)}
+          />
 
         </PageContainer>
 

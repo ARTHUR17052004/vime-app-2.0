@@ -25,6 +25,7 @@ import ContratoStats from "../components/contratos/ContratoStats";
 import ContratoFilters from "../components/contratos/ContratoFilters";
 import ContratoTable from "../components/contratos/ContratoTable";
 import ContratoClicksignOrfaos from "../components/contratos/ContratoClicksignOrfaos";
+import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
@@ -42,6 +43,9 @@ export default function ContratosPage() {
 
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
+
+  const [demonstrativoContratoId, setDemonstrativoContratoId] =
+    useState(null);
 
   const [contratos, setContratos] =
     useState([]);
@@ -110,7 +114,7 @@ export default function ContratosPage() {
 
         const contratoCriado = criado.data || criado;
 
-        gerarPdfContrato(contratoCriado.id);
+        setDemonstrativoContratoId(contratoCriado.id);
 
       }
 
@@ -379,6 +383,7 @@ export default function ContratosPage() {
                   onEdit={editarContrato}
                   onDelete={excluirContrato}
                   onBaixarPdf={gerarPdfContrato}
+                  onEnviarClicksign={setDemonstrativoContratoId}
                 />
 
                 <ContratoClicksignOrfaos contratosLocais={contratos} />
@@ -426,6 +431,13 @@ export default function ContratosPage() {
           />
 
         </ContratoModal>
+
+        <ContratoDemonstrativoModal
+          open={!!demonstrativoContratoId}
+          contratoId={demonstrativoContratoId}
+          onClose={() => setDemonstrativoContratoId(null)}
+          onEnviado={carregarContratos}
+        />
 
       </PageContainer>
 

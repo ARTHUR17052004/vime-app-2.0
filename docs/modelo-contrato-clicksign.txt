@@ -1,0 +1,206 @@
+CONTRATO DE LOCAÇÃO DE IMÓVEL RESIDENCIAL
+
+1. QUADRO RESUMO
+
+ITEM ESPECIFICAÇÃO DETALHAMENTO DAS INFORMAÇÕES
+1 Locadora {{locador_nome}} {{locador_cpf}} {{locador_cnpj}}
+Endereço: {{locador_endereco}}
+2 Locatário {{inquilino_nome}}
+CPF: {{inquilino_cpf}}
+3 Imóvel Locado Kitnet {{kitnet_nome}} - Unidade {{nome_unidade}}
+Endereço: {{unidade_logradouro}}, CEP: {{cep_unidade}}
+4 Prazo de Locação {{inquilino_prazo}}
+5 Data de Início {{inquilino_inicio_do_contrato}}
+6 Data de Término {{inquilino_fim_do_contrato}}
+7 Dia do Pagamento Dia {{unidade_dia_do_vencimento}} de cada mês subsequente
+8 Valor do Aluguel R$ {{unidade_valor_do_aluguel}}
+9 Limite de Água Incluso Até R$ 30,00 (trinta reais) mensais
+10 Limite de Energia Incluso Até R$ 80,00 (oitenta reais) mensais
+11 Taxa de Pintura R$ 600,00 (seiscentos reais) pagos na desocupação
+12 Taxa de Faxina R$ 80,00 (oitenta reais) pagos na desocupação
+13 Multa por Portão Aberto R$ 230,00 (duzentos e trinta reais) por ocorrência
+14 Termo de Vistoria ANEXO - I
+15 Termo De Entrega De Chaves ANEXO - II
+16 Declaração De Ciência E Aceite ANEXO - III
+
+2. IDENTIFICAÇÃO DAS PARTES
+
+{{locador_nome}}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{locador_cnpj}}, com endereço em {{locador_endereco}}.
+LOCATÁRIO: {{inquilino_nome}}, brasileiro(a), profissão e estado civil ignorados, portador(a) do RG nº {{inquilino_rg}} e inscrito(a) no CPF sob o nº {{inquilino_cpf}}.
+As partes acima qualificadas celebram entre si o presente Contrato de Locação Residencial, regido pela Lei nº 8.245, de 18 de outubro de 1991, mediante as cláusulas e condições seguintes:
+
+3. CLÁUSULA 1 – DO OBJETO
+
+O objeto deste contrato é a locação do imóvel residencial de propriedade da LOCADORA, especificado no Item 3 do Quadro Resumo.
+O imóvel encontra-se em condições adequadas de habitabilidade e destina-se exclusivamente ao uso residencial do LOCATÁRIO, sendo vedada qualquer alteração de sua destinação, bem como a sublocação, cessão ou empréstimo do imóvel, total ou parcialmente, sem o consentimento prévio e por escrito da LOCADORA.
+
+4. CLÁUSULA 2 – DA ENTREGA
+
+A posse do imóvel será entregue ao LOCATÁRIO na data de início especificada no Quadro Resumo, aceitando o LOCATÁRIO as condições e o estado de conservação do bem conforme Termo de Vistoria e Entrega de Chaves, que passa a fazer parte integrante deste instrumento.
+
+5. CLÁUSULA 3 – DO PRAZO DE LOCAÇÃO E RENOVAÇÃO
+
+O prazo de locação é aquele definido no Quadro Resumo, com início e término nas datas ali indicadas.
+Parágrafo Primeiro: Se o LOCATÁRIO devolver o imóvel antes do prazo ajustado, deverá comunicar a desocupação com antecedência mínima de 30 (trinta) dias e pagará à LOCADORA a multa compensatória correspondente a 3 (três) meses de aluguel vigente.
+Parágrafo Segundo: O contrato será renovado automaticamente a cada ciclo igual ao prazo de locação inicial, independentemente de notificação prévia, ressalvado o direito de qualquer das partes de comunicar a intenção de retomada ou devolução do imóvel com antecedência mínima de 30 (trinta) dias do término de cada período.
+Parágrafo Terceiro: Em caso de alienação ou oneração do imóvel durante a vigência do contrato, fica garantido ao LOCATÁRIO o direito de preferência nos termos da legislação vigente. Caso ocorra a desapropriação do imóvel, a LOCADORA ficará desobrigada de todas as cláusulas deste contrato.
+Parágrafo Quarto: As partes convencionam que, ocorrendo a renovação automática ou estando o contrato vigente no mês de agosto, o valor do aluguel será reajustado pela variação acumulada do IGP-M (Índice Geral de Preços de Mercado) ou, na sua falta, pelo IPCA (Índice Nacional de Preços ao Consumidor Amplo).
+
+6. CLÁUSULA 4 – DA DESTINAÇÃO DO IMÓVEL LOCADO
+
+O imóvel destina-se única e exclusivamente à moradia do LOCATÁRIO, sendo vedada a sublocação, cessão ou empréstimo do imóvel, no todo ou em parte, sem o consentimento prévio e por escrito da LOCADORA.
+Parágrafo Primeiro: O LOCATÁRIO é responsável pela conservação e manutenção do imóvel. Caso sejam necessários reparos, estes deverão ser realizados por profissional indicado pela LOCADORA e cobrados do LOCATÁRIO de forma destacada do aluguel.
+Parágrafo Segundo: O não pagamento imediato dos custos de reparos de responsabilidade do LOCATÁRIO ensejará a rescisão imediata do contrato, com a aplicação das penalidades previstas neste instrumento.
+
+7. CLÁUSULA 5 – DO ALUGUEL E ENCARGOS
+
+O valor do aluguel mensal é aquele estipulado no Quadro Resumo, devendo ser pago até a data de vencimento ali indicada.
+Parágrafo Primeiro: Estão incluídos no valor do aluguel os serviços de água, energia elétrica e internet por rede sem fio (wi-fi), observados os limites de consumo mensal estabelecidos no Quadro Resumo. O LOCATÁRIO obriga-se a pagar a diferença que exceder os referidos limites no prazo de 5 (cinco) dias do vencimento da respectiva fatura.
+Parágrafo Segundo: O atraso no pagamento do aluguel ou encargos sujeitará o LOCATÁRIO ao pagamento de multa moratória de 10% (dez por cento) sobre o valor do débito, juros de mora de 1% (um por cento) ao mês e correção monetária pelo IGP-M.
+Parágrafo Terceiro: Em caso de inadimplemento, a LOCADORA fica autorizada a realizar a inscrição do nome do LOCATÁRIO nos órgãos de proteção ao crédito (SPC e SERASA) a partir do dia subsequente ao do vencimento, sem necessidade de aviso prévio.
+Parágrafo Quarto: As partes convencionam que, em caso de atraso no pagamento, a LOCADORA poderá suspender o fornecimento de água, energia elétrica e internet do imóvel até a quitação dos débitos. Após o pagamento integral, a LOCADORA restabelecerá os serviços em até 48 (quarenta e oito) horas.
+
+8. CLÁUSULA 6 – DA FORMA DE PAGAMENTO
+
+Todo e qualquer pagamento decorrente deste contrato será realizado exclusivamente por meio de boleto bancário emitido e enviado ao LOCATÁRIO, não sendo aceita outra modalidade de pagamento.
+Parágrafo Primeiro: Eventual pagamento realizado por meio diverso não será considerado válido, sujeitando o LOCATÁRIO à obrigação de realizar novo pagamento por boleto bancário.
+Parágrafo Segundo: O LOCATÁRIO obriga-se a solicitar o envio do boleto bancário à LOCADORA com antecedência mínima de 2 (dois) dias da data de vencimento.
+
+9. CLÁUSULA 7 – DAS BENFEITORIAS
+
+O LOCATÁRIO poderá realizar benfeitorias úteis no imóvel, desde que previamente autorizadas por escrito pela LOCADORA.
+Parágrafo Primeiro: Ao término da locação, todas as benfeitorias realizadas incorporar-se-ão ao imóvel, sem que assista ao LOCATÁRIO qualquer direito de retenção, indenização ou compensação.
+Parágrafo Segundo: A LOCADORA poderá exigir a remoção das benfeitorias realizadas, correndo por conta exclusiva do LOCATÁRIO os custos de retirada e de recomposição do imóvel ao estado original verificado na vistoria inicial.
+
+10. CLÁUSULA 8 – DA MULTA CONTRATUAL
+
+A infração de qualquer cláusula ou condição deste contrato sujeitará a parte infratora ao pagamento de multa compensatória equivalente a 3 (três) meses de aluguel vigente à época da infração, calculada proporcionalmente ao tempo restante do contrato, sem prejuízo da rescisão de pleno direito da locação e da cobrança de perdas e danos adicionais.
+
+11. CLÁUSULA 9 – DAS OBRIGAÇÕES DO LOCATÁRIO
+
+O LOCATÁRIO obriga-se a cumprir as seguintes obrigações, além das demais previstas em lei:
+Parágrafo Primeiro: As partes convencionam que a LOCADORA poderá requerer, a qualquer momento, a vistoria do imóvel, devendo o LOCATÁRIO permitir o livre acesso ao bem, além das vistorias mensais ordinárias que serão registradas por termo de vistoria assinado pelo LOCATÁRIO.
+Parágrafo Segundo: Comunicar imediatamente à LOCADORA qualquer avaria ou necessidade de reparo no imóvel, autorizando a execução dos serviços necessários, cujos custos serão cobrados do LOCATÁRIO caso decorram de uso inadequado.
+Parágrafo Terceiro: Manter o imóvel, bem como suas redes elétrica e hidráulica, em perfeito estado de conservação e funcionamento.
+Parágrafo Quarto: Devolver o imóvel nas mesmas condições em que o recebeu, livre de objetos e pertences pessoais, com a pintura nova realizada pela LOCADORA mediante o pagamento da taxa de pintura especificada no Quadro Resumo.
+Parágrafo Quinto: Responsabilizar-se pela guarda das chaves do imóvel. Em caso de perda, os custos para confecção de novas chaves e serviços de chaveiro correrão por conta exclusiva do LOCATÁRIO.
+Parágrafo Sexto: Pagar a taxa de faxina especificada no Quadro Resumo no momento da desocupação do imóvel, ou entregá-lo em perfeitas condições de limpeza.
+Parágrafo Sétimo: A rescisão do contrato e a cessação da obrigação de pagar o aluguel somente ocorrerão com a efetiva entrega das chaves à LOCADORA, sendo o aluguel cobrado proporcionalmente até essa data.
+Parágrafo Oitavo: O LOCATÁRIO declara-se ciente de que o serviço de internet é fornecido por mera cortesia, não integrando o objeto do contrato, razão pela qual a LOCADORA não responde por interrupções, oscilações ou qualidade da conexão, podendo suspender o serviço a qualquer tempo, sem aviso prévio.
+Parágrafo Nono: Manter o portão de acesso coletivo devidamente trancado, sob pena de aplicação da multa por descumprimento de norma de segurança especificada no Quadro Resumo.
+Parágrafo Décimo: A caixa de correios é de uso coletivo, não respondendo a LOCADORA por extravios, danos ou perdas de correspondências.
+
+12. CLÁUSULA 10 – DA REMOÇÃO DE PERTENCES E GARANTIA
+
+Parágrafo Primeiro: As partes convencionam que, persistindo o atraso no pagamento do aluguel ou de qualquer encargo contratual por prazo igual ou superior a 30 (trinta) dias, a LOCADORA fica expressamente autorizada a ingressar no imóvel, realizar a desocupação administrativa e remover todos os pertences pessoais e bens móveis do LOCATÁRIO, conduzindo-os para o depósito da LOCADORA.
+Parágrafo Segundo: Os pertences removidos nos termos desta cláusula somente serão devolvidos ao LOCATÁRIO mediante a quitação integral de todos os débitos pendentes, acrescidos dos encargos contratuais e das despesas decorrentes da remoção e do depósito dos bens.
+Parágrafo Terceiro: Caso transcorram 30 (trinta) dias contados da data da remoção sem que o LOCATÁRIO realize o pagamento integral do débito, os pertences removidos serão dados em pagamento à LOCADORA, operando-se a transferência de propriedade para amortização ou quitação da dívida, sem prejuízo da cobrança de eventual saldo remanescente.
+
+13. CLÁUSULA 11 – DAS PROIBIÇÕES
+
+O descumprimento de qualquer das proibições desta cláusula ensejará a rescisão imediata do contrato e a obrigação de desocupação voluntária do imóvel no prazo de 24 (vinte e quatro) horas.
+Parágrafo Primeiro: É expressamente proibido armazenar, guardar ou utilizar no imóvel ou em suas áreas comuns substâncias químicas, tóxicas, entorpecentes ou substâncias ilícitas nos termos da Lei nº 11.343/2006, sob pena de rescisão contratual imediata e denúncia às autoridades competentes.
+Parágrafo Segundo: A locação possui caráter estritamente unipessoal, sendo vedada a residência ou permanência de terceiros, inclusive crianças, em razão das dimensões reduzidas do imóvel, que não comportam condições adequadas de habitabilidade para mais de uma pessoa.
+Parágrafo Terceiro: É expressamente proibida a manutenção, permanência ou guarda de animais de estimação de qualquer porte no imóvel, sob pena de rescisão contratual imediata.
+
+14. CLÁUSULA 12 – DISPOSIÇÕES GERAIS
+
+Parágrafo Único: O inadimplemento do aluguel ou de seus encargos autoriza a LOCADORA a pleitear a desocupação liminar do imóvel por meio de medida judicial, sem prejuízo da cobrança das multas e demais encargos contratuais.
+
+15. CLÁUSULA 13 – DA VISTORIA DO IMÓVEL
+
+As partes convencionam que a LOCADORA poderá requerer, a qualquer momento, a vistoria do imóvel, devendo o LOCATÁRIO permitir o livre acesso ao bem.
+
+16. CLÁUSULA 14 – DO FORO
+
+As partes, sendo pessoas capazes e tendo negociado livremente o presente instrumento, elegem, de forma irrevogável e irretratável, para dirimir eventuais dúvidas resultantes deste contrato, o foro da Comarca de Goiânia, GO, com a expressa renúncia de qualquer outro, por mais privilegiado que possa ser.
+As partes reconhecem como válidas e eficazes as assinaturas eletrônicas previstas em lei que garantam autenticidade, integridade e não repúdio, nos termos da Medida Provisória nº 2.200-2/2001, constituindo título executivo extrajudicial, nos termos do art. 784, §4º, do Código de Processo Civil.
+E, por estarem assim justas e contratadas, assinam o presente instrumento em (02) duas vias de igual teor, na presença das testemunhas abaixo ou eletronicamente, constituindo título executivo extrajudicial, nos termos dos Artigos 784 III e §4º, do Código de Processo Civil.
+
+Goiânia, GO, {{inquilino_inicio_do_contrato}}.
+
+{{locador_nome}}
+Locadora
+
+{{inquilino_nome}}
+Locatário
+
+Testemunhas:
+
+________________________________________
+Nome:
+CPF:
+________________________________________
+Nome:
+CPF:
+
+
+ANEXO – I
+
+16. TERMO DE VISTORIA PARA FINS DE LOCAÇÃO RESIDENCIAL
+
+LOCADORA: {{locador_nome}}.
+LOCATÁRIO: {{inquilino_nome}}.
+IMÓVEL: Kitnet {{kitnet_nome}} - Unidade {{nome_unidade}}, localizada em {{unidade_logradouro}}, CEP: {{cep_unidade}}.
+
+Pelo presente instrumento, as partes declaram que vistoriaram o imóvel objeto da locação e constataram que este se encontra em bom estado de conservação, com todos os seus pertences, utensílios e acessórios em perfeito estado de funcionamento, comprometendo-se o LOCATÁRIO a devolvê-lo nas mesmas condições ao término do contrato.
+
+Pintura: Todas as paredes internas e tetos foram pintados com tinta semibrilho na cor branca.
+Trincos e Fechaduras: Em bom estado de conservação e funcionamento, com todas as respectivas chaves.
+Parte Hidráulica: Em bom estado de conservação e funcionamento, sem vazamentos.
+Pisos e Azulejos: Em bom estado de conservação.
+Parte Elétrica: Em bom estado de conservação e funcionamento.
+Vidraças: Vidros de janelas e basculantes sem trincas.
+
+Goiânia, {{inquilino_inicio_do_contrato}}.
+
+{{locador_nome}}
+Locadora
+
+{{inquilino_nome}}
+Locatário
+
+
+ANEXO – II
+
+17. TERMO DE ENTREGA DE CHAVES
+
+O LOCATÁRIO declara que recebeu as chaves do imóvel situado em {{unidade_logradouro}}, CEP: {{cep_unidade}}, Kitnet {{kitnet_nome}}, passando a exercer a posse direta do imóvel a partir desta data, podendo usá-lo e fruí-lo nos termos do contrato de locação.
+
+Goiânia, {{inquilino_inicio_do_contrato}}.
+
+_______________________________________
+{{inquilino_nome}}
+Locatário
+
+
+ANEXO – III
+
+18. DECLARAÇÃO DE CIÊNCIA E ACEITE
+
+O LOCATÁRIO declara plena ciência e concordância de que a LOCADORA, em caso de inadimplência no pagamento do aluguel ou encargos, procederá ao bloqueio e à suspensão do fornecimento dos serviços de água, energia elétrica e internet do imóvel até a efetiva quitação dos débitos.
+Declara, ainda, ciência de que, após a comprovação do pagamento integral, a LOCADORA terá o prazo de até 48 (quarenta e oito) horas para restabelecer o fornecimento dos serviços suspensos.
+As partes convencionam que, persistindo o atraso no pagamento do aluguel ou de qualquer encargo contratual por prazo igual ou superior a 30 (trinta) dias, a LOCADORA fica expressamente autorizada a ingressar no imóvel, realizar a desocupação administrativa e remover todos os pertences pessoais e bens móveis do LOCATÁRIO, conduzindo-os para o depósito da LOCADORA.
+
+Goiânia, {{inquilino_inicio_do_contrato}}.
+
+_______________________________________
+{{inquilino_nome}}
+Locatário
+
+
+NOTA PROMISSÓRIA
+
+Número: 001
+Vencimento: {{nota_promissoria_vencimento}}
+Valor: R$ {{nota_promissoria_valor}} ({{nota_promissoria_valor_extenso}})
+
+No dia {{inquilino_inicio_do_contrato}}, pagará por esta única via de nota promissória, na praça de Goiânia, Estado de Goiás, a {{locador_nome}}, inscrita no CNPJ sob o nº {{locador_cnpj}}, ou à sua ordem, a quantia de R$ {{nota_promissoria_valor}} ({{nota_promissoria_valor_extenso}}) em moeda corrente nacional.
+Goiânia, {{inquilino_inicio_do_contrato}}.
+
+________________________________________
+{{inquilino_nome}}
+Emitente
+CPF: {{inquilino_cpf}}
+Endereço: {{unidade_logradouro}}
+CEP: {{cep_unidade}}

@@ -24,6 +24,7 @@ export default function TokenCard() {
   const [dados, setDados] = useState({
     ambiente: "sandbox",
     apiKey: "",
+    templateKey: "",
   });
 
   const [statusApi, setStatusApi] = useState({ configurado: false, online: false });
@@ -50,6 +51,7 @@ export default function TokenCard() {
         setDados({
           ambiente: configuracao.clicksignAmbiente || "sandbox",
           apiKey: configuracao.clicksignToken || "",
+          templateKey: configuracao.clicksignTemplateKey || "",
         });
       }
 
@@ -78,6 +80,7 @@ export default function TokenCard() {
       const payload = {
         clicksignAmbiente: dados.ambiente,
         clicksignToken: dados.apiKey || null,
+        clicksignTemplateKey: dados.templateKey || null,
       };
 
       if (configuracaoId) {
@@ -259,6 +262,28 @@ export default function TokenCard() {
             </button>
 
           </div>
+
+        </div>
+
+        <div>
+
+          <label className="mb-2 block text-sm text-slate-300">
+
+            Chave do Modelo de Contrato (Clicksign)
+
+          </label>
+
+          <input
+            value={dados.templateKey}
+            onChange={(e) => alterar("templateKey", e.target.value)}
+            disabled={carregando}
+            placeholder="Ex: 39f9f558-b0ba-4020-968e-9488c673dc67"
+            className="w-full rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-3 text-[var(--text)] outline-none"
+          />
+
+          <p className="mt-2 text-xs text-slate-400">
+            Código do modelo cadastrado em Modelos na Clicksign, usado para gerar o contrato automaticamente com os dados de cada locação.
+          </p>
 
         </div>
 

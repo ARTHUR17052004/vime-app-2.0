@@ -24,4 +24,6 @@ router.patch('/:id/encerrar', contratoController.encerrar);
 
 router.patch('/:id/renovar', contratoController.renovar);
 
+router.post('/:id/enviar-clicksign', contratoController.enviarClicksign);
+
 module.exports = router;

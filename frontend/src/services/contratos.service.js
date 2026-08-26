@@ -56,4 +56,11 @@ export const ContratoService = {
       method: "DELETE",
     });
   },
+
+  enviarClicksign(id, signatariosExtras = []) {
+    return api(`/contratos/${id}/enviar-clicksign`, {
+      method: "POST",
+      body: JSON.stringify({ signatariosExtras }),
+    });
+  },
 };

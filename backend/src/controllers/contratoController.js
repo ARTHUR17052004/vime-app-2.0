@@ -1,6 +1,6 @@
 const contratoService = require('../services/contratoService');
 const contratoDocumentoService = require('../services/contratoDocumentoService');
-const ClicksignApi = require('../services/ClicksignApi');
+const ClicksignApiV3 = require('../services/ClicksignApiV3');
 
 const listar = async (req, res) => {
 
@@ -47,11 +47,12 @@ const baixarPdf = async (req, res) => {
 
   // Se já foi enviado pra Clicksign, tenta baixar o arquivo real de lá
   // (com a autenticação/assinatura deles aplicada). Se não der — ainda
-  // não foi assinado, ou algo falhou — cai pro PDF gerado pelo VIME.
-  if (contrato.clicksignDocumentKey) {
+  // não foi assinado, ou algo falhou — cai pro PDF gerado pelo VIME
+  // (usado também como "demonstrativo" antes do envio).
+  if (contrato.clicksignEnvelopeId && contrato.clicksignDocumentKey) {
 
     try {
-      buffer = await ClicksignApi.baixarArquivoDocumento(contrato.clicksignDocumentKey);
+      buffer = await ClicksignApiV3.baixarArquivoDocumento(contrato.clicksignEnvelopeId, contrato.clicksignDocumentKey);
       assinado = true;
     } catch (err) {
       console.error('Não foi possível baixar o arquivo da Clicksign, usando o gerado pelo VIME:', err.message);
@@ -139,6 +140,20 @@ const renovar = async (req, res) => {
 
 };
 
+const enviarClicksign = async (req, res) => {
+
+  const resultado = await contratoService.enviarParaClicksign(
+    req.params.id,
+    req.body?.signatariosExtras
+  );
+
+  return res.json({
+    success: true,
+    data: resultado
+  });
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -147,5 +162,6 @@ module.exports = {
   atualizar,
   remover,
   encerrar,
-  renovar
+  renovar,
+  enviarClicksign
 };

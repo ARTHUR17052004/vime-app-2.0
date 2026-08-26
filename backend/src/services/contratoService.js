@@ -1,7 +1,7 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
 
-const ClicksignApi = require("./ClicksignApi");
+const ClicksignApiV3 = require("./ClicksignApiV3");
 const signatarioFixoService = require("./signatarioFixoService");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
@@ -9,6 +9,16 @@ const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
+
+const {
+  formatarDataExtensa,
+  formatarMoeda,
+  moedaPorExtenso,
+  numeroPorExtenso,
+  somarMeses,
+  enderecoUnidade,
+  enderecoLocador,
+} = contratoDocumentoService;
 
 // Nome de arquivo legível pro documento no Clicksign -- antes ficava
 // "contrato-<uuid>.pdf", sem nenhuma relação visível com o inquilino.
@@ -58,35 +68,6 @@ const notificarSeVencimentoProximo = async (contrato) => {
     titulo: 'Contrato próximo do vencimento',
     mensagem: `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`} (${fim.toLocaleDateString('pt-BR')}).`,
     link
-  });
-
-};
-
-// Cria o signatário na Clicksign e vincula ao documento (fluxo
-// signer -> list da API v1). Usado tanto pro inquilino quanto pelos
-// signatários fixos/extras -- cada chamada é independente, então um
-// signatário com e-mail inválido não derruba os outros.
-const adicionarSignatarioAoDocumento = async (documentKey, dadosSignatario, mensagem) => {
-
-  const signatarioCriado = await ClicksignApi.criarSignatario({
-    email: dadosSignatario.email,
-    phone_number: dadosSignatario.telefone || dadosSignatario.phone_number,
-    auth_mode: dadosSignatario.authMode || dadosSignatario.auth_mode || "email",
-    name: dadosSignatario.nome || dadosSignatario.name
-  });
-
-  const signerKey =
-    signatarioCriado?.signer?.key ||
-    signatarioCriado?.key ||
-    null;
-
-  if (!signerKey) {
-    return null;
-  }
-
-  return ClicksignApi.criarLista(documentKey, signerKey, {
-    signAs: dadosSignatario.signAs || dadosSignatario.sign_as || "sign",
-    message: mensagem
   });
 
 };
@@ -141,12 +122,10 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
-  // Signatários extras deste contrato específico (além do inquilino e
-  // dos signatários fixos, que entram em todos os contratos) -- não é
-  // campo do model Contrato, então sai do payload antes do create.
-  const signatariosExtras = Array.isArray(dados.signatariosExtras)
-    ? dados.signatariosExtras
-    : [];
+  // Signatários extras não são mais definidos na criação do contrato --
+  // agora são escolhidos na hora de enviar à Clicksign (ver
+  // enviarParaClicksign). Não é campo do model Contrato, então sai do
+  // payload antes do create, se vier.
   delete dados.signatariosExtras;
 
   await campoObrigatorioService.validar('contrato', dados);
@@ -315,110 +294,25 @@ const criar = async (dados) => {
     valorNovo: contrato
   });
 
+  // O contrato NÃO é mais enviado à Clicksign automaticamente aqui --
+  // fica só salvo no VIME. O envio agora é uma ação separada e
+  // deliberada (ver enviarParaClicksign), pedida depois que o usuário
+  // confere o demonstrativo do contrato na tela.
   try {
-
-    const conteudoBase64 = await contratoDocumentoService.gerarContratoPdfBase64({
-      ...contrato,
-      locador,
-      unidade,
-      kitnet,
-      inquilino
-    });
-
-    const documentoCriado = await ClicksignApi.criarDocumento({
-      document: {
-        path: `/contrato-${slugificarNomeArquivo(inquilino.nome)}.pdf`,
-        content_base64: conteudoBase64,
-        auto_close: true
-      }
-    });
-
-    const documentKey =
-      documentoCriado?.document?.key ||
-      documentoCriado?.key ||
-      null;
-
-    if (documentKey) {
-
-      await prisma.contrato.update({
-        where: { id: contrato.id },
-        data: { clicksignDocumentKey: documentKey }
-      });
-
-      const listaInquilino = await adicionarSignatarioAoDocumento(
-        documentKey,
-        { email: inquilino.email, telefone: inquilino.telefone, nome: inquilino.nome },
-        `Olá ${inquilino.nome}, segue seu contrato de locação para assinatura.`
-      );
-
-      const signingUrl = listaInquilino?.list?.url || null;
-
-      if (signingUrl) {
-        await prisma.contrato.update({
-          where: { id: contrato.id },
-          data: { clicksignSigningUrl: signingUrl }
-        });
-      }
-
-      // Signatários fixos (configurados em Clicksign > Signatários
-      // Fixos) entram automaticamente em todo contrato. Cada um é
-      // independente -- um falhar não derruba os outros nem o contrato.
-      const signatariosFixos = await signatarioFixoService.listarAtivos();
-
-      for (const fixo of signatariosFixos) {
-        try {
-          await adicionarSignatarioAoDocumento(
-            documentKey,
-            fixo,
-            `Olá ${fixo.nome}, segue o contrato de locação de ${inquilino.nome} para assinatura.`
-          );
-        } catch (erroFixo) {
-          console.error(`Erro ao adicionar signatário fixo "${fixo.nome}" ao contrato ${contrato.id}:`, erroFixo.message);
-        }
-      }
-
-      // Signatários extras enviados só para este contrato.
-      for (const extra of signatariosExtras) {
-        try {
-          await adicionarSignatarioAoDocumento(
-            documentKey,
-            extra,
-            `Olá ${extra.nome}, segue o contrato de locação de ${inquilino.nome} para assinatura.`
-          );
-        } catch (erroExtra) {
-          console.error(`Erro ao adicionar signatário extra "${extra.nome}" ao contrato ${contrato.id}:`, erroExtra.message);
-        }
-      }
-
-    }
-
-    // Cobrança NÃO é gerada aqui de propósito: só depois que o
-    // inquilino assinar o contrato de verdade (ver
-    // clicksignService.processarWebhook, evento "signature_finished").
-    // Asaas/Financeiro não devem cobrar por um contrato que ainda nem
-    // foi aceito.
 
     await WhatsappService.enviarMensagem({
       numero: inquilino.telefone,
-      mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso e enviado para assinatura.`
+      mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso. Em breve você receberá o link para assinatura.`
     });
 
   } catch (integracaoError) {
 
     console.error(
-      "Erro em integração externa ao criar contrato (Clicksign/Asaas/WhatsApp):",
+      "Erro ao enviar mensagem de WhatsApp na criação do contrato:",
       integracaoError.message
     );
 
   }
-
-  await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
-    modulo: "CLICKSIGN",
-    acao: "CRIAR_DOCUMENTO",
-    descricao: `Documento do contrato ${contrato.id} enviado.`
-  });
 
   // A receita/cobrança do aluguel é criada só depois que o contrato
   // for assinado de verdade (ver processarWebhook -> "signature_finished").
@@ -709,6 +603,148 @@ const renovar = async (id, dados) => {
 
 };
 
+// Monta os dados no formato exato esperado pelo Modelo cadastrado na
+// Clicksign (ver docs/modelo-contrato-clicksign.txt -- os nomes de
+// campo aqui têm que bater 100% com os {{placeholders}} do modelo).
+const montarDadosModeloClicksign = (contrato) => {
+
+  const locador = contrato.locador || {};
+  const inquilino = contrato.inquilino || {};
+  const unidade = contrato.unidade || {};
+  const kitnet = contrato.kitnet || {};
+
+  const locadorEhPJ = (locador.tipoPessoa || 'PJ') === 'PJ';
+  const locadorDocumento = locador.cpfCnpj || '';
+
+  const dataInicio = contrato.dataInicio;
+  const prazoMeses = inquilino.prazoContrato || null;
+  const dataFim = contrato.dataFim || (prazoMeses ? somarMeses(dataInicio, prazoMeses) : null);
+
+  const valorAluguel = contrato.valorAluguel || 0;
+  const valorNotaPromissoria = valorAluguel * 3;
+  const vencimentoNotaPromissoria = somarMeses(dataInicio, 1);
+
+  return {
+    locador_nome: locador.nome || '',
+    locador_cpf: locadorEhPJ ? '' : locadorDocumento,
+    locador_cnpj: locadorEhPJ ? locadorDocumento : '',
+    locador_endereco: enderecoLocador(locador),
+    inquilino_nome: inquilino.nome || '',
+    inquilino_cpf: inquilino.cpf || '',
+    inquilino_rg: inquilino.rg || '',
+    kitnet_nome: kitnet.nome || kitnet.numero || '',
+    nome_unidade: unidade.nome || '',
+    unidade_logradouro: enderecoUnidade(unidade),
+    cep_unidade: unidade.cep || '',
+    inquilino_prazo: prazoMeses ? `${prazoMeses} (${numeroPorExtenso(prazoMeses)}) meses` : 'Indeterminado',
+    inquilino_inicio_do_contrato: formatarDataExtensa(dataInicio),
+    inquilino_fim_do_contrato: formatarDataExtensa(dataFim),
+    unidade_dia_do_vencimento: String(contrato.diaVencimento || ''),
+    unidade_valor_do_aluguel: formatarMoeda(valorAluguel),
+    nota_promissoria_valor: formatarMoeda(valorNotaPromissoria),
+    nota_promissoria_valor_extenso: moedaPorExtenso(valorNotaPromissoria),
+    nota_promissoria_vencimento: formatarDataExtensa(vencimentoNotaPromissoria),
+  };
+
+};
+
+// Envia o contrato pra Clicksign (API v3, Envelopes + Modelo) -- ação
+// separada e deliberada, chamada só quando o usuário confere o
+// demonstrativo e clica em "Enviar à Clicksign". `signatariosExtras`
+// são signatários só deste envio específico (além do inquilino e dos
+// signatários fixos, que entram sempre).
+const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
+
+  const contrato = await buscarPorId(contratoId);
+
+  if (!contrato) {
+    throw new Error('Contrato não encontrado.');
+  }
+
+  if (contrato.clicksignEnvelopeId) {
+    throw new Error('Este contrato já foi enviado à Clicksign.');
+  }
+
+  const { templateKey } = await ClicksignApiV3.obterConfig();
+
+  if (!templateKey) {
+    throw new Error('Nenhum modelo da Clicksign configurado. Configure a "Chave do Modelo" em Configurações > Clicksign.');
+  }
+
+  const dadosModelo = montarDadosModeloClicksign(contrato);
+
+  const envelopeId = await ClicksignApiV3.criarEnvelope(`Contrato - ${contrato.inquilino.nome}`);
+
+  if (!envelopeId) {
+    throw new Error('Não foi possível criar o envelope na Clicksign.');
+  }
+
+  const documentId = await ClicksignApiV3.criarDocumentoDeModelo(
+    envelopeId,
+    templateKey,
+    dadosModelo,
+    `Contrato - ${slugificarNomeArquivo(contrato.inquilino.nome)}.pdf`
+  );
+
+  if (!documentId) {
+    throw new Error('Não foi possível gerar o documento a partir do modelo.');
+  }
+
+  const signatariosFixos = await signatarioFixoService.listarAtivos();
+
+  const listaSignatarios = [
+    { nome: contrato.inquilino.nome, email: contrato.inquilino.email },
+    ...signatariosFixos.map((s) => ({ nome: s.nome, email: s.email })),
+    ...signatariosExtras.filter((s) => s?.nome && s?.email),
+  ];
+
+  for (const signatario of listaSignatarios) {
+
+    try {
+
+      const signerId = await ClicksignApiV3.adicionarSignatario(envelopeId, signatario);
+
+      if (signerId) {
+        await ClicksignApiV3.criarRequisitosAssinatura(envelopeId, documentId, signerId);
+      }
+
+    } catch (erroSignatario) {
+      console.error(`Erro ao adicionar signatário "${signatario.nome}" ao envelope ${envelopeId}:`, erroSignatario.message);
+    }
+
+  }
+
+  await ClicksignApiV3.ativarEnvelope(envelopeId);
+  await ClicksignApiV3.enviarNotificacoes(envelopeId);
+
+  await prisma.contrato.update({
+    where: { id: contrato.id },
+    data: {
+      clicksignEnvelopeId: envelopeId,
+      clicksignDocumentKey: documentId,
+      clicksignEnviadoEm: new Date(),
+    },
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "CLICKSIGN",
+    acao: "ENVIAR_ENVELOPE",
+    descricao: `Contrato ${contrato.id} enviado à Clicksign (envelope ${envelopeId}).`
+  });
+
+  await notificacaoService.criar({
+    origem: 'SISTEMA',
+    titulo: 'Contrato enviado para assinatura',
+    mensagem: `Contrato de ${contrato.inquilino.nome} foi enviado à Clicksign para assinatura.`,
+    link: `/contratos/${contrato.id}`
+  });
+
+  return { envelopeId, documentId };
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -717,5 +753,6 @@ module.exports = {
   remover,
   encerrar,
   renovar,
-  notificarSeVencimentoProximo
+  notificarSeVencimentoProximo,
+  enviarParaClicksign
 };

@@ -495,4 +495,11 @@ async function gerarContratoPdfBase64(contrato) {
 
 module.exports = {
   gerarContratoPdfBase64,
+  formatarDataExtensa,
+  formatarMoeda,
+  moedaPorExtenso,
+  numeroPorExtenso,
+  somarMeses,
+  enderecoUnidade,
+  enderecoLocador,
 };

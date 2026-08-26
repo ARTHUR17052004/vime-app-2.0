@@ -98,6 +98,7 @@ const criar = async (dados) => {
   });
 
   let avisoContrato = null;
+  let contratoId = null;
 
   if (gerarContratoAutomatico) {
 
@@ -120,7 +121,7 @@ const criar = async (dados) => {
 
         const dataInicio = new Date(inquilino.dataInicioContrato);
 
-        await contratoService.criar({
+        const contrato = await contratoService.criar({
           locadorId: unidade.locadorId,
           unidadeId: unidade.id,
           kitnetId: kitnet.id,
@@ -133,6 +134,8 @@ const criar = async (dados) => {
           tipoGarantia: inquilino.tipoGarantia || null,
           valorCaucao: inquilino.valorCaucao || null,
         });
+
+        contratoId = contrato.id;
 
       }
 
@@ -151,7 +154,7 @@ const criar = async (dados) => {
 
   }
 
-  return { ...inquilino, avisoContrato };
+  return { ...inquilino, avisoContrato, contratoId };
 };
 
 const atualizar = async (id, dados) => {
