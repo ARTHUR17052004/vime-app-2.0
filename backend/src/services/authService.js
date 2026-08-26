@@ -63,6 +63,13 @@ const login = async (email, senha) => {
     }
   );
 
+  const agora = new Date();
+
+  await prisma.usuario.update({
+    where: { id: usuario.id },
+    data: { ultimoAcesso: agora },
+  });
+
   const logService = require("./logService");
   await logService.registrar({
 

@@ -75,9 +75,15 @@ export default function UsuariosTable({
 
       render: (usuario) =>
 
-        usuario.ultimoAcesso ||
-
-        "Nunca acessou",
+        usuario.ultimoAcesso
+          ? new Date(usuario.ultimoAcesso).toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "Nunca acessou",
 
     },
 

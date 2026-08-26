@@ -99,6 +99,8 @@ model Usuario {
   resetSenhaToken    String?   @unique
   resetSenhaExpiraEm DateTime?
 
+  ultimoAcesso DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
