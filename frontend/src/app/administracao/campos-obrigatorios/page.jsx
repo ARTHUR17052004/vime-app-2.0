@@ -49,7 +49,6 @@ const MODULOS = [
       { campo: "email", label: "E-mail" },
       { campo: "telefone", label: "Telefone" },
       { campo: "cpf", label: "CPF" },
-      { campo: "rg", label: "RG" },
       { campo: "dataNascimento", label: "Data de Nascimento" },
       { campo: "enderecoAnterior", label: "Endereço Anterior" },
       { campo: "contatoEmergencia", label: "Contato de Emergência" },

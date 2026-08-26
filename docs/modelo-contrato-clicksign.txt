@@ -26,7 +26,7 @@ Endereço: {{unidade_logradouro}}, CEP: {{cep_unidade}}
 2. IDENTIFICAÇÃO DAS PARTES
 
 {{locador_nome}}, pessoa jurídica de direito privado, inscrita no CNPJ sob o nº {{locador_cnpj}}, com endereço em {{locador_endereco}}.
-LOCATÁRIO: {{inquilino_nome}}, brasileiro(a), profissão e estado civil ignorados, portador(a) do RG nº {{inquilino_rg}} e inscrito(a) no CPF sob o nº {{inquilino_cpf}}.
+LOCATÁRIO: {{inquilino_nome}}, brasileiro(a), profissão e estado civil ignorados, inscrito(a) no CPF sob o nº {{inquilino_cpf}}.
 As partes acima qualificadas celebram entre si o presente Contrato de Locação Residencial, regido pela Lei nº 8.245, de 18 de outubro de 1991, mediante as cláusulas e condições seguintes:
 
 3. CLÁUSULA 1 – DO OBJETO

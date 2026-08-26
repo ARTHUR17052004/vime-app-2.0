@@ -267,7 +267,7 @@ async function gerarContratoPdfBase64(contrato) {
       [
         "2",
         "Locatário",
-        `${inquilino.nome || "-"}\nRG: ${inquilino.rg || "-"} CPF: ${inquilino.cpf || "-"}`,
+        `${inquilino.nome || "-"}\nCPF: ${inquilino.cpf || "-"}`,
       ],
       [
         "3",
@@ -298,7 +298,7 @@ async function gerarContratoPdfBase64(contrato) {
   );
 
   b.paragrafo(
-    `LOCATÁRIO: ${inquilino.nome || "-"}, brasileiro(a), profissão e estado civil ignorados, portador(a) do RG nº ${inquilino.rg || "-"} e inscrito(a) no CPF sob o nº ${inquilino.cpf || "-"}.`,
+    `LOCATÁRIO: ${inquilino.nome || "-"}, brasileiro(a), profissão e estado civil ignorados, inscrito(a) no CPF sob o nº ${inquilino.cpf || "-"}.`,
     { indent: 0 }
   );
 

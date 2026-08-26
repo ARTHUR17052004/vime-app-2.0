@@ -128,7 +128,20 @@ const criar = async (dados) => {
   // payload antes do create, se vier.
   delete dados.signatariosExtras;
 
-  await campoObrigatorioService.validar('contrato', dados);
+  // Contratos gerados automaticamente a partir de "Novo Inquilino" pulam
+  // essa validação de propósito: agora existe o demonstrativo + envio
+  // manual à Clicksign depois, então um campo como Tipo de Garantia
+  // faltando não deve travar a criação do inquilino/contrato inteiro no
+  // meio do cadastro -- o usuário pode completar isso editando o
+  // contrato antes de enviar. Quem cria contrato pela tela "Novo
+  // Contrato" direto continua vendo a validação normalmente (o
+  // formulário já mostra os asteriscos e valida antes de enviar).
+  const pularValidacaoObrigatorios = dados.pularValidacaoObrigatorios === true;
+  delete dados.pularValidacaoObrigatorios;
+
+  if (!pularValidacaoObrigatorios) {
+    await campoObrigatorioService.validar('contrato', dados);
+  }
 
   if (!dados.dataInicio) {
     throw new Error('Data de início do contrato é obrigatória.');
@@ -631,7 +644,6 @@ const montarDadosModeloClicksign = (contrato) => {
     locador_endereco: enderecoLocador(locador),
     inquilino_nome: inquilino.nome || '',
     inquilino_cpf: inquilino.cpf || '',
-    inquilino_rg: inquilino.rg || '',
     kitnet_nome: kitnet.nome || kitnet.numero || '',
     nome_unidade: unidade.nome || '',
     unidade_logradouro: enderecoUnidade(unidade),

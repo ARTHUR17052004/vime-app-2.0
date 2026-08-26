@@ -133,6 +133,10 @@ const criar = async (dados) => {
           indiceReajuste: inquilino.indiceReajuste || null,
           tipoGarantia: inquilino.tipoGarantia || null,
           valorCaucao: inquilino.valorCaucao || null,
+          // O demonstrativo + envio manual à Clicksign vêm depois -- não
+          // faz sentido travar a criação do contrato aqui por um campo
+          // que dá pra completar editando o contrato antes de enviar.
+          pularValidacaoObrigatorios: true,
         });
 
         contratoId = contrato.id;

@@ -14,7 +14,7 @@ import ContratoStep from "./steps/ContratoStep";
 // está visível quando o usuário clica em "Continuar", em vez de deixar
 // pra descobrir campo faltando só no fim (etapa 3).
 const CAMPOS_POR_STEP = {
-  1: ["nome", "email", "telefone", "cpf", "rg", "dataNascimento", "enderecoAnterior", "contatoEmergencia", "telefoneEmergencia"],
+  1: ["nome", "email", "telefone", "cpf", "dataNascimento", "enderecoAnterior", "contatoEmergencia", "telefoneEmergencia"],
   2: ["kitnetId"],
   3: ["dataInicioContrato", "dataFimContrato", "prazoContrato", "indiceReajuste", "tipoGarantia", "valorCaucao"],
 };
@@ -29,7 +29,6 @@ const ROTULOS = {
   email: "E-mail",
   telefone: "Telefone",
   cpf: "CPF",
-  rg: "RG",
   dataNascimento: "Data de Nascimento",
   enderecoAnterior: "Endereço Anterior",
   contatoEmergencia: "Contato de Emergência",
@@ -62,7 +61,6 @@ export default function InquilinoForm({
     email: "",
     telefone: "",
     cpf: "",
-    rg: "",
     dataNascimento: "",
     enderecoAnterior: "",
     contatoEmergencia: "",
@@ -141,7 +139,6 @@ export default function InquilinoForm({
       email: inquilino.email || "",
       telefone: inquilino.telefone || "",
       cpf: inquilino.cpf || "",
-      rg: inquilino.rg || "",
       dataNascimento:
         inquilino.dataNascimento || "",
       enderecoAnterior:

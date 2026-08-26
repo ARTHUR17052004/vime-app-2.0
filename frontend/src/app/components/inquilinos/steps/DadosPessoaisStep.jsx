@@ -80,17 +80,6 @@ export default function StepDadosPessoais({
         )}
       </Campo>
 
-      <Campo label="RG" obrigatorio={obrigatorios.has("rg")}>
-        <input
-          name="rg"
-          placeholder="RG"
-          value={formData.rg}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("rg")}
-        />
-      </Campo>
-
       <Campo label="Data de Nascimento" obrigatorio={obrigatorios.has("dataNascimento")}>
         <input
           type="date"
