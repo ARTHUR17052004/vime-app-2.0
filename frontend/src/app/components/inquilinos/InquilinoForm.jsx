@@ -107,13 +107,29 @@ export default function InquilinoForm({
 
       try {
 
-        const resposta = await CamposObrigatoriosService.listar("inquilino");
+        const [respInquilino, respContrato] = await Promise.all([
+          CamposObrigatoriosService.listar("inquilino"),
+          CamposObrigatoriosService.listar("contrato"),
+        ]);
 
-        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+        const listaInquilino = Array.isArray(respInquilino) ? respInquilino : respInquilino.data || [];
+        const listaContrato = Array.isArray(respContrato) ? respContrato : respContrato.data || [];
 
-        setObrigatorios(
-          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        const exigidos = new Set(
+          listaInquilino.filter((c) => c.obrigatorio).map((c) => c.campo)
         );
+
+        // O contrato é gerado automaticamente a partir destes dados -- se
+        // "Contratos" exige um campo (ex.: Data Final), a etapa 3 daqui
+        // também passa a exigir, senão o contrato sai incompleto sem o
+        // usuário nem saber.
+        const MAPA_CONTRATO_PARA_INQUILINO = { dataFim: "dataFimContrato" };
+
+        listaContrato
+          .filter((c) => c.obrigatorio)
+          .forEach((c) => exigidos.add(MAPA_CONTRATO_PARA_INQUILINO[c.campo] || c.campo));
+
+        setObrigatorios(exigidos);
 
       } catch (err) {
 

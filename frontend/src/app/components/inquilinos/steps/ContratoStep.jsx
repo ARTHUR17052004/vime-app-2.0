@@ -110,7 +110,8 @@ export default function ContratoStep({
         </p>
 
         <p className="text-sm text-emerald-300/80 mt-1">
-          Ao salvar, o contrato é gerado a partir do modelo cadastrado e enviado para assinatura na Clicksign.
+          Ao salvar, o contrato é gerado a partir do modelo cadastrado. Você poderá conferir o
+          demonstrativo e só depois enviar para assinatura na Clicksign.
         </p>
       </div>
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useRef, useState } from "react";
+
 export default function KitnetStep({
   formData,
   handleChange,
@@ -9,25 +11,79 @@ export default function KitnetStep({
   const inputStyle =
     "w-full border border-[var(--border-token)] rounded-xl p-3 text-[var(--text)] bg-[var(--surface-2)] backdrop-blur placeholder:text-[var(--text-subtle)] focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20";
 
-  const kitnetsDisponiveis =
-    kitnets.filter((kitnet) => {
+  const [busca, setBusca] = useState("");
+  const [aberto, setAberto] = useState(false);
 
-      if (
-        String(kitnet.id) ===
-        String(formData.kitnetId)
-      ) {
-        return true;
+  const containerRef = useRef(null);
+
+  const rotulo = (kitnet) =>
+    `${kitnet.unidade?.nome || kitnet.unidadeNome || ""} • ${kitnet.nome ? `${kitnet.nome} • ` : ""}Nº ${kitnet.numero}`;
+
+  const kitnetsDisponiveis = useMemo(() => {
+
+    return kitnets
+      .filter((kitnet) => {
+
+        if (String(kitnet.id) === String(formData.kitnetId)) {
+          return true;
+        }
+
+        return kitnet.status !== "Ocupada";
+
+      })
+      .sort((a, b) =>
+        String(a.numero).localeCompare(String(b.numero), undefined, {
+          numeric: true,
+          sensitivity: "base",
+        })
+      );
+
+  }, [kitnets, formData.kitnetId]);
+
+  const kitnetsFiltradas = useMemo(() => {
+
+    const termo = busca.trim().toLowerCase();
+
+    if (!termo) return kitnetsDisponiveis;
+
+    return kitnetsDisponiveis.filter((kitnet) =>
+      rotulo(kitnet).toLowerCase().includes(termo)
+    );
+
+  }, [kitnetsDisponiveis, busca]);
+
+  const kitnetSelecionada = kitnetsDisponiveis.find(
+    (kitnet) => String(kitnet.id) === String(formData.kitnetId)
+  );
+
+  useEffect(() => {
+
+    function fecharAoClicarFora(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setAberto(false);
       }
+    }
 
-      return kitnet.status !== "Ocupada";
+    document.addEventListener("mousedown", fecharAoClicarFora);
 
-    });
+    return () => document.removeEventListener("mousedown", fecharAoClicarFora);
+
+  }, []);
+
+  function selecionar(kitnet) {
+
+    handleChange({ target: { name: "kitnetId", value: kitnet.id } });
+
+    setBusca("");
+    setAberto(false);
+
+  }
 
   return (
 
     <div className="grid gap-6">
 
-      <div>
+      <div ref={containerRef} className="relative">
 
         <label className="block text-sm font-medium text-[var(--text-subtle)] mb-2">
 
@@ -36,35 +92,65 @@ export default function KitnetStep({
 
         </label>
 
-        <select
-          name="kitnetId"
-          value={formData.kitnetId}
-          onChange={handleChange}
+        <input
+          type="text"
+          value={aberto ? busca : kitnetSelecionada ? rotulo(kitnetSelecionada) : ""}
+          onChange={(e) => {
+            setBusca(e.target.value);
+            if (!aberto) setAberto(true);
+          }}
+          onFocus={() => {
+            setBusca("");
+            setAberto(true);
+          }}
+          placeholder="Digite pra buscar uma kitnet..."
           className={inputStyle}
-          required
-        >
+        />
 
-          <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+        {aberto && (
 
-            Selecione uma Kitnet
+          <div
+            className="
+              absolute z-20 mt-2 w-full max-h-64 overflow-y-auto
+              rounded-xl border border-[var(--border-token)]
+              bg-[var(--surface-2)] shadow-xl
+            "
+          >
 
-          </option>
+            {kitnetsFiltradas.length === 0 ? (
 
-          {kitnetsDisponiveis.map((kitnet) => (
+              <p className="px-4 py-3 text-sm text-[var(--text-subtle)]">
+                Nenhuma kitnet encontrada.
+              </p>
 
-            <option
-              key={kitnet.id}
-              value={kitnet.id}
-              style={{ backgroundColor: "#1d2833", color: "#fff" }}
-            >
+            ) : (
 
-              {kitnet.unidade?.nome || kitnet.unidadeNome} • {kitnet.nome} • Nº {kitnet.numero}
+              kitnetsFiltradas.map((kitnet) => (
 
-            </option>
+                <button
+                  key={kitnet.id}
+                  type="button"
+                  onClick={() => selecionar(kitnet)}
+                  className={`
+                    w-full text-left px-4 py-3 text-sm transition-colors
+                    hover:bg-emerald-500/10
+                    ${
+                      String(kitnet.id) === String(formData.kitnetId)
+                        ? "bg-emerald-500/15 text-emerald-300"
+                        : "text-[var(--text)]"
+                    }
+                  `}
+                >
+                  {rotulo(kitnet)}
+                </button>
 
-          ))}
+              ))
 
-        </select>
+            )}
+
+          </div>
+
+        )}
 
       </div>
 
