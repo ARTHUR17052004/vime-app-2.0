@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function KitnetStep({
   formData,
@@ -13,8 +14,10 @@ export default function KitnetStep({
 
   const [busca, setBusca] = useState("");
   const [aberto, setAberto] = useState(false);
+  const [posicao, setPosicao] = useState({ top: 0, left: 0, width: 0 });
 
-  const containerRef = useRef(null);
+  const inputRef = useRef(null);
+  const listaRef = useRef(null);
 
   const rotulo = (kitnet) =>
     `${kitnet.unidade?.nome || kitnet.unidadeNome || ""} • ${kitnet.nome ? `${kitnet.nome} • ` : ""}Nº ${kitnet.numero}`;
@@ -56,12 +59,61 @@ export default function KitnetStep({
     (kitnet) => String(kitnet.id) === String(formData.kitnetId)
   );
 
+  function atualizarPosicao() {
+
+    const el = inputRef.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+
+    setPosicao({
+      top: rect.bottom + 8,
+      left: rect.left,
+      width: rect.width,
+    });
+
+  }
+
+  // O input fica dentro do Modal, que tem overflow-y-auto pra rolar o
+  // conteúdo -- se a lista fosse filha normal dele, ficaria cortada nas
+  // bordas do card. Por isso ela é portada pro body (fixed, medida a
+  // partir do próprio input), igual ao ActionMenu já faz pros menus de
+  // ação das tabelas.
+  useLayoutEffect(() => {
+
+    if (!aberto) return;
+
+    atualizarPosicao();
+
+    window.addEventListener("scroll", atualizarPosicao, true);
+    window.addEventListener("resize", atualizarPosicao);
+
+    return () => {
+      window.removeEventListener("scroll", atualizarPosicao, true);
+      window.removeEventListener("resize", atualizarPosicao);
+    };
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aberto]);
+
   useEffect(() => {
 
     function fecharAoClicarFora(e) {
-      if (containerRef.current && !containerRef.current.contains(e.target)) {
-        setAberto(false);
+
+      if (
+        inputRef.current && inputRef.current.contains(e.target)
+      ) {
+        return;
       }
+
+      if (
+        listaRef.current && listaRef.current.contains(e.target)
+      ) {
+        return;
+      }
+
+      setAberto(false);
+
     }
 
     document.addEventListener("mousedown", fecharAoClicarFora);
@@ -83,7 +135,7 @@ export default function KitnetStep({
 
     <div className="grid gap-6">
 
-      <div ref={containerRef} className="relative">
+      <div>
 
         <label className="block text-sm font-medium text-[var(--text-subtle)] mb-2">
 
@@ -93,6 +145,7 @@ export default function KitnetStep({
         </label>
 
         <input
+          ref={inputRef}
           type="text"
           value={aberto ? busca : kitnetSelecionada ? rotulo(kitnetSelecionada) : ""}
           onChange={(e) => {
@@ -107,52 +160,64 @@ export default function KitnetStep({
           className={inputStyle}
         />
 
-        {aberto && (
-
-          <div
-            className="
-              absolute z-20 mt-2 w-full max-h-64 overflow-y-auto
-              rounded-xl border border-[var(--border-token)]
-              bg-[var(--surface-2)] shadow-xl
-            "
-          >
-
-            {kitnetsFiltradas.length === 0 ? (
-
-              <p className="px-4 py-3 text-sm text-[var(--text-subtle)]">
-                Nenhuma kitnet encontrada.
-              </p>
-
-            ) : (
-
-              kitnetsFiltradas.map((kitnet) => (
-
-                <button
-                  key={kitnet.id}
-                  type="button"
-                  onClick={() => selecionar(kitnet)}
-                  className={`
-                    w-full text-left px-4 py-3 text-sm transition-colors
-                    hover:bg-emerald-500/10
-                    ${
-                      String(kitnet.id) === String(formData.kitnetId)
-                        ? "bg-emerald-500/15 text-emerald-300"
-                        : "text-[var(--text)]"
-                    }
-                  `}
-                >
-                  {rotulo(kitnet)}
-                </button>
-
-              ))
-
-            )}
-
-          </div>
-
-        )}
-
       </div>
+
+      {aberto && typeof window !== "undefined" && createPortal(
+
+        <div
+          ref={listaRef}
+          style={{
+            position: "fixed",
+            top: posicao.top,
+            left: posicao.left,
+            width: posicao.width,
+            maxHeight: `min(24rem, calc(100vh - ${posicao.top + 16}px))`,
+            zIndex: 9999999,
+          }}
+          className="
+            overflow-y-auto
+            rounded-xl border border-[var(--border-token)]
+            bg-[var(--surface)] backdrop-blur-3xl
+            shadow-2xl shadow-black/60
+          "
+        >
+
+          {kitnetsFiltradas.length === 0 ? (
+
+            <p className="px-4 py-3 text-sm text-[var(--text-subtle)]">
+              Nenhuma kitnet encontrada.
+            </p>
+
+          ) : (
+
+            kitnetsFiltradas.map((kitnet) => (
+
+              <button
+                key={kitnet.id}
+                type="button"
+                onClick={() => selecionar(kitnet)}
+                className={`
+                  w-full text-left px-4 py-3 text-sm transition-colors
+                  hover:bg-emerald-500/10
+                  ${
+                    String(kitnet.id) === String(formData.kitnetId)
+                      ? "bg-emerald-500/15 text-emerald-300"
+                      : "text-[var(--text)]"
+                  }
+                `}
+              >
+                {rotulo(kitnet)}
+              </button>
+
+            ))
+
+          )}
+
+        </div>,
+
+        document.body
+
+      )}
 
       {formData.kitnetId && (
 
