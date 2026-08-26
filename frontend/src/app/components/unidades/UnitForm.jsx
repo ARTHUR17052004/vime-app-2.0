@@ -16,7 +16,7 @@ const CAMPOS = [
   "locadorId", "kitnets", "aluguel", "vencimento", "dataInicioCobranca", "status", "observacoes",
 ];
 
-const SEMPRE_OBRIGATORIOS = new Set(["nome", "cidade", "uf", "locadorId", "kitnets"]);
+const SEMPRE_OBRIGATORIOS = new Set(["nome", "cidade", "uf", "kitnets"]);
 
 const ROTULOS = {
   nome: "Nome da Residência",

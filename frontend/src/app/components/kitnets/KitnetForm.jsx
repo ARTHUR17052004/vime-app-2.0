@@ -13,7 +13,7 @@ import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoOb
 
 const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "status", "observacoes"];
 
-const SEMPRE_OBRIGATORIOS = new Set(["nome", "unidadeId", "numero", "metragem", "aluguel"]);
+const SEMPRE_OBRIGATORIOS = new Set(["unidadeId", "numero", "metragem", "aluguel"]);
 
 const ROTULOS = {
   nome: "Nome da Kitnet",
@@ -251,7 +251,7 @@ export default function KitnetForm({
           name="nome"
           value={formData.nome}
           onChange={handleChange}
-          required
+          required={obrigatorios.has("nome")}
         />
 
         <Select
