@@ -58,6 +58,17 @@ function enderecoUnidade(unidade) {
   return partes.join(", ") || unidade.nome || "-";
 }
 
+function enderecoLocador(locador) {
+  if (!locador) return "-";
+
+  const partes = [
+    locador.endereco,
+    [locador.cidade, locador.uf].filter(Boolean).join(" - "),
+  ].filter(Boolean);
+
+  return partes.join(", ") || "-";
+}
+
 /* ==========================================
    RENDERIZADOR DE PDF (jsPDF, sem DOM/browser)
 ========================================== */
@@ -209,6 +220,7 @@ async function gerarContratoPdfBase64(contrato) {
   const locadorCnpjTxt = locadorEhPJ ? `CNPJ sob o nº ${locadorDocumento}` : "";
 
   const enderecoImovel = enderecoUnidade(unidade);
+  const enderecoLocadora = enderecoLocador(locador);
   const cepImovel = unidade.cep || "-";
   const nomeKitnet = kitnet.nome || kitnet.numero || "-";
   const nomeUnidade = unidade.nome || "-";
@@ -223,10 +235,13 @@ async function gerarContratoPdfBase64(contrato) {
   const diaVencimento = contrato.diaVencimento || 5;
   const valorAluguel = contrato.valorAluguel || 0;
 
-  // Normaliza "hoje" para meia-noite UTC do dia local atual, pra ficar
-  // consistente com formatarDataExtensa (que lê em UTC).
-  const agora = new Date();
-  const hoje = new Date(Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate()));
+  // Data usada em todas as assinaturas/anexos/nota promissória do
+  // documento -- é a data de início do contrato, NÃO "hoje". O PDF é
+  // regerado toda vez que alguém clica em "Baixar" (baixarPdf), então
+  // usar new Date() aqui faria a data do contrato mudar a cada
+  // download, o que não faz sentido (e já gerava inconsistência: a
+  // nota promissória aparecia "emitida" depois do próprio vencimento).
+  const hoje = new Date(dataInicio);
 
   const valorNotaPromissoria = valorAluguel * 3;
   const vencimentoNotaPromissoria = somarMeses(dataInicio, 1);
@@ -247,7 +262,7 @@ async function gerarContratoPdfBase64(contrato) {
       [
         "1",
         "Locadora",
-        `${locador.nome || "-"}\n${[locadorCpfTxt, locadorCnpjTxt].filter(Boolean).join(" ")}\nEndereço: Rodovia GO-02, KM 18, Sala 02, Zona Rural, Bela Vista de Goiás - GO, CEP: 75.240-000`,
+        `${locador.nome || "-"}\n${[locadorCpfTxt, locadorCnpjTxt].filter(Boolean).join(" ")}\nEndereço: ${enderecoLocadora}`,
       ],
       [
         "2",
@@ -278,7 +293,7 @@ async function gerarContratoPdfBase64(contrato) {
   b.secao("2. IDENTIFICAÇÃO DAS PARTES");
 
   b.paragrafo(
-    `${locador.nome || "-"}, pessoa ${locadorEhPJ ? "jurídica de direito privado, inscrita no CNPJ sob o nº " + locadorDocumento : "física, inscrita no CPF sob o nº " + locadorDocumento}, com endereço na Rodovia GO-02, KM 18, Sala 02, Zona Rural, Bela Vista de Goiás - GO, CEP: 75.240-000.`,
+    `${locador.nome || "-"}, pessoa ${locadorEhPJ ? "jurídica de direito privado, inscrita no CNPJ sob o nº " + locadorDocumento : "física, inscrita no CPF sob o nº " + locadorDocumento}, com endereço em ${enderecoLocadora}.`,
     { indent: 0 }
   );
 
