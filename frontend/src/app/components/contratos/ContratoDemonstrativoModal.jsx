@@ -114,6 +114,8 @@ export default function ContratoDemonstrativoModal({
       title="Demonstrativo do Contrato"
       subtitle="Confira como o contrato vai ficar antes de enviar para assinatura."
       size="xl"
+      closeOnOverlay={false}
+      closeOnEsc={false}
     >
 
       <div className="space-y-6">

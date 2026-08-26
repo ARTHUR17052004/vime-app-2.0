@@ -271,6 +271,13 @@ export default function InquilinoForm({
 
     if (salvando) return;
 
+    // Um <input> de texto sozinho na etapa 2 (busca da kitnet) permite
+    // que o Enter dispare submissão implícita do form mesmo sem clicar
+    // em "Salvar Inquilino" -- isso não pode salvar com dados de uma
+    // etapa que o usuário nem viu ainda. Só a etapa 3 pode submeter de
+    // verdade.
+    if (step !== 3) return;
+
     if (!validarStep(3)) return;
 
     const kitnetSelecionada =

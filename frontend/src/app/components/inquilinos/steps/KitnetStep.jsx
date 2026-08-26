@@ -156,6 +156,19 @@ export default function KitnetStep({
             setBusca("");
             setAberto(true);
           }}
+          onKeyDown={(e) => {
+            // Um <input> de texto sozinho nesta etapa deixa o Enter
+            // submeter o formulário inteiro por engano (submissão
+            // implícita do HTML) -- aqui ele só escolhe o primeiro
+            // resultado da busca, nunca envia o form.
+            if (e.key !== "Enter") return;
+
+            e.preventDefault();
+
+            if (aberto && kitnetsFiltradas.length > 0) {
+              selecionar(kitnetsFiltradas[0]);
+            }
+          }}
           placeholder="Digite pra buscar uma kitnet..."
           className={inputStyle}
         />
