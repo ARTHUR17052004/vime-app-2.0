@@ -158,8 +158,12 @@ export default function InquilinoForm({
       email: inquilino.email || "",
       telefone: inquilino.telefone || "",
       cpf: inquilino.cpf || "",
+      // <input type="date"> só aceita o valor no formato exato
+      // "aaaa-mm-dd" -- a API devolve data/hora completa (ISO), e sem
+      // cortar pros 10 primeiros caracteres o campo simplesmente
+      // aparecia em branco, mesmo com a data salva corretamente.
       dataNascimento:
-        inquilino.dataNascimento || "",
+        (inquilino.dataNascimento || "").slice(0, 10),
       enderecoAnterior:
         inquilino.enderecoAnterior || "",
       contatoEmergencia:
@@ -171,10 +175,10 @@ export default function InquilinoForm({
         inquilino.kitnetId || "",
 
       dataInicioContrato:
-        inquilino.dataInicioContrato || "",
+        (inquilino.dataInicioContrato || "").slice(0, 10),
 
       dataFimContrato:
-        inquilino.dataFimContrato || "",
+        (inquilino.dataFimContrato || "").slice(0, 10),
 
       prazoContrato:
         inquilino.prazoContrato || "4",

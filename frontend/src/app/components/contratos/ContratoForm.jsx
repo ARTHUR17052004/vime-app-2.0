@@ -203,6 +203,12 @@ export default function ContratoForm({
 
       ...contrato,
 
+      // <input type="date"> só aceita "aaaa-mm-dd" -- a API devolve
+      // data/hora completa (ISO), e sem cortar pros 10 primeiros
+      // caracteres os campos apareciam em branco mesmo com data salva.
+      dataInicio: (contrato.dataInicio || "").slice(0, 10),
+      dataFim: (contrato.dataFim || "").slice(0, 10),
+
     });
 
   }, [contrato]);
