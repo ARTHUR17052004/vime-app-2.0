@@ -354,21 +354,22 @@ function TvConteudo() {
 
 function TvStatCard({ titulo, subtitulo, valor, icon: Icon }) {
   return (
-    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl p-7 flex items-center justify-between">
-      <div>
-        <p className="text-[13px] uppercase tracking-[0.2em] text-[var(--text-subtle)] font-semibold">
+    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl overflow-hidden p-4 sm:p-7 flex items-center justify-between gap-2">
+      <div className="min-w-0">
+        <p className="text-[11px] sm:text-[13px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--text-subtle)] font-semibold truncate">
           {titulo}
         </p>
 
-        <p className="mt-3 text-5xl font-black text-[var(--text)] tabular-nums leading-none">
+        <p className="mt-1.5 sm:mt-3 text-3xl sm:text-5xl font-black text-[var(--text)] tabular-nums leading-none">
           <AnimatedNumber value={valor} />
         </p>
 
-        <p className="mt-2 text-sm text-[var(--text-faint)]">{subtitulo}</p>
+        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-[var(--text-faint)] truncate">{subtitulo}</p>
       </div>
 
-      <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-        <Icon size={28} className="text-emerald-400" />
+      <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+        <Icon size={18} className="text-emerald-400 sm:hidden" />
+        <Icon size={28} className="text-emerald-400 hidden sm:block" />
       </div>
     </div>
   );

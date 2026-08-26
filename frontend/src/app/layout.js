@@ -35,6 +35,19 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "VIME 2.0",
   description: "Sistema de Gestão de Locações",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "VIME 2.0",
+  },
+  icons: {
+    icon: "/images/logo-vime.jpeg",
+    apple: "/images/logo-vime.jpeg",
+  },
+};
+
+export const viewport = {
+  themeColor: "#10B981",
 };
 
 export default function RootLayout({ children }) {
