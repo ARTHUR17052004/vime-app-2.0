@@ -79,7 +79,6 @@ const rotulosPadrao = {
   observacoes: 'Observações',
   dataInicioCobranca: 'Data de Início da Cobrança',
   rg: 'RG',
-  enderecoAnterior: 'Endereço Anterior',
   prazoContrato: 'Prazo do Contrato',
   dataInicioContrato: 'Data de Início do Contrato',
   dataFimContrato: 'Data Final do Contrato',

@@ -182,11 +182,6 @@ export default function InquilinoDetalhesPage() {
                 />
 
                 <Info
-                  label="Endereço Anterior"
-                  value={inquilino.enderecoAnterior}
-                />
-
-                <Info
                   label="Contato de Emergência"
                   value={inquilino.contatoEmergencia}
                 />

@@ -753,7 +753,6 @@ Cadastro em etapas (Wizard)
 * Telefone
 * CPF ou RG
 * Data de nascimento
-* Endereço anterior
 * Contato de emergência
 * Telefone de emergência
 * Upload de documento

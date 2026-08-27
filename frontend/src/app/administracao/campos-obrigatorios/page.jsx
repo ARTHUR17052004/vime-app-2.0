@@ -54,7 +54,6 @@ const MODULOS = [
       { campo: "telefone", label: "Telefone", travado: true },
       { campo: "cpf", label: "CPF" },
       { campo: "dataNascimento", label: "Data de Nascimento" },
-      { campo: "enderecoAnterior", label: "Endereço Anterior" },
       { campo: "contatoEmergencia", label: "Contato de Emergência" },
       { campo: "telefoneEmergencia", label: "Telefone de Emergência" },
       { campo: "kitnetId", label: "Kitnet", travado: true },

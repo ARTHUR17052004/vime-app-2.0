@@ -67,7 +67,6 @@ model Inquilino {
   contatoEmergencia  String?
   dataFimContrato    DateTime?
   dataNascimento     DateTime?
-  enderecoAnterior   String?
   indiceReajuste     String?
   prazoContrato      Int?
   rg                 String?

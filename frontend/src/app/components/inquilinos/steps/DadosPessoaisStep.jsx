@@ -91,17 +91,6 @@ export default function StepDadosPessoais({
         />
       </Campo>
 
-      <Campo label="Endereço Anterior" obrigatorio={obrigatorios.has("enderecoAnterior")}>
-        <input
-          name="enderecoAnterior"
-          placeholder="Endereço Anterior"
-          value={formData.enderecoAnterior}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("enderecoAnterior")}
-        />
-      </Campo>
-
       <Campo label="Contato de Emergência" obrigatorio={obrigatorios.has("contatoEmergencia")}>
         <input
           name="contatoEmergencia"
