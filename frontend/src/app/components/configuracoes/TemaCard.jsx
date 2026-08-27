@@ -13,6 +13,7 @@ export default function TemaCard({
   onChange = () => {},
   onSalvar = () => {},
   salvando = false,
+  podeEditar = true,
 }) {
   return (
     <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
@@ -126,19 +127,21 @@ export default function TemaCard({
 
       </div>
 
-      <button
-        onClick={onSalvar}
-        disabled={salvando}
-        className="
-          mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
-          disabled:opacity-50 disabled:cursor-not-allowed
-          transition px-6 py-3 text-[var(--text)]
-        "
-      >
+      {podeEditar && (
+        <button
+          onClick={onSalvar}
+          disabled={salvando}
+          className="
+            mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
+            disabled:opacity-50 disabled:cursor-not-allowed
+            transition px-6 py-3 text-[var(--text)]
+          "
+        >
 
-        {salvando ? "Salvando..." : "Salvar Tema"}
+          {salvando ? "Salvando..." : "Salvar Tema"}
 
-      </button>
+        </button>
+      )}
 
     </div>
   );

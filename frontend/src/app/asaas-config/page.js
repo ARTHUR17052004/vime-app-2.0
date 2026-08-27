@@ -15,8 +15,17 @@ import AsaasTutorial from "../components/asaas/AsaasTutorial";
 import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
+import SemPermissao from "../components/ui/SemPermissao";
+
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function AsaasConfigPage() {
+
+  const podeVisualizar = usePermissao("asaasConfig.visualizar");
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
  return (
 

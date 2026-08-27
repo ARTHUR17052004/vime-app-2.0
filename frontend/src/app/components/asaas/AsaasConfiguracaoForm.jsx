@@ -4,8 +4,12 @@ import { useEffect, useState } from "react";
 
 import { ConfiguracaoService } from "@/services/configuracao.service";
 import { AsaasService } from "@/services/asaas.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function AsaasConfiguracaoForm() {
+  const podeEditar = usePermissao("asaasConfig.editar");
+  const podeTestarConexao = usePermissao("asaasConfig.testarConexao");
+
   const [mostrarApi, setMostrarApi] = useState(false);
 
   const [configuracaoId, setConfiguracaoId] = useState(null);
@@ -261,54 +265,60 @@ export default function AsaasConfiguracaoForm() {
 
       <div className="border-t border-[var(--border-token)] px-8 py-6 flex flex-wrap gap-4">
 
-        <button
-          onClick={testarConexao}
-          disabled={testando || carregando}
-          className="
-          bg-blue-600
-          hover:bg-blue-700
-          disabled:opacity-50
-          text-[var(--text)]
-          px-6
-          py-3
-          rounded-xl
-          "
-        >
-          {testando ? "Testando..." : "Testar Conexão"}
-        </button>
+        {podeTestarConexao && (
+          <button
+            onClick={testarConexao}
+            disabled={testando || carregando}
+            className="
+            bg-blue-600
+            hover:bg-blue-700
+            disabled:opacity-50
+            text-[var(--text)]
+            px-6
+            py-3
+            rounded-xl
+            "
+          >
+            {testando ? "Testando..." : "Testar Conexão"}
+          </button>
+        )}
 
-        <button
-          onClick={buscarWallet}
-          disabled={buscandoWallet || carregando}
-          className="
-          bg-purple-600
-          hover:bg-purple-700
-          disabled:opacity-50
-          text-[var(--text)]
-          px-6
-          py-3
-          rounded-xl
-          "
-        >
-          {buscandoWallet ? "Buscando..." : "Buscar Wallet"}
-        </button>
+        {podeTestarConexao && (
+          <button
+            onClick={buscarWallet}
+            disabled={buscandoWallet || carregando}
+            className="
+            bg-purple-600
+            hover:bg-purple-700
+            disabled:opacity-50
+            text-[var(--text)]
+            px-6
+            py-3
+            rounded-xl
+            "
+          >
+            {buscandoWallet ? "Buscando..." : "Buscar Wallet"}
+          </button>
+        )}
 
-        <button
-          onClick={salvar}
-          disabled={salvando || carregando}
-          className="
-          bg-green-700
-          hover:bg-green-800
-          disabled:opacity-50
-          text-[var(--text)]
-          px-6
-          py-3
-          rounded-xl
-          ml-auto
-          "
-        >
-          {salvando ? "Salvando..." : "Salvar Configuração"}
-        </button>
+        {podeEditar && (
+          <button
+            onClick={salvar}
+            disabled={salvando || carregando}
+            className="
+            bg-green-700
+            hover:bg-green-800
+            disabled:opacity-50
+            text-[var(--text)]
+            px-6
+            py-3
+            rounded-xl
+            ml-auto
+            "
+          >
+            {salvando ? "Salvando..." : "Salvar Configuração"}
+          </button>
+        )}
 
       </div>
 

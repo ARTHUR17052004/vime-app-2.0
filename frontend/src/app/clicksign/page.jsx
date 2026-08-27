@@ -16,8 +16,17 @@ import WebhookCard from "../components/clicksign/WebhookCard";
 import AssinantesCard from "../components/clicksign/AssinantesCard";
 import AcessoRapido from "../components/clicksign/AcessoRapido";
 import SignatariosFixosCard from "../components/clicksign/SignatariosFixosCard";
+import SemPermissao from "../components/ui/SemPermissao";
+
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function ClicksignPage() {
+  const podeVisualizar = usePermissao("clicksign.visualizar");
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   return (
     <MainLayout>
 

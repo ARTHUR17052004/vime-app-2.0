@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { SignatarioFixoService } from "@/services/signatarioFixo.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 const SIGN_AS_OPCOES = [
   { value: "sign", label: "Assinar" },
@@ -27,6 +28,8 @@ const NOVO_PADRAO = {
 };
 
 export default function SignatariosFixosCard() {
+  const podeGerenciar = usePermissao("clicksign.signatariosFixos");
+
   const [lista, setLista] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [novo, setNovo] = useState(NOVO_PADRAO);
@@ -162,24 +165,28 @@ export default function SignatariosFixosCard() {
                     type="checkbox"
                     checked={signatario.ativo}
                     onChange={() => alternarAtivo(signatario)}
+                    disabled={!podeGerenciar}
                     className="scale-110"
                   />
                   Ativo
                 </label>
 
-                <button
-                  onClick={() => remover(signatario.id)}
-                  title="Remover"
-                  className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border-token)] text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition"
-                >
-                  <Trash2 size={16} />
-                </button>
+                {podeGerenciar && (
+                  <button
+                    onClick={() => remover(signatario.id)}
+                    title="Remover"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl border border-[var(--border-token)] text-red-400 hover:bg-red-500/10 hover:border-red-500/30 transition"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                )}
               </div>
             </div>
           ))}
         </div>
       )}
 
+      {podeGerenciar && (
       <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5">
 
         <p className="mb-4 text-sm font-medium text-slate-300">
@@ -246,6 +253,7 @@ export default function SignatariosFixosCard() {
         </div>
 
       </div>
+      )}
 
     </div>
   );

@@ -14,8 +14,14 @@ import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
+import SemPermissao from "../components/ui/SemPermissao";
+
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function RelatoriosPage() {
+
+  const podeVisualizar = usePermissao("relatorios.visualizar");
+  const podeExportar = usePermissao("relatorios.exportar");
 
   const [pesquisa, setPesquisa] =
     useState("");
@@ -50,6 +56,10 @@ export default function RelatoriosPage() {
 
     }, [modulos, pesquisa]);
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
  return (
 
   <MainLayout>
@@ -66,9 +76,11 @@ export default function RelatoriosPage() {
             count={modulos.length}
             countLabel="módulo(s) disponível(is)"
             actions={
-              <Button>
-                Exportar Tudo
-              </Button>
+              podeExportar && (
+                <Button>
+                  Exportar Tudo
+                </Button>
+              )
             }
           >
 
@@ -162,15 +174,19 @@ export default function RelatoriosPage() {
 
         </FadeIn>
 
-        <FadeIn delay={0.30}>
+        {podeExportar && (
 
-          <PageSection spacing="xxl">
+          <FadeIn delay={0.30}>
 
-            <RelatorioExportar />
+            <PageSection spacing="xxl">
 
-          </PageSection>
+              <RelatorioExportar />
 
-        </FadeIn>
+            </PageSection>
+
+          </FadeIn>
+
+        )}
 
       </PageContainer>
 

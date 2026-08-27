@@ -16,10 +16,16 @@ import UsuariosStats from "../../components/administracao/UsuariosStats";
 import UsuariosFilters from "../../components/administracao/UsuariosFilters";
 import UsuariosTable from "../../components/administracao/UsuariosTable";
 import UsuariosModal from "../../components/administracao/UsuariosModal";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { UsuarioService } from "@/services/usuarios.service";
 
+import { usePermissao } from "../../../hooks/usePermissao";
+
 export default function UsuariosPage() {
+
+  const podeVisualizar = usePermissao("usuarios.visualizar");
+  const podeCriar = usePermissao("usuarios.criar");
 
   const [usuarios, setUsuarios] = useState([]);
 
@@ -333,6 +339,10 @@ export default function UsuariosPage() {
 
   ).length;
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (loading) {
 
     return (
@@ -398,6 +408,8 @@ export default function UsuariosPage() {
               totalUsuarios={totalUsuarios}
 
               onNovoUsuario={novoUsuario}
+
+              podeCriar={podeCriar}
 
             />
 

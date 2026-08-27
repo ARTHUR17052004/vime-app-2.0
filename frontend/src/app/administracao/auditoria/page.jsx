@@ -13,8 +13,10 @@ import Table from "../../components/ui/Table";
 import Badge from "../../components/ui/Badge";
 import SearchInput from "../../components/ui/SearchInput";
 import Modal from "../../components/ui/Modal";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { AuditoriaService } from "@/services/auditoria.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 const ACAO_VARIANT = {
   CRIAR: "emerald",
@@ -26,6 +28,8 @@ const ACAO_VARIANT = {
 };
 
 export default function AuditoriaPage() {
+
+  const podeVisualizar = usePermissao("auditoria.visualizar");
 
   const router = useRouter();
 
@@ -136,6 +140,10 @@ export default function AuditoriaPage() {
       ),
     },
   ];
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   return (
 

@@ -8,6 +8,7 @@ export default function LogoCard({
   onChange = () => {},
   onSalvar = () => {},
   salvando = false,
+  podeEditar = true,
 }) {
 
   const inputRef = useRef(null);
@@ -104,17 +105,19 @@ export default function LogoCard({
             />
           </div>
 
-          <button
-            onClick={onSalvar}
-            disabled={salvando}
-            className="
-              mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700
-              disabled:opacity-50 disabled:cursor-not-allowed
-              transition px-6 py-3 text-[var(--text)]
-            "
-          >
-            {salvando ? "Salvando..." : "Salvar Alterações"}
-          </button>
+          {podeEditar && (
+            <button
+              onClick={onSalvar}
+              disabled={salvando}
+              className="
+                mt-2 rounded-xl bg-emerald-600 hover:bg-emerald-700
+                disabled:opacity-50 disabled:cursor-not-allowed
+                transition px-6 py-3 text-[var(--text)]
+              "
+            >
+              {salvando ? "Salvando..." : "Salvar Alterações"}
+            </button>
+          )}
 
         </div>
 

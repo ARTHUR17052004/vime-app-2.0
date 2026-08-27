@@ -7,11 +7,14 @@ import Input from "../ui/Input";
 import Button from "../ui/Button";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function WhatsappAssistenteCard({
   dados,
   onAtualizar,
 }) {
+  const podeConfigurar = usePermissao("whatsapp.assistenteConfigurar");
+
   const [ativo, setAtivo] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [salvando, setSalvando] = useState(false);
@@ -152,11 +155,13 @@ export default function WhatsappAssistenteCard({
         contato, a conversa continua caindo normalmente na caixa de mensagens.
       </p>
 
-      <div className="mt-8">
-        <Button onClick={salvar} disabled={salvando}>
-          {salvando ? "Salvando..." : "Salvar Assistente"}
-        </Button>
-      </div>
+      {podeConfigurar && (
+        <div className="mt-8">
+          <Button onClick={salvar} disabled={salvando}>
+            {salvando ? "Salvando..." : "Salvar Assistente"}
+          </Button>
+        </div>
+      )}
 
     </div>
   );

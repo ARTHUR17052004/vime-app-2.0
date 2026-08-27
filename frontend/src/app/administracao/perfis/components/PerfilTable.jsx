@@ -26,6 +26,10 @@ export default function PerfilTable({
 
   onStatus,
 
+  podeEditar = true,
+
+  podeExcluir = true,
+
 }) {
 
   const columns = [
@@ -114,6 +118,10 @@ export default function PerfilTable({
 
           onStatus={onStatus}
 
+          podeEditar={podeEditar}
+
+          podeExcluir={podeExcluir}
+
         />
 
       ),
@@ -147,6 +155,10 @@ function Actions({
   onExcluir,
 
   onStatus,
+
+  podeEditar = true,
+
+  podeExcluir = true,
 
 }) {
 
@@ -236,6 +248,7 @@ function Actions({
 
       >
 
+        {podeEditar && (
         <MenuButton
 
           icon={<Pencil size={18}/>}
@@ -251,6 +264,7 @@ function Actions({
           }}
 
         />
+        )}
 
         <MenuButton
 
@@ -284,6 +298,7 @@ function Actions({
 
         />
 
+        {podeExcluir && (
         <MenuButton
 
           danger
@@ -301,6 +316,7 @@ function Actions({
           }}
 
         />
+        )}
 
       </ActionMenu>
 

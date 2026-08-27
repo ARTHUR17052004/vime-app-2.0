@@ -7,11 +7,14 @@ import Select from "../ui/Select";
 import Button from "../ui/Button";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function WhatsappConfigCard({
   dados,
   onAtualizar,
 }) {
+  const podeConfigurar = usePermissao("whatsapp.configurar");
+
   const [form, setForm] = useState({
     nomeConexao: "",
     numero: "",
@@ -165,14 +168,16 @@ export default function WhatsappConfigCard({
 
       <div className="mt-8 flex gap-4 flex-wrap">
 
-        <Button
-          onClick={salvar}
-          disabled={salvando}
-        >
-          {salvando
-            ? "Salvando..."
-            : "Salvar Configuração"}
-        </Button>
+        {podeConfigurar && (
+          <Button
+            onClick={salvar}
+            disabled={salvando}
+          >
+            {salvando
+              ? "Salvando..."
+              : "Salvar Configuração"}
+          </Button>
+        )}
 
         <Button
           variant="secondary"

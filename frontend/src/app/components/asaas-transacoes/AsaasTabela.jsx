@@ -68,6 +68,8 @@ export default function AsaasTabela({
   onAlternarTodos,
   onEnviarSelecionados,
   enviandoLote = false,
+  podeEditar = true,
+  podeEnviar = true,
 }) {
 
   const enviaveis = transacoes.filter((t) => !t.enviadaAsaas);
@@ -236,7 +238,7 @@ export default function AsaasTabela({
                       Detalhes
                     </button>
 
-                    {!item.enviadaAsaas && (
+                    {!item.enviadaAsaas && podeEditar && (
                       <button
                         onClick={() => onEditar?.(item)}
                         className="
@@ -253,7 +255,7 @@ export default function AsaasTabela({
                       </button>
                     )}
 
-                    {!item.enviadaAsaas && (
+                    {!item.enviadaAsaas && podeEnviar && (
                       <button
                         onClick={() => onEnviar?.(item)}
                         disabled={enviandoId === item.id}
@@ -295,7 +297,7 @@ export default function AsaasTabela({
           {selecionados.size > 0 && ` • ${selecionados.size} selecionada(s)`}
         </span>
 
-        {selecionados.size > 0 && (
+        {selecionados.size > 0 && podeEnviar && (
           <button
             onClick={() => onEnviarSelecionados?.()}
             disabled={enviandoLote}

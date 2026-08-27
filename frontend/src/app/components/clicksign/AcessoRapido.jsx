@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { ClicksignService } from "@/services/clicksign.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 const acoes = [
   {
@@ -61,8 +62,14 @@ const acoes = [
 ];
 
 export default function AcessoRapido() {
+  const podeSincronizar = usePermissao("clicksign.sincronizar");
+
   const [sincronizando, setSincronizando] = useState(false);
   const [mensagem, setMensagem] = useState(null);
+
+  const acoesVisiveis = acoes.filter(
+    (item) => item.acao !== "sincronizar" || podeSincronizar
+  );
 
   function irPara(id) {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -101,7 +108,7 @@ export default function AcessoRapido() {
 
       <div className="space-y-3">
 
-        {acoes.map((item, index) => {
+        {acoesVisiveis.map((item, index) => {
 
           const Icon = item.icone;
 

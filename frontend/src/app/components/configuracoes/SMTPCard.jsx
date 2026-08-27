@@ -10,6 +10,7 @@ export default function SMTPCard({
   onChange = () => {},
   onSalvar = () => {},
   salvando = false,
+  podeEditar = true,
 }) {
   return (
     <div id="secao-smtp" className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
@@ -117,21 +118,23 @@ export default function SMTPCard({
 
       </div>
 
-      <button
-        onClick={onSalvar}
-        disabled={salvando}
-        className="
-          mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
-          disabled:opacity-50 disabled:cursor-not-allowed
-          transition px-6 py-3 text-[var(--text)] flex items-center gap-2
-        "
-      >
+      {podeEditar && (
+        <button
+          onClick={onSalvar}
+          disabled={salvando}
+          className="
+            mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700
+            disabled:opacity-50 disabled:cursor-not-allowed
+            transition px-6 py-3 text-[var(--text)] flex items-center gap-2
+          "
+        >
 
-        <ShieldCheck size={18} />
+          <ShieldCheck size={18} />
 
-        {salvando ? "Salvando..." : "Salvar"}
+          {salvando ? "Salvando..." : "Salvar"}
 
-      </button>
+        </button>
+      )}
 
     </div>
   );

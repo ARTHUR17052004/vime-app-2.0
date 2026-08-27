@@ -15,6 +15,7 @@ export default function SegurancaCard({
   onChange,
   onSalvar,
   salvando = false,
+  podeEditar = true,
 }) {
 
   const manutencaoAtiva = dados.manutencaoAtiva === true;
@@ -258,15 +259,17 @@ export default function SegurancaCard({
 
       </div>
 
-      <button
-        onClick={onSalvar}
-        disabled={salvando}
-        className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition px-6 py-3 text-[var(--text)]"
-      >
+      {podeEditar && (
+        <button
+          onClick={onSalvar}
+          disabled={salvando}
+          className="mt-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 transition px-6 py-3 text-[var(--text)]"
+        >
 
-        {salvando ? "Salvando..." : "Salvar Configurações"}
+          {salvando ? "Salvando..." : "Salvar Configurações"}
 
-      </button>
+        </button>
+      )}
 
     </div>
   );

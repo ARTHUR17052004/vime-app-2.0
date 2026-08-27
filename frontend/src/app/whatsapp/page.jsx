@@ -18,10 +18,14 @@ import WhatsappAssistenteCard from "../components/whatsapp/WhatsappAssistenteCar
 import WhatsappActions from "../components/whatsapp/WhatsappActions";
 import WhatsappConversations from "../components/whatsapp/WhatsappConversations";
 import WhatsappChat from "../components/whatsapp/WhatsappChat";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { WhatsappService } from "../../services/whatsapp.service";
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function WhatsappPage() {
+
+  const podeVisualizar = usePermissao("whatsapp.visualizar");
 
   const [loading, setLoading] = useState(true);
 
@@ -141,6 +145,10 @@ export default function WhatsappPage() {
 
 }, [conversaSelecionada]);
 
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
 

@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 
 import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function UsuariosActionsMenu({
 
@@ -43,6 +44,9 @@ export default function UsuariosActionsMenu({
 }) {
 
   const router = useRouter();
+
+  const podeEditar = usePermissao("usuarios.editar");
+  const podeExcluir = usePermissao("usuarios.excluir");
 
   const [open, setOpen] = useState(false);
 
@@ -171,19 +175,21 @@ export default function UsuariosActionsMenu({
 
         />
 
-        <MenuButton
-          icon={<Pencil size={18} />}
-          label="Editar"
-          onClick={() => {
+        {podeEditar && (
+          <MenuButton
+            icon={<Pencil size={18} />}
+            label="Editar"
+            onClick={() => {
 
-            console.log("EDITAR CLICADO", usuario);
+              console.log("EDITAR CLICADO", usuario);
 
-            onEditar?.(usuario);
+              onEditar?.(usuario);
 
-            setOpen(false);
+              setOpen(false);
 
-          }}
-        />
+            }}
+          />
+        )}
 
         <MenuButton
 
@@ -249,23 +255,25 @@ export default function UsuariosActionsMenu({
 
         />
 
-        <MenuButton
+        {podeExcluir && (
+          <MenuButton
 
-          danger
+            danger
 
-          icon={<Trash2 size={18} />}
+            icon={<Trash2 size={18} />}
 
-          label="Excluir"
+            label="Excluir"
 
-          onClick={() => {
+            onClick={() => {
 
-            onExcluir?.(usuario.id);
+              onExcluir?.(usuario.id);
 
-            setOpen(false);
+              setOpen(false);
 
-          }}
+            }}
 
-        />
+          />
+        )}
 
       </ActionMenu>
 

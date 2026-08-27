@@ -42,10 +42,15 @@ import PageHeader from "../../../components/ui/PageHeader";
 import PageSection from "../../../components/ui/PageSection";
 import Button from "../../../components/ui/Button";
 import FadeIn from "../../../components/ui/FadeIn";
+import SemPermissao from "../../../components/ui/SemPermissao";
 
 import { UsuarioService } from "@/services/usuarios.service";
 
+import { usePermissao } from "../../../../hooks/usePermissao";
+
 export default function UsuarioDetalhesPage() {
+
+  const podeVisualizar = usePermissao("usuarios.visualizar");
 
   const params = useParams();
 
@@ -87,6 +92,10 @@ export default function UsuarioDetalhesPage() {
     }
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
 

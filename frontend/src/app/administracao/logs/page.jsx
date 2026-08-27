@@ -11,10 +11,14 @@ import PageContainer from "../../components/ui/PageContainer";
 import PageSection from "../../components/ui/PageSection";
 import Table from "../../components/ui/Table";
 import SearchInput from "../../components/ui/SearchInput";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { LogService } from "@/services/log.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function LogsPage() {
+
+  const podeVisualizar = usePermissao("logs.visualizar");
 
   const router = useRouter();
 
@@ -106,6 +110,10 @@ export default function LogsPage() {
       render: (item) => item.ip || "-",
     },
   ];
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   return (
 

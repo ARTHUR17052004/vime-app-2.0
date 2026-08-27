@@ -16,6 +16,7 @@ import { ClicksignService } from "@/services/clicksign.service";
 import { obterLinkClicksign } from "@/utils/clicksignLink";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function extrairDocumentos(resposta) {
   const data = resposta?.data || resposta;
@@ -32,6 +33,9 @@ function statusLegivel(doc) {
 }
 
 export default function DocumentosCard() {
+  const podeEnviar = usePermissao("clicksign.enviar");
+  const podeCancelar = usePermissao("clicksign.cancelar");
+
   const inputRef = useRef(null);
 
   const [documentos, setDocumentos] = useState([]);
@@ -216,14 +220,16 @@ export default function DocumentosCard() {
 
         </div>
 
-        <button
-          onClick={abrirSeletorArquivo}
-          disabled={enviando}
-          className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-[var(--text)] transition hover:bg-emerald-700 disabled:opacity-50"
-        >
-          <Plus size={18} />
-          Novo Documento
-        </button>
+        {podeEnviar && (
+          <button
+            onClick={abrirSeletorArquivo}
+            disabled={enviando}
+            className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-5 py-3 text-[var(--text)] transition hover:bg-emerald-700 disabled:opacity-50"
+          >
+            <Plus size={18} />
+            Novo Documento
+          </button>
+        )}
 
       </div>
 
@@ -275,37 +281,39 @@ export default function DocumentosCard() {
 
       {/* Upload */}
 
-      <div
-        onClick={abrirSeletorArquivo}
-        className="mb-8 cursor-pointer rounded-3xl border-2 border-dashed border-[var(--border-token)] bg-[var(--surface-2)] p-10 text-center transition hover:border-emerald-500/40"
-      >
+      {podeEnviar && (
+        <div
+          onClick={abrirSeletorArquivo}
+          className="mb-8 cursor-pointer rounded-3xl border-2 border-dashed border-[var(--border-token)] bg-[var(--surface-2)] p-10 text-center transition hover:border-emerald-500/40"
+        >
 
-        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10">
 
-          <Upload size={36} className="text-emerald-400" />
+            <Upload size={36} className="text-emerald-400" />
+
+          </div>
+
+          <h3 className="text-xl font-semibold text-[var(--text)]">
+
+            Adicionar documentos
+
+          </h3>
+
+          <p className="mt-2 text-slate-400">
+
+            Clique aqui ou arraste arquivos PDF ou Word (.doc/.docx) para envio.
+
+          </p>
+
+          <button
+            onClick={(e) => { e.stopPropagation(); abrirSeletorArquivo(); }}
+            className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-[var(--text)] transition hover:bg-emerald-700"
+          >
+            Selecionar Arquivos
+          </button>
 
         </div>
-
-        <h3 className="text-xl font-semibold text-[var(--text)]">
-
-          Adicionar documentos
-
-        </h3>
-
-        <p className="mt-2 text-slate-400">
-
-          Clique aqui ou arraste arquivos PDF ou Word (.doc/.docx) para envio.
-
-        </p>
-
-        <button
-          onClick={(e) => { e.stopPropagation(); abrirSeletorArquivo(); }}
-          className="mt-6 rounded-2xl bg-emerald-600 px-6 py-3 text-[var(--text)] transition hover:bg-emerald-700"
-        >
-          Selecionar Arquivos
-        </button>
-
-      </div>
+      )}
 
       {/* Lista */}
 
@@ -354,7 +362,7 @@ export default function DocumentosCard() {
 
                   </button>
 
-                  {doc.status === "running" && (
+                  {doc.status === "running" && podeCancelar && (
 
                     <button
                       onClick={() => excluir(doc)}
@@ -493,20 +501,22 @@ export default function DocumentosCard() {
                 Cancelar
               </Button>
 
-              <Button
-                fullWidth
-                onClick={confirmarEnvio}
-                disabled={enviando}
-              >
-                {enviando ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Enviando...
-                  </>
-                ) : (
-                  "Enviar para assinatura"
-                )}
-              </Button>
+              {podeEnviar && (
+                <Button
+                  fullWidth
+                  onClick={confirmarEnvio}
+                  disabled={enviando}
+                >
+                  {enviando ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    "Enviar para assinatura"
+                  )}
+                </Button>
+              )}
 
             </div>
 

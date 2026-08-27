@@ -11,11 +11,18 @@ import PageSection from "../../components/ui/PageSection";
 
 import PerfilTable from "./components/PerfilTable";
 import PerfilModal from "./components/PerfilModal";
+import SemPermissao from "../../components/ui/SemPermissao";
 import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PerfilService } from "@/services/perfis.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function PerfisPage() {
+
+  const podeVisualizar = usePermissao("perfis.visualizar");
+  const podeCriar = usePermissao("perfis.criar");
+  const podeEditar = usePermissao("perfis.editar");
+  const podeExcluir = usePermissao("perfis.excluir");
 
   const [perfis, setPerfis] = useState([]);
 
@@ -134,6 +141,10 @@ export default function PerfisPage() {
 
   }, [perfis, busca]);
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (loading)
 
     return (
@@ -198,6 +209,7 @@ export default function PerfisPage() {
                     Voltar
                     </button>
 
+                    {podeCriar && (
                     <button
                     onClick={()=>{
                         setPerfilEditando(null);
@@ -215,6 +227,7 @@ export default function PerfisPage() {
                     >
                     Novo Perfil
                     </button>
+                    )}
 
                 </div>
 
@@ -265,6 +278,10 @@ export default function PerfisPage() {
               onExcluir={excluirPerfil}
 
               onStatus={alterarStatus}
+
+              podeEditar={podeEditar}
+
+              podeExcluir={podeExcluir}
 
             />
 

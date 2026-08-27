@@ -13,6 +13,8 @@ export default function UsuariosHeader({
 
   onNovoUsuario,
 
+  podeCriar = true,
+
 }) {
 
   return (
@@ -29,13 +31,17 @@ export default function UsuariosHeader({
 
       actions={
 
-        <Button onClick={onNovoUsuario}>
+        podeCriar && (
 
-          <UserPlus size={18} />
+          <Button onClick={onNovoUsuario}>
 
-          Novo Usuário
+            <UserPlus size={18} />
 
-        </Button>
+            Novo Usuário
+
+          </Button>
+
+        )
 
       }
 

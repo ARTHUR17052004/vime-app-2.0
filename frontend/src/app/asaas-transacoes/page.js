@@ -20,9 +20,11 @@ import AsaasExportar from "../components/asaas-transacoes/AsaasExportar";
 import AsaasDetalhesModal from "../components/asaas-transacoes/AsaasDetalhesModal";
 import AsaasEditarModal from "../components/asaas-transacoes/AsaasEditarModal";
 import AsaasNovaCobrancaModal from "../components/asaas-transacoes/AsaasNovaCobrancaModal";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { AsaasService } from "@/services/asaas.service";
 import { ReceitaService } from "@/services/financeiro.service";
+import { usePermissao } from "../../hooks/usePermissao";
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
@@ -32,6 +34,12 @@ const STATUS_ROTULO_PARA_VALOR = {
 };
 
 export default function AsaasTransacoesPage() {
+
+  const podeVisualizar = usePermissao("asaasTransacoes.visualizar");
+  const podeCriar = usePermissao("asaasTransacoes.criar");
+  const podeEditar = usePermissao("asaasTransacoes.editar");
+  const podeEnviar = usePermissao("asaasTransacoes.enviar");
+  const podeExportar = usePermissao("asaasTransacoes.exportar");
 
   const [transacoes, setTransacoes] =
     useState([]);
@@ -270,6 +278,10 @@ export default function AsaasTransacoesPage() {
 
   }, [transacoes, filtros]);
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   return (
 
   <MainLayout>
@@ -286,9 +298,11 @@ export default function AsaasTransacoesPage() {
             count={transacoes.length}
             countLabel="cobrança(s)"
             actions={
-              <Button onClick={() => setNovaCobrancaOpen(true)}>
-                Nova Cobrança
-              </Button>
+              podeCriar && (
+                <Button onClick={() => setNovaCobrancaOpen(true)}>
+                  Nova Cobrança
+                </Button>
+              )
             }
           />
 
@@ -334,21 +348,27 @@ export default function AsaasTransacoesPage() {
               onAlternarTodos={alternarTodos}
               onEnviarSelecionados={enviarSelecionados}
               enviandoLote={enviandoLote}
+              podeEditar={podeEditar}
+              podeEnviar={podeEnviar}
             />
 
           </PageSection>
 
         </FadeIn>
 
-        <FadeIn delay={0.40}>
+        {podeExportar && (
 
-          <PageSection spacing="xxl">
+          <FadeIn delay={0.40}>
 
-            <AsaasExportar transacoes={transacoesFiltradas} />
+            <PageSection spacing="xxl">
 
-          </PageSection>
+              <AsaasExportar transacoes={transacoesFiltradas} />
 
-        </FadeIn>
+            </PageSection>
+
+          </FadeIn>
+
+        )}
 
         <AsaasDetalhesModal
           open={detalhesOpen}

@@ -15,8 +15,11 @@ import {
 
 import { ConfiguracaoService } from "@/services/configuracao.service";
 import { ClicksignService } from "@/services/clicksign.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function TokenCard() {
+  const podeTestarConexao = usePermissao("clicksign.testarConexao");
+
   const [mostrarToken, setMostrarToken] = useState(false);
 
   const [configuracaoId, setConfiguracaoId] = useState(null);
@@ -303,14 +306,16 @@ export default function TokenCard() {
 
       <div className="mt-8 flex flex-wrap justify-end gap-3">
 
-        <button
-          onClick={testarConexao}
-          disabled={testando || carregando}
-          className="flex items-center gap-2 rounded-2xl border border-[var(--border-token)] bg-slate-800 px-5 py-3 text-[var(--text)] hover:border-emerald-500 transition disabled:opacity-50"
-        >
-          <RefreshCw size={18} className={testando ? "animate-spin" : ""} />
-          {testando ? "Testando..." : "Testar Conexão"}
-        </button>
+        {podeTestarConexao && (
+          <button
+            onClick={testarConexao}
+            disabled={testando || carregando}
+            className="flex items-center gap-2 rounded-2xl border border-[var(--border-token)] bg-slate-800 px-5 py-3 text-[var(--text)] hover:border-emerald-500 transition disabled:opacity-50"
+          >
+            <RefreshCw size={18} className={testando ? "animate-spin" : ""} />
+            {testando ? "Testando..." : "Testar Conexão"}
+          </button>
+        )}
 
         <button
           onClick={salvar}

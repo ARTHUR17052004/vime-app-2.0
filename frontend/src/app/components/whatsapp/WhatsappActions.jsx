@@ -13,12 +13,16 @@ import {
 } from "lucide-react";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function WhatsappActions({
 
   onAtualizar,
 
 }) {
+
+  const podeConectar = usePermissao("whatsapp.conectar");
+  const podeEnviar = usePermissao("whatsapp.enviar");
 
   const [qrCode, setQrCode] = useState("");
 
@@ -134,46 +138,54 @@ export default function WhatsappActions({
 
       <div className="flex flex-wrap gap-4">
 
-        <Button onClick={conectar}>
+        {podeConectar && (
+          <Button onClick={conectar}>
 
-          <PlugZap size={18} />
+            <PlugZap size={18} />
 
-          Conectar
+            Conectar
 
-        </Button>
+          </Button>
+        )}
 
-        <Button
-          variant="secondary"
-          onClick={gerarQrCode}
-        >
+        {podeConectar && (
+          <Button
+            variant="secondary"
+            onClick={gerarQrCode}
+          >
 
-          <QrCode size={18} />
+            <QrCode size={18} />
 
-          Gerar QR Code
+            Gerar QR Code
 
-        </Button>
+          </Button>
+        )}
 
-        <Button
-          variant="secondary"
-          onClick={enviarTeste}
-        >
+        {podeEnviar && (
+          <Button
+            variant="secondary"
+            onClick={enviarTeste}
+          >
 
-          <Send size={18} />
+            <Send size={18} />
 
-          Enviar Teste
+            Enviar Teste
 
-        </Button>
+          </Button>
+        )}
 
-        <Button
-          variant="secondary"
-          onClick={sincronizar}
-        >
+        {podeConectar && (
+          <Button
+            variant="secondary"
+            onClick={sincronizar}
+          >
 
-          <RefreshCcw size={18} />
+            <RefreshCcw size={18} />
 
-          Sincronizar
+            Sincronizar
 
-        </Button>
+          </Button>
+        )}
 
       </div>
 

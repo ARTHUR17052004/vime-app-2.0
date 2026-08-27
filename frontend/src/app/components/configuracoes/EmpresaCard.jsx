@@ -11,6 +11,7 @@ export default function EmpresaCard({
   onChange = () => {},
   onSalvar = () => {},
   salvando = false,
+  podeEditar = true,
 }) {
   return (
     <Card className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl shadow-xl p-6">
@@ -108,14 +109,16 @@ export default function EmpresaCard({
 
       </div>
 
-      <div className="flex justify-end mt-8">
-        <Button
-          onClick={onSalvar}
-          disabled={salvando}
-        >
-          {salvando ? "Salvando..." : "Salvar Alterações"}
-        </Button>
-      </div>
+      {podeEditar && (
+        <div className="flex justify-end mt-8">
+          <Button
+            onClick={onSalvar}
+            disabled={salvando}
+          >
+            {salvando ? "Salvando..." : "Salvar Alterações"}
+          </Button>
+        </div>
+      )}
 
     </Card>
   );

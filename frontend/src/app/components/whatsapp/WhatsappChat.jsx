@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 import {
   Bot,
@@ -11,6 +12,8 @@ import {
 } from "lucide-react";
 
 export default function WhatsappChat({ conversa }) {
+
+  const podeEnviar = usePermissao("whatsapp.enviar");
 
   const [texto, setTexto] = useState("");
 
@@ -346,7 +349,13 @@ export default function WhatsappChat({ conversa }) {
 
             onKeyDown={handleKeyDown}
 
-            placeholder="Digite uma mensagem..."
+            placeholder={
+              podeEnviar
+                ? "Digite uma mensagem..."
+                : "Você não tem permissão para enviar mensagens."
+            }
+
+            disabled={!podeEnviar}
 
             className="
               flex-1
@@ -357,37 +366,40 @@ export default function WhatsappChat({ conversa }) {
               text-[var(--text)]
               outline-none
               placeholder:text-[var(--text-faint)]
+              disabled:opacity-50
             "
 
           />
 
-          <button
+          {podeEnviar && (
+            <button
 
-            onClick={enviarMensagem}
+              onClick={enviarMensagem}
 
-            disabled={enviando}
+              disabled={enviando}
 
-            className="
-              h-14
-              w-14
-              rounded-xl
-              bg-green-600
-              flex
-              items-center
-              justify-center
-              transition
-              hover:bg-green-500
-              disabled:opacity-50
-            "
+              className="
+                h-14
+                w-14
+                rounded-xl
+                bg-green-600
+                flex
+                items-center
+                justify-center
+                transition
+                hover:bg-green-500
+                disabled:opacity-50
+              "
 
-          >
+            >
 
-            <SendHorizontal
-              size={22}
-              className="text-[var(--text)]"
-            />
+              <SendHorizontal
+                size={22}
+                className="text-[var(--text)]"
+              />
 
-          </button>
+            </button>
+          )}
 
         </div>
 

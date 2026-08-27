@@ -25,8 +25,10 @@ import BackupCard from "../components/configuracoes/BackupCard";
 import SegurancaCard from "../components/configuracoes/SegurancaCard";
 import LicencaCard from "../components/configuracoes/LicencaCard";
 import HistoricoCard from "../components/configuracoes/HistoricoCard";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { ConfiguracaoService } from "@/services/configuracao.service";
+import { usePermissao } from "../../hooks/usePermissao";
 
 const PADRAO = {
   empresa: "VIME APP 2.0",
@@ -59,6 +61,9 @@ const PADRAO = {
 };
 
 export default function ConfiguracoesPage() {
+  const podeVisualizar = usePermissao("configuracoes.visualizar");
+  const podeEditar = usePermissao("configuracoes.editar");
+
   const [dados, setDados] = useState(PADRAO);
   const [carregando, setCarregando] = useState(true);
   const [salvando, setSalvando] = useState(false);
@@ -144,6 +149,10 @@ export default function ConfiguracoesPage() {
 
   }
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (carregando) {
     return (
       <MainLayout>
@@ -177,6 +186,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <LogoCard
@@ -184,6 +194,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <TemaCard
@@ -191,6 +202,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <PersonalizacaoCard
@@ -198,6 +210,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <SistemaCard />
@@ -211,6 +224,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <BancoDadosCard />
@@ -222,6 +236,7 @@ export default function ConfiguracoesPage() {
                 onChange={alterar}
                 onSalvar={salvar}
                 salvando={salvando}
+                podeEditar={podeEditar}
               />
 
               <LicencaCard />
