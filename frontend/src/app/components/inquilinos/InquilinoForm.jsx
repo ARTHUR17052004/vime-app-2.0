@@ -213,13 +213,22 @@ export default function InquilinoForm({
             : value,
       };
 
-      // Data final sugerida automaticamente (4 meses após o início),
-      // só quando o campo ainda estiver vazio -- não sobrescreve se o
-      // usuário já escolheu uma data própria.
-      if (name === "dataInicioContrato" && value && !prev.dataFimContrato) {
+      // Data final sugerida automaticamente (prazo em meses após o
+      // início), só quando o campo ainda estiver vazio -- não
+      // sobrescreve se o usuário já escolheu uma data própria.
+      //
+      // O input de data dispara onChange a cada dígito digitado --
+      // enquanto o ano está pela metade (ex.: "0002" no meio de
+      // "2025"), value já é uma data "válida" só que com ano errado.
+      // Sem essa checagem, essa data quebrada era gravada e, como o
+      // campo deixa de estar vazio, nunca mais era recalculada.
+      const anoCompleto = /^\d{4}-\d{2}-\d{2}$/.test(value) && Number(value.slice(0, 4)) >= 1900;
+
+      if (name === "dataInicioContrato" && anoCompleto && !prev.dataFimContrato) {
 
         const data = new Date(value);
-        data.setMonth(data.getMonth() + 4);
+        const meses = Number(prev.prazoContrato) || 4;
+        data.setMonth(data.getMonth() + meses);
         novo.dataFimContrato = data.toISOString().slice(0, 10);
 
       }

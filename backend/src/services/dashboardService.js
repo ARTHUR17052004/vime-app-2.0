@@ -42,9 +42,12 @@ const resumo = async () => {
     return total + receita.valor;
   }, 0);
 
+  // "status" é o campo que a tela de Kitnets mostra e deixa editar
+  // direto -- usar ele aqui em vez de "ocupada" evita o dashboard
+  // ficar dessincronizado quando o status é alterado manualmente.
   const kitnetsOcupadas = await prisma.kitnet.count({
     where: {
-      ocupada: true
+      status: 'OCUPADA'
     }
   });
 
@@ -163,7 +166,7 @@ const ocupacao = async () => {
 
   const ocupadas = await prisma.kitnet.count({
     where: {
-      ocupada: true
+      status: 'OCUPADA'
     }
   });
 

@@ -75,6 +75,14 @@ const atualizar = async (id, dados) => {
     dados.aluguelManual = true;
   }
 
+  // "ocupada" e "status" representam a mesma coisa, mas quando o
+  // status é trocado direto aqui (fora do fluxo de contrato/inquilino),
+  // só ele era atualizado -- "ocupada" ficava para trás. Mantém os dois
+  // batendo sempre que o status muda nessa tela.
+  if (dados.status !== undefined) {
+    dados.ocupada = dados.status === 'OCUPADA';
+  }
+
   return prisma.kitnet.update({
     where: { id },
     data: dados

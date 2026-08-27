@@ -282,7 +282,15 @@ export default function ContratoForm({
 
         // Sugere a data final automaticamente (4 meses após o início)
         // só se o usuário ainda não tiver escolhido uma própria.
-        if (value && !prev.dataFim) {
+        //
+        // O input de data dispara onChange a cada dígito digitado --
+        // enquanto o ano está pela metade (ex.: "0002" no meio de
+        // "2025"), value já é uma data "válida" só que com ano errado.
+        // Sem essa checagem, essa data quebrada era gravada e, como o
+        // campo deixa de estar vazio, nunca mais era recalculada.
+        const anoCompleto = /^\d{4}-\d{2}-\d{2}$/.test(value) && Number(value.slice(0, 4)) >= 1900;
+
+        if (anoCompleto && !prev.dataFim) {
           const data = new Date(value);
           data.setMonth(data.getMonth() + 4);
           novo.dataFim = data.toISOString().slice(0, 10);

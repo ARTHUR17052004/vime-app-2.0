@@ -139,8 +139,12 @@ const sincronizarKitnets = async (antes, depois) => {
 
     const aRemover = Math.abs(diferenca);
 
+    // "status" (não "ocupada") é o campo que reflete a tela de Kitnets
+    // de verdade -- os dois podem ficar dessincronizados quando o
+    // status é trocado manualmente, e usar "ocupada" aqui já quase
+    // apagou kitnet ocupada de verdade nesta base.
     const candidatas = kitnets
-      .filter((k) => !k.ocupada)
+      .filter((k) => k.status !== 'OCUPADA')
       .sort((a, b) => (parseInt(b.numero, 10) || 0) - (parseInt(a.numero, 10) || 0))
       .slice(0, aRemover);
 
