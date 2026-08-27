@@ -3,6 +3,7 @@ const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
+const campoObrigatorioService = require('./campoObrigatorioService');
 
 const listar = () => {
   return prisma.vistoria.findMany({
@@ -51,6 +52,8 @@ const criar = async (dados) => {
 
   dados = converterDatas(dados);
 
+  await campoObrigatorioService.validar('vistoria', dados);
+
   const vistoria = await prisma.vistoria.create({
     data: dados
   });
@@ -80,6 +83,8 @@ const criar = async (dados) => {
 const atualizar = async (id, dados) => {
 
   dados = converterDatas(dados);
+
+  await campoObrigatorioService.validar('vistoria', dados);
 
   const anterior = await prisma.vistoria.findUnique({
     where: { id }

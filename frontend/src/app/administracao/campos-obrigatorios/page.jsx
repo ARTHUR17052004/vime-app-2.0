@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ListChecks } from "lucide-react";
+import { ArrowLeft, ListChecks, Lock } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import FadeIn from "../../components/ui/FadeIn";
@@ -17,19 +17,27 @@ import Button from "../../components/ui/Button";
 
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 
-// Cada módulo lista os campos disponíveis no cadastro dele. Mais
-// módulos entram aqui conforme forem sendo revisados.
+// Cada módulo lista os campos disponíveis no cadastro dele. Campos com
+// `travado: true` são exigidos pelo próprio sistema (coluna obrigatória
+// no banco) e nunca podem virar opcionais -- aparecem marcados e
+// desabilitados só pra deixar claro que existem e por que não dá pra
+// desmarcar, mas não são salvos como configuração (quem trava esses
+// campos é o código, não esta tela).
 const MODULOS = [
   {
     chave: "residencia",
     nome: "Residências",
     campos: [
+      { campo: "nome", label: "Nome da Residência", travado: true },
       { campo: "cep", label: "CEP" },
       { campo: "logradouro", label: "Logradouro" },
       { campo: "numero", label: "Número" },
       { campo: "complemento", label: "Complemento" },
       { campo: "bairro", label: "Bairro" },
+      { campo: "cidade", label: "Cidade", travado: true },
+      { campo: "uf", label: "UF", travado: true },
       { campo: "locadorId", label: "Locador" },
+      { campo: "kitnets", label: "Quantidade de Kitnets", travado: true },
       { campo: "aluguel", label: "Valor do Aluguel" },
       { campo: "vencimento", label: "Dia de Vencimento" },
       { campo: "dataInicioCobranca", label: "Data de Início da Cobrança" },
@@ -41,11 +49,16 @@ const MODULOS = [
     chave: "inquilino",
     nome: "Inquilinos",
     campos: [
+      { campo: "nome", label: "Nome Completo", travado: true },
+      { campo: "email", label: "E-mail", travado: true },
+      { campo: "telefone", label: "Telefone", travado: true },
       { campo: "cpf", label: "CPF" },
       { campo: "dataNascimento", label: "Data de Nascimento" },
       { campo: "enderecoAnterior", label: "Endereço Anterior" },
       { campo: "contatoEmergencia", label: "Contato de Emergência" },
       { campo: "telefoneEmergencia", label: "Telefone de Emergência" },
+      { campo: "kitnetId", label: "Kitnet", travado: true },
+      { campo: "dataInicioContrato", label: "Início do Contrato", travado: true },
       { campo: "dataFimContrato", label: "Data Final do Contrato" },
       { campo: "tipoGarantia", label: "Tipo de Garantia" },
       { campo: "valorCaucao", label: "Valor da Caução" },
@@ -56,6 +69,10 @@ const MODULOS = [
     nome: "Kitnets",
     campos: [
       { campo: "nome", label: "Nome da Kitnet" },
+      { campo: "unidadeId", label: "Residência", travado: true },
+      { campo: "numero", label: "Número", travado: true },
+      { campo: "metragem", label: "Metragem", travado: true },
+      { campo: "aluguel", label: "Valor do Aluguel", travado: true },
       { campo: "status", label: "Status" },
       { campo: "observacoes", label: "Observações" },
     ],
@@ -64,6 +81,8 @@ const MODULOS = [
     chave: "locador",
     nome: "Locadores",
     campos: [
+      { campo: "nome", label: "Nome Completo", travado: true },
+      { campo: "documento", label: "CPF/CNPJ", travado: true },
       { campo: "email", label: "E-mail" },
       { campo: "telefone", label: "Telefone" },
       { campo: "banco", label: "Banco" },
@@ -79,6 +98,13 @@ const MODULOS = [
     chave: "contrato",
     nome: "Contratos",
     campos: [
+      { campo: "locadorId", label: "Locador", travado: true },
+      { campo: "unidadeId", label: "Residência", travado: true },
+      { campo: "kitnetId", label: "Kitnet", travado: true },
+      { campo: "inquilinoId", label: "Inquilino", travado: true },
+      { campo: "dataInicio", label: "Data de Criação do Contrato", travado: true },
+      { campo: "valorAluguel", label: "Valor do Aluguel", travado: true },
+      { campo: "diaVencimento", label: "Dia do Vencimento", travado: true },
       { campo: "dataFim", label: "Data Final do Contrato" },
       { campo: "tipoGarantia", label: "Tipo de Garantia" },
       { campo: "valorCaucao", label: "Valor da Caução" },
@@ -89,9 +115,62 @@ const MODULOS = [
     chave: "solicitacao",
     nome: "Solicitações",
     campos: [
+      { campo: "numero", label: "Número", travado: true },
       { campo: "titulo", label: "Título" },
       { campo: "descricao", label: "Descrição" },
       { campo: "prazo", label: "Prazo" },
+    ],
+  },
+  {
+    chave: "vistoria",
+    nome: "Vistorias",
+    campos: [
+      { campo: "titulo", label: "Nome da Vistoria", travado: true },
+      { campo: "unidadeId", label: "Residência" },
+      { campo: "kitnetId", label: "Kitnet" },
+      { campo: "categoria", label: "Categoria" },
+      { campo: "criticidade", label: "Criticidade" },
+      { campo: "periodicidade", label: "Periodicidade" },
+      { campo: "responsavel", label: "Responsável" },
+      { campo: "dataProxima", label: "Data Próxima" },
+      { campo: "observacoes", label: "Observações" },
+    ],
+  },
+  {
+    chave: "receita",
+    nome: "Financeiro — Receitas",
+    campos: [
+      { campo: "categoria", label: "Categoria", travado: true },
+      { campo: "descricao", label: "Descrição", travado: true },
+      { campo: "valor", label: "Valor", travado: true },
+      { campo: "inquilinoId", label: "Inquilino" },
+      { campo: "status", label: "Status" },
+      { campo: "vencimento", label: "Vencimento" },
+      { campo: "dataPagamento", label: "Data de Pagamento" },
+    ],
+  },
+  {
+    chave: "despesa",
+    nome: "Financeiro — Despesas",
+    campos: [
+      { campo: "categoria", label: "Categoria", travado: true },
+      { campo: "descricao", label: "Descrição", travado: true },
+      { campo: "valor", label: "Valor", travado: true },
+      { campo: "unidadeId", label: "Residência" },
+      { campo: "status", label: "Status" },
+      { campo: "vencimento", label: "Vencimento" },
+      { campo: "dataPagamento", label: "Data de Pagamento" },
+    ],
+  },
+  {
+    chave: "cobranca",
+    nome: "Financeiro — Nova Cobrança",
+    campos: [
+      { campo: "categoria", label: "Categoria", travado: true },
+      { campo: "descricao", label: "Descrição", travado: true },
+      { campo: "valor", label: "Valor", travado: true },
+      { campo: "contratoId", label: "Contrato (Inquilino)" },
+      { campo: "vencimento", label: "Vencimento" },
     ],
   },
 ];
@@ -152,14 +231,17 @@ export default function CamposObrigatoriosPage() {
   }
 
   function marcarTudo() {
-    const todosMarcados = moduloAtual.campos.every((c) =>
+
+    const configuraveis = moduloAtual.campos.filter((c) => !c.travado);
+
+    const todosMarcados = configuraveis.every((c) =>
       selecionados.has(c.campo)
     );
 
     setSelecionados(
       todosMarcados
         ? new Set()
-        : new Set(moduloAtual.campos.map((c) => c.campo))
+        : new Set(configuraveis.map((c) => c.campo))
     );
   }
 
@@ -169,10 +251,12 @@ export default function CamposObrigatoriosPage() {
 
     try {
 
-      const campos = moduloAtual.campos.map((c) => ({
-        campo: c.campo,
-        obrigatorio: selecionados.has(c.campo),
-      }));
+      const campos = moduloAtual.campos
+        .filter((c) => !c.travado)
+        .map((c) => ({
+          campo: c.campo,
+          obrigatorio: selecionados.has(c.campo),
+        }));
 
       await CamposObrigatoriosService.salvar(moduloChave, campos);
 
@@ -307,22 +391,36 @@ export default function CamposObrigatoriosPage() {
 
                     <label
                       key={c.campo}
-                      className="
+                      className={`
                         flex
-                        items-center
+                        items-start
                         gap-3
-                        text-[var(--text-muted)]
-                        cursor-pointer
-                      "
+                        ${c.travado
+                          ? "text-[var(--text-faint)] cursor-not-allowed"
+                          : "text-[var(--text-muted)] cursor-pointer"}
+                      `}
                     >
 
                       <input
                         type="checkbox"
-                        checked={selecionados.has(c.campo)}
+                        checked={c.travado ? true : selecionados.has(c.campo)}
+                        disabled={c.travado}
                         onChange={() => alternar(c.campo)}
+                        className="mt-0.5"
                       />
 
-                      {c.label}
+                      <span>
+
+                        {c.label}
+
+                        {c.travado && (
+                          <span className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-[var(--text-faint)]">
+                            <Lock size={10} />
+                            sempre obrigatório
+                          </span>
+                        )}
+
+                      </span>
 
                     </label>
 

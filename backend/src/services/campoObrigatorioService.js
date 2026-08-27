@@ -83,6 +83,14 @@ const rotulosPadrao = {
   prazoContrato: 'Prazo do Contrato',
   dataInicioContrato: 'Data de Início do Contrato',
   dataFimContrato: 'Data Final do Contrato',
+  valor: 'Valor',
+  categoria: 'Categoria',
+  contratoId: 'Contrato',
+  dataPagamento: 'Data de Pagamento',
+  criticidade: 'Criticidade',
+  periodicidade: 'Periodicidade',
+  responsavel: 'Responsável',
+  dataProxima: 'Data Próxima',
 };
 
 // Lança erro listando os campos configurados como obrigatórios para o

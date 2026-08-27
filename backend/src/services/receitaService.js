@@ -3,6 +3,18 @@ const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
+const campoObrigatorioService = require('./campoObrigatorioService');
+
+// "Nova Receita" e "Nova Cobrança" criam a mesma Receita por baixo,
+// mas são telas diferentes -- cada uma com sua própria configuração em
+// Campos Obrigatórios ("receita" vs "cobranca"). `origemFormulario` diz
+// qual delas validar; não é campo do model, sai do payload antes do
+// create/update.
+const extrairModulo = (dados) => {
+  const modulo = dados.origemFormulario === 'cobranca' ? 'cobranca' : 'receita';
+  delete dados.origemFormulario;
+  return modulo;
+};
 
 const sanitizar = (dados) => {
 
@@ -62,7 +74,11 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
+  const modulo = extrairModulo(dados);
+
   dados = sanitizar(dados);
+
+  await campoObrigatorioService.validar(modulo, dados);
 
   const receita = await prisma.receita.create({
     data: dados
@@ -92,7 +108,11 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  const modulo = extrairModulo(dados);
+
   dados = sanitizar(dados);
+
+  await campoObrigatorioService.validar(modulo, dados);
 
   const anterior = await prisma.receita.findUnique({
     where: { id }

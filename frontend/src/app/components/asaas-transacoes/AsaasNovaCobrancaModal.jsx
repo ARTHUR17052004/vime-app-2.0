@@ -7,6 +7,8 @@ import Modal from "../ui/Modal";
 import { ContratoService } from "@/services/contratos.service";
 import { ReceitaService } from "@/services/financeiro.service";
 import { AsaasService } from "@/services/asaas.service";
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 
 const FORM_INICIAL = {
   contratoId: "",
@@ -14,6 +16,21 @@ const FORM_INICIAL = {
   descricao: "",
   valor: "",
   vencimento: "",
+};
+
+// Categoria/Descrição/Valor são colunas obrigatórias no banco da
+// Receita -- não tem como ficarem em branco independente do que for
+// configurado.
+const SEMPRE_OBRIGATORIOS = new Set(["categoria", "descricao", "valor"]);
+
+const CAMPOS = ["categoria", "descricao", "valor", "contratoId", "vencimento"];
+
+const ROTULOS = {
+  categoria: "Categoria",
+  descricao: "Descrição",
+  valor: "Valor",
+  contratoId: "Contrato",
+  vencimento: "Vencimento",
 };
 
 const rotuloContrato = (contrato) => {
@@ -48,6 +65,9 @@ export default function AsaasNovaCobrancaModal({
   const [erro, setErro] =
     useState("");
 
+  const [obrigatorios, setObrigatorios] =
+    useState(new Set());
+
   useEffect(() => {
 
     if (!open) return;
@@ -67,6 +87,18 @@ export default function AsaasNovaCobrancaModal({
         console.error("Erro ao carregar contratos:", err);
       });
 
+    CamposObrigatoriosService.listar("cobranca")
+      .then((resposta) => {
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        setObrigatorios(
+          new Set(lista.filter((c) => c.obrigatorio).map((c) => c.campo))
+        );
+      })
+      .catch((err) => {
+        console.error(err);
+      });
+
   }, [open]);
 
   const handleChange = (campo) => (e) => {
@@ -80,12 +112,22 @@ export default function AsaasNovaCobrancaModal({
 
     e.preventDefault();
 
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, form, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
     setErro("");
     setSalvando(true);
 
     try {
 
       const dados = {
+        origemFormulario: "cobranca",
         categoria: form.categoria,
         descricao: form.descricao,
         valor: Number(form.valor),
@@ -149,6 +191,7 @@ export default function AsaasNovaCobrancaModal({
 
       <form
         onSubmit={handleSubmit}
+        noValidate
         className="space-y-5"
       >
 
@@ -160,12 +203,13 @@ export default function AsaasNovaCobrancaModal({
 
         <div>
           <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-            Contrato (inquilino)
+            Contrato (inquilino){obrigatorios.has("contratoId") && <span className="text-red-400"> *</span>}
           </label>
 
           <select
             value={form.contratoId}
             onChange={handleChange("contratoId")}
+            required={obrigatorios.has("contratoId")}
             className={inputStyle}
           >
             <option value="" className="bg-[#1b2430]">
@@ -193,12 +237,13 @@ export default function AsaasNovaCobrancaModal({
 
           <div>
             <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-              Categoria
+              Categoria<span className="text-red-400"> *</span>
             </label>
 
             <select
               value={form.categoria}
               onChange={handleChange("categoria")}
+              required
               className={inputStyle}
             >
               <option className="bg-[#1b2430]">Aluguel</option>
@@ -210,7 +255,7 @@ export default function AsaasNovaCobrancaModal({
 
           <div>
             <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-              Valor
+              Valor<span className="text-red-400"> *</span>
             </label>
 
             <input
@@ -228,7 +273,7 @@ export default function AsaasNovaCobrancaModal({
 
         <div>
           <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-            Descrição
+            Descrição<span className="text-red-400"> *</span>
           </label>
 
           <input
@@ -242,15 +287,15 @@ export default function AsaasNovaCobrancaModal({
 
         <div>
           <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-            Vencimento
+            Vencimento{obrigatorios.has("vencimento") && <span className="text-red-400"> *</span>}
           </label>
 
           <input
             type="date"
             value={form.vencimento}
             onChange={handleChange("vencimento")}
+            required={obrigatorios.has("vencimento")}
             className={inputStyle}
-            required
           />
         </div>
 

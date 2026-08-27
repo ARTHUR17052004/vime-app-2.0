@@ -768,7 +768,7 @@ const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
   });
 
   await notificacaoService.criar({
-    origem: 'SISTEMA',
+    origem: 'CLICKSIGN',
     titulo: 'Contrato enviado para assinatura',
     mensagem: `Contrato de ${contrato.inquilino.nome} foi enviado à Clicksign para assinatura.`,
     link: `/contratos/${contrato.id}`

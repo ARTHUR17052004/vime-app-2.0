@@ -3,6 +3,7 @@ const { paraDataOuNull } = require('../utils/data');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
+const campoObrigatorioService = require('./campoObrigatorioService');
 
 const sanitizar = (dados) => {
 
@@ -50,6 +51,8 @@ const criar = async (dados) => {
 
   dados = sanitizar(dados);
 
+  await campoObrigatorioService.validar('despesa', dados);
+
   const despesa = await prisma.despesa.create({
     data: dados
   });
@@ -79,6 +82,8 @@ const criar = async (dados) => {
 const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
+
+  await campoObrigatorioService.validar('despesa', dados);
 
   const anterior = await prisma.despesa.findUnique({
     where: { id }

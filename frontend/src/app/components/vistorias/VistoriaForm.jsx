@@ -9,6 +9,30 @@ import Textarea from "../ui/Textarea";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
+import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
+import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+
+// "Nome da Vistoria" é sempre exigido -- vira a coluna "titulo" no
+// banco, que não aceita nulo, independente do que for configurado em
+// Campos Obrigatórios.
+const SEMPRE_OBRIGATORIOS = new Set(["nomeVistoria"]);
+
+const CAMPOS = [
+  "nomeVistoria", "unidadeId", "kitnetId", "categoria",
+  "criticidade", "periodicidade", "responsavel", "dataProxima", "observacoes",
+];
+
+const ROTULOS = {
+  nomeVistoria: "Nome da Vistoria",
+  unidadeId: "Residência",
+  kitnetId: "Kitnet",
+  categoria: "Categoria",
+  criticidade: "Criticidade",
+  periodicidade: "Periodicidade",
+  responsavel: "Responsável",
+  dataProxima: "Data Próxima",
+  observacoes: "Observações",
+};
 
 export default function VistoriaForm({
   onSave,
@@ -17,6 +41,9 @@ export default function VistoriaForm({
 
   const [residencias, setResidencias] = useState([]);
   const [kitnets, setKitnets] = useState([]);
+
+  const [obrigatorios, setObrigatorios] = useState(new Set());
+  const [erro, setErro] = useState("");
 
   const [formData, setFormData] = useState({
     unidadeId: "",
@@ -73,6 +100,39 @@ export default function VistoriaForm({
     }
 
     carregarResidencias();
+
+  }, []);
+
+  useEffect(() => {
+
+    async function carregarObrigatorios() {
+
+      try {
+
+        const resposta = await CamposObrigatoriosService.listar("vistoria");
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+
+        // O campo se chama "titulo" no banco, mas "nomeVistoria" aqui
+        // no formulário.
+        const MAPA = { titulo: "nomeVistoria" };
+
+        setObrigatorios(
+          new Set(
+            lista
+              .filter((c) => c.obrigatorio)
+              .map((c) => MAPA[c.campo] || c.campo)
+          )
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+    }
+
+    carregarObrigatorios();
 
   }, []);
 
@@ -149,6 +209,17 @@ export default function VistoriaForm({
 
     e.preventDefault();
 
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
     onSave(formData);
 
   };
@@ -171,6 +242,7 @@ export default function VistoriaForm({
 
     <form
       onSubmit={handleSubmit}
+      noValidate
       className="space-y-8"
     >
 
@@ -180,12 +252,14 @@ export default function VistoriaForm({
 
           <label className="font-semibold text-[var(--text-muted)]">
             Residência
+            {obrigatorios.has("unidadeId") && <span className="ml-1 text-red-400">*</span>}
           </label>
 
           <Select
             name="unidadeId"
             value={formData.unidadeId}
             onChange={handleChange}
+            required={obrigatorios.has("unidadeId")}
             className={input}
           >
             <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
@@ -209,12 +283,14 @@ export default function VistoriaForm({
 
           <label className="font-semibold text-[var(--text-muted)]">
             Kitnet
+            {obrigatorios.has("kitnetId") && <span className="ml-1 text-red-400">*</span>}
           </label>
 
           <Select
             name="kitnetId"
             value={formData.kitnetId}
             onChange={handleChange}
+            required={obrigatorios.has("kitnetId")}
             className={input}
           >
             <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
@@ -240,6 +316,7 @@ export default function VistoriaForm({
 
         <label className="font-semibold text-[var(--text-muted)]">
           Nome da Vistoria
+          <span className="ml-1 text-red-400">*</span>
         </label>
 
         <Input
@@ -247,6 +324,7 @@ export default function VistoriaForm({
           value={formData.nomeVistoria}
           onChange={handleChange}
           placeholder="Ex: Limpeza das Áreas Comuns"
+          required
           className={input}
         />
 
@@ -258,12 +336,14 @@ export default function VistoriaForm({
 
           <label className="font-semibold text-[var(--text-muted)]">
             Categoria
+            {obrigatorios.has("categoria") && <span className="ml-1 text-red-400">*</span>}
           </label>
 
           <Select
             name="categoria"
             value={formData.categoria}
             onChange={handleChange}
+            required={obrigatorios.has("categoria")}
             className={input}
           >
 
@@ -282,12 +362,14 @@ export default function VistoriaForm({
 
           <label className="font-semibold text-[var(--text-muted)]">
             Criticidade
+            {obrigatorios.has("criticidade") && <span className="ml-1 text-red-400">*</span>}
           </label>
 
           <Select
             name="criticidade"
             value={formData.criticidade}
             onChange={handleChange}
+            required={obrigatorios.has("criticidade")}
             className={input}
           >
 
@@ -308,12 +390,14 @@ export default function VistoriaForm({
 
           <label className="font-semibold text-[var(--text-muted)]">
             Periodicidade
+            {obrigatorios.has("periodicidade") && <span className="ml-1 text-red-400">*</span>}
           </label>
 
           <Select
             name="periodicidade"
             value={formData.periodicidade}
             onChange={handleChange}
+            required={obrigatorios.has("periodicidade")}
             className={input}
           >
 
@@ -333,6 +417,7 @@ export default function VistoriaForm({
 
   <label className="font-semibold text-[var(--text-muted)]">
     Responsável
+    {obrigatorios.has("responsavel") && <span className="ml-1 text-red-400">*</span>}
   </label>
 
   <Input
@@ -340,6 +425,7 @@ export default function VistoriaForm({
     value={formData.responsavel}
     onChange={handleChange}
     placeholder="Nome do responsável"
+    required={obrigatorios.has("responsavel")}
     className={input}
   />
 
@@ -369,6 +455,7 @@ export default function VistoriaForm({
 
     <label className="font-semibold text-[var(--text-muted)]">
       Data Próxima
+      {obrigatorios.has("dataProxima") && <span className="ml-1 text-red-400">*</span>}
     </label>
 
     <Input
@@ -376,6 +463,7 @@ export default function VistoriaForm({
       name="dataProxima"
       value={formData.dataProxima}
       onChange={handleChange}
+      required={obrigatorios.has("dataProxima")}
       className={input}
     />
 
@@ -609,6 +697,7 @@ export default function VistoriaForm({
 
   <label className="font-semibold text-[var(--text-muted)]">
     Observações
+    {obrigatorios.has("observacoes") && <span className="ml-1 text-red-400">*</span>}
   </label>
 
   <Textarea
@@ -616,6 +705,7 @@ export default function VistoriaForm({
     name="observacoes"
     value={formData.observacoes}
     onChange={handleChange}
+    required={obrigatorios.has("observacoes")}
     className={`
       ${input}
       min-h-[160px]
@@ -624,6 +714,12 @@ export default function VistoriaForm({
   />
 
 </div>
+
+{erro && (
+  <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
+    {erro}
+  </div>
+)}
 
 <div className="flex justify-end">
 
