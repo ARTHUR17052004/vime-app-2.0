@@ -12,13 +12,20 @@ const BASE_URLS = {
 
 class AsaasApi {
 
-  async obterConfig() {
+  // `override` deixa usar a conta Asaas de um locador específico em vez
+  // da conta padrão do sistema (ver locadorService/asaasService --
+  // "uma conta Asaas por locador"). Passa { apiKey } (e opcionalmente
+  // walletId); o ambiente (sandbox/produção) continua sendo o mesmo
+  // configurado globalmente, já que não faz sentido cada locador estar
+  // num ambiente diferente.
+  async obterConfig(override = null) {
 
     const configuracao = await prisma.configuracao.findFirst({
       orderBy: { id: "asc" },
     });
 
     const apiKey =
+      override?.apiKey ||
       configuracao?.asaasToken ||
       process.env.ASAAS_API_KEY ||
       "";
@@ -37,7 +44,7 @@ class AsaasApi {
       apiKey,
       ambiente,
       baseURL,
-      walletId: configuracao?.asaasWalletId || "",
+      walletId: override?.walletId || configuracao?.asaasWalletId || "",
       webhookToken: configuracao?.asaasWebhookToken || "",
       configuracaoId: configuracao?.id || null,
       email: configuracao?.email?.trim() || process.env.ASAAS_WEBHOOK_EMAIL || "",
@@ -45,9 +52,9 @@ class AsaasApi {
 
   }
 
-  async request(method, endpoint, body = null) {
+  async request(method, endpoint, body = null, override = null) {
 
-    const { apiKey, baseURL } = await this.obterConfig();
+    const { apiKey, baseURL } = await this.obterConfig(override);
 
     if (USAR_MOCK || !apiKey) {
 
@@ -151,16 +158,18 @@ class AsaasApi {
 
   }
 
-  async minhaConta() {
+  async minhaConta(override = null) {
 
     return this.request(
       "GET",
-      "/myAccount"
+      "/myAccount",
+      null,
+      override
     );
 
   }
 
-  async criarCliente(cliente) {
+  async criarCliente(cliente, override = null) {
 
     return this.request(
 
@@ -168,7 +177,9 @@ class AsaasApi {
 
       "/customers",
 
-      cliente
+      cliente,
+
+      override
 
     );
 
@@ -224,49 +235,57 @@ class AsaasApi {
 
   }
 
-  async criarCobranca(cobranca) {
+  async criarCobranca(cobranca, override = null) {
 
     return this.request(
       "POST",
       "/payments",
-      cobranca
+      cobranca,
+      override
     );
 
   }
 
-  async listarCobrancas(query = "") {
+  async listarCobrancas(query = "", override = null) {
 
     return this.request(
       "GET",
-      `/payments${query}`
+      `/payments${query}`,
+      null,
+      override
     );
 
   }
 
-  async buscarCobranca(id) {
+  async buscarCobranca(id, override = null) {
 
     return this.request(
       "GET",
-      `/payments/${id}`
+      `/payments/${id}`,
+      null,
+      override
     );
 
   }
 
-  async atualizarCobranca(id, cobranca) {
+  async atualizarCobranca(id, cobranca, override = null) {
 
     return this.request(
       "PUT",
       `/payments/${id}`,
-      cobranca
+      cobranca,
+      override
     );
 
   }
 
-  async cancelarCobranca(id) {
+  async cancelarCobranca(id, override = null) {
 
     return this.request(
       "DELETE",
-      `/payments/${id}`
+      `/payments/${id}`,
+      null,
+      override
     );
 
   }
@@ -275,9 +294,9 @@ class AsaasApi {
   // WEBHOOKS
   // ==========================
 
-  async configurarWebhook(url, token, eventos) {
+  async configurarWebhook(url, token, eventos, override = null) {
 
-    const { email } = await this.obterConfig();
+    const { email } = await this.obterConfig(override);
 
     if (!email) {
       throw new Error(
@@ -296,7 +315,8 @@ class AsaasApi {
         apiVersion: 3,
         authToken: token,
         events: eventos,
-      }
+      },
+      override
     );
 
   }

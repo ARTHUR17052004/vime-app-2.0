@@ -43,4 +43,10 @@ router.post("/webhook/token", permissaoMiddleware('asaasConfig.editar'), asaasCo
 
 router.post("/webhook/testar", permissaoMiddleware('asaasConfig.testarConexao'), asaasController.testarWebhook);
 
+// Conta Asaas própria de um locador (não a conta padrão do sistema) --
+// mesma permissão de testar/editar a config do Asaas.
+router.post("/locadores/:id/testar-conexao", permissaoMiddleware('asaasConfig.testarConexao'), asaasController.testarConexaoLocador);
+
+router.post("/locadores/:id/webhook", permissaoMiddleware('asaasConfig.editar'), asaasController.registrarWebhookLocador);
+
 module.exports = router;

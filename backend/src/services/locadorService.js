@@ -44,6 +44,9 @@ const criar = async (dados) => {
           : Number(dados.juros),
 
       observacoes: dados.observacoes,
+
+      asaasToken: dados.asaasToken || null,
+      asaasWalletId: dados.asaasWalletId || null,
     },
   });
 };
@@ -83,6 +86,9 @@ const atualizar = async (id, dados) => {
           : Number(dados.juros),
 
       observacoes: dados.observacoes,
+
+      asaasToken: dados.asaasToken || null,
+      asaasWalletId: dados.asaasWalletId || null,
     },
   });
 };

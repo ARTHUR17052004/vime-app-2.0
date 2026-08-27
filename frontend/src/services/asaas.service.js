@@ -42,4 +42,12 @@ export const AsaasService = {
     return api(`/asaas/transacoes/${receitaId}/enviar`, { method: "POST" });
   },
 
+  testarConexaoLocador(locadorId) {
+    return api(`/asaas/locadores/${locadorId}/testar-conexao`, { method: "POST" });
+  },
+
+  registrarWebhookLocador(locadorId) {
+    return api(`/asaas/locadores/${locadorId}/webhook`, { method: "POST" });
+  },
+
 };

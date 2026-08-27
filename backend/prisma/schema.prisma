@@ -226,6 +226,13 @@ model Locador {
 
   ativo Boolean @default(true)
 
+  // Conta própria do locador no Asaas -- quando preenchido, as
+  // cobranças dos contratos deste locador são criadas nesta conta em
+  // vez da conta padrão configurada em Configurações, então o dinheiro
+  // cai direto na conta bancária ligada a ESTE Asaas específico.
+  asaasToken    String?
+  asaasWalletId String?
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt

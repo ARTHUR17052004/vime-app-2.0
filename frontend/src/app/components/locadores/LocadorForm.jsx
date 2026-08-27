@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+import { AsaasService } from "@/services/asaas.service";
+import { usePermissao } from "@/hooks/usePermissao";
 
 const CAMPOS = [
   "nome", "documento", "email", "telefone", "banco", "agencia", "conta", "pix",
@@ -32,9 +34,17 @@ export default function LocadorForm({
   locadorEditando,
 }) {
 
+  const podeTestarAsaas = usePermissao("asaasConfig.testarConexao");
+  const podeEditarAsaas = usePermissao("asaasConfig.editar");
+
   const [obrigatorios, setObrigatorios] = useState(new Set());
 
   const [erro, setErro] = useState("");
+
+  const [testandoAsaas, setTestandoAsaas] = useState(false);
+  const [mensagemAsaas, setMensagemAsaas] = useState(null);
+
+  const [registrandoWebhook, setRegistrandoWebhook] = useState(false);
 
   useEffect(() => {
 
@@ -80,6 +90,9 @@ export default function LocadorForm({
     juros: "",
 
     observacoes: "",
+
+    asaasToken: "",
+    asaasWalletId: "",
 
   });
 
@@ -128,6 +141,12 @@ export default function LocadorForm({
       observacoes:
         locadorEditando.observacoes || "",
 
+      asaasToken:
+        locadorEditando.asaasToken || "",
+
+      asaasWalletId:
+        locadorEditando.asaasWalletId || "",
+
     });
 
   }, [locadorEditando]);
@@ -142,6 +161,64 @@ export default function LocadorForm({
       ...prev,
       [name]: value,
     }));
+
+  }
+
+  async function testarConexaoAsaas() {
+
+    if (!locadorEditando) return;
+
+    setTestandoAsaas(true);
+    setMensagemAsaas(null);
+
+    try {
+
+      const resposta = await AsaasService.testarConexaoLocador(locadorEditando.id);
+      const dados = resposta.data || resposta;
+
+      setMensagemAsaas({
+        tipo: dados.success ? "sucesso" : "erro",
+        texto: dados.mensagem || (dados.success ? "Conexão realizada com sucesso." : "Não foi possível conectar."),
+      });
+
+    } catch (err) {
+
+      setMensagemAsaas({ tipo: "erro", texto: err.message || "Não foi possível testar a conexão." });
+
+    } finally {
+
+      setTestandoAsaas(false);
+
+    }
+
+  }
+
+  async function registrarWebhookAsaas() {
+
+    if (!locadorEditando) return;
+
+    setRegistrandoWebhook(true);
+    setMensagemAsaas(null);
+
+    try {
+
+      const resposta = await AsaasService.registrarWebhookLocador(locadorEditando.id);
+      const dados = resposta.data || resposta;
+
+      setMensagemAsaas({
+        tipo: dados.success ? "sucesso" : "erro",
+        texto: dados.mensagem || (dados.success ? "Webhook registrado com sucesso." : "Não foi possível registrar o webhook."),
+      });
+
+    } catch (err) {
+
+      setMensagemAsaas({ tipo: "erro", texto: err.message || "Não foi possível registrar o webhook." });
+
+    } finally {
+
+      setRegistrandoWebhook(false);
+
+    }
 
   }
 
@@ -566,6 +643,95 @@ export default function LocadorForm({
           />
 
         </div>
+
+      </div>
+
+      {/* Conta Asaas própria */}
+
+      <div className="space-y-4">
+
+        <div>
+          <h3 className="text-lg font-semibold text-[var(--text)]">
+            Conta Asaas própria (opcional)
+          </h3>
+          <p className="text-sm text-[var(--text-subtle)] mt-1">
+            Preencha só se este locador tiver a própria conta no Asaas e quiser que o
+            aluguel dele caia direto lá. Deixe em branco para continuar usando a conta
+            padrão do sistema (Configurações → Asaas).
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+
+          <input
+            name="asaasToken"
+            type="password"
+            placeholder="Token da API do Asaas"
+            value={formData.asaasToken}
+            onChange={handleChange}
+            className={inputStyle}
+            autoComplete="off"
+          />
+
+          <input
+            name="asaasWalletId"
+            placeholder="Wallet ID (opcional)"
+            value={formData.asaasWalletId}
+            onChange={handleChange}
+            className={inputStyle}
+          />
+
+        </div>
+
+        {locadorEditando && formData.asaasToken && (podeTestarAsaas || podeEditarAsaas) && (
+
+          <div className="flex flex-wrap items-center gap-3">
+
+            {podeTestarAsaas && (
+              <button
+                type="button"
+                onClick={testarConexaoAsaas}
+                disabled={testandoAsaas}
+                className="
+                  rounded-xl border border-[var(--border-token)]
+                  bg-[var(--surface-2)] px-4 py-2.5 text-sm text-[var(--text)]
+                  hover:border-emerald-500/50 transition disabled:opacity-50
+                "
+              >
+                {testandoAsaas ? "Testando..." : "Testar Conexão"}
+              </button>
+            )}
+
+            {podeEditarAsaas && (
+              <button
+                type="button"
+                onClick={registrarWebhookAsaas}
+                disabled={registrandoWebhook}
+                className="
+                  rounded-xl border border-[var(--border-token)]
+                  bg-[var(--surface-2)] px-4 py-2.5 text-sm text-[var(--text)]
+                  hover:border-emerald-500/50 transition disabled:opacity-50
+                "
+              >
+                {registrandoWebhook ? "Registrando..." : "Registrar Webhook"}
+              </button>
+            )}
+
+          </div>
+
+        )}
+
+        {mensagemAsaas && (
+          <div
+            className={`rounded-xl px-4 py-3 text-sm border ${
+              mensagemAsaas.tipo === "sucesso"
+                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                : "border-red-500/30 bg-red-500/10 text-red-400"
+            }`}
+          >
+            {mensagemAsaas.texto}
+          </div>
+        )}
 
       </div>
 

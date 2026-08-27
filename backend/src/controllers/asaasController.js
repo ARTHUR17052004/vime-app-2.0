@@ -24,6 +24,29 @@ const testarConexao = async (req, res) => {
   });
 };
 
+const testarConexaoLocador = async (req, res) => {
+  const resultado = await asaasService.testarConexaoLocador(req.params.id);
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
+  });
+};
+
+const registrarWebhookLocador = async (req, res) => {
+
+  const webhookUrl = process.env.ASAAS_WEBHOOK_URL || `${req.protocol}://${req.get("host")}/asaas/webhook`;
+
+  const resultado = await asaasService.registrarWebhookLocador(req.params.id, webhookUrl);
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado
+  });
+};
+
 const buscarWallet = async (req, res) => {
   const resultado = await asaasService.buscarWallet();
 
@@ -226,6 +249,8 @@ module.exports = {
   config,
   status,
   testarConexao,
+  testarConexaoLocador,
+  registrarWebhookLocador,
   buscarWallet,
   listarTransacoes,
   buscarTransacao,
