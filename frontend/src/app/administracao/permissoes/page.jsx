@@ -93,6 +93,31 @@ const CATALOGO = [
     chave: "logs",
     acoes: ["visualizar"],
   },
+  {
+    modulo: "Asaas — Configuração",
+    chave: "asaasConfig",
+    acoes: ["visualizar", "editar", "testarConexao"],
+  },
+  {
+    modulo: "Asaas — Transações",
+    chave: "asaasTransacoes",
+    acoes: ["visualizar", "criar", "editar", "enviar", "exportar"],
+  },
+  {
+    modulo: "Clicksign",
+    chave: "clicksign",
+    acoes: ["visualizar", "testarConexao", "enviar", "cancelar", "signatariosFixos", "sincronizar"],
+  },
+  {
+    modulo: "WhatsApp",
+    chave: "whatsapp",
+    acoes: ["visualizar", "enviar", "conectar", "configurar", "assistenteConfigurar"],
+  },
+  {
+    modulo: "Notificações",
+    chave: "notificacoes",
+    acoes: ["visualizar", "gerenciar"],
+  },
 ];
 
 const ROTULOS_ACAO = {
@@ -102,6 +127,15 @@ const ROTULOS_ACAO = {
   excluir: "Excluir",
   exportar: "Exportar",
   classificar: "Classificar solicitações",
+  testarConexao: "Testar conexão",
+  enviar: "Enviar",
+  cancelar: "Cancelar",
+  signatariosFixos: "Signatários fixos",
+  sincronizar: "Sincronizar",
+  conectar: "Conectar / QR Code",
+  configurar: "Configurar",
+  assistenteConfigurar: "Configurar assistente de IA",
+  gerenciar: "Gerenciar",
 };
 
 export default function PermissoesPage() {

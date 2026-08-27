@@ -5,6 +5,7 @@ const router = express.Router();
 const asaasController = require('../controllers/asaasController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
+const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
 
 // Rota pública — chamada pelo próprio Asaas, sem cookie/JWT de sessão.
 // A autenticidade é validada por dentro (token asaas-access-token).
@@ -12,34 +13,34 @@ router.post("/webhook", asaasController.webhook);
 
 router.use(authMiddleware);
 
-router.get('/config', asaasController.config);
+router.get('/config', permissaoMiddleware('asaasConfig.visualizar'), asaasController.config);
 
-router.get('/status', asaasController.status);
+router.get('/status', permissaoMiddleware('asaasConfig.visualizar'), asaasController.status);
 
-router.post('/testar-conexao', asaasController.testarConexao);
+router.post('/testar-conexao', permissaoMiddleware('asaasConfig.testarConexao'), asaasController.testarConexao);
 
-router.post('/buscar-wallet', asaasController.buscarWallet);
+router.post('/buscar-wallet', permissaoMiddleware('asaasConfig.testarConexao'), asaasController.buscarWallet);
 
-router.get('/transacoes', asaasController.listarTransacoes);
+router.get('/transacoes', permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarTransacoes);
 
-router.get('/transacoes/:id', asaasController.buscarTransacao);
+router.get('/transacoes/:id', permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.buscarTransacao);
 
-router.post('/transacoes/:id/enviar', asaasController.enviarCobranca);
+router.post('/transacoes/:id/enviar', permissaoMiddleware('asaasTransacoes.enviar'), asaasController.enviarCobranca);
 
-router.get('/resumo', asaasController.resumo);
+router.get('/resumo', permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.resumo);
 
-router.post('/sincronizar', asaasController.sincronizar);
+router.post('/sincronizar', permissaoMiddleware('asaasConfig.editar'), asaasController.sincronizar);
 
-router.get("/clientes", asaasController.listarClientes);
+router.get("/clientes", permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarClientes);
 
-router.post("/clientes", asaasController.criarCliente);
+router.post("/clientes", permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCliente);
 
-router.get("/cobrancas", asaasController.listarCobrancas);
+router.get("/cobrancas", permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarCobrancas);
 
-router.post("/cobrancas", asaasController.criarCobranca);
+router.post("/cobrancas", permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCobranca);
 
-router.post("/webhook/token", asaasController.gerarTokenWebhook);
+router.post("/webhook/token", permissaoMiddleware('asaasConfig.editar'), asaasController.gerarTokenWebhook);
 
-router.post("/webhook/testar", asaasController.testarWebhook);
+router.post("/webhook/testar", permissaoMiddleware('asaasConfig.testarConexao'), asaasController.testarWebhook);
 
 module.exports = router;
