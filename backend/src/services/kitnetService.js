@@ -50,7 +50,10 @@ const criar = async (dados) => {
   }
 
   return prisma.kitnet.create({
-    data: dados
+    // Criada manualmente aqui (fora do lote automático da Residência)
+    // -- o valor já veio escolhido pelo usuário, então não deixa a
+    // edição da Residência sobrescrever depois.
+    data: { ...dados, aluguelManual: true }
   });
 
 };
@@ -58,6 +61,19 @@ const criar = async (dados) => {
 const atualizar = async (id, dados) => {
 
   await campoObrigatorioService.validar('kitnet', dados);
+
+  const atual = await prisma.kitnet.findUnique({ where: { id } });
+
+  // Só marca como "editada manualmente" se o aluguel realmente mudou --
+  // assim um salvar sem mexer nesse campo não trava a sincronização
+  // automática vinda da Residência.
+  if (
+    atual &&
+    dados.aluguel !== undefined &&
+    Number(dados.aluguel) !== atual.aluguel
+  ) {
+    dados.aluguelManual = true;
+  }
 
   return prisma.kitnet.update({
     where: { id },

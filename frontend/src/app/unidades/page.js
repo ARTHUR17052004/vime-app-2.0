@@ -122,10 +122,17 @@ export default function UnidadesPage() {
 
       if (editingUnit) {
 
-        await UnidadeService.atualizar(
+        const resposta = await UnidadeService.atualizar(
           editingUnit.id,
           payload
         );
+
+        const avisoKitnets =
+          resposta?.avisoKitnets || resposta?.data?.avisoKitnets;
+
+        if (avisoKitnets) {
+          alert(avisoKitnets);
+        }
 
       } else {
 

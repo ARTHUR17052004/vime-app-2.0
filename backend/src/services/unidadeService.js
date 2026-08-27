@@ -94,16 +94,97 @@ const criar = async (dados) => {
 
 };
 
+// Depois de editar a residência, mantém as kitnets em sincronia:
+// - quantidade menor -> apaga o excedente (só vagas -- nunca uma
+//   kitnet ocupada, isso apagaria inquilino/contrato junto)
+// - quantidade maior -> cria as que faltam, continuando a numeração
+// - aluguel mudou -> propaga pras kitnets que nunca foram editadas
+//   manualmente (aluguelManual: false)
+const sincronizarKitnets = async (antes, depois) => {
+
+  const kitnets = await prisma.kitnet.findMany({
+    where: { unidadeId: depois.id },
+    orderBy: { numero: 'asc' },
+  });
+
+  const aluguelMudou = (depois.aluguel ?? null) !== (antes.aluguel ?? null);
+
+  if (aluguelMudou) {
+    await prisma.kitnet.updateMany({
+      where: { unidadeId: depois.id, aluguelManual: false },
+      data: { aluguel: depois.aluguel || 0 },
+    });
+  }
+
+  const alvo = depois.kitnets || 0;
+  const diferenca = alvo - kitnets.length;
+
+  if (diferenca > 0) {
+
+    const maiorNumero = kitnets.reduce((max, k) => {
+      const n = parseInt(k.numero, 10);
+      return Number.isNaN(n) ? max : Math.max(max, n);
+    }, 0);
+
+    const novas = Array.from({ length: diferenca }, (_, i) => ({
+      numero: String(maiorNumero + i + 1).padStart(2, '0'),
+      metragem: 20,
+      aluguel: depois.aluguel || 0,
+      unidadeId: depois.id,
+    }));
+
+    await prisma.kitnet.createMany({ data: novas });
+
+  } else if (diferenca < 0) {
+
+    const aRemover = Math.abs(diferenca);
+
+    const candidatas = kitnets
+      .filter((k) => !k.ocupada)
+      .sort((a, b) => (parseInt(b.numero, 10) || 0) - (parseInt(a.numero, 10) || 0))
+      .slice(0, aRemover);
+
+    if (candidatas.length > 0) {
+      await prisma.kitnet.deleteMany({
+        where: { id: { in: candidatas.map((k) => k.id) } },
+      });
+    }
+
+    // Se não tinha vaga suficiente pra apagar (kitnets ocupadas no
+    // caminho), o total real fica acima do pedido -- avisa o usuário
+    // em vez de falhar a edição inteira.
+    if (candidatas.length < aRemover) {
+      return `Não foi possível reduzir para ${alvo} kitnet(s): ${
+        aRemover - candidatas.length
+      } kitnet(s) em excesso está(ão) ocupada(s) e não foi(ram) removida(s). Desocupe-a(s) primeiro.`;
+    }
+
+  }
+
+  return null;
+
+};
+
 const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
   await campoObrigatorioService.validar('residencia', dados);
 
-  return prisma.unidade.update({
+  const antes = await prisma.unidade.findUnique({ where: { id } });
+
+  if (!antes) {
+    throw new Error('Residência não encontrada.');
+  }
+
+  const unidade = await prisma.unidade.update({
     where: { id },
     data: dados
   });
+
+  const avisoKitnets = await sincronizarKitnets(antes, unidade);
+
+  return avisoKitnets ? { ...unidade, avisoKitnets } : unidade;
 };
 
 const remover = (id) => {

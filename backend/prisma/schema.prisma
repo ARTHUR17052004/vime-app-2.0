@@ -46,6 +46,9 @@ model Kitnet {
   updatedAt  DateTime    @updatedAt
   nome       String?
   observacoes String?
+  // true depois que o aluguel dessa kitnet é editado individualmente --
+  // a partir daí, mudar o valor da Residência não sobrescreve mais ela.
+  aluguelManual Boolean  @default(false)
   contratos  Contrato[]
   inquilinos Inquilino[]
   unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
