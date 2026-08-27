@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const ClicksignApi = require("./ClicksignApi");
+const notificacaoService = require("./notificacaoService");
 
 const config = async () => {
 
@@ -210,6 +211,13 @@ const processarWebhook = async (evento) => {
 
         console.log(`[Clicksign Webhook] Receita ${receitaCriada.id} criada para o contrato ${documento.id}.`);
 
+        await notificacaoService.criar({
+          origem: "CLICKSIGN",
+          titulo: "Contrato assinado",
+          mensagem: `Contrato de ${documento.inquilino?.nome || "inquilino"} foi assinado na Clicksign.`,
+          link: `/contratos/${documento.id}`
+        });
+
       } else {
 
         console.log(`[Clicksign Webhook] Receita já existia para o contrato ${documento.id}, nada a fazer.`);
@@ -227,6 +235,13 @@ const processarWebhook = async (evento) => {
         data: {
           status: "CANCELADO"
         }
+      });
+
+      await notificacaoService.criar({
+        origem: "CLICKSIGN",
+        titulo: "Contrato cancelado na Clicksign",
+        mensagem: `O envio para assinatura do contrato de ${documento.inquilino?.nome || "inquilino"} foi cancelado.`,
+        link: `/contratos/${documento.id}`
       });
 
       break;

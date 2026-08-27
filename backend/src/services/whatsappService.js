@@ -2,6 +2,7 @@ const prisma = require("../config/prisma");
 const axios = require("axios");
 const metaWhatsappService = require("./metaWhatsappService");
 const assistenteWhatsappService = require("./assistenteWhatsappService");
+const notificacaoService = require("./notificacaoService");
 const { getIO } = require("../socket");
 
 const USAR_MOCK =
@@ -407,6 +408,17 @@ class WhatsappService {
               increment: 1,
             },
           },
+        });
+
+        // O WhatsApp é onde a equipe efetivamente responde o inquilino --
+        // toda mensagem recebida precisa aparecer no sino de notificações
+        // pra alguém saber que precisa responder, mesmo se o assistente
+        // de IA também responder automaticamente logo abaixo.
+        await notificacaoService.criar({
+          origem: "WHATSAPP",
+          titulo: `Nova mensagem de ${contato.nome || numero}`,
+          mensagem: texto,
+          link: "/whatsapp",
         });
 
         // Assistente IA: só responde automaticamente se estiver ativado
