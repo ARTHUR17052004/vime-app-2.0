@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, KeyRound } from "lucide-react";
+import { ArrowLeft, KeyRound, Lock } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import FadeIn from "../../components/ui/FadeIn";
@@ -22,16 +22,19 @@ const CATALOGO = [
     modulo: "Usuários",
     chave: "usuarios",
     acoes: ["visualizar", "criar", "editar", "excluir"],
+    sempreAdministrador: true,
   },
   {
     modulo: "Perfis",
     chave: "perfis",
     acoes: ["visualizar", "criar", "editar", "excluir"],
+    sempreAdministrador: true,
   },
   {
     modulo: "Permissões",
     chave: "permissoes",
     acoes: ["visualizar", "editar"],
+    sempreAdministrador: true,
   },
   {
     modulo: "Locadores",
@@ -423,6 +426,35 @@ export default function PermissoesPage() {
                       </button>
 
                     </div>
+
+                    {modulo.sempreAdministrador && (
+
+                      <div
+                        className="
+                          mb-4
+                          flex
+                          items-start
+                          gap-2
+                          rounded-xl
+                          border
+                          border-yellow-500/20
+                          bg-yellow-500/10
+                          px-4
+                          py-3
+                          text-xs
+                          text-yellow-300
+                        "
+                      >
+                        <Lock size={14} className="mt-0.5 shrink-0" />
+                        <span>
+                          Por segurança, só o perfil ADMINISTRADOR mexe aqui, mesmo que
+                          você marque estas caixinhas para outro perfil -- gerenciar
+                          usuários, perfis e permissões fica travado pra evitar que
+                          alguém dê acesso a si mesmo.
+                        </span>
+                      </div>
+
+                    )}
 
                     <div className="space-y-3">
 

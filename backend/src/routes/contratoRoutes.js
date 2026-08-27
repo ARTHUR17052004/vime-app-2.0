@@ -5,25 +5,29 @@ const router = express.Router();
 const contratoController = require('../controllers/contratoController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
+const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
 
-router.get('/', contratoController.listar);
+router.get('/', permissaoMiddleware('contratos.visualizar'), contratoController.listar);
 
-router.get('/:id', contratoController.buscarPorId);
+router.get('/:id', permissaoMiddleware('contratos.visualizar'), contratoController.buscarPorId);
 
-router.get('/:id/pdf', contratoController.baixarPdf);
+router.get('/:id/pdf', permissaoMiddleware('contratos.visualizar'), contratoController.baixarPdf);
 
-router.post('/', contratoController.criar);
+router.post('/', permissaoMiddleware('contratos.criar'), contratoController.criar);
 
-router.put('/:id', contratoController.atualizar);
+router.put('/:id', permissaoMiddleware('contratos.editar'), contratoController.atualizar);
 
-router.delete('/:id', contratoController.remover);
+router.delete('/:id', permissaoMiddleware('contratos.excluir'), contratoController.remover);
 
-router.patch('/:id/encerrar', contratoController.encerrar);
+router.patch('/:id/encerrar', permissaoMiddleware('contratos.editar'), contratoController.encerrar);
 
-router.patch('/:id/renovar', contratoController.renovar);
+router.patch('/:id/renovar', permissaoMiddleware('contratos.editar'), contratoController.renovar);
 
-router.post('/:id/enviar-clicksign', contratoController.enviarClicksign);
+// Envio pra assinatura é ação do próprio Contrato (finaliza o
+// documento), não do módulo "Clicksign" (que cobre a área de
+// integração/documentos avulsos) -- fica sob a permissão de Contratos.
+router.post('/:id/enviar-clicksign', permissaoMiddleware('contratos.editar'), contratoController.enviarClicksign);
 
 module.exports = router;

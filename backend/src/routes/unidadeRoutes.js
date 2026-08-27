@@ -4,15 +4,16 @@ const router = express.Router();
 
 const unidadeController = require('../controllers/unidadeController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
 
-router.get('/', unidadeController.listar);
+router.get('/', permissaoMiddleware('unidades.visualizar'), unidadeController.listar);
 
-router.post('/', unidadeController.criar);
+router.post('/', permissaoMiddleware('unidades.criar'), unidadeController.criar);
 
-router.put('/:id', unidadeController.atualizar);
+router.put('/:id', permissaoMiddleware('unidades.editar'), unidadeController.atualizar);
 
-router.delete('/:id', unidadeController.remover);
+router.delete('/:id', permissaoMiddleware('unidades.excluir'), unidadeController.remover);
 
 module.exports = router;

@@ -12,6 +12,7 @@ import {
 import { useRouter } from "next/navigation";
 
 import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function KitnetActionsMenu({
   kitnet,
@@ -20,6 +21,9 @@ export default function KitnetActionsMenu({
 }) {
 
   const router = useRouter();
+
+  const podeEditar = usePermissao("kitnets.editar");
+  const podeExcluir = usePermissao("kitnets.excluir");
 
   const [open, setOpen] = useState(false);
 
@@ -135,30 +139,34 @@ export default function KitnetActionsMenu({
           }}
         />
 
-        <MenuButton
-          icon={<Pencil size={17} />}
-          label="Editar"
-          onClick={() => {
+        {podeEditar && (
+          <MenuButton
+            icon={<Pencil size={17} />}
+            label="Editar"
+            onClick={() => {
 
-            onEdit?.(kitnet);
+              onEdit?.(kitnet);
 
-            setOpen(false);
+              setOpen(false);
 
-          }}
-        />
+            }}
+          />
+        )}
 
-        <MenuButton
-          danger
-          icon={<Trash2 size={17} />}
-          label="Excluir"
-          onClick={() => {
+        {podeExcluir && (
+          <MenuButton
+            danger
+            icon={<Trash2 size={17} />}
+            label="Excluir"
+            onClick={() => {
 
-            onDelete?.(kitnet.id);
+              onDelete?.(kitnet.id);
 
-            setOpen(false);
+              setOpen(false);
 
-          }}
-        />
+            }}
+          />
+        )}
 
       </ActionMenu>
 

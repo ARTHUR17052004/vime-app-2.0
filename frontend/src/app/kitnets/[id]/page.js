@@ -19,12 +19,17 @@ import Page from "../../components/ui/Page";
 import PageContainer from "../../components/ui/PageContainer";
 import PageHeader from "../../components/ui/PageHeader";
 import Button from "../../components/ui/Button";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { KitnetService } from "../../../services/kitnets.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function KitnetDetalhesPage() {
   const params = useParams();
   const router = useRouter();
+
+  const podeVisualizar = usePermissao("kitnets.visualizar");
+  const podeEditar = usePermissao("kitnets.editar");
 
   const [kitnet, setKitnet] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -54,6 +59,10 @@ export default function KitnetDetalhesPage() {
       carregarKitnet();
     }
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
     return (
@@ -108,14 +117,16 @@ export default function KitnetDetalhesPage() {
                   Voltar
                 </Button>
 
-                <Button
-                  onClick={() =>
-                    router.push("/kitnets")
-                  }
-                >
-                  <Pencil size={18} />
-                  Editar
-                </Button>
+                {podeEditar && (
+                  <Button
+                    onClick={() =>
+                      router.push("/kitnets")
+                    }
+                  >
+                    <Pencil size={18} />
+                    Editar
+                  </Button>
+                )}
 
               </div>
             }

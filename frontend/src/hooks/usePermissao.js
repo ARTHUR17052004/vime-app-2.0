@@ -1,60 +1,40 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 import { useAuth } from "@/context/AuthContext";
-import { PerfilService } from "@/services/perfis.service";
 
+// usuario.permissoes já vem completo no login (ver authService.js no
+// backend) e fica salvo no localStorage -- não precisa buscar de novo
+// a cada checagem. ADMINISTRADOR sempre pode tudo, igual à regra do
+// backend (permissaoMiddleware).
 export function usePermissao(chave) {
 
   const { usuario } = useAuth();
 
-  const [permitido, setPermitido] = useState(false);
+  if (!usuario) return false;
 
-  useEffect(() => {
+  if (usuario.perfil === "ADMINISTRADOR") return true;
 
-    async function verificar() {
+  return Boolean(usuario.permissoes?.includes(chave));
 
-      if (!usuario) {
-        setPermitido(false);
-        return;
-      }
+}
 
-      if (usuario.perfil === "ADMINISTRADOR") {
-        setPermitido(true);
-        return;
-      }
+// Pra quando o componente precisa checar várias permissões de uma vez
+// (ex.: uma tabela que decide mostrar "Editar" e "Excluir" no menu de
+// ações) -- evita repetir a leitura do usuário pra cada uma.
+export function usePermissoes() {
 
-      try {
+  const { usuario } = useAuth();
 
-        const resposta = await PerfilService.listar();
+  function pode(chave) {
 
-        const perfis = Array.isArray(resposta)
-          ? resposta
-          : resposta.data || [];
+    if (!usuario) return false;
 
-        const meuPerfil = perfis.find(
-          (p) => p.nome === usuario.perfil
-        );
+    if (usuario.perfil === "ADMINISTRADOR") return true;
 
-        setPermitido(
-          Boolean(
-            meuPerfil?.permissoes?.includes(chave)
-          )
-        );
+    return Boolean(usuario.permissoes?.includes(chave));
 
-      } catch (err) {
+  }
 
-        console.error("Erro ao verificar permissão:", err);
-
-      }
-
-    }
-
-    verificar();
-
-  }, [usuario, chave]);
-
-  return permitido;
+  return { usuario, pode };
 
 }

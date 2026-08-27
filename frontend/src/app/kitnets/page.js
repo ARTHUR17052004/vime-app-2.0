@@ -19,6 +19,7 @@ import PageSection from "../components/ui/PageSection";
 import PageGrid from "../components/ui/PageGrid";
 import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import DashboardStatsCard from "../components/dashboard/DashboardStatsCard";
 
@@ -27,7 +28,12 @@ import KitnetForm from "../components/kitnets/KitnetForm";
 import KitnetTable from "../components/kitnets/KitnetTable";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
+import { usePermissao } from "../../hooks/usePermissao";
+
 export default function KitnetsPage() {
+
+  const podeVisualizar = usePermissao("kitnets.visualizar");
+  const podeCriar = usePermissao("kitnets.criar");
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -181,6 +187,10 @@ export default function KitnetsPage() {
       )
     : kitnets;
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (loading) {
 
     return (
@@ -245,9 +255,11 @@ export default function KitnetsPage() {
             count={totalKitnets}
             countLabel="kitnet(s) cadastrada(s)"
             actions={
-              <Button onClick={novaKitnet}>
-                + Nova Kitnet
-              </Button>
+              podeCriar && (
+                <Button onClick={novaKitnet}>
+                  + Nova Kitnet
+                </Button>
+              )
             }
           />
 
