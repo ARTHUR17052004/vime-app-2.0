@@ -29,6 +29,18 @@ const ROTULOS = {
   observacoes: "Observações",
 };
 
+function Campo({ label, obrigatorio, children }) {
+  return (
+    <div>
+      <label className="block text-xs text-[var(--text-subtle)] mb-1.5">
+        {label}
+        {obrigatorio && <span className="ml-1 text-red-400">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function LocadorForm({
   onSave,
   locadorEditando,
@@ -345,71 +357,50 @@ export default function LocadorForm({
             </option>
           </select>
 
-          <input
+          <Campo label="Nome Completo" obrigatorio>
+            <input
+              name="nome"
+              placeholder="Nome Completo"
+              value={formData.nome}
+              onChange={handleChange}
+              className={inputStyle}
+              required
+            />
+          </Campo>
 
-            name="nome"
+          <Campo label="CPF/CNPJ" obrigatorio>
+            <input
+              name="documento"
+              placeholder="CPF ou CNPJ"
+              value={formData.documento}
+              onChange={handleChange}
+              className={inputStyle}
+              required
+            />
+          </Campo>
 
-            placeholder="Nome Completo"
+          <Campo label="E-mail" obrigatorio={obrigatorios.has("email")}>
+            <input
+              name="email"
+              type="email"
+              placeholder="E-mail"
+              value={formData.email}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("email")}
+            />
+          </Campo>
 
-            value={formData.nome}
-
-            onChange={handleChange}
-
-            className={inputStyle}
-
-            required
-
-          />
-
-          <input
-
-            name="documento"
-
-            placeholder="CPF ou CNPJ"
-
-            value={formData.documento}
-
-            onChange={handleChange}
-
-            className={inputStyle}
-
-            required={true}
-
-          />
-
-          <input
-
-            name="email"
-
-            type="email"
-
-            placeholder="E-mail"
-
-            value={formData.email}
-
-            onChange={handleChange}
-
-            className={inputStyle}
-
-            required={obrigatorios.has("email")}
-
-          />
-
-          <input
-
-            name="telefone"
-
-            placeholder="Telefone"
-
-            value={formData.telefone}
-
-            onChange={handleChange}
-
-            className={inputStyle}
-
-            required={obrigatorios.has("telefone")}
-
-          />
+          <Campo label="Telefone" obrigatorio={obrigatorios.has("telefone")}>
+            <input
+              name="telefone"
+              placeholder="Telefone"
+              value={formData.telefone}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("telefone")}
+            />
+          </Campo>
 
         </div>
 
@@ -427,6 +418,7 @@ export default function LocadorForm({
 
         <div className="grid md:grid-cols-2 gap-6">
 
+          <Campo label="Banco" obrigatorio={obrigatorios.has("banco")}>
           <select
 
             name="banco"
@@ -450,6 +442,16 @@ export default function LocadorForm({
             >
               Selecione um banco
             </option>
+
+          <option
+            value="Asaas"
+            style={{
+              backgroundColor: "#1d2833",
+              color: "#ffffff",
+            }}
+          >
+            Asaas
+          </option>
 
           <option
             value="001 - Banco do Brasil"
@@ -571,33 +573,40 @@ export default function LocadorForm({
             748 - Sicredi
           </option>
           </select>
+          </Campo>
 
-                    <input
-            name="agencia"
-            placeholder="Agência"
-            value={formData.agencia}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("agencia")}
-          />
+          <Campo label="Agência" obrigatorio={obrigatorios.has("agencia")}>
+            <input
+              name="agencia"
+              placeholder="Agência"
+              value={formData.agencia}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("agencia")}
+            />
+          </Campo>
 
-          <input
-            name="conta"
-            placeholder="Conta"
-            value={formData.conta}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("conta")}
-          />
+          <Campo label="Conta" obrigatorio={obrigatorios.has("conta")}>
+            <input
+              name="conta"
+              placeholder="Conta"
+              value={formData.conta}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("conta")}
+            />
+          </Campo>
 
-          <input
-            name="pix"
-            placeholder="Chave PIX"
-            value={formData.pix}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("pix")}
-          />
+          <Campo label="Chave PIX" obrigatorio={obrigatorios.has("pix")}>
+            <input
+              name="pix"
+              placeholder="Chave PIX"
+              value={formData.pix}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("pix")}
+            />
+          </Campo>
 
         </div>
 
@@ -615,32 +624,38 @@ export default function LocadorForm({
 
         <div className="grid md:grid-cols-3 gap-6">
 
-          <input
-            name="taxaAdministracao"
-            placeholder="Taxa Administração (%)"
-            value={formData.taxaAdministracao}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("taxaAdministracao")}
-          />
+          <Campo label="Taxa de Administração (%)" obrigatorio={obrigatorios.has("taxaAdministracao")}>
+            <input
+              name="taxaAdministracao"
+              placeholder="Taxa Administração (%)"
+              value={formData.taxaAdministracao}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("taxaAdministracao")}
+            />
+          </Campo>
 
-          <input
-            name="multa"
-            placeholder="Multa (%)"
-            value={formData.multa}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("multa")}
-          />
+          <Campo label="Multa (%)" obrigatorio={obrigatorios.has("multa")}>
+            <input
+              name="multa"
+              placeholder="Multa (%)"
+              value={formData.multa}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("multa")}
+            />
+          </Campo>
 
-          <input
-            name="juros"
-            placeholder="Juros (%)"
-            value={formData.juros}
-            onChange={handleChange}
-            className={inputStyle}
-            required={obrigatorios.has("juros")}
-          />
+          <Campo label="Juros (%)" obrigatorio={obrigatorios.has("juros")}>
+            <input
+              name="juros"
+              placeholder="Juros (%)"
+              value={formData.juros}
+              onChange={handleChange}
+              className={inputStyle}
+              required={obrigatorios.has("juros")}
+            />
+          </Campo>
 
         </div>
 
@@ -745,13 +760,16 @@ export default function LocadorForm({
 
         </h3>
 
-        <textarea
-          name="observacoes"
-          placeholder="Observações sobre o locador..."
-          value={formData.observacoes}
-          onChange={handleChange}
-          className={`${inputStyle} min-h-[140px] resize-none`}
-        />
+        <Campo label="Observações" obrigatorio={obrigatorios.has("observacoes")}>
+          <textarea
+            name="observacoes"
+            placeholder="Observações sobre o locador..."
+            value={formData.observacoes}
+            onChange={handleChange}
+            className={`${inputStyle} min-h-[140px] resize-none`}
+            required={obrigatorios.has("observacoes")}
+          />
+        </Campo>
 
       </div>
 
