@@ -1,6 +1,67 @@
+const crypto = require("crypto");
+
 const prisma = require("../config/prisma");
 const ClicksignApi = require("./ClicksignApi");
+const ClicksignApiV3 = require("./ClicksignApiV3");
 const notificacaoService = require("./notificacaoService");
+
+// Confere se o webhook realmente veio da Clicksign, usando o segredo
+// gerado pra esse endpoint (header "Content-Hmac: sha256=<hash>").
+//
+// MODO OBSERVAÇÃO: a documentação pública da Clicksign não deixa claro
+// se o cálculo é um HMAC de verdade (chave = segredo) ou um hash simples
+// do corpo concatenado com o segredo -- por segurança, aqui só REGISTRA
+// no log qual das duas contas bate com o header recebido, sem bloquear
+// nada ainda. Depois de confirmar nos logs qual delas bate com avisos
+// reais da Clicksign, trocar `apenasRegistrar` por `false` fecha a
+// validação de verdade (rejeitar quando não bater).
+const apenasRegistrar = true;
+
+const verificarAssinaturaWebhook = async (req) => {
+
+  const header = req.headers["content-hmac"];
+  const rawBody = req.rawBody;
+
+  if (!header || !rawBody) {
+    console.warn("[Clicksign Webhook] Sem header Content-Hmac ou corpo bruto -- não deu pra conferir a assinatura.");
+    return { valido: apenasRegistrar, motivo: "sem-dados" };
+  }
+
+  const assinaturaRecebida = header.replace(/^sha256=/, "");
+
+  const segredo = await ClicksignApiV3.obterSegredoWebhook();
+
+  if (!segredo) {
+    console.warn("[Clicksign Webhook] Sem segredo do webhook configurado -- não deu pra conferir a assinatura.");
+    return { valido: apenasRegistrar, motivo: "sem-segredo" };
+  }
+
+  const digestHmacDeVerdade = crypto
+    .createHmac("sha256", segredo)
+    .update(rawBody)
+    .digest("hex");
+
+  const digestConcatenado = crypto
+    .createHash("sha256")
+    .update(Buffer.concat([rawBody, Buffer.from(segredo)]))
+    .digest("hex");
+
+  const compararSeguro = (a, b) => {
+    const bufA = Buffer.from(a, "hex");
+    const bufB = Buffer.from(b, "hex");
+    return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+  };
+
+  const bateHmac = compararSeguro(digestHmacDeVerdade, assinaturaRecebida);
+  const bateConcatenado = compararSeguro(digestConcatenado, assinaturaRecebida);
+
+  console.log(
+    `[Clicksign Webhook] Verificação de assinatura -- HMAC(secret,body)=${bateHmac ? "BATEU" : "não bateu"} | SHA256(body+secret)=${bateConcatenado ? "BATEU" : "não bateu"}`
+  );
+
+  return { valido: bateHmac || bateConcatenado || apenasRegistrar, motivo: bateHmac || bateConcatenado ? "confirmado" : "nenhum-bateu" };
+
+};
 
 const config = async () => {
 
@@ -317,5 +378,6 @@ module.exports = {
   testarConexao,
   enviarDocumento,
   sincronizar,
-  processarWebhook
+  processarWebhook,
+  verificarAssinaturaWebhook
 };

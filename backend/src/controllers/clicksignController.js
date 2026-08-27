@@ -124,6 +124,19 @@ const enviarAssinatura = async (req, res) => {
 
 const webhook = async (req, res) => {
 
+  const { valido, motivo } = await clicksignService.verificarAssinaturaWebhook(req);
+
+  if (!valido) {
+
+    console.warn(`[Clicksign Webhook] Assinatura rejeitada (${motivo}) -- ignorando aviso.`);
+
+    return res.status(401).json({
+      success: false,
+      message: "Assinatura inválida."
+    });
+
+  }
+
   const dados = await clicksignService.processarWebhook(req.body);
 
   return res.json(dados);

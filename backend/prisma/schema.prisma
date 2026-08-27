@@ -564,6 +564,7 @@ model Configuracao {
   clicksignToken        String?
   clicksignAmbiente     String?  @default("sandbox")
   clicksignTemplateKey  String?
+  clicksignWebhookSecret String?
 
   whatsappToken    String?
   whatsappNumero   String?

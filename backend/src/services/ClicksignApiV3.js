@@ -31,6 +31,48 @@ class ClicksignApiV3 {
 
   }
 
+  // O segredo do webhook (usado pra conferir o header Content-Hmac e
+  // garantir que o aviso realmente veio da Clicksign) fica salvo depois
+  // da primeira busca -- evita chamar a API a cada webhook recebido.
+  async obterSegredoWebhook() {
+
+    const configuracao = await prisma.configuracao.findFirst({
+      orderBy: { id: "asc" },
+    });
+
+    if (configuracao?.clicksignWebhookSecret) {
+      return configuracao.clicksignWebhookSecret;
+    }
+
+    try {
+
+      const resposta = await this.request("GET", "/webhooks");
+      const webhooks = resposta?.data || [];
+
+      const webhook =
+        webhooks.find((w) => w.attributes?.endpoint?.includes("/clicksign/webhook")) ||
+        webhooks[0];
+
+      const segredo = webhook?.attributes?.secret || null;
+
+      if (segredo && configuracao) {
+        await prisma.configuracao.update({
+          where: { id: configuracao.id },
+          data: { clicksignWebhookSecret: segredo },
+        });
+      }
+
+      return segredo;
+
+    } catch (error) {
+
+      console.error("Erro ao buscar segredo do webhook da Clicksign:", error.message);
+      return null;
+
+    }
+
+  }
+
   async request(method, endpoint, body = null) {
 
     const { apiKey, baseURL } = await this.obterConfig();
