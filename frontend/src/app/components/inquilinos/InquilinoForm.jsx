@@ -16,7 +16,7 @@ import ContratoStep from "./steps/ContratoStep";
 const CAMPOS_POR_STEP = {
   1: ["nome", "email", "telefone", "cpf", "dataNascimento", "contatoEmergencia", "telefoneEmergencia"],
   2: ["kitnetId"],
-  3: ["dataInicioContrato", "dataFimContrato", "tipoGarantia", "valorCaucao"],
+  3: ["dataInicioContrato", "dataFimContrato"],
 };
 
 // Estruturalmente necessários pro cadastro/contrato automático
@@ -36,8 +36,6 @@ const ROTULOS = {
   dataInicioContrato: "Início do Contrato",
   dataFimContrato: "Fim do Contrato",
   prazoContrato: "Prazo do Contrato",
-  tipoGarantia: "Tipo de Garantia",
-  valorCaucao: "Valor da Caução",
 };
 
 export default function InquilinoForm({
@@ -70,8 +68,6 @@ export default function InquilinoForm({
     // Prazo padrão do contrato -- fixo em 4 meses (mesmo período usado
     // pra sugerir automaticamente a Data Final acima).
     prazoContrato: "4",
-    tipoGarantia: "",
-    valorCaucao: "",
 
     ativo: true,
   });
@@ -120,15 +116,24 @@ export default function InquilinoForm({
         // O contrato é gerado automaticamente a partir destes dados -- se
         // "Contratos" exige um campo (ex.: Data Final), a etapa 3 daqui
         // também passa a exigir, senão o contrato sai incompleto sem o
-        // usuário nem saber. Índice de Reajuste fica de fora: não existe
-        // mais campo pra ele aqui (removido da etapa 3), então não dá
-        // pra exigir -- quem precisar define depois editando o contrato.
+        // usuário nem saber. Índice de Reajuste, Tipo de Garantia e Valor
+        // da Caução ficam de fora: não existe mais campo pra eles aqui
+        // (removidos da etapa 3), então não dá pra exigir -- quem
+        // precisar define depois editando o contrato.
         const MAPA_CONTRATO_PARA_INQUILINO = { dataFim: "dataFimContrato" };
-        const CAMPOS_CONTRATO_FORA_DO_INQUILINO = new Set(["indiceReajuste"]);
+        const CAMPOS_CONTRATO_FORA_DO_INQUILINO = new Set([
+          "indiceReajuste", "tipoGarantia", "valorCaucao",
+        ]);
 
         listaContrato
           .filter((c) => c.obrigatorio && !CAMPOS_CONTRATO_FORA_DO_INQUILINO.has(c.campo))
           .forEach((c) => exigidos.add(MAPA_CONTRATO_PARA_INQUILINO[c.campo] || c.campo));
+
+        // Podem existir configurações antigas de "Campos Obrigatórios"
+        // marcando esses dois como obrigatórios em Inquilinos -- como o
+        // campo não existe mais nesta tela, nunca trava por causa dele.
+        exigidos.delete("tipoGarantia");
+        exigidos.delete("valorCaucao");
 
         setObrigatorios(exigidos);
 
@@ -178,12 +183,6 @@ export default function InquilinoForm({
 
       prazoContrato:
         inquilino.prazoContrato || "4",
-
-      tipoGarantia:
-        inquilino.tipoGarantia || "",
-
-      valorCaucao:
-        inquilino.valorCaucao || "",
 
       ativo:
         inquilino.ativo ?? true,

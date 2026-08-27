@@ -59,8 +59,6 @@ const MODULOS = [
       { campo: "kitnetId", label: "Kitnet", travado: true },
       { campo: "dataInicioContrato", label: "Início do Contrato", travado: true },
       { campo: "dataFimContrato", label: "Data Final do Contrato" },
-      { campo: "tipoGarantia", label: "Tipo de Garantia" },
-      { campo: "valorCaucao", label: "Valor da Caução" },
     ],
   },
   {

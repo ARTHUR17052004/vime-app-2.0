@@ -55,41 +55,6 @@ export default function ContratoStep({
         />
       </Campo>
 
-      <Campo label="Tipo de Garantia" obrigatorio={obrigatorios.has("tipoGarantia")}>
-        <select
-          name="tipoGarantia"
-          value={formData.tipoGarantia}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("tipoGarantia")}
-        >
-          <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-            Selecione...
-          </option>
-          <option value="CAUCAO" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-            Caução
-          </option>
-          <option value="FIADOR" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-            Fiador
-          </option>
-          <option value="SEGURO_FIANCA" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-            Seguro Fiança
-          </option>
-        </select>
-      </Campo>
-
-      <Campo label="Valor da Caução" obrigatorio={obrigatorios.has("valorCaucao")}>
-        <input
-          type="number"
-          name="valorCaucao"
-          placeholder="Valor da Caução"
-          value={formData.valorCaucao}
-          onChange={handleChange}
-          className={inputStyle}
-          required={obrigatorios.has("valorCaucao")}
-        />
-      </Campo>
-
       <div className="col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
         <p className="font-semibold text-emerald-400">
           Contrato automático
