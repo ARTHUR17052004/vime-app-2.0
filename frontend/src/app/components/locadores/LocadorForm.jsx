@@ -121,7 +121,7 @@ export default function LocadorForm({
         locadorEditando.nome || "",
 
       documento:
-        locadorEditando.documento || "",
+        locadorEditando.documento || locadorEditando.cpfCnpj || "",
 
       email:
         locadorEditando.email || "",

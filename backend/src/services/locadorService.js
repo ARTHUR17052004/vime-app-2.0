@@ -1,6 +1,15 @@
 const prisma = require("../config/prisma");
 const campoObrigatorioService = require("./campoObrigatorioService");
 
+// Aceita "10,5" (vírgula, formato brasileiro) e "10.5" (ponto). Number("10,5")
+// dá NaN, e o Prisma grava NaN em coluna Float como NULL sem avisar --
+// foi assim que taxaAdministracao/multa/juros sumiam silenciosamente.
+const paraNumero = (v) => {
+  if (v === "" || v === null || v === undefined) return 0;
+  const n = Number(String(v).replace(",", "."));
+  return Number.isNaN(n) ? 0 : n;
+};
+
 const listar = () => {
   return prisma.locador.findMany({
     include: {
@@ -28,20 +37,9 @@ const criar = async (dados) => {
       conta: dados.conta,
       pix: dados.pix,
 
-      taxaAdministracao:
-        dados.taxaAdministracao === ""
-          ? 0
-          : Number(dados.taxaAdministracao),
-
-      multa:
-        dados.multa === ""
-          ? 0
-          : Number(dados.multa),
-
-      juros:
-        dados.juros === ""
-          ? 0
-          : Number(dados.juros),
+      taxaAdministracao: paraNumero(dados.taxaAdministracao),
+      multa: paraNumero(dados.multa),
+      juros: paraNumero(dados.juros),
 
       observacoes: dados.observacoes,
 
@@ -70,20 +68,9 @@ const atualizar = async (id, dados) => {
       conta: dados.conta,
       pix: dados.pix,
 
-      taxaAdministracao:
-        dados.taxaAdministracao === ""
-          ? 0
-          : Number(dados.taxaAdministracao),
-
-      multa:
-        dados.multa === ""
-          ? 0
-          : Number(dados.multa),
-
-      juros:
-        dados.juros === ""
-          ? 0
-          : Number(dados.juros),
+      taxaAdministracao: paraNumero(dados.taxaAdministracao),
+      multa: paraNumero(dados.multa),
+      juros: paraNumero(dados.juros),
 
       observacoes: dados.observacoes,
 
