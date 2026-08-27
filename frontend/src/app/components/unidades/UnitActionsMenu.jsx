@@ -11,6 +11,7 @@ import {
 
 import ActionMenu from "../ui/ActionMenu";
 import { useAuth } from "../../../context/AuthContext";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function UnitActionsMenu({
   unidade,
@@ -21,6 +22,9 @@ export default function UnitActionsMenu({
 
   const { usuario } = useAuth();
   const ehAdministrador = usuario?.perfil === "ADMINISTRADOR";
+
+  const podeEditar = usePermissao("unidades.editar");
+  const podeExcluir = usePermissao("unidades.excluir");
 
   const [open, setOpen] = useState(false);
 
@@ -125,49 +129,53 @@ export default function UnitActionsMenu({
 
         />
 
-        <MenuButton
+        {podeEditar && (
+          <MenuButton
 
-          icon={<Pencil size={17} />}
+            icon={<Pencil size={17} />}
 
-          label="Editar"
+            label="Editar"
 
-          onClick={() => {
+            onClick={() => {
 
-            close();
+              close();
 
-            if (!ehAdministrador) {
-              alert("Apenas o Administrador pode editar uma residência depois de criada.");
-              return;
-            }
+              if (!ehAdministrador) {
+                alert("Apenas o Administrador pode editar uma residência depois de criada.");
+                return;
+              }
 
-            onEdit(unidade);
+              onEdit(unidade);
 
-          }}
+            }}
 
-        />
+          />
+        )}
 
-        <MenuButton
+        {podeExcluir && (
+          <MenuButton
 
-          danger
+            danger
 
-          icon={<Trash2 size={17} />}
+            icon={<Trash2 size={17} />}
 
-          label="Excluir"
+            label="Excluir"
 
-          onClick={() => {
+            onClick={() => {
 
-            close();
+              close();
 
-            if (!ehAdministrador) {
-              alert("Apenas o Administrador pode excluir uma residência depois de criada.");
-              return;
-            }
+              if (!ehAdministrador) {
+                alert("Apenas o Administrador pode excluir uma residência depois de criada.");
+                return;
+              }
 
-            onDelete(unidade.id);
+              onDelete(unidade.id);
 
-          }}
+            }}
 
-        />
+          />
+        )}
 
       </ActionMenu>
 

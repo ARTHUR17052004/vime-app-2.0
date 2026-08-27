@@ -16,10 +16,15 @@ import SearchInput from "../components/common/SearchInput";
 import UnitModal from "../components/unidades/UnitModal";
 import UnitForm from "../components/unidades/UnitForm";
 import UnitCardList from "../components/unidades/UnitCardList";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { UnidadeService } from "@/services/unidades.service";
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function UnidadesPage() {
+
+  const podeVisualizar = usePermissao("unidades.visualizar");
+  const podeCriar = usePermissao("unidades.criar");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState(null);
@@ -236,6 +241,14 @@ export default function UnidadesPage() {
   );
 
   /* ===================================================
+     PERMISSAO
+  =================================================== */
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
+  /* ===================================================
      LOADING
   =================================================== */
 
@@ -307,19 +320,21 @@ export default function UnidadesPage() {
               countLabel="residência(s) cadastrada(s)"
               actions={
 
-                <Button
-                  onClick={() => {
+                podeCriar && (
+                  <Button
+                    onClick={() => {
 
-                    setEditingUnit(null);
+                      setEditingUnit(null);
 
-                    setModalOpen(true);
+                      setModalOpen(true);
 
-                  }}
-                >
+                    }}
+                  >
 
-                  + Nova Residência
+                    + Nova Residência
 
-                </Button>
+                  </Button>
+                )
 
               }
             />

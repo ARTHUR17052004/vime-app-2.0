@@ -11,12 +11,16 @@ import PageContainer from "../../components/ui/PageContainer";
 import PageHeader from "../../components/ui/PageHeader";
 import PageSection from "../../components/ui/PageSection";
 import Card from "../../components/ui/Card";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { InquilinoService } from "../../../services/inquilinos.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function InquilinoDetalhesPage() {
 
   const { id } = useParams();
+
+  const podeVisualizar = usePermissao("inquilinos.visualizar");
 
   const [inquilino, setInquilino] = useState(null);
 
@@ -61,6 +65,10 @@ export default function InquilinoDetalhesPage() {
     }
 
   }, [id, carregarInquilino]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
 

@@ -14,6 +14,7 @@ import ActionMenu from "../ui/ActionMenu";
 
 import DespesaVisualizarModal from "./DespesaVisualizarModal";
 import DespesaEditarModal from "./DespesaEditarModal";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function MenuButton({ label, danger, warning, onClick }) {
   return (
@@ -47,6 +48,8 @@ export default function FinanceiroDespesas({
   onFixar,
   onNovo,
 }) {
+  const podeEditar = usePermissao("financeiro.editar");
+
   const [despesaSelecionada, setDespesaSelecionada] =
     useState(null);
 
@@ -129,31 +132,33 @@ export default function FinanceiroDespesas({
 
           </div>
 
-          <button
-            onClick={onNovo}
-            title="Nova Despesa"
-            className="
-              w-10
-              h-10
+          {podeEditar && (
+            <button
+              onClick={onNovo}
+              title="Nova Despesa"
+              className="
+                w-10
+                h-10
 
-              rounded-xl
+                rounded-xl
 
-              flex
-              items-center
-              justify-center
+                flex
+                items-center
+                justify-center
 
-              bg-red-500/10
-              border
-              border-red-500/20
+                bg-red-500/10
+                border
+                border-red-500/20
 
-              text-red-400
+                text-red-400
 
-              hover:bg-red-500/20
-              transition
-            "
-          >
-            <Plus size={20} />
-          </button>
+                hover:bg-red-500/20
+                transition
+              "
+            >
+              <Plus size={20} />
+            </button>
+          )}
 
         </div>
 
@@ -293,15 +298,17 @@ export default function FinanceiroDespesas({
                         }}
                       />
 
-                      <MenuButton
-                        label="Editar"
-                        warning
-                        onClick={() => {
-                          setDespesaSelecionada(item);
-                          setEditarOpen(true);
-                          setMenuAberto(null);
-                        }}
-                      />
+                      {podeEditar && (
+                        <MenuButton
+                          label="Editar"
+                          warning
+                          onClick={() => {
+                            setDespesaSelecionada(item);
+                            setEditarOpen(true);
+                            setMenuAberto(null);
+                          }}
+                        />
+                      )}
 
                       <MenuButton
                         label={item.fixado ? "Desafixar" : "Fixar"}
@@ -311,14 +318,16 @@ export default function FinanceiroDespesas({
                         }}
                       />
 
-                      <MenuButton
-                        label="Excluir"
-                        danger
-                        onClick={() => {
-                          onDelete?.(item.id);
-                          setMenuAberto(null);
-                        }}
-                      />
+                      {podeEditar && (
+                        <MenuButton
+                          label="Excluir"
+                          danger
+                          onClick={() => {
+                            onDelete?.(item.id);
+                            setMenuAberto(null);
+                          }}
+                        />
+                      )}
                     </ActionMenu>
 
                   </td>

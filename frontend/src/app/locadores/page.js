@@ -16,11 +16,16 @@ import SearchInput from "../components/common/SearchInput";
 import LocadorModal from "../components/locadores/LocadorModal";
 import LocadorForm from "../components/locadores/LocadorForm";
 import LocadorCardList from "../components/locadores/LocadorCardList";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { LocadorService } from "@/services/locadores.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function LocadoresPage() {
+
+  const podeVisualizar = usePermissao("locadores.visualizar");
+  const podeCriar = usePermissao("locadores.criar");
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -181,6 +186,11 @@ export default function LocadoresPage() {
     return true;
 
   });
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   return (
 
   <MainLayout>
@@ -197,9 +207,11 @@ export default function LocadoresPage() {
             count={locadores.length}
             countLabel="locador(es) cadastrado(s)"
             actions={
-              <Button onClick={novoLocador}>
-                + Novo Locador
-              </Button>
+              podeCriar && (
+                <Button onClick={novoLocador}>
+                  + Novo Locador
+                </Button>
+              )
             }
           />
 

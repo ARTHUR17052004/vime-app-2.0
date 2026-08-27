@@ -15,6 +15,7 @@ import {
 
 import Button from "../ui/Button";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function VistoriaCard({
   vistorias,
@@ -24,6 +25,9 @@ export default function VistoriaCard({
   onCancelar,
   onFixar,
 }) {
+
+  const podeEditar = usePermissao("vistorias.editar");
+  const podeExcluir = usePermissao("vistorias.excluir");
 
   const [aberto, setAberto] =
     useState(null);
@@ -312,97 +316,105 @@ export default function VistoriaCard({
               Visualizar
             </Link>
 
-            <button
-              onClick={() => onEdit?.(vistoria)}
-              className="
-                flex
-                items-center
-                gap-2
-                px-4
-                py-2.5
-                rounded-xl
-                border
-                border-yellow-500/20
-                bg-yellow-500/10
-                text-yellow-400
-                text-sm
-                font-semibold
-                hover:bg-yellow-500/20
-                transition
-              "
-            >
-              <Pencil size={16} />
-              Editar
-            </button>
+            {podeEditar && (
+              <button
+                onClick={() => onEdit?.(vistoria)}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  border
+                  border-yellow-500/20
+                  bg-yellow-500/10
+                  text-yellow-400
+                  text-sm
+                  font-semibold
+                  hover:bg-yellow-500/20
+                  transition
+                "
+              >
+                <Pencil size={16} />
+                Editar
+              </button>
+            )}
 
-            <button
-              onClick={() => onConcluir?.(vistoria.id)}
-              className="
-                flex
-                items-center
-                gap-2
-                px-4
-                py-2.5
-                rounded-xl
-                border
-                border-emerald-500/20
-                bg-emerald-500/10
-                text-emerald-400
-                text-sm
-                font-semibold
-                hover:bg-emerald-500/20
-                transition
-              "
-            >
-              <CheckCircle2 size={16} />
-              Realizar
-            </button>
+            {podeEditar && (
+              <button
+                onClick={() => onConcluir?.(vistoria.id)}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  border
+                  border-emerald-500/20
+                  bg-emerald-500/10
+                  text-emerald-400
+                  text-sm
+                  font-semibold
+                  hover:bg-emerald-500/20
+                  transition
+                "
+              >
+                <CheckCircle2 size={16} />
+                Realizar
+              </button>
+            )}
 
-            <button
-              onClick={() => onCancelar?.(vistoria.id)}
-              className="
-                flex
-                items-center
-                gap-2
-                px-4
-                py-2.5
-                rounded-xl
-                border
-                border-orange-500/20
-                bg-orange-500/10
-                text-orange-400
-                text-sm
-                font-semibold
-                hover:bg-orange-500/20
-                transition
-              "
-            >
-              <XCircle size={16} />
-              Cancelar
-            </button>
+            {podeEditar && (
+              <button
+                onClick={() => onCancelar?.(vistoria.id)}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  border
+                  border-orange-500/20
+                  bg-orange-500/10
+                  text-orange-400
+                  text-sm
+                  font-semibold
+                  hover:bg-orange-500/20
+                  transition
+                "
+              >
+                <XCircle size={16} />
+                Cancelar
+              </button>
+            )}
 
-            <button
-              onClick={() => onDelete?.(vistoria.id)}
-              className="
-                flex
-                items-center
-                gap-2
-                px-4
-                py-2.5
-                rounded-xl
-                border
-                border-red-500/20
-                bg-red-500/10
-                text-red-400
-                text-sm
-                font-semibold
-                hover:bg-red-500/20
-                transition
-              "
-            >
-              <Trash2 size={16} />
-              Excluir
-            </button>
+            {podeExcluir && (
+              <button
+                onClick={() => onDelete?.(vistoria.id)}
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  border
+                  border-red-500/20
+                  bg-red-500/10
+                  text-red-400
+                  text-sm
+                  font-semibold
+                  hover:bg-red-500/20
+                  transition
+                "
+              >
+                <Trash2 size={16} />
+                Excluir
+              </button>
+            )}
 
           </div>
 

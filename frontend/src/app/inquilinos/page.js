@@ -19,11 +19,16 @@ import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
 import ExplicacaoInquilinoModal from "../components/inquilinos/ExplicacaoInquilinoModal";
 import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import { InquilinoService } from "../../services/inquilinos.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function InquilinosPage() {
+
+  const podeVisualizar = usePermissao("inquilinos.visualizar");
+  const podeCriar = usePermissao("inquilinos.criar");
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -280,6 +285,14 @@ export default function InquilinosPage() {
   }, [inquilinos, search, residenciaSelecionada]);
 
   /* ==========================================
+     PERMISSAO
+  ========================================== */
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
+  /* ==========================================
      LOADING
   ========================================== */
 
@@ -350,18 +363,20 @@ export default function InquilinosPage() {
               count={inquilinos.length}
               countLabel="inquilino(s) cadastrado(s)"
               actions={
-                <div className="flex gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={abrirExplicacao}
-                  >
-                    + Adicionar Inquilino
-                  </Button>
+                podeCriar && (
+                  <div className="flex gap-3">
+                    <Button
+                      variant="secondary"
+                      onClick={abrirExplicacao}
+                    >
+                      + Adicionar Inquilino
+                    </Button>
 
-                  <Button onClick={abrirExplicacao}>
-                    + Novo Inquilino
-                  </Button>
-                </div>
+                    <Button onClick={abrirExplicacao}>
+                      + Novo Inquilino
+                    </Button>
+                  </div>
+                )
               }
             />
 

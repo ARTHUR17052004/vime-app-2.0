@@ -3,11 +3,15 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import MainLayout from "../../components/layout/MainLayout";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { UnidadeService } from "@/services/unidades.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function UnidadeDetalhesPage() {
   const params = useParams();
+
+  const podeVisualizar = usePermissao("unidades.visualizar");
 
   const [unidade, setUnidade] = useState(null);
 
@@ -62,6 +66,10 @@ export default function UnidadeDetalhesPage() {
     }
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
     return (

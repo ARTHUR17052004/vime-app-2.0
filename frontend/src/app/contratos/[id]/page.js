@@ -8,11 +8,15 @@ import ContratoHistoricoFinanceiro from "../../components/contratos/ContratoHist
 import ContratoHistoricoEventos from "../../components/contratos/ContratoHistoricoEventos";
 import ContratoFinanceiroResumo from "../../components/contratos/ContratoFinanceiroResumo";
 import ContratoHistoricoCard from "../../components/contratos/ContratoHistoricoCard";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { ContratoService } from "@/services/contratos.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function DetalhesContratoPage() {
   const params = useParams();
+
+  const podeVisualizar = usePermissao("contratos.visualizar");
 
   const [contrato, setContrato] =
     useState(null);
@@ -45,6 +49,10 @@ export default function DetalhesContratoPage() {
     carregar();
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (carregando) {
     return (

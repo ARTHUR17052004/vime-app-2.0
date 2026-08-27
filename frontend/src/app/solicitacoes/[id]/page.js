@@ -4,10 +4,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { SolicitacaoService } from "@/services/solicitacao.service";
 import { AuditoriaService } from "@/services/auditoria.service";
 import SolicitacaoChat from "../../components/solicitacoes/SolicitacaoChat";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function formatarData(data) {
   return data ? new Date(data).toLocaleString("pt-BR") : "-";
@@ -22,6 +24,8 @@ const ACAO_LABEL = {
 export default function DetalhesSolicitacaoPage() {
 
   const params = useParams();
+
+  const podeVisualizar = usePermissao("solicitacoes.visualizar");
 
   const [solicitacao, setSolicitacao] =
     useState(null);
@@ -85,6 +89,10 @@ export default function DetalhesSolicitacaoPage() {
     carregar();
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (carregando) {
 

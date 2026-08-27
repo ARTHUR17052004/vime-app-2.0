@@ -5,12 +5,16 @@ import { MoreVertical } from "lucide-react";
 import { useState } from "react";
 
 import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function InquilinoActionsMenu({
   inquilino,
   onEdit,
   onDelete,
 }) {
+
+  const podeEditar = usePermissao("inquilinos.editar");
+  const podeExcluir = usePermissao("inquilinos.excluir");
 
   const [open, setOpen] =
     useState(false);
@@ -98,49 +102,53 @@ export default function InquilinoActionsMenu({
           Visualizar
         </Link>
 
-        <button
-          onClick={() => {
-            onEdit?.(inquilino);
-            setOpen(false);
-          }}
-          className="
-            w-full
-            text-left
+        {podeEditar && (
+          <button
+            onClick={() => {
+              onEdit?.(inquilino);
+              setOpen(false);
+            }}
+            className="
+              w-full
+              text-left
 
-            px-4
-            py-3
+              px-4
+              py-3
 
-            text-yellow-400
+              text-yellow-400
 
-            hover:bg-yellow-500/10
+              hover:bg-yellow-500/10
 
-            transition
-          "
-        >
-          Editar
-        </button>
+              transition
+            "
+          >
+            Editar
+          </button>
+        )}
 
-        <button
-          onClick={() => {
-            onDelete?.(inquilino.id);
-            setOpen(false);
-          }}
-          className="
-            w-full
-            text-left
+        {podeExcluir && (
+          <button
+            onClick={() => {
+              onDelete?.(inquilino.id);
+              setOpen(false);
+            }}
+            className="
+              w-full
+              text-left
 
-            px-4
-            py-3
+              px-4
+              py-3
 
-            text-red-400
+              text-red-400
 
-            hover:bg-red-500/10
+              hover:bg-red-500/10
 
-            transition
-          "
-        >
-          Excluir
-        </button>
+              transition
+            "
+          >
+            Excluir
+          </button>
+        )}
 
       </ActionMenu>
 

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function InquilinoTable({
   inquilinos,
@@ -14,6 +15,9 @@ export default function InquilinoTable({
 }) {
 
   const router = useRouter();
+
+  const podeEditar = usePermissao("inquilinos.editar");
+  const podeExcluir = usePermissao("inquilinos.excluir");
 
   const [menuAberto, setMenuAberto] =
     useState(null);
@@ -311,51 +315,55 @@ export default function InquilinoTable({
                     Visualizar
                   </button>
 
-                  <button
-                    onClick={() => {
-                      onEdit?.(
-                        inquilino
-                      );
+                  {podeEditar && (
+                    <button
+                      onClick={() => {
+                        onEdit?.(
+                          inquilino
+                        );
 
-                      setMenuAberto(
-                        null
-                      );
-                    }}
-                    className="
-                      w-full
-                      text-left
-                      px-4
-                      py-3
-                      hover:bg-yellow-500/10
-                      text-yellow-400
-                      transition
-                    "
-                  >
-                    Editar
-                  </button>
+                        setMenuAberto(
+                          null
+                        );
+                      }}
+                      className="
+                        w-full
+                        text-left
+                        px-4
+                        py-3
+                        hover:bg-yellow-500/10
+                        text-yellow-400
+                        transition
+                      "
+                    >
+                      Editar
+                    </button>
+                  )}
 
-                  <button
-                    onClick={() => {
-                      onDelete?.(
-                        inquilino.id
-                      );
+                  {podeExcluir && (
+                    <button
+                      onClick={() => {
+                        onDelete?.(
+                          inquilino.id
+                        );
 
-                      setMenuAberto(
-                        null
-                      );
-                    }}
-                    className="
-                      w-full
-                      text-left
-                      px-4
-                      py-3
-                      hover:bg-red-500/10
-                      text-red-400
-                      transition
-                    "
-                  >
-                    Excluir
-                  </button>
+                        setMenuAberto(
+                          null
+                        );
+                      }}
+                      className="
+                        w-full
+                        text-left
+                        px-4
+                        py-3
+                        hover:bg-red-500/10
+                        text-red-400
+                        transition
+                      "
+                    >
+                      Excluir
+                    </button>
+                  )}
 
                 </ActionMenu>
               </td>

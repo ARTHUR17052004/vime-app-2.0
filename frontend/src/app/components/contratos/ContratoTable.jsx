@@ -18,6 +18,7 @@ import Table from "../ui/Table";
 import { formatarProximoVencimento } from "../../../utils/vencimento";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function ContratoTable({
   contratos = [],
@@ -27,6 +28,9 @@ export default function ContratoTable({
   onEnviarClicksign,
   onRenovar,
 }) {
+
+  const podeEditar = usePermissao("contratos.editar");
+  const podeExcluir = usePermissao("contratos.excluir");
 
   const [menuAberto, setMenuAberto] =
     useState(null);
@@ -335,7 +339,7 @@ export default function ContratoTable({
 
                 </button>
 
-                {!contrato.clicksignEnvelopeId && (
+                {podeEditar && !contrato.clicksignEnvelopeId && (
 
                   <button
                     onClick={() => {
@@ -400,98 +404,110 @@ export default function ContratoTable({
 
                 )}
 
-                <button
-                  onClick={() => {
+                {podeEditar && (
 
-                    setMenuAberto(null);
+                  <button
+                    onClick={() => {
 
-                    onRenovar?.(contrato.id);
+                      setMenuAberto(null);
 
-                  }}
-                  className="
-                    flex
-                    items-center
-                    gap-3
+                      onRenovar?.(contrato.id);
 
-                    w-full
+                    }}
+                    className="
+                      flex
+                      items-center
+                      gap-3
 
-                    px-5
-                    py-3
+                      w-full
 
-                    text-emerald-400
+                      px-5
+                      py-3
 
-                    hover:bg-emerald-500/10
-                    transition
-                  "
-                >
+                      text-emerald-400
 
-                  <RefreshCw size={18} />
+                      hover:bg-emerald-500/10
+                      transition
+                    "
+                  >
 
-                  Renovar
+                    <RefreshCw size={18} />
 
-                </button>
+                    Renovar
 
-                <button
-                  onClick={() => {
+                  </button>
 
-                    setMenuAberto(null);
+                )}
 
-                    onEdit?.(contrato);
+                {podeEditar && (
 
-                  }}
-                  className="
-                    flex
-                    items-center
-                    gap-3
+                  <button
+                    onClick={() => {
 
-                    w-full
+                      setMenuAberto(null);
 
-                    px-5
-                    py-3
+                      onEdit?.(contrato);
 
-                    text-yellow-400
+                    }}
+                    className="
+                      flex
+                      items-center
+                      gap-3
 
-                    hover:bg-yellow-500/10
-                    transition
-                  "
-                >
+                      w-full
 
-                  <Pencil size={18} />
+                      px-5
+                      py-3
 
-                  Editar
+                      text-yellow-400
 
-                </button>
+                      hover:bg-yellow-500/10
+                      transition
+                    "
+                  >
 
-                <button
-                  onClick={() => {
+                    <Pencil size={18} />
 
-                    setMenuAberto(null);
+                    Editar
 
-                    onDelete?.(contrato.id);
+                  </button>
 
-                  }}
-                  className="
-                    flex
-                    items-center
-                    gap-3
+                )}
 
-                    w-full
+                {podeExcluir && (
 
-                    px-5
-                    py-3
+                  <button
+                    onClick={() => {
 
-                    text-red-400
+                      setMenuAberto(null);
 
-                    hover:bg-red-500/10
-                    transition
-                  "
-                >
+                      onDelete?.(contrato.id);
 
-                  <Trash2 size={18} />
+                    }}
+                    className="
+                      flex
+                      items-center
+                      gap-3
 
-                  Excluir
+                      w-full
 
-                </button>
+                      px-5
+                      py-3
+
+                      text-red-400
+
+                      hover:bg-red-500/10
+                      transition
+                    "
+                  >
+
+                    <Trash2 size={18} />
+
+                    Excluir
+
+                  </button>
+
+                )}
 
               </ActionMenu>
 

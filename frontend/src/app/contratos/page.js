@@ -12,6 +12,7 @@ import PageContainer from "../components/ui/PageContainer";
 import PageSection from "../components/ui/PageSection";
 import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import SearchInput from "../components/common/SearchInput";
 
@@ -29,8 +30,12 @@ import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstr
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function ContratosPage() {
+
+  const podeVisualizar = usePermissao("contratos.visualizar");
+  const podeCriar = usePermissao("contratos.criar");
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -305,6 +310,10 @@ export default function ContratosPage() {
       (c) => c.status === "VENCENDO"
     ).length;
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   return (
 
   <MainLayout>
@@ -322,13 +331,15 @@ export default function ContratosPage() {
             countLabel="contrato(s) cadastrado(s)"
             actions={
 
-              <Button
-                onClick={novoContrato}
-              >
+              podeCriar && (
+                <Button
+                  onClick={novoContrato}
+                >
 
-                + Novo Contrato
+                  + Novo Contrato
 
-              </Button>
+                </Button>
+              )
 
             }
           />

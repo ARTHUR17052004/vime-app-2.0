@@ -5,10 +5,12 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 const ACAO_LABEL = {
   CRIAR: "Vistoria criada",
@@ -19,6 +21,8 @@ const ACAO_LABEL = {
 export default function DetalhesVistoriaPage() {
 
   const params = useParams();
+
+  const podeVisualizar = usePermissao("vistorias.visualizar");
 
   const [vistoria, setVistoria] =
     useState(null);
@@ -71,6 +75,10 @@ export default function DetalhesVistoriaPage() {
     carregar();
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (carregando) {
 

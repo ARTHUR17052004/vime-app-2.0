@@ -27,7 +27,14 @@ import VistoriaStats from "../components/vistorias/VistoriaStats";
 import VistoriaFilters from "../components/vistorias/VistoriaFilters";
 import VistoriaCardList from "../components/vistorias/VistoriaCardList";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import SemPermissao from "../components/ui/SemPermissao";
+
+import { usePermissao } from "../../hooks/usePermissao";
+
 export default function VistoriasPage() {
+
+  const podeVisualizar = usePermissao("vistorias.visualizar");
+  const podeCriar = usePermissao("vistorias.criar");
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -401,6 +408,10 @@ const fixarVistoria = async (id, fixado) => {
   (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
 );
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (!carregado) {
     return (
       <MainLayout>
@@ -427,9 +438,11 @@ const fixarVistoria = async (id, fixado) => {
             count={vistorias.length}
             countLabel="vistoria(s) cadastrada(s)"
             actions={
-              <Button onClick={novaVistoria}>
-                + Nova Vistoria
-              </Button>
+              podeCriar && (
+                <Button onClick={novaVistoria}>
+                  + Nova Vistoria
+                </Button>
+              )
             }
           >
 

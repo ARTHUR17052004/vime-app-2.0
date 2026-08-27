@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 import MainLayout from "../../components/layout/MainLayout";
+import SemPermissao from "../../components/ui/SemPermissao";
 
 import { LocadorService } from "@/services/locadores.service";
 import { UnidadeService } from "@/services/unidades.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function DetalhesLocadorPage() {
   const params = useParams();
+
+  const podeVisualizar = usePermissao("locadores.visualizar");
 
   const [locador, setLocador] = useState(null);
   const [totalUnidades, setTotalUnidades] =
@@ -75,6 +79,10 @@ export default function DetalhesLocadorPage() {
     }
 
   }, [params.id]);
+
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
 
   if (loading) {
     return (

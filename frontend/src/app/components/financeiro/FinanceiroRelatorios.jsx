@@ -8,6 +8,7 @@ import {
 
 import Table from "../ui/Table";
 import { exportarPDF, exportarExcel } from "@/utils/exportar";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 const COLUNAS_RECEITAS = ["Categoria", "Descrição", "Valor", "Vencimento", "Status"];
 const COLUNAS_DESPESAS = ["Categoria", "Descrição", "Valor", "Vencimento", "Status"];
@@ -24,6 +25,8 @@ export default function FinanceiroRelatorios({
   receitas = [],
   despesas = [],
 }) {
+
+  const podeExportar = usePermissao("financeiro.exportar");
 
   const linhasReceitas = receitas.map((item) => [
     item.categoria || "-",
@@ -146,36 +149,38 @@ export default function FinanceiroRelatorios({
             Exportar receitas, despesas e fluxo de caixa.
           </p>
 
-          <button
-            onClick={handleExportarPDF}
-            className="
-              flex
-              items-center
-              gap-2
+          {podeExportar && (
+            <button
+              onClick={handleExportarPDF}
+              className="
+                flex
+                items-center
+                gap-2
 
-              rounded-xl
+                rounded-xl
 
-              bg-red-500/15
+                bg-red-500/15
 
-              border
-              border-red-500/20
+                border
+                border-red-500/20
 
-              px-5
-              py-3
+                px-5
+                py-3
 
-              text-red-400
+                text-red-400
 
-              hover:bg-red-500/25
+                hover:bg-red-500/25
 
-              transition
-            "
-          >
+                transition
+              "
+            >
 
-            <Download size={18} />
+              <Download size={18} />
 
-            Exportar PDF
+              Exportar PDF
 
-          </button>
+            </button>
+          )}
 
         </div>
 
@@ -210,36 +215,38 @@ export default function FinanceiroRelatorios({
             Exportar planilhas financeiras.
           </p>
 
-          <button
-            onClick={handleExportarExcel}
-            className="
-              flex
-              items-center
-              gap-2
+          {podeExportar && (
+            <button
+              onClick={handleExportarExcel}
+              className="
+                flex
+                items-center
+                gap-2
 
-              rounded-xl
+                rounded-xl
 
-              bg-emerald-500/15
+                bg-emerald-500/15
 
-              border
-              border-emerald-500/20
+                border
+                border-emerald-500/20
 
-              px-5
-              py-3
+                px-5
+                py-3
 
-              text-emerald-400
+                text-emerald-400
 
-              hover:bg-emerald-500/25
+                hover:bg-emerald-500/25
 
-              transition
-            "
-          >
+                transition
+              "
+            >
 
-            <Download size={18} />
+              <Download size={18} />
 
-            Exportar Excel
+              Exportar Excel
 
-          </button>
+            </button>
+          )}
 
         </div>
 

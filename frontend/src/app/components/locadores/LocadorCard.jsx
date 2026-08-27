@@ -12,12 +12,16 @@ import {
 } from "lucide-react";
 
 import { UnidadeService } from "@/services/unidades.service";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function LocadorCard({
   locadores,
   onDelete,
   onEdit,
 }) {
+
+  const podeEditar = usePermissao("locadores.editar");
+  const podeExcluir = usePermissao("locadores.excluir");
 
   const [locadorSelecionado, setLocadorSelecionado] =
     useState(null);
@@ -192,48 +196,52 @@ export default function LocadorCard({
 
                 </button>
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onEdit?.(locador);
-                  }}
-                  className="
-                    w-full
-                    text-left
-                    px-4
-                    py-3
-                    text-sm
-                    text-[var(--text)]
-                    hover:bg-emerald-500/10
-                    transition-all
-                  "
-                >
-                  Editar
-                </button>
+                {podeEditar && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onEdit?.(locador);
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      text-sm
+                      text-[var(--text)]
+                      hover:bg-emerald-500/10
+                      transition-all
+                    "
+                  >
+                    Editar
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
+                {podeExcluir && (
+                  <button
+                    onClick={() => {
 
-                    setMenuAberto(null);
+                      setMenuAberto(null);
 
-                    onDelete?.(locador.id);
+                      onDelete?.(locador.id);
 
-                  }}
-                  className="
-                    w-full
-                    text-left
-                    px-4
-                    py-3
-                    text-sm
-                    text-[var(--text)]
-                    hover:bg-red-500/10
-                    transition-all
-                  "
-                >
+                    }}
+                    className="
+                      w-full
+                      text-left
+                      px-4
+                      py-3
+                      text-sm
+                      text-[var(--text)]
+                      hover:bg-red-500/10
+                      transition-all
+                    "
+                  >
 
-                  Excluir
+                    Excluir
 
-                </button>
+                  </button>
+                )}
 
               </div>
 

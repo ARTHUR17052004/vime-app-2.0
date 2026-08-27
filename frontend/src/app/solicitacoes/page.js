@@ -21,12 +21,18 @@ import PageSection from "../components/ui/PageSection";
 import FadeIn from "../components/ui/FadeIn";
 
 import Button from "../components/ui/Button";
+import SemPermissao from "../components/ui/SemPermissao";
 
 import SolicitacaoModal from "../components/solicitacoes/SolicitacaoModal";
 import SolicitacaoForm from "../components/solicitacoes/SolicitacaoForm";
 import SolicitacaoRelatorios from "../components/solicitacoes/SolicitacaoRelatorios";
 
+import { usePermissao } from "../../hooks/usePermissao";
+
 export default function SolicitacoesPage() {
+
+  const podeVisualizar = usePermissao("solicitacoes.visualizar");
+  const podeCriar = usePermissao("solicitacoes.criar");
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -220,6 +226,10 @@ export default function SolicitacoesPage() {
 
   });
 
+  if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
   if (!carregado) {
     return (
       <MainLayout>
@@ -246,9 +256,11 @@ export default function SolicitacoesPage() {
             count={solicitacoes.length}
             countLabel="solicitação(ões) cadastrada(s)"
             actions={
-              <Button onClick={novaSolicitacao}>
-                + Nova Solicitação
-              </Button>
+              podeCriar && (
+                <Button onClick={novaSolicitacao}>
+                  + Nova Solicitação
+                </Button>
+              )
             }
           >
 

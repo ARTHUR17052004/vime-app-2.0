@@ -49,6 +49,8 @@ export default function SolicitacaoCard({
   const router = useRouter();
 
   const podeClassificar = usePermissao("solicitacoes.classificar");
+  const podeEditar = usePermissao("solicitacoes.editar");
+  const podeExcluir = usePermissao("solicitacoes.excluir");
 
   const [menuAberto, setMenuAberto] = useState(null);
 
@@ -281,47 +283,51 @@ export default function SolicitacaoCard({
 
                 )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onEdit(item);
-                  }}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-5
-                    py-3
-                    text-yellow-400
-                    hover:bg-yellow-500/10
-                    transition
-                  "
-                >
-                  <Pencil size={17} />
-                  Editar
-                </button>
+                {podeEditar && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onEdit(item);
+                    }}
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-3
+                      px-5
+                      py-3
+                      text-yellow-400
+                      hover:bg-yellow-500/10
+                      transition
+                    "
+                  >
+                    <Pencil size={17} />
+                    Editar
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onDelete(item.id);
-                  }}
-                  className="
-                    w-full
-                    flex
-                    items-center
-                    gap-3
-                    px-5
-                    py-3
-                    text-red-400
-                    hover:bg-red-500/10
-                    transition
-                  "
-                >
-                  <Trash2 size={17} />
-                  Excluir
-                </button>
+                {podeExcluir && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onDelete(item.id);
+                    }}
+                    className="
+                      w-full
+                      flex
+                      items-center
+                      gap-3
+                      px-5
+                      py-3
+                      text-red-400
+                      hover:bg-red-500/10
+                      transition
+                    "
+                  >
+                    <Trash2 size={17} />
+                    Excluir
+                  </button>
+                )}
 
               </ActionMenu>
 

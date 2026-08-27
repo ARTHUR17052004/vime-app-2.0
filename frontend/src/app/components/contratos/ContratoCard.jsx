@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function ContratoCard({
   contratos,
@@ -19,6 +20,9 @@ export default function ContratoCard({
   onEncerrar,
   onRenovar,
 }) {
+
+  const podeEditar = usePermissao("contratos.editar");
+  const podeExcluir = usePermissao("contratos.excluir");
 
   const [menuAberto, setMenuAberto] =
     useState(null);
@@ -252,85 +256,93 @@ export default function ContratoCard({
 
                 )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onEdit?.(contrato);
-                  }}
-                  className="
-                    w-full
-                    text-left
+                {podeEditar && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onEdit?.(contrato);
+                    }}
+                    className="
+                      w-full
+                      text-left
 
-                    px-4
-                    py-3
+                      px-4
+                      py-3
 
-                    text-yellow-400
+                      text-yellow-400
 
-                    hover:bg-yellow-500/10
-                  "
-                >
-                  Editar
-                </button>
+                      hover:bg-yellow-500/10
+                    "
+                  >
+                    Editar
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onRenovar?.(contrato.id);
-                  }}
-                  className="
-                    w-full
-                    text-left
+                {podeEditar && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onRenovar?.(contrato.id);
+                    }}
+                    className="
+                      w-full
+                      text-left
 
-                    px-4
-                    py-3
+                      px-4
+                      py-3
 
-                    text-emerald-400
+                      text-emerald-400
 
-                    hover:bg-emerald-500/10
-                  "
-                >
-                  Renovar
-                </button>
+                      hover:bg-emerald-500/10
+                    "
+                  >
+                    Renovar
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onEncerrar?.(contrato.id);
-                  }}
-                  className="
-                    w-full
-                    text-left
+                {podeEditar && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onEncerrar?.(contrato.id);
+                    }}
+                    className="
+                      w-full
+                      text-left
 
-                    px-4
-                    py-3
+                      px-4
+                      py-3
 
-                    text-cyan-400
+                      text-cyan-400
 
-                    hover:bg-cyan-500/10
-                  "
-                >
-                  Encerrar
-                </button>
+                      hover:bg-cyan-500/10
+                    "
+                  >
+                    Encerrar
+                  </button>
+                )}
 
-                <button
-                  onClick={() => {
-                    setMenuAberto(null);
-                    onDelete?.(contrato.id);
-                  }}
-                  className="
-                    w-full
-                    text-left
+                {podeExcluir && (
+                  <button
+                    onClick={() => {
+                      setMenuAberto(null);
+                      onDelete?.(contrato.id);
+                    }}
+                    className="
+                      w-full
+                      text-left
 
-                    px-4
-                    py-3
+                      px-4
+                      py-3
 
-                    text-red-400
+                      text-red-400
 
-                    hover:bg-red-500/10
-                  "
-                >
-                  Excluir
-                </button>
+                      hover:bg-red-500/10
+                    "
+                  >
+                    Excluir
+                  </button>
+                )}
 
               </div>
 

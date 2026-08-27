@@ -31,10 +31,15 @@ import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
 import FinanceiroAsaas from "../components/financeiro/FinanceiroAsaas";
 import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
+import SemPermissao from "../components/ui/SemPermissao";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
+import { usePermissao } from "../../hooks/usePermissao";
 
 export default function FinanceiroPage() {
+  const podeVisualizar = usePermissao("financeiro.visualizar");
+  const podeEditar = usePermissao("financeiro.editar");
+
   const [receitas, setReceitas] = useState([]);
   const [despesas, setDespesas] = useState([]);
 
@@ -337,6 +342,10 @@ export default function FinanceiroPage() {
     (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
   );
 
+ if (!podeVisualizar) {
+    return <SemPermissao />;
+  }
+
  if (!carregado) {
     return (
       <MainLayout>
@@ -361,26 +370,28 @@ export default function FinanceiroPage() {
         count={receitas.length}
         countLabel="receita(s) cadastrada(s)"
         actions={
-          <>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setTipoModal("despesa");
-                setModalOpen(true);
-              }}
-            >
-              + Nova Despesa
-            </Button>
+          podeEditar && (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setTipoModal("despesa");
+                  setModalOpen(true);
+                }}
+              >
+                + Nova Despesa
+              </Button>
 
-            <Button
-              onClick={() => {
-                setTipoModal("receita");
-                setModalOpen(true);
-              }}
-            >
-              + Nova Receita
-            </Button>
-          </>
+              <Button
+                onClick={() => {
+                  setTipoModal("receita");
+                  setModalOpen(true);
+                }}
+              >
+                + Nova Receita
+              </Button>
+            </>
+          )
         }
       />
     </FadeIn>

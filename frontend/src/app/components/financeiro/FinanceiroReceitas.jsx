@@ -16,6 +16,7 @@ import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function MenuButton({ label, danger, success, warning, onClick }) {
   return (
@@ -52,6 +53,8 @@ export default function FinanceiroReceitas({
   onFixar,
   onNovo,
 }) {
+  const podeEditar = usePermissao("financeiro.editar");
+
   const [receitaSelecionada, setReceitaSelecionada] =
     useState(null);
 
@@ -99,15 +102,17 @@ export default function FinanceiroReceitas({
           }}
         />
 
-        <MenuButton
-          label="Editar"
-          warning
-          onClick={() => {
-            setReceitaSelecionada(item);
-            setEditarOpen(true);
-            setMenuAberto(null);
-          }}
-        />
+        {podeEditar && (
+          <MenuButton
+            label="Editar"
+            warning
+            onClick={() => {
+              setReceitaSelecionada(item);
+              setEditarOpen(true);
+              setMenuAberto(null);
+            }}
+          />
+        )}
 
         <MenuButton
           label="Marcar Pago"
@@ -126,14 +131,16 @@ export default function FinanceiroReceitas({
           }}
         />
 
-        <MenuButton
-          label="Excluir"
-          danger
-          onClick={() => {
-            onDelete?.(item.id);
-            setMenuAberto(null);
-          }}
-        />
+        {podeEditar && (
+          <MenuButton
+            label="Excluir"
+            danger
+            onClick={() => {
+              onDelete?.(item.id);
+              setMenuAberto(null);
+            }}
+          />
+        )}
       </ActionMenu>
     );
   }
@@ -196,31 +203,33 @@ export default function FinanceiroReceitas({
 
           </div>
 
-          <button
-            onClick={onNovo}
-            title="Nova Receita"
-            className="
-              w-10
-              h-10
+          {podeEditar && (
+            <button
+              onClick={onNovo}
+              title="Nova Receita"
+              className="
+                w-10
+                h-10
 
-              rounded-xl
+                rounded-xl
 
-              flex
-              items-center
-              justify-center
+                flex
+                items-center
+                justify-center
 
-              bg-emerald-500/10
-              border
-              border-emerald-500/20
+                bg-emerald-500/10
+                border
+                border-emerald-500/20
 
-              text-emerald-400
+                text-emerald-400
 
-              hover:bg-emerald-500/20
-              transition
-            "
-          >
-            <Plus size={20} />
-          </button>
+                hover:bg-emerald-500/20
+                transition
+              "
+            >
+              <Plus size={20} />
+            </button>
+          )}
 
         </div>
 
