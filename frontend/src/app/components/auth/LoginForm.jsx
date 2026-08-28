@@ -71,6 +71,7 @@ export default function LoginForm() {
     <form
       onSubmit={fazerLogin}
       className="space-y-6"
+      autoComplete="off"
     >
 
       {erro && (
@@ -115,6 +116,8 @@ export default function LoginForm() {
           setEmail(e.target.value)
         }
 
+        autoComplete="off"
+
       />
 
       <LoginInput
@@ -132,6 +135,8 @@ export default function LoginForm() {
         onChange={(e) =>
           setSenha(e.target.value)
         }
+
+        autoComplete="new-password"
 
       />
 

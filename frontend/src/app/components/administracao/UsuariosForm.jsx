@@ -161,14 +161,21 @@ export default function UsuariosForm({
 
       <div className="grid md:grid-cols-2 gap-5">
         <Input
-          label="Senha Temporária"
+          label={usuario ? "Nova Senha" : "Senha"}
           type="text"
           name="senha"
           value={formData.senha}
           onChange={alterarCampo}
+          placeholder={usuario ? "Deixe em branco para manter a senha atual" : ""}
           required={!usuario}
         />
       </div>
+
+      <p className="text-sm text-[var(--text-subtle)] -mt-3">
+        Essa é a senha definitiva do usuário para entrar no sistema -- não
+        expira nem precisa ser trocada depois. Digite a senha que quiser ou
+        gere uma automática abaixo.
+      </p>
 
       <div className="flex">
         <Button
