@@ -2,6 +2,7 @@
 
 import Card from "../ui/Card";
 import OccupancyChart from "../charts/OccupancyChart";
+import AnimatedNumber from "../ui/AnimatedNumber";
 import { Home } from "lucide-react";
 
 export default function OccupancyCard({ ocupacao }) {
@@ -113,7 +114,7 @@ export default function OccupancyCard({ ocupacao }) {
                 text-emerald-400
               "
             >
-              {percentual}%
+              <AnimatedNumber value={percentual} formatador={(v) => `${v}%`} />
             </span>
 
           </div>
@@ -162,7 +163,7 @@ function ItemLegenda({
           text-[var(--text)]
         "
       >
-        {valor}
+        <AnimatedNumber value={valor} />
       </span>
 
     </div>

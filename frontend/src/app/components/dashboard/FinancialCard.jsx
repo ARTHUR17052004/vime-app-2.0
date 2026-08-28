@@ -5,6 +5,7 @@ import { Wallet } from "lucide-react";
 
 import Panel from "../ui/Panel";
 import RevenueChart from "../charts/RevenueChart";
+import { useAnimatedNumber } from "../ui/AnimatedNumber";
 
 import { formatCurrency } from "@/utils/formatCurrency";
 import { DashboardService } from "@/services/dashboard.service";
@@ -147,21 +148,21 @@ export default function FinancialCard({ financeiro }) {
 
           <ResumoFinanceiro
             titulo="Recebido"
-            valor={formatCurrency(recebido)}
+            valor={recebido}
             legenda="Valor recebido"
             cor="emerald"
           />
 
           <ResumoFinanceiro
             titulo="Pendente"
-            valor={formatCurrency(pendente)}
+            valor={pendente}
             legenda="A receber"
             cor="yellow"
           />
 
           <ResumoFinanceiro
             titulo="Atrasado"
-            valor={formatCurrency(atrasado)}
+            valor={atrasado}
             legenda="Em atraso"
             cor="red"
           />
@@ -199,6 +200,8 @@ function ResumoFinanceiro({
     },
 
   };
+
+  const animado = useAnimatedNumber(Math.round(Number(valor || 0)));
 
   return (
 
@@ -251,7 +254,7 @@ function ResumoFinanceiro({
           ${cores[cor].valor}
         `}
       >
-        {valor}
+        {formatCurrency(animado)}
       </h3>
 
       <p

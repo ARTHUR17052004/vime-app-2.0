@@ -22,6 +22,7 @@ import SystemStatus from "./components/dashboard/SystemStatus";
 
 import FadeIn from "./components/ui/FadeIn";
 import Loading from "./components/ui/Loading";
+import AnimatedNumber from "./components/ui/AnimatedNumber";
 
 import Page from "./components/ui/Page";
 import PageContainer from "./components/ui/PageContainer";
@@ -44,6 +45,7 @@ function DashboardConteudo() {
     dados,
     loading,
     erro,
+    ultimaAtualizacao,
   } = useDashboard();
 
   const { usuario } = useAuth();
@@ -75,6 +77,11 @@ function DashboardConteudo() {
                 <DashboardHeader
                   usuario={primeiroNome}
                   perfil={usuario?.perfil}
+                  ultimaAtualizacao={
+                    ultimaAtualizacao
+                      ? ultimaAtualizacao.toLocaleTimeString("pt-BR")
+                      : null
+                  }
                 />
               </FadeIn>
 
@@ -93,28 +100,28 @@ function DashboardConteudo() {
                   <PageGrid cols={4}>
                     <DashboardStatsCard
                       title="Inquilinos"
-                      value={dados?.inquilinos ?? 0}
+                      value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
                       subtitle="Ativos"
                       icon={Users}
                     />
 
                     <DashboardStatsCard
                       title="Residências"
-                      value={dados?.unidades ?? 0}
+                      value={<AnimatedNumber value={dados?.unidades ?? 0} />}
                       subtitle="Ativas"
                       icon={Building2}
                     />
 
                     <DashboardStatsCard
                       title="Kitnets"
-                      value={dados?.kitnets ?? 0}
+                      value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
                       subtitle="Total"
                       icon={House}
                     />
 
                     <DashboardStatsCard
                       title="Solicitações"
-                      value={dados?.solicitacoesPendentes ?? 0}
+                      value={<AnimatedNumber value={dados?.solicitacoesPendentes ?? 0} />}
                       subtitle="Pendentes"
                       icon={ClipboardList}
                     />
