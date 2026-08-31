@@ -1,6 +1,8 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
 const { validarCpf } = require('../utils/cpf');
+const { validarTelefone } = require('../utils/validadores');
+const { filtroInquilino } = require('../utils/escopoLocador');
 const contratoService = require('./contratoService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 
@@ -10,6 +12,14 @@ const sanitizar = (dados) => {
     if (!validarCpf(dados.cpf)) {
       throw new Error('CPF inválido.');
     }
+  }
+
+  if (dados.telefone && !validarTelefone(dados.telefone)) {
+    throw new Error('Telefone inválido.');
+  }
+
+  if (dados.telefoneEmergencia && !validarTelefone(dados.telefoneEmergencia)) {
+    throw new Error('Telefone de Emergência inválido.');
   }
 
   if (dados.dataNascimento !== undefined) dados.dataNascimento = paraDataOuNull(dados.dataNascimento);
@@ -46,8 +56,9 @@ const sanitizar = (dados) => {
 
 };
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.inquilino.findMany({
+    where: filtroInquilino(usuario),
     include: {
       kitnet: {
         include: {
@@ -61,8 +72,9 @@ const listar = () => {
   });
 };
 
-const buscarPorId = (id) => {
-  return prisma.inquilino.findUnique({
+const buscarPorId = async (id, usuario) => {
+
+  const inquilino = await prisma.inquilino.findUnique({
     where: { id },
     include: {
       kitnet: {
@@ -72,6 +84,13 @@ const buscarPorId = (id) => {
       }
     }
   });
+
+  if (usuario?.locadorId && inquilino && inquilino.kitnet?.unidade?.locadorId !== usuario.locadorId) {
+    return null;
+  }
+
+  return inquilino;
+
 };
 
 const criar = async (dados) => {

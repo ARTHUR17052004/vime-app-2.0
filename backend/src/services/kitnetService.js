@@ -1,8 +1,10 @@
 const prisma = require('../config/prisma');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { filtroKitnet } = require('../utils/escopoLocador');
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.kitnet.findMany({
+    where: filtroKitnet(usuario),
     include: {
       unidade: true
     },
@@ -21,7 +23,7 @@ const buscarPorId = (id) => {
   });
 };
 
-const criar = async (dados) => {
+const criar = async (dados, usuario) => {
 
   await campoObrigatorioService.validar('kitnet', dados);
 
@@ -30,6 +32,10 @@ const criar = async (dados) => {
   });
 
   if (!unidade) {
+    throw new Error('Residência não encontrada.');
+  }
+
+  if (usuario?.locadorId && unidade.locadorId !== usuario.locadorId) {
     throw new Error('Residência não encontrada.');
   }
 

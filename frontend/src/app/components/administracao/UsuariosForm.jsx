@@ -7,6 +7,8 @@ import Select from "../ui/Select";
 import Button from "../ui/Button";
 
 import { PerfilService } from "@/services/perfis.service";
+import { LocadorService } from "@/services/locadores.service";
+import { validarTelefone } from "@/utils/validadores";
 
 export default function UsuariosForm({
   usuario,
@@ -14,6 +16,7 @@ export default function UsuariosForm({
   onCancel,
 }) {
   const [perfis, setPerfis] = useState([]);
+  const [locadores, setLocadores] = useState([]);
 
   const [salvando, setSalvando] = useState(false);
 
@@ -22,6 +25,7 @@ export default function UsuariosForm({
     email: "",
     telefone: "",
     perfilId: "",
+    locadorId: "",
     senha: "",
     ativo: true,
   });
@@ -41,7 +45,22 @@ export default function UsuariosForm({
       }
     }
 
+    async function carregarLocadores() {
+      try {
+        const resposta = await LocadorService.listar();
+
+        setLocadores(
+          Array.isArray(resposta)
+            ? resposta
+            : resposta.data || []
+        );
+      } catch (err) {
+        console.error("Erro ao carregar locadores:", err);
+      }
+    }
+
     carregarPerfis();
+    carregarLocadores();
   }, []);
 
   useEffect(() => {
@@ -51,6 +70,7 @@ export default function UsuariosForm({
         email: "",
         telefone: "",
         perfilId: "",
+        locadorId: "",
         senha: "",
         ativo: true,
       });
@@ -63,6 +83,7 @@ export default function UsuariosForm({
       email: usuario.email || "",
       telefone: usuario.telefone || "",
       perfilId: usuario.perfil?.id || usuario.perfilId || "",
+      locadorId: usuario.locadorId || "",
       senha: "",
       ativo: usuario.ativo ?? true,
     });
@@ -138,6 +159,11 @@ export default function UsuariosForm({
           name="telefone"
           value={formData.telefone}
           onChange={alterarCampo}
+          error={
+            formData.telefone && !validarTelefone(formData.telefone)
+              ? 'Telefone inválido. Digite "SN" se não tiver.'
+              : undefined
+          }
         />
 
         <Select
@@ -157,7 +183,31 @@ export default function UsuariosForm({
             })),
           ]}
         />
+
+        <Select
+          label="Locador correspondente"
+          name="locadorId"
+          value={formData.locadorId}
+          onChange={alterarCampo}
+          options={[
+            {
+              label: "Todos (gerenciamento geral)",
+              value: "",
+            },
+            ...locadores.map((locador) => ({
+              label: locador.nome,
+              value: locador.id,
+            })),
+          ]}
+        />
       </div>
+
+      <p className="text-sm text-[var(--text-subtle)] -mt-3">
+        Escolhendo um locador, esse usuário só vai ver residências,
+        kitnets, inquilinos, contratos e financeiro (repasses,
+        lucros, pendentes) desse locador. Deixe em "Todos" para o
+        gerenciamento geral do sistema, do jeito que já é hoje.
+      </p>
 
       <div className="grid md:grid-cols-2 gap-5">
         <Input

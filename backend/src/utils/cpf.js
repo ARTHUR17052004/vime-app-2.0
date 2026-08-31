@@ -1,4 +1,11 @@
+const isento = (valor) => {
+  const limpo = (valor || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+  return limpo === 'SN';
+};
+
 const validarCpf = (cpf) => {
+
+  if (isento(cpf)) return true;
 
   const digitos = (cpf || '').replace(/\D/g, '');
 

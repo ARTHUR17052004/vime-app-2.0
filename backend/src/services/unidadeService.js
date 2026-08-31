@@ -1,7 +1,13 @@
 const prisma = require('../config/prisma');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { validarCep } = require('../utils/validadores');
+const { filtroUnidade } = require('../utils/escopoLocador');
 
 const sanitizar = (dados) => {
+
+  if (dados.cep && !validarCep(dados.cep)) {
+    throw new Error('CEP inválido.');
+  }
 
   if (dados.kitnets !== undefined && dados.kitnets !== "") {
     dados.kitnets = parseInt(dados.kitnets, 10) || 0;
@@ -43,8 +49,9 @@ const sanitizar = (dados) => {
 
 };
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.unidade.findMany({
+    where: filtroUnidade(usuario),
     include: {
       locadorRel: true
     },

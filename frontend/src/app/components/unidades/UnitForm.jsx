@@ -10,6 +10,7 @@ import Button from "../ui/Button";
 import { LocadorService } from "@/services/locadores.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+import { validarCep } from "@/utils/validadores";
 
 const CAMPOS = [
   "nome", "cep", "logradouro", "numero", "complemento", "bairro", "cidade", "uf",
@@ -375,6 +376,11 @@ export default function UnitForm({
             value={formData.cep}
             onChange={handleChange}
             placeholder="00000-000"
+            error={
+              formData.cep && !validarCep(formData.cep)
+                ? 'CEP inválido. Digite "SN" se não tiver.'
+                : undefined
+            }
           />
 
         </div>

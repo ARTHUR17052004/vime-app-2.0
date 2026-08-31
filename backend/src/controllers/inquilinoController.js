@@ -1,13 +1,13 @@
 const inquilinoService = require('../services/inquilinoService');
 
 const listar = async (req, res) => {
-  const inquilinos = await inquilinoService.listar();
+  const inquilinos = await inquilinoService.listar(req.usuario);
   res.json(inquilinos);
 };
 
 const buscarPorId = async (req, res) => {
 
-  const inquilino = await inquilinoService.buscarPorId(req.params.id);
+  const inquilino = await inquilinoService.buscarPorId(req.params.id, req.usuario);
 
   if (!inquilino) {
     return res.status(404).json({

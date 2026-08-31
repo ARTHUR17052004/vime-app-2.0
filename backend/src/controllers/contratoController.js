@@ -4,7 +4,7 @@ const ClicksignApiV3 = require('../services/ClicksignApiV3');
 
 const listar = async (req, res) => {
 
-  const contratos = await contratoService.listar();
+  const contratos = await contratoService.listar(req.usuario);
 
   return res.json({
     success: true,
@@ -15,7 +15,7 @@ const listar = async (req, res) => {
 
 const buscarPorId = async (req, res) => {
 
-  const contrato = await contratoService.buscarPorId(req.params.id);
+  const contrato = await contratoService.buscarPorId(req.params.id, req.usuario);
 
   if (!contrato) {
     return res.status(404).json({
@@ -33,7 +33,7 @@ const buscarPorId = async (req, res) => {
 
 const baixarPdf = async (req, res) => {
 
-  const contrato = await contratoService.buscarPorId(req.params.id);
+  const contrato = await contratoService.buscarPorId(req.params.id, req.usuario);
 
   if (!contrato) {
     return res.status(404).json({

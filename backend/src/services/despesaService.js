@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
+const { filtroDespesa } = require('../utils/escopoLocador');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
@@ -27,8 +28,9 @@ const sanitizar = (dados) => {
 
 };
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.despesa.findMany({
+    where: filtroDespesa(usuario),
     include: {
       unidade: true
     },

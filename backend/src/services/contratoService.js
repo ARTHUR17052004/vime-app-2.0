@@ -9,6 +9,7 @@ const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
+const { filtroContrato } = require("../utils/escopoLocador");
 
 const {
   formatarDataExtensa,
@@ -92,8 +93,9 @@ const sanitizar = (dados) => {
 
 };
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.contrato.findMany({
+    where: filtroContrato(usuario),
     include: {
       locador: true,
       unidade: true,
@@ -107,8 +109,9 @@ const listar = () => {
   });
 };
 
-const buscarPorId = (id) => {
-  return prisma.contrato.findUnique({
+const buscarPorId = async (id, usuario) => {
+
+  const contrato = await prisma.contrato.findUnique({
     where: { id },
     include: {
       locador: true,
@@ -118,6 +121,13 @@ const buscarPorId = (id) => {
       receitas: true
     }
   });
+
+  if (usuario?.locadorId && contrato && contrato.locadorId !== usuario.locadorId) {
+    return null;
+  }
+
+  return contrato;
+
 };
 
 const criar = async (dados) => {

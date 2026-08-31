@@ -94,6 +94,12 @@ model Usuario {
 
   perfil Perfil? @relation(fields: [perfilId], references: [id])
 
+  // Sem locador definido, o usuário vê o sistema inteiro (comportamento
+  // atual). Com um locador definido, ele só enxerga dados ligados a
+  // esse locador -- residências, kitnets, contratos, financeiro etc.
+  locadorId String?
+  locador   Locador? @relation(fields: [locadorId], references: [id])
+
   ativo Boolean @default(true)
 
   foto String?
@@ -242,6 +248,8 @@ model Locador {
   contratos Contrato[]
 
   unidades Unidade[]
+
+  usuarios Usuario[]
 }
 
 model Receita {

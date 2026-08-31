@@ -6,6 +6,7 @@ import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { AsaasService } from "@/services/asaas.service";
 import { usePermissao } from "@/hooks/usePermissao";
+import { validarTelefone, validarDocumento } from "@/utils/validadores";
 
 const CAMPOS = [
   "nome", "documento", "email", "telefone", "banco", "agencia", "conta", "pix",
@@ -175,6 +176,9 @@ export default function LocadorForm({
     }));
 
   }
+
+  const documentoInvalido = !!formData.documento && !validarDocumento(formData.documento);
+  const telefoneInvalido = !!formData.telefone && !validarTelefone(formData.telefone);
 
   async function testarConexaoAsaas() {
 
@@ -374,9 +378,17 @@ export default function LocadorForm({
               placeholder="CPF ou CNPJ"
               value={formData.documento}
               onChange={handleChange}
-              className={inputStyle}
+              className={`${inputStyle} ${
+                documentoInvalido ? "border-red-500/60 focus:border-red-500" : ""
+              }`}
               required
             />
+
+            {documentoInvalido && (
+              <p className="mt-1.5 text-xs text-red-400">
+                CPF/CNPJ inválido. Digite "SN" se não tiver.
+              </p>
+            )}
           </Campo>
 
           <Campo label="E-mail" obrigatorio={obrigatorios.has("email")}>
@@ -397,9 +409,17 @@ export default function LocadorForm({
               placeholder="Telefone"
               value={formData.telefone}
               onChange={handleChange}
-              className={inputStyle}
+              className={`${inputStyle} ${
+                telefoneInvalido ? "border-red-500/60 focus:border-red-500" : ""
+              }`}
               required={obrigatorios.has("telefone")}
             />
+
+            {telefoneInvalido && (
+              <p className="mt-1.5 text-xs text-red-400">
+                Telefone inválido. Digite "SN" se não tiver.
+              </p>
+            )}
           </Campo>
 
         </div>

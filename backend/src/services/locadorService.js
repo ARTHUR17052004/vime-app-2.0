@@ -1,5 +1,20 @@
 const prisma = require("../config/prisma");
 const campoObrigatorioService = require("./campoObrigatorioService");
+const { validarTelefone, validarDocumento } = require("../utils/validadores");
+
+const validar = (dados) => {
+
+  if (dados.telefone && !validarTelefone(dados.telefone)) {
+    throw new Error("Telefone inválido.");
+  }
+
+  if (dados.documento && !validarDocumento(dados.documento)) {
+    throw new Error(
+      dados.tipoPessoa === "PJ" ? "CNPJ inválido." : "CPF/CNPJ inválido."
+    );
+  }
+
+};
 
 // Aceita "10,5" (vírgula, formato brasileiro) e "10.5" (ponto). Number("10,5")
 // dá NaN, e o Prisma grava NaN em coluna Float como NULL sem avisar --
@@ -10,8 +25,9 @@ const paraNumero = (v) => {
   return Number.isNaN(n) ? 0 : n;
 };
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.locador.findMany({
+    where: usuario?.locadorId ? { id: usuario.locadorId } : {},
     include: {
       unidades: true,
     },
@@ -23,6 +39,7 @@ const listar = () => {
 
 const criar = async (dados) => {
 
+  validar(dados);
   await campoObrigatorioService.validar('locador', dados);
 
   return prisma.locador.create({
@@ -51,6 +68,7 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  validar(dados);
   await campoObrigatorioService.validar('locador', dados);
 
   return prisma.locador.update({

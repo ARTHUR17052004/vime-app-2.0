@@ -2,7 +2,7 @@ const dashboardService = require('../services/dashboardService');
 
 const resumo = async (req, res) => {
   try {
-    const dados = await dashboardService.resumo();
+    const dados = await dashboardService.resumo(req.usuario);
 
     return res.status(200).json({
       success: true,
@@ -34,7 +34,7 @@ const atividades = async (req, res) => {
 
 const alertas = async (req, res) => {
   try {
-    const dados = await dashboardService.alertas();
+    const dados = await dashboardService.alertas(req.usuario);
 
     return res.status(200).json({
       success: true,
@@ -50,7 +50,7 @@ const alertas = async (req, res) => {
 
 const ocupacao = async (req, res) => {
   try {
-    const dados = await dashboardService.ocupacao();
+    const dados = await dashboardService.ocupacao(req.usuario);
 
     return res.status(200).json({
       success: true,
@@ -66,7 +66,7 @@ const ocupacao = async (req, res) => {
 
 const financeiro = async (req, res) => {
   try {
-    const dados = await dashboardService.financeiro();
+    const dados = await dashboardService.financeiro(req.usuario);
 
     return res.status(200).json({
       success: true,
@@ -88,7 +88,7 @@ const receitasMensais = async (req, res) => {
       ? anoParam
       : new Date().getFullYear();
 
-    const dados = await dashboardService.receitasMensais(ano);
+    const dados = await dashboardService.receitasMensais(ano, req.usuario);
 
     return res.status(200).json({
       success: true,

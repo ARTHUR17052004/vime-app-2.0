@@ -1,6 +1,7 @@
 "use client";
 
 import { validarCpf } from "../../../../utils/cpf";
+import { validarTelefone } from "../../../../utils/validadores";
 
 function Campo({ label, obrigatorio, children }) {
   return (
@@ -24,6 +25,9 @@ export default function StepDadosPessoais({
 
   const cpfDigitado = (formData.cpf || "").replace(/\D/g, "").length > 0;
   const cpfInvalido = cpfDigitado && !validarCpf(formData.cpf);
+
+  const telefoneInvalido = !!formData.telefone && !validarTelefone(formData.telefone);
+  const telefoneEmergenciaInvalido = !!formData.telefoneEmergencia && !validarTelefone(formData.telefoneEmergencia);
 
   return (
     <div className="grid grid-cols-2 gap-4">
@@ -56,9 +60,17 @@ export default function StepDadosPessoais({
           placeholder="Telefone"
           value={formData.telefone}
           onChange={handleChange}
-          className={inputStyle}
+          className={`${inputStyle} ${
+            telefoneInvalido ? "border-red-500/60 focus:border-red-500" : ""
+          }`}
           required
         />
+
+        {telefoneInvalido && (
+          <p className="mt-1.5 text-xs text-red-400">
+            Telefone inválido. Digite "SN" se não tiver.
+          </p>
+        )}
       </Campo>
 
       <Campo label="CPF" obrigatorio={obrigatorios.has("cpf")}>
@@ -108,9 +120,17 @@ export default function StepDadosPessoais({
           placeholder="Telefone Emergência"
           value={formData.telefoneEmergencia}
           onChange={handleChange}
-          className={inputStyle}
+          className={`${inputStyle} ${
+            telefoneEmergenciaInvalido ? "border-red-500/60 focus:border-red-500" : ""
+          }`}
           required={obrigatorios.has("telefoneEmergencia")}
         />
+
+        {telefoneEmergenciaInvalido && (
+          <p className="mt-1.5 text-xs text-red-400">
+            Telefone inválido. Digite "SN" se não tiver.
+          </p>
+        )}
       </Campo>
 
     </div>

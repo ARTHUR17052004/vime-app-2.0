@@ -1,29 +1,45 @@
 const prisma = require('../config/prisma');
 
-const resumo = async () => {
+const {
+  filtroUnidade,
+  filtroKitnet,
+  filtroContrato,
+  filtroReceita,
+} = require('../utils/escopoLocador');
 
-  const inquilinos = await prisma.inquilino.count();
+const resumo = async (usuario) => {
 
-  const unidades = await prisma.unidade.count();
+  const inquilinos = await prisma.inquilino.count({
+    where: { kitnet: { unidade: filtroUnidade(usuario) } }
+  });
 
-  const kitnets = await prisma.kitnet.count();
+  const unidades = await prisma.unidade.count({
+    where: filtroUnidade(usuario)
+  });
 
-  const locadores = await prisma.locador.count();
+  const kitnets = await prisma.kitnet.count({
+    where: filtroKitnet(usuario)
+  });
+
+  // "Locadores" no card de resumo é só um contador de referência --
+  // pra quem está restrito a um locador, o número certo é sempre 1.
+  const locadores = usuario?.locadorId
+    ? 1
+    : await prisma.locador.count();
 
   const contratosAtivos = await prisma.contrato.count({
-    where: {
-      status: 'ATIVO'
-    }
+    where: { ...filtroContrato(usuario), status: 'ATIVO' }
   });
 
   const contratosVencendo = 0;
 
   const inadimplentes = await prisma.contrato.count({
-    where: {
-      status: 'INADIMPLENTE'
-    }
+    where: { ...filtroContrato(usuario), status: 'INADIMPLENTE' }
   });
 
+  // Solicitações não têm nenhum vínculo com kitnet/unidade/locador no
+  // banco -- não tem como restringir por locador, então continuam
+  // visíveis pra todo mundo (mesmo comportamento de sempre).
   const solicitacoesPendentes = await prisma.solicitacao.count({
     where: {
       status: {
@@ -33,9 +49,7 @@ const resumo = async () => {
   });
 
   const receitas = await prisma.receita.findMany({
-    where: {
-      status: 'PENDENTE'
-    }
+    where: { ...filtroReceita(usuario), status: 'PENDENTE' }
   });
 
   const receitaMensal = receitas.reduce((total, receita) => {
@@ -46,9 +60,7 @@ const resumo = async () => {
   // direto -- usar ele aqui em vez de "ocupada" evita o dashboard
   // ficar dessincronizado quando o status é alterado manualmente.
   const kitnetsOcupadas = await prisma.kitnet.count({
-    where: {
-      status: 'OCUPADA'
-    }
+    where: { ...filtroKitnet(usuario), status: 'OCUPADA' }
   });
 
   const ocupacao =
@@ -78,6 +90,8 @@ const STATUS_ATIVIDADE = {
   REJEITADA: 'rejeitada'
 };
 
+// Solicitações também não têm vínculo com locador -- ver comentário em
+// resumo() acima.
 const atividades = async () => {
 
   const solicitacoes = await prisma.solicitacao.findMany({
@@ -97,7 +111,7 @@ const atividades = async () => {
   }));
 };
 
-const alertas = async () => {
+const alertas = async (usuario) => {
 
   const lista = [];
 
@@ -108,6 +122,7 @@ const alertas = async () => {
 
   const contratosVencendo = await prisma.contrato.findMany({
     where: {
+      ...filtroContrato(usuario),
       status: 'ATIVO',
       dataFim: {
         not: null,
@@ -142,9 +157,7 @@ const alertas = async () => {
   });
 
   const cobrancasAtrasadas = await prisma.receita.count({
-    where: {
-      status: 'ATRASADA'
-    }
+    where: { ...filtroReceita(usuario), status: 'ATRASADA' }
   });
 
   if (cobrancasAtrasadas > 0) {
@@ -160,14 +173,14 @@ const alertas = async () => {
   return lista;
 };
 
-const ocupacao = async () => {
+const ocupacao = async (usuario) => {
 
-  const total = await prisma.kitnet.count();
+  const total = await prisma.kitnet.count({
+    where: filtroKitnet(usuario)
+  });
 
   const ocupadas = await prisma.kitnet.count({
-    where: {
-      status: 'OCUPADA'
-    }
+    where: { ...filtroKitnet(usuario), status: 'OCUPADA' }
   });
 
   const vazias = total - ocupadas;
@@ -181,9 +194,11 @@ const ocupacao = async () => {
   };
 };
 
-const financeiro = async () => {
+const financeiro = async (usuario) => {
 
-  const receitas = await prisma.receita.findMany();
+  const receitas = await prisma.receita.findMany({
+    where: filtroReceita(usuario)
+  });
 
   let recebido = 0;
   let pendente = 0;
@@ -219,10 +234,11 @@ const MESES = [
   'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
 ];
 
-const receitasMensais = async (ano) => {
+const receitasMensais = async (ano, usuario) => {
 
   const receitas = await prisma.receita.findMany({
     where: {
+      ...filtroReceita(usuario),
       vencimento: {
         gte: new Date(`${ano}-01-01`),
         lte: new Date(`${ano}-12-31`)

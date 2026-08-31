@@ -1,7 +1,7 @@
 const locadorService = require('../services/locadorService');
 
 const listar = async (req, res) => {
-  const locadores = await locadorService.listar();
+  const locadores = await locadorService.listar(req.usuario);
   res.json(locadores);
 };
 

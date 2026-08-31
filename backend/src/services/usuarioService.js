@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 const emailService = require("./emailService");
+const { validarTelefone } = require("../utils/validadores");
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://vimesistema.online';
 
@@ -41,6 +42,18 @@ const listar = () => {
         include: {
 
             perfil: {
+
+                select: {
+
+                    id: true,
+
+                    nome: true,
+
+                },
+
+            },
+
+            locador: {
 
                 select: {
 
@@ -104,6 +117,10 @@ const buscarPorId = (id) => {
 
 const criar = async (dados) => {
 
+    if (dados.telefone && !validarTelefone(dados.telefone)) {
+        throw new Error("Telefone inválido.");
+    }
+
     const senhaHash = await bcrypt.hash(
 
         dados.senha,
@@ -125,6 +142,14 @@ const criar = async (dados) => {
         senha: senhaHash,
 
         ativo: dados.ativo ?? true,
+
+        // Select sem locador escolhido ("Todos") manda "" -- só conecta
+        // se veio um id de verdade.
+        ...(dados.locadorId && {
+            locador: {
+                connect: { id: dados.locadorId },
+            },
+        }),
 
         perfil: {
 
@@ -197,6 +222,10 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+    if (dados.telefone && !validarTelefone(dados.telefone)) {
+        throw new Error("Telefone inválido.");
+    }
+
     const anterior = await prisma.usuario.findUnique({
 
         where: {
@@ -232,6 +261,20 @@ const atualizar = async (id, dados) => {
         foto: dados.foto,
 
     };
+
+    // Só mexe no locador se ele veio no payload -- telas como
+    // "ativar/desativar" mandam só { ativo }, e sem essa checagem
+    // isso desconectaria o locador do usuário numa atualização que
+    // nem tocou nesse campo.
+    if (dados.locadorId !== undefined) {
+
+        // Select sem locador escolhido ("Todos") manda "" -- desconecta
+        // nesse caso; com um id de verdade, conecta nele.
+        data.locador = dados.locadorId
+            ? { connect: { id: dados.locadorId } }
+            : { disconnect: true };
+
+    }
 
     if (dados.perfilId) {
 

@@ -1,7 +1,7 @@
 const receitaService = require('../services/receitaService');
 
 const listar = async (req, res) => {
-  const receitas = await receitaService.listar();
+  const receitas = await receitaService.listar(req.usuario);
 
   return res.json({
     success: true,

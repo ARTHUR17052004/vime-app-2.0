@@ -52,7 +52,12 @@ const login = async (email, senha) => {
     nome: usuario.nome,
     email: usuario.email,
     perfil: usuario.perfil?.nome,
-    ativo: usuario.ativo
+    ativo: usuario.ativo,
+    // Sem locadorId, o usuário vê o sistema inteiro. Com um definido,
+    // toda listagem fica restrita aos dados desse locador (ver
+    // utils/escopoLocador.js) -- igual ao "perfil" acima, só é
+    // atualizado no próximo login.
+    locadorId: usuario.locadorId || null
   };
 
   const token = jwt.sign(
