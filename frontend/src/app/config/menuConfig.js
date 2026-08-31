@@ -33,8 +33,18 @@ const menuConfig = [
   },
 
   {
+    // Ordem segue a sequência real de cadastro: precisa de um Locador
+    // antes de criar a Residência dele, a Residência já gera as
+    // Kitnets, e só com a Kitnet disponível dá pra cadastrar o
+    // Inquilino nela.
     title: "Imóveis",
     items: [
+      {
+        label: "Locadores",
+        href: "/locadores",
+        icon: UserSquare2,
+        permissao: "locadores.visualizar",
+      },
       {
         label: "Residências",
         href: "/unidades",
@@ -46,12 +56,6 @@ const menuConfig = [
         href: "/kitnets",
         icon: Home,
         permissao: "kitnets.visualizar",
-      },
-      {
-        label: "Locadores",
-        href: "/locadores",
-        icon: UserSquare2,
-        permissao: "locadores.visualizar",
       },
       {
         label: "Inquilinos",
