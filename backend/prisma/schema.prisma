@@ -224,6 +224,13 @@ model Locador {
 
   juros Float? @default(0)
 
+  // Preenche automaticamente o "Dia de Vencimento" de toda Residência
+  // nova desse locador -- não precisa configurar residência por
+  // residência. Em branco = cada contrato vence sempre no dia em que
+  // foi cadastrado (rotativo); um número fixo (ex.: 1) = todo mundo
+  // vence nesse dia do mês, igual o ARA pediu.
+  diaVencimentoPadrao Int?
+
   endereco String?
 
   cidade String?

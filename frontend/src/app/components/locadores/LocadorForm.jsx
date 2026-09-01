@@ -101,6 +101,7 @@ export default function LocadorForm({
     taxaAdministracao: "",
     multa: "",
     juros: "",
+    diaVencimentoPadrao: "",
 
     observacoes: "",
 
@@ -150,6 +151,11 @@ export default function LocadorForm({
 
       juros:
         locadorEditando.juros || "",
+
+      diaVencimentoPadrao:
+        locadorEditando.diaVencimentoPadrao != null
+          ? String(locadorEditando.diaVencimentoPadrao)
+          : "",
 
       observacoes:
         locadorEditando.observacoes || "",
@@ -677,7 +683,25 @@ export default function LocadorForm({
             />
           </Campo>
 
+          <Campo label="Dia de Vencimento Padrão">
+            <input
+              name="diaVencimentoPadrao"
+              placeholder="Em branco = dia do cadastro"
+              value={formData.diaVencimentoPadrao}
+              onChange={handleChange}
+              className={inputStyle}
+            />
+          </Campo>
+
         </div>
+
+        <p className="text-sm text-[var(--text-subtle)]">
+          Preenche automaticamente o "Dia de Vencimento" de toda Residência
+          nova cadastrada pra este locador. Deixe em branco pra cada contrato
+          vencer sempre no dia em que foi cadastrado (cobrança espalhada ao
+          longo do mês); preencha com um número fixo (ex.: 1) pra todo mundo
+          vencer sempre nesse dia do mês.
+        </p>
 
       </div>
 

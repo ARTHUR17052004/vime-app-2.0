@@ -71,7 +71,7 @@ export default function UnitForm({
 
     aluguel: "",
 
-    vencimento: "10",
+    vencimento: "",
 
     dataInicioCobranca: "",
 
@@ -178,8 +178,11 @@ export default function UnitForm({
         aluguel:
           unidade.aluguel || "",
 
+        // Diferente de "" (nunca configurado -- vence sempre no dia do
+        // cadastro do contrato). "|| '10'" apagava esse "em branco"
+        // intencional toda vez que a residência era reaberta pra editar.
         vencimento:
-          unidade.vencimento || "10",
+          unidade.vencimento != null ? String(unidade.vencimento) : "",
 
         dataInicioCobranca:
           unidade.dataInicioCobranca
@@ -291,6 +294,14 @@ export default function UnitForm({
       locadorId,
 
       locador: selecionado?.nome || "",
+
+      // Puxa o "Dia de Vencimento" padrão configurado no cadastro
+      // desse locador -- evita ter que preencher residência por
+      // residência. Ainda dá pra sobrescrever manualmente depois.
+      vencimento:
+        selecionado?.diaVencimentoPadrao != null
+          ? String(selecionado.diaVencimentoPadrao)
+          : "",
 
     }));
 
@@ -553,6 +564,8 @@ export default function UnitForm({
             name="vencimento"
             value={formData.vencimento}
             onChange={handleChange}
+            placeholder="Em branco = sempre no dia do cadastro"
+            helperText="Preenchido automaticamente com o padrão do locador escolhido acima. Deixe em branco pra cada contrato vencer no dia em que foi cadastrado, ou um número fixo (ex.: 1) pra todo mundo vencer sempre nesse dia do mês."
           />
 
           <div>

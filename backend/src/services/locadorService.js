@@ -25,6 +25,15 @@ const paraNumero = (v) => {
   return Number.isNaN(n) ? 0 : n;
 };
 
+// Diferente de paraNumero: aqui "vazio" precisa continuar vazio (null),
+// não virar 0 -- é o que sinaliza "vencimento rotativo, no dia do
+// cadastro" pras Residências desse locador.
+const paraInteiroOuNull = (v) => {
+  if (v === "" || v === null || v === undefined) return null;
+  const n = parseInt(v, 10);
+  return Number.isNaN(n) ? null : n;
+};
+
 const listar = (usuario) => {
   return prisma.locador.findMany({
     where: usuario?.locadorId ? { id: usuario.locadorId } : {},
@@ -58,6 +67,8 @@ const criar = async (dados) => {
       multa: paraNumero(dados.multa),
       juros: paraNumero(dados.juros),
 
+      diaVencimentoPadrao: paraInteiroOuNull(dados.diaVencimentoPadrao),
+
       observacoes: dados.observacoes,
 
       asaasToken: dados.asaasToken || null,
@@ -89,6 +100,8 @@ const atualizar = async (id, dados) => {
       taxaAdministracao: paraNumero(dados.taxaAdministracao),
       multa: paraNumero(dados.multa),
       juros: paraNumero(dados.juros),
+
+      diaVencimentoPadrao: paraInteiroOuNull(dados.diaVencimentoPadrao),
 
       observacoes: dados.observacoes,
 
