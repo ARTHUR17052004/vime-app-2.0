@@ -130,7 +130,11 @@ const buscarPorId = async (id, usuario) => {
 
 };
 
-const criar = async (dados) => {
+const criar = async (dados, usuario) => {
+
+  if (usuario?.locadorId && dados.locadorId && dados.locadorId !== usuario.locadorId) {
+    throw new Error('Você só pode criar contratos para o seu próprio locador.');
+  }
 
   // Signatários extras não são mais definidos na criação do contrato --
   // agora são escolhidos na hora de enviar à Clicksign (ver

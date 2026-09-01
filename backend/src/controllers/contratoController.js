@@ -2,6 +2,19 @@ const contratoService = require('../services/contratoService');
 const contratoDocumentoService = require('../services/contratoDocumentoService');
 const ClicksignApiV3 = require('../services/ClicksignApiV3');
 
+// Usuário restrito a um locador não pode mexer num contrato de fora
+// da sua área só porque descobriu o id (a listagem já não mostra, mas
+// a rota em si não sabia disso até aqui).
+const foraDoEscopo = async (req) => {
+
+  if (!req.usuario?.locadorId) return false;
+
+  const contrato = await contratoService.buscarPorId(req.params.id, req.usuario);
+
+  return !contrato;
+
+};
+
 const listar = async (req, res) => {
 
   const contratos = await contratoService.listar(req.usuario);
@@ -81,7 +94,7 @@ const baixarPdf = async (req, res) => {
 
 const criar = async (req, res) => {
 
-  const contrato = await contratoService.criar(req.body);
+  const contrato = await contratoService.criar(req.body, req.usuario);
 
   return res.status(201).json({
     success: true,
@@ -91,6 +104,10 @@ const criar = async (req, res) => {
 };
 
 const atualizar = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
 
   const contrato = await contratoService.atualizar(
     req.params.id,
@@ -106,6 +123,10 @@ const atualizar = async (req, res) => {
 
 const remover = async (req, res) => {
 
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
+
   await contratoService.remover(req.params.id);
 
   return res.json({
@@ -117,6 +138,10 @@ const remover = async (req, res) => {
 
 const encerrar = async (req, res) => {
 
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
+
   const contrato = await contratoService.encerrar(req.params.id);
 
   return res.json({
@@ -127,6 +152,10 @@ const encerrar = async (req, res) => {
 };
 
 const renovar = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
 
   const contrato = await contratoService.renovar(
     req.params.id
@@ -140,6 +169,10 @@ const renovar = async (req, res) => {
 };
 
 const enviarClicksign = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
 
   const resultado = await contratoService.enviarParaClicksign(
     req.params.id,
