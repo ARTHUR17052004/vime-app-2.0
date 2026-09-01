@@ -139,21 +139,27 @@ class BBApi {
 
     } catch (error) {
 
-      // O BB não é consistente entre os próprios endpoints: uns devolvem
-      // "erros[]" em português (textoMensagem/textoProvidencia), outros
-      // "errors[]" em inglês (message/action) -- confirmado ao vivo,
-      // testando /boletos (POST) vs /boletos/{numero} (GET). Trata os
-      // dois formatos.
+      // O BB não é consistente nem entre os próprios endpoints -- já
+      // confirmado ao vivo em 3 formatos diferentes de erro:
+      // 1) erros[].textoMensagem / textoProvidencia
+      // 2) erros[].mensagem / providencia
+      // 3) errors[].message / action
+      // Tenta os três antes de cair no genérico do axios.
       const dadosErro = error.response?.data;
+      const primeiroErro = dadosErro?.erros?.[0] || dadosErro?.errors?.[0];
 
-      const erroPt = dadosErro?.erros?.[0];
-      const erroEn = dadosErro?.errors?.[0];
+      const texto =
+        primeiroErro?.textoMensagem ||
+        primeiroErro?.mensagem ||
+        primeiroErro?.message;
+
+      const providencia =
+        primeiroErro?.textoProvidencia ||
+        primeiroErro?.providencia ||
+        primeiroErro?.action;
 
       const mensagem =
-        (erroPt?.textoMensagem &&
-          `${erroPt.textoMensagem}${erroPt.textoProvidencia ? ` (${erroPt.textoProvidencia})` : ""}`) ||
-        (erroEn?.message &&
-          `${erroEn.message}${erroEn.action ? ` (${erroEn.action})` : ""}`) ||
+        (texto && `${texto}${providencia ? ` (${providencia})` : ""}`) ||
         dadosErro?.error_description ||
         error.message;
 
@@ -183,6 +189,8 @@ class BBApi {
       numeroConvenio,
       numeroCarteira,
       numeroVariacaoCarteira,
+      agenciaBeneficiario,
+      contaBeneficiario,
     } = this.obterConfig();
 
     if (!numeroConvenio) {
@@ -195,6 +203,12 @@ class BBApi {
       numeroConvenio: Number(numeroConvenio),
       numeroCarteira: Number(numeroCarteira),
       numeroVariacaoCarteira: Number(numeroVariacaoCarteira),
+      // Documento do convênio traz Agência+Conta amarradas ao mesmo
+      // registro de Carteira/Variação -- sem isso aqui, o BB não
+      // conseguia validar a combinação na criação do boleto (só usava
+      // pra consulta antes, faltava mandar também ao criar).
+      agenciaBeneficiario: Number(agenciaBeneficiario),
+      contaBeneficiario: Number(contaBeneficiario),
       codigoModalidade: 1,
       dataEmissao: dados.dataEmissao,
       dataVencimento: dados.dataVencimento,
