@@ -4,9 +4,11 @@ const { paraDataOuNull } = require('../utils/data');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { filtroVistoria } = require('../utils/escopoLocador');
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.vistoria.findMany({
+    where: filtroVistoria(usuario),
     include: {
       ocorrencias: true,
       unidade: true,

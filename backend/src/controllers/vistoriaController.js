@@ -1,7 +1,7 @@
 const vistoriaService = require('../services/vistoriaService');
 
 const listar = async (req, res) => {
-  const dados = await vistoriaService.listar();
+  const dados = await vistoriaService.listar(req.usuario);
   res.json(dados);
 };
 

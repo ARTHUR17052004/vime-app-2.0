@@ -43,9 +43,16 @@ const filtroDespesa = (usuario) => {
   return { unidade: { locadorId: usuario.locadorId } };
 };
 
+// Vistoria pode estar presa direto numa Unidade OU numa Kitnet (os
+// dois são opcionais e independentes) -- checa os dois caminhos.
 const filtroVistoria = (usuario) => {
   if (!usuario?.locadorId) return {};
-  return { kitnet: { unidade: { locadorId: usuario.locadorId } } };
+  return {
+    OR: [
+      { unidade: { locadorId: usuario.locadorId } },
+      { kitnet: { unidade: { locadorId: usuario.locadorId } } },
+    ],
+  };
 };
 
 module.exports = {
