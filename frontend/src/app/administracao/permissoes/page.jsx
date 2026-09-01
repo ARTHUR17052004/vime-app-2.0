@@ -82,6 +82,11 @@ const CATALOGO = [
     acoes: ["visualizar", "exportar"],
   },
   {
+    modulo: "Suporte Técnico",
+    chave: "suporte",
+    acoes: ["visualizar", "criar", "editar", "excluir"],
+  },
+  {
     modulo: "Configurações",
     chave: "configuracoes",
     acoes: ["visualizar", "editar"],

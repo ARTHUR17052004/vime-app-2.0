@@ -14,6 +14,7 @@ import {
   Bot,
   Settings,
   BadgeDollarSign,
+  LifeBuoy,
 } from "lucide-react";
 
 // `permissao` é a chave conferida contra usuario.permissoes (ver
@@ -155,6 +156,12 @@ const menuConfig = [
   {
     title: "Sistema",
     items: [
+      {
+        label: "Suporte Técnico",
+        href: "/suporte",
+        icon: LifeBuoy,
+        permissao: "suporte.visualizar",
+      },
       {
         label: "Notificações",
         href: "/notificacoes",

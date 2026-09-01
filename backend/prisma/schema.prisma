@@ -351,6 +351,62 @@ model SolicitacaoMensagem {
   createdAt DateTime @default(now())
 }
 
+// Suporte Técnico: usuário abre um chamado relatando um problema do
+// sistema e conversa com quem for atender, em formato de chat (igual
+// Solicitacao/SolicitacaoMensagem, só que pra bug/dúvida do próprio
+// VIME em vez de compra/manutenção do imóvel).
+model Chamado {
+  id String @id @default(uuid())
+
+  numero String
+
+  titulo String
+
+  descricao String?
+
+  categoria String? // Bug, Dúvida, Sugestão, Outro
+
+  criticidade String? // Baixa, Média, Alta, Urgente
+
+  status String @default("ABERTO") // ABERTO, EM_ANDAMENTO, RESOLVIDO, FECHADO
+
+  criadoPorId String?
+
+  criadoPorNome String?
+
+  criadoPorPerfil String?
+
+  mensagens ChamadoMensagem[]
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+}
+
+model ChamadoMensagem {
+  id String @id @default(uuid())
+
+  chamadoId String
+
+  chamado Chamado @relation(fields: [chamadoId], references: [id], onDelete: Cascade)
+
+  autorId String?
+
+  autorNome String
+
+  texto String?
+
+  statusAlterado String?
+
+  anexoNome String?
+
+  anexoTipo String?
+
+  anexoDados String?
+
+  createdAt DateTime @default(now())
+}
+
 model Vistoria {
   id String @id @default(uuid())
 
