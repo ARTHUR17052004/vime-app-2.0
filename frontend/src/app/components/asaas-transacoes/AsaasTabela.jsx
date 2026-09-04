@@ -72,7 +72,11 @@ export default function AsaasTabela({
   podeEnviar = true,
 }) {
 
-  const enviaveis = transacoes.filter((t) => !t.enviadaAsaas);
+  // enviadaAsaas só cobre o caminho Asaas -- uma receita mandada pelo
+  // BB fica com gatewayReferencia preenchida em vez disso.
+  const foiEnviada = (t) => t.enviadaAsaas || !!t.gatewayReferencia;
+
+  const enviaveis = transacoes.filter((t) => !foiEnviada(t));
   const todosSelecionados =
     enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
@@ -158,7 +162,7 @@ export default function AsaasTabela({
               >
 
                 <td className="p-4">
-                  {!item.enviadaAsaas && (
+                  {!foiEnviada(item) && (
                     <input
                       type="checkbox"
                       checked={selecionados.has(item.id)}
@@ -174,9 +178,11 @@ export default function AsaasTabela({
                   </div>
 
                   <div className="text-sm text-[var(--text-subtle)]">
-                    {item.enviadaAsaas
+                    {item.gatewayProvider === "BB"
+                      ? `BB • ${item.gatewayReferencia || "sincronizado"}`
+                      : item.enviadaAsaas
                       ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
-                      : "Ainda não enviada ao Asaas"}
+                      : "Ainda não enviada a nenhum banco"}
                   </div>
 
                 </td>
@@ -238,7 +244,7 @@ export default function AsaasTabela({
                       Detalhes
                     </button>
 
-                    {!item.enviadaAsaas && podeEditar && (
+                    {!foiEnviada(item) && podeEditar && (
                       <button
                         onClick={() => onEditar?.(item)}
                         className="
@@ -255,7 +261,7 @@ export default function AsaasTabela({
                       </button>
                     )}
 
-                    {!item.enviadaAsaas && podeEnviar && (
+                    {!foiEnviada(item) && podeEnviar && (
                       <button
                         onClick={() => onEnviar?.(item)}
                         disabled={enviandoId === item.id}
@@ -272,7 +278,7 @@ export default function AsaasTabela({
                       >
                         {enviandoId === item.id
                           ? "Enviando..."
-                          : "Enviar ao Asaas"}
+                          : "Enviar Cobrança"}
                       </button>
                     )}
 
@@ -315,7 +321,7 @@ export default function AsaasTabela({
           >
             {enviandoLote
               ? "Enviando..."
-              : `Enviar ${selecionados.size} selecionada(s) ao Asaas`}
+              : `Enviar ${selecionados.size} selecionada(s)`}
           </button>
         )}
 

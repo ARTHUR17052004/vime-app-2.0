@@ -23,30 +23,34 @@ const ESCOPO_COBRANCAS =
 class BBApi {
 
   constructor() {
-    // Cache simples em memória -- token do BB dura 600s (10 min); evita
-    // logar de novo a cada chamada.
-    this._token = null;
-    this._tokenExpiraEm = 0;
+    // Cache em memória por client_id -- token do BB dura 600s (10 min).
+    // Com várias contas BB (uma por locador, no futuro), cada uma tem
+    // client_id diferente, então não dá pra ter um token só global.
+    this._tokens = {};
   }
 
-  obterConfig() {
+  // `override` é o JSON `credenciais` de um ContaPagamento (provider
+  // "BB") -- mesmo padrão do AsaasApi.obterConfig(override). Sem
+  // override, cai nas variáveis de ambiente (uso direto/testes).
+  obterConfig(override = null) {
 
-    const ambiente = process.env.BB_AMBIENTE || "homologacao";
+    const ambiente =
+      override?.ambiente || process.env.BB_AMBIENTE || "homologacao";
 
     return {
-      clientId: process.env.BB_CLIENT_ID || "",
-      clientSecret: process.env.BB_CLIENT_SECRET || "",
-      appKey: process.env.BB_APP_KEY || "",
+      clientId: override?.clientId || process.env.BB_CLIENT_ID || "",
+      clientSecret: override?.clientSecret || process.env.BB_CLIENT_SECRET || "",
+      appKey: override?.appKey || process.env.BB_APP_KEY || "",
       ambiente,
       oauthURL: OAUTH_URLS[ambiente] || OAUTH_URLS.homologacao,
       apiURL: API_URLS[ambiente] || API_URLS.homologacao,
       // Convênio/Carteira só existem depois que o gerente libera --
       // ficam vazios até lá, e criarBoleto() explica isso no erro.
-      numeroConvenio: process.env.BB_NUMERO_CONVENIO || "",
-      numeroCarteira: process.env.BB_NUMERO_CARTEIRA || "",
-      numeroVariacaoCarteira: process.env.BB_VARIACAO_CARTEIRA || "",
-      agenciaBeneficiario: process.env.BB_AGENCIA || "",
-      contaBeneficiario: process.env.BB_CONTA || "",
+      numeroConvenio: override?.numeroConvenio || process.env.BB_NUMERO_CONVENIO || "",
+      numeroCarteira: override?.numeroCarteira || process.env.BB_NUMERO_CARTEIRA || "",
+      numeroVariacaoCarteira: override?.numeroVariacaoCarteira || process.env.BB_VARIACAO_CARTEIRA || "",
+      agenciaBeneficiario: override?.agencia || process.env.BB_AGENCIA || "",
+      contaBeneficiario: override?.conta || process.env.BB_CONTA || "",
     };
 
   }
@@ -54,20 +58,21 @@ class BBApi {
   // Autentica via OAuth2 client_credentials (Basic client_id:client_secret
   // no header, grant_type + escopo no corpo) -- fluxo confirmado
   // funcionando ao vivo contra oauth.hm.bb.com.br.
-  async obterToken() {
+  async obterToken(override = null) {
 
-    const agora = Date.now();
-
-    if (this._token && agora < this._tokenExpiraEm) {
-      return this._token;
-    }
-
-    const { clientId, clientSecret, oauthURL } = this.obterConfig();
+    const { clientId, clientSecret, oauthURL } = this.obterConfig(override);
 
     if (!clientId || !clientSecret) {
       throw new Error(
-        "BB_CLIENT_ID/BB_CLIENT_SECRET não configurados (.env)."
+        "Client ID/Secret do BB não configurados."
       );
+    }
+
+    const agora = Date.now();
+    const cache = this._tokens[clientId];
+
+    if (cache && agora < cache.expiraEm) {
+      return cache.token;
     }
 
     const basic = Buffer.from(`${clientId}:${clientSecret}`).toString(
@@ -88,12 +93,14 @@ class BBApi {
         }
       );
 
-      this._token = resposta.data.access_token;
       // Renova 30s antes de vencer, de propósito -- margem de segurança
       // pra não usar um token vencido bem na hora H.
-      this._tokenExpiraEm = agora + (resposta.data.expires_in - 30) * 1000;
+      this._tokens[clientId] = {
+        token: resposta.data.access_token,
+        expiraEm: agora + (resposta.data.expires_in - 30) * 1000,
+      };
 
-      return this._token;
+      return resposta.data.access_token;
 
     } catch (error) {
 
@@ -108,15 +115,15 @@ class BBApi {
 
   }
 
-  async request(method, endpoint, body = null, params = {}) {
+  async request(method, endpoint, body = null, params = {}, override = null) {
 
-    const { appKey, apiURL } = this.obterConfig();
+    const { appKey, apiURL } = this.obterConfig(override);
 
     if (USAR_MOCK) {
       return { success: true, mock: true, method, endpoint, body, params };
     }
 
-    const token = await this.obterToken();
+    const token = await this.obterToken(override);
 
     try {
 
@@ -183,19 +190,34 @@ class BBApi {
   // chamada aqui recebe "Contrato de cobrança não localizado" (já
   // confirmado ao vivo), o que é esperado.
 
-  async criarBoleto(dados) {
+  // "Nosso Número" pro formato JSON da API (confirmado no manual oficial
+  // -- diferente do formato de impressão do boleto em papel, que é
+  // outro documento): STRING de 20 dígitos = "000" + convênio (7
+  // dígitos) + número de controle escolhido por nós (10 dígitos,
+  // zeros à esquerda). Guarda só o número de controle -- essa função
+  // monta o resto.
+  montarNumeroTituloCliente(numeroControle, override = null) {
+
+    const { numeroConvenio } = this.obterConfig(override);
+
+    const convenio = String(numeroConvenio).padStart(7, "0");
+    const controle = String(numeroControle).padStart(10, "0");
+
+    return `000${convenio}${controle}`;
+
+  }
+
+  async criarBoleto(dados, override = null) {
 
     const {
       numeroConvenio,
       numeroCarteira,
       numeroVariacaoCarteira,
-      agenciaBeneficiario,
-      contaBeneficiario,
-    } = this.obterConfig();
+    } = this.obterConfig(override);
 
     if (!numeroConvenio) {
       throw new Error(
-        "Número do Convênio de Cobrança ainda não configurado -- peça ao seu gerente do BB e defina BB_NUMERO_CONVENIO no .env."
+        "Número do Convênio de Cobrança ainda não configurado para essa conta BB."
       );
     }
 
@@ -203,12 +225,6 @@ class BBApi {
       numeroConvenio: Number(numeroConvenio),
       numeroCarteira: Number(numeroCarteira),
       numeroVariacaoCarteira: Number(numeroVariacaoCarteira),
-      // Documento do convênio traz Agência+Conta amarradas ao mesmo
-      // registro de Carteira/Variação -- sem isso aqui, o BB não
-      // conseguia validar a combinação na criação do boleto (só usava
-      // pra consulta antes, faltava mandar também ao criar).
-      agenciaBeneficiario: Number(agenciaBeneficiario),
-      contaBeneficiario: Number(contaBeneficiario),
       codigoModalidade: 1,
       dataEmissao: dados.dataEmissao,
       dataVencimento: dados.dataVencimento,
@@ -218,7 +234,7 @@ class BBApi {
       descricaoTipoTitulo: "DM",
       indicadorPermissaoRecebimentoParcial: "N",
       numeroTituloBeneficiario: dados.numeroTituloBeneficiario,
-      numeroTituloCliente: dados.numeroTituloCliente,
+      numeroTituloCliente: this.montarNumeroTituloCliente(dados.numeroControle, override),
       indicadorPix: "S",
       pagador: {
         tipoInscricao: dados.pagador.tipoInscricao, // 1 = CPF, 2 = CNPJ
@@ -230,31 +246,34 @@ class BBApi {
         bairro: dados.pagador.bairro,
         uf: dados.pagador.uf,
       },
-    });
+    }, {}, override);
 
   }
 
-  async consultarBoleto(numeroBoleto) {
+  async consultarBoleto(numeroControle, override = null) {
 
-    const { numeroConvenio } = this.obterConfig();
+    const { numeroConvenio } = this.obterConfig(override);
 
     return this.request(
       "GET",
-      `/cobrancas/v2/boletos/${numeroBoleto}`,
+      `/cobrancas/v2/boletos/${this.montarNumeroTituloCliente(numeroControle, override)}`,
       null,
-      { numeroConvenio: Number(numeroConvenio) }
+      { numeroConvenio: Number(numeroConvenio) },
+      override
     );
 
   }
 
-  async baixarBoleto(numeroBoleto) {
+  async baixarBoleto(numeroControle, override = null) {
 
-    const { numeroConvenio } = this.obterConfig();
+    const { numeroConvenio } = this.obterConfig(override);
 
     return this.request(
       "POST",
-      `/cobrancas/v2/boletos/${numeroBoleto}/baixar`,
-      { numeroConvenio: Number(numeroConvenio) }
+      `/cobrancas/v2/boletos/${this.montarNumeroTituloCliente(numeroControle, override)}/baixar`,
+      { numeroConvenio: Number(numeroConvenio) },
+      {},
+      override
     );
 
   }

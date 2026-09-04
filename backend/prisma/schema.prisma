@@ -197,6 +197,37 @@ model SignatarioFixo {
   updatedAt DateTime @updatedAt
 }
 
+// Uma conta de recebimento cadastrada no sistema -- Asaas, Banco do
+// Brasil, ou outro banco que vier depois. Cada Locador escolhe qual
+// conta processa as cobranças dele (Locador.contaPagamentoId); sem
+// escolher, usa a conta marcada como padrao=true.
+model ContaPagamento {
+  id String @id @default(uuid())
+
+  provider String // "ASAAS" | "BB"
+
+  nome String // rótulo pra identificar na tela, ex: "Asaas Padrão", "BB - SH"
+
+  // Cada banco pede campos bem diferentes (Asaas: apiKey/walletId; BB:
+  // client_id/secret/appKey/convênio/carteira/variação/agência/conta)
+  // -- fica tudo aqui num JSON em vez de uma coluna por campo de cada
+  // provedor, senão toda vez que entrar um banco novo precisaria de
+  // migração de schema.
+  credenciais Json
+
+  padrao Boolean @default(false) // usada quando um locador não tem conta própria
+
+  ativo Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  locadores Locador[]
+
+  receitas Receita[]
+}
+
 model Locador {
   id String @id @default(uuid())
 
@@ -241,12 +272,18 @@ model Locador {
 
   ativo Boolean @default(true)
 
-  // Conta própria do locador no Asaas -- quando preenchido, as
-  // cobranças dos contratos deste locador são criadas nesta conta em
-  // vez da conta padrão configurada em Configurações, então o dinheiro
-  // cai direto na conta bancária ligada a ESTE Asaas específico.
+  // Conta própria do locador no Asaas -- mantido por compatibilidade
+  // com locadores já configurados assim. Pra contas novas (Asaas ou
+  // BB), usar contaPagamentoId abaixo -- é o caminho genérico, vale
+  // pra qualquer banco.
   asaasToken    String?
   asaasWalletId String?
+
+  // Qual conta de recebimento (Asaas, BB, o que vier depois) processa
+  // as cobranças deste locador. Sem isso definido, cai na conta padrão
+  // do sistema (ContaPagamento.padrao = true).
+  contaPagamentoId String?
+  contaPagamento   ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
 
   createdAt DateTime @default(now())
 
@@ -277,6 +314,13 @@ model Receita {
   asaasPaymentId  String?   @unique
   asaasCustomerId String?
   enviadaAsaas    Boolean   @default(false)
+  // Genéricos, preenchidos independente do banco (Asaas continua
+  // preenchendo os dois campos acima também, por compatibilidade com
+  // telas que já leem enviadaAsaas/asaasPaymentId direto).
+  contaPagamentoId  String?
+  contaPagamento    ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
+  gatewayProvider   String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
+  gatewayReferencia String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
   lembreteEnviadoEm DateTime?
   fixado          Boolean   @default(false)
   createdAt       DateTime  @default(now())

@@ -342,10 +342,10 @@ export default function FinanceiroReceitas({
                     </Badge>
 
                     <Badge
-                      variant={item.enviadaAsaas ? "blue" : "gray"}
+                      variant={item.gatewayProvider === "BB" || item.enviadaAsaas ? "blue" : "gray"}
                       size="sm"
                     >
-                      {item.enviadaAsaas ? "Asaas" : "Local"}
+                      {item.gatewayProvider === "BB" ? "BB" : item.enviadaAsaas ? "Asaas" : "Local"}
                     </Badge>
 
                   </div>
@@ -493,19 +493,23 @@ export default function FinanceiroReceitas({
                       </Badge>
 
                       <Badge
-                        variant={item.enviadaAsaas ? "blue" : "gray"}
+                        variant={item.gatewayProvider === "BB" || item.enviadaAsaas ? "blue" : "gray"}
                         size="sm"
                         title={
-                          item.enviadaAsaas
+                          item.gatewayProvider === "BB"
+                            ? `Sincronizada com o Banco do Brasil${
+                                item.gatewayReferencia ? ` (${item.gatewayReferencia})` : ""
+                              }`
+                            : item.enviadaAsaas
                             ? `Sincronizada com Asaas${
                                 item.asaasPaymentId
                                   ? ` (${item.asaasPaymentId})`
                                   : ""
                               }`
-                            : "Ainda não enviada ao Asaas"
+                            : "Ainda não enviada a nenhum banco"
                         }
                       >
-                        {item.enviadaAsaas ? "Asaas" : "Local"}
+                        {item.gatewayProvider === "BB" ? "BB" : item.enviadaAsaas ? "Asaas" : "Local"}
                       </Badge>
 
                     </div>

@@ -1,4 +1,5 @@
 const asaasService = require('../services/asaasService');
+const gatewayPagamentoService = require('../services/gatewayPagamentoService');
 
 const config = async (req, res) => {
   return res.json({
@@ -84,7 +85,10 @@ const buscarTransacao = async (req, res) => {
 
 const enviarCobranca = async (req, res) => {
 
-  const resultado = await asaasService.enviarCobranca(req.params.id);
+  // Escolhe Asaas ou BB sozinho, olhando a conta configurada no
+  // locador do contrato/inquilino dessa receita -- ver
+  // gatewayPagamentoService.js.
+  const resultado = await gatewayPagamentoService.enviarCobranca(req.params.id);
 
   return res.status(resultado.success ? 200 : 400).json({
     success: resultado.success,
