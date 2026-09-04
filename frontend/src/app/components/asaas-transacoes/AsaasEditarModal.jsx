@@ -76,7 +76,7 @@ export default function AsaasEditarModal({
           </h2>
 
           <p className="text-[var(--text-subtle)] mt-1">
-            Ajuste os dados antes de enviar ao Asaas. Só é possível editar
+            Ajuste os dados antes de enviar ao banco. Só é possível editar
             enquanto a cobrança ainda não foi enviada.
           </p>
         </div>

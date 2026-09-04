@@ -142,7 +142,7 @@ export default function AsaasNovaCobrancaModal({
 
       const enviarAgora = form.contratoId
         ? window.confirm(
-            "Receita criada. Deseja enviar esta cobrança ao Asaas agora?"
+            "Receita criada. Deseja enviar esta cobrança ao banco agora?"
           )
         : false;
 
@@ -150,13 +150,15 @@ export default function AsaasNovaCobrancaModal({
 
         try {
 
-          await AsaasService.enviarCobranca(receitaCriada.id);
+          const resposta = await AsaasService.enviarCobranca(receitaCriada.id);
+
+          alert(resposta.message || "Cobrança enviada com sucesso.");
 
         } catch (err) {
 
           alert(
             err.message ||
-            "Receita criada, mas não foi possível enviá-la ao Asaas agora."
+            "Receita criada, mas não foi possível enviá-la ao banco agora."
           );
 
         }
@@ -185,7 +187,7 @@ export default function AsaasNovaCobrancaModal({
       open={open}
       onClose={onClose}
       title="Nova Cobrança"
-      subtitle="Cria uma receita e, se desejar, envia a cobrança ao Asaas."
+      subtitle="Cria uma receita e, se desejar, envia a cobrança ao banco."
       size="md"
     >
 
@@ -228,8 +230,8 @@ export default function AsaasNovaCobrancaModal({
           </select>
 
           <p className="text-xs text-[var(--text-faint)] mt-1">
-            Necessário para enviar a cobrança ao Asaas (o inquilino do contrato
-            vira o cliente da cobrança).
+            Necessário para enviar a cobrança ao banco (o inquilino do contrato
+            vira o pagador da cobrança).
           </p>
         </div>
 

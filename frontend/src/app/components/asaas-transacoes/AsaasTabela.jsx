@@ -278,7 +278,7 @@ export default function AsaasTabela({
                       >
                         {enviandoId === item.id
                           ? "Enviando..."
-                          : "Enviar Cobrança"}
+                          : "Enviar ao Banco"}
                       </button>
                     )}
 

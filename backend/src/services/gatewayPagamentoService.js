@@ -87,7 +87,8 @@ const enviarPeloBB = async (receita, conta) => {
 
     return {
       success: true,
-      mensagem: 'Boleto gerado no Banco do Brasil.',
+      mensagem: 'Cobrança enviada ao Banco do Brasil com sucesso.',
+      gatewayProvider: 'BB',
       linhaDigitavel: resultado.linhaDigitavel,
       urlBoleto: resultado.urlImagemBoleto,
     };

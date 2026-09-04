@@ -112,15 +112,21 @@ export default function AsaasTransacoesPage() {
 
       setEnviandoId(transacao.id);
 
-      await AsaasService.enviarCobranca(transacao.id);
+      const resposta = await AsaasService.enviarCobranca(transacao.id);
+
+      // Confirma explicitamente qual banco recebeu -- a mensagem já
+      // vem do backend nomeando o banco certo (ver
+      // gatewayPagamentoService.js), então não tem chance de mostrar
+      // um banco errado por engano aqui na tela.
+      alert(resposta.message || "Cobrança enviada com sucesso.");
 
       await carregarTransacoes();
 
     } catch (error) {
 
-      console.error("Erro ao enviar cobrança ao Asaas:", error);
+      console.error("Erro ao enviar cobrança:", error);
 
-      alert(error.message || "Erro ao enviar cobrança ao Asaas.");
+      alert(error.message || "Erro ao enviar cobrança.");
 
     } finally {
 
@@ -159,14 +165,28 @@ export default function AsaasTransacoesPage() {
 
     let sucesso = 0;
     let falha = 0;
+    // Conta quantas foram pra cada banco, pra confirmar no resumo
+    // final -- mesma lógica de segurança do envio individual.
+    const porBanco = {};
 
     for (const id of selecionados) {
 
       try {
-        await AsaasService.enviarCobranca(id);
+
+        const resposta = await AsaasService.enviarCobranca(id);
+
+        if (resposta.success === false) {
+          falha++;
+          continue;
+        }
+
         sucesso++;
+
+        const banco = resposta.data?.gatewayProvider === "BB" ? "Banco do Brasil" : "Asaas";
+        porBanco[banco] = (porBanco[banco] || 0) + 1;
+
       } catch (error) {
-        console.error(`Erro ao enviar cobrança ${id} ao Asaas:`, error);
+        console.error(`Erro ao enviar cobrança ${id}:`, error);
         falha++;
       }
 
@@ -177,10 +197,14 @@ export default function AsaasTransacoesPage() {
 
     await carregarTransacoes();
 
+    const resumoBancos = Object.entries(porBanco)
+      .map(([banco, qtd]) => `${qtd} pro ${banco}`)
+      .join(", ");
+
     alert(
       falha > 0
-        ? `${sucesso} cobrança(s) enviada(s). ${falha} falharam (confira o status delas na lista).`
-        : `${sucesso} cobrança(s) enviada(s) ao Asaas com sucesso.`
+        ? `${sucesso} cobrança(s) enviada(s)${resumoBancos ? ` (${resumoBancos})` : ""}. ${falha} falharam (confira o status delas na lista).`
+        : `${sucesso} cobrança(s) enviada(s) com sucesso${resumoBancos ? ` -- ${resumoBancos}` : ""}.`
     );
 
   }
