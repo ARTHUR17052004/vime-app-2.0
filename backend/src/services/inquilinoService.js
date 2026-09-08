@@ -5,7 +5,6 @@ const { validarTelefone } = require('../utils/validadores');
 const { filtroInquilino } = require('../utils/escopoLocador');
 const contratoService = require('./contratoService');
 const campoObrigatorioService = require('./campoObrigatorioService');
-const { gerarCobrancaParaContrato } = require('./cobrancaRecorrenteService');
 
 const sanitizar = (dados) => {
 
@@ -162,26 +161,11 @@ const criar = async (dados) => {
 
         contratoId = contrato.id;
 
-        // Gera a 1ª cobrança já na hora do cadastro, em vez de esperar
-        // o job diário (8h) pegar esse contrato -- pedido explícito:
-        // "ao cadastrar o inquilino automaticamente seja gerado uma
-        // cobrança". Mesma lógica/regras do job (não duplica, respeita
-        // dataInicioCobranca), só que síncrona pra esse contrato.
-        try {
-
-          await gerarCobrancaParaContrato({ ...contrato, unidade });
-
-        } catch (erroCobranca) {
-
-          console.error(
-            'Erro ao gerar a primeira cobrança do contrato automático:',
-            erroCobranca.message
-          );
-
-          avisoContrato =
-            'Inquilino e contrato cadastrados, mas não foi possível gerar a primeira cobrança automaticamente.';
-
-        }
+        // NÃO gera cobrança aqui -- regra já estabelecida em
+        // contratoService.criar/clicksignService.processarWebhook: a
+        // cobrança do aluguel só nasce depois que o contrato for
+        // assinado de verdade na Clicksign (evento "close"/"auto_close").
+        // Contrato recém-criado começa como "PENDENTE", não assinado.
 
       }
 
