@@ -41,6 +41,8 @@ export default function LocadoresPage() {
 
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
+  const [ordenacao, setOrdenacao] = useState("nome-asc");
+
   const carregarLocadores = useCallback(async () => {
 
     try {
@@ -149,6 +151,14 @@ export default function LocadoresPage() {
 
   }
 
+  const COMPARADORES_LOCADOR = {
+    "nome-asc": (a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    "nome-desc": (a, b) => (b.nome || "").localeCompare(a.nome || "", "pt-BR"),
+    "email-asc": (a, b) => (a.email || "").localeCompare(b.email || "", "pt-BR"),
+    "residencias-mais": (a, b) => (b.unidades?.length || 0) - (a.unidades?.length || 0),
+    "residencias-menos": (a, b) => (a.unidades?.length || 0) - (b.unidades?.length || 0),
+  };
+
   const locadoresFiltrados = locadores.filter((locador) => {
 
     const termo = search.toLowerCase();
@@ -185,7 +195,7 @@ export default function LocadoresPage() {
 
     return true;
 
-  });
+  }).slice().sort(COMPARADORES_LOCADOR[ordenacao] || COMPARADORES_LOCADOR["nome-asc"]);
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -253,11 +263,32 @@ export default function LocadoresPage() {
                   placeholder="Pesquisar locador..."
                 />
 
-                <div className="mt-4">
-                  <ResidenciaFiltro
-                    value={residenciaSelecionada}
-                    onChange={setResidenciaSelecionada}
-                  />
+                <div className="mt-4 flex flex-wrap gap-4 items-center">
+
+                  <div className="flex-1 min-w-[220px]">
+                    <ResidenciaFiltro
+                      value={residenciaSelecionada}
+                      onChange={setResidenciaSelecionada}
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                      Organizar por
+                    </label>
+                    <select
+                      value={ordenacao}
+                      onChange={(e) => setOrdenacao(e.target.value)}
+                      className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                    >
+                      <option value="nome-asc" className="bg-[#1b2430]">Nome (A-Z)</option>
+                      <option value="nome-desc" className="bg-[#1b2430]">Nome (Z-A)</option>
+                      <option value="email-asc" className="bg-[#1b2430]">E-mail</option>
+                      <option value="residencias-mais" className="bg-[#1b2430]">Nº de Residências (mais)</option>
+                      <option value="residencias-menos" className="bg-[#1b2430]">Nº de Residências (menos)</option>
+                    </select>
+                  </div>
+
                 </div>
 
               </PageSection>

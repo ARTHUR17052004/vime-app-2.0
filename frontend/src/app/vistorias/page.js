@@ -48,6 +48,9 @@ export default function VistoriasPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
+  const [ordenacao, setOrdenacao] =
+    useState("data-proxima");
+
   const [search, setSearch] =
     useState("");
   
@@ -357,6 +360,15 @@ const fixarVistoria = async (id, fixado) => {
     setModalOpen(true);
 
   };
+     const COMPARADORES_VISTORIA = {
+       "data-proxima": (a, b) => new Date(a.dataProxima || 0) - new Date(b.dataProxima || 0),
+       "data-distante": (a, b) => new Date(b.dataProxima || 0) - new Date(a.dataProxima || 0),
+       "titulo-asc": (a, b) => (a.titulo || "").localeCompare(b.titulo || "", "pt-BR"),
+       "responsavel-asc": (a, b) => (a.responsavel || "").localeCompare(b.responsavel || "", "pt-BR"),
+       "criticidade": (a, b) => (a.criticidade || "").localeCompare(b.criticidade || "", "pt-BR"),
+       "residencia-asc": (a, b) => (a.unidadeNome || "").localeCompare(b.unidadeNome || "", "pt-BR"),
+     };
+
      const vistoriasFiltradas = vistorias.filter((vistoria) => {
 
   const texto = `
@@ -404,9 +416,15 @@ const fixarVistoria = async (id, fixado) => {
 
   }
 
-}).sort(
-  (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
-);
+}).sort((a, b) => {
+
+  const fixadoDiff = (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0);
+
+  if (fixadoDiff !== 0) return fixadoDiff;
+
+  return (COMPARADORES_VISTORIA[ordenacao] || COMPARADORES_VISTORIA["data-proxima"])(a, b);
+
+});
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -479,11 +497,33 @@ const fixarVistoria = async (id, fixado) => {
               setFiltroSelecionado={setFiltroSelecionado}
             />
 
-            <div className="mt-4">
-              <ResidenciaFiltro
-                value={residenciaSelecionada}
-                onChange={setResidenciaSelecionada}
-              />
+            <div className="mt-4 flex flex-wrap gap-4 items-center">
+
+              <div className="flex-1 min-w-[220px]">
+                <ResidenciaFiltro
+                  value={residenciaSelecionada}
+                  onChange={setResidenciaSelecionada}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                  Organizar por
+                </label>
+                <select
+                  value={ordenacao}
+                  onChange={(e) => setOrdenacao(e.target.value)}
+                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="data-proxima" className="bg-[#1b2430]">Data (mais próxima)</option>
+                  <option value="data-distante" className="bg-[#1b2430]">Data (mais distante)</option>
+                  <option value="titulo-asc" className="bg-[#1b2430]">Título (A-Z)</option>
+                  <option value="responsavel-asc" className="bg-[#1b2430]">Responsável</option>
+                  <option value="criticidade" className="bg-[#1b2430]">Criticidade</option>
+                  <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+                </select>
+              </div>
+
             </div>
 
             <VistoriaTabs

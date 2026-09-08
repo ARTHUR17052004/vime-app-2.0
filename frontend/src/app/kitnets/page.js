@@ -47,6 +47,8 @@ export default function KitnetsPage() {
 
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
+  const [ordenacao, setOrdenacao] = useState("numero-asc");
+
   /* ==========================================
      CARREGAR DADOS
   ========================================== */
@@ -181,11 +183,22 @@ export default function KitnetsPage() {
 
   ).length;
 
-  const kitnetsFiltradas = residenciaSelecionada
-    ? kitnets.filter(
-        (k) => k.unidadeId === residenciaSelecionada
-      )
-    : kitnets;
+  const COMPARADORES_KITNET = {
+    "numero-asc": (a, b) => (a.numero || a.nome || "").localeCompare(b.numero || b.nome || "", "pt-BR", { numeric: true }),
+    "numero-desc": (a, b) => (b.numero || b.nome || "").localeCompare(a.numero || a.nome || "", "pt-BR", { numeric: true }),
+    "residencia-asc": (a, b) => (a.unidade?.nome || a.unidadeNome || "").localeCompare(b.unidade?.nome || b.unidadeNome || "", "pt-BR"),
+    "aluguel-maior": (a, b) => (b.aluguel || 0) - (a.aluguel || 0),
+    "aluguel-menor": (a, b) => (a.aluguel || 0) - (b.aluguel || 0),
+    "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+  };
+
+  const kitnetsFiltradas = (
+    residenciaSelecionada
+      ? kitnets.filter((k) => k.unidadeId === residenciaSelecionada)
+      : kitnets
+  )
+    .slice()
+    .sort(COMPARADORES_KITNET[ordenacao] || COMPARADORES_KITNET["numero-asc"]);
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -309,10 +322,34 @@ export default function KitnetsPage() {
 
           <PageSection>
 
-            <ResidenciaFiltro
-              value={residenciaSelecionada}
-              onChange={setResidenciaSelecionada}
-            />
+            <div className="flex flex-wrap gap-4 items-center">
+
+              <div className="flex-1 min-w-[220px]">
+                <ResidenciaFiltro
+                  value={residenciaSelecionada}
+                  onChange={setResidenciaSelecionada}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                  Organizar por
+                </label>
+                <select
+                  value={ordenacao}
+                  onChange={(e) => setOrdenacao(e.target.value)}
+                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="numero-asc" className="bg-[#1b2430]">Número (A-Z)</option>
+                  <option value="numero-desc" className="bg-[#1b2430]">Número (Z-A)</option>
+                  <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+                  <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
+                  <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
+                  <option value="status" className="bg-[#1b2430]">Status</option>
+                </select>
+              </div>
+
+            </div>
 
           </PageSection>
 

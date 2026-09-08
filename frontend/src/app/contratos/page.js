@@ -49,6 +49,9 @@ export default function ContratosPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
+  const [ordenacao, setOrdenacao] =
+    useState("inicio-recente");
+
   const [demonstrativoContratoId, setDemonstrativoContratoId] =
     useState(null);
 
@@ -233,6 +236,16 @@ export default function ContratosPage() {
     }
 
   }
+    const COMPARADORES_CONTRATO = {
+      "inicio-recente": (a, b) => new Date(b.dataInicio || 0) - new Date(a.dataInicio || 0),
+      "inicio-antigo": (a, b) => new Date(a.dataInicio || 0) - new Date(b.dataInicio || 0),
+      "inquilino-asc": (a, b) => (a.inquilino?.nome || a.inquilinoNome || "").localeCompare(b.inquilino?.nome || b.inquilinoNome || "", "pt-BR"),
+      "residencia-asc": (a, b) => (a.unidade?.nome || a.unidadeNome || "").localeCompare(b.unidade?.nome || b.unidadeNome || "", "pt-BR"),
+      "aluguel-maior": (a, b) => (b.valorAluguel || 0) - (a.valorAluguel || 0),
+      "aluguel-menor": (a, b) => (a.valorAluguel || 0) - (b.valorAluguel || 0),
+      "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+    };
+
     const contratosFiltrados = contratos.filter(
     (contrato) => {
 
@@ -290,7 +303,7 @@ export default function ContratosPage() {
       );
 
     }
-  );
+  ).slice().sort(COMPARADORES_CONTRATO[ordenacao] || COMPARADORES_CONTRATO["inicio-recente"]);
 
   const totalContratos =
     contratos.length;
@@ -375,11 +388,34 @@ export default function ContratosPage() {
               }
             />
 
-            <div className="mt-4">
-              <ResidenciaFiltro
-                value={residenciaSelecionada}
-                onChange={setResidenciaSelecionada}
-              />
+            <div className="mt-4 flex flex-wrap gap-4 items-center">
+
+              <div className="flex-1 min-w-[220px]">
+                <ResidenciaFiltro
+                  value={residenciaSelecionada}
+                  onChange={setResidenciaSelecionada}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                  Organizar por
+                </label>
+                <select
+                  value={ordenacao}
+                  onChange={(e) => setOrdenacao(e.target.value)}
+                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="inicio-recente" className="bg-[#1b2430]">Início (mais recente)</option>
+                  <option value="inicio-antigo" className="bg-[#1b2430]">Início (mais antigo)</option>
+                  <option value="inquilino-asc" className="bg-[#1b2430]">Inquilino (A-Z)</option>
+                  <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+                  <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
+                  <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
+                  <option value="status" className="bg-[#1b2430]">Status</option>
+                </select>
+              </div>
+
             </div>
 
           </PageSection>

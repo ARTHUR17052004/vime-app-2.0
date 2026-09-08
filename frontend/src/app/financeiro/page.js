@@ -60,6 +60,9 @@ export default function FinanceiroPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
+  const [ordenacao, setOrdenacao] =
+    useState("vencimento-proximo");
+
   const [dataDe, setDataDe] = useState("");
 
   const [dataAte, setDataAte] = useState("");
@@ -293,6 +296,16 @@ export default function FinanceiroPage() {
 
   };
 
+  const COMPARADORES_FINANCEIRO = {
+    "vencimento-proximo": (a, b) => new Date(a.vencimento || 0) - new Date(b.vencimento || 0),
+    "vencimento-distante": (a, b) => new Date(b.vencimento || 0) - new Date(a.vencimento || 0),
+    "valor-maior": (a, b) => (b.valor || 0) - (a.valor || 0),
+    "valor-menor": (a, b) => (a.valor || 0) - (b.valor || 0),
+    "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+  };
+
+  const ordenarFinanceiro = COMPARADORES_FINANCEIRO[ordenacao] || COMPARADORES_FINANCEIRO["vencimento-proximo"];
+
   const receitasFiltradas = receitas.filter((item) => {
 
     const texto = `
@@ -315,7 +328,7 @@ export default function FinanceiroPage() {
     return true;
 
   }).sort(
-    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
+    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0) || ordenarFinanceiro(a, b)
   );
 
   const despesasFiltradas = despesas.filter((item) => {
@@ -339,7 +352,7 @@ export default function FinanceiroPage() {
     return true;
 
   }).sort(
-    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0)
+    (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0) || ordenarFinanceiro(a, b)
   );
 
  if (!podeVisualizar) {
@@ -458,6 +471,23 @@ export default function FinanceiroPage() {
             </button>
           )}
 
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+            Organizar por
+          </label>
+          <select
+            value={ordenacao}
+            onChange={(e) => setOrdenacao(e.target.value)}
+            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="vencimento-proximo" className="bg-[#1b2430]">Vencimento (mais próximo)</option>
+            <option value="vencimento-distante" className="bg-[#1b2430]">Vencimento (mais distante)</option>
+            <option value="valor-maior" className="bg-[#1b2430]">Valor (maior)</option>
+            <option value="valor-menor" className="bg-[#1b2430]">Valor (menor)</option>
+            <option value="status" className="bg-[#1b2430]">Status</option>
+          </select>
         </div>
 
       </div>
