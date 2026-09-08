@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const metaWhatsappService = require("./metaWhatsappService");
 const { getIO } = require("../socket");
+const { paraChave: normalizarTelefone } = require("../utils/telefoneWhatsapp");
 
 /*
   Disparos automáticos de WhatsApp ligados ao ciclo de vida da cobrança:
@@ -26,23 +27,6 @@ function formatarMoeda(valor) {
 
 function formatarData(data) {
   return data ? new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" }) : "-";
-}
-
-// Mesma regra do metaWhatsappService: o cadastro de Inquilino grava o
-// telefone local (sem "55"), mas uma mensagem recebida via webhook já
-// chega com o "55" na frente. Precisam virar a MESMA chave aqui --
-// senão o mesmo inquilino ganha dois WhatsappContato diferentes (um
-// pras mensagens automáticas, outro pra quando ele escreve pra gente).
-function normalizarTelefone(telefone) {
-
-  let digitos = (telefone || "").replace(/\D/g, "");
-
-  if (digitos.length <= 11 && !digitos.startsWith("55")) {
-    digitos = "55" + digitos;
-  }
-
-  return digitos;
-
 }
 
 /* ==========================================

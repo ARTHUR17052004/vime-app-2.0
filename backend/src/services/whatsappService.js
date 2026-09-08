@@ -4,6 +4,7 @@ const metaWhatsappService = require("./metaWhatsappService");
 const assistenteWhatsappService = require("./assistenteWhatsappService");
 const notificacaoService = require("./notificacaoService");
 const { getIO } = require("../socket");
+const { paraChave: normalizarTelefoneChave } = require("../utils/telefoneWhatsapp");
 
 const USAR_MOCK =
   process.env.WHATSAPP_MOCK === "true";
@@ -348,7 +349,10 @@ class WhatsappService {
 
       for (const msg of mensagens) {
 
-        const numero = msg.from;
+        // msg.from às vezes vem sem o 9º dígito do celular (mesmo
+        // quando mandamos PARA o número com o 9) -- normaliza pra
+        // chave canônica, senão a mesma pessoa vira dois contatos.
+        const numero = normalizarTelefoneChave(msg.from);
 
         const texto =
           msg.text?.body ||

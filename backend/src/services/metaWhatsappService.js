@@ -1,23 +1,6 @@
 const axios = require("axios");
 const prisma = require("../config/prisma");
-
-// O cadastro de Inquilino grava o telefone local, sem código do país
-// (ex: "9281440073"), mas a Cloud API exige o número completo (código
-// do país + DDD + número, só dígitos: "559281440073"). Números vindos
-// do próprio WhatsApp (webhook, ou conversa já existente) já chegam
-// completos -- só completa quando parece ser um número local (10 ou 11
-// dígitos e ainda sem o "55" na frente).
-function normalizarNumero(numero) {
-
-  let digitos = (numero || "").replace(/\D/g, "");
-
-  if (digitos.length <= 11 && !digitos.startsWith("55")) {
-    digitos = "55" + digitos;
-  }
-
-  return digitos;
-
-}
+const { paraEnvio: normalizarNumero } = require("../utils/telefoneWhatsapp");
 
 class MetaWhatsappService {
 
