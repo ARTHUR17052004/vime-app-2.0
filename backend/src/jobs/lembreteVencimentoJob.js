@@ -1,5 +1,5 @@
 const prisma = require("../config/prisma");
-const whatsappService = require("../services/whatsappService");
+const whatsappAutomacaoService = require("../services/whatsappAutomacaoService");
 
 /*
   Lembrete automático de vencimento (via WhatsApp).
@@ -23,10 +23,6 @@ function inicioDoDia(data) {
   const d = new Date(data);
   d.setHours(0, 0, 0, 0);
   return d;
-}
-
-function formatarMoeda(valor) {
-  return `R$ ${Number(valor || 0).toFixed(2).replace(".", ",")}`;
 }
 
 module.exports = async () => {
@@ -55,6 +51,7 @@ module.exports = async () => {
       contrato: {
         include: { inquilino: true },
       },
+      inquilino: true,
     },
   });
 
@@ -62,9 +59,9 @@ module.exports = async () => {
   let ignorados = 0;
 
   for (const receita of receitas) {
-    const telefone = receita.contrato?.inquilino?.telefone;
+    const inquilino = receita.inquilino || receita.contrato?.inquilino;
 
-    if (!telefone) {
+    if (!inquilino?.telefone) {
       ignorados++;
       continue;
     }
@@ -78,24 +75,13 @@ module.exports = async () => {
       continue;
     }
 
-    const venceHoje =
-      inicioDoDia(receita.vencimento).getTime() === hoje.getTime();
-
-    const nomeInquilino = receita.contrato?.inquilino?.nome || "Inquilino";
-    const dataFormatada = new Date(receita.vencimento).toLocaleDateString(
-      "pt-BR"
-    );
-    const valorFormatado = formatarMoeda(receita.valor);
-
-    const mensagem = venceHoje
-      ? `Olá, ${nomeInquilino}! Passando para lembrar que sua cobrança de ${valorFormatado} (${receita.descricao}) vence HOJE, ${dataFormatada}. Evite atrasos e regularize o quanto antes.`
-      : `Olá, ${nomeInquilino}! Sua cobrança de ${valorFormatado} (${receita.descricao}) vence em ${dataFormatada}. Fique atento para evitar juros e multa por atraso.`;
-
     try {
-      await whatsappService.enviarMensagem({
-        numero: telefone,
-        mensagem,
-      });
+      const resultado = await whatsappAutomacaoService.notificarLembreteVencimento(receita, inquilino);
+
+      if (!resultado.success) {
+        ignorados++;
+        continue;
+      }
 
       await prisma.receita.update({
         where: { id: receita.id },

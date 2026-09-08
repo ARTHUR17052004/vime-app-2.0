@@ -362,11 +362,29 @@ class WhatsappService {
           });
 
         if (!contato) {
+
+          // Tenta casar esse número com um inquilino cadastrado (pelos
+          // últimos 8 dígitos, pra não depender do 9º dígito/DDI batendo
+          // igual) -- assim a conversa já nasce com o nome certo em vez
+          // do número cru, mesmo quando quem manda a 1ª mensagem é o
+          // inquilino (não a gente).
+          const sufixo = numero.slice(-8);
+
+          const inquilinos = await prisma.inquilino.findMany({
+            select: { id: true, nome: true, telefone: true },
+          });
+
+          const inquilinoEncontrado = inquilinos.find((i) => {
+            const digitos = (i.telefone || "").replace(/\D/g, "");
+            return digitos && digitos.slice(-8) === sufixo;
+          });
+
           contato =
             await prisma.whatsappContato.create({
               data: {
                 telefone: numero,
-                nome: numero,
+                nome: inquilinoEncontrado?.nome || numero,
+                inquilinoId: inquilinoEncontrado?.id || null,
               },
             });
         }

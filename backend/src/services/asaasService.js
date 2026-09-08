@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const AsaasApi = require('./AsaasApi');
 const notificacaoService = require('./notificacaoService');
+const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 
 // Acha o locador dono da receita (via contrato, ou via
 // inquilino → kitnet → residência quando a receita não tem contrato)
@@ -424,6 +425,7 @@ const enviarCobranca = async (receitaId) => {
         asaasCustomerId: customerId,
         enviadaAsaas: true,
         formaPagamento: cobranca.billingType || 'BOLETO',
+        linkBoleto: cobranca.bankSlipUrl || cobranca.invoiceUrl || null,
       },
     });
 
@@ -505,13 +507,14 @@ const sincronizar = async (evento) => {
       // pro mesmo pagamento (comum em boleto).
       if (receita.status !== "PAGA") {
 
-        await prisma.receita.update({
+        const atualizada = await prisma.receita.update({
           where: {
             id: receita.id
           },
           data: {
             status: "PAGA",
-            dataPagamento: new Date()
+            dataPagamento: new Date(),
+            confirmacaoPagtoEnviadaEm: new Date(),
           }
         });
 
@@ -521,6 +524,14 @@ const sincronizar = async (evento) => {
           mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
           link: "/asaas-transacoes",
         });
+
+        const inquilino = receita.inquilino || receita.contrato?.inquilino;
+
+        if (inquilino) {
+          whatsappAutomacaoService
+            .notificarPagamentoConfirmado(atualizada, inquilino)
+            .catch((erro) => console.error('[WhatsApp] pagamento_confirmado (Asaas):', erro.message));
+        }
 
       }
 

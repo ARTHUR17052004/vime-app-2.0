@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const notificacaoService = require('./notificacaoService');
+const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 
 // ATENÇÃO: o formato exato do webhook do BB (Cobranças v2) ainda não
 // foi confirmado ao vivo -- a documentação oficial só menciona que ele
@@ -73,11 +74,12 @@ const sincronizar = async (payload) => {
 
   if (receita.status !== 'PAGA') {
 
-    await prisma.receita.update({
+    const atualizada = await prisma.receita.update({
       where: { id: receita.id },
       data: {
         status: 'PAGA',
         dataPagamento: new Date(),
+        confirmacaoPagtoEnviadaEm: new Date(),
       },
     });
 
@@ -89,6 +91,14 @@ const sincronizar = async (payload) => {
       mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ''} — R$ ${receita.valor} foi confirmado como pago no Banco do Brasil.`,
       link: '/financeiro',
     });
+
+    const inquilino = receita.inquilino || receita.contrato?.inquilino;
+
+    if (inquilino) {
+      whatsappAutomacaoService
+        .notificarPagamentoConfirmado(atualizada, inquilino)
+        .catch((erro) => console.error('[WhatsApp] pagamento_confirmado (BB):', erro.message));
+    }
 
   }
 

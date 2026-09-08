@@ -78,6 +78,7 @@ model Inquilino {
   valorCaucao        Float?
   contratos          Contrato[]
   receitas           Receita[]
+  whatsappContatos   WhatsappContato[]
   kitnet             Kitnet     @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 }
 
@@ -321,7 +322,12 @@ model Receita {
   contaPagamento    ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
   gatewayProvider   String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
   gatewayReferencia String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
+  linkBoleto        String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
   lembreteEnviadoEm DateTime?
+  // Dedupe dos avisos automáticos por WhatsApp -- cada um dispara só
+  // uma vez por Receita, mesmo se o job rodar de novo.
+  avisoVencidoEnviadoEm       DateTime?
+  confirmacaoPagtoEnviadaEm   DateTime?
   fixado          Boolean   @default(false)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -602,6 +608,13 @@ model WhatsappContato {
   telefone String @unique
 
   foto String?
+
+  // Vincula o contato ao inquilino cadastrado com esse telefone, quando
+  // existir -- permite mostrar o nome real na lista (em vez do número
+  // cru) e ligar os disparos automáticos (cobrança/lembrete/etc) à
+  // conversa certa.
+  inquilinoId String?
+  inquilino   Inquilino? @relation(fields: [inquilinoId], references: [id])
 
   createdAt DateTime @default(now())
 

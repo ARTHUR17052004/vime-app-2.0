@@ -3,6 +3,7 @@ const prisma = require('../config/prisma');
 const asaasService = require('./asaasService');
 const contaPagamentoService = require('./contaPagamentoService');
 const BBApi = require('./BBApi');
+const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 
 const formatarDataBB = (data) => {
   const d = new Date(data);
@@ -76,14 +77,21 @@ const enviarPeloBB = async (receita, conta) => {
       },
     }, conta.credenciais);
 
-    await prisma.receita.update({
+    const atualizada = await prisma.receita.update({
       where: { id: receita.id },
       data: {
         contaPagamentoId: conta.id,
         gatewayProvider: 'BB',
         gatewayReferencia: resultado.numero,
+        linkBoleto: resultado.urlImagemBoleto || null,
       },
     });
+
+    // Não trava o envio da cobrança se o WhatsApp falhar -- o boleto já
+    // foi criado no banco de qualquer forma.
+    whatsappAutomacaoService
+      .notificarNovaCobranca(atualizada, inquilino)
+      .catch((erro) => console.error('[WhatsApp] nova_cobranca (BB):', erro.message));
 
     return {
       success: true,
@@ -135,7 +143,26 @@ const enviarCobranca = async (receitaId) => {
   }
 
   // Sem conta BB vinculada -- segue o fluxo Asaas de sempre.
-  return asaasService.enviarCobranca(receitaId);
+  const resultado = await asaasService.enviarCobranca(receitaId);
+
+  if (resultado.success) {
+
+    const inquilino = receita.inquilino || receita.contrato?.inquilino;
+
+    if (inquilino) {
+
+      // Recarrega pra pegar o linkBoleto que o asaasService acabou de gravar.
+      const atualizada = await prisma.receita.findUnique({ where: { id: receita.id } });
+
+      whatsappAutomacaoService
+        .notificarNovaCobranca(atualizada, inquilino)
+        .catch((erro) => console.error('[WhatsApp] nova_cobranca (Asaas):', erro.message));
+
+    }
+
+  }
+
+  return resultado;
 
 };
 

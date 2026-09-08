@@ -7,6 +7,7 @@ const verificarNotificacoes = require("./verificarNotificacoesJob");
 const gerarCobrancasRecorrentes = require("./gerarCobrancasRecorrentesJob");
 const lembreteVencimento = require("./lembreteVencimentoJob");
 const notificarVencimentoContrato = require("./notificarVencimentoContratoJob");
+const cobrancaVencidaWhatsapp = require("./cobrancaVencidaWhatsappJob");
 
 const iniciarJobs = () => {
 
@@ -15,6 +16,9 @@ const iniciarJobs = () => {
     console.log("========== JOBS ==========");
 
     await verificarVencimentos();
+
+    // depois de virar PENDENTE -> ATRASADA acima, avisa o inquilino
+    await cobrancaVencidaWhatsapp();
 
     await verificarContratos();
 
