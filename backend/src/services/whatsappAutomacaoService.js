@@ -133,9 +133,18 @@ async function registrarMensagemEnviada(conversa, texto) {
    ENVIO GENÉRICO DE MODELO
 ========================================== */
 
+// Erros da Meta relacionados ao MODELO em si (não existe, não aprovado
+// ainda, idioma errado etc) -- só nesses casos vale tentar a mensagem
+// livre como alternativa. Um erro de outro tipo (token inválido,
+// número mal formatado...) não seria resolvido por essa troca.
+function erroEhDeModelo(mensagem) {
+  const m = (mensagem || "").toLowerCase();
+  return m.includes("template") || m.includes("modelo");
+}
+
 // Nunca deixa uma falha de WhatsApp derrubar o fluxo que chamou (enviar
 // cobrança, marcar pagamento, etc) -- só loga e segue.
-async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, documentoUrl, resumoParaHistorico }) {
+async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, documentoUrl, resumoParaHistorico, textoFallback }) {
 
   try {
 
@@ -150,12 +159,33 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
       return { success: false, mensagem: "Telefone inválido." };
     }
 
-    await metaWhatsappService.enviarTemplate(
-      inquilino.telefone,
-      nomeModelo,
-      parametros,
-      documentoUrl
-    );
+    try {
+
+      await metaWhatsappService.enviarTemplate(
+        inquilino.telefone,
+        nomeModelo,
+        parametros,
+        documentoUrl
+      );
+
+    } catch (erroTemplate) {
+
+      // Modelo ainda não aprovado (ou não existe) -- tenta mensagem
+      // livre como alternativa. Só funciona se o inquilino escreveu
+      // pra gente nas últimas 24h (janela de atendimento da própria
+      // Meta); se não, a Meta recusa e cai no catch de fora, sem
+      // travar o fluxo de qualquer forma.
+      if (!erroEhDeModelo(erroTemplate.message)) throw erroTemplate;
+
+      console.warn(`[WhatsApp] Modelo "${nomeModelo}" indisponível (${erroTemplate.message}) -- tentando mensagem livre como alternativa.`);
+
+      await metaWhatsappService.enviarMensagem(inquilino.telefone, textoFallback || resumoParaHistorico);
+
+      if (documentoUrl) {
+        await metaWhatsappService.enviarDocumento(inquilino.telefone, documentoUrl, "Boleto para pagamento.");
+      }
+
+    }
 
     await registrarMensagemEnviada(conversa, resumoParaHistorico);
 
@@ -177,12 +207,19 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
 
 async function notificarNovaCobranca(receita, inquilino) {
 
+  // O link do boleto (BB e Asaas) é uma página pra abrir no navegador,
+  // não um PDF puro -- por isso vai como link clicável no texto, não
+  // como anexo de documento (a Meta rejeita/renderiza errado um
+  // "documento" cujo conteúdo não é realmente um arquivo).
+  const link = receita.linkBoleto || "";
+
   return enviarTemplateParaInquilino({
     inquilino,
-    nomeModelo: "nova_cobranca",
-    parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.vencimento)],
-    documentoUrl: receita.linkBoleto || null,
+    nomeModelo: "nova_cobranca_boleto",
+    parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.vencimento), link],
+    documentoUrl: null,
     resumoParaHistorico: `📄 Nova cobrança: R$ ${formatarMoeda(receita.valor)}, vencimento ${formatarData(receita.vencimento)}.`,
+    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nUma nova cobrança foi gerada para você:\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Vencimento: ${formatarData(receita.vencimento)}\n\n🔗 Link para pagamento (boleto/Pix): ${link}\n\nQualquer dúvida, é só responder aqui.`,
   });
 
 }
@@ -195,6 +232,7 @@ async function notificarLembreteVencimento(receita, inquilino) {
     parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.vencimento)],
     documentoUrl: null,
     resumoParaHistorico: `⏰ Lembrete de vencimento: R$ ${formatarMoeda(receita.valor)}, vence ${formatarData(receita.vencimento)}.`,
+    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nPassando pra lembrar que sua cobrança vence em breve:\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Vencimento: ${formatarData(receita.vencimento)}\n\nEvite atrasos garantindo o pagamento até a data. Qualquer dúvida, é só responder aqui.`,
   });
 
 }
@@ -207,6 +245,7 @@ async function notificarCobrancaVencida(receita, inquilino) {
     parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.vencimento)],
     documentoUrl: null,
     resumoParaHistorico: `⚠️ Cobrança vencida: R$ ${formatarMoeda(receita.valor)}, venceu ${formatarData(receita.vencimento)}.`,
+    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nNotamos que sua cobrança venceu e ainda não identificamos o pagamento:\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Vencimento: ${formatarData(receita.vencimento)}\n\nSe já pagou, desconsidere esta mensagem. Caso contrário, regularize o quanto antes para evitar juros e multa. Qualquer dúvida, é só responder aqui.`,
   });
 
 }
@@ -219,6 +258,7 @@ async function notificarPagamentoConfirmado(receita, inquilino) {
     parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.dataPagamento || new Date())],
     documentoUrl: null,
     resumoParaHistorico: `✅ Pagamento confirmado: R$ ${formatarMoeda(receita.valor)}.`,
+    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nRecebemos seu pagamento com sucesso! ✅\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Pago em: ${formatarData(receita.dataPagamento || new Date())}\n\nObrigado pela pontualidade! Qualquer dúvida, é só responder aqui.`,
   });
 
 }

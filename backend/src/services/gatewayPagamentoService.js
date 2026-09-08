@@ -4,6 +4,7 @@ const asaasService = require('./asaasService');
 const contaPagamentoService = require('./contaPagamentoService');
 const BBApi = require('./BBApi');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
+const emailAutomacaoService = require('./emailAutomacaoService');
 
 const formatarDataBB = (data) => {
   const d = new Date(data);
@@ -87,11 +88,15 @@ const enviarPeloBB = async (receita, conta) => {
       },
     });
 
-    // Não trava o envio da cobrança se o WhatsApp falhar -- o boleto já
-    // foi criado no banco de qualquer forma.
+    // Não trava o envio da cobrança se o WhatsApp/e-mail falharem -- o
+    // boleto já foi criado no banco de qualquer forma.
     whatsappAutomacaoService
       .notificarNovaCobranca(atualizada, inquilino)
       .catch((erro) => console.error('[WhatsApp] nova_cobranca (BB):', erro.message));
+
+    emailAutomacaoService
+      .notificarNovaCobranca(atualizada, inquilino)
+      .catch((erro) => console.error('[E-mail] nova_cobranca (BB):', erro.message));
 
     return {
       success: true,
@@ -157,6 +162,10 @@ const enviarCobranca = async (receitaId) => {
       whatsappAutomacaoService
         .notificarNovaCobranca(atualizada, inquilino)
         .catch((erro) => console.error('[WhatsApp] nova_cobranca (Asaas):', erro.message));
+
+      emailAutomacaoService
+        .notificarNovaCobranca(atualizada, inquilino)
+        .catch((erro) => console.error('[E-mail] nova_cobranca (Asaas):', erro.message));
 
     }
 

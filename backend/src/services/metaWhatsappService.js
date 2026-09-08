@@ -120,6 +120,42 @@ class MetaWhatsappService {
   }
 
   /* ==========================================
+     ENVIAR DOCUMENTO (mensagem livre, sem modelo)
+
+     Só funciona dentro da janela de 24h depois do cliente escrever
+     pra gente (mesma regra da mensagem de texto livre). Usado como
+     alternativa quando um modelo ainda não foi aprovado pela Meta --
+     assim que o modelo aprovar, o caminho oficial (enviarTemplate)
+     volta a ser usado sozinho.
+  ========================================== */
+
+  async enviarDocumento(numero, url, legenda, filename = "boleto.pdf") {
+
+    return await this.request(
+
+      "/messages",
+
+      {
+
+        messaging_product: "whatsapp",
+
+        to: normalizarNumero(numero),
+
+        type: "document",
+
+        document: {
+          link: url,
+          filename,
+          caption: legenda,
+        },
+
+      }
+
+    );
+
+  }
+
+  /* ==========================================
      ENVIAR MODELO (TEMPLATE)
 
      Mensagens automáticas (cobrança nova, lembrete, atraso, pagamento
