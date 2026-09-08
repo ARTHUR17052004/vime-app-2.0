@@ -89,8 +89,11 @@ const listar = (usuario) => {
     include: {
       locadorRel: true
     },
+    // Por nome (ex.: "VIME I", "VIME II", "VIME III"...) em vez de data
+    // de criação -- fica na ordem que faz sentido pra quem tá olhando
+    // a lista, não na ordem em que foram cadastradas.
     orderBy: {
-      createdAt: 'desc'
+      nome: 'asc'
     }
   });
 };
