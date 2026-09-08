@@ -2,6 +2,9 @@ const prisma = require('../config/prisma');
 
 const listar = () => {
   return prisma.contaPagamento.findMany({
+    include: {
+      locadores: { select: { id: true, nome: true } },
+    },
     orderBy: { createdAt: 'asc' },
   });
 };

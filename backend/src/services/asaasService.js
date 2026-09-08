@@ -18,10 +18,29 @@ const obterOverrideDoLocador = async (receita) => {
 
   if (!locadorId) return null;
 
-  const locador = receita.contrato?.locador?.id === locadorId
-    ? receita.contrato.locador
-    : await prisma.locador.findUnique({ where: { id: locadorId } });
+  const locador = await prisma.locador.findUnique({
+    where: { id: locadorId },
+    include: { contaPagamento: true },
+  });
 
+  // Sistema novo (multi-banco, tela "Contas"): se o locador tiver uma
+  // ContaPagamento do tipo ASAAS vinculada e ativa, ela manda -- mesmo
+  // formato de credenciais que a conta padrão do sistema espera.
+  if (locador?.contaPagamento?.provider === 'ASAAS' && locador.contaPagamento.ativo) {
+
+    const cred = locador.contaPagamento.credenciais || {};
+
+    if (cred.apiKey) {
+      return {
+        apiKey: cred.apiKey,
+        walletId: cred.walletId || undefined,
+      };
+    }
+
+  }
+
+  // Compatibilidade com o campo antigo (Locador.asaasToken direto),
+  // de antes da tela "Contas" existir.
   if (!locador?.asaasToken) return null;
 
   return {
@@ -240,28 +259,62 @@ const buscarWallet = async () => {
 
 };
 
-const mapearTransacao = (receita) => ({
-  id: receita.id,
-  cliente: receita.descricao,
-  valor: receita.valor,
-  vencimento: receita.vencimento,
-  dataPagamento: receita.dataPagamento,
-  formaPagamento: receita.formaPagamento || (receita.enviadaAsaas ? 'BOLETO' : '-'),
-  status: receita.status,
-  enviadaAsaas: receita.enviadaAsaas,
-  asaasPaymentId: receita.asaasPaymentId,
-  descontoValor: receita.descontoValor,
-  descontoDias: receita.descontoDias,
-  multaValor: receita.multaValor,
-  jurosValor: receita.jurosValor,
-});
+// Resolve o locador dono da receita pelo mesmo caminho usado em todo
+// lugar (contrato -> locador, ou inquilino -> kitnet -> unidade -> locador).
+const resolverLocadorDaReceita = (receita) => {
+  return (
+    receita.contrato?.locador ||
+    receita.contrato?.inquilino?.kitnet?.unidade?.locadorRel ||
+    receita.inquilino?.kitnet?.unidade?.locadorRel ||
+    null
+  );
+};
+
+const mapearTransacao = (receita) => {
+
+  const locador = resolverLocadorDaReceita(receita);
+
+  return {
+    id: receita.id,
+    cliente: receita.descricao,
+    valor: receita.valor,
+    vencimento: receita.vencimento,
+    dataPagamento: receita.dataPagamento,
+    formaPagamento: receita.formaPagamento || (receita.enviadaAsaas ? 'BOLETO' : '-'),
+    status: receita.status,
+    enviadaAsaas: receita.enviadaAsaas,
+    asaasPaymentId: receita.asaasPaymentId,
+    // Genéricos -- só vêm preenchidos depois que a receita passa pelo
+    // gatewayPagamentoService (Asaas continua preenchendo os dois
+    // formatos, BB só o genérico).
+    gatewayProvider: receita.gatewayProvider || (receita.enviadaAsaas ? 'ASAAS' : null),
+    gatewayReferencia: receita.gatewayReferencia || receita.asaasPaymentId,
+    linkBoleto: receita.linkBoleto,
+    descontoValor: receita.descontoValor,
+    descontoDias: receita.descontoDias,
+    multaValor: receita.multaValor,
+    jurosValor: receita.jurosValor,
+    locadorId: locador?.id || null,
+    locadorNome: locador?.nome || null,
+  };
+
+};
 
 const listarTransacoes = async () => {
 
   const receitas = await prisma.receita.findMany({
     orderBy: {
       createdAt: 'desc'
-    }
+    },
+    include: {
+      contrato: {
+        include: {
+          locador: true,
+          inquilino: { include: { kitnet: { include: { unidade: { include: { locadorRel: true } } } } } },
+        },
+      },
+      inquilino: { include: { kitnet: { include: { unidade: { include: { locadorRel: true } } } } } },
+    },
   });
 
   return receitas.map(mapearTransacao);

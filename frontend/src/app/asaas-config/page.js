@@ -12,6 +12,8 @@ import AsaasConfiguracaoForm from "../components/asaas/AsaasConfiguracaoForm";
 import AsaasWebhookCard from "../components/asaas/AsaasWebhookCard";
 import AsaasDiagnostico from "../components/asaas/AsaasDiagnostico";
 import AsaasTutorial from "../components/asaas/AsaasTutorial";
+import ContasCard from "../components/contas/ContasCard";
+import LocadoresContaTable from "../components/contas/LocadoresContaTable";
 import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
@@ -38,11 +40,29 @@ export default function AsaasConfigPage() {
         <FadeIn>
 
           <PageHeader
-            title="Configuração Asaas"
-            subtitle="Configure toda a integração do VIME com o Asaas."
-            count={1}
-            countLabel="integração financeira"
+            title="Contas"
+            subtitle="Cadastre as contas bancárias (Asaas, Banco do Brasil...) e escolha qual locador usa qual conta."
           />
+
+        </FadeIn>
+
+        <FadeIn delay={0.05}>
+
+          <PageSection spacing="xl">
+
+            <ContasCard />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.08}>
+
+          <PageSection spacing="xl">
+
+            <LocadoresContaTable />
+
+          </PageSection>
 
         </FadeIn>
 

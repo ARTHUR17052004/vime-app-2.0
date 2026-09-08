@@ -24,6 +24,7 @@ import SemPermissao from "../components/ui/SemPermissao";
 
 import { AsaasService } from "@/services/asaas.service";
 import { ReceitaService } from "@/services/financeiro.service";
+import { LocadorService } from "@/services/locadores.service";
 import { usePermissao } from "../../hooks/usePermissao";
 
 const STATUS_ROTULO_PARA_VALOR = {
@@ -73,6 +74,23 @@ export default function AsaasTransacoesPage() {
 
   const [enviandoLote, setEnviandoLote] =
     useState(false);
+
+  const [locadores, setLocadores] =
+    useState([]);
+
+  const [locadorFiltro, setLocadorFiltro] =
+    useState("");
+
+  useEffect(() => {
+
+    LocadorService.listar()
+      .then((resposta) => {
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+        setLocadores(lista);
+      })
+      .catch((err) => console.error("Erro ao carregar locadores:", err));
+
+  }, []);
 
   async function carregarTransacoes() {
 
@@ -251,9 +269,13 @@ export default function AsaasTransacoesPage() {
 
   const transacoesFiltradas = useMemo(() => {
 
-    if (!filtros) return transacoes;
+    const porLocador = locadorFiltro
+      ? transacoes.filter((item) => item.locadorId === locadorFiltro)
+      : transacoes;
 
-    return transacoes.filter((item) => {
+    if (!filtros) return porLocador;
+
+    return porLocador.filter((item) => {
 
       const termo = filtros.busca?.toLowerCase().trim();
 
@@ -300,7 +322,7 @@ export default function AsaasTransacoesPage() {
 
     });
 
-  }, [transacoes, filtros]);
+  }, [transacoes, filtros, locadorFiltro]);
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -317,9 +339,9 @@ export default function AsaasTransacoesPage() {
         <FadeIn>
 
           <PageHeader
-            title="Asaas Transações"
-            subtitle="Gerencie cobranças, recebimentos e sincronizações."
-            count={transacoes.length}
+            title="Transações"
+            subtitle="Gerencie cobranças, recebimentos e sincronizações de qualquer banco."
+            count={transacoesFiltradas.length}
             countLabel="cobrança(s)"
             actions={
               podeCriar && (
@@ -332,11 +354,40 @@ export default function AsaasTransacoesPage() {
 
         </FadeIn>
 
+        <FadeIn delay={0.08}>
+
+          <PageSection spacing="lg">
+
+            <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] p-5 flex items-center gap-4 flex-wrap">
+
+              <label className="text-sm font-semibold text-[var(--text-1)]">
+                Selecione o locador
+              </label>
+
+              <select
+                value={locadorFiltro}
+                onChange={(e) => setLocadorFiltro(e.target.value)}
+                className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg p-2 min-w-[220px]"
+              >
+                <option value="" className="bg-[#1b2430]">Todos os locadores</option>
+                {locadores.map((locador) => (
+                  <option key={locador.id} value={locador.id} className="bg-[#1b2430]">
+                    {locador.nome}
+                  </option>
+                ))}
+              </select>
+
+            </div>
+
+          </PageSection>
+
+        </FadeIn>
+
         <FadeIn delay={0.10}>
 
           <PageSection spacing="xl">
 
-            <AsaasResumoCards transacoes={transacoes} />
+            <AsaasResumoCards transacoes={transacoesFiltradas} />
 
           </PageSection>
 

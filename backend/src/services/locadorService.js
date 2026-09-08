@@ -39,6 +39,7 @@ const listar = (usuario) => {
     where: usuario?.locadorId ? { id: usuario.locadorId } : {},
     include: {
       unidades: true,
+      contaPagamento: { select: { id: true, nome: true, provider: true } },
     },
     orderBy: {
       createdAt: "desc",
@@ -73,6 +74,13 @@ const criar = async (dados) => {
 
       asaasToken: dados.asaasToken || null,
       asaasWalletId: dados.asaasWalletId || null,
+
+      // Conta genérica da tela "Contas" -- de qual banco (Asaas, BB...)
+      // as cobranças desse locador saem. undefined = campo nem veio no
+      // form, não mexe; "" (opção "usar a padrão do sistema") vira null.
+      ...(dados.contaPagamentoId !== undefined && {
+        contaPagamentoId: dados.contaPagamentoId || null,
+      }),
     },
   });
 };
@@ -107,6 +115,10 @@ const atualizar = async (id, dados) => {
 
       asaasToken: dados.asaasToken || null,
       asaasWalletId: dados.asaasWalletId || null,
+
+      ...(dados.contaPagamentoId !== undefined && {
+        contaPagamentoId: dados.contaPagamentoId || null,
+      }),
     },
   });
 };

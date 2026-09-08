@@ -107,13 +107,13 @@ const menuConfig = [
         permissao: "relatorios.visualizar",
       },
       {
-        label: "Asaas Config",
+        label: "Contas",
         href: "/asaas-config",
         icon: BadgeDollarSign,
         permissao: "asaasConfig.visualizar",
       },
       {
-        label: "Asaas Transações",
+        label: "Transações",
         href: "/asaas-transacoes",
         icon: Receipt,
         permissao: "asaasTransacoes.visualizar",
