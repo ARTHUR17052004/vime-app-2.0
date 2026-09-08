@@ -307,6 +307,45 @@ export default function UnitForm({
 
   }
 
+  // Presença dos campos obrigatórios já é conferida por obterCamposFaltando --
+  // aqui só o FORMATO de quem foi preenchido. Bloqueia o envio de
+  // verdade (não é só um aviso visual no campo) -- é o que faltava pro
+  // cadastro ficar "impecável".
+  function validarFormatos() {
+
+    if (formData.cep && !validarCep(formData.cep)) {
+      return 'CEP inválido. Digite "SN" se não tiver.';
+    }
+
+    if (formData.uf && !/^[A-Za-z]{2}$/.test(formData.uf.trim())) {
+      return "UF inválida: use a sigla de 2 letras (ex.: SP, GO).";
+    }
+
+    if (formData.kitnets !== "") {
+      const kitnets = parseInt(formData.kitnets, 10);
+      if (!Number.isInteger(kitnets) || kitnets < 1) {
+        return "Quantidade de Kitnets deve ser um número inteiro de pelo menos 1.";
+      }
+    }
+
+    if (formData.aluguel !== "") {
+      const aluguel = Number(formData.aluguel);
+      if (!Number.isFinite(aluguel) || aluguel <= 0) {
+        return "Valor do Aluguel deve ser um número maior que zero.";
+      }
+    }
+
+    if (formData.vencimento !== "") {
+      const vencimento = parseInt(formData.vencimento, 10);
+      if (!Number.isInteger(vencimento) || vencimento < 1 || vencimento > 31) {
+        return "Dia do Vencimento deve ser um número entre 1 e 31.";
+      }
+    }
+
+    return "";
+
+  }
+
   function handleSubmit(e) {
 
     e.preventDefault();
@@ -317,6 +356,13 @@ export default function UnitForm({
 
     if (faltando.length > 0) {
       setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    const erroFormato = validarFormatos();
+
+    if (erroFormato) {
+      setErro(erroFormato);
       return;
     }
 

@@ -9,18 +9,52 @@ const sanitizar = (dados) => {
     throw new Error('CEP inválido.');
   }
 
+  if (dados.uf) {
+    const ufLimpa = String(dados.uf).trim().toUpperCase();
+
+    if (!/^[A-Z]{2}$/.test(ufLimpa)) {
+      throw new Error('UF inválida: use a sigla de 2 letras (ex.: SP, GO).');
+    }
+
+    dados.uf = ufLimpa;
+  }
+
   if (dados.kitnets !== undefined && dados.kitnets !== "") {
-    dados.kitnets = parseInt(dados.kitnets, 10) || 0;
+
+    const kitnets = parseInt(dados.kitnets, 10);
+
+    if (!Number.isInteger(kitnets) || kitnets < 1) {
+      throw new Error('Quantidade de Kitnets deve ser um número inteiro de pelo menos 1.');
+    }
+
+    dados.kitnets = kitnets;
+
   }
 
   if (dados.aluguel !== undefined && dados.aluguel !== "") {
-    dados.aluguel = Number(dados.aluguel);
+
+    const aluguel = Number(dados.aluguel);
+
+    if (!Number.isFinite(aluguel) || aluguel <= 0) {
+      throw new Error('Valor do Aluguel deve ser um número maior que zero.');
+    }
+
+    dados.aluguel = aluguel;
+
   } else {
     dados.aluguel = null;
   }
 
   if (dados.vencimento !== undefined && dados.vencimento !== "") {
-    dados.vencimento = parseInt(dados.vencimento, 10);
+
+    const vencimento = parseInt(dados.vencimento, 10);
+
+    if (!Number.isInteger(vencimento) || vencimento < 1 || vencimento > 31) {
+      throw new Error('Dia de Vencimento deve ser um número entre 1 e 31.');
+    }
+
+    dados.vencimento = vencimento;
+
   } else {
     dados.vencimento = null;
   }

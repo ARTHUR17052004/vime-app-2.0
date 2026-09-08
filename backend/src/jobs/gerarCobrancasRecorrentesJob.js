@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { gerarCobrancaParaContrato } = require("../services/cobrancaRecorrenteService");
 
 /*
   Cobrança recorrente automática.
@@ -14,20 +15,18 @@ const prisma = require("../config/prisma");
   futuro ainda não entram no job. Sem data definida, sempre valeu (não
   trava nada -- comportamento anterior).
 
-  Importante: este job NÃO envia a cobrança ao Asaas automaticamente —
+  A lógica de cada contrato individual mora em cobrancaRecorrenteService
+  -- reaproveitada também na hora de cadastrar um inquilino com contrato
+  automático, pra gerar a 1ª cobrança na hora (sem esperar até amanhã
+  8h, quando este job roda de novo).
+
+  Importante: este job NÃO envia a cobrança ao banco automaticamente —
   isso continua sendo uma ação humana deliberada (botão "Enviar ao
-  Asaas" em outra parte do sistema). Aqui só criamos o registro local.
+  Banco" em outra parte do sistema). Aqui só criamos o registro local.
 */
 
 module.exports = async () => {
   console.log("[JOB] Gerando cobranças recorrentes...");
-
-  const hoje = new Date();
-  const ano = hoje.getFullYear();
-  const mes = hoje.getMonth(); // 0-indexed
-
-  const inicioMes = new Date(ano, mes, 1);
-  const inicioProximoMes = new Date(ano, mes + 1, 1);
 
   const contratos = await prisma.contrato.findMany({
     where: { status: "ATIVO" },
@@ -41,61 +40,18 @@ module.exports = async () => {
 
   for (const contrato of contratos) {
 
-    if (
-      contrato.unidade?.dataInicioCobranca &&
-      contrato.unidade.dataInicioCobranca > hoje
-    ) {
+    const resultado = await gerarCobrancaParaContrato(contrato);
+
+    if (resultado.criada) {
+      criadas++;
+    } else if (resultado.motivo === "aindaNaoIniciou") {
       aindaNaoIniciou++;
-      continue;
-    }
-
-    const receitasDoContrato = await prisma.receita.findMany({
-      where: { contratoId: contrato.id, categoria: "Aluguel" },
-    });
-
-    // Já existe cobrança pro mês atual (em qualquer status)? Não cria
-    // outra. Checa todas, não só "a mais recente por vencimento" --
-    // uma cobrança futura já paga adiantada não pode mascarar a
-    // checagem do mês corrente.
-    const jaTemEsteMes = receitasDoContrato.some(
-      (r) =>
-        r.vencimento &&
-        r.vencimento >= inicioMes &&
-        r.vencimento < inicioProximoMes
-    );
-
-    if (jaTemEsteMes) {
+    } else if (resultado.motivo === "jaExiste") {
       existentes++;
-      continue;
-    }
-
-    // Alguma cobrança (de qualquer período) ainda não paga? Mantém
-    // como está, não empilha mais uma por cima.
-    const temPendente = receitasDoContrato.some((r) => r.status !== "PAGA");
-
-    if (temPendente) {
+    } else {
       aguardandoPagamento++;
-      continue;
     }
 
-    // O dia de vencimento do contrato pode não existir no mês atual
-    // (ex.: dia 31 em fevereiro) — nesse caso, usa o último dia do mês.
-    const ultimoDiaDoMes = new Date(ano, mes + 1, 0).getDate();
-    const dia = Math.min(contrato.diaVencimento || 1, ultimoDiaDoMes);
-    const vencimento = new Date(ano, mes, dia);
-
-    await prisma.receita.create({
-      data: {
-        contratoId: contrato.id,
-        categoria: "Aluguel",
-        descricao: `Aluguel - ${mes + 1}/${ano}`,
-        valor: contrato.valorAluguel,
-        vencimento,
-        status: "PENDENTE",
-      },
-    });
-
-    criadas++;
   }
 
   console.log(
