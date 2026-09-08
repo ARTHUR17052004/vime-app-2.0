@@ -60,6 +60,9 @@ export default function InquilinosPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
 
+  const [ordenacao, setOrdenacao] =
+    useState("nome-asc");
+
   /* ==========================================
      CARREGAR DADOS
   ========================================== */
@@ -254,11 +257,26 @@ export default function InquilinosPage() {
      FILTRO
   ========================================== */
 
+  function nomeKitnetOrdenavel(inquilino) {
+    const unidade = inquilino.kitnet?.unidade?.nome || inquilino.unidadeNome || "";
+    const kitnet = inquilino.kitnet?.nome || inquilino.kitnet?.numero || inquilino.kitnetNome || "";
+    return `${unidade} ${kitnet}`.trim().toLowerCase();
+  }
+
+  const COMPARADORES = {
+    "nome-asc": (a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    "nome-desc": (a, b) => (b.nome || "").localeCompare(a.nome || "", "pt-BR"),
+    "kitnet-asc": (a, b) => nomeKitnetOrdenavel(a).localeCompare(nomeKitnetOrdenavel(b), "pt-BR"),
+    "contrato-recente": (a, b) => new Date(b.dataFimContrato || 0) - new Date(a.dataFimContrato || 0),
+    "contrato-antigo": (a, b) => new Date(a.dataFimContrato || 0) - new Date(b.dataFimContrato || 0),
+    "status": (a, b) => (b.ativo === true) - (a.ativo === true) || (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+  };
+
   const inquilinosFiltrados = useMemo(() => {
 
     const termo = search.toLowerCase();
 
-    return inquilinos.filter((inquilino) => {
+    const filtrados = inquilinos.filter((inquilino) => {
 
       const correspondeTexto =
 
@@ -282,7 +300,11 @@ export default function InquilinosPage() {
 
     });
 
-  }, [inquilinos, search, residenciaSelecionada]);
+    const comparador = COMPARADORES[ordenacao] || COMPARADORES["nome-asc"];
+
+    return [...filtrados].sort(comparador);
+
+  }, [inquilinos, search, residenciaSelecionada, ordenacao]);
 
   /* ==========================================
      PERMISSAO
@@ -394,11 +416,33 @@ export default function InquilinosPage() {
                 placeholder="Pesquisar inquilino..."
               />
 
-              <div className="mt-4">
-                <ResidenciaFiltro
-                  value={residenciaSelecionada}
-                  onChange={setResidenciaSelecionada}
-                />
+              <div className="mt-4 flex flex-wrap gap-4 items-center">
+
+                <div className="flex-1 min-w-[220px]">
+                  <ResidenciaFiltro
+                    value={residenciaSelecionada}
+                    onChange={setResidenciaSelecionada}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                    Organizar por
+                  </label>
+                  <select
+                    value={ordenacao}
+                    onChange={(e) => setOrdenacao(e.target.value)}
+                    className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="nome-asc" className="bg-[#1b2430]">Nome (A-Z)</option>
+                    <option value="nome-desc" className="bg-[#1b2430]">Nome (Z-A)</option>
+                    <option value="kitnet-asc" className="bg-[#1b2430]">Kitnet</option>
+                    <option value="contrato-recente" className="bg-[#1b2430]">Contrato (mais recente)</option>
+                    <option value="contrato-antigo" className="bg-[#1b2430]">Contrato (mais antigo)</option>
+                    <option value="status" className="bg-[#1b2430]">Status (ativos primeiro)</option>
+                  </select>
+                </div>
+
               </div>
 
             </PageSection>
