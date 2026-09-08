@@ -90,6 +90,14 @@ export default function UnitForm({
   const [obrigatorios, setObrigatorios] =
     useState(new Set());
 
+  // Guarda o que o ViaCEP retornou pro CEP atual, pra comparar com o
+  // que a pessoa efetivamente deixou nos campos (ela pode editar por
+  // cima do preenchimento automático) e avisar se destoar -- pedido
+  // depois de um caso real: CEP de um bairro, mas "Bairro" preenchido
+  // com outro nome.
+  const [cepReferencia, setCepReferencia] =
+    useState(null);
+
   useEffect(() => {
 
     async function carregarLocadores() {
@@ -224,21 +232,30 @@ export default function UnitForm({
 
       if (data.erro) return;
 
+      const referencia = {
+        logradouro: data.logradouro || "",
+        bairro: data.bairro || "",
+        cidade: data.localidade || "",
+        uf: data.uf || "",
+      };
+
+      setCepReferencia(referencia);
+
       setFormData((prev) => ({
 
         ...prev,
 
         logradouro:
-          data.logradouro || "",
+          referencia.logradouro,
 
         bairro:
-          data.bairro || "",
+          referencia.bairro,
 
         cidade:
-          data.localidade || "",
+          referencia.cidade,
 
         uf:
-          data.uf || "",
+          referencia.uf,
 
       }));
 
@@ -271,11 +288,47 @@ export default function UnitForm({
 
     if (name === "cep") {
 
+      // CEP mudou -- a referência antiga não vale mais até uma nova
+      // busca terminar (ou fica sem referência, se o CEP ficar incompleto).
+      setCepReferencia(null);
+
       buscarCep(value);
 
     }
 
   }
+
+  function normalizarTexto(valor) {
+    return (valor || "")
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .trim()
+      .toUpperCase();
+  }
+
+  // Só compara Bairro/Cidade/UF -- Logradouro varia demais de
+  // abreviação (Av./Avenida, etc.) pro ViaCEP pra valer a pena, geraria
+  // aviso falso toda hora.
+  const divergenciasCep = (() => {
+
+    if (!cepReferencia) return [];
+
+    const campos = [
+      ["bairro", "Bairro"],
+      ["cidade", "Cidade"],
+      ["uf", "UF"],
+    ];
+
+    return campos
+      .filter(([campo]) => formData[campo] && cepReferencia[campo])
+      .filter(([campo]) => normalizarTexto(formData[campo]) !== normalizarTexto(cepReferencia[campo]))
+      .map(([campo, rotulo]) => ({
+        rotulo,
+        digitado: formData[campo],
+        esperado: cepReferencia[campo],
+      }));
+
+  })();
 
   function handleChangeLocador(e) {
 
@@ -528,6 +581,24 @@ export default function UnitForm({
           />
 
         </div>
+
+        {divergenciasCep.length > 0 && (
+          <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 px-5 py-4 text-sm text-yellow-300">
+            <p className="font-semibold mb-1">
+              ⚠️ {divergenciasCep.length === 1 ? "Campo não bate" : "Campos não batem"} com o CEP informado:
+            </p>
+            <ul className="space-y-0.5">
+              {divergenciasCep.map((d) => (
+                <li key={d.rotulo}>
+                  <strong>{d.rotulo}:</strong> você preencheu "{d.digitado}", mas o CEP {formData.cep} aponta para "{d.esperado}".
+                </li>
+              ))}
+            </ul>
+            <p className="mt-1.5 text-yellow-400/80">
+              Confira se é isso mesmo antes de salvar -- não impede o cadastro, é só um aviso.
+            </p>
+          </div>
+        )}
 
       </section>
 
