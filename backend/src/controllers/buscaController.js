@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const { filtroInquilino, filtroContrato, filtroKitnet, filtroUnidade } = require('../utils/escopoLocador');
 
 const buscar = async (req, res, next) => {
 
@@ -32,10 +33,15 @@ const buscar = async (req, res, next) => {
 
       prisma.inquilino.findMany({
         where: {
-          OR: [
-            { nome: { contains: termo, mode: 'insensitive' } },
-            { email: { contains: termo, mode: 'insensitive' } },
-            { cpf: { contains: termo, mode: 'insensitive' } },
+          AND: [
+            {
+              OR: [
+                { nome: { contains: termo, mode: 'insensitive' } },
+                { email: { contains: termo, mode: 'insensitive' } },
+                { cpf: { contains: termo, mode: 'insensitive' } },
+              ],
+            },
+            filtroInquilino(req.usuario),
           ],
         },
         take: 5,
@@ -43,9 +49,14 @@ const buscar = async (req, res, next) => {
 
       prisma.contrato.findMany({
         where: {
-          OR: [
-            { inquilino: { nome: { contains: termo, mode: 'insensitive' } } },
-            { locador: { nome: { contains: termo, mode: 'insensitive' } } },
+          AND: [
+            {
+              OR: [
+                { inquilino: { nome: { contains: termo, mode: 'insensitive' } } },
+                { locador: { nome: { contains: termo, mode: 'insensitive' } } },
+              ],
+            },
+            filtroContrato(req.usuario),
           ],
         },
         include: { inquilino: true, locador: true },
@@ -54,9 +65,14 @@ const buscar = async (req, res, next) => {
 
       prisma.kitnet.findMany({
         where: {
-          OR: [
-            { numero: { contains: termo, mode: 'insensitive' } },
-            { nome: { contains: termo, mode: 'insensitive' } },
+          AND: [
+            {
+              OR: [
+                { numero: { contains: termo, mode: 'insensitive' } },
+                { nome: { contains: termo, mode: 'insensitive' } },
+              ],
+            },
+            filtroKitnet(req.usuario),
           ],
         },
         take: 5,
@@ -64,9 +80,14 @@ const buscar = async (req, res, next) => {
 
       prisma.unidade.findMany({
         where: {
-          OR: [
-            { nome: { contains: termo, mode: 'insensitive' } },
-            { cidade: { contains: termo, mode: 'insensitive' } },
+          AND: [
+            {
+              OR: [
+                { nome: { contains: termo, mode: 'insensitive' } },
+                { cidade: { contains: termo, mode: 'insensitive' } },
+              ],
+            },
+            filtroUnidade(req.usuario),
           ],
         },
         take: 5,

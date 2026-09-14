@@ -61,13 +61,13 @@ const buscarWallet = async (req, res) => {
 const listarTransacoes = async (req, res) => {
   return res.json({
     success: true,
-    data: await asaasService.listarTransacoes()
+    data: await asaasService.listarTransacoes(req.usuario)
   });
 };
 
 const buscarTransacao = async (req, res) => {
 
-  const dados = await asaasService.buscarTransacao(req.params.id);
+  const dados = await asaasService.buscarTransacao(req.params.id, req.usuario);
 
   if (!dados) {
     return res.status(404).json({
@@ -101,7 +101,7 @@ const enviarCobranca = async (req, res) => {
 const resumo = async (req, res) => {
   return res.json({
     success: true,
-    data: await asaasService.resumo()
+    data: await asaasService.resumo(req.usuario)
   });
 };
 

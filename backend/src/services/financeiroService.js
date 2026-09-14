@@ -1,10 +1,11 @@
 const prisma = require('../config/prisma');
+const { filtroReceita, filtroDespesa } = require('../utils/escopoLocador');
 
-const fluxoCaixa = async () => {
+const fluxoCaixa = async (usuario) => {
 
-  const receitas = await prisma.receita.findMany();
+  const receitas = await prisma.receita.findMany({ where: filtroReceita(usuario) });
 
-  const despesas = await prisma.despesa.findMany();
+  const despesas = await prisma.despesa.findMany({ where: filtroDespesa(usuario) });
 
   const fluxo = [];
 
@@ -32,11 +33,11 @@ const fluxoCaixa = async () => {
 
 };
 
-const resumo = async () => {
+const resumo = async (usuario) => {
 
-  const receitas = await prisma.receita.findMany();
+  const receitas = await prisma.receita.findMany({ where: filtroReceita(usuario) });
 
-  const despesas = await prisma.despesa.findMany();
+  const despesas = await prisma.despesa.findMany({ where: filtroDespesa(usuario) });
 
   const totalReceitas = receitas.reduce(
     (total, item) => total + item.valor,

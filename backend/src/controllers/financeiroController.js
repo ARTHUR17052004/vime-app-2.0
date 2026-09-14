@@ -2,7 +2,7 @@ const financeiroService = require('../services/financeiroService');
 
 const fluxoCaixa = async (req, res) => {
 
-  const fluxo = await financeiroService.fluxoCaixa();
+  const fluxo = await financeiroService.fluxoCaixa(req.usuario);
 
   return res.json({
     success: true,
@@ -13,7 +13,7 @@ const fluxoCaixa = async (req, res) => {
 
 const resumo = async (req, res) => {
 
-  const resumo = await financeiroService.resumo();
+  const resumo = await financeiroService.resumo(req.usuario);
 
   return res.json({
     success: true,

@@ -64,9 +64,9 @@ const listar = (usuario) => {
   });
 };
 
-const buscarPorId = (id) => {
-  return prisma.receita.findUnique({
-    where: { id },
+const buscarPorId = (id, usuario) => {
+  return prisma.receita.findFirst({
+    where: { id, ...filtroReceita(usuario) },
     include: {
       contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
       inquilino: { include: { kitnet: { include: { unidade: true } } } }

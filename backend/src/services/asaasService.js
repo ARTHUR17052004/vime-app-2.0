@@ -2,6 +2,8 @@ const prisma = require('../config/prisma');
 const AsaasApi = require('./AsaasApi');
 const notificacaoService = require('./notificacaoService');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
+const { emitirAtualizacao } = require('../socket');
+const { filtroReceita } = require('../utils/escopoLocador');
 
 // Acha o locador dono da receita (via contrato, ou via
 // inquilino → kitnet → residência quando a receita não tem contrato)
@@ -300,9 +302,10 @@ const mapearTransacao = (receita) => {
 
 };
 
-const listarTransacoes = async () => {
+const listarTransacoes = async (usuario) => {
 
   const receitas = await prisma.receita.findMany({
+    where: filtroReceita(usuario),
     orderBy: {
       createdAt: 'desc'
     },
@@ -321,10 +324,19 @@ const listarTransacoes = async () => {
 
 };
 
-const buscarTransacao = async (id) => {
+const buscarTransacao = async (id, usuario) => {
 
-  const receita = await prisma.receita.findUnique({
-    where: { id }
+  const receita = await prisma.receita.findFirst({
+    where: { id, ...filtroReceita(usuario) },
+    include: {
+      contrato: {
+        include: {
+          locador: true,
+          inquilino: { include: { kitnet: { include: { unidade: { include: { locadorRel: true } } } } } },
+        },
+      },
+      inquilino: { include: { kitnet: { include: { unidade: { include: { locadorRel: true } } } } } },
+    },
   });
 
   if (!receita) {
@@ -499,9 +511,11 @@ const enviarCobranca = async (receitaId) => {
 
 };
 
-const resumo = async () => {
+const resumo = async (usuario) => {
 
-  const receitas = await prisma.receita.findMany();
+  const receitas = await prisma.receita.findMany({
+    where: filtroReceita(usuario)
+  });
 
   return {
     total: receitas.length,
@@ -650,6 +664,11 @@ const sincronizar = async (evento) => {
       break;
 
   }
+
+  // Cobre qualquer um dos cases acima -- sem isso, quem estivesse com
+  // Financeiro/Transações abertas só via a receita atualizada depois
+  // de dar F5.
+  emitirAtualizacao("receita");
 
   return {
     success: true
