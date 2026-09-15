@@ -9,6 +9,7 @@ import MainLayout from "../components/layout/MainLayout";
 import FadeIn from "../components/ui/FadeIn";
 
 import ConfiguracoesHeader from "../components/configuracoes/ConfiguracoesHeader";
+import SyntPromoCard from "../components/configuracoes/SyntPromoCard";
 import ConfiguracoesStats from "../components/configuracoes/ConfiguracoesStats";
 import PainelRapido from "../components/configuracoes/PainelRapido";
 
@@ -166,8 +167,13 @@ export default function ConfiguracoesPage() {
   return (
     <MainLayout>
       <div className="space-y-6">
-        {/* Cabeçalho */}
+        {/* Propaganda da desenvolvedora */}
         <FadeIn delay={0}>
+          <SyntPromoCard />
+        </FadeIn>
+
+        {/* Cabeçalho */}
+        <FadeIn delay={0.05}>
           <ConfiguracoesHeader />
         </FadeIn>
 
