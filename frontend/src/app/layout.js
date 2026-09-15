@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
+import BrandBadge from "./components/layout/BrandBadge";
 
 // Evita flash de tema: aplica o data-theme (a partir do cache local)
 // antes da primeira pintura, sincronamente.
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <BrandBadge />
       </body>
     </html>
   );
