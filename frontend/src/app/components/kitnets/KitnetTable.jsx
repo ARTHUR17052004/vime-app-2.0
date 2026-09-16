@@ -6,6 +6,7 @@ import Table from "../ui/Table";
 import EmptyState from "../ui/EmptyState";
 
 import KitnetActionsMenu from "./KitnetActionsMenu";
+import VacanciaKitnet from "./VacanciaKitnet";
 
 import { House } from "lucide-react";
 
@@ -105,6 +106,12 @@ export default function KitnetTable({
         );
 
       },
+    },
+
+    {
+      key: "vacancia",
+      title: "Vacância",
+      render: (item) => <VacanciaKitnet kitnet={item} />,
     },
 
     {

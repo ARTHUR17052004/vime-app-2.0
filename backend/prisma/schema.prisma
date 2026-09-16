@@ -49,6 +49,13 @@ model Kitnet {
   // true depois que o aluguel dessa kitnet é editado individualmente --
   // a partir daí, mudar o valor da Residência não sobrescreve mais ela.
   aluguelManual Boolean  @default(false)
+  // Desde quando o status é DISPONIVEL, ininterruptamente -- mantido
+  // sozinho pela extensão do Prisma Client (ver config/prisma.js), não
+  // por cada service que muda o status. Null enquanto não é DISPONIVEL.
+  vazioDesde DateTime?
+  // Último alerta "kitnet vazia" enviado por verificarKitnetsVaziasJob.js
+  // (72h+ sem locar) -- evita reenviar mais de uma vez por dia.
+  ultimoAlertaVaziaEm DateTime?
   contratos  Contrato[]
   inquilinos Inquilino[]
   unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)

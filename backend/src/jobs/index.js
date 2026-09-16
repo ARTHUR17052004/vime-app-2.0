@@ -8,6 +8,7 @@ const gerarCobrancasRecorrentes = require("./gerarCobrancasRecorrentesJob");
 const lembreteVencimento = require("./lembreteVencimentoJob");
 const notificarVencimentoContrato = require("./notificarVencimentoContratoJob");
 const cobrancaVencidaWhatsapp = require("./cobrancaVencidaWhatsappJob");
+const verificarKitnetsVazias = require("./verificarKitnetsVaziasJob");
 
 const iniciarJobs = () => {
 
@@ -33,6 +34,8 @@ const iniciarJobs = () => {
     await gerarCobrancasRecorrentes();
 
     await lembreteVencimento();
+
+    await verificarKitnetsVazias();
 
     console.log("==========================");
 

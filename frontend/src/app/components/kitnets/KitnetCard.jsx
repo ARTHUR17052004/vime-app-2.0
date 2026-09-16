@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
+import VacanciaKitnet from "./VacanciaKitnet";
 
 export default function KitnetCard({
   kitnet,
@@ -109,6 +110,10 @@ export default function KitnetCard({
           >
             {status}
           </span>
+
+          <div className="mt-3">
+            <VacanciaKitnet kitnet={kitnet} />
+          </div>
 
         </div>
 
