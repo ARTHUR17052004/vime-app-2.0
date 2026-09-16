@@ -52,6 +52,10 @@ export default function VacanciaKitnet({ kitnet }) {
 
   if (!vazioDesdeMs) return null;
 
+  // Tela usada muito no celular e por gente mais idosa -- pouco espaço
+  // pra sutileza. Preto sobre amarelo e branco sobre vermelho forte é o
+  // mesmo contraste de placa de alerta de trânsito, de propósito: dá
+  // pra reconhecer de longe/sem precisar ler os números primeiro.
   if (!emAlerta) {
 
     const restante = MS_LIMITE - decorrido;
@@ -59,15 +63,17 @@ export default function VacanciaKitnet({ kitnet }) {
     return (
       <span
         className="
-          inline-flex items-center gap-1.5
-          rounded-full border border-amber-500/25 bg-amber-500/10
-          px-3 py-1
-          text-xs font-semibold text-amber-400
+          inline-flex items-center gap-2
+          rounded-2xl
+          bg-amber-400
+          px-4 py-2.5
+          text-base font-extrabold text-slate-900
           tabular-nums
+          shadow-[0_2px_10px_rgba(245,158,11,.45)]
         "
         title="Tempo restante até o alerta de vacância (72h)"
       >
-        <Clock size={13} />
+        <Clock size={20} strokeWidth={2.5} />
         {formatarRelogio(restante)}
       </span>
     );
@@ -79,15 +85,17 @@ export default function VacanciaKitnet({ kitnet }) {
   return (
     <span
       className="
-        inline-flex items-center gap-1.5
-        rounded-full border border-red-500/40 bg-red-500/15
-        px-3 py-1
-        text-xs font-bold text-red-500
+        inline-flex items-center gap-2
+        rounded-2xl
+        bg-red-600
+        px-4 py-2.5
+        text-base font-extrabold text-white
         animate-pulse
+        shadow-[0_2px_14px_rgba(220,38,38,.55)]
       "
       title="Kitnet vazia há mais de 72h -- notificando a cada 24h"
     >
-      <TriangleAlert size={13} />
+      <TriangleAlert size={20} strokeWidth={2.5} />
       Vazia há {dias} {dias === 1 ? "dia" : "dias"}
     </span>
   );
