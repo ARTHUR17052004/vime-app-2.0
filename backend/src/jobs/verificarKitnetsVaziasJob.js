@@ -36,7 +36,7 @@ module.exports = async () => {
     if (jaAlertouHoje) continue;
 
     const decorridoMs = agora.getTime() - new Date(kitnet.vazioDesde).getTime();
-    const dias = Math.floor((decorridoMs - MS_LIMITE) / MS_DIA) + 1;
+    const dias = Math.floor(decorridoMs / MS_DIA);
 
     const nomeKitnet = kitnet.nome || `Kitnet ${kitnet.numero}`;
     const nomeUnidade = kitnet.unidade?.nome || "residência";

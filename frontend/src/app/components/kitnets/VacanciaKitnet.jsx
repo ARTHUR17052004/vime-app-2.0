@@ -74,7 +74,7 @@ export default function VacanciaKitnet({ kitnet }) {
 
   }
 
-  const dias = Math.floor((decorrido - MS_LIMITE) / MS_DIA) + 1;
+  const dias = Math.floor(decorrido / MS_DIA);
 
   return (
     <span
