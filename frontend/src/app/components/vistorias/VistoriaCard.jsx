@@ -16,6 +16,7 @@ import {
 import Button from "../ui/Button";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
+import AtrasoVistoria from "./AtrasoVistoria";
 
 export default function VistoriaCard({
   vistorias,
@@ -135,6 +136,8 @@ export default function VistoriaCard({
                 >
                   {vistoria.status}
                 </span>
+
+                <AtrasoVistoria vistoria={vistoria} />
 
                 <h2
                   className="

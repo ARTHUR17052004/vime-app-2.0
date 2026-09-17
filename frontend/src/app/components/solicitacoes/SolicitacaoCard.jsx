@@ -14,6 +14,7 @@ import {
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
 import SolicitacaoRespostaRapidaModal from "./SolicitacaoRespostaRapidaModal";
+import PrazoSolicitacao from "./PrazoSolicitacao";
 import { usePermissao } from "@/hooks/usePermissao";
 
 const STATUS_CONFIG = {
@@ -171,11 +172,13 @@ export default function SolicitacaoCard({
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
 
                   <Badge variant={config.badge}>
                     {item.status}
                   </Badge>
+
+                  <PrazoSolicitacao solicitacao={item} />
 
                 </div>
 

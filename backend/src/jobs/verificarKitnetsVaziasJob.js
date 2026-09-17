@@ -1,9 +1,6 @@
 const prisma = require("../config/prisma");
 const notificacaoService = require("../services/notificacaoService");
-
-const HORAS_LIMITE = 72;
-const MS_LIMITE = HORAS_LIMITE * 60 * 60 * 1000;
-const MS_DIA = 24 * 60 * 60 * 1000;
+const { MS_LIMITE, MS_DIA, calcularAlerta } = require("../utils/prazoAlerta");
 
 // Roda 1x por dia (ver jobs/index.js) -- "notificação de 24 em 24
 // horas" cai direto nesse cron diário, sem precisar de agendamento à
@@ -11,7 +8,7 @@ const MS_DIA = 24 * 60 * 60 * 1000;
 // Client (ver config/prisma.js) toda vez que o status muda pra/de
 // DISPONIVEL, então aqui só falta achar quem já passou das 72h do
 // relógio amarelo sem alertar nas últimas ~24h. N (dias) conta a partir
-// daí: 72h = dia 1, +24h = dia 2, +24h = dia 3...
+// daí: 72h = dia 1, +24h = dia 2, +24h = dia 3... (ver utils/prazoAlerta.js).
 module.exports = async () => {
 
   console.log("[JOB] Verificando kitnets vazias há mais de 72h...");
@@ -36,8 +33,7 @@ module.exports = async () => {
 
     if (jaAlertouHoje) continue;
 
-    const decorridoMs = agora.getTime() - new Date(kitnet.vazioDesde).getTime();
-    const dias = Math.floor((decorridoMs - MS_LIMITE) / MS_DIA) + 1;
+    const { dias } = calcularAlerta(kitnet.vazioDesde, agora);
 
     const nomeKitnet = kitnet.nome || `Kitnet ${kitnet.numero}`;
     const nomeUnidade = kitnet.unidade?.nome || "residência";

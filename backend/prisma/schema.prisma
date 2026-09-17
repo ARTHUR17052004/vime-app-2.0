@@ -384,6 +384,11 @@ model Solicitacao {
 
   criadoPorPerfil String?
 
+  // Último alerta "solicitação com prazo vencido" enviado por
+  // verificarSolicitacoesAtrasadasJob.js (prazo + 72h+ sem atender) --
+  // evita reenviar mais de uma vez por dia.
+  ultimoAlertaPrazoEm DateTime?
+
   mensagens SolicitacaoMensagem[]
 
   createdAt DateTime @default(now())
@@ -509,6 +514,11 @@ model Vistoria {
   fotosConclusao Json?
 
   observacoes String?
+
+  // Último alerta "vistoria atrasada" enviado por
+  // verificarVistoriasAtrasadasJob.js (dataProxima + 72h+ sem realizar)
+  // -- evita reenviar mais de uma vez por dia.
+  ultimoAlertaAtrasadaEm DateTime?
 
   createdAt DateTime @default(now())
 
