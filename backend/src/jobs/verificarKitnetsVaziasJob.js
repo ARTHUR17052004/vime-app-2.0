@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
 const notificacaoService = require("../services/notificacaoService");
 
-const HORAS_LIMITE = 72;
+const HORAS_LIMITE = 24;
 const MS_LIMITE = HORAS_LIMITE * 60 * 60 * 1000;
 const MS_DIA = 24 * 60 * 60 * 1000;
 
@@ -9,11 +9,11 @@ const MS_DIA = 24 * 60 * 60 * 1000;
 // horas" cai direto nesse cron diário, sem precisar de agendamento à
 // parte. kitnet.vazioDesde é mantido sozinho pela extensão do Prisma
 // Client (ver config/prisma.js) toda vez que o status muda pra/de
-// DISPONIVEL, então aqui só falta achar quem já passou de 72h sem
+// DISPONIVEL, então aqui só falta achar quem já passou de 24h sem
 // alertar nas últimas ~24h.
 module.exports = async () => {
 
-  console.log("[JOB] Verificando kitnets vazias há mais de 72h...");
+  console.log("[JOB] Verificando kitnets vazias há mais de 24h...");
 
   const agora = new Date();
   const limite = new Date(agora.getTime() - MS_LIMITE);
@@ -57,6 +57,6 @@ module.exports = async () => {
 
   }
 
-  console.log(`[JOB] ${candidatas.length} kitnet(s) vazia(s) há mais de 72h, ${alertadas} alerta(s) enviado(s).`);
+  console.log(`[JOB] ${candidatas.length} kitnet(s) vazia(s) há mais de 24h, ${alertadas} alerta(s) enviado(s).`);
 
 };

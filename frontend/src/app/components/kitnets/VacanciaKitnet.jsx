@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Clock, TriangleAlert } from "lucide-react";
 
-const HORAS_LIMITE = 72;
+const HORAS_LIMITE = 24;
 const MS_LIMITE = HORAS_LIMITE * 60 * 60 * 1000;
 const MS_DIA = 24 * 60 * 60 * 1000;
 
@@ -17,7 +17,7 @@ function formatarRelogio(ms) {
 }
 
 // Relógio de vacância de uma kitnet: enquanto está DISPONIVEL, conta
-// as 72h corridas desde que ficou vazia (kitnet.vazioDesde, mantido
+// as 24h corridas desde que ficou vazia (kitnet.vazioDesde, mantido
 // pela extensão do Prisma -- ver backend/src/config/prisma.js). Passado
 // esse prazo sem locar, vira o aviso vermelho "vazia há N dia(s)" (o
 // mesmo N que entra na notificação diária de verificarKitnetsVaziasJob.js).
@@ -71,7 +71,7 @@ export default function VacanciaKitnet({ kitnet }) {
           tabular-nums
           shadow-[0_2px_10px_rgba(245,158,11,.45)]
         "
-        title="Tempo restante até o alerta de vacância (72h)"
+        title="Tempo restante até o alerta de vacância (24h)"
       >
         <Clock size={20} strokeWidth={2.5} />
         {formatarRelogio(restante)}
@@ -93,7 +93,7 @@ export default function VacanciaKitnet({ kitnet }) {
         animate-pulse
         shadow-[0_2px_14px_rgba(220,38,38,.55)]
       "
-      title="Kitnet vazia há mais de 72h -- notificando a cada 24h"
+      title="Kitnet vazia há mais de 24h -- notificando todo dia"
     >
       <TriangleAlert size={20} strokeWidth={2.5} />
       Vazia há {dias} {dias === 1 ? "dia" : "dias"}

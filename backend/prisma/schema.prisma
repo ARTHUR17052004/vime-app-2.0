@@ -54,7 +54,7 @@ model Kitnet {
   // por cada service que muda o status. Null enquanto não é DISPONIVEL.
   vazioDesde DateTime?
   // Último alerta "kitnet vazia" enviado por verificarKitnetsVaziasJob.js
-  // (72h+ sem locar) -- evita reenviar mais de uma vez por dia.
+  // (24h+ sem locar) -- evita reenviar mais de uma vez por dia.
   ultimoAlertaVaziaEm DateTime?
   contratos  Contrato[]
   inquilinos Inquilino[]

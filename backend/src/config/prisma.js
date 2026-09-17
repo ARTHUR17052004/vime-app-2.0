@@ -7,7 +7,7 @@ const base = new PrismaClient();
 // inquilinoService, kitnetService, verificarContratosJob...): sempre
 // que o status entra em DISPONIVEL, marca "vazia desde agora"; sempre
 // que sai de DISPONIVEL (locada ou em manutenção), zera. O alerta de
-// 72h+ (verificarKitnetsVaziasJob.js) lê só esse campo.
+// 24h+ (verificarKitnetsVaziasJob.js) lê só esse campo.
 const prisma = base.$extends({
   query: {
     kitnet: {
