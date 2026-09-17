@@ -69,7 +69,7 @@ export default function KitnetTable({
       render: (item) => {
 
         const statusLabel = {
-          DISPONIVEL: "Disponível",
+          DISPONIVEL: "Vazia",
           OCUPADA: "Ocupada",
           MANUTENCAO: "Manutenção",
         }[item.status] || item.status;

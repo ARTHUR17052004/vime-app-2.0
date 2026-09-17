@@ -292,7 +292,7 @@ export default function KitnetsPage() {
               />
 
               <DashboardStatsCard
-                title="Disponíveis"
+                title="Vazias"
                 value={disponiveis}
                 subtitle="Prontas para locação"
                 icon={CheckCircle2}

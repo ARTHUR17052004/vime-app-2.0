@@ -330,7 +330,7 @@ export default function KitnetForm({
               color:"#fff",
             }}
           >
-            Disponível
+            Vazia
           </option>
 
           <option
