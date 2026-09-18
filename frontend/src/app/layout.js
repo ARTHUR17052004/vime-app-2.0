@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
+import InstalarAppBanner from "./components/layout/InstalarAppBanner";
 
 // Evita flash de tema: aplica o data-theme (a partir do cache local)
 // antes da primeira pintura, sincronamente.
@@ -41,8 +42,8 @@ export const metadata = {
     title: "VIME 2.0",
   },
   icons: {
-    icon: "/images/logo-vime.jpeg",
-    apple: "/images/logo-vime.jpeg",
+    icon: "/images/icon-192.png",
+    apple: "/images/icon-192.png",
   },
 };
 
@@ -68,6 +69,7 @@ export default function RootLayout({ children }) {
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <InstalarAppBanner />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../socket");
+const pushService = require("./pushService");
 
 /* ==========================================
    CRIAR (usado pelos outros serviços:
@@ -28,6 +29,22 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link }) => {
       io.emit("notificacao:nova", notificacao);
     }
   }
+
+  // Notificação de verdade no celular (funciona até com o app
+  // fechado) -- só pra quem já ativou isso no aparelho dele (ver
+  // pushService.js). Nunca deve derrubar a criação da notificação em
+  // si, então qualquer falha aqui só fica no log.
+  const payloadPush = {
+    title: titulo,
+    body: mensagem,
+    url: link || "/",
+  };
+
+  Promise.resolve(
+    usuarioId
+      ? pushService.enviarPara(usuarioId, payloadPush)
+      : pushService.enviarParaTodos(payloadPush)
+  ).catch((erro) => console.error("[push] Falha ao notificar:", erro.message));
 
   return notificacao;
 };

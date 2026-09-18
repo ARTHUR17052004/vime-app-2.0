@@ -18,6 +18,7 @@ import FadeIn from "../components/ui/FadeIn";
 
 import { useNotificacoes } from "../../hooks/useNotificacoes";
 import { NotificacaoService } from "../../services/notificacao.service";
+import AtivarNotificacoesPush from "../components/notificacoes/AtivarNotificacoesPush";
 
 const origens = [
   { valor: "TODOS", label: "Todos" },
@@ -208,6 +209,11 @@ export default function NotificacoesPage() {
             </Button>
           )}
         </div>
+      </FadeIn>
+
+      {/* PUSH */}
+      <FadeIn delay={0.05}>
+        <AtivarNotificacoesPush />
       </FadeIn>
 
       {/* STATS */}

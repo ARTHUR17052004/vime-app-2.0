@@ -41,6 +41,7 @@ const configuracaoRoutes = require("./src/routes/configuracaoRoutes");
 const modeloDocumentoRoutes = require("./src/routes/modeloDocumentoRoutes");
 const campoObrigatorioRoutes = require("./src/routes/campoObrigatorioRoutes");
 const signatarioFixoRoutes = require("./src/routes/signatarioFixoRoutes");
+const pushRoutes = require("./src/routes/pushRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -134,6 +135,7 @@ app.use("/logs", logRoutes);
 app.use("/sessoes", sessaoRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/notificacoes", notificacaoRoutes);
+app.use("/push", pushRoutes);
 app.use("/busca", buscaRoutes);
 app.use("/configuracoes", configuracaoRoutes);
 app.use("/modelos-documento", modeloDocumentoRoutes);

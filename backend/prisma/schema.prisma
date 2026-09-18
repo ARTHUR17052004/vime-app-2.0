@@ -121,6 +121,25 @@ model Usuario {
   updatedAt DateTime @updatedAt
 
   notificacoes Notificacao[]
+
+  pushSubscriptions PushSubscription[]
+}
+
+// Uma inscrição de push por navegador/aparelho -- o mesmo usuário pode
+// ter várias (celular, computador...). endpoint já é a identidade
+// única dada pelo navegador; salvar de novo com o mesmo endpoint só
+// atualiza as chaves.
+model PushSubscription {
+  id String @id @default(uuid())
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  endpoint String @unique
+  p256dh   String
+  auth     String
+
+  createdAt DateTime @default(now())
 }
 
 model Notificacao {
