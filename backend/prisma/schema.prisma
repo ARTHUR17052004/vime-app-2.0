@@ -777,3 +777,15 @@ model CampoObrigatorio {
 
   @@unique([modulo, campo])
 }
+// O que o administrador escolheu notificar (Administração > Notificações).
+// Sem linha pro tipo = ligado (comportamento de sempre).
+//   ativo = false -> a notificação nem é criada (nem sino, nem celular)
+//   push  = false -> cria no sino, mas não manda pro celular
+model NotificacaoConfig {
+  tipo String @id
+
+  ativo Boolean @default(true)
+  push  Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}

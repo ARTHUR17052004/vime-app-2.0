@@ -83,6 +83,11 @@ export const PushService = {
 
   },
 
+  // Manda um aviso de teste só pra este usuário (ver pushController.teste).
+  async testar() {
+    return api("/push/teste", { method: "POST" });
+  },
+
   async desativar() {
 
     const subscription = await this.inscricaoAtual();

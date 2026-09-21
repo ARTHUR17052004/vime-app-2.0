@@ -74,6 +74,8 @@ const enviarParaSubscricoes = async (subscricoes, payload) => {
 
 };
 
+const contarSubscricoes = (usuarioId) => prisma.pushSubscription.count({ where: { usuarioId } });
+
 const enviarPara = async (usuarioId, payload) => {
   const subscricoes = await prisma.pushSubscription.findMany({ where: { usuarioId } });
   await enviarParaSubscricoes(subscricoes, payload);
@@ -90,5 +92,6 @@ module.exports = {
   salvarSubscricao,
   removerSubscricao,
   enviarPara,
+  contarSubscricoes,
   enviarParaTodos,
 };

@@ -4,8 +4,14 @@ const router = express.Router();
 
 const notificacaoController = require("../controllers/notificacaoController");
 const authMiddleware = require("../middlewares/authMiddleware");
+const permissaoMiddleware = require("../middlewares/permissaoMiddleware");
 
 router.use(authMiddleware);
+
+// Escolha do que notificar (tela Administração > Notificações).
+router.get("/config", permissaoMiddleware("configuracoes.visualizar"), notificacaoController.listarConfig);
+
+router.put("/config/:tipo", permissaoMiddleware("configuracoes.editar"), notificacaoController.atualizarConfig);
 
 router.get("/nao-lidas", notificacaoController.listarNaoLidas);
 

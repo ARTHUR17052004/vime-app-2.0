@@ -376,6 +376,30 @@ export default function AdministracaoPage() {
 
                 </AdministracaoCard>
 
+                <AdministracaoCard
+
+                  title="Notificações"
+
+                  subtitle="Escolha o que o sistema avisa e o que vai pro celular"
+
+                >
+
+                  <Button
+
+                    className="w-full"
+
+                    onClick={() =>
+                      router.push("/administracao/notificacoes")
+                    }
+
+                  >
+
+                    Abrir Notificações
+
+                  </Button>
+
+                </AdministracaoCard>
+
               </div>
 
             </PageSection>

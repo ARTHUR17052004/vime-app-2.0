@@ -24,6 +24,7 @@ export default function AtivarNotificacoesPush() {
   const [estado, setEstado] = useState("verificando");
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [testeMsg, setTesteMsg] = useState("");
 
   useEffect(() => {
 
@@ -64,6 +65,23 @@ export default function AtivarNotificacoesPush() {
     } catch (err) {
       setErro(err.message || "Não foi possível ativar.");
       if (PushService.permissao() === "denied") setEstado("bloqueada");
+    } finally {
+      setCarregando(false);
+    }
+
+  }
+
+  async function testar() {
+
+    setTesteMsg("");
+    setErro("");
+    setCarregando(true);
+
+    try {
+      await PushService.testar();
+      setTesteMsg("Teste enviado! Feche o app ou apague a tela: o aviso deve chegar em instantes.");
+    } catch (err) {
+      setErro(err.message || "Não foi possível enviar o teste.");
     } finally {
       setCarregando(false);
     }
@@ -143,7 +161,16 @@ export default function AtivarNotificacoesPush() {
           <p className="mt-1 text-sm text-[var(--text-subtle)]">
             Você vai receber avisos aqui mesmo com o app fechado.
           </p>
+          {testeMsg && <p className="mt-2 text-xs text-emerald-400">{testeMsg}</p>}
+          {erro && <p className="mt-2 text-xs text-red-400">{erro}</p>}
         </div>
+        <button
+          onClick={testar}
+          disabled={carregando}
+          className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition shrink-0"
+        >
+          Enviar teste
+        </button>
         <button
           onClick={desativar}
           disabled={carregando}

@@ -11,6 +11,8 @@ router.get("/chave-publica", pushController.chavePublica);
 
 router.post("/inscrever", pushController.inscrever);
 
+router.post("/teste", pushController.teste);
+
 router.post("/desinscrever", pushController.desinscrever);
 
 module.exports = router;

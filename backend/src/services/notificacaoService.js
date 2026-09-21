@@ -1,6 +1,8 @@
 const prisma = require("../config/prisma");
 const { getIO } = require("../socket");
 const pushService = require("./pushService");
+const notificacaoConfigService = require("./notificacaoConfigService");
+const { tipoDe } = require("../utils/tiposNotificacao");
 
 /* ==========================================
    CRIAR (usado pelos outros serviços:
@@ -8,6 +10,12 @@ const pushService = require("./pushService");
 ========================================== */
 
 const criar = async ({ usuarioId, origem, titulo, mensagem, link }) => {
+
+  // O admin escolhe o que notificar (Administração > Notificações).
+  // Desligado = nem cria. Tipo sem configuração continua ligado.
+  const config = await notificacaoConfigService.obter(tipoDe({ origem, titulo }));
+
+  if (!config.ativo) return null;
 
   const notificacao = await prisma.notificacao.create({
     data: {
@@ -40,7 +48,7 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link }) => {
     url: link || "/",
   };
 
-  Promise.resolve(
+  if (config.push) Promise.resolve(
     usuarioId
       ? pushService.enviarPara(usuarioId, payloadPush)
       : pushService.enviarParaTodos(payloadPush)

@@ -13,6 +13,17 @@ export const NotificacaoService = {
     return api(`/notificacoes/${id}/ler`, { method: "PUT" });
   },
 
+  listarConfig() {
+    return api("/notificacoes/config");
+  },
+
+  atualizarConfig(tipo, dados) {
+    return api(`/notificacoes/config/${tipo}`, {
+      method: "PUT",
+      body: JSON.stringify(dados),
+    });
+  },
+
   marcarTodasComoLidas() {
     return api("/notificacoes/ler-todas", { method: "PUT" });
   },
