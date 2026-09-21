@@ -6,9 +6,13 @@ const solicitacaoController = require('../controllers/solicitacaoController');
 const solicitacaoMensagemController = require('../controllers/solicitacaoMensagemController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
+const escopoRegistro = require('../middlewares/escopoRegistro');
+const { filtroSolicitacao } = require('../utils/escopoLocador');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
+
+router.param('id', escopoRegistro('solicitacao', filtroSolicitacao));
 
 router.get('/', permissaoMiddleware('solicitacoes.visualizar'), solicitacaoController.listar);
 

@@ -5,6 +5,7 @@ const contaPagamentoService = require('./contaPagamentoService');
 const BBApi = require('./BBApi');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 const emailAutomacaoService = require('./emailAutomacaoService');
+const { emitirAtualizacao } = require('../socket');
 
 const formatarDataBB = (data) => {
   const d = new Date(data);
@@ -98,6 +99,8 @@ const enviarPeloBB = async (receita, conta) => {
       .notificarNovaCobranca(atualizada, inquilino)
       .catch((erro) => console.error('[E-mail] nova_cobranca (BB):', erro.message));
 
+    emitirAtualizacao('receita');
+
     return {
       success: true,
       mensagem: 'Cobrança enviada ao Banco do Brasil com sucesso.',
@@ -151,6 +154,8 @@ const enviarCobranca = async (receitaId) => {
   const resultado = await asaasService.enviarCobranca(receitaId);
 
   if (resultado.success) {
+
+    emitirAtualizacao('receita');
 
     const inquilino = receita.inquilino || receita.contrato?.inquilino;
 

@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { emitirAtualizacao } = require("../socket");
 
 module.exports = async () => {
 
@@ -27,5 +28,9 @@ module.exports = async () => {
   });
 
 }
+
+  if (receitas.length > 0) {
+    emitirAtualizacao("receita");
+  }
 
 };

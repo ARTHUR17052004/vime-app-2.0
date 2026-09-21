@@ -4,6 +4,7 @@ const notificacaoService = require('./notificacaoService');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 const { emitirAtualizacao } = require('../socket');
 const { filtroReceita } = require('../utils/escopoLocador');
+const { daReceita: locadorDaReceita } = require('../utils/locadorDeRegistro');
 
 // Acha o locador dono da receita (via contrato, ou via
 // inquilino → kitnet → residência quando a receita não tem contrato)
@@ -590,6 +591,7 @@ const sincronizar = async (evento) => {
           titulo: "Cobrança paga",
           mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
           link: "/asaas-transacoes",
+          locadorId: await locadorDaReceita(receita.id),
         });
 
         const inquilino = receita.inquilino || receita.contrato?.inquilino;
@@ -620,6 +622,7 @@ const sincronizar = async (evento) => {
         titulo: "Cobrança atrasada",
         mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`,
         link: "/asaas-transacoes",
+        locadorId: await locadorDaReceita(receita.id),
       });
 
       break;

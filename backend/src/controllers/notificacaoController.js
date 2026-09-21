@@ -3,7 +3,7 @@ const notificacaoConfigService = require("../services/notificacaoConfigService")
 
 const listarNaoLidas = async (req, res) => {
 
-  const dados = await notificacaoService.listarNaoLidas(req.usuario.id);
+  const dados = await notificacaoService.listarNaoLidas(req.usuario.id, req.usuario.locadorId);
 
   return res.json({
     success: true,
@@ -14,7 +14,7 @@ const listarNaoLidas = async (req, res) => {
 
 const listarHistorico = async (req, res) => {
 
-  const dados = await notificacaoService.listarHistorico(req.usuario.id);
+  const dados = await notificacaoService.listarHistorico(req.usuario.id, req.usuario.locadorId);
 
   return res.json({
     success: true,
@@ -36,7 +36,7 @@ const marcarComoLida = async (req, res) => {
 
 const marcarTodasComoLidas = async (req, res) => {
 
-  await notificacaoService.marcarTodasComoLidas(req.usuario.id);
+  await notificacaoService.marcarTodasComoLidas(req.usuario.id, req.usuario.locadorId);
 
   return res.json({
     success: true,

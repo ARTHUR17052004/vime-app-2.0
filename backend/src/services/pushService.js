@@ -81,8 +81,16 @@ const enviarPara = async (usuarioId, payload) => {
   await enviarParaSubscricoes(subscricoes, payload);
 };
 
-const enviarParaTodos = async (payload) => {
-  const subscricoes = await prisma.pushSubscription.findMany();
+// Aviso geral: vai pra quem vê o sistema inteiro e, se o aviso é de um
+// locador, também pros usuários restritos a ele -- nunca pra outro locador.
+const enviarParaTodos = async (payload, locadorId = null) => {
+  const subscricoes = await prisma.pushSubscription.findMany({
+    where: {
+      usuario: locadorId
+        ? { OR: [{ locadorId: null }, { locadorId }] }
+        : { locadorId: null },
+    },
+  });
   await enviarParaSubscricoes(subscricoes, payload);
 };
 

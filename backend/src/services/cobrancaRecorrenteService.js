@@ -1,4 +1,5 @@
 const prisma = require("../config/prisma");
+const { emitirAtualizacao } = require("../socket");
 
 /*
   Núcleo da geração de cobrança de aluguel a partir de um Contrato --
@@ -70,6 +71,8 @@ const gerarCobrancaParaContrato = async (contrato) => {
       status: "PENDENTE",
     },
   });
+
+  emitirAtualizacao("receita");
 
   return { criada: true, receita };
 

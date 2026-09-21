@@ -4,6 +4,8 @@ const metaWhatsappService = require("./metaWhatsappService");
 const assistenteWhatsappService = require("./assistenteWhatsappService");
 const notificacaoService = require("./notificacaoService");
 const { getIO } = require("../socket");
+const { filtroInquilino } = require("../utils/escopoLocador");
+const { doInquilino: locadorDoInquilino } = require("../utils/locadorDeRegistro");
 const { paraChave: normalizarTelefoneChave } = require("../utils/telefoneWhatsapp");
 
 const USAR_MOCK =
@@ -163,9 +165,14 @@ class WhatsappService {
      CONVERSAS
   ========================================== */
 
-  async conversas() {
+  // Usuário restrito a um locador só vê conversa de contato ligado a
+  // inquilino da área dele (contato sem inquilino cadastrado fica de fora).
+  async conversas(usuario) {
 
     const conversas = await prisma.whatsappConversa.findMany({
+      where: usuario?.locadorId
+        ? { contato: { inquilino: filtroInquilino(usuario) } }
+        : {},
       include: {
         contato: true,
         mensagens: {
@@ -441,6 +448,7 @@ class WhatsappService {
           titulo: `Nova mensagem de ${contato.nome || numero}`,
           mensagem: texto,
           link: "/whatsapp",
+          locadorId: contato.inquilinoId ? await locadorDoInquilino(contato.inquilinoId) : null,
         });
 
         // Assistente IA: só responde automaticamente se estiver ativado

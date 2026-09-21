@@ -26,6 +26,7 @@ import { AsaasService } from "@/services/asaas.service";
 import { ReceitaService } from "@/services/financeiro.service";
 import { LocadorService } from "@/services/locadores.service";
 import { usePermissao } from "../../hooks/usePermissao";
+import { socket } from "../../services/socket";
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
@@ -121,6 +122,21 @@ export default function AsaasTransacoesPage() {
   useEffect(() => {
 
     carregarTransacoes();
+
+    // Cobrança pode virar "Paga"/"Atrasada" sozinha (webhook do banco,
+    // job de vencimento) sem ninguém mexer nesta tela -- sem isso, só
+    // aparecia atualizado depois de dar F5.
+    function aoAtualizar(evento) {
+      if (evento?.tipo === "receita") {
+        carregarTransacoes();
+      }
+    }
+
+    socket.on("dados:atualizados", aoAtualizar);
+
+    return () => {
+      socket.off("dados:atualizados", aoAtualizar);
+    };
 
   }, []);
 

@@ -2,7 +2,7 @@ const solicitacaoService = require('../services/solicitacaoService');
 
 const listar = async (req, res) => {
 
-  const solicitacoes = await solicitacaoService.listar();
+  const solicitacoes = await solicitacaoService.listar(req.usuario);
 
   res.json(solicitacoes);
 

@@ -6,6 +6,7 @@ const whatsappController = require("../controllers/whatsappController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const permissaoMiddleware = require("../middlewares/permissaoMiddleware");
 const { temPermissao } = require("../middlewares/permissaoMiddleware");
+const { apenasIrrestrito } = require("../middlewares/restricoes");
 
 // Webhook fica FORA da autenticação de usuário —
 // quem chama essa rota é a Meta (WhatsApp), não um usuário logado
@@ -38,11 +39,11 @@ async function permissaoConfiguracaoWhatsapp(req, res, next) {
 
 router.get("/status", permissaoMiddleware('whatsapp.visualizar'), whatsappController.status);
 router.get("/configuracao", permissaoMiddleware('whatsapp.visualizar'), whatsappController.configuracao);
-router.put("/configuracao", permissaoConfiguracaoWhatsapp, whatsappController.salvarConfiguracao);
+router.put("/configuracao", apenasIrrestrito, permissaoConfiguracaoWhatsapp, whatsappController.salvarConfiguracao);
 router.get("/conversas", permissaoMiddleware('whatsapp.visualizar'), whatsappController.conversas);
-router.post("/conectar", permissaoMiddleware('whatsapp.conectar'), whatsappController.conectar);
-router.post("/qrcode", permissaoMiddleware('whatsapp.conectar'), whatsappController.gerarQrCode);
-router.post("/sincronizar", permissaoMiddleware('whatsapp.conectar'), whatsappController.sincronizar);
+router.post("/conectar", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.conectar);
+router.post("/qrcode", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.gerarQrCode);
+router.post("/sincronizar", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.sincronizar);
 router.post("/enviar", permissaoMiddleware('whatsapp.enviar'), whatsappController.enviar);
 router.post("/receber", permissaoMiddleware('whatsapp.enviar'), whatsappController.receber);
 

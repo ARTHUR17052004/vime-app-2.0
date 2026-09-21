@@ -6,6 +6,7 @@ const asaasController = require('../controllers/asaasController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
+const { apenasIrrestrito } = require('../middlewares/restricoes');
 
 // Rota pública — chamada pelo próprio Asaas, sem cookie/JWT de sessão.
 // A autenticidade é validada por dentro (token asaas-access-token).
@@ -31,13 +32,13 @@ router.get('/resumo', permissaoMiddleware('asaasTransacoes.visualizar'), asaasCo
 
 router.post('/sincronizar', permissaoMiddleware('asaasConfig.editar'), asaasController.sincronizar);
 
-router.get("/clientes", permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarClientes);
+router.get("/clientes", apenasIrrestrito, permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarClientes);
 
-router.post("/clientes", permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCliente);
+router.post("/clientes", apenasIrrestrito, permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCliente);
 
-router.get("/cobrancas", permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarCobrancas);
+router.get("/cobrancas", apenasIrrestrito, permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.listarCobrancas);
 
-router.post("/cobrancas", permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCobranca);
+router.post("/cobrancas", apenasIrrestrito, permissaoMiddleware('asaasTransacoes.criar'), asaasController.criarCobranca);
 
 router.post("/webhook/token", permissaoMiddleware('asaasConfig.editar'), asaasController.gerarTokenWebhook);
 

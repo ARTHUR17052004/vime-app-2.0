@@ -207,6 +207,8 @@ io.use((socket, next) => {
 io.on("connection", (socket) => {
   if (socket.usuario?.id) {
     socket.join(`usuario:${socket.usuario.id}`);
+    // Aviso geral só chega a quem vê tudo ou ao locador do usuário.
+    socket.join(socket.usuario.locadorId ? `locador:${socket.usuario.locadorId}` : "irrestritos");
     registrarConexao(socket);
   }
 

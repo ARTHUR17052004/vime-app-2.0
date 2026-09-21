@@ -6,8 +6,13 @@ const vistoriaController = require('../controllers/vistoriaController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
+const escopoRegistro = require('../middlewares/escopoRegistro');
+const { filtroVistoria } = require('../utils/escopoLocador');
 
 router.use(authMiddleware);
+
+// Restrito a um locador: só mexe em vistoria da própria área, mesmo pelo id.
+router.param('id', escopoRegistro('vistoria', filtroVistoria));
 
 router.get('/', permissaoMiddleware('vistorias.visualizar'), vistoriaController.listar);
 

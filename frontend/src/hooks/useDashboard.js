@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { DashboardService } from "../services/dashboard.service";
 import { dashboardMock } from "../mock/dashboard";
+import { socket } from "../services/socket";
 
 // Mesmo intervalo do Modo TV -- atualiza sozinho em segundo plano, sem
 // precisar dar F5, pra números e valores ficarem "ao vivo" também na
@@ -49,7 +50,21 @@ export function useDashboard() {
       }
     }, INTERVALO_ATUALIZACAO_MS);
 
-    return () => clearInterval(intervalo);
+    // Além do polling (rede de segurança a cada 25s), reage na hora a
+    // mudanças de fundo -- webhook do banco/Clicksign confirmando,
+    // job noturno -- em vez de esperar o próximo ciclo.
+    function aoAtualizar(evento) {
+      if (evento?.tipo === "contrato" || evento?.tipo === "receita") {
+        carregar(false);
+      }
+    }
+
+    socket.on("dados:atualizados", aoAtualizar);
+
+    return () => {
+      clearInterval(intervalo);
+      socket.off("dados:atualizados", aoAtualizar);
+    };
   }, [carregar]);
 
   return {

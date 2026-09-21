@@ -6,6 +6,7 @@ import {
   Building2,
   House,
   ClipboardList,
+  DoorOpen,
 } from "lucide-react";
 
 import MainLayout from "./components/layout/MainLayout";
@@ -108,8 +109,9 @@ function DashboardConteudo() {
 
               <FadeIn delay={0.1}>
                 <PageSection spacing="xl">
-                  <PageGrid cols={4}>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5">
                     <DashboardStatsCard
+                      compact
                       title="Inquilinos"
                       value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
                       subtitle="Ativos"
@@ -117,6 +119,7 @@ function DashboardConteudo() {
                     />
 
                     <DashboardStatsCard
+                      compact
                       title="Residências"
                       value={<AnimatedNumber value={dados?.unidades ?? 0} />}
                       subtitle="Ativas"
@@ -124,6 +127,15 @@ function DashboardConteudo() {
                     />
 
                     <DashboardStatsCard
+                      compact
+                      title="Vazias"
+                      value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
+                      subtitle="Kitnets"
+                      icon={DoorOpen}
+                    />
+
+                    <DashboardStatsCard
+                      compact
                       title="Kitnets"
                       value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
                       subtitle="Total"
@@ -131,12 +143,13 @@ function DashboardConteudo() {
                     />
 
                     <DashboardStatsCard
+                      compact
                       title="Solicitações"
                       value={<AnimatedNumber value={dados?.solicitacoesPendentes ?? 0} />}
                       subtitle="Pendentes"
                       icon={ClipboardList}
                     />
-                  </PageGrid>
+                  </div>
                 </PageSection>
               </FadeIn>
 

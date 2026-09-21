@@ -3,10 +3,12 @@ const prisma = require('../config/prisma');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const notificacaoService = require('./notificacaoService');
+const { filtroSolicitacao } = require('../utils/escopoLocador');
 const campoObrigatorioService = require('./campoObrigatorioService');
 
-const listar = () => {
+const listar = (usuario) => {
   return prisma.solicitacao.findMany({
+    where: filtroSolicitacao(usuario),
     orderBy: {
       createdAt: 'desc'
     }
@@ -30,6 +32,7 @@ const criar = async (dados, autor) => {
   delete dados.responsavel;
   delete dados.anexo;
 
+  dados.locadorId = autor?.locadorId || null;
   dados.criadoPorId = autor?.id || null;
   dados.criadoPorNome = autor?.nome || "Sistema";
   dados.criadoPorPerfil = autor?.perfil || null;
@@ -60,7 +63,8 @@ const criar = async (dados, autor) => {
     origem: "SISTEMA",
     titulo: "Nova solicitação",
     mensagem: `${solicitacao.criadoPorNome || "Alguém"} criou a solicitação "${solicitacao.titulo}" (${solicitacao.numero}).`,
-    link: `/solicitacoes/${solicitacao.id}`
+    link: `/solicitacoes/${solicitacao.id}`,
+    locadorId: solicitacao.locadorId
   });
 
   return solicitacao;
@@ -74,6 +78,7 @@ const atualizar = async (id, dados) => {
   if (dados.data) dados.data = new Date(dados.data);
   if (dados.prazo) dados.prazo = new Date(dados.prazo);
 
+  delete dados.locadorId;
   delete dados.id;
   delete dados.createdAt;
   delete dados.updatedAt;

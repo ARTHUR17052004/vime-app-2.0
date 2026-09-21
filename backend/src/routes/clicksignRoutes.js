@@ -4,6 +4,7 @@ const router = express.Router();
 
 const clicksignController = require('../controllers/clicksignController');
 const authMiddleware = require('../middlewares/authMiddleware');
+const { chavesDoEscopo } = require('../utils/escopoClicksign');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
 
 // Webhook fica FORA da autenticação de usuário —
@@ -12,6 +13,30 @@ router.post('/webhook', clicksignController.webhook);
 
 // Todas as rotas abaixo continuam exigindo login
 router.use(authMiddleware);
+
+// Todas as rotas com :id aqui são de documento da Clicksign (conta única da
+// empresa): usuário restrito a um locador só acessa documento de contrato dele.
+router.param("id", async (req, res, next, id) => {
+
+  if (!req.usuario?.locadorId) return next();
+
+  try {
+
+    const chaves = await chavesDoEscopo(req.usuario);
+
+    if (!chaves.has(id)) {
+      return res.status(404).json({ success: false, message: "Documento não encontrado." });
+    }
+
+    return next();
+
+  } catch (erro) {
+
+    return next(erro);
+
+  }
+
+});
 
 router.get('/config', permissaoMiddleware('clicksign.visualizar'), clicksignController.config);
 

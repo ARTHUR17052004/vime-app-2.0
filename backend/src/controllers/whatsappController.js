@@ -59,7 +59,7 @@ const conversas = async (req, res) => {
 
   try {
 
-    const dados = await whatsappService.conversas();
+    const dados = await whatsappService.conversas(req.usuario);
 
     return res.json({
       success: true,

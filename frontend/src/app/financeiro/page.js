@@ -35,6 +35,7 @@ import SemPermissao from "../components/ui/SemPermissao";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { socket } from "../../services/socket";
 
 export default function FinanceiroPage() {
   const podeVisualizar = usePermissao("financeiro.visualizar");
@@ -99,6 +100,21 @@ export default function FinanceiroPage() {
   useEffect(() => {
 
     carregar();
+
+    // Receita pode mudar de status sozinha (banco confirmando
+    // pagamento, job de vencimento) sem ninguém mexer nesta tela --
+    // sem isso, só aparecia atualizado depois de dar F5.
+    function aoAtualizar(evento) {
+      if (evento?.tipo === "receita") {
+        carregar();
+      }
+    }
+
+    socket.on("dados:atualizados", aoAtualizar);
+
+    return () => {
+      socket.off("dados:atualizados", aoAtualizar);
+    };
 
   }, [carregar]);
 

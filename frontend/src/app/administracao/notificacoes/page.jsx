@@ -16,7 +16,7 @@ import Button from "../../components/ui/Button";
 import SemPermissao from "../../components/ui/SemPermissao";
 
 import { NotificacaoService } from "@/services/notificacao.service";
-import { usePermissao } from "@/hooks/usePermissao";
+import { useAuth } from "@/context/AuthContext";
 
 function Interruptor({ ligado, onChange, desabilitado, rotulo }) {
   return (
@@ -57,8 +57,11 @@ export default function NotificacoesAdminPage() {
 
   const router = useRouter();
 
-  const podeVisualizar = usePermissao("configuracoes.visualizar");
-  const podeEditar = usePermissao("configuracoes.editar");
+  // Escolha do que notificar vale pra empresa toda: só o administrador
+  // geral (sem locador definido) mexe -- o servidor também confere.
+  const { usuario } = useAuth();
+  const podeVisualizar = usuario?.perfil === "ADMINISTRADOR" && !usuario?.locadorId;
+  const podeEditar = podeVisualizar;
 
   const [tipos, setTipos] = useState([]);
   const [loading, setLoading] = useState(true);

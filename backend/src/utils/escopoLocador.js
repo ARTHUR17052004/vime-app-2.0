@@ -55,7 +55,15 @@ const filtroVistoria = (usuario) => {
   };
 };
 
+// Solicitação não liga a kitnet: vale o locador de quem criou (gravado na
+// criação) ou a própria autoria.
+const filtroSolicitacao = (usuario) => {
+  if (!usuario?.locadorId) return {};
+  return { OR: [{ locadorId: usuario.locadorId }, { criadoPorId: usuario.id }] };
+};
+
 module.exports = {
+  filtroSolicitacao,
   filtroUnidade,
   filtroKitnet,
   filtroContrato,

@@ -1,3 +1,4 @@
+const { chavesDoEscopo, filtrarDocumentos } = require("../utils/escopoClicksign");
 const clicksignService = require("../services/clicksignService");
 const ClicksignApi = require("../services/ClicksignApi");
 
@@ -55,7 +56,13 @@ const sincronizar = async (req, res) => {
 
 const listarDocumentosApi = async (req, res) => {
 
-  const dados = await ClicksignApi.listarDocumentos();
+  let dados = await ClicksignApi.listarDocumentos();
+
+  // Conta única da empresa: usuário restrito a um locador só vê os
+  // documentos dos contratos dele.
+  if (req.usuario?.locadorId) {
+    dados = filtrarDocumentos(dados, await chavesDoEscopo(req.usuario));
+  }
 
   return res.json({
     success: true,

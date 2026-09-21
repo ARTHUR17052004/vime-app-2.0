@@ -31,6 +31,7 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../hooks/usePermissao";
+import { socket } from "../../services/socket";
 
 export default function ContratosPage() {
 
@@ -91,6 +92,21 @@ export default function ContratosPage() {
   useEffect(() => {
 
     carregarContratos();
+
+    // Contrato pode virar ATIVO sozinho (assinatura confirmada na
+    // Clicksign) sem ninguém clicar em nada nesta tela -- sem isso, só
+    // aparecia atualizado depois de dar F5.
+    function aoAtualizar(evento) {
+      if (evento?.tipo === "contrato") {
+        carregarContratos();
+      }
+    }
+
+    socket.on("dados:atualizados", aoAtualizar);
+
+    return () => {
+      socket.off("dados:atualizados", aoAtualizar);
+    };
 
   }, []);
 

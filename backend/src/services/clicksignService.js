@@ -4,6 +4,7 @@ const prisma = require("../config/prisma");
 const ClicksignApi = require("./ClicksignApi");
 const ClicksignApiV3 = require("./ClicksignApiV3");
 const notificacaoService = require("./notificacaoService");
+const { emitirAtualizacao } = require("../socket");
 
 // Confere se o webhook realmente veio da Clicksign, usando o segredo
 // gerado pra esse endpoint (header "Content-Hmac: sha256=<hash>").
@@ -279,7 +280,14 @@ const processarWebhook = async (evento) => {
           link: `/contratos/${documento.id}`
         });
 
+        // Sem isso, quem estivesse com a tela de Contratos/Financeiro
+        // aberta só via o status novo depois de dar F5.
+        emitirAtualizacao("contrato");
+        emitirAtualizacao("receita");
+
       } else {
+
+        emitirAtualizacao("contrato");
 
         console.log(`[Clicksign Webhook] Receita já existia para o contrato ${documento.id}, nada a fazer.`);
 
@@ -304,6 +312,8 @@ const processarWebhook = async (evento) => {
         mensagem: `O envio para assinatura do contrato de ${documento.inquilino?.nome || "inquilino"} foi cancelado.`,
         link: `/contratos/${documento.id}`
       });
+
+      emitirAtualizacao("contrato");
 
       break;
 

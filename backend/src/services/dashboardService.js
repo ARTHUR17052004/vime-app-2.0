@@ -5,6 +5,7 @@ const {
   filtroKitnet,
   filtroContrato,
   filtroReceita,
+  filtroSolicitacao,
 } = require('../utils/escopoLocador');
 
 const resumo = async (usuario) => {
@@ -42,6 +43,7 @@ const resumo = async (usuario) => {
   // visíveis pra todo mundo (mesmo comportamento de sempre).
   const solicitacoesPendentes = await prisma.solicitacao.count({
     where: {
+      ...filtroSolicitacao(usuario),
       status: {
         notIn: ['ATENDIDA', 'REJEITADA']
       }
@@ -92,9 +94,10 @@ const STATUS_ATIVIDADE = {
 
 // Solicitações também não têm vínculo com locador -- ver comentário em
 // resumo() acima.
-const atividades = async () => {
+const atividades = async (usuario) => {
 
   const solicitacoes = await prisma.solicitacao.findMany({
+    where: filtroSolicitacao(usuario),
     take: 10,
     orderBy: {
       updatedAt: 'desc'
@@ -183,7 +186,11 @@ const ocupacao = async (usuario) => {
     where: { ...filtroKitnet(usuario), status: 'OCUPADA' }
   });
 
-  const vazias = total - ocupadas;
+  // Mesma regra da tela de Kitnets ("Vazias" = status DISPONIVEL): kitnet em
+  // manutenção não conta como vazia.
+  const vazias = await prisma.kitnet.count({
+    where: { ...filtroKitnet(usuario), status: 'DISPONIVEL' }
+  });
 
   return {
     ocupadas,

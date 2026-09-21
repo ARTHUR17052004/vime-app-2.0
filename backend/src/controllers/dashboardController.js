@@ -18,7 +18,7 @@ const resumo = async (req, res) => {
 
 const atividades = async (req, res) => {
   try {
-    const dados = await dashboardService.atividades();
+    const dados = await dashboardService.atividades(req.usuario);
 
     return res.status(200).json({
       success: true,

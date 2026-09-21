@@ -155,6 +155,11 @@ model Notificacao {
 
   link        String?
 
+  // De qual locador é o assunto do aviso (descoberto pelo link/registro).
+  // Usuário restrito a um locador só recebe os dele; sem locador conhecido,
+  // só quem vê o sistema inteiro recebe.
+  locadorId   String?
+
   lida        Boolean  @default(false)
   lidaEm      DateTime?
 
@@ -402,6 +407,11 @@ model Solicitacao {
   criadoPorNome String?
 
   criadoPorPerfil String?
+
+  // Locador do criador no momento da criação (null = criada por quem vê
+  // tudo). Usuário restrito a um locador só enxerga as do locador dele
+  // ou as que ele mesmo criou.
+  locadorId String?
 
   // Último alerta "solicitação com prazo vencido" enviado por
   // verificarSolicitacoesAtrasadasJob.js (prazo + 72h+ sem atender) --

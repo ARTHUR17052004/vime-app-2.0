@@ -1,12 +1,27 @@
 const configuracaoService = require("../services/configuracaoService");
 
+// Configuração é da empresa inteira. Usuário restrito a um locador pode
+// ver o que é de tela (tema, nome...), mas nunca senha/token de integração.
+const CAMPOS_SECRETOS = ["smtpSenha", "asaasToken", "clicksignToken", "whatsappToken"];
+
+const semSegredos = (usuario, registro) => {
+
+  if (!usuario?.locadorId || !registro) return registro;
+
+  const copia = { ...registro };
+  CAMPOS_SECRETOS.forEach((campo) => delete copia[campo]);
+
+  return copia;
+
+};
+
 const listar = async (req, res, next) => {
   try {
     const configuracoes = await configuracaoService.listar();
 
     return res.json({
       success: true,
-      data: configuracoes,
+      data: configuracoes.map((c) => semSegredos(req.usuario, c)),
     });
   } catch (error) {
     next(error);
@@ -19,7 +34,7 @@ const buscarPorId = async (req, res, next) => {
 
     return res.json({
       success: true,
-      data: configuracao,
+      data: semSegredos(req.usuario, configuracao),
     });
   } catch (error) {
     next(error);

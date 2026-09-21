@@ -51,10 +51,25 @@ function listarOnline() {
   }));
 }
 
+// Aviso genérico de "algo mudou" pra qualquer tela que esteja aberta
+// -- usado principalmente por mudanças que acontecem em segundo plano
+// (webhook do banco/Clicksign confirmando, job noturno) e que, sem
+// isso, só apareciam depois de a pessoa dar F5 na página. `tipo`
+// identifica QUAL lista deve se atualizar ("contrato", "receita",
+// "inquilino"...); cada tela só reage ao(s) tipo(s) que exibe.
+function emitirAtualizacao(tipo, extra = {}) {
+
+  if (!io) return;
+
+  io.emit("dados:atualizados", { tipo, ...extra, em: new Date() });
+
+}
+
 module.exports = {
   setIO,
   getIO,
   registrarConexao,
   removerConexao,
   listarOnline,
+  emitirAtualizacao,
 };
