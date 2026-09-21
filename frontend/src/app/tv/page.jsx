@@ -20,6 +20,7 @@ import { useRouter } from "next/navigation";
 import ProtectedRoute from "../components/auth/ProtectedRoute";
 import RevenueChart from "../components/charts/RevenueChart";
 import OccupancyChart from "../components/charts/OccupancyChart";
+import DashboardStatsCard from "../components/dashboard/DashboardStatsCard";
 import AnimatedNumber, { useAnimatedNumber } from "../components/ui/AnimatedNumber";
 
 import { DashboardService } from "@/services/dashboard.service";
@@ -234,36 +235,41 @@ function TvConteudo() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mt-10 grid grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6 shrink-0"
+          className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5 shrink-0"
         >
-          <TvStatCard
-            titulo="Inquilinos"
-            subtitulo="Ativos"
-            valor={dados?.inquilinos ?? 0}
+          <DashboardStatsCard
+            compact
+            title="Inquilinos"
+            value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
+            subtitle="Ativos"
             icon={Users}
           />
-          <TvStatCard
-            titulo="Residências"
-            subtitulo="Ativas"
-            valor={dados?.unidades ?? 0}
+          <DashboardStatsCard
+            compact
+            title="Residências"
+            value={<AnimatedNumber value={dados?.unidades ?? 0} />}
+            subtitle="Ativas"
             icon={Building2}
           />
-          <TvStatCard
-            titulo="Vazias"
-            subtitulo="Kitnets"
-            valor={ocupacao?.vazias ?? 0}
+          <DashboardStatsCard
+            compact
+            title="Vazias"
+            value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
+            subtitle="Kitnets"
             icon={DoorOpen}
           />
-          <TvStatCard
-            titulo="Kitnets"
-            subtitulo="Total"
-            valor={dados?.kitnets ?? 0}
+          <DashboardStatsCard
+            compact
+            title="Kitnets"
+            value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
+            subtitle="Total"
             icon={House}
           />
-          <TvStatCard
-            titulo="Solicitações"
-            subtitulo="Pendentes"
-            valor={dados?.solicitacoesPendentes ?? 0}
+          <DashboardStatsCard
+            compact
+            title="Solicitações"
+            value={<AnimatedNumber value={dados?.solicitacoesPendentes ?? 0} />}
+            subtitle="Pendentes"
             icon={ClipboardList}
           />
         </motion.div>
@@ -354,29 +360,6 @@ function TvConteudo() {
             : "Carregando dados ao vivo..."}
         </p>
 
-      </div>
-    </div>
-  );
-}
-
-function TvStatCard({ titulo, subtitulo, valor, icon: Icon }) {
-  return (
-    <div className="rounded-3xl border border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl overflow-hidden p-4 sm:p-7 flex items-center justify-between gap-2">
-      <div className="min-w-0">
-        <p className="text-[11px] sm:text-[13px] uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[var(--text-subtle)] font-semibold truncate">
-          {titulo}
-        </p>
-
-        <p className="mt-1.5 sm:mt-3 text-3xl sm:text-5xl font-black text-[var(--text)] tabular-nums leading-none">
-          <AnimatedNumber value={valor} />
-        </p>
-
-        <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-[var(--text-faint)] truncate">{subtitulo}</p>
-      </div>
-
-      <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
-        <Icon size={18} className="text-emerald-400 sm:hidden" />
-        <Icon size={28} className="text-emerald-400 hidden sm:block" />
       </div>
     </div>
   );
