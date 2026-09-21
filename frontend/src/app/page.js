@@ -112,14 +112,6 @@ function DashboardConteudo() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5">
                     <DashboardStatsCard
                       compact
-                      title="Inquilinos"
-                      value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
-                      subtitle="Ativos"
-                      icon={Users}
-                    />
-
-                    <DashboardStatsCard
-                      compact
                       title="Residências"
                       value={<AnimatedNumber value={dados?.unidades ?? 0} />}
                       subtitle="Ativas"
@@ -128,18 +120,26 @@ function DashboardConteudo() {
 
                     <DashboardStatsCard
                       compact
-                      title="Vazias"
-                      value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
-                      subtitle="Kitnets"
-                      icon={DoorOpen}
-                    />
-
-                    <DashboardStatsCard
-                      compact
                       title="Kitnets"
                       value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
                       subtitle="Total"
                       icon={House}
+                    />
+
+                    <DashboardStatsCard
+                      compact
+                      title="Inquilinos"
+                      value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
+                      subtitle="Ativos"
+                      icon={Users}
+                    />
+
+                    <DashboardStatsCard
+                      compact
+                      title="Vazias"
+                      value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
+                      subtitle="Kitnets"
+                      icon={DoorOpen}
                     />
 
                     <DashboardStatsCard

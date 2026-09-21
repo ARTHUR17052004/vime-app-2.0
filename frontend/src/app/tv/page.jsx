@@ -239,13 +239,6 @@ function TvConteudo() {
         >
           <DashboardStatsCard
             compact
-            title="Inquilinos"
-            value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
-            subtitle="Ativos"
-            icon={Users}
-          />
-          <DashboardStatsCard
-            compact
             title="Residências"
             value={<AnimatedNumber value={dados?.unidades ?? 0} />}
             subtitle="Ativas"
@@ -253,17 +246,24 @@ function TvConteudo() {
           />
           <DashboardStatsCard
             compact
-            title="Vazias"
-            value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
-            subtitle="Kitnets"
-            icon={DoorOpen}
-          />
-          <DashboardStatsCard
-            compact
             title="Kitnets"
             value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
             subtitle="Total"
             icon={House}
+          />
+          <DashboardStatsCard
+            compact
+            title="Inquilinos"
+            value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
+            subtitle="Ativos"
+            icon={Users}
+          />
+          <DashboardStatsCard
+            compact
+            title="Vazias"
+            value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
+            subtitle="Kitnets"
+            icon={DoorOpen}
           />
           <DashboardStatsCard
             compact
