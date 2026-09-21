@@ -12,6 +12,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 export default function DetalhesContratoPage() {
   const params = useParams();
@@ -76,6 +77,9 @@ export default function DetalhesContratoPage() {
 
   return (
   <MainLayout>
+<div className="mb-4">
+<BotaoVoltar href="/contratos" label="Voltar para Contratos" />
+</div>
 
     <div className="space-y-8">
 

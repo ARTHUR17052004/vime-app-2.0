@@ -7,6 +7,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 export default function UnidadeDetalhesPage() {
   const params = useParams();
@@ -93,6 +94,9 @@ export default function UnidadeDetalhesPage() {
 
   return (
     <MainLayout>
+<div className="mb-4">
+<BotaoVoltar href="/unidades" label="Voltar para Residências" />
+</div>
       <div className="space-y-6">
 
         <div>

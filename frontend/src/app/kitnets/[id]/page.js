@@ -111,7 +111,7 @@ export default function KitnetDetalhesPage() {
 
                 <Button
                   variant="secondary"
-                  onClick={() => router.back()}
+                  onClick={() => router.push("/kitnets")}
                 >
                   <ArrowLeft size={18} />
                   Voltar

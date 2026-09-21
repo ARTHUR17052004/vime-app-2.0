@@ -9,6 +9,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 import { LocadorService } from "@/services/locadores.service";
 import { UnidadeService } from "@/services/unidades.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 export default function DetalhesLocadorPage() {
   const params = useParams();
@@ -106,6 +107,9 @@ export default function DetalhesLocadorPage() {
 
   return (
     <MainLayout>
+<div className="mb-4">
+<BotaoVoltar href="/locadores" label="Voltar para Locadores" />
+</div>
       <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-10">
 
         <h1 className="text-4xl font-bold text-[var(--text)] mb-2">

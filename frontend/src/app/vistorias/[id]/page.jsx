@@ -11,6 +11,7 @@ import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 const ACAO_LABEL = {
   CRIAR: "Vistoria criada",
@@ -117,6 +118,9 @@ export default function DetalhesVistoriaPage() {
   return (
 
     <MainLayout>
+<div className="mb-4">
+<BotaoVoltar href="/vistorias" label="Voltar para Vistorias" />
+</div>
 
       <div className="space-y-8">
 

@@ -15,6 +15,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 
 import { InquilinoService } from "../../../services/inquilinos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 export default function InquilinoDetalhesPage() {
 
@@ -133,6 +134,9 @@ export default function InquilinoDetalhesPage() {
       <Page>
 
         <PageContainer>
+<div className="mb-4">
+<BotaoVoltar href="/inquilinos" label="Voltar para Inquilinos" />
+</div>
 
           <PageHeader
             title={inquilino.nome}

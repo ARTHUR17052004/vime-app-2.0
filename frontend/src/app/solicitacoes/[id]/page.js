@@ -10,6 +10,7 @@ import { SolicitacaoService } from "@/services/solicitacao.service";
 import { AuditoriaService } from "@/services/auditoria.service";
 import SolicitacaoChat from "../../components/solicitacoes/SolicitacaoChat";
 import { usePermissao } from "../../../hooks/usePermissao";
+import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 function formatarData(data) {
   return data ? new Date(data).toLocaleString("pt-BR") : "-";
@@ -139,6 +140,9 @@ export default function DetalhesSolicitacaoPage() {
  return (
 
   <MainLayout>
+<div className="mb-4">
+<BotaoVoltar href="/solicitacoes" label="Voltar para Solicitações" />
+</div>
 
     <div className="space-y-8">
 

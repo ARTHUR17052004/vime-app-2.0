@@ -179,7 +179,7 @@ export default function UsuarioDetalhesPage() {
 
                   variant="secondary"
 
-                  onClick={() => router.back()}
+                  onClick={() => router.push("/administracao/usuarios")}
 
                 >
 
