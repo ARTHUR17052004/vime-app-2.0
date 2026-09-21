@@ -156,7 +156,7 @@ export default function AtivarNotificacoesPush() {
   }
 
   return (
-    <div className={`${base} border-[var(--border-token)] bg-[var(--surface-2)]`}>
+    <div className={`${base} border-[var(--border-token)] bg-[var(--surface)] backdrop-blur-xl`}>
       <Smartphone size={20} className="text-[var(--text-muted)] shrink-0 mt-0.5" />
       <div className="flex-1 min-w-[220px]">
         <p className="text-sm font-semibold text-[var(--text)]">

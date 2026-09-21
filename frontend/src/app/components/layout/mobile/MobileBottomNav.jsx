@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
+  House,
   FileText,
   Users,
   Wallet,
@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 const ITENS = [
-  { label: "Início", href: "/", icon: LayoutDashboard },
+  { label: "Início", href: "/", icon: House },
   { label: "Contratos", href: "/contratos", icon: FileText },
   { label: "Inquilinos", href: "/inquilinos", icon: Users },
   { label: "Financeiro", href: "/financeiro", icon: Wallet },

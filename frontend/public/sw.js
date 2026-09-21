@@ -1,5 +1,12 @@
 // Service worker só pra push notification (sem cache/offline -- isso
 // é outro escopo). Registrado em src/services/push.service.js.
+//
+// Som: o navegador não deixa o site escolher o som da notificação do
+// sistema (é o som padrão do canal "VIME" do Android, que o próprio
+// usuário pode trocar em Configurações > Apps > VIME > Notificações).
+// Com o app aberto quem toca é o som do VIME, na página (ver
+// src/utils/somNotificacao.js). Aqui só dá pra escolher o padrão de
+// vibração.
 
 self.addEventListener("push", (event) => {
 
@@ -11,15 +18,35 @@ self.addEventListener("push", (event) => {
     dados = { title: "VIME 2.0", body: event.data ? event.data.text() : "" };
   }
 
-  const titulo = dados.title || "VIME 2.0";
-
   event.waitUntil(
-    self.registration.showNotification(titulo, {
-      body: dados.body || "",
-      icon: "/icon.png",
-      badge: "/icon.png",
-      data: { url: dados.url || "/" },
-    })
+
+    self.clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then((lista) => {
+
+        // App aberto e na tela: não empilha notificação do sistema por
+        // cima -- avisa a página, que atualiza o sino e toca o som.
+        const visiveis = lista.filter(
+          (c) => c.visibilityState === "visible" && c.focused
+        );
+
+        if (visiveis.length > 0) {
+          visiveis.forEach((c) => c.postMessage({ tipo: "push-recebido", dados }));
+          return;
+        }
+
+        return self.registration.showNotification(dados.title || "VIME 2.0", {
+          body: dados.body || "",
+          icon: "/images/icon-192.png",
+          badge: "/images/badge-96.png",
+          vibrate: [200, 100, 200, 100, 300],
+          tag: dados.url || "vime",
+          renotify: true,
+          data: { url: dados.url || "/" },
+        });
+
+      })
+
   );
 
 });

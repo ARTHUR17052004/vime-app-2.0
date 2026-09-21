@@ -19,6 +19,7 @@ import RecentActivities from "./components/dashboard/RecentActivities";
 import QuickActions from "./components/dashboard/QuickActions";
 import AlertsPanel from "./components/dashboard/AlertsPanel";
 import SystemStatus from "./components/dashboard/SystemStatus";
+import DashboardMobile from "./components/dashboard/mobile/DashboardMobile";
 
 import FadeIn from "./components/ui/FadeIn";
 import Loading from "./components/ui/Loading";
@@ -31,6 +32,7 @@ import PageGrid from "./components/ui/PageGrid";
 
 import { useDashboard } from "../hooks/useDashboard";
 import { useAuth } from "../context/AuthContext";
+import { useIsMobile } from "../hooks/useIsMobile";
 
 export default function Home() {
   return (
@@ -49,12 +51,21 @@ function DashboardConteudo() {
   } = useDashboard();
 
   const { usuario } = useAuth();
+  const isMobile = useIsMobile();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Visitante";
 
   if (loading) {
     return (
       <MainLayout>
         <Loading />
+      </MainLayout>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <MainLayout>
+        <DashboardMobile dados={dados} primeiroNome={primeiroNome} />
       </MainLayout>
     );
   }

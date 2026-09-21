@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { NotificacaoService } from "../services/notificacao.service";
 import { socket } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
+import { tocarSomNotificacao } from "../utils/somNotificacao";
 
 export function useNotificacoes() {
   const { usuario } = useAuth();
@@ -28,12 +29,26 @@ export function useNotificacoes() {
 
     function aoReceberNova(notificacao) {
       setNaoLidas((atual) => [notificacao, ...atual]);
+      tocarSomNotificacao();
+    }
+
+    // Push que chegou com o app aberto: o service worker não mostra a
+    // notificação do sistema (ver public/sw.js) e avisa a página, que
+    // recarrega a lista e toca o som -- garante o aviso mesmo se o
+    // socket tiver caído.
+    function aoMensagemDoServiceWorker(evento) {
+      if (evento.data?.tipo === "push-recebido") {
+        carregar();
+        tocarSomNotificacao();
+      }
     }
 
     socket.on("notificacao:nova", aoReceberNova);
+    navigator.serviceWorker?.addEventListener("message", aoMensagemDoServiceWorker);
 
     return () => {
       socket.off("notificacao:nova", aoReceberNova);
+      navigator.serviceWorker?.removeEventListener("message", aoMensagemDoServiceWorker);
     };
   }, [usuario, carregar]);
 

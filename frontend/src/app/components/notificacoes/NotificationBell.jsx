@@ -74,7 +74,7 @@ export default function NotificationBell() {
   const total = naoLidas.length;
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="sm:relative">
       <button
         onClick={() => setAberto((v) => !v)}
         className="
@@ -133,9 +133,14 @@ export default function NotificationBell() {
             transition={{ duration: 0.18 }}
             className="
               absolute
-              right-0
-              mt-3
-              w-[calc(100vw-2rem)]
+              left-4
+              right-4
+              top-full
+              mt-2
+              sm:left-auto
+              sm:right-0
+              sm:top-auto
+              sm:mt-3
               sm:w-96
 
               rounded-2xl
@@ -143,7 +148,8 @@ export default function NotificationBell() {
               border
               border-[var(--border-token)]
 
-              bg-[var(--surface)]
+              bg-[var(--select-option-bg)]
+              sm:bg-[var(--surface)]
 
               backdrop-blur-xl
 

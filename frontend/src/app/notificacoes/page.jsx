@@ -19,6 +19,7 @@ import FadeIn from "../components/ui/FadeIn";
 import { useNotificacoes } from "../../hooks/useNotificacoes";
 import { NotificacaoService } from "../../services/notificacao.service";
 import AtivarNotificacoesPush from "../components/notificacoes/AtivarNotificacoesPush";
+import SomNotificacaoToggle from "../components/notificacoes/SomNotificacaoToggle";
 
 const origens = [
   { valor: "TODOS", label: "Todos" },
@@ -187,7 +188,7 @@ export default function NotificacoesPage() {
 
   return (
     <MainLayout>
-    <div className="max-w-[1700px] mx-auto px-8 xl:px-10 py-8 space-y-10">
+    <div className="max-w-[1700px] mx-auto px-0 md:px-8 xl:px-10 py-3 md:py-8 space-y-6 md:space-y-10">
       {/* HEADER */}
       <FadeIn delay={0}>
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -213,12 +214,17 @@ export default function NotificacoesPage() {
 
       {/* PUSH */}
       <FadeIn delay={0.05}>
-        <AtivarNotificacoesPush />
+        <div className="space-y-4">
+          <AtivarNotificacoesPush />
+          <div className="md:hidden">
+            <SomNotificacaoToggle />
+          </div>
+        </div>
       </FadeIn>
 
       {/* STATS */}
       <FadeIn delay={0.10}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-6">
           <Card padding="sm">
             <p className="text-xs uppercase tracking-widest text-[var(--text-subtle)]">
               Não lidas

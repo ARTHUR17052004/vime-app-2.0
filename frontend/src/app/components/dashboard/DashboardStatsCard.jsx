@@ -13,9 +13,12 @@ export default function DashboardStatsCard({
     <DashboardCard
       onClick={onClick}
       className="
-        min-h-[138px]
-        px-7
-        py-6
+        min-h-[96px]
+        px-4
+        py-3
+        md:min-h-[138px]
+        md:px-7
+        md:py-6
 
         transition-all
         duration-300
@@ -43,8 +46,10 @@ export default function DashboardStatsCard({
 
           <span
             className="
-              mt-3
-              text-5xl
+              mt-2
+              text-3xl
+              md:mt-3
+              md:text-5xl
               leading-none
               font-black
               tracking-tight
@@ -57,8 +62,10 @@ export default function DashboardStatsCard({
           {subtitle && (
             <span
               className="
-                mt-3
-                text-sm
+                mt-2
+                text-xs
+                md:mt-3
+                md:text-sm
                 text-[var(--text-faint)]
               "
             >
@@ -78,8 +85,10 @@ export default function DashboardStatsCard({
             items-center
             justify-center
 
-            w-16
-            h-16
+            w-12
+            h-12
+            md:w-16
+            md:h-16
 
             rounded-2xl
 
@@ -96,7 +105,7 @@ export default function DashboardStatsCard({
             <Icon
               size={32}
               strokeWidth={2}
-              className="text-emerald-400"
+              className="w-6 h-6 md:w-8 md:h-8 text-emerald-400"
             />
           )}
         </div>

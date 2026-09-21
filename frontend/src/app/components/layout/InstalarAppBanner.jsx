@@ -28,6 +28,9 @@ export default function InstalarAppBanner() {
 
   useEffect(() => {
 
+    // Só no celular -- no desktop o sistema segue sem nenhum banner.
+    if (!window.matchMedia("(max-width: 767px)").matches) return;
+
     if (rodandoStandalone()) return;
 
     try {
@@ -71,7 +74,7 @@ export default function InstalarAppBanner() {
       className="
         fixed
         inset-x-4
-        bottom-4
+        bottom-24
         sm:inset-x-auto
         sm:right-4
         sm:max-w-sm

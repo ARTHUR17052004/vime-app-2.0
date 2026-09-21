@@ -5,6 +5,7 @@ import { useState } from "react";
 import MobileTopbar from "./MobileTopbar";
 import MobileBottomNav from "./MobileBottomNav";
 import MobileMoreMenu from "./MobileMoreMenu";
+import CommandPalette from "../CommandPalette";
 
 export default function MobileShell({ children }) {
   const [maisAberto, setMaisAberto] = useState(false);
@@ -60,6 +61,8 @@ export default function MobileShell({ children }) {
       </div>
 
       <MobileMoreMenu aberto={maisAberto} onFechar={() => setMaisAberto(false)} />
+
+      <CommandPalette />
     </div>
   );
 }

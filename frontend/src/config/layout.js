@@ -11,11 +11,11 @@ const layout = {
   page: {
     maxWidth: "max-w-[1700px]",
 
-    paddingX: "px-6 md:px-8 xl:px-10 2xl:px-12",
+    paddingX: "px-0 md:px-8 xl:px-10 2xl:px-12",
 
-    paddingY: "py-8",
+    paddingY: "py-3 md:py-8",
 
-    spacing: "space-y-10",
+    spacing: "space-y-6 md:space-y-10",
   },
 
   // ==========================
