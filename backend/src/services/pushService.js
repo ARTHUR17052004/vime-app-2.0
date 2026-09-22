@@ -1,21 +1,25 @@
 const webpush = require("web-push");
 const prisma = require("../config/prisma");
 
-// Sem as 3 chaves configuradas, o serviço só ignora em silêncio (não
-// derruba o resto do app -- notificação continua indo pro sino/socket
-// normalmente, só a de celular que não sai).
-const configurado = Boolean(
-  process.env.VAPID_PUBLIC_KEY &&
-  process.env.VAPID_PRIVATE_KEY &&
-  process.env.VAPID_SUBJECT
-);
+// .trim() porque um "\r" sobrando (arquivo .env editado no Windows, por
+// exemplo) já é o bastante pra invalidar a chave e derrubar isso aqui.
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY?.trim();
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY?.trim();
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT?.trim();
+
+// Sem as 3 chaves configuradas (ou com alguma inválida), o serviço só
+// ignora em silêncio -- nunca pode derrubar o resto do app por causa
+// disso. Notificação continua indo pro sino/socket normalmente, só a de
+// celular que não sai.
+let configurado = Boolean(VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY && VAPID_SUBJECT);
 
 if (configurado) {
-  webpush.setVapidDetails(
-    process.env.VAPID_SUBJECT,
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-  );
+  try {
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  } catch (erro) {
+    configurado = false;
+    console.error("[push] Chave VAPID inválida, notificação no celular desligada:", erro.message);
+  }
 }
 
 const chavePublica = () => process.env.VAPID_PUBLIC_KEY || null;
