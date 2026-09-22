@@ -70,6 +70,7 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   // pushService.js). Nunca deve derrubar a criação da notificação em
   // si, então qualquer falha aqui só fica no log.
   const payloadPush = {
+    id: notificacao.id,
     title: titulo,
     body: mensagem,
     url: link || "/",

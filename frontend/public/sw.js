@@ -7,6 +7,11 @@
 // Com o app aberto quem toca é o som do VIME, na página (ver
 // src/utils/somNotificacao.js). Aqui só dá pra escolher o padrão de
 // vibração.
+//
+// Popup do sistema: sempre aparece, com app aberto ou fechado -- é
+// assim que qualquer app de verdade se comporta. Com o app aberto e na
+// tela, também avisa a página (pra tocar o som do VIME e atualizar o
+// sino na hora).
 
 self.addEventListener("push", (event) => {
 
@@ -24,23 +29,18 @@ self.addEventListener("push", (event) => {
       .matchAll({ type: "window", includeUncontrolled: true })
       .then((lista) => {
 
-        // App aberto e na tela: não empilha notificação do sistema por
-        // cima -- avisa a página, que atualiza o sino e toca o som.
         const visiveis = lista.filter(
           (c) => c.visibilityState === "visible" && c.focused
         );
 
-        if (visiveis.length > 0) {
-          visiveis.forEach((c) => c.postMessage({ tipo: "push-recebido", dados }));
-          return;
-        }
+        visiveis.forEach((c) => c.postMessage({ tipo: "push-recebido", dados }));
 
         return self.registration.showNotification(dados.title || "VIME 2.0", {
           body: dados.body || "",
           icon: "/images/icon-192.png",
           badge: "/images/badge-96.png",
           vibrate: [200, 100, 200, 100, 300],
-          tag: dados.url || "vime",
+          tag: dados.id || dados.url || "vime",
           renotify: true,
           data: { url: dados.url || "/" },
         });

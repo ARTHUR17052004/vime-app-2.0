@@ -1,8 +1,9 @@
-// Som do próprio VIME quando chega notificação com o app aberto
+// Som do próprio VIME quando chega notificação com o app/site aberto
 // (public/sounds/notificacao.wav -- pra trocar por outro som, é só
 // substituir esse arquivo mantendo o nome). Com o app fechado quem
 // toca é o som do sistema do celular, que o navegador não deixa
-// trocar por código (ver sw.js).
+// trocar por código (ver sw.js). Vale pra qualquer tela, celular ou
+// desktop -- notificação é notificação.
 
 const ARQUIVO = "/sounds/notificacao.wav";
 const CHAVE_PREFERENCIA = "vime-som-notificacao";
@@ -30,10 +31,7 @@ export function definirSomAtivado(ativado) {
 // do usuário na página) só ignora em silêncio.
 export function tocarSomNotificacao() {
 
-  // Só no celular (mesmo corte de largura da casca mobile) -- o desktop
-  // continua exatamente como sempre foi.
   if (typeof window === "undefined" || !somAtivado()) return;
-  if (!window.matchMedia("(max-width: 767px)").matches) return;
 
   const agora = Date.now();
   if (agora - ultimoToque < INTERVALO_MINIMO_MS) return;

@@ -5,6 +5,7 @@ import { NotificacaoService } from "../services/notificacao.service";
 import { socket } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 import { tocarSomNotificacao } from "../utils/somNotificacao";
+import { mostrarPopupNotificacao } from "../utils/popupNotificacao";
 
 export function useNotificacoes() {
   const { usuario } = useAuth();
@@ -30,6 +31,7 @@ export function useNotificacoes() {
     function aoReceberNova(notificacao) {
       setNaoLidas((atual) => [notificacao, ...atual]);
       tocarSomNotificacao();
+      mostrarPopupNotificacao(notificacao);
     }
 
     // Push que chegou com o app aberto: o service worker não mostra a
