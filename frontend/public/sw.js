@@ -51,25 +51,27 @@ self.addEventListener("push", (event) => {
 
 });
 
-// Clica na notificação -> foca uma aba já aberta no link, ou abre uma nova.
+// Clica na notificação -> foca uma janela já aberta no link, ou abre
+// uma nova -- pelo app instalado, não pelo navegador solto. URL sempre
+// absoluta: é o que faz o Android abrir no app (WebAPK) em vez do
+// Chrome quando o app já foi instalado ("Adicionar à tela inicial").
 self.addEventListener("notificationclick", (event) => {
 
   event.notification.close();
 
-  const url = event.notification.data?.url || "/";
+  const url = new URL(event.notification.data?.url || "/", self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((lista) => {
 
       for (const cliente of lista) {
-        if (cliente.url.includes(url) && "focus" in cliente) {
+        if (cliente.url === url && "focus" in cliente) {
           return cliente.focus();
         }
       }
 
-      if (lista.length > 0 && "focus" in lista[0]) {
-        lista[0].navigate(url);
-        return lista[0].focus();
+      if (lista.length > 0 && "navigate" in lista[0]) {
+        return lista[0].navigate(url).then((c) => c && c.focus());
       }
 
       if (clients.openWindow) {
