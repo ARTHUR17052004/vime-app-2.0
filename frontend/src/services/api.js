@@ -4,7 +4,7 @@ export async function api(endpoint, options = {}) {
 
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token")
+      ? sessionStorage.getItem("token")
       : null;
 
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -53,9 +53,8 @@ export async function api(endpoint, options = {}) {
 
   if (response.status === 401 && endpoint !== "/auth/login") {
     if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("usuario");
-      localStorage.removeItem("vime-remember");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("usuario");
 
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";

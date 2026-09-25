@@ -42,7 +42,7 @@ const buscarPorId = async (req, res) => {
 
 const criar = async (req, res) => {
 
-  const receita = await receitaService.criar(req.body);
+  const receita = await receitaService.criar(req.body, req.usuario);
 
   return res.status(201).json({
     success: true,

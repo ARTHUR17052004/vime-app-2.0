@@ -32,6 +32,7 @@ const filtroReceita = (usuario) => {
   if (!usuario?.locadorId) return {};
   return {
     OR: [
+      { locadorId: usuario.locadorId },
       { contrato: { locadorId: usuario.locadorId } },
       { inquilino: { kitnet: { unidade: { locadorId: usuario.locadorId } } } },
     ],

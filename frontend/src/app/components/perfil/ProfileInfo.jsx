@@ -34,7 +34,7 @@ export default function ProfileInfo() {
       const usuarioAtualizado = { ...usuario, ...atualizado };
 
       setUsuario(usuarioAtualizado);
-      localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      sessionStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
 
       alert("Perfil atualizado com sucesso.");
     } catch (error) {

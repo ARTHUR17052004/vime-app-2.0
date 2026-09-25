@@ -6,7 +6,7 @@ export const ContratoService = {
   async baixarPdf(id) {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("token")
+        ? sessionStorage.getItem("token")
         : null;
 
     const response = await fetch(`${API_URL}/contratos/${id}/pdf`, {

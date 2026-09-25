@@ -2,9 +2,12 @@ const jwt = require("jsonwebtoken");
 const prisma = require("../config/prisma");
 
 const authMiddleware = async (req, res, next) => {
+  // O header vem da guia (cada uma com o seu usuário); o cookie é um só pro
+  // navegador inteiro e só serve de reserva -- se ele vencesse, logar em outra
+  // guia trocava o usuário das demais.
   const token =
-    req.cookies?.token ||
-    req.headers.authorization?.replace("Bearer ", "");
+    req.headers.authorization?.replace("Bearer ", "") ||
+    req.cookies?.token;
 
   if (!token) {
     return res.status(401).json({

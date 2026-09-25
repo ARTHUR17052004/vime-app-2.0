@@ -8,4 +8,7 @@ export const socket = io(API_URL, {
   transports: ["polling", "websocket"],
   autoConnect: true,
   withCredentials: true,
+  // Token da GUIA (não o cookie, que é um só pro navegador todo): assim cada
+  // guia entra no tempo real com o usuário dela.
+  auth: (cb) => cb({ token: typeof window !== "undefined" ? sessionStorage.getItem("token") : null }),
 });

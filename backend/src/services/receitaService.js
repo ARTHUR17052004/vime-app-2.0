@@ -5,6 +5,16 @@ const { filtroReceita } = require('../utils/escopoLocador');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { doContrato, doInquilino } = require('../utils/locadorDeRegistro');
+
+const locadorDaReceita = async (dados) => {
+  if (dados.contratoId) {
+    const l = await doContrato(dados.contratoId);
+    if (l) return l;
+  }
+  if (dados.inquilinoId) return doInquilino(dados.inquilinoId);
+  return null;
+};
 
 // "Nova Receita" e "Nova Cobrança" criam a mesma Receita por baixo,
 // mas são telas diferentes -- cada uma com sua própria configuração em
@@ -74,13 +84,21 @@ const buscarPorId = (id, usuario) => {
   });
 };
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
 
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
 
   await campoObrigatorioService.validar(modulo, dados);
+
+  // Restrito a um locador: a receita é sempre dele. Senão, deriva do contrato
+  // ou do inquilino (e do valor enviado, se o admin escolheu um locador).
+  if (autor?.locadorId) {
+    dados.locadorId = autor.locadorId;
+  } else if (!dados.locadorId) {
+    dados.locadorId = await locadorDaReceita(dados);
+  }
 
   const receita = await prisma.receita.create({
     data: dados

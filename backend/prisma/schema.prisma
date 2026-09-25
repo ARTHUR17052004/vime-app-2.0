@@ -332,6 +332,10 @@ model Receita {
   id              String    @id @default(uuid())
   contratoId      String?
   inquilinoId     String?
+  // De qual locador é o dinheiro. Preenchido na criação (pelo contrato/inquilino
+  // ou pelo usuário restrito que lançou) -- é o que faz a receita avulsa, sem
+  // contrato nem inquilino, aparecer pro locador certo.
+  locadorId       String?
   categoria       String
   descricao       String
   valor           Float

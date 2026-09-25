@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../services/api";
+import { socket } from "../services/socket";
 
 export const AuthContext = createContext({});
 
@@ -11,7 +12,13 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      const usuarioStorage = localStorage.getItem("usuario");
+      // Sessão é por guia (sessionStorage): sobra de login antigo, que era
+      // compartilhado entre guias, é descartada.
+      localStorage.removeItem("token");
+      localStorage.removeItem("usuario");
+      localStorage.removeItem("vime-remember");
+
+      const usuarioStorage = sessionStorage.getItem("usuario");
 
       if (usuarioStorage) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -26,14 +33,17 @@ export function AuthProvider({ children }) {
 
  function login(token, usuario) {
 
-  localStorage.setItem("token", token);
+  sessionStorage.setItem("token", token);
 
-  localStorage.setItem(
+  sessionStorage.setItem(
     "usuario",
     JSON.stringify(usuario)
   );
 
   setUsuario(usuario);
+
+  // Reconecta o tempo real já com o token desta guia.
+  socket.disconnect().connect();
 }
 
   async function logout() {
@@ -43,8 +53,8 @@ export function AuthProvider({ children }) {
       console.error("Erro ao fazer logout no servidor:", error);
     }
 
-    localStorage.removeItem("usuario");
-    localStorage.removeItem("token");
+    sessionStorage.removeItem("usuario");
+    sessionStorage.removeItem("token");
 
     setUsuario(null);
 

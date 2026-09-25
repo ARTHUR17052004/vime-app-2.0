@@ -6,7 +6,7 @@ export const ClicksignService = {
   async baixarArquivo(id) {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("token")
+        ? sessionStorage.getItem("token")
         : null;
 
     const response = await fetch(`${API_URL}/clicksign/documentos/${id}/baixar`, {

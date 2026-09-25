@@ -69,7 +69,7 @@ export default function ProfileCard() {
       const usuarioAtualizado = { ...usuario, ...atualizado };
 
       setUsuario(usuarioAtualizado);
-      localStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      sessionStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
 
     } catch (error) {
       console.error(error);
