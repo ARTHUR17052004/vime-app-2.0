@@ -56,15 +56,7 @@ app.set("trust proxy", 1);
 /* ===========================
    CORS
 =========================== */
-const origensPadrao = [
-  "http://localhost:3000",
-  "https://vimesistema.online",
-  "https://www.vimesistema.online",
-];
-
-const origensPermitidas = process.env.FRONTEND_URL
-  ? process.env.FRONTEND_URL.split(",").map((url) => url.trim())
-  : origensPadrao;
+const { origensPermitidas } = require("./src/utils/origensPermitidas");
 
 app.use(
   cors({

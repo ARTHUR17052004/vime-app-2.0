@@ -5,6 +5,7 @@ import MainLayout from "../components/layout/MainLayout";
 import ProfileCard from "../components/perfil/ProfileCard";
 import ProfileInfo from "../components/perfil/ProfileInfo";
 import ProfileActions from "../components/perfil/ProfileActions";
+import BiometriaCard from "../components/perfil/BiometriaCard";
 
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
@@ -62,6 +63,8 @@ export default function PerfilPage() {
                 <div className="col-span-12 xl:col-span-8 space-y-8">
 
                   <ProfileInfo />
+
+                  <BiometriaCard />
 
                   <ProfileActions />
 

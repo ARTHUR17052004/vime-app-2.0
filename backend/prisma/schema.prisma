@@ -89,6 +89,23 @@ model Inquilino {
   kitnet             Kitnet     @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 }
 
+// Digital / rosto do celular (WebAuthn): só guarda a chave PÚBLICA -- a
+// biometria em si nunca sai do aparelho.
+model CredencialBiometria {
+  id           String   @id @default(uuid())
+  usuarioId    String
+  credentialId String   @unique
+  publicKey    String
+  counter      Int      @default(0)
+  transports   String?
+  nome         String?
+  createdAt    DateTime @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  @@index([usuarioId])
+}
+
 model Usuario {
   id String @id @default(uuid())
 
@@ -123,6 +140,7 @@ model Usuario {
   notificacoes Notificacao[]
 
   pushSubscriptions PushSubscription[]
+  credenciaisBiometria CredencialBiometria[]
 }
 
 // Uma inscrição de push por navegador/aparelho -- o mesmo usuário pode

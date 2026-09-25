@@ -31,7 +31,14 @@ const login = async (email, senha) => {
     throw new Error('Senha inválida.');
   }
 
-  // Modo manutenção: ninguém além do Administrador consegue nem logar.
+  return criarSessao(usuario);
+
+};
+
+// Modo manutenção: ninguém além do Administrador consegue nem logar.
+// Usado por qualquer forma de entrar (senha, digital...).
+const criarSessao = async (usuario, metodo = 'senha') => {
+
   if (usuario.perfil?.nome !== 'ADMINISTRADOR') {
 
     const configuracao = await prisma.configuracao.findFirst({
@@ -86,7 +93,7 @@ const login = async (email, senha) => {
 
   acao: "LOGIN",
 
-  descricao: "Usuário realizou login.",
+  descricao: metodo === 'senha' ? "Usuário realizou login." : `Usuário realizou login (${metodo}).`,
 
 });
 
@@ -178,6 +185,7 @@ const redefinirSenha = async (token, novaSenha) => {
 
 module.exports = {
   login,
+  criarSessao,
   solicitarRedefinicaoSenha,
   redefinirSenha,
 };
