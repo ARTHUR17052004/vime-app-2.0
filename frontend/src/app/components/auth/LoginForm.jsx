@@ -9,6 +9,7 @@ import LoginInput from "./LoginInput";
 
 import { api } from "../../../services/api";
 import { BiometriaService } from "../../../services/biometria.service";
+import { emAppInstalado } from "../../../utils/sessao";
 
 export default function LoginForm() {
 
@@ -89,6 +90,7 @@ export default function LoginForm() {
         body: JSON.stringify({
           email,
           senha,
+          app: emAppInstalado(),
         }),
       });
 

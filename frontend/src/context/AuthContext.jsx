@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../services/api";
 import { socket } from "../services/socket";
+import { Sessao, emAppInstalado } from "../utils/sessao";
 
 export const AuthContext = createContext({});
 
@@ -12,17 +13,21 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     try {
-      // Sessão é por guia (sessionStorage): sobra de login antigo, que era
-      // compartilhado entre guias, é descartada.
-      localStorage.removeItem("token");
-      localStorage.removeItem("usuario");
+      // No navegador a sessão é por guia (ver utils/sessao.js): sobra de
+      // login antigo, que era compartilhado entre guias, é descartada. No
+      // app instalado o localStorage É a sessão, então fica.
+      if (!emAppInstalado()) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("usuario");
+      }
+
       localStorage.removeItem("vime-remember");
 
-      const usuarioStorage = sessionStorage.getItem("usuario");
+      const usuarioSalvo = Sessao.usuario();
 
-      if (usuarioStorage) {
+      if (usuarioSalvo) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
-        setUsuario(JSON.parse(usuarioStorage));
+        setUsuario(usuarioSalvo);
       }
     } catch (error) {
       console.error("Erro ao recuperar usuário:", error);
@@ -33,12 +38,7 @@ export function AuthProvider({ children }) {
 
  function login(token, usuario) {
 
-  sessionStorage.setItem("token", token);
-
-  sessionStorage.setItem(
-    "usuario",
-    JSON.stringify(usuario)
-  );
+  Sessao.salvar(token, usuario);
 
   setUsuario(usuario);
 
@@ -53,8 +53,7 @@ export function AuthProvider({ children }) {
       console.error("Erro ao fazer logout no servidor:", error);
     }
 
-    sessionStorage.removeItem("usuario");
-    sessionStorage.removeItem("token");
+    Sessao.limpar();
 
     setUsuario(null);
 

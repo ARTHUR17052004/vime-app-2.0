@@ -18,7 +18,7 @@ const login = async (req, res) => {
   try {
     const { email, senha } = req.body;
 
-    const resultado = await authService.login(email, senha);
+    const resultado = await authService.login(email, senha, req.body.app === true);
 
     res.cookie("token", resultado.token, {
       ...cookieOptions,

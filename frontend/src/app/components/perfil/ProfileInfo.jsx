@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import DashboardCard from "../dashboard/DashboardCard";
 import { useAuth } from "../../../context/AuthContext";
 import { AuthService } from "../../../services/auth.service";
+import { Sessao } from "../../../utils/sessao";
 
 export default function ProfileInfo() {
   const { usuario, setUsuario } = useAuth();
@@ -34,7 +35,7 @@ export default function ProfileInfo() {
       const usuarioAtualizado = { ...usuario, ...atualizado };
 
       setUsuario(usuarioAtualizado);
-      sessionStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      Sessao.atualizarUsuario(usuarioAtualizado);
 
       alert("Perfil atualizado com sucesso.");
     } catch (error) {

@@ -6,6 +6,7 @@ import {
 } from "@simplewebauthn/browser";
 
 import { api } from "./api";
+import { emAppInstalado } from "../utils/sessao";
 
 // Login por digital/rosto (WebAuthn): quem reconhece o dono é o próprio
 // celular/computador -- o sistema só recebe uma assinatura, nunca a
@@ -86,7 +87,7 @@ export const BiometriaService = {
 
     const login = await api("/auth/biometria/login/verificar", {
       method: "POST",
-      body: JSON.stringify({ desafioId: opcoes.data.desafioId, resposta }),
+      body: JSON.stringify({ desafioId: opcoes.data.desafioId, resposta, app: emAppInstalado() }),
     });
 
     return login.data;

@@ -172,7 +172,7 @@ const verificarLogin = async (req) => {
 
   if (!credencial.usuario.ativo) throw new Error("Usuário inativo.");
 
-  return authService.criarSessao(credencial.usuario, "digital");
+  return authService.criarSessao(credencial.usuario, "digital", req.body.app === true);
 
 };
 

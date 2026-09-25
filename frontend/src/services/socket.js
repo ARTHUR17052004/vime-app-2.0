@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import { API_URL } from "../config/api";
+import { Sessao } from "../utils/sessao";
 
 export const socket = io(API_URL, {
   // Começa por polling e sobe pra websocket quando o servidor deixar (se o
@@ -10,5 +11,5 @@ export const socket = io(API_URL, {
   withCredentials: true,
   // Token da GUIA (não o cookie, que é um só pro navegador todo): assim cada
   // guia entra no tempo real com o usuário dela.
-  auth: (cb) => cb({ token: typeof window !== "undefined" ? sessionStorage.getItem("token") : null }),
+  auth: (cb) => cb({ token: Sessao.token() }),
 });

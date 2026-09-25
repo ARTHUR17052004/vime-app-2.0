@@ -7,7 +7,7 @@ const emailService = require('./emailService');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://vimesistema.online';
 
-const login = async (email, senha) => {
+const login = async (email, senha, app = false) => {
 
   const usuario = await prisma.usuario.findUnique({
     where: {
@@ -31,13 +31,15 @@ const login = async (email, senha) => {
     throw new Error('Senha inválida.');
   }
 
-  return criarSessao(usuario);
+  return criarSessao(usuario, 'senha', app);
 
 };
 
 // Modo manutenção: ninguém além do Administrador consegue nem logar.
 // Usado por qualquer forma de entrar (senha, digital...).
-const criarSessao = async (usuario, metodo = 'senha') => {
+// `app`: app instalado no celular fica logado por mais tempo (30 dias) -- só
+// sai se apertar em Sair ou a sessão vencer. No navegador continua 1 dia.
+const criarSessao = async (usuario, metodo = 'senha', app = false) => {
 
   if (usuario.perfil?.nome !== 'ADMINISTRADOR') {
 
@@ -71,7 +73,7 @@ const criarSessao = async (usuario, metodo = 'senha') => {
     payload,
     process.env.JWT_SECRET || 'vime_secret_dev',
     {
-      expiresIn: '1d'
+      expiresIn: app ? '30d' : '1d'
     }
   );
 

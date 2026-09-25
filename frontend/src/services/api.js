@@ -1,10 +1,11 @@
 import { API_URL } from "../config/api";
+import { Sessao } from "../utils/sessao";
 
 export async function api(endpoint, options = {}) {
 
   const token =
     typeof window !== "undefined"
-      ? sessionStorage.getItem("token")
+      ? Sessao.token()
       : null;
 
   const response = await fetch(`${API_URL}${endpoint}`, {
@@ -53,8 +54,7 @@ export async function api(endpoint, options = {}) {
 
   if (response.status === 401 && endpoint !== "/auth/login") {
     if (typeof window !== "undefined") {
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("usuario");
+      Sessao.limpar();
 
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";

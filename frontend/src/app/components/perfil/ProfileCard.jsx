@@ -6,6 +6,7 @@ import { Camera, UserCircle2, ShieldCheck } from "lucide-react";
 import DashboardCard from "../dashboard/DashboardCard";
 import { useAuth } from "../../../context/AuthContext";
 import { AuthService } from "../../../services/auth.service";
+import { Sessao } from "../../../utils/sessao";
 
 // Redimensiona pra no máximo 300x300 e converte pra JPEG antes de
 // mandar pro servidor -- uma foto de celular direto facilmente passa
@@ -69,7 +70,7 @@ export default function ProfileCard() {
       const usuarioAtualizado = { ...usuario, ...atualizado };
 
       setUsuario(usuarioAtualizado);
-      sessionStorage.setItem("usuario", JSON.stringify(usuarioAtualizado));
+      Sessao.atualizarUsuario(usuarioAtualizado);
 
     } catch (error) {
       console.error(error);
