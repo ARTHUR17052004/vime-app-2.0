@@ -26,6 +26,33 @@ export function definirSomAtivado(ativado) {
   } catch (e) {}
 }
 
+// Navegador só deixa tocar áudio depois que o usuário interagiu com a
+// página (clique/toque/tecla). No primeiro gesto, "destrava" o áudio pra
+// que a notificação toque no ato em que chegar, sem depender de o usuário
+// ter apertado algo logo antes.
+function destravarAudio() {
+  try {
+    if (!audio) audio = new Audio(ARQUIVO);
+    audio.muted = true;
+    const p = audio.play();
+    const restaurar = () => { audio.pause(); audio.currentTime = 0; audio.muted = false; };
+    if (p && p.then) p.then(restaurar).catch(() => { audio.muted = false; });
+    else restaurar();
+  } catch (e) {}
+}
+
+if (typeof window !== "undefined") {
+  const aoInteragir = () => {
+    destravarAudio();
+    ["pointerdown", "keydown", "touchstart"].forEach((t) =>
+      window.removeEventListener(t, aoInteragir)
+    );
+  };
+  ["pointerdown", "keydown", "touchstart"].forEach((t) =>
+    window.addEventListener(t, aoInteragir, { passive: true })
+  );
+}
+
 // Chegando a mesma notificação por dois caminhos (socket e push) toca
 // uma vez só. Navegador que bloqueia autoplay (ainda sem nenhum toque
 // do usuário na página) só ignora em silêncio.
