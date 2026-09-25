@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Bell,
+  BellRing,
   MessageCircle,
   DollarSign,
   FileText,
@@ -77,46 +78,55 @@ export default function NotificationBell() {
     <div ref={containerRef} className="sm:relative">
       <button
         onClick={() => setAberto((v) => !v)}
-        className="
+        aria-label={total > 0 ? `${total} notificações não lidas` : "Notificações"}
+        className={`
           relative
-          w-10
-          h-10
+          w-10 h-10 sm:w-12 sm:h-12
           rounded-full
-          hover:bg-[var(--surface-2)]
-          flex
-          items-center
-          justify-center
+          flex items-center justify-center
           transition
-        "
+          ${total > 0
+            ? "bg-emerald-500/15 border border-emerald-400/50 hover:bg-emerald-500/25 sino-brilho"
+            : "hover:bg-[var(--surface-2)]"}
+        `}
       >
-        <Bell size={18} className="text-[var(--text)]" />
+        {total > 0 ? (
+          <BellRing
+            className="sino-balancando w-[22px] h-[22px] sm:w-[26px] sm:h-[26px] text-emerald-300"
+            strokeWidth={2.4}
+          />
+        ) : (
+          <Bell className="w-[20px] h-[20px] sm:w-[24px] sm:h-[24px] text-[var(--text)]" />
+        )}
 
         {total > 0 && (
           <span
             className="
+              sino-badge
               absolute
-              -top-0.5
-              -right-0.5
+              -top-1.5
+              -right-1.5
 
-              min-w-[18px]
-              h-[18px]
+              min-w-[22px]
+              h-[22px]
 
-              px-1
+              px-1.5
 
               rounded-full
 
-              bg-emerald-500
+              bg-red-500
 
-              border
+              border-2
               border-slate-900
 
               flex
               items-center
               justify-center
 
-              text-[10px]
-              font-bold
-              text-[var(--text)]
+              text-[12px]
+              font-extrabold
+              text-white
+              shadow-lg shadow-red-500/40
             "
           >
             {total > 9 ? "9+" : total}

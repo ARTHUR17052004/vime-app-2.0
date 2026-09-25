@@ -446,3 +446,36 @@ table{
   animation:fadeUp .45s ease;
 
 }
+/* =========================================================
+   SINO DE NOTIFICAÇÕES (chama atenção quando há não lidas)
+========================================================= */
+
+@keyframes sinoBalancar {
+  0%, 55%, 100% { transform: rotate(0); }
+  5%  { transform: rotate(18deg); }
+  10% { transform: rotate(-16deg); }
+  15% { transform: rotate(13deg); }
+  20% { transform: rotate(-10deg); }
+  25% { transform: rotate(6deg); }
+  30% { transform: rotate(-3deg); }
+  35% { transform: rotate(0); }
+}
+
+@keyframes sinoBrilho {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+  70%  { box-shadow: 0 0 0 12px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+@keyframes sinoBadge {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.18); }
+}
+
+.sino-balancando { transform-origin: 50% 8%; animation: sinoBalancar 2.8s ease-in-out infinite; }
+.sino-brilho     { animation: sinoBrilho 1.8s ease-out infinite; }
+.sino-badge      { animation: sinoBadge 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sino-balancando, .sino-brilho, .sino-badge { animation: none; }
+}
