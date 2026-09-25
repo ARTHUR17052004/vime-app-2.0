@@ -8,6 +8,7 @@
 
 const TIPOS = [
   { chave: "KITNET_VAZIA", grupo: "Imóveis", rotulo: "Kitnet vazia", descricao: "Avisa todo dia enquanto uma kitnet passar de 72h sem ser locada.", titulos: ["Kitnet vazia"] },
+  { chave: "VISTORIA_NOVA", grupo: "Imóveis", rotulo: "Nova vistoria", descricao: "Quando uma vistoria é cadastrada.", titulos: ["Nova vistoria"] },
   { chave: "VISTORIA_ATRASADA", grupo: "Imóveis", rotulo: "Vistoria atrasada", descricao: "Vistoria que passou da data sem ser realizada.", titulos: ["Vistoria atrasada"] },
 
   { chave: "CONTRATO_VENCENDO", grupo: "Contratos", rotulo: "Contrato próximo do vencimento", descricao: "Contrato ativo que vence nos próximos dias.", titulos: ["Contrato próximo do vencimento"] },

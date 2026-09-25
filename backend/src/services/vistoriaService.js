@@ -5,6 +5,7 @@ const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { filtroVistoria } = require('../utils/escopoLocador');
+const notificacaoService = require('./notificacaoService');
 
 const listar = (usuario) => {
   return prisma.vistoria.findMany({
@@ -77,6 +78,19 @@ const criar = async (dados) => {
     acao: "CRIAR",
     descricao: `Vistoria ${vistoria.id} criada.`
   });
+
+  // Aviso na hora (sino, som e popup no celular) -- o locador é descoberto
+  // pelo link. Nunca pode impedir a vistoria de ser criada.
+  try {
+    await notificacaoService.criar({
+      origem: 'SISTEMA',
+      titulo: 'Nova vistoria',
+      mensagem: `Tem vistoria nova: "${vistoria.titulo}".`,
+      link: `/vistorias/${vistoria.id}`
+    });
+  } catch (erro) {
+    console.error('[notificacao] Falha ao avisar vistoria nova:', erro.message);
+  }
 
   return vistoria;
 
