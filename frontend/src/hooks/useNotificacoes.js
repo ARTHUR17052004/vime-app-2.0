@@ -6,6 +6,7 @@ import { socket } from "../services/socket";
 import { useAuth } from "../context/AuthContext";
 import { tocarSomNotificacao } from "../utils/somNotificacao";
 import { mostrarPopupNotificacao } from "../utils/popupNotificacao";
+import { PushService } from "../services/push.service";
 
 export function useNotificacoes() {
   const { usuario } = useAuth();
@@ -27,6 +28,15 @@ export function useNotificacoes() {
     if (!usuario) return;
 
     carregar();
+
+    // Auto-cura: o backend apaga sozinho inscrição de push que o
+    // Google/Apple rejeitem como expirada, e aí o navegador "acha" que
+    // ainda está inscrito enquanto o servidor não tem mais pra quem
+    // mandar. Reconfirma em toda página, em segundo plano, sem incomodar
+    // ninguém -- é só um upsert barato quando já existe inscrição local.
+    PushService.inscricaoAtual()
+      .then((inscricao) => inscricao && PushService.confirmarNoServidor(inscricao))
+      .catch(() => {});
 
     function aoReceberNova(notificacao) {
       setNaoLidas((atual) => [notificacao, ...atual]);

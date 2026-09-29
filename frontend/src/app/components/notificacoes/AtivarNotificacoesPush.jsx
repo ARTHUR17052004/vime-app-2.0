@@ -46,7 +46,17 @@ export default function AtivarNotificacoesPush() {
       }
 
       const inscricao = await PushService.inscricaoAtual();
-      setEstado(inscricao ? "ativa" : "inativa");
+
+      if (!inscricao) {
+        setEstado("inativa");
+        return;
+      }
+
+      // Confere (e re-registra, se precisar) que o servidor ainda tem essa
+      // inscrição salva -- senão "ativada" ficaria mostrando um estado que
+      // não existe mais, sem nenhum aviso realmente saindo.
+      const noServidor = await PushService.confirmarNoServidor(inscricao);
+      setEstado(noServidor ? "ativa" : "inativa");
 
     }
 

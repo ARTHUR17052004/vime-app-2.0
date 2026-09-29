@@ -40,6 +40,23 @@ export const PushService = {
     return registro.pushManager.getSubscription();
   },
 
+  // O backend apaga sozinho qualquer inscrição que o Google/Apple rejeitem
+  // como expirada (ver pushService.js) -- aí o navegador ainda "acha" que
+  // está inscrito, mas o servidor não tem mais pra quem mandar. Reenviar
+  // de novo é barato (upsert) e resolve esse desalinhamento sem o usuário
+  // precisar apertar em Desativar/Ativar de novo.
+  async confirmarNoServidor(subscription) {
+    try {
+      await api("/push/inscrever", {
+        method: "POST",
+        body: JSON.stringify(subscription.toJSON()),
+      });
+      return true;
+    } catch (e) {
+      return false;
+    }
+  },
+
   // Pede permissão (se ainda não decidida), registra o service worker
   // e envia a inscrição pro backend. Lança erro com mensagem amigável
   // se algo no caminho não der certo.
