@@ -260,6 +260,8 @@ const atualizar = async (id, dados) => {
 
         foto: dados.foto,
 
+        notificarWhatsapp: dados.notificarWhatsapp,
+
     };
 
     // Só mexe no locador se ele veio no payload -- telas como

@@ -108,6 +108,8 @@ const criarSessao = async (usuario, metodo = 'senha', app = false) => {
     usuario: {
       ...payload,
       foto: usuario.foto || null,
+      telefone: usuario.telefone || null,
+      notificarWhatsapp: usuario.notificarWhatsapp || false,
       permissoes: usuario.perfil?.permissoes || [],
     }
   };

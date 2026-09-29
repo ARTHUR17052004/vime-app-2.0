@@ -20,6 +20,7 @@ import { useNotificacoes } from "../../hooks/useNotificacoes";
 import { NotificacaoService } from "../../services/notificacao.service";
 import AtivarNotificacoesPush from "../components/notificacoes/AtivarNotificacoesPush";
 import SomNotificacaoToggle from "../components/notificacoes/SomNotificacaoToggle";
+import AtivarNotificacoesWhatsapp from "../components/notificacoes/AtivarNotificacoesWhatsapp";
 
 const origens = [
   { valor: "TODOS", label: "Todos" },
@@ -216,6 +217,7 @@ export default function NotificacoesPage() {
       <FadeIn delay={0.05}>
         <div className="space-y-4">
           <AtivarNotificacoesPush />
+          <AtivarNotificacoesWhatsapp />
           <div className="md:hidden">
             <SomNotificacaoToggle />
           </div>

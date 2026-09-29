@@ -247,10 +247,58 @@ async function notificarPagamentoConfirmado(receita, inquilino) {
 
 }
 
+/* ==========================================
+   AVISO DE SISTEMA POR WHATSAPP (equipe, não inquilino)
+   Usado por notificacaoService.criar() pra quem ligou "Receber avisos
+   no WhatsApp" no perfil -- mesma notificação do sino, também lá.
+========================================== */
+
+// Sem Contato/Conversa (isso aqui é a equipe, não um inquilino) -- só
+// tenta mandar e nunca deixa a notificação em si falhar por causa disso.
+async function notificarSistemaWhatsapp(usuario, titulo, mensagem) {
+
+  if (!usuario?.telefone) {
+    return { success: false, mensagem: "Usuário sem telefone cadastrado." };
+  }
+
+  const texto = `🔔 *VIME* — ${titulo}\n\n${mensagem}`;
+
+  try {
+
+    try {
+
+      // Modelo genérico ("aviso_sistema", 2 parâmetros: título e
+      // mensagem) -- precisa existir aprovado no WhatsApp Manager da
+      // Meta. Enquanto não existir/aprovar, cai na mensagem livre
+      // abaixo (só funciona se o usuário já escreveu pro número da
+      // VIME nas últimas 24h).
+      await metaWhatsappService.enviarTemplate(usuario.telefone, "aviso_sistema", [titulo, mensagem]);
+
+    } catch (erroTemplate) {
+
+      if (!erroEhDeModelo(erroTemplate.message)) throw erroTemplate;
+
+      await metaWhatsappService.enviarMensagem(usuario.telefone, texto);
+
+    }
+
+    return { success: true };
+
+  } catch (error) {
+
+    console.error(`[WhatsApp] Falha ao notificar ${usuario.nome} por WhatsApp:`, error.message);
+
+    return { success: false, mensagem: error.message };
+
+  }
+
+}
+
 module.exports = {
   notificarNovaCobranca,
   notificarLembreteVencimento,
   notificarCobrancaVencida,
   notificarPagamentoConfirmado,
+  notificarSistemaWhatsapp,
   obterOuCriarConversa,
 };

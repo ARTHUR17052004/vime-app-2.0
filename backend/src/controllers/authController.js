@@ -66,9 +66,9 @@ const me = async (req, res) => {
 const atualizarMe = async (req, res) => {
   try {
 
-    const { nome, email, foto } = req.body;
+    const { nome, email, foto, telefone, notificarWhatsapp } = req.body;
 
-    const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email, foto });
+    const usuario = await usuarioService.atualizar(req.usuario.id, { nome, email, foto, telefone, notificarWhatsapp });
 
     // authService.login() devolve o perfil já achatado em string e as
     // permissões resolvidas (o que o front espera em usuario.perfil /

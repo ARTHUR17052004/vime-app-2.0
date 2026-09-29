@@ -4,6 +4,7 @@ const pushService = require("./pushService");
 const notificacaoConfigService = require("./notificacaoConfigService");
 const { tipoDe } = require("../utils/tiposNotificacao");
 const { doLink } = require("../utils/locadorDeRegistro");
+const { notificarSistemaWhatsapp } = require("./whatsappAutomacaoService");
 
 // Quem enxerga o quê:
 //  - usuário que vê o sistema inteiro (sem locador): tudo, como sempre;
@@ -81,6 +82,29 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
       ? pushService.enviarPara(usuarioId, payloadPush)
       : pushService.enviarParaTodos(payloadPush, locadorId || null)
   ).catch((erro) => console.error("[push] Falha ao notificar:", erro.message));
+
+  // WhatsApp: mesmo aviso, pra quem ligou "Receber avisos no WhatsApp" no
+  // perfil dele. Best-effort (ver notificarSistemaWhatsapp) -- nunca deve
+  // travar nem derrubar a criação da notificação em si.
+  (async () => {
+
+    const destinatarios = await prisma.usuario.findMany({
+      where: {
+        notificarWhatsapp: true,
+        telefone: { not: null },
+        ...(usuarioId
+          ? { id: usuarioId }
+          : locadorId
+            ? { OR: [{ locadorId: null }, { locadorId }] }
+            : { locadorId: null }),
+      },
+    });
+
+    for (const destinatario of destinatarios) {
+      await notificarSistemaWhatsapp(destinatario, titulo, mensagem);
+    }
+
+  })().catch((erro) => console.error("[whatsapp] Falha ao notificar:", erro.message));
 
   return notificacao;
 };

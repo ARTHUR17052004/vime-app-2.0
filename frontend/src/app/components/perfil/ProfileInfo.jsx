@@ -10,7 +10,7 @@ import { Sessao } from "../../../utils/sessao";
 export default function ProfileInfo() {
   const { usuario, setUsuario } = useAuth();
 
-  const [form, setForm] = useState({ nome: "", email: "" });
+  const [form, setForm] = useState({ nome: "", email: "", telefone: "" });
   const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
@@ -20,6 +20,7 @@ export default function ProfileInfo() {
     setForm({
       nome: usuario.nome || "",
       email: usuario.email || "",
+      telefone: usuario.telefone || "",
     });
   }, [usuario]);
 
@@ -93,6 +94,14 @@ export default function ProfileInfo() {
             onChange={(v) => setForm((prev) => ({ ...prev, email: v }))}
           />
 
+          <CampoEditavel
+            label="Telefone (WhatsApp)"
+            type="tel"
+            value={form.telefone}
+            onChange={(v) => setForm((prev) => ({ ...prev, telefone: v }))}
+            obrigatorio={false}
+          />
+
           <InfoItem
             label="Perfil"
             value={usuario?.perfil || "-"}
@@ -141,6 +150,7 @@ function CampoEditavel({
   value,
   onChange,
   type = "text",
+  obrigatorio = true,
 }) {
   return (
     <div>
@@ -160,7 +170,7 @@ function CampoEditavel({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        required
+        required={obrigatorio}
         className="
           mt-2
           w-full

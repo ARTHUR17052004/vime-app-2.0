@@ -127,6 +127,12 @@ model Usuario {
 
   ativo Boolean @default(true)
 
+  // Manda a mesma notificação (sino/push) também por WhatsApp, pro
+  // número em `telefone`. Best-effort: a Meta só entrega mensagem livre
+  // dentro de 24h depois do usuário escrever pro número da VIME -- ver
+  // notificarSistemaWhatsapp() em whatsappAutomacaoService.js.
+  notificarWhatsapp Boolean @default(false)
+
   foto String?
 
   resetSenhaToken    String?   @unique

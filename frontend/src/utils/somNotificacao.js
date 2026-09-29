@@ -1,15 +1,16 @@
-// Som do próprio VIME quando chega notificação com o app/site aberto
-// (public/sounds/notificacao.wav -- pra trocar por outro som, é só
-// substituir esse arquivo mantendo o nome). Com o app fechado quem
-// toca é o som do sistema do celular, que o navegador não deixa
-// trocar por código (ver sw.js). Vale pra qualquer tela, celular ou
-// desktop -- notificação é notificação.
+// Som do próprio VIME quando chega notificação com o app/site aberto.
+// Gerado por código (Web Audio API), não é um arquivo de áudio -- assim
+// fica garantido sempre no volume máximo, sem depender da mixagem de um
+// .wav específico. Pra ajustar o som, é só mexer nas frequências/volume/
+// duração em tocarBeep() abaixo. Com o app fechado quem toca é o som do
+// sistema do celular, que o navegador não deixa trocar por código (ver
+// sw.js). Vale pra qualquer tela, celular ou desktop -- notificação é
+// notificação.
 
-const ARQUIVO = "/sounds/notificacao.wav";
 const CHAVE_PREFERENCIA = "vime-som-notificacao";
 const INTERVALO_MINIMO_MS = 2000;
 
-let audio = null;
+let contexto = null;
 let ultimoToque = 0;
 
 export function somAtivado() {
@@ -26,18 +27,42 @@ export function definirSomAtivado(ativado) {
   } catch (e) {}
 }
 
-// Navegador só deixa tocar áudio depois que o usuário interagiu com a
-// página (clique/toque/tecla). No primeiro gesto, "destrava" o áudio pra
-// que a notificação toque no ato em que chegar, sem depender de o usuário
-// ter apertado algo logo antes.
+function obterContexto() {
+  if (!contexto) {
+    const AudioContextClasse = window.AudioContext || window.webkitAudioContext;
+    contexto = new AudioContextClasse();
+  }
+  return contexto;
+}
+
+// Um "bip" isolado: ataque bem rápido (sobe na hora) e decaimento suave,
+// no volume que for passado -- é isso que faz soar forte e nítido, em vez
+// de abafado.
+function tocarBeep(ctx, inicio, frequencia, duracao, volume) {
+
+  const osc = ctx.createOscillator();
+  const ganho = ctx.createGain();
+
+  osc.type = "triangle";
+  osc.frequency.setValueAtTime(frequencia, inicio);
+
+  ganho.gain.setValueAtTime(0, inicio);
+  ganho.gain.linearRampToValueAtTime(volume, inicio + 0.012);
+  ganho.gain.exponentialRampToValueAtTime(0.001, inicio + duracao);
+
+  osc.connect(ganho).connect(ctx.destination);
+  osc.start(inicio);
+  osc.stop(inicio + duracao + 0.05);
+
+}
+
+// Navegador só deixa o Web Audio tocar de verdade depois de um gesto do
+// usuário (clique/toque/tecla) -- o contexto nasce "suspenso". Destrava
+// no primeiro gesto pra que a notificação já toque na hora certa depois.
 function destravarAudio() {
   try {
-    if (!audio) audio = new Audio(ARQUIVO);
-    audio.muted = true;
-    const p = audio.play();
-    const restaurar = () => { audio.pause(); audio.currentTime = 0; audio.muted = false; };
-    if (p && p.then) p.then(restaurar).catch(() => { audio.muted = false; });
-    else restaurar();
+    const ctx = obterContexto();
+    if (ctx.state === "suspended") ctx.resume();
   } catch (e) {}
 }
 
@@ -54,8 +79,8 @@ if (typeof window !== "undefined") {
 }
 
 // Chegando a mesma notificação por dois caminhos (socket e push) toca
-// uma vez só. Navegador que bloqueia autoplay (ainda sem nenhum toque
-// do usuário na página) só ignora em silêncio.
+// uma vez só. Navegador que ainda bloqueia áudio (nenhum gesto do
+// usuário na página ainda) só ignora em silêncio.
 export function tocarSomNotificacao() {
 
   if (typeof window === "undefined" || !somAtivado()) return;
@@ -65,9 +90,16 @@ export function tocarSomNotificacao() {
   ultimoToque = agora;
 
   try {
-    if (!audio) audio = new Audio(ARQUIVO);
-    audio.currentTime = 0;
-    audio.play().catch(() => {});
+
+    const ctx = obterContexto();
+    if (ctx.state === "suspended") ctx.resume();
+
+    const t0 = ctx.currentTime;
+
+    // "Ding-ding!" ascendente, volume quase no talo (1 = máximo).
+    tocarBeep(ctx, t0, 1046.5, 0.18, 0.9);        // C6
+    tocarBeep(ctx, t0 + 0.16, 1568.0, 0.28, 0.95); // G6
+
   } catch (e) {}
 
 }
