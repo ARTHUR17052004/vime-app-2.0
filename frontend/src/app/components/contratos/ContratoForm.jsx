@@ -283,6 +283,32 @@ export default function ContratoForm({
 
     }
 
+    // Escolher o inquilino direto (sem ter escolhido locador/residência/
+    // kitnet antes) já preenche os três sozinho, a partir da kitnet dele --
+    // é o caminho mais rápido pra quem já sabe quem é o inquilino (ex.:
+    // "Adicionar Contrato" no Arquivo).
+    if (name === "inquilinoId") {
+
+      const inquilino = inquilinos.find((i) => i.id === value);
+
+      setFormData((prev) => ({
+
+        ...prev,
+
+        inquilinoId: value,
+
+        ...(inquilino?.kitnetId && {
+          kitnetId: inquilino.kitnetId,
+          unidadeId: inquilino.kitnet?.unidadeId || prev.unidadeId,
+          locadorId: inquilino.kitnet?.unidade?.locadorId || prev.locadorId,
+        }),
+
+      }));
+
+      return;
+
+    }
+
     if (name === "dataInicio") {
 
       setFormData((prev) => {
