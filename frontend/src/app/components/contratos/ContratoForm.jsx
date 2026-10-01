@@ -3,6 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useMemo, useState } from "react";
+import { Paperclip, Download, Trash2 } from "lucide-react";
 
 import Button from "../ui/Button";
 
@@ -40,6 +41,14 @@ export default function ContratoForm({
   onSave,
   onCancel,
   contrato,
+  // "Adicionar Contrato" (Arquivo de Contratos): contrato que já existia
+  // em papel, sem assinatura digital -- mesmos campos, só adiciona o
+  // anexo do arquivo real.
+  modoManual = false,
+  arquivoSelecionado,
+  onArquivoSelecionado,
+  onBaixarArquivoAtual,
+  onRemoverArquivoAtual,
 }) {
 
   const [obrigatorios, setObrigatorios] =
@@ -336,6 +345,8 @@ export default function ContratoForm({
       await onSave({
 
         ...formData,
+
+        ...(modoManual && !contrato ? { origem: "MANUAL" } : {}),
 
         valorAluguel: Number(formData.valorAluguel),
 
@@ -762,6 +773,60 @@ export default function ContratoForm({
     resize-none
   `}
 />
+
+{modoManual && (
+  <div className="rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-5 space-y-3">
+
+    <p className="text-sm font-semibold text-[var(--text)] flex items-center gap-2">
+      <Paperclip size={16} />
+      Arquivo do contrato (PDF ou foto)
+    </p>
+
+    {contrato?.arquivoNomeOriginal && !arquivoSelecionado && (
+      <div className="flex items-center justify-between gap-3 rounded-lg bg-[var(--surface)] px-4 py-3">
+        <span className="text-sm text-[var(--text-subtle)] truncate">
+          {contrato.arquivoNomeOriginal}
+        </span>
+        <div className="flex items-center gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={onBaixarArquivoAtual}
+            className="text-emerald-400 hover:text-emerald-300 transition"
+            aria-label="Baixar arquivo atual"
+          >
+            <Download size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={onRemoverArquivoAtual}
+            className="text-red-400 hover:text-red-300 transition"
+            aria-label="Remover arquivo atual"
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+    )}
+
+    <input
+      type="file"
+      accept=".pdf,image/*"
+      onChange={(e) => onArquivoSelecionado?.(e.target.files?.[0] || null)}
+      className="text-sm text-[var(--text-subtle)] file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-600"
+    />
+
+    {arquivoSelecionado && (
+      <p className="text-xs text-emerald-400">Selecionado: {arquivoSelecionado.name}</p>
+    )}
+
+    <p className="text-xs text-[var(--text-faint)]">
+      {contrato
+        ? "Escolher um novo arquivo substitui o atual ao salvar."
+        : "Opcional -- dá pra anexar depois, editando o contrato."}
+    </p>
+
+  </div>
+)}
 
 {erro && (
   <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">

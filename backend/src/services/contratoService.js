@@ -329,7 +329,9 @@ const criar = async (dados, usuario) => {
 
     await WhatsappService.enviarMensagem({
       numero: inquilino.telefone,
-      mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso. Em breve você receberá o link para assinatura.`
+      mensagem: contrato.origem === 'MANUAL'
+        ? `Olá ${inquilino.nome}, seu contrato foi registrado com sucesso no sistema.`
+        : `Olá ${inquilino.nome}, seu contrato foi criado com sucesso. Em breve você receberá o link para assinatura.`
     });
 
   } catch (integracaoError) {
@@ -509,6 +511,15 @@ const remover = async (id) => {
     where: { id }
   });
 
+};
+
+// Arquivo do "Adicionar Contrato" (ver controller) -- dados = null apaga
+// o anexo (usado por removerArquivo).
+const anexarArquivo = (id, { arquivoDados, arquivoTipo, arquivoNomeOriginal }) => {
+  return prisma.contrato.update({
+    where: { id },
+    data: { arquivoDados, arquivoTipo, arquivoNomeOriginal },
+  });
 };
 
 const encerrar = async (id) => {
@@ -800,6 +811,7 @@ module.exports = {
   remover,
   encerrar,
   renovar,
+  anexarArquivo,
   notificarSeVencimentoProximo,
   enviarParaClicksign
 };

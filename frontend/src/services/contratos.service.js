@@ -70,4 +70,51 @@ export const ContratoService = {
       method: "PATCH",
     });
   },
+
+  // Arquivo do "Adicionar Contrato" (PDF/foto do contrato real, diferente
+  // do PDF modelo gerado pelo VIME). `arquivo` é um File do input.
+  enviarArquivo(id, arquivo) {
+    return new Promise((resolve, reject) => {
+      const leitor = new FileReader();
+      leitor.onload = () => {
+        const [, base64] = String(leitor.result).split(",");
+        api(`/contratos/${id}/arquivo`, {
+          method: "POST",
+          body: JSON.stringify({
+            dados: base64,
+            tipo: arquivo.type,
+            nomeOriginal: arquivo.name,
+          }),
+        }).then(resolve).catch(reject);
+      };
+      leitor.onerror = () => reject(new Error("Não foi possível ler o arquivo."));
+      leitor.readAsDataURL(arquivo);
+    });
+  },
+
+  async baixarArquivo(id) {
+    const token = typeof window !== "undefined" ? Sessao.token() : null;
+
+    const response = await fetch(`${API_URL}/contratos/${id}/arquivo`, {
+      credentials: "include",
+      headers: { ...(token && { Authorization: `Bearer ${token}` }) },
+    });
+
+    if (!response.ok) {
+      let mensagem = "Erro ao baixar o arquivo do contrato.";
+      try {
+        const data = await response.json();
+        mensagem = data.message || mensagem;
+      } catch {}
+      throw new Error(mensagem);
+    }
+
+    return response.blob();
+  },
+
+  removerArquivo(id) {
+    return api(`/contratos/${id}/arquivo`, {
+      method: "DELETE",
+    });
+  },
 };

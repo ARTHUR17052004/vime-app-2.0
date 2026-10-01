@@ -168,6 +168,65 @@ const renovar = async (req, res) => {
 
 };
 
+// Arquivo do "Adicionar Contrato" (Arquivo de Contratos) -- o PDF/foto
+// real do contrato em papel, diferente do /pdf acima (que é o template
+// gerado pelo VIME). Guardado como base64 direto no banco, mesmo padrão
+// de Usuario.foto/Inquilino.foto.
+const uploadArquivo = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
+
+  const { dados, tipo, nomeOriginal } = req.body;
+
+  if (!dados) {
+    return res.status(400).json({ success: false, message: 'Nenhum arquivo enviado.' });
+  }
+
+  const contrato = await contratoService.anexarArquivo(req.params.id, {
+    arquivoDados: dados,
+    arquivoTipo: tipo || 'application/octet-stream',
+    arquivoNomeOriginal: nomeOriginal || 'contrato',
+  });
+
+  return res.json({ success: true, data: contrato });
+
+};
+
+const baixarArquivo = async (req, res) => {
+
+  const contrato = await contratoService.buscarPorId(req.params.id, req.usuario);
+
+  if (!contrato || !contrato.arquivoDados) {
+    return res.status(404).json({ success: false, message: 'Este contrato não tem arquivo anexado.' });
+  }
+
+  const buffer = Buffer.from(contrato.arquivoDados, 'base64');
+
+  res.setHeader('Content-Type', contrato.arquivoTipo || 'application/octet-stream');
+  res.setHeader('Content-Disposition', `attachment; filename="${contrato.arquivoNomeOriginal || 'contrato'}"`);
+
+  return res.send(buffer);
+
+};
+
+const removerArquivo = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
+  }
+
+  const contrato = await contratoService.anexarArquivo(req.params.id, {
+    arquivoDados: null,
+    arquivoTipo: null,
+    arquivoNomeOriginal: null,
+  });
+
+  return res.json({ success: true, data: contrato });
+
+};
+
 const enviarClicksign = async (req, res) => {
 
   if (await foraDoEscopo(req)) {
@@ -195,5 +254,8 @@ module.exports = {
   remover,
   encerrar,
   renovar,
+  uploadArquivo,
+  baixarArquivo,
+  removerArquivo,
   enviarClicksign
 };

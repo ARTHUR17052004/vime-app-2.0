@@ -227,6 +227,15 @@ model Contrato {
   clicksignEnvelopeId  String?
   clicksignSigningUrl  String?
   clicksignEnviadoEm   DateTime?
+  // "DIGITAL" (padrão, assinado pela Clicksign) ou "MANUAL" (contrato que já
+  // existia em papel/PDF e só foi cadastrado aqui pra ficar organizado --
+  // ver "Arquivo de Contratos"). arquivoDados é o PDF/foto anexado, como
+  // data URL base64 (mesmo padrão de Usuario.foto/Inquilino.foto -- sem
+  // precisar de disco/volume próprio na VPS).
+  origem              String  @default("DIGITAL")
+  arquivoDados         String?
+  arquivoTipo          String?
+  arquivoNomeOriginal String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
   inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
