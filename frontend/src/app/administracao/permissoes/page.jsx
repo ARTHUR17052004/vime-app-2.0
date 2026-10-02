@@ -42,7 +42,7 @@ const CATALOGO = [
     // "visualizar" é o botão-mestre: sem ele, o perfil nem abre a tela
     // inicial. Os outros controlam cada pedaço dela, independente dos
     // outros módulos (ex.: pode ver a tela mas não o gráfico financeiro).
-    acoes: ["visualizar", "indicadores", "financeiro", "ocupacao", "atividades", "alertas", "painelSistema"],
+    acoes: ["visualizar", "indicadores", "financeiro", "ocupacao", "atividades", "alertas", "acoesRapidas", "statusSistema"],
   },
   {
     modulo: "Locadores",
@@ -157,7 +157,8 @@ const ROTULOS_ACAO = {
   ocupacao: "Ocupação (gráfico de ocupadas x vazias)",
   atividades: "Atividades / solicitações recentes",
   alertas: "Alertas",
-  painelSistema: "Ações rápidas e status do sistema",
+  acoesRapidas: "Ações rápidas",
+  statusSistema: "Status do sistema",
 };
 
 export default function PermissoesPage() {

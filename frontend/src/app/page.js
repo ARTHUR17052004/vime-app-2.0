@@ -67,7 +67,8 @@ function DashboardConteudo() {
   const podeOcupacao = usePermissao("dashboard.ocupacao");
   const podeAtividades = usePermissao("dashboard.atividades");
   const podeAlertas = usePermissao("dashboard.alertas");
-  const podePainelSistema = usePermissao("dashboard.painelSistema");
+  const podeAcoesRapidas = usePermissao("dashboard.acoesRapidas");
+  const podeStatusSistema = usePermissao("dashboard.statusSistema");
 
   if (!podeDashboard) {
     return (
@@ -95,7 +96,6 @@ function DashboardConteudo() {
           podeFinanceiro={podeFinanceiro}
           podeOcupacao={podeOcupacao}
           podeAlertas={podeAlertas}
-          podePainelSistema={podePainelSistema}
         />
       </MainLayout>
     );
@@ -263,7 +263,7 @@ function DashboardConteudo() {
               {/* AÇÕES */}
               {/* ========================= */}
 
-              {podePainelSistema && (
+              {(podeAcoesRapidas || podeStatusSistema) && (
                 <FadeIn delay={0.4}>
                   <PageSection spacing="xxl">
                     <PageGrid
@@ -271,13 +271,17 @@ function DashboardConteudo() {
                       gap="relaxed"
                       className="grid-cols-12"
                     >
-                      <div className="col-span-12 xl:col-span-5">
-                        <QuickActions />
-                      </div>
+                      {podeAcoesRapidas && (
+                        <div className={podeStatusSistema ? "col-span-12 xl:col-span-5" : "col-span-12"}>
+                          <QuickActions />
+                        </div>
+                      )}
 
-                      <div className="col-span-12 xl:col-span-7">
-                        <SystemStatus />
-                      </div>
+                      {podeStatusSistema && (
+                        <div className={podeAcoesRapidas ? "col-span-12 xl:col-span-7" : "col-span-12"}>
+                          <SystemStatus />
+                        </div>
+                      )}
                     </PageGrid>
                   </PageSection>
                 </FadeIn>
