@@ -30,6 +30,7 @@ const menuConfig = [
         label: "Dashboard",
         href: "/",
         icon: LayoutDashboard,
+        permissao: "dashboard.visualizar",
       },
     ],
   },
