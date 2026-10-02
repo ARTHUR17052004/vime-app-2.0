@@ -105,14 +105,45 @@ const criarSessao = async (usuario, metodo = 'senha', app = false) => {
     // permissões só vão na resposta HTTP pro front guardar, nunca
     // dentro do token/cookie (o backend nunca confia nisso pra
     // autorizar nada -- permissaoMiddleware sempre confere no banco).
-    usuario: {
-      ...payload,
-      foto: usuario.foto || null,
-      telefone: usuario.telefone || null,
-      notificarWhatsapp: usuario.notificarWhatsapp || false,
-      permissoes: usuario.perfil?.permissoes || [],
-    }
+    usuario: montarUsuarioResposta(usuario),
   };
+
+};
+
+// Mesmo formato de `usuario` que o login devolve -- usado também por
+// `criarSessao` acima e por `sessaoAtual` abaixo (refresh sem logar de novo).
+function montarUsuarioResposta(usuario) {
+
+  return {
+    id: usuario.id,
+    nome: usuario.nome,
+    email: usuario.email,
+    perfil: usuario.perfil?.nome,
+    ativo: usuario.ativo,
+    locadorId: usuario.locadorId || null,
+    foto: usuario.foto || null,
+    telefone: usuario.telefone || null,
+    notificarWhatsapp: usuario.notificarWhatsapp || false,
+    permissoes: usuario.perfil?.permissoes || [],
+  };
+
+}
+
+// GET /auth/me: o token já garante quem é o usuário, mas perfil/permissões
+// vêm sempre frescos do banco aqui -- se o admin mudar as permissões de um
+// perfil, todo mundo logado nesse perfil pega a mudança no próximo
+// carregamento da página, sem precisar sair e entrar de novo (ver
+// AuthContext.jsx, que chama isso ao abrir o app).
+const sessaoAtual = async (usuarioId) => {
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: usuarioId },
+    include: { perfil: true },
+  });
+
+  if (!usuario) throw new Error('Usuário não encontrado.');
+
+  return montarUsuarioResposta(usuario);
 
 };
 
@@ -190,6 +221,7 @@ const redefinirSenha = async (token, novaSenha) => {
 module.exports = {
   login,
   criarSessao,
+  sessaoAtual,
   solicitarRedefinicaoSenha,
   redefinirSenha,
 };

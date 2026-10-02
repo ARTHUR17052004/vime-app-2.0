@@ -52,10 +52,23 @@ const logout = async (req, res) => {
 
 const me = async (req, res) => {
 
-  return res.status(200).json({
-    success: true,
-    data: req.usuario
-  });
+  try {
+
+    const usuario = await authService.sessaoAtual(req.usuario.id);
+
+    return res.status(200).json({
+      success: true,
+      data: usuario
+    });
+
+  } catch (error) {
+
+    return res.status(404).json({
+      success: false,
+      message: error.message
+    });
+
+  }
 
 };
 

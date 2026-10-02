@@ -28,6 +28,21 @@ export function AuthProvider({ children }) {
       if (usuarioSalvo) {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         setUsuario(usuarioSalvo);
+
+        // Perfil/permissões ficam "fotografados" no login e guardados no
+        // aparelho -- se o admin mudar as permissões depois, quem já
+        // estava logado só veria a mudança saindo e entrando de novo.
+        // Busca a versão fresca em segundo plano (sem travar a tela) e
+        // atualiza sozinho -- autoriza igual no app e no navegador, sem
+        // precisar relogar. Token expirado já cai no 401 de api.js.
+        api("/auth/me")
+          .then((resposta) => {
+            const fresco = resposta.data || resposta;
+            const atualizado = { ...usuarioSalvo, ...fresco };
+            setUsuario(atualizado);
+            Sessao.atualizarUsuario(atualizado);
+          })
+          .catch(() => {});
       }
     } catch (error) {
       console.error("Erro ao recuperar usuário:", error);
