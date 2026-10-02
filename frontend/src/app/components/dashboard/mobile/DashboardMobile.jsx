@@ -104,7 +104,18 @@ function percentualRecebido(financeiro) {
 
 }
 
-export default function DashboardMobile({ dados, primeiroNome }) {
+export default function DashboardMobile({
+  dados,
+  primeiroNome,
+  // Mesmas permissões do Dashboard desktop (Administração > Permissões) --
+  // app e site têm que mostrar exatamente os mesmos dados, só o layout
+  // muda. Atalhos de navegação (Ações rápidas/Acesso rápido) não entram
+  // aqui: a página de destino já tem a permissão dela própria.
+  podeIndicadores = true,
+  podeFinanceiro = true,
+  podeOcupacao = true,
+  podeAlertas = true,
+}) {
 
   const router = useRouter();
   const clima = useClima();
@@ -123,11 +134,11 @@ export default function DashboardMobile({ dados, primeiroNome }) {
   ];
 
   const indicadores = [
-    { titulo: "Residências", valor: dados?.unidades ?? 0, sub: "Cadastradas", icone: Building2, cor: "text-emerald-400 bg-emerald-500/15" },
-    { titulo: "Inquilinos", valor: dados?.inquilinos ?? 0, sub: "Ativos", icone: Users, cor: "text-sky-400 bg-sky-500/15" },
-    { titulo: "Locadores", valor: dados?.locadores ?? 0, sub: "Cadastrados", icone: User, cor: "text-violet-300 bg-violet-500/15" },
-    { titulo: "Recebido", valor: recebido === null ? "—" : `${recebido}%`, sub: "Do lançado", icone: DollarSign, cor: "text-emerald-400 bg-emerald-500/15" },
-  ];
+    podeIndicadores && { titulo: "Residências", valor: dados?.unidades ?? 0, sub: "Cadastradas", icone: Building2, cor: "text-emerald-400 bg-emerald-500/15" },
+    podeIndicadores && { titulo: "Inquilinos", valor: dados?.inquilinos ?? 0, sub: "Ativos", icone: Users, cor: "text-sky-400 bg-sky-500/15" },
+    podeIndicadores && { titulo: "Locadores", valor: dados?.locadores ?? 0, sub: "Cadastrados", icone: User, cor: "text-violet-300 bg-violet-500/15" },
+    podeFinanceiro && { titulo: "Recebido", valor: recebido === null ? "—" : `${recebido}%`, sub: "Do lançado", icone: DollarSign, cor: "text-emerald-400 bg-emerald-500/15" },
+  ].filter(Boolean);
 
   const atalhos = [
     { titulo: "Unidades", icone: Building2, href: "/unidades" },
@@ -237,6 +248,7 @@ export default function DashboardMobile({ dados, primeiroNome }) {
 
       {/* INDICADORES */}
 
+      {indicadores.length > 0 && (
       <section className="grid grid-cols-4 gap-2">
         {indicadores.map(({ titulo, valor, sub, icone: Icone, cor }) => (
           <div key={titulo} className={`${cartao} p-2.5`}>
@@ -251,9 +263,11 @@ export default function DashboardMobile({ dados, primeiroNome }) {
           </div>
         ))}
       </section>
+      )}
 
       {/* OCUPAÇÃO */}
 
+      {podeOcupacao && (
       <section className={`${cartao} p-4`}>
 
         <div className="flex items-center gap-2">
@@ -299,6 +313,7 @@ export default function DashboardMobile({ dados, primeiroNome }) {
         </div>
 
       </section>
+      )}
 
       {/* NOTIFICAÇÕES RECENTES */}
 
@@ -366,7 +381,7 @@ export default function DashboardMobile({ dados, primeiroNome }) {
 
       {/* AVISOS (só aparece se houver) */}
 
-      {alertas.length > 0 && (
+      {podeAlertas && alertas.length > 0 && (
         <section className={`${cartao} p-4`}>
 
           <div className="flex items-center gap-2">

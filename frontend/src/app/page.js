@@ -34,6 +34,8 @@ import PageGrid from "./components/ui/PageGrid";
 import { useDashboard } from "../hooks/useDashboard";
 import { useAuth } from "../context/AuthContext";
 import { useIsMobile } from "../hooks/useIsMobile";
+import { usePermissao } from "../hooks/usePermissao";
+import SemPermissao from "./components/ui/SemPermissao";
 
 export default function Home() {
   return (
@@ -55,6 +57,26 @@ function DashboardConteudo() {
   const isMobile = useIsMobile();
   const primeiroNome = usuario?.nome?.split(" ")[0] || "Visitante";
 
+  // Cada pedaço do Dashboard tem a sua própria permissão (Administração >
+  // Permissões > Dashboard) -- um perfil pode ver a tela e não ver, por
+  // exemplo, o gráfico financeiro. Vale tanto aqui quanto no mobile
+  // (DashboardMobile usa os mesmos "dados", vindos da mesma API).
+  const podeDashboard = usePermissao("dashboard.visualizar");
+  const podeIndicadores = usePermissao("dashboard.indicadores");
+  const podeFinanceiro = usePermissao("dashboard.financeiro");
+  const podeOcupacao = usePermissao("dashboard.ocupacao");
+  const podeAtividades = usePermissao("dashboard.atividades");
+  const podeAlertas = usePermissao("dashboard.alertas");
+  const podePainelSistema = usePermissao("dashboard.painelSistema");
+
+  if (!podeDashboard) {
+    return (
+      <MainLayout>
+        <SemPermissao />
+      </MainLayout>
+    );
+  }
+
   if (loading) {
     return (
       <MainLayout>
@@ -66,7 +88,15 @@ function DashboardConteudo() {
   if (isMobile) {
     return (
       <MainLayout>
-        <DashboardMobile dados={dados} primeiroNome={primeiroNome} />
+        <DashboardMobile
+          dados={dados}
+          primeiroNome={primeiroNome}
+          podeIndicadores={podeIndicadores}
+          podeFinanceiro={podeFinanceiro}
+          podeOcupacao={podeOcupacao}
+          podeAlertas={podeAlertas}
+          podePainelSistema={podePainelSistema}
+        />
       </MainLayout>
     );
   }
@@ -107,125 +137,151 @@ function DashboardConteudo() {
               {/* CARDS SUPERIORES */}
               {/* ========================= */}
 
-              <FadeIn delay={0.1}>
-                <PageSection spacing="xl">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5">
-                    <DashboardStatsCard
-                      compact
-                      title="Residências"
-                      value={<AnimatedNumber value={dados?.unidades ?? 0} />}
-                      subtitle="Ativas"
-                      icon={Building2}
-                    />
+              {(podeIndicadores || podeOcupacao) && (
+                <FadeIn delay={0.1}>
+                  <PageSection spacing="xl">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 xl:gap-5">
 
-                    <DashboardStatsCard
-                      compact
-                      title="Kitnets"
-                      value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
-                      subtitle="Total"
-                      icon={House}
-                    />
+                      {podeIndicadores && (
+                        <>
+                          <DashboardStatsCard
+                            compact
+                            title="Residências"
+                            value={<AnimatedNumber value={dados?.unidades ?? 0} />}
+                            subtitle="Ativas"
+                            icon={Building2}
+                          />
 
-                    <DashboardStatsCard
-                      compact
-                      title="Inquilinos"
-                      value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
-                      subtitle="Ativos"
-                      icon={Users}
-                    />
+                          <DashboardStatsCard
+                            compact
+                            title="Kitnets"
+                            value={<AnimatedNumber value={dados?.kitnets ?? 0} />}
+                            subtitle="Total"
+                            icon={House}
+                          />
 
-                    <DashboardStatsCard
-                      compact
-                      title="Vazias"
-                      value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
-                      subtitle="Kitnets"
-                      icon={DoorOpen}
-                    />
+                          <DashboardStatsCard
+                            compact
+                            title="Inquilinos"
+                            value={<AnimatedNumber value={dados?.inquilinos ?? 0} />}
+                            subtitle="Ativos"
+                            icon={Users}
+                          />
+                        </>
+                      )}
 
-                    <DashboardStatsCard
-                      compact
-                      title="Solicitações"
-                      value={<AnimatedNumber value={dados?.solicitacoesPendentes ?? 0} />}
-                      subtitle="Pendentes"
-                      icon={ClipboardList}
-                    />
-                  </div>
-                </PageSection>
-              </FadeIn>
+                      {podeOcupacao && (
+                        <DashboardStatsCard
+                          compact
+                          title="Vazias"
+                          value={<AnimatedNumber value={dados?.ocupacao?.vazias ?? 0} />}
+                          subtitle="Kitnets"
+                          icon={DoorOpen}
+                        />
+                      )}
+
+                      {podeIndicadores && (
+                        <DashboardStatsCard
+                          compact
+                          title="Solicitações"
+                          value={<AnimatedNumber value={dados?.solicitacoesPendentes ?? 0} />}
+                          subtitle="Pendentes"
+                          icon={ClipboardList}
+                        />
+                      )}
+
+                    </div>
+                  </PageSection>
+                </FadeIn>
+              )}
 
               {/* ========================= */}
               {/* FINANCEIRO */}
               {/* ========================= */}
 
-              <FadeIn delay={0.2}>
-                <PageSection spacing="xxl">
-                  <PageGrid
-                    layout="8-4"
-                    gap="relaxed"
-                    className="grid-cols-12"
-                  >
-                    <div className="col-span-12 xl:col-span-8">
-                      <FinancialCard
-                        financeiro={dados?.financeiro}
-                      />
-                    </div>
+              {(podeFinanceiro || podeAtividades) && (
+                <FadeIn delay={0.2}>
+                  <PageSection spacing="xxl">
+                    <PageGrid
+                      layout="8-4"
+                      gap="relaxed"
+                      className="grid-cols-12"
+                    >
+                      {podeFinanceiro && (
+                        <div className="col-span-12 xl:col-span-8">
+                          <FinancialCard
+                            financeiro={dados?.financeiro}
+                          />
+                        </div>
+                      )}
 
-                    <div className="col-span-12 xl:col-span-4">
-                      <RecentActivities
-                        atividades={dados?.atividades}
-                      />
-                    </div>
-                  </PageGrid>
-                </PageSection>
-              </FadeIn>
+                      {podeAtividades && (
+                        <div className="col-span-12 xl:col-span-4">
+                          <RecentActivities
+                            atividades={dados?.atividades}
+                          />
+                        </div>
+                      )}
+                    </PageGrid>
+                  </PageSection>
+                </FadeIn>
+              )}
 
               {/* ========================= */}
               {/* OCUPAÇÃO */}
               {/* ========================= */}
 
-              <FadeIn delay={0.3}>
-                <PageSection spacing="xxl">
-                  <PageGrid
-                    layout="5-7"
-                    gap="relaxed"
-                    className="grid-cols-12"
-                  >
-                    <div className="col-span-12 xl:col-span-5">
-                      <OccupancyCard
-                        ocupacao={dados?.ocupacao}
-                      />
-                    </div>
+              {(podeOcupacao || podeAlertas) && (
+                <FadeIn delay={0.3}>
+                  <PageSection spacing="xxl">
+                    <PageGrid
+                      layout="5-7"
+                      gap="relaxed"
+                      className="grid-cols-12"
+                    >
+                      {podeOcupacao && (
+                        <div className="col-span-12 xl:col-span-5">
+                          <OccupancyCard
+                            ocupacao={dados?.ocupacao}
+                          />
+                        </div>
+                      )}
 
-                    <div className="col-span-12 xl:col-span-7">
-                      <AlertsPanel
-                        alertas={dados?.alertas}
-                      />
-                    </div>
-                  </PageGrid>
-                </PageSection>
-              </FadeIn>
+                      {podeAlertas && (
+                        <div className="col-span-12 xl:col-span-7">
+                          <AlertsPanel
+                            alertas={dados?.alertas}
+                          />
+                        </div>
+                      )}
+                    </PageGrid>
+                  </PageSection>
+                </FadeIn>
+              )}
 
               {/* ========================= */}
               {/* AÇÕES */}
               {/* ========================= */}
 
-              <FadeIn delay={0.4}>
-                <PageSection spacing="xxl">
-                  <PageGrid
-                    layout="5-7"
-                    gap="relaxed"
-                    className="grid-cols-12"
-                  >
-                    <div className="col-span-12 xl:col-span-5">
-                      <QuickActions />
-                    </div>
+              {podePainelSistema && (
+                <FadeIn delay={0.4}>
+                  <PageSection spacing="xxl">
+                    <PageGrid
+                      layout="5-7"
+                      gap="relaxed"
+                      className="grid-cols-12"
+                    >
+                      <div className="col-span-12 xl:col-span-5">
+                        <QuickActions />
+                      </div>
 
-                    <div className="col-span-12 xl:col-span-7">
-                      <SystemStatus />
-                    </div>
-                  </PageGrid>
-                </PageSection>
-              </FadeIn>
+                      <div className="col-span-12 xl:col-span-7">
+                        <SystemStatus />
+                      </div>
+                    </PageGrid>
+                  </PageSection>
+                </FadeIn>
+              )}
             </motion.main>
           </PageContainer>
         </Page>

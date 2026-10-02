@@ -37,6 +37,14 @@ const CATALOGO = [
     sempreAdministrador: true,
   },
   {
+    modulo: "Dashboard",
+    chave: "dashboard",
+    // "visualizar" é o botão-mestre: sem ele, o perfil nem abre a tela
+    // inicial. Os outros controlam cada pedaço dela, independente dos
+    // outros módulos (ex.: pode ver a tela mas não o gráfico financeiro).
+    acoes: ["visualizar", "indicadores", "financeiro", "ocupacao", "atividades", "alertas", "painelSistema"],
+  },
+  {
     modulo: "Locadores",
     chave: "locadores",
     acoes: ["visualizar", "criar", "editar", "excluir"],
@@ -144,6 +152,12 @@ const ROTULOS_ACAO = {
   configurar: "Configurar",
   assistenteConfigurar: "Configurar assistente de IA",
   gerenciar: "Gerenciar",
+  indicadores: "Indicadores (Residências, Kitnets, Inquilinos, Vazias, Solicitações)",
+  financeiro: "Financeiro (receitas mensais, recebido/pendente/atrasado)",
+  ocupacao: "Ocupação (gráfico de ocupadas x vazias)",
+  atividades: "Atividades / solicitações recentes",
+  alertas: "Alertas",
+  painelSistema: "Ações rápidas e status do sistema",
 };
 
 export default function PermissoesPage() {
