@@ -441,7 +441,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-10">
 
           <Icon
-            size={20}
+            size={item.iconSize || 20}
             strokeWidth={2}
             className={`
               transition-colors

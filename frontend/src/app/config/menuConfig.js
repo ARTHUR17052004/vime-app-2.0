@@ -5,7 +5,7 @@ import {
   Users,
   UserSquare2,
   FileText,
-  FileStack,
+  Archive,
   ClipboardList,
   ShieldCheck,
   Wallet,
@@ -80,7 +80,8 @@ const menuConfig = [
       {
         label: "Arquivo de Contratos",
         href: "/contratos/arquivo",
-        icon: FileStack,
+        icon: Archive,
+        iconSize: 24,
         permissao: "contratos.visualizar",
       },
       {
