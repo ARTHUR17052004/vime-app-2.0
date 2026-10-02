@@ -83,7 +83,7 @@ const menuConfig = [
         href: "/contratos/arquivo",
         icon: Archive,
         iconSize: 24,
-        permissao: "contratos.visualizar",
+        permissao: "arquivoContratos.visualizar",
       },
       {
         label: "Solicitações",

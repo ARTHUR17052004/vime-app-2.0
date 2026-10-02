@@ -70,6 +70,14 @@ const CATALOGO = [
     acoes: ["visualizar", "criar", "editar", "excluir"],
   },
   {
+    // Contrato que já existia em papel e só foi cadastrado aqui pra ficar
+    // organizado (sem assinatura digital) -- separado de "Contratos" de
+    // propósito, pra dar pra liberar um sem liberar o outro.
+    modulo: "Arquivo de Contratos",
+    chave: "arquivoContratos",
+    acoes: ["visualizar", "criar", "editar", "excluir"],
+  },
+  {
     modulo: "Financeiro",
     chave: "financeiro",
     acoes: ["visualizar", "editar", "exportar"],

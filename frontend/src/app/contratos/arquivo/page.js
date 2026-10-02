@@ -31,8 +31,8 @@ import { usePermissao } from "../../../hooks/usePermissao";
 // Clicksign -- ver Contrato.origem = "MANUAL".
 export default function ContratosArquivoPage() {
 
-  const podeVisualizar = usePermissao("contratos.visualizar");
-  const podeCriar = usePermissao("contratos.criar");
+  const podeVisualizar = usePermissao("arquivoContratos.visualizar");
+  const podeCriar = usePermissao("arquivoContratos.criar");
 
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);

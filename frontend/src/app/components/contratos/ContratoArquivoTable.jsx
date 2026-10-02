@@ -13,8 +13,8 @@ export default function ContratoArquivoTable({
   onBaixarArquivo,
 }) {
 
-  const podeEditar = usePermissao("contratos.editar");
-  const podeExcluir = usePermissao("contratos.excluir");
+  const podeEditar = usePermissao("arquivoContratos.editar");
+  const podeExcluir = usePermissao("arquivoContratos.excluir");
 
   if (!contratos.length) {
 

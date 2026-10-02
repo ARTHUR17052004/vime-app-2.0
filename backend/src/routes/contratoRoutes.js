@@ -10,19 +10,19 @@ const { temPermissao } = permissaoMiddleware;
 
 router.use(authMiddleware);
 
-// Anexar o arquivo acontece tanto na hora de criar (quem tem só
-// "contratos.criar" já precisa anexar o arquivo ali mesmo, no fluxo de
-// "Adicionar Contrato") quanto depois, editando -- então aceita qualquer
-// uma das duas permissões, não só "editar".
-const podeAnexarArquivo = async (req, res, next) => {
+// Contrato (assinado pela Clicksign) e Arquivo de Contratos (cadastrado na
+// mão, já existia em papel) são o mesmo model/tabela por baixo -- pra dar
+// pra liberar um sem liberar o outro, toda rota compartilhada aceita
+// qualquer uma das duas permissões, nunca só "contratos.*".
+const podeContrato = (acao) => async (req, res, next) => {
 
   if (!req.usuario) {
     return res.status(401).json({ success: false, message: 'Usuário não autenticado.' });
   }
 
   const permitido =
-    (await temPermissao(req.usuario, 'contratos.criar')) ||
-    (await temPermissao(req.usuario, 'contratos.editar'));
+    (await temPermissao(req.usuario, `contratos.${acao}`)) ||
+    (await temPermissao(req.usuario, `arquivoContratos.${acao}`));
 
   if (!permitido) {
     return res.status(403).json({ success: false, message: 'Você não tem permissão para realizar esta ação.' });
@@ -32,27 +32,48 @@ const podeAnexarArquivo = async (req, res, next) => {
 
 };
 
-router.get('/', permissaoMiddleware('contratos.visualizar'), contratoController.listar);
+// Anexar o arquivo acontece tanto na hora de criar (quem tem só
+// "criar" já precisa anexar o arquivo ali mesmo, no fluxo de "Adicionar
+// Contrato") quanto depois, editando -- então aceita qualquer uma das
+// duas ações, não só "editar", além das duas permissões acima.
+const podeAnexarArquivo = async (req, res, next) => {
 
-router.get('/:id', permissaoMiddleware('contratos.visualizar'), contratoController.buscarPorId);
+  if (!req.usuario) {
+    return res.status(401).json({ success: false, message: 'Usuário não autenticado.' });
+  }
 
-router.get('/:id/pdf', permissaoMiddleware('contratos.visualizar'), contratoController.baixarPdf);
+  const chaves = ['contratos.criar', 'contratos.editar', 'arquivoContratos.criar', 'arquivoContratos.editar'];
+  const resultados = await Promise.all(chaves.map((chave) => temPermissao(req.usuario, chave)));
+
+  if (!resultados.some(Boolean)) {
+    return res.status(403).json({ success: false, message: 'Você não tem permissão para realizar esta ação.' });
+  }
+
+  return next();
+
+};
+
+router.get('/', podeContrato('visualizar'), contratoController.listar);
+
+router.get('/:id', podeContrato('visualizar'), contratoController.buscarPorId);
+
+router.get('/:id/pdf', podeContrato('visualizar'), contratoController.baixarPdf);
 
 // Arquivo do contrato "Adicionar Contrato" (upload/download/remoção do
 // PDF/scan real -- diferente do /pdf acima, que é o template gerado pelo VIME).
-router.get('/:id/arquivo', permissaoMiddleware('contratos.visualizar'), contratoController.baixarArquivo);
+router.get('/:id/arquivo', podeContrato('visualizar'), contratoController.baixarArquivo);
 router.post('/:id/arquivo', podeAnexarArquivo, contratoController.uploadArquivo);
-router.delete('/:id/arquivo', permissaoMiddleware('contratos.editar'), contratoController.removerArquivo);
+router.delete('/:id/arquivo', podeContrato('editar'), contratoController.removerArquivo);
 
-router.post('/', permissaoMiddleware('contratos.criar'), contratoController.criar);
+router.post('/', podeContrato('criar'), contratoController.criar);
 
-router.put('/:id', permissaoMiddleware('contratos.editar'), contratoController.atualizar);
+router.put('/:id', podeContrato('editar'), contratoController.atualizar);
 
-router.delete('/:id', permissaoMiddleware('contratos.excluir'), contratoController.remover);
+router.delete('/:id', podeContrato('excluir'), contratoController.remover);
 
-router.patch('/:id/encerrar', permissaoMiddleware('contratos.editar'), contratoController.encerrar);
+router.patch('/:id/encerrar', podeContrato('editar'), contratoController.encerrar);
 
-router.patch('/:id/renovar', permissaoMiddleware('contratos.editar'), contratoController.renovar);
+router.patch('/:id/renovar', podeContrato('editar'), contratoController.renovar);
 
 // Envio pra assinatura é ação do próprio Contrato (finaliza o
 // documento), não do módulo "Clicksign" (que cobre a área de
