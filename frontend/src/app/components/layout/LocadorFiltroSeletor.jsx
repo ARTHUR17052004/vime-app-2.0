@@ -8,10 +8,11 @@ import { LocadorService } from "../../../services/locadores.service";
 import { locadorFiltroAtual, definirLocadorFiltro } from "../../../utils/locadorFiltro";
 
 // Só pra quem enxerga todo mundo (sem locador fixo no cadastro) e tem
-// perfil Gerência ou Operador -- Diretoria e os demais continuam vendo
-// exatamente o que já era mostrado pra eles, sem esse seletor (ver
-// authMiddleware.js, que é quem de fato aplica o filtro no servidor).
-const PERFIS_COM_SELETOR = ["GERENCIA", "OPERADOR"];
+// perfil Administrador, Gerência ou Operador -- Diretoria e os demais
+// continuam vendo exatamente o que já era mostrado pra eles, sem esse
+// seletor (ver authMiddleware.js, que é quem de fato aplica o filtro no
+// servidor).
+const PERFIS_COM_SELETOR = ["ADMINISTRADOR", "GERENCIA", "OPERADOR"];
 
 export default function LocadorFiltroSeletor({ compacto = false }) {
 
