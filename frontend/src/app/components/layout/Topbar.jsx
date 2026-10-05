@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import NotificationBell from "../notificacoes/NotificationBell";
+import LocadorFiltroSeletor from "./LocadorFiltroSeletor";
 
 export default function Topbar() {
   const { usuario, logout } = useAuth();
@@ -190,6 +191,8 @@ export default function Topbar() {
       {/* ========================= */}
 
       <div className="flex items-center gap-2 sm:gap-5">
+        <LocadorFiltroSeletor />
+
         <NotificationBell />
 
         <div

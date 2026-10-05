@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 
 import NotificationBell from "../../notificacoes/NotificationBell";
+import LocadorFiltroSeletor from "../LocadorFiltroSeletor";
 import { useAuth } from "../../../../context/AuthContext";
 
 // "ARTHUR " no cadastro vira "Arthur" na saudação.
@@ -79,6 +80,8 @@ export default function MobileTopbar() {
       </Link>
 
       <div className="flex items-center gap-1.5 shrink-0">
+
+        <LocadorFiltroSeletor compacto />
 
         <button
           onClick={() => window.dispatchEvent(new Event("abrir-busca-universal"))}

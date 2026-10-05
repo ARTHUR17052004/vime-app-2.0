@@ -34,6 +34,17 @@ const paraInteiroOuNull = (v) => {
   return Number.isNaN(n) ? null : n;
 };
 
+// Só id+nome, de TODOS os locadores, sem filtro nenhum -- usado pelo
+// seletor de "locador de trabalho" (Gerência/Operador escolhendo ARA ou
+// SH pra focar a visão). Não pode respeitar usuario.locadorId: é
+// exatamente esse filtro que a pessoa está tentando trocar através dele.
+const listarOpcoes = () => {
+  return prisma.locador.findMany({
+    select: { id: true, nome: true },
+    orderBy: { nome: "asc" },
+  });
+};
+
 const listar = (usuario) => {
   return prisma.locador.findMany({
     where: usuario?.locadorId ? { id: usuario.locadorId } : {},
@@ -133,6 +144,7 @@ const remover = (id) => {
 
 module.exports = {
   listar,
+  listarOpcoes,
   criar,
   atualizar,
   remover,

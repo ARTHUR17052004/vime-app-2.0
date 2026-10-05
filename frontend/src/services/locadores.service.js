@@ -6,6 +6,12 @@ export const LocadorService = {
     return api("/locadores");
   },
 
+  // Só id+nome, de todos -- pro seletor de "locador de trabalho" (ver
+  // utils/locadorFiltro.js), sem precisar de "locadores.visualizar".
+  listarOpcoes() {
+    return api("/locadores/opcoes");
+  },
+
   buscar(id) {
     return api(`/locadores/${id}`);
   },

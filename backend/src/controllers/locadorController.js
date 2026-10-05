@@ -5,6 +5,11 @@ const listar = async (req, res) => {
   res.json(locadores);
 };
 
+const listarOpcoes = async (req, res) => {
+  const locadores = await locadorService.listarOpcoes();
+  res.json({ success: true, data: locadores });
+};
+
 const criar = async (req, res) => {
   const locador = await locadorService.criar(req.body);
   res.status(201).json(locador);
@@ -29,6 +34,7 @@ const remover = async (req, res) => {
 
 module.exports = {
   listar,
+  listarOpcoes,
   criar,
   atualizar,
   remover

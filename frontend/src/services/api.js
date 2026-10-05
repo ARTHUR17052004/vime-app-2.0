@@ -1,5 +1,6 @@
 import { API_URL } from "../config/api";
 import { Sessao } from "../utils/sessao";
+import { locadorFiltroAtual } from "../utils/locadorFiltro";
 
 export async function api(endpoint, options = {}) {
 
@@ -7,6 +8,9 @@ export async function api(endpoint, options = {}) {
     typeof window !== "undefined"
       ? Sessao.token()
       : null;
+
+  const locadorFiltro =
+    typeof window !== "undefined" ? locadorFiltroAtual() : "";
 
   const response = await fetch(`${API_URL}${endpoint}`, {
 
@@ -18,6 +22,11 @@ export async function api(endpoint, options = {}) {
 
       ...(token && {
         Authorization: `Bearer ${token}`,
+      }),
+
+      // "Locador de trabalho" (Gerência/Operador) -- ver utils/locadorFiltro.js.
+      ...(locadorFiltro && {
+        "x-locador-filtro": locadorFiltro,
       }),
 
       ...options.headers,
