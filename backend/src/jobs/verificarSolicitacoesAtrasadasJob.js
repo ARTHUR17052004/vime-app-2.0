@@ -40,7 +40,7 @@ module.exports = async () => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Solicitação com prazo vencido",
-      mensagem: `A solicitação "${solicitacao.titulo}" (${solicitacao.numero}) está com o prazo vencido há ${dias} dia(s) sem ser atendida.`,
+      mensagem: `⏰ Ei, a solicitação "${solicitacao.titulo}" (${solicitacao.numero}) está esperando há ${dias} dia(s) além do prazo. Vamos dar aquela resolvida?`,
       link: `/solicitacoes/${solicitacao.id}`,
     });
 

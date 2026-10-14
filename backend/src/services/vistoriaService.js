@@ -85,7 +85,7 @@ const criar = async (dados) => {
     await notificacaoService.criar({
       origem: 'SISTEMA',
       titulo: 'Nova vistoria',
-      mensagem: `Tem vistoria nova: "${vistoria.titulo}".`,
+      mensagem: `🔍 Nova vistoria na área: "${vistoria.titulo}". Bora conferir quando der!`,
       link: `/vistorias/${vistoria.id}`
     });
   } catch (erro) {
