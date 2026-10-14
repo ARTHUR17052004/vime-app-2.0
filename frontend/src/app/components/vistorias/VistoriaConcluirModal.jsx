@@ -6,6 +6,7 @@ import { Image as ImageIcon } from "lucide-react";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { formatDate } from "@/utils/formatDate";
+import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 
 export default function VistoriaConcluirModal({
   isOpen,
@@ -15,27 +16,33 @@ export default function VistoriaConcluirModal({
 }) {
   const [data, setData] = useState("");
   const [midias, setMidias] = useState([]);
+  const [erro, setErro] = useState("");
 
   useEffect(() => {
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(new Date().toISOString().split("T")[0]);
       setMidias([]);
+      setErro("");
     }
   }, [isOpen]);
 
-  const handleArquivos = (e) => {
+  const handleArquivos = async (e) => {
     const arquivos = Array.from(e.target.files || []);
+    e.target.value = "";
 
-    arquivos.forEach((arquivo) => {
-      const reader = new FileReader();
+    let totalAtualMB = tamanhoTotalMB(midias);
 
-      reader.onload = () => {
-        setMidias((prev) => [...prev, reader.result]);
-      };
-
-      reader.readAsDataURL(arquivo);
-    });
+    for (const arquivo of arquivos) {
+      try {
+        const dataUrl = await lerArquivoComoDataUrl(arquivo, { totalAtualMB });
+        totalAtualMB += arquivo.size / 1024 / 1024;
+        setMidias((prev) => [...prev, dataUrl]);
+      } catch (erro) {
+        setErro(erro.message);
+        break;
+      }
+    }
   };
 
   const handleConfirmar = () => {
@@ -128,6 +135,10 @@ export default function VistoriaConcluirModal({
                 )
               )}
             </div>
+          )}
+
+          {erro && (
+            <p className="mt-3 text-sm text-red-400">{erro}</p>
           )}
         </div>
 

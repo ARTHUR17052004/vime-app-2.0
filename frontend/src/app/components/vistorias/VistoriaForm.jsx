@@ -11,6 +11,7 @@ import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 
 // "Nome da Vistoria" é sempre exigido -- vira a coluna "titulo" no
 // banco, que não aceita nulo, independente do que for configurado em
@@ -619,34 +620,38 @@ export default function VistoriaForm({
     multiple
     accept="image/*,video/*"
     className={input}
-    onChange={(e) => {
+    onChange={async (e) => {
 
       const arquivos = Array.from(
         e.target.files || []
       );
 
-      arquivos.forEach((arquivo) => {
+      e.target.value = "";
 
-        const reader = new FileReader();
+      // Um de cada vez (não em paralelo) pra somar o total certo --
+      // senão vários arquivos grandes escolhidos juntos passariam cada
+      // um na checagem individual e só estourariam o limite do
+      // backend (25MB) depois, todos juntos no mesmo envio. O total
+      // roda numa variável local (não no estado do React, que só
+      // atualiza de verdade depois do fim desta função).
+      let totalAtualMB = tamanhoTotalMB(formData.fotos);
 
-        reader.onload = () => {
+      for (const arquivo of arquivos) {
+
+        try {
+          const dataUrl = await lerArquivoComoDataUrl(arquivo, { totalAtualMB });
+          totalAtualMB += arquivo.size / 1024 / 1024;
 
           setFormData((prev) => ({
-
             ...prev,
-
-            fotos: [
-              ...(prev.fotos || []),
-              reader.result,
-            ],
-
+            fotos: [...(prev.fotos || []), dataUrl],
           }));
+        } catch (erro) {
+          setErro(erro.message);
+          break;
+        }
 
-        };
-
-        reader.readAsDataURL(arquivo);
-
-      });
+      }
 
     }}
   />
