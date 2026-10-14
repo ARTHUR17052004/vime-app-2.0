@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -121,6 +122,18 @@ export default function DashboardMobile({
   const clima = useClima();
   const { naoLidas, marcarComoLida } = useNotificacoes();
 
+  // Calculado só depois de montado (mesmo motivo do DashboardHeader
+  // desktop): "new Date()" direto no corpo do componente roda uma vez no
+  // servidor e outra no navegador, em momentos diferentes -- dá erro de
+  // hidratação toda vez que calha de bater num horário/dia diferente.
+  const [saudacaoAtual, setSaudacaoAtual] = useState("Olá");
+  const [dataAtual, setDataAtual] = useState("");
+
+  useEffect(() => {
+    setSaudacaoAtual(saudacao());
+    setDataAtual(dataExtensa());
+  }, []);
+
   const percentual = percentualOcupacao(dados?.ocupacao);
   const ocupadas = dados?.ocupacao?.ocupadas ?? 0;
   const vazias = dados?.ocupacao?.vazias ?? 0;
@@ -176,11 +189,11 @@ export default function DashboardMobile({
       >
 
         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
-          {dataExtensa()}
+          {dataAtual}
         </p>
 
         <h1 className="mt-2 text-[26px] leading-tight font-extrabold text-white">
-          {saudacao()}, {nomeProprio(primeiroNome)}! <span aria-hidden="true">👋</span>
+          {saudacaoAtual}, {nomeProprio(primeiroNome)}! <span aria-hidden="true">👋</span>
         </h1>
 
         <p className="mt-2 max-w-[68%] text-[13px] leading-snug text-emerald-50/80">

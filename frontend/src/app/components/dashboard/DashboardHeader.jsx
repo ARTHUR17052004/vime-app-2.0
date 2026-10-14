@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Tv } from "lucide-react";
 
@@ -14,22 +15,35 @@ export default function DashboardHeader({
 }) {
   const router = useRouter();
   const { mensagemBoasVindas } = useTheme();
-  const hora = new Date().getHours();
 
-  let saudacao = "Boa noite";
+  // "new Date()" direto no corpo do componente rodava uma vez no servidor
+  // (SSR) e outra no navegador, em momentos diferentes -- dava erro de
+  // hidratação sempre que calhava de bater num horário/dia diferente entre
+  // os dois. Calculando só depois de montado (igual useIsMobile), servidor
+  // e primeira pintura do cliente concordam, e só atualiza depois.
+  const [saudacao, setSaudacao] = useState("Olá");
+  const [hoje, setHoje] = useState("");
 
-  if (hora < 12) {
-    saudacao = "Bom dia";
-  } else if (hora < 18) {
-    saudacao = "Boa tarde";
-  }
+  useEffect(() => {
+    const hora = new Date().getHours();
 
-  const hoje = new Date().toLocaleDateString("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+    if (hora < 12) {
+      setSaudacao("Bom dia");
+    } else if (hora < 18) {
+      setSaudacao("Boa tarde");
+    } else {
+      setSaudacao("Boa noite");
+    }
+
+    setHoje(
+      new Date().toLocaleDateString("pt-BR", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    );
+  }, []);
 
   return (
     <section

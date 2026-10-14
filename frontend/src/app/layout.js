@@ -56,6 +56,11 @@ export default function RootLayout({ children }) {
     <html
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable}`}
+      // O script logo abaixo seta data-theme direto no DOM antes do React
+      // hidratar (evita o "flash" de tema errado) -- o React nunca vai
+      // saber desse valor no SSR, então essa diferença é esperada e
+      // sempre vai existir; sem isso, ele reclamava (sem motivo) toda vez.
+      suppressHydrationWarning
     >
       <body>
         <Script

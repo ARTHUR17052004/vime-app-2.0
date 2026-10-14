@@ -2,9 +2,9 @@
 "use client";
 
 // "Propaganda" da desenvolvedora do sistema -- aparece só aqui em
-// Configurações (não em todas as telas). synt-logo-transparent.png é
-// a logo original (fundo branco sólido) com o fundo removido, senão
-// aparecia um quadrado branco por cima do glass escuro do card.
+// Configurações (não em todas as telas). synt-logo.png precisa ter
+// fundo transparente, senão aparece um quadrado branco por cima do
+// glass escuro do card.
 export default function SyntPromoCard() {
   return (
     <div
@@ -29,7 +29,7 @@ export default function SyntPromoCard() {
     >
 
       <img
-        src="/images/synt-logo-transparent.png"
+        src="/images/synt-logo.png"
         alt="Synt.axenterprise"
         className="w-16 h-16 object-contain shrink-0"
       />

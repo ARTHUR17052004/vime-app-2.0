@@ -97,12 +97,15 @@ Data: 12/06/2026
 
 como iniciar o ssh no powershell
 
+cd vime-app-2.0
+git push origin resgate-dashboard:main
+
 ssh root@129.121.49.155 -p 22022
 senha: Britec2323@
 
 bash deploy.sh
 
-  cd $(dirname $(find / -maxdepth 4 -name "deploy.sh" 2>/dev/null | head -1)) && bash deploy.sh
+  -------------------------------------------------------------------------------------------------------------------------
 
 
 cd /var/www/vime-app-2.0
@@ -110,7 +113,7 @@ git pull origin main
 cd backend
 npm install
 set -a && source .env && set +a
-npx prisma generate
+npx prisma generate -
 pm2 restart vime-backend
 cd ../frontend
 npm install
