@@ -6,19 +6,39 @@ import {
   House,
   FileText,
   Users,
+  UserSquare2,
+  Building2,
+  ClipboardList,
+  ShieldCheck,
+  LifeBuoy,
   Wallet,
   Menu,
 } from "lucide-react";
 
-const ITENS = [
-  { label: "Início", href: "/", icon: House },
-  { label: "Contratos", href: "/contratos", icon: FileText },
-  { label: "Inquilinos", href: "/inquilinos", icon: Users },
-  { label: "Financeiro", href: "/financeiro", icon: Wallet },
+import { usePermissoes } from "../../../../hooks/usePermissao";
+
+// Só os 3 primeiros com permissão entram na barra (o resto fica no "Mais",
+// que já é filtrado por permissão -- ver MobileMoreMenu.jsx). Ordem é por
+// frequência de uso real, não alfabética.
+const CANDIDATOS = [
+  { label: "Contratos", href: "/contratos", icon: FileText, permissao: "contratos.visualizar" },
+  { label: "Inquilinos", href: "/inquilinos", icon: Users, permissao: "inquilinos.visualizar" },
+  { label: "Financeiro", href: "/financeiro", icon: Wallet, permissao: "financeiro.visualizar" },
+  { label: "Solicitações", href: "/solicitacoes", icon: ClipboardList, permissao: "solicitacoes.visualizar" },
+  { label: "Vistorias", href: "/vistorias", icon: ShieldCheck, permissao: "vistorias.visualizar" },
+  { label: "Locadores", href: "/locadores", icon: UserSquare2, permissao: "locadores.visualizar" },
+  { label: "Unidades", href: "/unidades", icon: Building2, permissao: "unidades.visualizar" },
+  { label: "Suporte", href: "/suporte", icon: LifeBuoy, permissao: "suporte.visualizar" },
 ];
 
 export default function MobileBottomNav({ onAbrirMais, maisAberto }) {
   const pathname = usePathname();
+  const { pode } = usePermissoes();
+
+  const ITENS = [
+    { label: "Início", href: "/", icon: House },
+    ...CANDIDATOS.filter((item) => pode(item.permissao)).slice(0, 3),
+  ];
 
   return (
     <nav

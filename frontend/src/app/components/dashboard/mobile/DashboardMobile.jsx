@@ -13,6 +13,8 @@ import {
   FileText,
   House,
   LayoutDashboard,
+  LifeBuoy,
+  ShieldCheck,
   TriangleAlert,
   User,
   UserPlus,
@@ -22,6 +24,7 @@ import {
 
 import { useNotificacoes } from "../../../../hooks/useNotificacoes";
 import { useClima } from "../../../../hooks/useClima";
+import { usePermissoes } from "../../../../hooks/usePermissao";
 
 // Home do celular -- mesma organização do modelo aprovado: saudação,
 // ações rápidas, indicadores, ocupação, notificações e acesso rápido.
@@ -110,8 +113,8 @@ export default function DashboardMobile({
   primeiroNome,
   // Mesmas permissões do Dashboard desktop (Administração > Permissões) --
   // app e site têm que mostrar exatamente os mesmos dados, só o layout
-  // muda. Atalhos de navegação (Ações rápidas/Acesso rápido) não entram
-  // aqui: a página de destino já tem a permissão dela própria.
+  // muda. Ações rápidas e Acesso rápido usam a permissão do módulo de
+  // destino (ver `pode(...)` abaixo), igual ao Sidebar.jsx no desktop.
   podeIndicadores = true,
   podeFinanceiro = true,
   podeOcupacao = true,
@@ -121,6 +124,7 @@ export default function DashboardMobile({
   const router = useRouter();
   const clima = useClima();
   const { naoLidas, marcarComoLida } = useNotificacoes();
+  const { pode } = usePermissoes();
 
   // Calculado só depois de montado (mesmo motivo do DashboardHeader
   // desktop): "new Date()" direto no corpo do componente roda uma vez no
@@ -139,12 +143,17 @@ export default function DashboardMobile({
   const vazias = dados?.ocupacao?.vazias ?? 0;
   const recebido = percentualRecebido(dados?.financeiro);
 
+  // Cada atalho só aparece se o usuário tiver a permissão da página de
+  // destino -- do contrário o Zelador (por exemplo) via botões para telas
+  // que o sistema barra assim que ele toca (ver Sidebar.jsx/menuConfig.js,
+  // que já faz o mesmo no desktop).
   const acoesRapidas = [
-    { titulo: "Novo Inquilino", icone: UserPlus, href: "/inquilinos" },
-    { titulo: "Nova Unidade", icone: Building2, href: "/unidades" },
-    { titulo: "Lançar Recebimento", icone: DollarSign, href: "/financeiro" },
-    { titulo: "Nova Solicitação", icone: ClipboardPlus, href: "/solicitacoes" },
-  ];
+    pode("inquilinos.criar") && { titulo: "Novo Inquilino", icone: UserPlus, href: "/inquilinos" },
+    pode("unidades.criar") && { titulo: "Nova Unidade", icone: Building2, href: "/unidades" },
+    pode("financeiro.editar") && { titulo: "Lançar Recebimento", icone: DollarSign, href: "/financeiro" },
+    pode("solicitacoes.criar") && { titulo: "Nova Solicitação", icone: ClipboardPlus, href: "/solicitacoes" },
+    pode("vistorias.criar") && { titulo: "Nova Vistoria", icone: ShieldCheck, href: "/vistorias" },
+  ].filter(Boolean);
 
   const indicadores = [
     podeIndicadores && { titulo: "Residências", valor: dados?.unidades ?? 0, sub: "Cadastradas", icone: Building2, cor: "text-emerald-400 bg-emerald-500/15" },
@@ -154,13 +163,16 @@ export default function DashboardMobile({
   ].filter(Boolean);
 
   const atalhos = [
-    { titulo: "Unidades", icone: Building2, href: "/unidades" },
-    { titulo: "Kitnets", icone: House, href: "/kitnets" },
-    { titulo: "Inquilinos", icone: Users, href: "/inquilinos" },
-    { titulo: "Locadores", icone: User, href: "/locadores" },
-    { titulo: "Contratos", icone: FileText, href: "/contratos" },
-    { titulo: "Financeiro", icone: Wallet, href: "/financeiro" },
-  ];
+    pode("locadores.visualizar") && { titulo: "Locadores", icone: User, href: "/locadores" },
+    pode("unidades.visualizar") && { titulo: "Unidades", icone: Building2, href: "/unidades" },
+    pode("kitnets.visualizar") && { titulo: "Kitnets", icone: House, href: "/kitnets" },
+    pode("inquilinos.visualizar") && { titulo: "Inquilinos", icone: Users, href: "/inquilinos" },
+    pode("contratos.visualizar") && { titulo: "Contratos", icone: FileText, href: "/contratos" },
+    pode("solicitacoes.visualizar") && { titulo: "Solicitações", icone: ClipboardList, href: "/solicitacoes" },
+    pode("vistorias.visualizar") && { titulo: "Vistorias", icone: ShieldCheck, href: "/vistorias" },
+    pode("financeiro.visualizar") && { titulo: "Financeiro", icone: Wallet, href: "/financeiro" },
+    pode("suporte.visualizar") && { titulo: "Suporte", icone: LifeBuoy, href: "/suporte" },
+  ].filter(Boolean);
 
   const alertas = (dados?.alertas || []).slice(0, 3);
   const recentes = naoLidas.slice(0, 5);
@@ -231,6 +243,7 @@ export default function DashboardMobile({
 
       {/* AÇÕES RÁPIDAS */}
 
+      {acoesRapidas.length > 0 && (
       <section className="grid grid-cols-4 gap-2">
         {acoesRapidas.map(({ titulo, icone: Icone, href }) => (
           <Link
@@ -258,6 +271,7 @@ export default function DashboardMobile({
           </Link>
         ))}
       </section>
+      )}
 
       {/* INDICADORES */}
 
@@ -432,6 +446,7 @@ export default function DashboardMobile({
 
       {/* ACESSO RÁPIDO */}
 
+      {atalhos.length > 0 && (
       <section>
 
         <div className="flex items-center gap-2 mb-2.5 px-1">
@@ -465,6 +480,7 @@ export default function DashboardMobile({
         </div>
 
       </section>
+      )}
 
     </div>
   );
