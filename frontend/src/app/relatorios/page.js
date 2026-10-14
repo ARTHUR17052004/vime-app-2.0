@@ -9,11 +9,9 @@ import PageContainer from "../components/ui/PageContainer";
 import RelatorioStats from "../components/relatorios/RelatorioStats";
 import RelatorioFilters from "../components/relatorios/RelatorioFilters";
 import RelatorioCards from "../components/relatorios/RelatorioCards";
-import RelatorioExportar from "../components/relatorios/RelatorioExportar";
 import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
-import Button from "../components/ui/Button";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { usePermissao } from "../../hooks/usePermissao";
@@ -75,13 +73,6 @@ export default function RelatoriosPage() {
             subtitle="Visualize e exporte relatórios do sistema."
             count={modulos.length}
             countLabel="módulo(s) disponível(is)"
-            actions={
-              podeExportar && (
-                <Button>
-                  Exportar Tudo
-                </Button>
-              )
-            }
           >
 
             <RelatorioFilters
@@ -168,25 +159,11 @@ export default function RelatoriosPage() {
 
           <PageSection spacing="xxl">
 
-            <RelatorioCards />
+            <RelatorioCards podeExportar={podeExportar} />
 
           </PageSection>
 
         </FadeIn>
-
-        {podeExportar && (
-
-          <FadeIn delay={0.30}>
-
-            <PageSection spacing="xxl">
-
-              <RelatorioExportar />
-
-            </PageSection>
-
-          </FadeIn>
-
-        )}
 
       </PageContainer>
 

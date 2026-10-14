@@ -400,6 +400,30 @@ export default function AdministracaoPage() {
 
                 </AdministracaoCard>
 
+                <AdministracaoCard
+
+                  title="Relatórios"
+
+                  subtitle="Escolha quais relatórios o sistema emite"
+
+                >
+
+                  <Button
+
+                    className="w-full"
+
+                    onClick={() =>
+                      router.push("/administracao/relatorios")
+                    }
+
+                  >
+
+                    Abrir Relatórios
+
+                  </Button>
+
+                </AdministracaoCard>
+
               </div>
 
             </PageSection>

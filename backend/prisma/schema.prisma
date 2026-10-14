@@ -836,3 +836,14 @@ model NotificacaoConfig {
 
   updatedAt DateTime @updatedAt
 }
+
+// O que o administrador escolheu deixar disponível na tela de Relatórios
+// (Administração > Relatórios). Sem linha pro tipo = disponível
+// (comportamento de sempre) -- mesmo espírito do NotificacaoConfig acima.
+model RelatorioConfig {
+  tipo String @id
+
+  ativo Boolean @default(true)
+
+  updatedAt DateTime @updatedAt
+}
