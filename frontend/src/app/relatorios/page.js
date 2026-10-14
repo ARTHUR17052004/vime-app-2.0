@@ -9,6 +9,7 @@ import PageContainer from "../components/ui/PageContainer";
 import RelatorioStats from "../components/relatorios/RelatorioStats";
 import RelatorioFilters from "../components/relatorios/RelatorioFilters";
 import RelatorioCards from "../components/relatorios/RelatorioCards";
+import RelatorioComparativo from "../components/relatorios/RelatorioComparativo";
 import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
@@ -160,6 +161,16 @@ export default function RelatoriosPage() {
           <PageSection spacing="xxl">
 
             <RelatorioCards podeExportar={podeExportar} />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.25}>
+
+          <PageSection spacing="xxl">
+
+            <RelatorioComparativo podeExportar={podeExportar} />
 
           </PageSection>
 
