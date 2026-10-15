@@ -5,6 +5,7 @@ const { validarTelefone } = require('../utils/validadores');
 const { filtroInquilino } = require('../utils/escopoLocador');
 const contratoService = require('./contratoService');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { kitnetAindaOcupada } = require('../utils/kitnetOcupacao');
 
 const sanitizar = (dados) => {
 
@@ -208,15 +209,19 @@ const atualizar = async (id, dados) => {
     dados.kitnetId !== anterior.kitnetId
   ) {
 
-    await prisma.kitnet.update({
-      where: {
-        id: anterior.kitnetId
-      },
-      data: {
-        ocupada: false,
-        status: 'DISPONIVEL'
-      }
-    });
+    // Só esvazia a kitnet antiga se não sobrou outro inquilino/contrato
+    // ativo nela (pode ser uma república, com mais de um morador).
+    if (!(await kitnetAindaOcupada(anterior.kitnetId, { ignorarInquilinoId: id }))) {
+      await prisma.kitnet.update({
+        where: {
+          id: anterior.kitnetId
+        },
+        data: {
+          ocupada: false,
+          status: 'DISPONIVEL'
+        }
+      });
+    }
 
     await prisma.kitnet.update({
       where: {
@@ -239,7 +244,7 @@ const remover = async (id) => {
     where: { id }
   });
 
-  if (inquilino) {
+  if (inquilino && !(await kitnetAindaOcupada(inquilino.kitnetId, { ignorarInquilinoId: id }))) {
     await prisma.kitnet.update({
       where: {
         id: inquilino.kitnetId

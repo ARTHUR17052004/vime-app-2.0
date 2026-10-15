@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const logService = require("../services/logService");
 const { emitirAtualizacao } = require("../socket");
+const { kitnetAindaOcupada } = require("../utils/kitnetOcupacao");
 
 module.exports = async () => {
 
@@ -29,15 +30,17 @@ module.exports = async () => {
       }
     });
 
-    await prisma.kitnet.update({
-      where: {
-        id: contrato.kitnetId
-      },
-      data: {
-        ocupada: false,
-        status: "DISPONIVEL"
-      }
-    });
+    if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: contrato.id }))) {
+      await prisma.kitnet.update({
+        where: {
+          id: contrato.kitnetId
+        },
+        data: {
+          ocupada: false,
+          status: "DISPONIVEL"
+        }
+      });
+    }
 
     await logService.registrar({
       usuarioId: null,

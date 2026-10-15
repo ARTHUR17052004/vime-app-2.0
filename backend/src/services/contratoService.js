@@ -10,6 +10,7 @@ const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
 const { filtroContrato } = require("../utils/escopoLocador");
+const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo } = require("../utils/kitnetOcupacao");
 
 const {
   formatarDataExtensa,
@@ -488,24 +489,31 @@ const remover = async (id) => {
     descricao: `Contrato ${contrato.id} excluído.`
   });
 
-  await prisma.kitnet.update({
-    where: {
-      id: contrato.kitnetId
-    },
-    data: {
-      ocupada: false,
-      status: "DISPONIVEL"
-    }
-  });
+  // Só esvazia a kitnet/desativa o inquilino se não sobrou outro
+  // inquilino/contrato ativo ligado a eles (ex.: kitnet compartilhada,
+  // ou um contrato novo já criado antes de excluir o antigo).
+  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id }))) {
+    await prisma.kitnet.update({
+      where: {
+        id: contrato.kitnetId
+      },
+      data: {
+        ocupada: false,
+        status: "DISPONIVEL"
+      }
+    });
+  }
 
-  await prisma.inquilino.update({
-    where: {
-      id: contrato.inquilinoId
-    },
-    data: {
-      ativo: false
-    }
-  });
+  if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {
+    await prisma.inquilino.update({
+      where: {
+        id: contrato.inquilinoId
+      },
+      data: {
+        ativo: false
+      }
+    });
+  }
 
   return prisma.contrato.delete({
     where: { id }
@@ -540,24 +548,28 @@ const encerrar = async (id) => {
     }
   });
 
-  await prisma.kitnet.update({
-    where: {
-      id: contrato.kitnetId
-    },
-    data: {
-      ocupada: false,
-      status: 'DISPONIVEL'
-    }
-  });
+  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id }))) {
+    await prisma.kitnet.update({
+      where: {
+        id: contrato.kitnetId
+      },
+      data: {
+        ocupada: false,
+        status: 'DISPONIVEL'
+      }
+    });
+  }
 
-  await prisma.inquilino.update({
-    where: {
-      id: contrato.inquilinoId
-    },
-    data: {
-      ativo: false
-    }
-  });
+  if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {
+    await prisma.inquilino.update({
+      where: {
+        id: contrato.inquilinoId
+      },
+      data: {
+        ativo: false
+      }
+    });
+  }
 
   await auditoriaService.registrar({
     usuarioId: null,
