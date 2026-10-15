@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Paperclip, Download, Trash2 } from "lucide-react";
 
 import Button from "../ui/Button";
+import SeletorBusca from "../ui/SeletorBusca";
 
 import { LocadorService } from "@/services/locadores.service";
 import { UnidadeService } from "@/services/unidades.service";
@@ -355,7 +356,13 @@ export default function ContratoForm({
 
     const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
-    const faltando = obterCamposFaltando(CAMPOS, formData, exigidos, ROTULOS);
+    // No Arquivo de Contratos (modoManual) esses 3 campos nem aparecem
+    // na tela (ver abaixo) -- não faz sentido exigi-los.
+    const campos = modoManual
+      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste"].includes(c))
+      : CAMPOS;
+
+    const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
 
     if (faltando.length > 0) {
       setErro(mensagemCamposFaltando(faltando));
@@ -532,6 +539,7 @@ export default function ContratoForm({
           onChange={alterarCampo}
           className={input}
           required
+          disabled={!formData.unidadeId}
         >
 
           <option
@@ -542,11 +550,15 @@ export default function ContratoForm({
             }}
           >
 
-            Selecione uma Kitnet
+            {formData.unidadeId ? "Selecione uma Kitnet" : "Selecione uma Residência primeiro"}
 
           </option>
 
-          {kitnets.map((kitnet)=>(
+          {/* Só as kitnets da residência escolhida -- com tudo junto
+              ficava impossível saber qual kitnet era de qual Residência. */}
+          {kitnets
+            .filter((kitnet) => kitnet.unidadeId === formData.unidadeId)
+            .map((kitnet)=>(
 
             <option
               key={kitnet.id}
@@ -565,44 +577,14 @@ export default function ContratoForm({
 
         </select>
 
-        <select
-          name="inquilinoId"
+        <SeletorBusca
+          opcoes={inquilinos.map((i) => ({ value: i.id, label: i.nome }))}
           value={formData.inquilinoId}
-          onChange={alterarCampo}
+          onChange={(value) => alterarCampo({ target: { name: "inquilinoId", value } })}
+          placeholder="Busque pelo nome do inquilino"
           className={input}
           required
-        >
-
-          <option
-            value=""
-            style={{
-              backgroundColor:"#1d2833",
-              color:"#fff"
-            }}
-          >
-
-            Selecione um Inquilino
-
-          </option>
-
-          {inquilinos.map((inquilino)=>(
-
-            <option
-              key={inquilino.id}
-              value={inquilino.id}
-              style={{
-                backgroundColor:"#1d2833",
-                color:"#fff"
-              }}
-            >
-
-              {inquilino.nome}
-
-            </option>
-
-          ))}
-
-        </select>
+        />
 
       </div>
 
@@ -715,6 +697,9 @@ export default function ContratoForm({
 
 </div>
 
+{/* No Arquivo de Contratos (modoManual) o contrato já existe em papel
+    -- esses detalhes já estão nele, não precisa recadastrar. */}
+{!modoManual && (
 <div className="grid md:grid-cols-3 gap-5">
 
   <select
@@ -787,6 +772,7 @@ export default function ContratoForm({
   />
 
 </div>
+)}
 
 <textarea
   name="observacoes"
