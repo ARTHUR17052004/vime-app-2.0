@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
 const logService = require("../services/logService");
 const { emitirAtualizacao } = require("../socket");
-const { kitnetAindaOcupada } = require("../utils/kitnetOcupacao");
+const { kitnetAindaOcupada, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 
 module.exports = async () => {
 
@@ -40,6 +40,7 @@ module.exports = async () => {
           status: "DISPONIVEL"
         }
       });
+      gerarVistoriaDeEntrega(contrato.kitnetId);
     }
 
     await logService.registrar({

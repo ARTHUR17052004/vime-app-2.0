@@ -10,7 +10,7 @@ const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
 const { filtroContrato } = require("../utils/escopoLocador");
-const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo } = require("../utils/kitnetOcupacao");
+const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 
 const {
   formatarDataExtensa,
@@ -502,6 +502,7 @@ const remover = async (id) => {
         status: "DISPONIVEL"
       }
     });
+    gerarVistoriaDeEntrega(contrato.kitnetId);
   }
 
   if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {
@@ -558,6 +559,7 @@ const encerrar = async (id) => {
         status: 'DISPONIVEL'
       }
     });
+    gerarVistoriaDeEntrega(contrato.kitnetId);
   }
 
   if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {

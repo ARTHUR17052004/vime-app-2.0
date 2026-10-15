@@ -5,7 +5,7 @@ const { validarTelefone } = require('../utils/validadores');
 const { filtroInquilino } = require('../utils/escopoLocador');
 const contratoService = require('./contratoService');
 const campoObrigatorioService = require('./campoObrigatorioService');
-const { kitnetAindaOcupada } = require('../utils/kitnetOcupacao');
+const { kitnetAindaOcupada, gerarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
 
 const sanitizar = (dados) => {
 
@@ -221,6 +221,7 @@ const atualizar = async (id, dados) => {
           status: 'DISPONIVEL'
         }
       });
+      gerarVistoriaDeEntrega(anterior.kitnetId);
     }
 
     await prisma.kitnet.update({
@@ -254,6 +255,7 @@ const remover = async (id) => {
         status: 'DISPONIVEL'
       }
     });
+    gerarVistoriaDeEntrega(inquilino.kitnetId);
   }
 
   return prisma.inquilino.delete({

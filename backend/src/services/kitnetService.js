@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { filtroKitnet } = require('../utils/escopoLocador');
+const { gerarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
 
 const listar = (usuario) => {
   return prisma.kitnet.findMany({
@@ -89,10 +90,18 @@ const atualizar = async (id, dados) => {
     dados.ocupada = dados.status === 'OCUPADA';
   }
 
-  return prisma.kitnet.update({
+  const resultado = await prisma.kitnet.update({
     where: { id },
     data: dados
   });
+
+  // Ficou vazia agora mesmo (editada direto nesta tela, não por um
+  // contrato/inquilino) -- mesmo gatilho de vistoria automática.
+  if (dados.status === 'DISPONIVEL' && atual?.status !== 'DISPONIVEL') {
+    gerarVistoriaDeEntrega(id);
+  }
+
+  return resultado;
 };
 
 const remover = (id) => {
