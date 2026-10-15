@@ -391,6 +391,7 @@ model Receita {
   gatewayProvider   String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
   gatewayReferencia String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
   linkBoleto        String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
+  linhaDigitavel    String? // só o BB devolve isso -- código pra digitar no app do banco em vez de abrir o link
   lembreteEnviadoEm DateTime?
   // Dedupe dos avisos automáticos por WhatsApp -- cada um dispara só
   // uma vez por Receita, mesmo se o job rodar de novo.

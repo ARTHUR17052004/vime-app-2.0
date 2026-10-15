@@ -25,6 +25,7 @@ async function notificarNovaCobranca(receita, inquilino) {
   }
 
   const link = receita.linkBoleto || "";
+  const linhaDigitavel = receita.linhaDigitavel || "";
 
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
@@ -49,11 +50,15 @@ async function notificarNovaCobranca(receita, inquilino) {
         </p>
         <p style="font-size: 13px; color: #6b7280;">Ou copie o link: <a href="${link}">${link}</a></p>
       ` : ""}
+      ${linhaDigitavel ? `
+        <p style="font-size: 13px; color: #6b7280; margin-top: 16px;">Prefere digitar no app do seu banco? Copie a linha digitável:</p>
+        <p style="font-family: monospace; font-size: 14px; background: #f3f4f6; padding: 10px 12px; border-radius: 6px; word-break: break-all;">${linhaDigitavel}</p>
+      ` : ""}
       <p style="font-size: 13px; color: #6b7280; margin-top: 24px;">Qualquer dúvida, entre em contato conosco.</p>
     </div>
   `;
 
-  const texto = `Olá, ${inquilino.nome}!\n\nUma nova cobrança foi gerada para você:\nValor: R$ ${formatarMoeda(receita.valor)}\nVencimento: ${formatarData(receita.vencimento)}\n${link ? `\nLink para pagamento: ${link}` : ""}`;
+  const texto = `Olá, ${inquilino.nome}!\n\nUma nova cobrança foi gerada para você:\nValor: R$ ${formatarMoeda(receita.valor)}\nVencimento: ${formatarData(receita.vencimento)}\n${link ? `\nLink para pagamento: ${link}` : ""}${linhaDigitavel ? `\nLinha digitável: ${linhaDigitavel}` : ""}`;
 
   try {
 

@@ -197,13 +197,20 @@ async function notificarNovaCobranca(receita, inquilino) {
   // "documento" cujo conteúdo não é realmente um arquivo).
   const link = receita.linkBoleto || "";
 
+  // Só o BB devolve linha digitável (Asaas não) -- quando tem, entra
+  // na mensagem livre pra quem prefere copiar e colar no app do banco
+  // em vez de abrir o link. Não dá pra acrescentar como parâmetro novo
+  // no modelo aprovado da Meta (nomeModelo abaixo) sem reaprovar o
+  // modelo lá, então só vai no texto alternativo mesmo.
+  const linhaDigitavel = receita.linhaDigitavel || "";
+
   return enviarTemplateParaInquilino({
     inquilino,
     nomeModelo: "nova_cobranca_boleto",
     parametros: [inquilino.nome, formatarMoeda(receita.valor), formatarData(receita.vencimento), link],
     documentoUrl: null,
     resumoParaHistorico: `📄 Nova cobrança: R$ ${formatarMoeda(receita.valor)}, vencimento ${formatarData(receita.vencimento)}.`,
-    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nUma nova cobrança foi gerada para você:\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Vencimento: ${formatarData(receita.vencimento)}\n\n🔗 Link para pagamento (boleto/Pix): ${link}\n\nQualquer dúvida, é só responder aqui.`,
+    textoFallback: `Olá ${inquilino.nome}, tudo bem?\n\nUma nova cobrança foi gerada para você:\n\n💰 Valor: R$ ${formatarMoeda(receita.valor)}\n📅 Vencimento: ${formatarData(receita.vencimento)}\n\n🔗 Link para pagamento (boleto/Pix): ${link}${linhaDigitavel ? `\n\n🔢 Linha digitável (copie e cole no app do seu banco):\n${linhaDigitavel}` : ""}\n\nQualquer dúvida, é só responder aqui.`,
   });
 
 }

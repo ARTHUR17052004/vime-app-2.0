@@ -86,6 +86,7 @@ const enviarPeloBB = async (receita, conta) => {
         gatewayProvider: 'BB',
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,
+        linhaDigitavel: resultado.linhaDigitavel || null,
       },
     });
 
