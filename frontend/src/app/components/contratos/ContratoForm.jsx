@@ -356,10 +356,11 @@ export default function ContratoForm({
 
     const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
-    // No Arquivo de Contratos (modoManual) esses 3 campos nem aparecem
-    // na tela (ver abaixo) -- não faz sentido exigi-los.
+    // No Arquivo de Contratos (modoManual) esses campos nem aparecem na
+    // tela (ver abaixo) -- não faz sentido exigi-los. dataInicio é
+    // preenchida sozinha logo abaixo, antes de enviar.
     const campos = modoManual
-      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste"].includes(c))
+      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataInicio", "dataFim"].includes(c))
       : CAMPOS;
 
     const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
@@ -375,11 +376,22 @@ export default function ContratoForm({
 
     try {
 
+      // No Arquivo, dataInicio some da tela mas a coluna não aceita
+      // vazio -- usa o início de contrato do inquilino escolhido (se
+      // tiver) ou hoje, sem incomodar quem está cadastrando.
+      const inquilinoEscolhido = inquilinos.find((i) => i.id === formData.inquilinoId);
+
+      const dataInicioFinal = modoManual
+        ? (formData.dataInicio || inquilinoEscolhido?.dataInicioContrato?.slice(0, 10) || new Date().toISOString().slice(0, 10))
+        : formData.dataInicio;
+
       await onSave({
 
         ...formData,
 
         ...(modoManual && !contrato ? { origem: "MANUAL" } : {}),
+
+        dataInicio: dataInicioFinal,
 
         valorAluguel: Number(formData.valorAluguel),
 
@@ -555,9 +567,17 @@ export default function ContratoForm({
           </option>
 
           {/* Só as kitnets da residência escolhida -- com tudo junto
-              ficava impossível saber qual kitnet era de qual Residência. */}
+              ficava impossível saber qual kitnet era de qual Residência.
+              Ordenada por número (a API devolve por data de criação, que
+              vira uma bagunça tipo 17, 13, 12... em vez de 01, 02, 03...). */}
           {kitnets
             .filter((kitnet) => kitnet.unidadeId === formData.unidadeId)
+            .sort((a, b) => {
+              const na = Number(a.numero);
+              const nb = Number(b.numero);
+              if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
+              return String(a.numero).localeCompare(String(b.numero));
+            })
             .map((kitnet)=>(
 
             <option
@@ -590,6 +610,11 @@ export default function ContratoForm({
 
       <div className="grid md:grid-cols-2 gap-5">
 
+        {/* No Arquivo (modoManual) essas datas já estão no papel do
+            contrato -- dataInicio é preenchida sozinha (pelo início de
+            contrato do inquilino, ou hoje) na hora de salvar. */}
+        {!modoManual && (
+        <>
         <div>
 
           <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
@@ -623,6 +648,8 @@ export default function ContratoForm({
           />
 
         </div>
+        </>
+        )}
 
         <input
           className={input}
