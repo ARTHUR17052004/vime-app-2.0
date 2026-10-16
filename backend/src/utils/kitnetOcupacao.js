@@ -95,10 +95,14 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
       },
     });
 
+    // Título próprio (não "Nova vistoria") de propósito -- vira um tipo
+    // separado em Administração > Notificações, e o frontend usa esse
+    // mesmo título pra saber quando tocar o alerta mais forte (ver
+    // somNotificacao.js) e destacar com um ícone diferente na lista.
     await notificacaoService.criar({
       origem: "SISTEMA",
-      titulo: "Nova vistoria",
-      mensagem: `🔑 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia. Dá uma olhada em como ela foi entregue assim que puder!`,
+      titulo: "Vistoria urgente: kitnet vazia",
+      mensagem: `🔑🚨 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia! Vai lá conferir a entrega assim que puder.`,
       link: `/vistorias/${vistoria.id}`,
     });
 

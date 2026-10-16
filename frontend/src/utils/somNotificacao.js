@@ -37,13 +37,13 @@ function obterContexto() {
 
 // Um "bip" isolado: ataque bem rápido (sobe na hora) e decaimento suave,
 // no volume que for passado -- é isso que faz soar forte e nítido, em vez
-// de abafado.
-function tocarBeep(ctx, inicio, frequencia, duracao, volume) {
+// de abafado. "sawtooth" soa mais áspero/urgente que "triangle" (padrão).
+function tocarBeep(ctx, inicio, frequencia, duracao, volume, tipoOnda = "triangle") {
 
   const osc = ctx.createOscillator();
   const ganho = ctx.createGain();
 
-  osc.type = "triangle";
+  osc.type = tipoOnda;
   osc.frequency.setValueAtTime(frequencia, inicio);
 
   ganho.gain.setValueAtTime(0, inicio);
@@ -78,10 +78,20 @@ if (typeof window !== "undefined") {
   );
 }
 
+// Títulos que tocam o alerta urgente (mais alto, mais insistente) em
+// vez do "ding-ding" padrão -- coisa que não pode passar despercebida
+// (ex.: kitnet vazia já com vistoria de entrega esperando o Zelador).
+const TITULOS_URGENTES = ["Vistoria urgente: kitnet vazia"];
+
+function ehUrgente(notificacao) {
+  return Boolean(notificacao?.titulo && TITULOS_URGENTES.includes(notificacao.titulo));
+}
+
 // Chegando a mesma notificação por dois caminhos (socket e push) toca
 // uma vez só. Navegador que ainda bloqueia áudio (nenhum gesto do
-// usuário na página ainda) só ignora em silêncio.
-export function tocarSomNotificacao() {
+// usuário na página ainda) só ignora em silêncio. `notificacao` é
+// opcional -- sem ela, toca sempre o som padrão.
+export function tocarSomNotificacao(notificacao) {
 
   if (typeof window === "undefined" || !somAtivado()) return;
 
@@ -96,9 +106,22 @@ export function tocarSomNotificacao() {
 
     const t0 = ctx.currentTime;
 
-    // "Ding-ding!" ascendente, volume quase no talo (1 = máximo).
-    tocarBeep(ctx, t0, 1046.5, 0.18, 0.9);        // C6
-    tocarBeep(ctx, t0 + 0.16, 1568.0, 0.28, 0.95); // G6
+    if (ehUrgente(notificacao)) {
+
+      // Alarme: 3 bipes curtos, secos e ásperos (dente de serra, não
+      // triângulo) -- "beep-beep-beeep", dá pra reconhecer de ouvido,
+      // sem precisar olhar pra tela.
+      tocarBeep(ctx, t0, 880.0, 0.14, 1, "sawtooth");
+      tocarBeep(ctx, t0 + 0.2, 880.0, 0.14, 1, "sawtooth");
+      tocarBeep(ctx, t0 + 0.4, 880.0, 0.22, 1, "sawtooth");
+
+    } else {
+
+      // "Ding-ding!" ascendente, volume quase no talo (1 = máximo).
+      tocarBeep(ctx, t0, 1046.5, 0.18, 0.9);        // C6
+      tocarBeep(ctx, t0 + 0.16, 1568.0, 0.28, 0.95); // G6
+
+    }
 
   } catch (e) {}
 

@@ -35,11 +35,18 @@ self.addEventListener("push", (event) => {
 
         visiveis.forEach((c) => c.postMessage({ tipo: "push-recebido", dados }));
 
+        // "Vistoria urgente" (kitnet vazia -- ver kitnetOcupacao.js no
+        // backend) vibra mais forte e insistente, e fica fixa na tela
+        // até alguém tocar -- o resto some sozinha depois de um tempo,
+        // essa não, de propósito.
+        const urgente = dados.title === "Vistoria urgente: kitnet vazia";
+
         return self.registration.showNotification(dados.title || "VIME 2.0", {
           body: dados.body || "",
           icon: "/images/icon-192.png",
           badge: "/images/badge-96.png",
-          vibrate: [200, 100, 200, 100, 300],
+          vibrate: urgente ? [300, 120, 300, 120, 300, 120, 500] : [200, 100, 200, 100, 300],
+          requireInteraction: urgente,
           tag: dados.id || dados.url || "vime",
           renotify: true,
           data: { url: dados.url || "/" },

@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { validarCep } = require('../utils/validadores');
 const { filtroUnidade } = require('../utils/escopoLocador');
+const { gerarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
 
 const sanitizar = (dados) => {
 
@@ -132,6 +133,16 @@ const criar = async (dados) => {
 
     await prisma.kitnet.createMany({ data: kitnets });
 
+    // Nascem todas vazias (status padrão DISPONIVEL) -- mesmo gatilho
+    // de vistoria automática das que ficaram vazias depois de ocupadas.
+    // createMany não devolve os ids criados, por isso busca de novo.
+    const criadas = await prisma.kitnet.findMany({
+      where: { unidadeId: unidade.id, numero: { in: kitnets.map((k) => k.numero) } },
+      select: { id: true },
+    });
+
+    criadas.forEach((k) => gerarVistoriaDeEntrega(k.id));
+
   }
 
   return unidade;
@@ -178,6 +189,13 @@ const sincronizarKitnets = async (antes, depois) => {
     }));
 
     await prisma.kitnet.createMany({ data: novas });
+
+    const criadas = await prisma.kitnet.findMany({
+      where: { unidadeId: depois.id, numero: { in: novas.map((k) => k.numero) } },
+      select: { id: true },
+    });
+
+    criadas.forEach((k) => gerarVistoriaDeEntrega(k.id));
 
   } else if (diferenca < 0) {
 

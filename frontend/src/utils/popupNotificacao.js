@@ -17,11 +17,16 @@ export async function mostrarPopupNotificacao(notificacao) {
     const inscricao = await PushService.inscricaoAtual();
     if (inscricao) return;
 
+    // Mesmo critério de urgência do som (ver somNotificacao.js) -- fica
+    // fixa na tela até alguém tocar, em vez de sumir sozinha.
+    const urgente = notificacao.titulo === "Vistoria urgente: kitnet vazia";
+
     const opcoes = {
       body: notificacao.mensagem || "",
       icon: "/images/icon-192.png",
       badge: "/images/badge-96.png",
       tag: notificacao.id || notificacao.link || "vime",
+      requireInteraction: urgente,
       data: { url: notificacao.link || "/" },
     };
 

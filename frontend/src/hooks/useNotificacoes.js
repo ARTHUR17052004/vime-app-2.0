@@ -40,7 +40,7 @@ export function useNotificacoes() {
 
     function aoReceberNova(notificacao) {
       setNaoLidas((atual) => [notificacao, ...atual]);
-      tocarSomNotificacao();
+      tocarSomNotificacao(notificacao);
       mostrarPopupNotificacao(notificacao);
     }
 
@@ -51,7 +51,9 @@ export function useNotificacoes() {
     function aoMensagemDoServiceWorker(evento) {
       if (evento.data?.tipo === "push-recebido") {
         carregar();
-        tocarSomNotificacao();
+        // payloadPush.title (ver pushService.js) é o mesmo texto de
+        // notificacao.titulo -- dá pra reaproveitar pra escolher o som.
+        tocarSomNotificacao({ titulo: evento.data.dados?.title });
       }
     }
 

@@ -56,12 +56,20 @@ const criar = async (dados, usuario) => {
 
   }
 
-  return prisma.kitnet.create({
+  const kitnet = await prisma.kitnet.create({
     // Criada manualmente aqui (fora do lote automático da Residência)
     // -- o valor já veio escolhido pelo usuário, então não deixa a
     // edição da Residência sobrescrever depois.
     data: { ...dados, aluguelManual: true }
   });
+
+  // Já nasce vazia (status padrão é DISPONIVEL) -- mesmo gatilho de
+  // vistoria automática das que ficaram vazias depois de ocupadas.
+  if (kitnet.status === 'DISPONIVEL') {
+    gerarVistoriaDeEntrega(kitnet.id);
+  }
+
+  return kitnet;
 
 };
 
