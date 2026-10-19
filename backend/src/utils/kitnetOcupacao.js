@@ -49,9 +49,11 @@ const inquilinoTemOutroContratoAtivo = async (inquilinoId, { ignorarContratoId }
 
 // Toda vez que uma kitnet fica vazia de verdade (sem ninguém mais
 // morando), gera sozinha uma vistoria de entrega pro Zelador validar em
-// que estado ela ficou -- com o mesmo relógio de 72h que "Kitnet vazia"
-// já usa (dataProxima = agora; verificarVistoriasAtrasadasJob.js cuida
-// do alerta depois, igual qualquer outra vistoria).
+// que estado ela ficou -- já nasce Pendente (urgente, não espera a
+// janela normal de Programada -> Pendente) mas com as mesmas 72h de
+// prazo que o resto do sistema usa antes de virar Atrasada (ver
+// atualizarStatusVistoriasJob.js) -- nascer com dataProxima = agora
+// virava Atrasada na hora, sem nenhum tempo de verdade pra ir resolver.
 const gerarVistoriaDeEntrega = async (kitnetId) => {
 
   try {
@@ -110,7 +112,7 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
         responsavel: primeiroZelador?.nome || "Zelador",
         status: "PENDENTE",
         data: agora,
-        dataProxima: agora,
+        dataProxima: new Date(agora.getTime() + 72 * 60 * 60 * 1000),
       },
     });
 
