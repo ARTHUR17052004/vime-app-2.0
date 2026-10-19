@@ -210,7 +210,7 @@ export default function DetalhesVistoriaPage() {
             <div>
               <p className="text-[var(--text-subtle)]">Kitnet</p>
               <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.kitnet?.nome || vistoria.kitnet?.numero || "-"}
+                {vistoria.kitnet?.nome || vistoria.kitnet?.numero || (vistoria.unidadeId ? "Geral (todas as kitnets)" : "-")}
               </h3>
             </div>
 

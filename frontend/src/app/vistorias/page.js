@@ -95,7 +95,8 @@ export default function VistoriasPage() {
           ...vistoria,
           nomeVistoria: vistoria.titulo,
           unidadeNome: vistoria.unidade?.nome || "",
-          kitnetNome: vistoria.kitnet?.nome || vistoria.kitnet?.numero || "",
+          // null = vistoria "Geral" (toda a residência, sem kitnet específica).
+          kitnetNome: vistoria.kitnet?.nome || vistoria.kitnet?.numero || (vistoria.unidadeId ? "Geral" : ""),
           dataUltima,
           dataProxima,
         };
@@ -257,6 +258,10 @@ const confirmarConcluirVistoria = async (
   let recorrente = true;
 
   switch (vistoria?.periodicidade) {
+
+    case "Diária":
+      proximaData.setDate(proximaData.getDate() + 1);
+      break;
 
     case "Semanal":
       proximaData.setDate(proximaData.getDate() + 7);

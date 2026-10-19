@@ -12,6 +12,13 @@ import { KitnetService } from "@/services/kitnets.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
+import { ordenarPorNumero } from "@/utils/ordenarKitnets";
+
+// Sentinela só de UI pra "vale pra todas as kitnets desta residência"
+// (ex.: vistoria de limpeza das áreas comuns da VIME I inteira) -- vira
+// kitnetId null de verdade antes de enviar pro backend (que já aceita
+// null nesse campo).
+const GERAL = "GERAL";
 
 // "Nome da Vistoria" é sempre exigido -- vira a coluna "titulo" no
 // banco, que não aceita nulo, independente do que for configurado em
@@ -176,6 +183,10 @@ export default function VistoriaForm({
       setFormData({
         ...formData,
         ...vistoriaEditando,
+        // null = "Geral" (vale pra residência inteira) -- sem isso o
+        // select ficava sem nada selecionado ao editar uma vistoria
+        // assim, parecendo que esqueceram de escolher a kitnet.
+        kitnetId: vistoriaEditando.kitnetId || (vistoriaEditando.unidadeId ? GERAL : ""),
       });
 
     }
@@ -221,7 +232,10 @@ export default function VistoriaForm({
 
     setErro("");
 
-    onSave(formData);
+    onSave({
+      ...formData,
+      kitnetId: formData.kitnetId === GERAL ? null : formData.kitnetId,
+    });
 
   };
 
@@ -298,7 +312,11 @@ export default function VistoriaForm({
               Selecione...
             </option>
 
-            {kitnets.map((kitnet) => (
+            <option value={GERAL} style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+              🏢 Geral -- todas as kitnets desta residência
+            </option>
+
+            {ordenarPorNumero(kitnets).map((kitnet) => (
               <option
                 key={kitnet.id}
                 value={kitnet.id}
@@ -402,6 +420,8 @@ export default function VistoriaForm({
             className={input}
           >
 
+            <option>Única</option>
+            <option>Diária</option>
             <option>Semanal</option>
             <option>Quinzenal</option>
             <option>Mensal</option>
@@ -411,6 +431,11 @@ export default function VistoriaForm({
             <option>Anual</option>
 
           </Select>
+
+          <p className="mt-1.5 text-xs text-[var(--text-faint)]">
+            "Única" não se repete. As demais renovam sozinhas ao concluir --
+            já marcam a próxima data automaticamente.
+          </p>
 
         </div>
 

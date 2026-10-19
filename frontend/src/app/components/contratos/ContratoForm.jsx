@@ -14,6 +14,7 @@ import { KitnetService } from "@/services/kitnets.service";
 import { InquilinoService } from "@/services/inquilinos.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+import { ordenarPorNumero } from "@/utils/ordenarKitnets";
 
 const CAMPOS = [
   "locadorId", "unidadeId", "kitnetId", "inquilinoId", "dataInicio", "dataFim",
@@ -570,14 +571,7 @@ export default function ContratoForm({
               ficava impossível saber qual kitnet era de qual Residência.
               Ordenada por número (a API devolve por data de criação, que
               vira uma bagunça tipo 17, 13, 12... em vez de 01, 02, 03...). */}
-          {kitnets
-            .filter((kitnet) => kitnet.unidadeId === formData.unidadeId)
-            .sort((a, b) => {
-              const na = Number(a.numero);
-              const nb = Number(b.numero);
-              if (!Number.isNaN(na) && !Number.isNaN(nb)) return na - nb;
-              return String(a.numero).localeCompare(String(b.numero));
-            })
+          {ordenarPorNumero(kitnets.filter((kitnet) => kitnet.unidadeId === formData.unidadeId))
             .map((kitnet)=>(
 
             <option
