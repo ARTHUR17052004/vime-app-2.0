@@ -118,8 +118,9 @@ export default function VistoriasPage() {
         const normalizada = {
           ...vistoria,
           nomeVistoria: vistoria.titulo,
-          unidadeNome: vistoria.unidade?.nome || "",
-          // null = vistoria "Geral" (toda a residência, sem kitnet específica).
+          // null = vistoria "Geral" (unidadeId null = todas as residências;
+          // kitnetId null = todas as kitnets da residência escolhida).
+          unidadeNome: vistoria.unidade?.nome || "Geral",
           kitnetNome: vistoria.kitnet?.nome || vistoria.kitnet?.numero || (vistoria.unidadeId ? "Geral" : ""),
           dataUltima,
           dataProxima,

@@ -203,7 +203,7 @@ export default function DetalhesVistoriaPage() {
             <div>
               <p className="text-[var(--text-subtle)]">Residência</p>
               <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.unidade?.nome || "-"}
+                {vistoria.unidade?.nome || "Geral (todas as residências)"}
               </h3>
             </div>
 

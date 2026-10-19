@@ -197,13 +197,15 @@ export default function VistoriaForm({
 
     if (vistoriaEditando) {
 
+      // null = "Geral" (residência inteira, ou -- se unidadeId também
+      // for null -- o sistema inteiro) -- sem isso os selects ficavam
+      // sem nada marcado ao editar uma vistoria assim, parecendo que
+      // esqueceram de escolher.
       setFormData({
         ...formData,
         ...vistoriaEditando,
-        // null = "Geral" (vale pra residência inteira) -- sem isso o
-        // select ficava sem nada selecionado ao editar uma vistoria
-        // assim, parecendo que esqueceram de escolher a kitnet.
-        kitnetId: vistoriaEditando.kitnetId || (vistoriaEditando.unidadeId ? GERAL : ""),
+        unidadeId: vistoriaEditando.unidadeId || GERAL,
+        kitnetId: vistoriaEditando.kitnetId || GERAL,
       });
 
     }
@@ -220,7 +222,9 @@ export default function VistoriaForm({
       setFormData((prev) => ({
         ...prev,
         unidadeId: value,
-        kitnetId: "",
+        // Geral em Residência já é "todas as kitnets de todas as
+        // residências" -- não faz sentido escolher uma kitnet depois.
+        kitnetId: value === GERAL ? GERAL : "",
       }));
 
       return;
@@ -251,6 +255,7 @@ export default function VistoriaForm({
 
     onSave({
       ...formData,
+      unidadeId: formData.unidadeId === GERAL ? null : formData.unidadeId,
       kitnetId: formData.kitnetId === GERAL ? null : formData.kitnetId,
     });
 
@@ -298,6 +303,10 @@ export default function VistoriaForm({
               Selecione...
             </option>
 
+            <option value={GERAL} style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+              🏢 Geral -- todas as residências
+            </option>
+
             {residencias.map((residencia) => (
               <option
                 key={residencia.id}
@@ -323,15 +332,24 @@ export default function VistoriaForm({
             value={formData.kitnetId}
             onChange={handleChange}
             required={obrigatorios.has("kitnetId")}
+            disabled={formData.unidadeId === GERAL}
             className={input}
           >
-            <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-              Selecione...
-            </option>
+            {formData.unidadeId === GERAL ? (
+              <option value={GERAL} style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+                🏢 Geral -- todas as kitnets de todas as residências
+              </option>
+            ) : (
+              <>
+                <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+                  Selecione...
+                </option>
 
-            <option value={GERAL} style={{ backgroundColor: "#1d2833", color: "#fff" }}>
-              🏢 Geral -- todas as kitnets desta residência
-            </option>
+                <option value={GERAL} style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+                  🏢 Geral -- todas as kitnets desta residência
+                </option>
+              </>
+            )}
 
             {ordenarPorNumero(kitnets).map((kitnet) => (
               <option
