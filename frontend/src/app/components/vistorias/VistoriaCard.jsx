@@ -25,6 +25,7 @@ export default function VistoriaCard({
   onConcluir,
   onCancelar,
   onFixar,
+  onVerMissoes,
 }) {
 
   const podeEditar = usePermissao("vistorias.editar");
@@ -157,8 +158,8 @@ export default function VistoriaCard({
                 )}
 
                 {vistoria.progressoMissoes && (
-                  <Link
-                    href={`/vistorias/arquivo?vistoriaId=${vistoria.id}`}
+                  <button
+                    onClick={() => onVerMissoes?.(vistoria.id)}
                     title="Ver residências já vistoriadas neste ciclo"
                     className="
                       text-xs
@@ -175,7 +176,7 @@ export default function VistoriaCard({
                     "
                   >
                     {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs concluídas
-                  </Link>
+                  </button>
                 )}
 
               </div>

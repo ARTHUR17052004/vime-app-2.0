@@ -24,6 +24,7 @@ import SearchInput from "../components/common/SearchInput";
 
 import VistoriaStats from "../components/vistorias/VistoriaStats";
 import VistoriaCardList from "../components/vistorias/VistoriaCardList";
+import VistoriaRealizadasTable from "../components/vistorias/VistoriaRealizadasTable";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
 
@@ -64,6 +65,24 @@ export default function VistoriasPage() {
 
   const [carregado, setCarregado] =
     useState(false);
+
+  // Clicar em "X/Y VIMEs concluídas" num card leva direto pra aba
+  // Realizadas já filtrada só nessa vistoria.
+  const [filtroMissaoVistoriaId, setFiltroMissaoVistoriaId] =
+    useState(null);
+
+  const verMissoesDaVistoria = (vistoriaId) => {
+    setAbaSelecionada("realizadas");
+    setFiltroMissaoVistoriaId(vistoriaId);
+  };
+
+  // Trocar de aba por qualquer outro caminho (tabs, cards de resumo)
+  // limpa o filtro de uma missão específica -- só fica ativo vindo do
+  // "X/Y VIMEs concluídas" de um card.
+  const trocarAba = (aba) => {
+    setAbaSelecionada(aba);
+    setFiltroMissaoVistoriaId(null);
+  };
 
   const carregar = useCallback(async () => {
 
@@ -472,7 +491,7 @@ const fixarVistoria = async (id, fixado) => {
             <VistoriaStats
               vistorias={vistorias}
               abaSelecionada={abaSelecionada}
-              setAbaSelecionada={setAbaSelecionada}
+              setAbaSelecionada={trocarAba}
             />
 
           </PageSection>
@@ -513,7 +532,7 @@ const fixarVistoria = async (id, fixado) => {
 
             <VistoriaTabs
               abaSelecionada={abaSelecionada}
-              setAbaSelecionada={setAbaSelecionada}
+              setAbaSelecionada={trocarAba}
             />
 
           </PageSection>
@@ -526,14 +545,27 @@ const fixarVistoria = async (id, fixado) => {
 
               <PageSection spacing="xxl">
 
-                <VistoriaCardList
-                  vistorias={vistoriasFiltradas}
-                  onEdit={editarVistoria}
-                  onDelete={excluirVistoria}
-                  onConcluir={abrirConcluirVistoria}
-                  onCancelar={cancelarVistoria}
-                  onFixar={fixarVistoria}
-                />
+                {abaSelecionada === "realizadas" ? (
+
+                  <VistoriaRealizadasTable
+                    vistorias={vistorias}
+                    filtroVistoriaId={filtroMissaoVistoriaId}
+                    onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
+                  />
+
+                ) : (
+
+                  <VistoriaCardList
+                    vistorias={vistoriasFiltradas}
+                    onEdit={editarVistoria}
+                    onDelete={excluirVistoria}
+                    onConcluir={abrirConcluirVistoria}
+                    onCancelar={cancelarVistoria}
+                    onFixar={fixarVistoria}
+                    onVerMissoes={verMissoesDaVistoria}
+                  />
+
+                )}
 
               </PageSection>
 
