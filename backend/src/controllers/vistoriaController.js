@@ -60,6 +60,16 @@ const listarMissoesRealizadas = async (req, res) => {
   res.json(dados);
 };
 
+const atualizarMissao = async (req, res) => {
+  const dados = await vistoriaService.atualizarMissao(req.params.missaoId, req.body);
+  res.json(dados);
+};
+
+const removerMissao = async (req, res) => {
+  await vistoriaService.removerMissao(req.params.missaoId);
+  res.json({ mensagem: 'Registro removido com sucesso.' });
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -69,4 +79,6 @@ module.exports = {
   listarMissoes,
   concluirMissoes,
   listarMissoesRealizadas,
+  atualizarMissao,
+  removerMissao,
 };

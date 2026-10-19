@@ -416,12 +416,50 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
 };
 
 // Histórico de missões concluídas (todas as rodadas, de todas as
-// vistorias "Geral") -- base do Arquivo de Vistorias Realizadas.
+// vistorias "Geral") -- base da aba Realizadas.
 const listarMissoesRealizadas = () => {
   return prisma.vistoriaMissao.findMany({
     include: { unidade: true, vistoria: true },
     orderBy: { dataRealizacao: 'desc' },
   });
+};
+
+// Corrige uma missão já registrada (data, responsável, observações,
+// fotos) -- não mexe em qual residência/ciclo ela representa, só o
+// que foi anotado na hora de concluir.
+const atualizarMissao = async (missaoId, { dataRealizacao, realizadoPor, observacoes, fotos }) => {
+
+  const dados = {};
+
+  if (dataRealizacao !== undefined) dados.dataRealizacao = new Date(dataRealizacao);
+  if (realizadoPor !== undefined) dados.realizadoPor = realizadoPor || null;
+  if (observacoes !== undefined) dados.observacoes = observacoes || null;
+  if (fotos !== undefined) dados.fotos = fotos || null;
+
+  return prisma.vistoriaMissao.update({
+    where: { id: missaoId },
+    data: dados,
+    include: { unidade: true, vistoria: true },
+  });
+
+};
+
+// Desfaz o registro de uma missão (ex.: marcou a residência errada).
+// Se for do ciclo atual (ainda aberto), simplesmente "desmarca" a
+// residência -- a vistoria não fecha a rodada até ela ser batida de
+// novo. Não mexe no status/data da vistoria em si.
+const removerMissao = async (missaoId) => {
+
+  const missao = await prisma.vistoriaMissao.findUnique({ where: { id: missaoId } });
+
+  if (!missao) {
+    throw new Error('Registro não encontrado.');
+  }
+
+  await prisma.vistoriaMissao.delete({ where: { id: missaoId } });
+
+  return missao;
+
 };
 
 module.exports = {
@@ -433,4 +471,6 @@ module.exports = {
   listarMissoes,
   concluirMissoes,
   listarMissoesRealizadas,
+  atualizarMissao,
+  removerMissao,
 };

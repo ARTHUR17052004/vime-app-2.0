@@ -182,7 +182,7 @@ export default function VistoriaRelatorios({
 
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
           <p className="text-[var(--text-subtle)]">
             <span className="text-2xl font-bold text-[var(--text)] mr-2">{realizadasNoPeriodo.length}</span>
@@ -190,11 +190,11 @@ export default function VistoriaRelatorios({
           </p>
 
           {podeExportar && (
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
 
               <button
                 onClick={handleExportarPDF}
-                className="flex items-center gap-2 rounded-xl bg-red-500/15 border border-red-500/20 px-5 py-3 text-red-400 hover:bg-red-500/25 transition"
+                className="flex items-center justify-center gap-2 rounded-xl bg-red-500/15 border border-red-500/20 px-5 py-3 text-red-400 hover:bg-red-500/25 transition"
               >
                 <FileBarChart size={18} />
                 <Download size={16} />
@@ -203,7 +203,7 @@ export default function VistoriaRelatorios({
 
               <button
                 onClick={handleExportarExcel}
-                className="flex items-center gap-2 rounded-xl bg-emerald-500/15 border border-emerald-500/20 px-5 py-3 text-emerald-400 hover:bg-emerald-500/25 transition"
+                className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500/15 border border-emerald-500/20 px-5 py-3 text-emerald-400 hover:bg-emerald-500/25 transition"
               >
                 <FileSpreadsheet size={18} />
                 <Download size={16} />

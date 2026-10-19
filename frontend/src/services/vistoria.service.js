@@ -45,4 +45,17 @@ export const VistoriaService = {
     return api("/vistorias/arquivo-missoes");
   },
 
+  atualizarMissao(vistoriaId, missaoId, dados) {
+    return api(`/vistorias/${vistoriaId}/missoes/${missaoId}`, {
+      method: "PUT",
+      body: JSON.stringify(dados),
+    });
+  },
+
+  excluirMissao(vistoriaId, missaoId) {
+    return api(`/vistorias/${vistoriaId}/missoes/${missaoId}`, {
+      method: "DELETE",
+    });
+  },
+
 };
