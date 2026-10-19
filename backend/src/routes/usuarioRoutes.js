@@ -8,6 +8,12 @@ const perfilMiddleware = require('../middlewares/perfilMiddleware');
 
 router.get('/', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.listar);
 
+// Qualquer usuário logado pode ver essa lista (id+nome, só zeladores
+// ativos) -- é o que alimenta o seletor de "Responsável" na Vistoria;
+// quem cria (Operador, Gerência...) não tem permissão da tela de
+// Usuários, mas precisa escolher entre os zeladores.
+router.get('/zeladores', authMiddleware, usuarioController.listarZeladores);
+
 router.get('/:id', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.buscarPorId);
 
 router.post('/', authMiddleware, perfilMiddleware('ADMINISTRADOR'), usuarioController.criar);

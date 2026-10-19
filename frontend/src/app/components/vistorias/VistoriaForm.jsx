@@ -9,6 +9,7 @@ import Textarea from "../ui/Textarea";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
+import { UsuarioService } from "@/services/usuarios.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
@@ -25,12 +26,9 @@ const GERAL = "GERAL";
 // Campos Obrigatórios.
 const SEMPRE_OBRIGATORIOS = new Set(["nomeVistoria"]);
 
-// "responsavel" não tem mais campo na tela (preenchido sozinho com
-// quem está logado, ver vistorias/page.js) -- nunca checa como
-// obrigatório aqui, não tem onde a pessoa preencheria.
 const CAMPOS = [
   "nomeVistoria", "unidadeId", "kitnetId", "categoria",
-  "criticidade", "periodicidade", "dataProxima", "observacoes",
+  "criticidade", "periodicidade", "responsavel", "dataProxima", "observacoes",
 ];
 
 const ROTULOS = {
@@ -52,6 +50,7 @@ export default function VistoriaForm({
 
   const [residencias, setResidencias] = useState([]);
   const [kitnets, setKitnets] = useState([]);
+  const [zeladores, setZeladores] = useState([]);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
@@ -102,6 +101,30 @@ export default function VistoriaForm({
     }
 
     carregarResidencias();
+
+  }, []);
+
+  useEffect(() => {
+
+    async function carregarZeladores() {
+
+      try {
+
+        const resposta = await UsuarioService.listarZeladores();
+
+        setZeladores(
+          Array.isArray(resposta) ? resposta : resposta.data || []
+        );
+
+      } catch (err) {
+
+        console.error("Erro ao carregar zeladores:", err);
+
+      }
+
+    }
+
+    carregarZeladores();
 
   }, []);
 
@@ -430,6 +453,46 @@ export default function VistoriaForm({
             "Única" não se repete. As demais renovam sozinhas ao concluir --
             já marcam a próxima data automaticamente.
           </p>
+
+        </div>
+
+        <div>
+
+          <label className="font-semibold text-[var(--text-muted)]">
+            Responsável (Zelador)
+            {obrigatorios.has("responsavel") && <span className="ml-1 text-red-400">*</span>}
+          </label>
+
+          {/* Quem cria (Operador, Gerência...) não é quem executa --
+              só escolhe entre os zeladores cadastrados, sem digitar
+              nome nenhum. */}
+          <Select
+            name="responsavel"
+            value={formData.responsavel}
+            onChange={handleChange}
+            required={obrigatorios.has("responsavel")}
+            className={input}
+          >
+            <option value="" style={{ backgroundColor: "#1d2833", color: "#fff" }}>
+              Selecione um zelador...
+            </option>
+
+            {zeladores.map((zelador) => (
+              <option
+                key={zelador.id}
+                value={zelador.nome}
+                style={{ backgroundColor: "#1d2833", color: "#fff" }}
+              >
+                {zelador.nome}
+              </option>
+            ))}
+          </Select>
+
+          {zeladores.length === 0 && (
+            <p className="mt-1.5 text-xs text-[var(--text-faint)]">
+              Nenhum usuário com perfil Zelador cadastrado ainda.
+            </p>
+          )}
 
         </div>
 

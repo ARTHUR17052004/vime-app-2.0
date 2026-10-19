@@ -5,6 +5,13 @@ export const UsuarioService = {
     return api("/usuarios");
   },
 
+  // Só id+nome dos zeladores ativos -- pro seletor de "Responsável" da
+  // Vistoria, aberto pra qualquer usuário logado (não exige a
+  // permissão de Administração > Usuários).
+  listarZeladores() {
+    return api("/usuarios/zeladores");
+  },
+
   buscar(id) {
     return api(`/usuarios/${id}`);
   },

@@ -1,6 +1,40 @@
 const usuarioService = require("../services/usuarioService");
 
 /* ==========================================
+   LISTAR ZELADORES (opções pro seletor de Responsável da Vistoria)
+========================================== */
+
+const listarZeladores = async (req, res) => {
+
+    try {
+
+        const usuarios = await usuarioService.listarZeladores();
+
+        return res.status(200).json({
+
+            success: true,
+
+            data: usuarios,
+
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+
+            success: false,
+
+            message: "Erro ao listar zeladores.",
+
+        });
+
+    }
+
+};
+
+/* ==========================================
    LISTAR
 ========================================== */
 
@@ -301,6 +335,8 @@ const enviarAcesso = async (req, res) => {
 module.exports = {
 
     listar,
+
+    listarZeladores,
 
     buscarPorId,
 

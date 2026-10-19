@@ -72,6 +72,49 @@ const listar = () => {
 };
 
 /* =====================================================
+   LISTAR ZELADORES (só id+nome, ativos)
+   Pro seletor de "Responsável" da Vistoria -- quem cria (Operador,
+   Gerência...) não tem permissão de ver a lista completa de usuários
+   (isso é só de Administração), mas precisa escolher entre os
+   zeladores pra marcar quem vai executar. Dados mínimos, sem nada
+   sensível, igual locadorService.listarOpcoes() já faz pros locadores.
+===================================================== */
+
+const listarZeladores = () => {
+
+    return prisma.usuario.findMany({
+
+        where: {
+
+            ativo: true,
+
+            perfil: {
+
+                nome: "ZELADOR",
+
+            },
+
+        },
+
+        select: {
+
+            id: true,
+
+            nome: true,
+
+        },
+
+        orderBy: {
+
+            nome: "asc",
+
+        },
+
+    });
+
+};
+
+/* =====================================================
    BUSCAR POR ID
 ===================================================== */
 
@@ -588,6 +631,8 @@ const enviarAcesso = async (id) => {
 module.exports = {
 
     listar,
+
+    listarZeladores,
 
     buscarPorId,
 

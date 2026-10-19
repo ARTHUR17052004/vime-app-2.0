@@ -30,7 +30,6 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { usePermissao } from "../../hooks/usePermissao";
-import { useAuth } from "@/context/AuthContext";
 
 // Um passo da periodicidade (null = "Única", não repete). Mora fora do
 // componente porque é puro -- não depende de nada daqui.
@@ -60,7 +59,6 @@ export default function VistoriasPage() {
 
   const podeVisualizar = usePermissao("vistorias.visualizar");
   const podeCriar = usePermissao("vistorias.criar");
-  const { usuario } = useAuth();
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -172,9 +170,10 @@ export default function VistoriasPage() {
     categoria: dados.categoria,
     criticidade: dados.criticidade,
     periodicidade: dados.periodicidade,
-    // Sem campo na tela pra digitar -- preenche sozinho com quem
-    // está logado, em vez de deixar a pessoa escrever um nome toda vez.
-    responsavel: dados.responsavel || usuario?.nome || null,
+    // Quem cria a vistoria (Operador, Gerência...) não é quem a
+    // executa -- o campo é um seletor de zelador (ver VistoriaForm),
+    // nunca preenchido com quem está logado.
+    responsavel: dados.responsavel || null,
     dataUltima: dados.dataUltima || null,
     dataProxima: dados.dataProxima || null,
     status: dados.status,
