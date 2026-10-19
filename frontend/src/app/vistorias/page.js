@@ -23,7 +23,6 @@ import PageHeader from "../components/ui/PageHeader";
 import SearchInput from "../components/common/SearchInput";
 
 import VistoriaStats from "../components/vistorias/VistoriaStats";
-import VistoriaFilters from "../components/vistorias/VistoriaFilters";
 import VistoriaCardList from "../components/vistorias/VistoriaCardList";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
@@ -64,9 +63,6 @@ export default function VistoriasPage() {
 
   const [abaSelecionada, setAbaSelecionada] =
     useState("visao-geral");
-
-  const [filtroSelecionado, setFiltroSelecionado] =
-    useState("Todos");
 
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
@@ -395,13 +391,6 @@ const fixarVistoria = async (id, fixado) => {
   }
 
   if (
-    filtroSelecionado !== "Todos" &&
-    vistoria.categoria !== filtroSelecionado
-  ) {
-    return false;
-  }
-
-  if (
     residenciaSelecionada &&
     vistoria.unidadeId !== residenciaSelecionada
   ) {
@@ -505,12 +494,7 @@ const fixarVistoria = async (id, fixado) => {
 
           <PageSection spacing="lg">
 
-            <VistoriaFilters
-              filtroSelecionado={filtroSelecionado}
-              setFiltroSelecionado={setFiltroSelecionado}
-            />
-
-            <div className="mt-4 flex flex-wrap gap-4 items-center">
+            <div className="flex flex-wrap gap-4 items-center">
 
               <div className="flex-1 min-w-[220px]">
                 <ResidenciaFiltro
