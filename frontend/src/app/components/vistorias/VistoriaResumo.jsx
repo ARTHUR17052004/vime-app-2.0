@@ -2,6 +2,8 @@
 
 export default function VistoriaResumo({
   vistorias,
+  abaSelecionada,
+  setAbaSelecionada,
 }) {
 
   const programadas =
@@ -31,6 +33,7 @@ export default function VistoriaResumo({
   const cards = [
 
     {
+      aba: "visao-geral",
       titulo: "Total",
       valor: total,
       cor: "text-[var(--text)]",
@@ -38,6 +41,7 @@ export default function VistoriaResumo({
     },
 
     {
+      aba: "agendadas",
       titulo: "Programadas",
       valor: programadas,
       cor: "text-sky-400",
@@ -45,6 +49,7 @@ export default function VistoriaResumo({
     },
 
     {
+      aba: "realizadas",
       titulo: "Realizadas",
       valor: realizadas,
       cor: "text-emerald-400",
@@ -52,6 +57,7 @@ export default function VistoriaResumo({
     },
 
     {
+      aba: "atrasadas",
       titulo: "Atrasadas",
       valor: atrasadas,
       cor: "text-red-400",
@@ -62,57 +68,52 @@ export default function VistoriaResumo({
 
   return (
 
-    <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
+    // 2 colunas sempre (até no celular) -- 4 só teria espaço a partir
+    // de telas bem largas. Cada card é um botão: clicar nele já troca
+    // pra aba correspondente (Total -> Visão Geral, Atrasadas ->
+    // Atrasadas...), sem precisar rolar até as abas.
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-6">
 
       {cards.map((card) => (
 
-        <div
+        <button
           key={card.titulo}
-          className="
-            rounded-[22px]
+          type="button"
+          onClick={() => setAbaSelecionada?.(card.aba)}
+          className={`
+            rounded-2xl
             border
-            border-[var(--border-token)]
-            bg-[var(--surface)]
-            backdrop-blur-xl
-            p-6
+            text-left
+            p-4
+            md:p-6
             transition-all
             duration-300
             hover:border-emerald-500/30
             hover:shadow-[0_0_35px_rgba(16,185,129,.08)]
-          "
+            ${
+              abaSelecionada === card.aba
+                ? "border-emerald-500/40 bg-[var(--surface-2)]"
+                : "border-[var(--border-token)] bg-[var(--surface)]"
+            }
+          `}
         >
 
-          <div className="flex items-center justify-between">
-
-            <div>
-
-              <p className="text-[var(--text-subtle)] text-sm">
-                {card.titulo}
-              </p>
-
-              <h2
-                className={`
-                  text-4xl
-                  font-black
-                  mt-3
-                  ${card.cor}
-                `}
-              >
-                {card.valor}
-              </h2>
-
-            </div>
+          <div className="flex items-center gap-3">
 
             <div
               className={`
-                w-14
-                h-14
-                rounded-2xl
+                w-10
+                h-10
+                md:w-12
+                md:h-12
+                shrink-0
+                rounded-xl
                 flex
                 items-center
                 justify-center
-                text-xl
-                font-bold
+                text-base
+                md:text-lg
+                font-black
                 ${card.fundo}
                 ${card.cor}
               `}
@@ -122,9 +123,13 @@ export default function VistoriaResumo({
 
             </div>
 
+            <p className="text-[var(--text-subtle)] text-sm truncate">
+              {card.titulo}
+            </p>
+
           </div>
 
-        </div>
+        </button>
 
       ))}
 

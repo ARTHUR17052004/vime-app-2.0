@@ -23,8 +23,8 @@ export default function VistoriaTabs({
       nome: "Pendentes",
     },
     {
-      id: "ocorrencias",
-      nome: "Ocorrências",
+      id: "atrasadas",
+      nome: "Atrasadas",
     },
   ];
 

@@ -16,7 +16,6 @@ import VistoriaForm from "../components/vistorias/VistoriaForm";
 import VistoriaConcluirModal from "../components/vistorias/VistoriaConcluirModal";
 import VistoriaRelatorios from "../components/vistorias/VistoriaRelatorios";
 import VistoriaProximasVistorias from "../components/vistorias/VistoriaProximasVistorias";
-import OcorrenciaCard from "../components/vistorias/OcorrenciaCard";
 import FadeIn from "../components/ui/FadeIn";
 import PageSection from "../components/ui/PageSection";
 import Button from "../components/ui/Button";
@@ -420,6 +419,9 @@ const fixarVistoria = async (id, fixado) => {
     case "pendentes":
       return vistoria.status === "PENDENTE";
 
+    case "atrasadas":
+      return vistoria.status === "ATRASADA";
+
     default:
       return true;
 
@@ -491,6 +493,8 @@ const fixarVistoria = async (id, fixado) => {
 
             <VistoriaStats
               vistorias={vistorias}
+              abaSelecionada={abaSelecionada}
+              setAbaSelecionada={setAbaSelecionada}
             />
 
           </PageSection>
@@ -544,21 +548,7 @@ const fixarVistoria = async (id, fixado) => {
 
         </FadeIn>
 
-        {abaSelecionada === "ocorrencias" ? (
-
-          <FadeIn delay={0.20}>
-
-            <PageSection spacing="xxl">
-
-              <OcorrenciaCard />
-
-            </PageSection>
-
-          </FadeIn>
-
-        ) : (
-
-          <>
+        <>
 
             <FadeIn delay={0.20}>
 
@@ -602,8 +592,6 @@ const fixarVistoria = async (id, fixado) => {
             </FadeIn>
 
           </>
-
-        )}
 
         <VistoriaModal
           isOpen={modalOpen}

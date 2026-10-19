@@ -80,15 +80,34 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
     const nomeUnidade = kitnet.unidade?.nome || "residência";
     const agora = new Date();
 
+    // Endereço completo da residência -- pra quem vai até lá não
+    // precisar abrir a Residência só pra descobrir onde fica.
+    const u = kitnet.unidade || {};
+    const endereco = [
+      [u.logradouro, u.numero].filter(Boolean).join(", "),
+      u.complemento,
+      u.bairro,
+      [u.cidade, u.uf].filter(Boolean).join("/"),
+    ].filter(Boolean).join(" -- ") || null;
+
+    // Responsável já nasce com um zelador de verdade escolhido (o
+    // primeiro ativo), pra bater com as opções do seletor da tela --
+    // "Zelador" genérico só se ainda não tiver nenhum cadastrado.
+    const primeiroZelador = await prisma.usuario.findFirst({
+      where: { ativo: true, perfil: { nome: "ZELADOR" } },
+      orderBy: { nome: "asc" },
+      select: { nome: true },
+    });
+
     const vistoria = await prisma.vistoria.create({
       data: {
         titulo: `Vistoria de entrega - ${nomeKitnet} (${nomeUnidade})`,
-        descricao: "Gerada automaticamente: a kitnet acabou de ficar vazia. Confira o estado de entrega antes de disponibilizar pro próximo inquilino.",
+        descricao: `Gerada automaticamente: a kitnet acabou de ficar vazia. Precisa ir até lá fazer a visita e a manutenção necessária antes de disponibilizar pro próximo inquilino.${endereco ? `\n\nEndereço: ${endereco}` : ""}`,
         unidadeId: kitnet.unidadeId,
         kitnetId: kitnet.id,
         categoria: "Entrega de kitnet vazia",
         criticidade: "Alta",
-        responsavel: "Zelador",
+        responsavel: primeiroZelador?.nome || "Zelador",
         status: "PENDENTE",
         data: agora,
         dataProxima: agora,
@@ -102,7 +121,7 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Vistoria urgente: kitnet vazia",
-      mensagem: `🔑🚨 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia! Vai lá conferir a entrega assim que puder.`,
+      mensagem: `🔑🚨 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia!${endereco ? ` (${endereco})` : ""} Vai lá conferir a entrega assim que puder.`,
       link: `/vistorias/${vistoria.id}`,
     });
 
