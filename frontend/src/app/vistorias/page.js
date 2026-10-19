@@ -66,6 +66,33 @@ export default function VistoriasPage() {
   const [carregado, setCarregado] =
     useState(false);
 
+  // Histórico de missões (Realizadas + Relatórios mostram a mesma
+  // coisa) -- um estado só, buscado uma vez aqui, pra editar/excluir
+  // numa aba refletir na outra na hora, sem cada uma guardar sua
+  // própria cópia desatualizada.
+  const [missoesRealizadas, setMissoesRealizadas] =
+    useState([]);
+
+  const [carregandoMissoes, setCarregandoMissoes] =
+    useState(true);
+
+  const carregarMissoes = useCallback(async () => {
+
+    try {
+      const resposta = await VistoriaService.listarArquivoMissoes();
+      setMissoesRealizadas(Array.isArray(resposta) ? resposta : []);
+    } catch (err) {
+      console.error("Erro ao carregar vistorias realizadas:", err);
+    } finally {
+      setCarregandoMissoes(false);
+    }
+
+  }, []);
+
+  useEffect(() => {
+    carregarMissoes();
+  }, [carregarMissoes]);
+
   // Clicar em "X/Y VIMEs concluídas" num card leva direto pra aba
   // Realizadas já filtrada só nessa vistoria.
   const [filtroMissaoVistoriaId, setFiltroMissaoVistoriaId] =
@@ -549,9 +576,12 @@ const fixarVistoria = async (id, fixado) => {
 
                   <VistoriaRealizadasTable
                     vistorias={vistorias}
+                    missoesRealizadas={missoesRealizadas}
+                    carregandoMissoes={carregandoMissoes}
                     filtroVistoriaId={filtroMissaoVistoriaId}
                     onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
                     onRecarregarVistorias={carregar}
+                    onRecarregarMissoes={carregarMissoes}
                   />
 
                 ) : (
@@ -590,6 +620,7 @@ const fixarVistoria = async (id, fixado) => {
 
                 <VistoriaRelatorios
                   vistorias={vistorias}
+                  missoesRealizadas={missoesRealizadas}
                 />
 
               </PageSection>

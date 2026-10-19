@@ -15,35 +15,22 @@ import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 // missão de uma vistoria "Geral" (uma por residência/ciclo -- registro
 // à parte, dá pra editar/excluir) e a última execução registrada de
 // uma vistoria normal (concluidaEm -- é um campo dela mesma, só dá
-// pra ver).
+// pra ver). `missoesRealizadas` vem de cima (vistorias/page.js) -- o
+// mesmo estado que a aba Relatórios usa, pra editar/excluir aqui
+// refletir lá também na hora, em vez de cada um buscar (e ficar) com
+// sua própria cópia desatualizada.
 export default function VistoriaRealizadasTable({
   vistorias = [],
+  missoesRealizadas = [],
+  carregandoMissoes = false,
   filtroVistoriaId = null,
   onLimparFiltro,
   onRecarregarVistorias,
+  onRecarregarMissoes,
 }) {
 
-  const [missoesRealizadas, setMissoesRealizadas] = useState([]);
-  const [carregando, setCarregando] = useState(true);
   const [detalhe, setDetalhe] = useState(null);
   const [editando, setEditando] = useState(null);
-
-  const carregarMissoes = async () => {
-
-    try {
-      const resposta = await VistoriaService.listarArquivoMissoes();
-      setMissoesRealizadas(Array.isArray(resposta) ? resposta : []);
-    } catch (err) {
-      console.error("Erro ao carregar vistorias realizadas:", err);
-    } finally {
-      setCarregando(false);
-    }
-
-  };
-
-  useEffect(() => {
-    carregarMissoes();
-  }, []);
 
   const linhas = useMemo(() => {
 
@@ -90,7 +77,7 @@ export default function VistoriaRealizadasTable({
 
     try {
       await VistoriaService.excluirMissao(item.vistoriaId, item.missaoId);
-      await carregarMissoes();
+      await onRecarregarMissoes?.();
     } catch (err) {
       alert(err.message || "Erro ao excluir o registro.");
     }
@@ -166,7 +153,7 @@ export default function VistoriaRealizadasTable({
       <Table
         columns={colunas}
         data={linhas}
-        loading={carregando}
+        loading={carregandoMissoes}
         emptyMessage="Nenhuma vistoria realizada ainda."
       />
 
@@ -177,7 +164,7 @@ export default function VistoriaRealizadasTable({
         onClose={() => setEditando(null)}
         onSalvo={async () => {
           setEditando(null);
-          await carregarMissoes();
+          await onRecarregarMissoes?.();
         }}
       />
 

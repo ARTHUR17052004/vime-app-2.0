@@ -1,46 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FileBarChart, FileSpreadsheet, Download } from "lucide-react";
 
 import Table from "../ui/Table";
-import { VistoriaService } from "@/services/vistoria.service";
 import { formatDateTime } from "@/utils/formatDate";
 import { exportarPDF, exportarExcel } from "@/utils/exportar";
 import { usePermissao } from "../../../hooks/usePermissao";
 
 const COLUNAS_EXPORT = ["Vistoria", "Residência", "Data/Hora Realizada", "Responsável"];
 
+// `missoesRealizadas` vem de cima (vistorias/page.js) -- um estado só,
+// compartilhado com a aba Realizadas, pra editar/excluir uma missão lá
+// já refletir aqui também, sem cada um buscar (e ficar) com sua
+// própria cópia.
 export default function VistoriaRelatorios({
   vistorias = [],
+  missoesRealizadas = [],
 }) {
 
   const podeExportar = usePermissao("vistorias.exportar");
 
-  const [missoesRealizadas, setMissoesRealizadas] = useState([]);
-  const [carregando, setCarregando] = useState(true);
-
   const [dataDe, setDataDe] = useState("");
   const [dataAte, setDataAte] = useState("");
-
-  useEffect(() => {
-
-    async function carregarArquivo() {
-
-      try {
-        const resposta = await VistoriaService.listarArquivoMissoes();
-        setMissoesRealizadas(Array.isArray(resposta) ? resposta : []);
-      } catch (err) {
-        console.error("Erro ao carregar arquivo de vistorias realizadas:", err);
-      } finally {
-        setCarregando(false);
-      }
-
-    }
-
-    carregarArquivo();
-
-  }, []);
 
   // Junta as duas fontes de "realizada" que existem no sistema: cada
   // missão de uma vistoria "Geral" (uma por residência/ciclo, já é
@@ -220,7 +202,6 @@ export default function VistoriaRelatorios({
       <Table
         columns={colunasTabela}
         data={realizadasNoPeriodo}
-        loading={carregando}
         emptyMessage="Nenhuma vistoria realizada nesse período."
       />
 
