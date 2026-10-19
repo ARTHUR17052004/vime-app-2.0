@@ -90,7 +90,7 @@ export default function VistoriaResumo({
             duration-300
             ${
               abaSelecionada === card.aba
-                ? "bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20"
+                ? "bg-green-700 border-green-700"
                 : "bg-[var(--surface)] border-[var(--border-token)] hover:border-emerald-500/30 hover:shadow-[0_0_35px_rgba(16,185,129,.08)]"
             }
           `}
