@@ -88,12 +88,10 @@ export default function VistoriaResumo({
             md:p-6
             transition-all
             duration-300
-            hover:border-emerald-500/30
-            hover:shadow-[0_0_35px_rgba(16,185,129,.08)]
             ${
               abaSelecionada === card.aba
-                ? "border-emerald-500/40 bg-[var(--surface-2)]"
-                : "border-[var(--border-token)] bg-[var(--surface)]"
+                ? "bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-500/20"
+                : "bg-[var(--surface)] border-[var(--border-token)] hover:border-emerald-500/30 hover:shadow-[0_0_35px_rgba(16,185,129,.08)]"
             }
           `}
         >
@@ -114,8 +112,11 @@ export default function VistoriaResumo({
                 text-base
                 md:text-lg
                 font-black
-                ${card.fundo}
-                ${card.cor}
+                ${
+                  abaSelecionada === card.aba
+                    ? "bg-black/15 text-[var(--text)]"
+                    : `${card.fundo} ${card.cor}`
+                }
               `}
             >
 
@@ -123,7 +124,17 @@ export default function VistoriaResumo({
 
             </div>
 
-            <p className="text-[var(--text-subtle)] text-sm truncate">
+            <p
+              className={`
+                text-sm
+                truncate
+                ${
+                  abaSelecionada === card.aba
+                    ? "text-[var(--text)] font-semibold"
+                    : "text-[var(--text-subtle)]"
+                }
+              `}
+            >
               {card.titulo}
             </p>
 
