@@ -9,7 +9,8 @@
 const TIPOS = [
   { chave: "KITNET_VAZIA", grupo: "Imóveis", rotulo: "Kitnet vazia", descricao: "Avisa todo dia enquanto uma kitnet passar de 72h sem ser locada.", titulos: ["Kitnet vazia"] },
   { chave: "VISTORIA_NOVA", grupo: "Imóveis", rotulo: "Nova vistoria", descricao: "Quando uma vistoria é cadastrada.", titulos: ["Nova vistoria"] },
-  { chave: "VISTORIA_ATRASADA", grupo: "Imóveis", rotulo: "Vistoria atrasada", descricao: "Vistoria que passou da data sem ser realizada.", titulos: ["Vistoria atrasada"] },
+  { chave: "VISTORIA_PENDENTE", grupo: "Imóveis", rotulo: "Vistoria pendente", descricao: "Avisa assim que a vistoria entra nas últimas 72h antes do prazo, e todo dia enquanto continuar sem resposta.", titulos: ["Vistoria pendente"] },
+  { chave: "VISTORIA_ATRASADA", grupo: "Imóveis", rotulo: "Vistoria atrasada", descricao: "Avisa assim que o prazo vence sem resposta, e todo dia enquanto continuar atrasada.", titulos: ["Vistoria atrasada"] },
   { chave: "VISTORIA_ENTREGA_VAZIA", grupo: "Imóveis", rotulo: "Vistoria urgente (kitnet vazia)", descricao: "Toca um alerta mais forte: uma kitnet acabou de ficar vazia e já tem vistoria de entrega esperando (pro Zelador).", titulos: ["Vistoria urgente: kitnet vazia"] },
 
   { chave: "CONTRATO_VENCENDO", grupo: "Contratos", rotulo: "Contrato próximo do vencimento", descricao: "Contrato ativo que vence nos próximos dias.", titulos: ["Contrato próximo do vencimento"] },

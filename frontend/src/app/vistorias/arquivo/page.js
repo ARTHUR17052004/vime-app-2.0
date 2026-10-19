@@ -2,9 +2,10 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { ArrowLeft, Eye, ImageIcon } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 
@@ -14,6 +15,8 @@ import PageContainer from "../../components/ui/PageContainer";
 import PageSection from "../../components/ui/PageSection";
 import PageHeader from "../../components/ui/PageHeader";
 import Table from "../../components/ui/Table";
+import Modal from "../../components/ui/Modal";
+import Button from "../../components/ui/Button";
 import SemPermissao from "../../components/ui/SemPermissao";
 
 import SearchInput from "../../components/common/SearchInput";
@@ -27,12 +30,24 @@ import { usePermissao } from "../../../hooks/usePermissao";
 // no backend: quando todas as residências ativas de um ciclo são
 // batidas, a vistoria fecha a rodada e abre a próxima sozinha.
 export default function VistoriaArquivoPage() {
+  return (
+    <Suspense fallback={null}>
+      <VistoriaArquivoConteudo />
+    </Suspense>
+  );
+}
+
+function VistoriaArquivoConteudo() {
 
   const podeVisualizar = usePermissao("arquivoVistorias.visualizar");
+
+  const searchParams = useSearchParams();
+  const vistoriaIdFiltro = searchParams.get("vistoriaId") || "";
 
   const [missoes, setMissoes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [detalhe, setDetalhe] = useState(null);
 
   useEffect(() => {
 
@@ -66,6 +81,8 @@ export default function VistoriaArquivoPage() {
 
     return missoes.filter((m) => {
 
+      if (vistoriaIdFiltro && m.vistoriaId !== vistoriaIdFiltro) return false;
+
       const alvo = `
         ${m.vistoria?.titulo || ""}
         ${m.unidade?.nome || ""}
@@ -76,7 +93,7 @@ export default function VistoriaArquivoPage() {
 
     });
 
-  }, [missoes, search]);
+  }, [missoes, search, vistoriaIdFiltro]);
 
   const colunas = [
     { key: "vistoria", title: "Vistoria", render: (m) => m.vistoria?.titulo || "-" },
@@ -84,6 +101,33 @@ export default function VistoriaArquivoPage() {
     { key: "ciclo", title: "Ciclo" },
     { key: "dataRealizacao", title: "Data/Hora Realizada", render: (m) => formatDateTime(m.dataRealizacao) },
     { key: "realizadoPor", title: "Responsável", render: (m) => m.realizadoPor || "-" },
+    {
+      key: "fotos",
+      title: "Fotos",
+      render: (m) => (
+        m.fotos?.length > 0
+          ? (
+            <span className="inline-flex items-center gap-1 text-[var(--text-subtle)]">
+              <ImageIcon size={14} />
+              {m.fotos.length}
+            </span>
+          )
+          : "-"
+      ),
+    },
+    {
+      key: "acoes",
+      title: "",
+      render: (m) => (
+        <button
+          onClick={() => setDetalhe(m)}
+          className="inline-flex items-center gap-1.5 text-emerald-400 hover:text-emerald-300 text-sm font-medium"
+        >
+          <Eye size={15} />
+          Ver
+        </button>
+      ),
+    },
   ];
 
   if (!podeVisualizar) {
@@ -162,6 +206,16 @@ export default function VistoriaArquivoPage() {
                 placeholder="Pesquisar por vistoria, residência ou responsável..."
               />
 
+              {vistoriaIdFiltro && (
+                <p className="mt-3 text-sm text-[var(--text-subtle)]">
+                  Mostrando só os registros de <strong className="text-[var(--text)]">{missoes.find((m) => m.vistoriaId === vistoriaIdFiltro)?.vistoria?.titulo || "uma vistoria"}</strong>.
+                  {" "}
+                  <Link href="/vistorias/arquivo" className="text-emerald-400 hover:underline">
+                    Ver tudo
+                  </Link>
+                </p>
+              )}
+
             </PageSection>
 
           </FadeIn>
@@ -179,6 +233,86 @@ export default function VistoriaArquivoPage() {
             </PageSection>
 
           </FadeIn>
+
+          <Modal
+            open={!!detalhe}
+            onClose={() => setDetalhe(null)}
+            title={detalhe?.unidade?.nome || "Detalhes"}
+            subtitle={detalhe?.vistoria?.titulo}
+            size="md"
+          >
+
+            {detalhe && (
+
+              <div className="space-y-5">
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Data/Hora Realizada</p>
+                    <p className="text-[var(--text)] font-medium">{formatDateTime(detalhe.dataRealizacao)}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Responsável</p>
+                    <p className="text-[var(--text)] font-medium">{detalhe.realizadoPor || "-"}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Residência</p>
+                    <p className="text-[var(--text)] font-medium">{detalhe.unidade?.nome || "-"}</p>
+                  </div>
+
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Ciclo</p>
+                    <p className="text-[var(--text)] font-medium">{detalhe.ciclo}</p>
+                  </div>
+
+                </div>
+
+                {detalhe.observacoes && (
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Observações</p>
+                    <p className="text-[var(--text-muted)] whitespace-pre-wrap">{detalhe.observacoes}</p>
+                  </div>
+                )}
+
+                {detalhe.fotos?.length > 0 && (
+                  <div>
+                    <p className="text-[var(--text-faint)] uppercase text-xs mb-2">Fotos e Vídeos</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      {detalhe.fotos.map((midia, index) =>
+                        midia.startsWith("data:video") ? (
+                          <video
+                            key={index}
+                            src={midia}
+                            controls
+                            className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
+                          />
+                        ) : (
+                          <img
+                            key={index}
+                            src={midia}
+                            alt={`Mídia ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
+                          />
+                        )
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex justify-end">
+                  <Button variant="secondary" onClick={() => setDetalhe(null)}>
+                    Fechar
+                  </Button>
+                </div>
+
+              </div>
+
+            )}
+
+          </Modal>
 
         </PageContainer>
 

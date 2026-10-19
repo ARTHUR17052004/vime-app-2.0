@@ -12,6 +12,7 @@ const verificarKitnetsVazias = require("./verificarKitnetsVaziasJob");
 const verificarSolicitacoesAtrasadas = require("./verificarSolicitacoesAtrasadasJob");
 const verificarVistoriasAtrasadas = require("./verificarVistoriasAtrasadasJob");
 const atualizarStatusVistorias = require("./atualizarStatusVistoriasJob");
+const lembrarVistoriasPendentes = require("./lembrarVistoriasPendentesJob");
 
 const iniciarJobs = () => {
 
@@ -47,6 +48,8 @@ const iniciarJobs = () => {
     await verificarKitnetsVazias();
 
     await verificarSolicitacoesAtrasadas();
+
+    await lembrarVistoriasPendentes();
 
     await verificarVistoriasAtrasadas();
 

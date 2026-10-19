@@ -581,12 +581,17 @@ model Vistoria {
 
   fotosConclusao Json?
 
+  observacoesConclusao String?
+
   observacoes String?
 
-  // Último alerta "vistoria atrasada" enviado por
-  // verificarVistoriasAtrasadasJob.js (dataProxima + 72h+ sem realizar)
-  // -- evita reenviar mais de uma vez por dia.
+  // Último lembrete diário enviado (verificarVistoriasAtrasadasJob.js /
+  // lembrarVistoriasPendentesJob.js) -- evita reenviar mais de uma vez
+  // por dia pro mesmo status. A notificação da PRIMEIRA entrada em cada
+  // status (PROGRAMADA -> PENDENTE -> ATRASADA) sai na hora, direto do
+  // atualizarStatusVistoriasJob.js.
   ultimoAlertaAtrasadaEm DateTime?
+  ultimoAlertaPendenteEm DateTime?
 
   createdAt DateTime @default(now())
 
@@ -628,6 +633,7 @@ model VistoriaMissao {
   dataRealizacao DateTime
   realizadoPor   String?
   fotos          Json?
+  observacoes    String?
 
   createdAt DateTime @default(now())
 

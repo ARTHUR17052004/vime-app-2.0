@@ -299,6 +299,8 @@ const listarMissoes = async (vistoriaId) => {
         concluida: !!missao,
         dataRealizacao: missao?.dataRealizacao || null,
         realizadoPor: missao?.realizadoPor || null,
+        fotos: missao?.fotos || null,
+        observacoes: missao?.observacoes || null,
       };
     }),
   };
@@ -309,7 +311,7 @@ const listarMissoes = async (vistoriaId) => {
 // as residências ativas tiverem missão no ciclo, fecha a rodada --
 // igual concluir uma vistoria normal (renova sozinha pra próxima data
 // se tiver periodicidade) -- e abre um ciclo novo e vazio.
-const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor }) => {
+const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor, observacoes }) => {
 
   if (!Array.isArray(unidadeIds) || unidadeIds.length === 0) {
     throw new Error('Selecione ao menos uma residência.');
@@ -339,11 +341,13 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
         dataRealizacao: dataEscolhida,
         realizadoPor: realizadoPor || null,
         fotos: fotos || null,
+        observacoes: observacoes || null,
       },
       update: {
         dataRealizacao: dataEscolhida,
         realizadoPor: realizadoPor || null,
         fotos: fotos || null,
+        observacoes: observacoes || null,
       },
     })
   ));

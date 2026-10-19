@@ -279,35 +279,45 @@ export default function DetalhesVistoriaPage() {
 
         )}
 
-        {vistoria.fotosConclusao?.length > 0 && (
+        {(vistoria.fotosConclusao?.length > 0 || vistoria.observacoesConclusao) && (
 
           <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
             <h2 className="text-2xl font-bold text-[var(--text)] mb-6">
-              Fotos e Vídeos da Baixa
+              Fotos, Vídeos e Observações da Baixa
             </h2>
 
-            <div className="grid md:grid-cols-3 gap-4">
+            {vistoria.observacoesConclusao && (
+              <p className="text-[var(--text-muted)] whitespace-pre-wrap mb-6">
+                {vistoria.observacoesConclusao}
+              </p>
+            )}
 
-              {vistoria.fotosConclusao.map((midia, index) =>
-                midia.startsWith("data:video") ? (
-                  <video
-                    key={index}
-                    src={midia}
-                    controls
-                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                  />
-                ) : (
-                  <img
-                    key={index}
-                    src={midia}
-                    alt={`Mídia ${index + 1}`}
-                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                  />
-                )
-              )}
+            {vistoria.fotosConclusao?.length > 0 && (
 
-            </div>
+              <div className="grid md:grid-cols-3 gap-4">
+
+                {vistoria.fotosConclusao.map((midia, index) =>
+                  midia.startsWith("data:video") ? (
+                    <video
+                      key={index}
+                      src={midia}
+                      controls
+                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                    />
+                  ) : (
+                    <img
+                      key={index}
+                      src={midia}
+                      alt={`Mídia ${index + 1}`}
+                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                    />
+                  )
+                )}
+
+              </div>
+
+            )}
 
           </div>
 

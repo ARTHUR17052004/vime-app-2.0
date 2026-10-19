@@ -253,7 +253,7 @@ const abrirConcluirVistoria = (id) => {
 };
 
 const confirmarConcluirVistoria = async (
-  { dataUltima, fotosConclusao }
+  { dataUltima, fotosConclusao, observacoesConclusao }
 ) => {
 
   const vistoria = vistoriaParaConcluir;
@@ -293,6 +293,7 @@ const confirmarConcluirVistoria = async (
       dataProxima: recorrente ? proximaData.toISOString() : null,
       concluidaEm: new Date().toISOString(),
       fotosConclusao,
+      observacoesConclusao,
     });
 
     await carregar();

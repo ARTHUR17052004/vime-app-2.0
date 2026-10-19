@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import { Image as ImageIcon, CheckCircle2, NotebookPen } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
@@ -18,6 +18,7 @@ export default function VistoriaConcluirModal({
 }) {
   const [data, setData] = useState("");
   const [midias, setMidias] = useState([]);
+  const [observacoes, setObservacoes] = useState("");
   const [erro, setErro] = useState("");
   const [enviando, setEnviando] = useState(false);
 
@@ -36,6 +37,7 @@ export default function VistoriaConcluirModal({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(new Date().toISOString().split("T")[0]);
       setMidias([]);
+      setObservacoes("");
       setErro("");
       setSelecionadas(new Set());
       setMissoes(null);
@@ -110,6 +112,7 @@ export default function VistoriaConcluirModal({
           dataRealizacao: data,
           fotos: midias,
           realizadoPor: vistoria.responsavel || null,
+          observacoes: observacoes || null,
         });
 
         onMissoesConcluidas?.();
@@ -131,6 +134,7 @@ export default function VistoriaConcluirModal({
     onConfirm({
       dataUltima: data,
       fotosConclusao: midias,
+      observacoesConclusao: observacoes || null,
     });
 
   };
@@ -278,6 +282,34 @@ export default function VistoriaConcluirModal({
           {erro && (
             <p className="mt-3 text-sm text-red-400">{erro}</p>
           )}
+        </div>
+
+        <div>
+          <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] mb-2">
+            <NotebookPen size={16} />
+            Observações (opcional)
+          </label>
+
+          <textarea
+            value={observacoes}
+            onChange={(e) => setObservacoes(e.target.value)}
+            rows={3}
+            placeholder="Algo a registrar sobre essa vistoria..."
+            className="
+              w-full
+              rounded-xl
+              border
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
+              px-4
+              py-3
+              text-[var(--text)]
+              text-sm
+              outline-none
+              focus:border-emerald-500
+              resize-none
+            "
+          />
         </div>
 
         <div className="flex justify-end gap-3">

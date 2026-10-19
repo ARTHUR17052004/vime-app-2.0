@@ -157,7 +157,9 @@ export default function VistoriaCard({
                 )}
 
                 {vistoria.progressoMissoes && (
-                  <span
+                  <Link
+                    href={`/vistorias/arquivo?vistoriaId=${vistoria.id}`}
+                    title="Ver residências já vistoriadas neste ciclo"
                     className="
                       text-xs
                       font-semibold
@@ -168,10 +170,12 @@ export default function VistoriaCard({
                       rounded-full
                       px-3
                       py-1
+                      hover:bg-emerald-500/20
+                      transition
                     "
                   >
                     {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs concluídas
-                  </span>
+                  </Link>
                 )}
 
               </div>
