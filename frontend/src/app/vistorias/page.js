@@ -30,11 +30,37 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { useAuth } from "@/context/AuthContext";
+
+// Um passo da periodicidade (null = "Única", não repete). Mora fora do
+// componente porque é puro -- não depende de nada daqui.
+function avancarUmaVez(data, periodicidade) {
+
+  const nova = new Date(data);
+
+  switch (periodicidade) {
+
+    case "Diária": nova.setDate(nova.getDate() + 1); break;
+    case "Semanal": nova.setDate(nova.getDate() + 7); break;
+    case "Quinzenal": nova.setDate(nova.getDate() + 15); break;
+    case "Mensal": nova.setMonth(nova.getMonth() + 1); break;
+    case "Bimestral": nova.setMonth(nova.getMonth() + 2); break;
+    case "Trimestral": nova.setMonth(nova.getMonth() + 3); break;
+    case "Semestral": nova.setMonth(nova.getMonth() + 6); break;
+    case "Anual": nova.setFullYear(nova.getFullYear() + 1); break;
+    default: return null;
+
+  }
+
+  return nova;
+
+}
 
 export default function VistoriasPage() {
 
   const podeVisualizar = usePermissao("vistorias.visualizar");
   const podeCriar = usePermissao("vistorias.criar");
+  const { usuario } = useAuth();
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -146,11 +172,12 @@ export default function VistoriasPage() {
     categoria: dados.categoria,
     criticidade: dados.criticidade,
     periodicidade: dados.periodicidade,
-    responsavel: dados.responsavel,
+    // Sem campo na tela pra digitar -- preenche sozinho com quem
+    // está logado, em vez de deixar a pessoa escrever um nome toda vez.
+    responsavel: dados.responsavel || usuario?.nome || null,
     dataUltima: dados.dataUltima || null,
     dataProxima: dados.dataProxima || null,
     status: dados.status,
-    checklist: dados.checklist,
     fotos: dados.fotos,
     observacoes: dados.observacoes,
   };
@@ -253,47 +280,24 @@ const confirmarConcluirVistoria = async (
     ? new Date(dataUltima)
     : new Date();
 
-  const proximaData = new Date(dataEscolhida);
+  // Avança a partir da data que JÁ estava programada (não de quando foi
+  // concluída de verdade) -- assim "todo dia 10" continua caindo dia 10
+  // pra sempre, mesmo concluindo atrasado ou adiantado. Só usa a data de
+  // conclusão como base se a vistoria nunca teve uma próxima data.
+  const baseAncora = vistoria?.dataProxima ? new Date(vistoria.dataProxima) : dataEscolhida;
 
-  let recorrente = true;
+  let proximaData = avancarUmaVez(baseAncora, vistoria?.periodicidade);
+  const recorrente = proximaData !== null;
 
-  switch (vistoria?.periodicidade) {
+  if (recorrente) {
 
-    case "Diária":
-      proximaData.setDate(proximaData.getDate() + 1);
-      break;
-
-    case "Semanal":
-      proximaData.setDate(proximaData.getDate() + 7);
-      break;
-
-    case "Quinzenal":
-      proximaData.setDate(proximaData.getDate() + 15);
-      break;
-
-    case "Mensal":
-      proximaData.setMonth(proximaData.getMonth() + 1);
-      break;
-
-    case "Bimestral":
-      proximaData.setMonth(proximaData.getMonth() + 2);
-      break;
-
-    case "Trimestral":
-      proximaData.setMonth(proximaData.getMonth() + 3);
-      break;
-
-    case "Semestral":
-      proximaData.setMonth(proximaData.getMonth() + 6);
-      break;
-
-    case "Anual":
-      proximaData.setFullYear(proximaData.getFullYear() + 1);
-      break;
-
-    default:
-      recorrente = false;
-      break;
+    // Concluiu bem atrasado (ex.: 2 meses depois)? Pula pras próximas
+    // ocorrências até achar uma data ainda no futuro, sem perder o dia
+    // fixo do ciclo.
+    const agora = new Date();
+    while (proximaData <= agora) {
+      proximaData = avancarUmaVez(proximaData, vistoria.periodicidade);
+    }
 
   }
 

@@ -25,9 +25,12 @@ const GERAL = "GERAL";
 // Campos Obrigatórios.
 const SEMPRE_OBRIGATORIOS = new Set(["nomeVistoria"]);
 
+// "responsavel" não tem mais campo na tela (preenchido sozinho com
+// quem está logado, ver vistorias/page.js) -- nunca checa como
+// obrigatório aqui, não tem onde a pessoa preencheria.
 const CAMPOS = [
   "nomeVistoria", "unidadeId", "kitnetId", "categoria",
-  "criticidade", "periodicidade", "responsavel", "dataProxima", "observacoes",
+  "criticidade", "periodicidade", "dataProxima", "observacoes",
 ];
 
 const ROTULOS = {
@@ -76,15 +79,6 @@ export default function VistoriaForm({
     observacoes: "",
 
     fotos: [],
-
-    checklist: {
-      portao: false,
-      telhado: false,
-      caixaAgua: false,
-      extintores: false,
-      iluminacao: false,
-      corredores: false,
-    },
   });
 
   useEffect(() => {
@@ -439,24 +433,6 @@ export default function VistoriaForm({
 
         </div>
 
-      <div>
-
-  <label className="font-semibold text-[var(--text-muted)]">
-    Responsável
-    {obrigatorios.has("responsavel") && <span className="ml-1 text-red-400">*</span>}
-  </label>
-
-  <Input
-    name="responsavel"
-    value={formData.responsavel}
-    onChange={handleChange}
-    placeholder="Nome do responsável"
-    required={obrigatorios.has("responsavel")}
-    className={input}
-  />
-
-</div>
-
 </div>
 
 <div className="grid md:grid-cols-2 gap-6">
@@ -517,120 +493,6 @@ export default function VistoriaForm({
     <option>ATRASADA</option>
 
   </Select>
-
-</div>
-
-<div>
-
-  <label className="font-semibold text-[var(--text-muted)] block mb-4">
-    Checklist da Vistoria
-  </label>
-
-  <div className="grid md:grid-cols-2 gap-4">
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.portao}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              portao: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Portão</span>
-    </label>
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.telhado}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              telhado: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Telhado</span>
-    </label>
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.caixaAgua}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              caixaAgua: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Caixa de Água</span>
-    </label>
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.extintores}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              extintores: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Extintores</span>
-    </label>
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.iluminacao}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              iluminacao: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Iluminação</span>
-    </label>
-
-    <label className="flex items-center gap-3 rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 text-[var(--text-muted)]">
-      <input
-        type="checkbox"
-        checked={formData.checklist.corredores}
-        onChange={(e) =>
-          setFormData({
-            ...formData,
-            checklist: {
-              ...formData.checklist,
-              corredores: e.target.checked,
-            },
-          })
-        }
-      />
-      <span>Corredores</span>
-    </label>
-
-  </div>
 
 </div>
 
