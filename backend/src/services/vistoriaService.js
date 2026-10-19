@@ -55,7 +55,12 @@ const criar = async (dados) => {
 
   dados = converterDatas(dados);
 
-  await campoObrigatorioService.validar('vistoria', dados);
+  // kitnetId null de propósito = vistoria "Geral" (residência inteira,
+  // sem uma kitnet específica) -- escolha válida mesmo com "Kitnet"
+  // marcado como obrigatório em Campos Obrigatórios.
+  const ignorar = dados.kitnetId === null ? ['kitnetId'] : [];
+
+  await campoObrigatorioService.validar('vistoria', dados, { ignorar });
 
   const vistoria = await prisma.vistoria.create({
     data: dados
@@ -100,11 +105,18 @@ const atualizar = async (id, dados) => {
 
   dados = converterDatas(dados);
 
-  await campoObrigatorioService.validar('vistoria', dados);
-
   const anterior = await prisma.vistoria.findUnique({
     where: { id }
   });
+
+  // Atualização parcial (ex.: só muda o status ao concluir) não pode
+  // reprovar por "falta" um campo que já está preenchido desde a
+  // criação -- valida o resultado final (anterior + alterações), não só
+  // o pedaço que veio nesta chamada. kitnetId null de propósito = "Geral".
+  const mesclado = { ...anterior, ...dados };
+  const ignorar = mesclado.kitnetId === null ? ['kitnetId'] : [];
+
+  await campoObrigatorioService.validar('vistoria', mesclado, { ignorar });
 
   const vistoria = await prisma.vistoria.update({
     where: { id },

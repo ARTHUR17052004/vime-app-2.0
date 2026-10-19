@@ -85,11 +85,13 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
-  await campoObrigatorioService.validar('despesa', dados);
-
   const anterior = await prisma.despesa.findUnique({
     where: { id }
   });
+
+  // Atualização parcial (ex.: só marcar como paga) não pode reprovar
+  // por "faltar" um campo que já está preenchido desde a criação.
+  await campoObrigatorioService.validar('despesa', { ...anterior, ...dados });
 
   const despesa = await prisma.despesa.update({
     where: { id },

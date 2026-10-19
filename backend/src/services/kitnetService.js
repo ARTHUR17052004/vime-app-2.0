@@ -75,9 +75,12 @@ const criar = async (dados, usuario) => {
 
 const atualizar = async (id, dados) => {
 
-  await campoObrigatorioService.validar('kitnet', dados);
-
   const atual = await prisma.kitnet.findUnique({ where: { id } });
+
+  // Atualização parcial (ex.: só o status) não pode reprovar por
+  // "faltar" um campo que já está preenchido desde a criação -- valida
+  // o resultado final (atual + alterações), não só o pedaço enviado.
+  await campoObrigatorioService.validar('kitnet', { ...atual, ...dados });
 
   // Só marca como "editada manualmente" se o aluguel realmente mudou --
   // assim um salvar sem mexer nesse campo não trava a sincronização

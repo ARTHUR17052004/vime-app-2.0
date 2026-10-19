@@ -73,7 +73,11 @@ const criar = async (dados, autor) => {
 
 const atualizar = async (id, dados) => {
 
-  await campoObrigatorioService.validar('solicitacao', dados);
+  // Atualização parcial (ex.: só classificar/responder) não pode
+  // reprovar por "faltar" um campo que já está preenchido desde a
+  // criação -- valida o resultado final (atual + alterações).
+  const atual = await prisma.solicitacao.findUnique({ where: { id } });
+  await campoObrigatorioService.validar('solicitacao', { ...atual, ...dados });
 
   if (dados.data) dados.data = new Date(dados.data);
   if (dados.prazo) dados.prazo = new Date(dados.prazo);

@@ -235,13 +235,16 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
-  await campoObrigatorioService.validar('residencia', dados);
-
   const antes = await prisma.unidade.findUnique({ where: { id } });
 
   if (!antes) {
     throw new Error('Residência não encontrada.');
   }
+
+  // Atualização parcial não pode reprovar por "faltar" um campo que já
+  // está preenchido desde a criação -- valida o resultado final
+  // (antes + alterações), não só o pedaço enviado nesta chamada.
+  await campoObrigatorioService.validar('residencia', { ...antes, ...dados });
 
   const unidade = await prisma.unidade.update({
     where: { id },

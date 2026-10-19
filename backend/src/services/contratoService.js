@@ -395,8 +395,6 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
-  await campoObrigatorioService.validar('contrato', dados);
-
   if (dados.dataInicio !== undefined) {
     if (!dados.dataInicio) {
       throw new Error('Data de início do contrato é obrigatória.');
@@ -408,6 +406,11 @@ const atualizar = async (id, dados) => {
   const anterior = await prisma.contrato.findUnique({
     where: { id }
   });
+
+  // Atualização parcial não pode reprovar por "faltar" um campo que já
+  // está preenchido desde a criação -- valida o resultado final
+  // (anterior + alterações), não só o pedaço enviado nesta chamada.
+  await campoObrigatorioService.validar('contrato', { ...anterior, ...dados });
 
   if (dados.inquilinoId && dados.inquilinoId !== anterior?.inquilinoId) {
 

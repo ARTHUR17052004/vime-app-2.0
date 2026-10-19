@@ -99,7 +99,12 @@ const criar = async (dados) => {
 const atualizar = async (id, dados) => {
 
   validar(dados);
-  await campoObrigatorioService.validar('locador', dados);
+
+  // Atualização parcial não pode reprovar por "faltar" um campo que já
+  // está preenchido desde a criação -- valida o resultado final
+  // (atual + alterações), não só o pedaço enviado nesta chamada.
+  const atual = await prisma.locador.findUnique({ where: { id } });
+  await campoObrigatorioService.validar('locador', { ...atual, ...dados });
 
   return prisma.locador.update({
     where: {

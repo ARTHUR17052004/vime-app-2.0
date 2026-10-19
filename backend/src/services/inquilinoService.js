@@ -196,7 +196,10 @@ const atualizar = async (id, dados) => {
 
   dados = sanitizar(dados);
 
-  await campoObrigatorioService.validar('inquilino', dados);
+  // Atualização parcial não pode reprovar por "faltar" um campo que já
+  // está preenchido desde a criação -- valida o resultado final
+  // (anterior + alterações), não só o pedaço enviado nesta chamada.
+  await campoObrigatorioService.validar('inquilino', { ...anterior, ...dados });
 
   const inquilino = await prisma.inquilino.update({
     where: { id },
