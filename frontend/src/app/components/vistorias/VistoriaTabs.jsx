@@ -52,7 +52,7 @@ export default function VistoriaTabs({
 
             ${
               abaSelecionada === aba.id
-                ? "bg-green-700 text-[var(--text)]"
+                ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,.45)]"
                 : "text-[var(--text-subtle)] hover:bg-[var(--surface-2)]"
             }
           `}

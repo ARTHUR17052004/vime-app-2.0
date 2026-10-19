@@ -90,7 +90,7 @@ export default function VistoriaResumo({
             duration-300
             ${
               abaSelecionada === card.aba
-                ? "bg-green-700 border-green-700"
+                ? "bg-[var(--surface)] border-emerald-400/70 ring-2 ring-emerald-400/70 shadow-[0_0_25px_rgba(16,185,129,.35)]"
                 : "bg-[var(--surface)] border-[var(--border-token)] hover:border-emerald-500/30 hover:shadow-[0_0_35px_rgba(16,185,129,.08)]"
             }
           `}
@@ -112,11 +112,8 @@ export default function VistoriaResumo({
                 text-base
                 md:text-lg
                 font-black
-                ${
-                  abaSelecionada === card.aba
-                    ? "bg-black/15 text-[var(--text)]"
-                    : `${card.fundo} ${card.cor}`
-                }
+                ${card.fundo}
+                ${card.cor}
               `}
             >
 
@@ -130,7 +127,7 @@ export default function VistoriaResumo({
                 truncate
                 ${
                   abaSelecionada === card.aba
-                    ? "text-[var(--text)] font-semibold"
+                    ? "text-emerald-400 font-semibold"
                     : "text-[var(--text-subtle)]"
                 }
               `}
