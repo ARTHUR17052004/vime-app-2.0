@@ -26,6 +26,8 @@ router.get('/:id/missoes', permissaoMiddleware('vistorias.visualizar'), vistoria
 
 router.post('/:id/missoes/concluir', permissaoMiddleware('vistorias.editar'), vistoriaController.concluirMissoes);
 
+router.post('/:id/cancelar-realizacao', permissaoMiddleware('vistorias.editar'), vistoriaController.cancelarRealizacao);
+
 router.put('/:id/missoes/:missaoId', permissaoMiddleware('vistorias.editar'), vistoriaController.atualizarMissao);
 
 router.delete('/:id/missoes/:missaoId', permissaoMiddleware('vistorias.excluir'), vistoriaController.removerMissao);

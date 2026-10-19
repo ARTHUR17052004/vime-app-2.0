@@ -551,6 +551,7 @@ const fixarVistoria = async (id, fixado) => {
                     vistorias={vistorias}
                     filtroVistoriaId={filtroMissaoVistoriaId}
                     onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
+                    onRecarregarVistorias={carregar}
                   />
 
                 ) : (

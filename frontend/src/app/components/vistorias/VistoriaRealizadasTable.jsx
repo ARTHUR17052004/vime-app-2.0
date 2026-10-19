@@ -20,6 +20,7 @@ export default function VistoriaRealizadasTable({
   vistorias = [],
   filtroVistoriaId = null,
   onLimparFiltro,
+  onRecarregarVistorias,
 }) {
 
   const [missoesRealizadas, setMissoesRealizadas] = useState([]);
@@ -96,6 +97,23 @@ export default function VistoriaRealizadasTable({
 
   };
 
+  const cancelarRealizacao = async (item) => {
+
+    const confirmar = window.confirm(
+      `Cancelar a realização de "${item.vistoria}" (${item.residencia})? Ela volta a ficar como estava antes de marcar "Realizar".`
+    );
+
+    if (!confirmar) return;
+
+    try {
+      await VistoriaService.cancelarRealizacao(item.vistoriaId);
+      await onRecarregarVistorias?.();
+    } catch (err) {
+      alert(err.message || "Erro ao cancelar a realização.");
+    }
+
+  };
+
   const colunas = [
     { key: "vistoria", title: "Vistoria" },
     { key: "residencia", title: "Residência" },
@@ -125,6 +143,7 @@ export default function VistoriaRealizadasTable({
           onVer={setDetalhe}
           onEditar={setEditando}
           onExcluir={excluirMissao}
+          onCancelarRealizacao={cancelarRealizacao}
         />
       ),
     },

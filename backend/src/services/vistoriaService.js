@@ -415,6 +415,81 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
 
 };
 
+// Desfaz o último "Realizar" de uma vistoria normal (não "Geral") --
+// ex.: marcou como realizada a kitnet errada. Restaura status, datas,
+// fotos e observações de antes dessa conclusão, lendo o snapshot que
+// a própria auditoria (ver atualizar()) já guarda de toda alteração.
+// Para vistoria "Geral" é a missão específica que se desfaz (ver
+// removerMissao), não a vistoria inteira.
+const cancelarRealizacao = async (vistoriaId) => {
+
+  const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+  if (!vistoria) {
+    throw new Error('Vistoria não encontrada.');
+  }
+
+  if (!vistoria.unidadeId) {
+    throw new Error('Essa é uma vistoria "Geral" -- exclua a missão da residência errada em vez de cancelar a vistoria inteira.');
+  }
+
+  if (!vistoria.concluidaEm) {
+    throw new Error('Essa vistoria ainda não foi realizada.');
+  }
+
+  const ultimaAuditoria = await prisma.auditoria.findFirst({
+    where: { modulo: 'VISTORIAS', registroId: vistoriaId, acao: 'ATUALIZAR' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  const anterior = ultimaAuditoria?.valorAnterior;
+
+  // Só desfaz se o último ATUALIZAR registrado for mesmo o "Realizar"
+  // que estamos tentando cancelar (concluidaEm bate com o atual) --
+  // evita desfazer por engano uma edição qualquer feita depois dele.
+  const foiEssaConclusao =
+    anterior &&
+    ultimaAuditoria.valorNovo?.concluidaEm &&
+    new Date(ultimaAuditoria.valorNovo.concluidaEm).getTime() === new Date(vistoria.concluidaEm).getTime();
+
+  if (!foiEssaConclusao) {
+    throw new Error('Não foi possível identificar a conclusão a desfazer -- pode já ter sido editada depois de concluída.');
+  }
+
+  const revertida = await prisma.vistoria.update({
+    where: { id: vistoriaId },
+    data: {
+      status: anterior.status,
+      dataUltima: anterior.dataUltima ? new Date(anterior.dataUltima) : null,
+      dataProxima: anterior.dataProxima ? new Date(anterior.dataProxima) : null,
+      concluidaEm: anterior.concluidaEm ? new Date(anterior.concluidaEm) : null,
+      fotosConclusao: anterior.fotosConclusao || null,
+      observacoesConclusao: anterior.observacoesConclusao || null,
+    },
+  });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    registroId: vistoria.id,
+    acao: "ATUALIZAR",
+    valorAnterior: vistoria,
+    valorNovo: revertida,
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    acao: "ATUALIZAR",
+    descricao: `Vistoria ${vistoria.id}: conclusão desfeita (cancelada pelo usuário).`,
+  });
+
+  return revertida;
+
+};
+
 // Histórico de missões concluídas (todas as rodadas, de todas as
 // vistorias "Geral") -- base da aba Realizadas.
 const listarMissoesRealizadas = () => {
@@ -470,6 +545,7 @@ module.exports = {
   remover,
   listarMissoes,
   concluirMissoes,
+  cancelarRealizacao,
   listarMissoesRealizadas,
   atualizarMissao,
   removerMissao,

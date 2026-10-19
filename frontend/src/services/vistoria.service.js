@@ -58,4 +58,10 @@ export const VistoriaService = {
     });
   },
 
+  cancelarRealizacao(vistoriaId) {
+    return api(`/vistorias/${vistoriaId}/cancelar-realizacao`, {
+      method: "POST",
+    });
+  },
+
 };

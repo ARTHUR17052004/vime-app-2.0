@@ -6,14 +6,18 @@ import { MoreVertical, Eye } from "lucide-react";
 import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
 
-// Só missões (vistoria "Geral") têm Editar/Excluir -- a última execução
-// de uma vistoria normal é um campo dela mesma, não um registro à
-// parte, então só dá pra ver.
+// Missão (vistoria "Geral") tem Editar/Excluir de verdade -- é um
+// registro à parte. Vistoria normal não tem registro separado (a
+// última execução é um campo dela mesma), então em vez de excluir ela
+// tem "Cancelar Realização", que desfaz a conclusão (ver
+// vistoriaService.cancelarRealizacao) -- útil quando marcou "Realizar"
+// na kitnet errada.
 export default function VistoriaMissaoActionsMenu({
   item,
   onVer,
   onEditar,
   onExcluir,
+  onCancelarRealizacao,
 }) {
 
   const podeEditar = usePermissao("vistorias.editar");
@@ -83,6 +87,15 @@ export default function VistoriaMissaoActionsMenu({
             className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 transition"
           >
             Excluir
+          </button>
+        )}
+
+        {!ehMissao && podeEditar && (
+          <button
+            onClick={() => { onCancelarRealizacao?.(item); setOpen(false); }}
+            className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 transition"
+          >
+            Cancelar Realização
           </button>
         )}
 
