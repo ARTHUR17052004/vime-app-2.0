@@ -32,6 +32,7 @@ model Unidade {
   locadorRel          Locador?   @relation(fields: [locadorId], references: [id])
   despesas            Despesa[]
   vistorias           Vistoria[]
+  vistoriaMissoes     VistoriaMissao[]
 }
 
 model Kitnet {
@@ -591,11 +592,46 @@ model Vistoria {
 
   updatedAt DateTime @updatedAt
 
+  // Vistoria "Geral" (unidadeId null) com mais de uma residência vira
+  // um "mundo com várias missões" -- uma por residência (ver
+  // VistoriaMissao). cicloAtual separa as missões da rodada atual das
+  // de rodadas já fechadas (histórico no Arquivo de Vistorias
+  // Realizadas), já que a mesma Vistoria se repete pra sempre.
+  cicloAtual Int @default(1)
+
   unidade Unidade? @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
 
   kitnet Kitnet? @relation(fields: [kitnetId], references: [id], onDelete: SetNull)
 
   ocorrencias Ocorrencia[]
+
+  missoes VistoriaMissao[]
+}
+
+// Uma "missão" = a vistoria de UMA residência específica, dentro de uma
+// Vistoria "Geral" que cobre várias. Cada rodada (ciclo) tem uma missão
+// por residência ativa -- quando todas as missões do ciclo atual
+// existem, a Vistoria fecha a rodada (igual concluir uma vistoria
+// normal: renova sozinha pra próxima data se tiver periodicidade) e
+// cicloAtual avança, abrindo um checklist novo e vazio.
+model VistoriaMissao {
+  id String @id @default(uuid())
+
+  vistoriaId String
+  vistoria   Vistoria @relation(fields: [vistoriaId], references: [id], onDelete: Cascade)
+
+  unidadeId String
+  unidade   Unidade @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+
+  ciclo Int
+
+  dataRealizacao DateTime
+  realizadoPor   String?
+  fotos          Json?
+
+  createdAt DateTime @default(now())
+
+  @@unique([vistoriaId, unidadeId, ciclo])
 }
 
 model Ocorrencia {

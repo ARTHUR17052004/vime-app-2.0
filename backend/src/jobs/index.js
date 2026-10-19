@@ -11,8 +11,15 @@ const cobrancaVencidaWhatsapp = require("./cobrancaVencidaWhatsappJob");
 const verificarKitnetsVazias = require("./verificarKitnetsVaziasJob");
 const verificarSolicitacoesAtrasadas = require("./verificarSolicitacoesAtrasadasJob");
 const verificarVistoriasAtrasadas = require("./verificarVistoriasAtrasadasJob");
+const atualizarStatusVistorias = require("./atualizarStatusVistoriasJob");
 
 const iniciarJobs = () => {
+
+  // Status (Programada -> Pendente -> Atrasada) depende de estar perto
+  // ou ter passado do prazo na hora certa -- de hora em hora é fino o
+  // bastante pra uma janela de 72h, sem precisar rodar o resto dos jobs
+  // (notificações, cobranças...) nesse ritmo também.
+  cron.schedule("0 * * * *", atualizarStatusVistorias);
 
   cron.schedule("0 8 * * *", async () => {
 

@@ -97,6 +97,13 @@ const menuConfig = [
         icon: ShieldCheck,
         permissao: "vistorias.visualizar",
       },
+      {
+        label: "Arquivo de Vistorias Realizadas",
+        href: "/vistorias/arquivo",
+        icon: Archive,
+        iconSize: 24,
+        permissao: "arquivoVistorias.visualizar",
+      },
     ],
   },
 

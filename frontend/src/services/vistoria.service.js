@@ -30,4 +30,19 @@ export const VistoriaService = {
     });
   },
 
+  listarMissoes(id) {
+    return api(`/vistorias/${id}/missoes`);
+  },
+
+  concluirMissoes(id, dados) {
+    return api(`/vistorias/${id}/missoes/concluir`, {
+      method: "POST",
+      body: JSON.stringify(dados),
+    });
+  },
+
+  listarArquivoMissoes() {
+    return api("/vistorias/arquivo-missoes");
+  },
+
 };

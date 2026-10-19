@@ -156,6 +156,24 @@ export default function VistoriaCard({
                   />
                 )}
 
+                {vistoria.progressoMissoes && (
+                  <span
+                    className="
+                      text-xs
+                      font-semibold
+                      text-emerald-400
+                      bg-emerald-500/10
+                      border
+                      border-emerald-500/30
+                      rounded-full
+                      px-3
+                      py-1
+                    "
+                  >
+                    {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs concluídas
+                  </span>
+                )}
+
               </div>
 
               <div className="mt-5 grid md:grid-cols-2 gap-4">
@@ -442,18 +460,6 @@ export default function VistoriaCard({
 
                   <p className="text-[var(--text)] mt-1">
                     {vistoria.categoria}
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <p className="text-xs text-[var(--text-faint)] uppercase">
-                    Criticidade
-                  </p>
-
-                  <p className="text-[var(--text)] mt-1">
-                    {vistoria.criticidade}
                   </p>
 
                 </div>

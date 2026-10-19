@@ -28,30 +28,7 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { usePermissao } from "../../hooks/usePermissao";
-
-// Um passo da periodicidade (null = "Única", não repete). Mora fora do
-// componente porque é puro -- não depende de nada daqui.
-function avancarUmaVez(data, periodicidade) {
-
-  const nova = new Date(data);
-
-  switch (periodicidade) {
-
-    case "Diária": nova.setDate(nova.getDate() + 1); break;
-    case "Semanal": nova.setDate(nova.getDate() + 7); break;
-    case "Quinzenal": nova.setDate(nova.getDate() + 15); break;
-    case "Mensal": nova.setMonth(nova.getMonth() + 1); break;
-    case "Bimestral": nova.setMonth(nova.getMonth() + 2); break;
-    case "Trimestral": nova.setMonth(nova.getMonth() + 3); break;
-    case "Semestral": nova.setMonth(nova.getMonth() + 6); break;
-    case "Anual": nova.setFullYear(nova.getFullYear() + 1); break;
-    default: return null;
-
-  }
-
-  return nova;
-
-}
+import { avancarUmaVez } from "../../utils/periodicidade";
 
 export default function VistoriasPage() {
 
@@ -98,9 +75,18 @@ export default function VistoriasPage() {
         ? resposta
         : resposta.data || [];
 
-      const hoje = new Date().toISOString().split("T")[0];
+      const agora = new Date();
+      const limitePendente = new Date(agora.getTime() + 72 * 60 * 60 * 1000);
+      const STATUS_ENCERRADOS = ["REALIZADA", "CANCELADA"];
 
       const atualizadas = dados.map((vistoria) => {
+
+        // Datetime de verdade (ver abaixo), não a string só-com-data que
+        // vai pro formData do card/input -- senão a janela de 72h perdia
+        // a hora e virava "72h ou 96h", dependendo da hora do dia.
+        const dataProximaCompleta = vistoria.dataProxima
+          ? new Date(vistoria.dataProxima)
+          : null;
 
         const dataProxima = vistoria.dataProxima
           ? new Date(vistoria.dataProxima).toISOString().split("T")[0]
@@ -121,13 +107,17 @@ export default function VistoriasPage() {
           dataProxima,
         };
 
-        if (
-          normalizada.status === "PROGRAMADA" &&
-          dataProxima &&
-          dataProxima < hoje
-        ) {
+        // Mesma régua do job do backend (atualizarStatusVistoriasJob, de
+        // hora em hora) -- só adiantada aqui pra tela não ficar até 1h
+        // atrasada em relação ao prazo real: Programada -> Pendente nas
+        // últimas 72h, Pendente/Programada -> Atrasada no vencimento.
+        if (dataProximaCompleta && !STATUS_ENCERRADOS.includes(normalizada.status)) {
 
-          normalizada.status = "ATRASADA";
+          if (dataProximaCompleta <= agora) {
+            normalizada.status = "ATRASADA";
+          } else if (dataProximaCompleta <= limitePendente && normalizada.status === "PROGRAMADA") {
+            normalizada.status = "PENDENTE";
+          }
 
         }
 
@@ -164,7 +154,6 @@ export default function VistoriasPage() {
     unidadeId: dados.unidadeId || null,
     kitnetId: dados.kitnetId || null,
     categoria: dados.categoria,
-    criticidade: dados.criticidade,
     periodicidade: dados.periodicidade,
     // Quem cria a vistoria (Operador, Gerência...) não é quem a
     // executa -- o campo é um seletor de zelador (ver VistoriaForm),
@@ -369,7 +358,6 @@ const fixarVistoria = async (id, fixado) => {
        "data-distante": (a, b) => new Date(b.dataProxima || 0) - new Date(a.dataProxima || 0),
        "titulo-asc": (a, b) => (a.titulo || "").localeCompare(b.titulo || "", "pt-BR"),
        "responsavel-asc": (a, b) => (a.responsavel || "").localeCompare(b.responsavel || "", "pt-BR"),
-       "criticidade": (a, b) => (a.criticidade || "").localeCompare(b.criticidade || "", "pt-BR"),
        "residencia-asc": (a, b) => (a.unidadeNome || "").localeCompare(b.unidadeNome || "", "pt-BR"),
      };
 
@@ -516,7 +504,6 @@ const fixarVistoria = async (id, fixado) => {
                   <option value="data-distante" className="bg-[#1b2430]">Data (mais distante)</option>
                   <option value="titulo-asc" className="bg-[#1b2430]">Título (A-Z)</option>
                   <option value="responsavel-asc" className="bg-[#1b2430]">Responsável</option>
-                  <option value="criticidade" className="bg-[#1b2430]">Criticidade</option>
                   <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
                 </select>
               </div>
@@ -600,6 +587,11 @@ const fixarVistoria = async (id, fixado) => {
           }}
           vistoria={vistoriaParaConcluir}
           onConfirm={confirmarConcluirVistoria}
+          onMissoesConcluidas={async () => {
+            await carregar();
+            setConcluirModalOpen(false);
+            setVistoriaParaConcluir(null);
+          }}
         />
 
       </PageContainer>

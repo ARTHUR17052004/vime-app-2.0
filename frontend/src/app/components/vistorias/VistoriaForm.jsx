@@ -14,6 +14,7 @@ import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 import { ordenarPorNumero } from "@/utils/ordenarKitnets";
+import { avancarUmaVez } from "@/utils/periodicidade";
 
 // Sentinela só de UI pra "vale pra todas as kitnets desta residência"
 // (ex.: vistoria de limpeza das áreas comuns da VIME I inteira) -- vira
@@ -28,7 +29,7 @@ const SEMPRE_OBRIGATORIOS = new Set(["nomeVistoria"]);
 
 const CAMPOS = [
   "nomeVistoria", "unidadeId", "kitnetId", "categoria",
-  "criticidade", "periodicidade", "responsavel", "dataProxima", "observacoes",
+  "periodicidade", "responsavel", "dataProxima", "observacoes",
 ];
 
 const ROTULOS = {
@@ -36,7 +37,6 @@ const ROTULOS = {
   unidadeId: "Residência",
   kitnetId: "Kitnet",
   categoria: "Categoria",
-  criticidade: "Criticidade",
   periodicidade: "Periodicidade",
   responsavel: "Responsável",
   dataProxima: "Data Próxima",
@@ -62,8 +62,6 @@ export default function VistoriaForm({
     nomeVistoria: "",
 
     categoria: "Preventiva",
-
-    criticidade: "Média",
 
     periodicidade: "Mensal",
 
@@ -212,6 +210,22 @@ export default function VistoriaForm({
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vistoriaEditando]);
+
+  // Data Próxima é calculada sozinha a partir da Data Última + 1 passo
+  // da periodicidade (sem Data Última ainda, usa hoje como base) --
+  // "Única" não repete, então não tem próxima data.
+  useEffect(() => {
+
+    const base = formData.dataUltima ? new Date(`${formData.dataUltima}T00:00:00`) : new Date();
+    const proxima = avancarUmaVez(base, formData.periodicidade);
+
+    setFormData((prev) => ({
+      ...prev,
+      dataProxima: proxima ? proxima.toISOString().split("T")[0] : "",
+    }));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.dataUltima, formData.periodicidade]);
 
   const handleChange = (e) => {
 
@@ -384,57 +398,29 @@ export default function VistoriaForm({
 
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div>
 
-        <div>
+        <label className="font-semibold text-[var(--text-muted)]">
+          Categoria
+          {obrigatorios.has("categoria") && <span className="ml-1 text-red-400">*</span>}
+        </label>
 
-          <label className="font-semibold text-[var(--text-muted)]">
-            Categoria
-            {obrigatorios.has("categoria") && <span className="ml-1 text-red-400">*</span>}
-          </label>
+        <Select
+          name="categoria"
+          value={formData.categoria}
+          onChange={handleChange}
+          required={obrigatorios.has("categoria")}
+          className={input}
+        >
 
-          <Select
-            name="categoria"
-            value={formData.categoria}
-            onChange={handleChange}
-            required={obrigatorios.has("categoria")}
-            className={input}
-          >
+          <option>Preventiva</option>
+          <option>Corretiva</option>
+          <option>Inspeção</option>
+          <option>Limpeza</option>
+          <option>Segurança</option>
+          <option>Estrutural</option>
 
-            <option>Preventiva</option>
-            <option>Corretiva</option>
-            <option>Inspeção</option>
-            <option>Limpeza</option>
-            <option>Segurança</option>
-            <option>Estrutural</option>
-
-          </Select>
-
-        </div>
-
-        <div>
-
-          <label className="font-semibold text-[var(--text-muted)]">
-            Criticidade
-            {obrigatorios.has("criticidade") && <span className="ml-1 text-red-400">*</span>}
-          </label>
-
-          <Select
-            name="criticidade"
-            value={formData.criticidade}
-            onChange={handleChange}
-            required={obrigatorios.has("criticidade")}
-            className={input}
-          >
-
-            <option>Baixa</option>
-            <option>Média</option>
-            <option>Alta</option>
-            <option>Crítica</option>
-
-          </Select>
-
-        </div>
+        </Select>
 
       </div>
 
@@ -547,8 +533,15 @@ export default function VistoriaForm({
       value={formData.dataProxima}
       onChange={handleChange}
       required={obrigatorios.has("dataProxima")}
-      className={input}
+      disabled
+      className={`${input} opacity-70 cursor-not-allowed`}
     />
+
+    <p className="mt-1.5 text-xs text-[var(--text-faint)]">
+      {formData.periodicidade === "Única"
+        ? "Calculada automaticamente -- \"Única\" não se repete."
+        : "Calculada automaticamente a partir da Data Última + Periodicidade."}
+    </p>
 
   </div>
 

@@ -45,10 +45,28 @@ const remover = async (req, res) => {
 
 };
 
+const listarMissoes = async (req, res) => {
+  const dados = await vistoriaService.listarMissoes(req.params.id);
+  res.json(dados);
+};
+
+const concluirMissoes = async (req, res) => {
+  const dados = await vistoriaService.concluirMissoes(req.params.id, req.body);
+  res.json(dados);
+};
+
+const listarMissoesRealizadas = async (req, res) => {
+  const dados = await vistoriaService.listarMissoesRealizadas();
+  res.json(dados);
+};
+
 module.exports = {
   listar,
   buscarPorId,
   criar,
   atualizar,
-  remover
+  remover,
+  listarMissoes,
+  concluirMissoes,
+  listarMissoesRealizadas,
 };

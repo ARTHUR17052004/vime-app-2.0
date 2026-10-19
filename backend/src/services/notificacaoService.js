@@ -181,10 +181,25 @@ const marcarTodasComoLidas = async (usuarioId, locadorId) => {
 
 };
 
+/* ==========================================
+   REMOVER PELO LINK (registro apagado -- ex.:
+   vistoriaService.remover -- não deixa notificação
+   velha abrindo em "não encontrada")
+========================================== */
+
+const removerPorLink = async (link) => {
+
+  return prisma.notificacao.deleteMany({
+    where: { link },
+  });
+
+};
+
 module.exports = {
   criar,
   listarNaoLidas,
   listarHistorico,
   marcarComoLida,
   marcarTodasComoLidas,
+  removerPorLink,
 };

@@ -90,7 +90,15 @@ const CATALOGO = [
   {
     modulo: "Vistorias",
     chave: "vistorias",
-    acoes: ["visualizar", "criar", "editar", "excluir"],
+    acoes: ["visualizar", "criar", "editar", "excluir", "exportar"],
+  },
+  {
+    // Histórico das missões concluídas (residência + ciclo) de vistorias
+    // "Geral" -- separado de "Vistorias" de propósito, igual o Arquivo de
+    // Contratos, pra dar pra liberar um sem liberar o outro.
+    modulo: "Arquivo de Vistorias Realizadas",
+    chave: "arquivoVistorias",
+    acoes: ["visualizar"],
   },
   {
     modulo: "Relatórios",

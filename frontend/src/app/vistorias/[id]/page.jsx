@@ -152,13 +152,6 @@ export default function DetalhesVistoriaPage() {
             </div>
 
             <div>
-              <p className="text-[var(--text-subtle)]">Criticidade</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.criticidade || "-"}
-              </h3>
-            </div>
-
-            <div>
               <p className="text-[var(--text-subtle)]">Responsável</p>
               <h3 className="font-semibold text-[var(--text)]">
                 {vistoria.responsavel || "-"}

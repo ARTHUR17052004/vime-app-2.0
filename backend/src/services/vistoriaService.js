@@ -7,29 +7,97 @@ const campoObrigatorioService = require('./campoObrigatorioService');
 const { filtroVistoria } = require('../utils/escopoLocador');
 const notificacaoService = require('./notificacaoService');
 
-const listar = (usuario) => {
-  return prisma.vistoria.findMany({
-    where: filtroVistoria(usuario),
-    include: {
-      ocorrencias: true,
-      unidade: true,
-      kitnet: true
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
+// Um passo da periodicidade (null = "Única", não repete). Mesma lógica
+// do frontend (vistorias/page.js) -- precisa existir aqui também pro
+// fechamento de ciclo de uma vistoria "Geral" rodar sozinho no backend.
+const avancarUmaVez = (data, periodicidade) => {
+
+  const nova = new Date(data);
+
+  switch (periodicidade) {
+
+    case 'Diária': nova.setDate(nova.getDate() + 1); break;
+    case 'Semanal': nova.setDate(nova.getDate() + 7); break;
+    case 'Quinzenal': nova.setDate(nova.getDate() + 15); break;
+    case 'Mensal': nova.setMonth(nova.getMonth() + 1); break;
+    case 'Bimestral': nova.setMonth(nova.getMonth() + 2); break;
+    case 'Trimestral': nova.setMonth(nova.getMonth() + 3); break;
+    case 'Semestral': nova.setMonth(nova.getMonth() + 6); break;
+    case 'Anual': nova.setFullYear(nova.getFullYear() + 1); break;
+    default: return null;
+
+  }
+
+  return nova;
+
 };
 
-const buscarPorId = (id) => {
-  return prisma.vistoria.findUnique({
-    where: { id },
-    include: {
-      ocorrencias: true,
-      unidade: true,
-      kitnet: true
-    }
-  });
+// "Missões" (ver VistoriaMissao) cobrem TODAS as residências ativas do
+// sistema, não só as do locador de quem está concluindo -- vistoria
+// "Geral" foi definida assim de propósito (ver decisão do usuário).
+const contarResidenciasAtivas = () => {
+  return prisma.unidade.count({ where: { status: 'Ativa' } });
+};
+
+// Progresso da rodada atual de uma vistoria "Geral" -- só as missões
+// batidas no cicloAtual contam (rodadas antigas já fecharam e viram
+// histórico no Arquivo).
+const progressoMissoes = (vistoria, totalResidenciasAtivas) => {
+
+  if (vistoria.unidadeId) return null; // não é "Geral", não tem missão
+
+  const concluidas = (vistoria.missoes || []).filter(
+    (m) => m.ciclo === vistoria.cicloAtual
+  ).length;
+
+  return { concluidas, total: totalResidenciasAtivas };
+
+};
+
+const listar = async (usuario) => {
+
+  const [vistorias, totalResidenciasAtivas] = await Promise.all([
+    prisma.vistoria.findMany({
+      where: filtroVistoria(usuario),
+      include: {
+        ocorrencias: true,
+        unidade: true,
+        kitnet: true,
+        missoes: true,
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    }),
+    contarResidenciasAtivas(),
+  ]);
+
+  return vistorias.map((v) => ({
+    ...v,
+    progressoMissoes: progressoMissoes(v, totalResidenciasAtivas),
+  }));
+
+};
+
+const buscarPorId = async (id) => {
+
+  const [vistoria, totalResidenciasAtivas] = await Promise.all([
+    prisma.vistoria.findUnique({
+      where: { id },
+      include: {
+        ocorrencias: true,
+        unidade: true,
+        kitnet: true,
+        missoes: { include: { unidade: true }, orderBy: { createdAt: 'desc' } },
+      }
+    }),
+    contarResidenciasAtivas(),
+  ]);
+
+  if (!vistoria) return null;
+
+  return { ...vistoria, progressoMissoes: progressoMissoes(vistoria, totalResidenciasAtivas) };
+
 };
 
 const converterDatas = (dados) => {
@@ -181,10 +249,175 @@ const remover = async (id) => {
     descricao: `Vistoria ${vistoria.id} excluída.`
   });
 
-  return prisma.vistoria.delete({
+  const removida = await prisma.vistoria.delete({
     where: { id }
   });
 
+  // Sem isso, uma notificação antiga (ex.: "Nova vistoria") continua
+  // linkando pra um id que não existe mais -- clicar nela cai em
+  // "Vistoria não encontrada" em vez de abrir alguma coisa. Nunca pode
+  // impedir a exclusão em si.
+  try {
+    await notificacaoService.removerPorLink(`/vistorias/${id}`);
+  } catch (erro) {
+    console.error('[notificacao] Falha ao limpar notificações da vistoria excluída:', erro.message);
+  }
+
+  return removida;
+
+};
+
+// Checklist da rodada atual (ciclo) de uma vistoria "Geral" -- uma
+// "missão" por residência ativa, batida ou não.
+const listarMissoes = async (vistoriaId) => {
+
+  const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+  if (!vistoria) {
+    throw new Error('Vistoria não encontrada.');
+  }
+
+  if (vistoria.unidadeId) {
+    throw new Error('Essa vistoria não é "Geral" -- não tem missões por residência.');
+  }
+
+  const [residencias, missoes] = await Promise.all([
+    prisma.unidade.findMany({ where: { status: 'Ativa' }, orderBy: { nome: 'asc' } }),
+    prisma.vistoriaMissao.findMany({ where: { vistoriaId, ciclo: vistoria.cicloAtual } }),
+  ]);
+
+  const porUnidade = new Map(missoes.map((m) => [m.unidadeId, m]));
+
+  return {
+    vistoriaId,
+    ciclo: vistoria.cicloAtual,
+    residencias: residencias.map((u) => {
+      const missao = porUnidade.get(u.id);
+      return {
+        unidadeId: u.id,
+        unidadeNome: u.nome,
+        concluida: !!missao,
+        dataRealizacao: missao?.dataRealizacao || null,
+        realizadoPor: missao?.realizadoPor || null,
+      };
+    }),
+  };
+
+};
+
+// Bate o check de uma ou mais residências na rodada atual. Quando todas
+// as residências ativas tiverem missão no ciclo, fecha a rodada --
+// igual concluir uma vistoria normal (renova sozinha pra próxima data
+// se tiver periodicidade) -- e abre um ciclo novo e vazio.
+const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor }) => {
+
+  if (!Array.isArray(unidadeIds) || unidadeIds.length === 0) {
+    throw new Error('Selecione ao menos uma residência.');
+  }
+
+  const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+  if (!vistoria) {
+    throw new Error('Vistoria não encontrada.');
+  }
+
+  if (vistoria.unidadeId) {
+    throw new Error('Essa vistoria não é "Geral" -- não tem missões por residência.');
+  }
+
+  const dataEscolhida = dataRealizacao ? new Date(dataRealizacao) : new Date();
+
+  await Promise.all(unidadeIds.map((unidadeId) =>
+    prisma.vistoriaMissao.upsert({
+      where: {
+        vistoriaId_unidadeId_ciclo: { vistoriaId, unidadeId, ciclo: vistoria.cicloAtual },
+      },
+      create: {
+        vistoriaId,
+        unidadeId,
+        ciclo: vistoria.cicloAtual,
+        dataRealizacao: dataEscolhida,
+        realizadoPor: realizadoPor || null,
+        fotos: fotos || null,
+      },
+      update: {
+        dataRealizacao: dataEscolhida,
+        realizadoPor: realizadoPor || null,
+        fotos: fotos || null,
+      },
+    })
+  ));
+
+  const [totalAtivas, concluidas] = await Promise.all([
+    contarResidenciasAtivas(),
+    prisma.vistoriaMissao.count({ where: { vistoriaId, ciclo: vistoria.cicloAtual } }),
+  ]);
+
+  const fechouCiclo = concluidas >= totalAtivas;
+
+  if (!fechouCiclo) {
+    return { fechouCiclo: false, progresso: { concluidas, total: totalAtivas } };
+  }
+
+  // Igual ao fluxo de "Realizar" de uma vistoria normal: avança a partir
+  // da data que JÁ estava programada (não da data de conclusão), com
+  // salto de ciclos se concluiu bem atrasado, pra não perder o dia fixo
+  // da recorrência.
+  const baseAncora = vistoria.dataProxima ? new Date(vistoria.dataProxima) : dataEscolhida;
+  let proximaData = avancarUmaVez(baseAncora, vistoria.periodicidade);
+  const recorrente = proximaData !== null;
+
+  if (recorrente) {
+    const agora = new Date();
+    while (proximaData <= agora) {
+      proximaData = avancarUmaVez(proximaData, vistoria.periodicidade);
+    }
+  }
+
+  const vistoriaAtualizada = await prisma.vistoria.update({
+    where: { id: vistoriaId },
+    data: {
+      status: recorrente ? 'PROGRAMADA' : 'REALIZADA',
+      dataUltima: dataEscolhida,
+      dataProxima: recorrente ? proximaData : null,
+      concluidaEm: new Date(),
+      cicloAtual: vistoria.cicloAtual + 1,
+    },
+  });
+
+  await auditoriaService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    registroId: vistoria.id,
+    acao: "ATUALIZAR",
+    valorAnterior: vistoria,
+    valorNovo: vistoriaAtualizada
+  });
+
+  await logService.registrar({
+    usuarioId: null,
+    usuarioNome: "Sistema",
+    modulo: "VISTORIAS",
+    acao: "ATUALIZAR",
+    descricao: `Vistoria ${vistoria.id}: todas as missões do ciclo ${vistoria.cicloAtual} concluídas, rodada fechada.`
+  });
+
+  return {
+    fechouCiclo: true,
+    progresso: { concluidas, total: totalAtivas },
+    vistoria: vistoriaAtualizada,
+  };
+
+};
+
+// Histórico de missões concluídas (todas as rodadas, de todas as
+// vistorias "Geral") -- base do Arquivo de Vistorias Realizadas.
+const listarMissoesRealizadas = () => {
+  return prisma.vistoriaMissao.findMany({
+    include: { unidade: true, vistoria: true },
+    orderBy: { dataRealizacao: 'desc' },
+  });
 };
 
 module.exports = {
@@ -192,5 +425,8 @@ module.exports = {
   buscarPorId,
   criar,
   atualizar,
-  remover
+  remover,
+  listarMissoes,
+  concluirMissoes,
+  listarMissoesRealizadas,
 };

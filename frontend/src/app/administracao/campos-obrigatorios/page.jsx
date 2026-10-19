@@ -126,7 +126,6 @@ const MODULOS = [
       { campo: "unidadeId", label: "Residência" },
       { campo: "kitnetId", label: "Kitnet" },
       { campo: "categoria", label: "Categoria" },
-      { campo: "criticidade", label: "Criticidade" },
       { campo: "periodicidade", label: "Periodicidade" },
       { campo: "responsavel", label: "Responsável" },
       { campo: "dataProxima", label: "Data Próxima" },
