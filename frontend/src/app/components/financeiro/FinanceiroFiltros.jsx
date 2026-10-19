@@ -37,7 +37,7 @@ export default function FinanceiroFiltros({
               ${
                 filtroSelecionado ===
                 filtro
-                  ? "bg-green-700 text-[var(--text)]"
+                  ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,.45)]"
                   : "bg-[var(--surface-2)] text-[var(--text-1)] hover:bg-[var(--surface-3)]"
               }
             `}

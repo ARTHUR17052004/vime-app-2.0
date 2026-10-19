@@ -53,7 +53,7 @@ export default function ContratoFiltros({
 
               ${
                 filtroSelecionado === filtro
-                  ? "bg-emerald-600 text-[var(--text)] shadow-lg"
+                  ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,.45)]"
                   : "bg-[var(--surface-2)] text-[var(--text-muted)] hover:bg-[var(--surface-3)] hover:text-[var(--text)]"
               }
             `}

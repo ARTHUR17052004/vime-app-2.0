@@ -44,10 +44,12 @@ export default function Filters({
               ${
                 ativo
                   ? `
-                    bg-emerald-600
-                    border-emerald-600
-                    text-[var(--text)]
-                    shadow-lg
+                    bg-[var(--surface-2)]
+                    border-emerald-400/70
+                    text-emerald-400
+                    ring-2
+                    ring-emerald-400/70
+                    shadow-[0_0_18px_rgba(16,185,129,.45)]
                   `
                   : `
                     bg-[var(--surface-2)]

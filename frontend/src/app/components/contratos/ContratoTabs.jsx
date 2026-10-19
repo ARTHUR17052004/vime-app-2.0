@@ -55,10 +55,11 @@ export default function ContratoTabs({
               ${
                 abaSelecionada === aba.id
                   ? `
-                    bg-emerald-500
-                    text-[var(--text)]
-                    shadow-lg
-                    shadow-emerald-500/20
+                    bg-[var(--surface-2)]
+                    text-emerald-400
+                    ring-2
+                    ring-emerald-400/70
+                    shadow-[0_0_18px_rgba(16,185,129,.45)]
                   `
                   : `
                     text-[var(--text-muted)]
