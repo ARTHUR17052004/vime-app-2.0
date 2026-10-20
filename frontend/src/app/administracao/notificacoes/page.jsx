@@ -122,14 +122,26 @@ export default function NotificacoesAdminPage() {
 
   }
 
+  // Na tela todo perfil nasce marcado (= todo mundo recebe); desmarcar
+  // tira só aquele. Por baixo o campo continua sendo a lista de quem
+  // RECEBE (vazio = todos, sem precisar listar perfil por perfil) -- se
+  // o resultado de desmarcar voltar a cobrir todo mundo, simplificamos
+  // de volta pra [] pra continuar pegando perfis novos automaticamente.
   function alternarPerfil(tipo, nomePerfil) {
 
-    const atual = tipo.perfis || [];
+    const todosNomes = perfis.map((p) => p.nome);
+    const atual = tipo.perfis?.length > 0 ? tipo.perfis : todosNomes;
+
     const novo = atual.includes(nomePerfil)
       ? atual.filter((p) => p !== nomePerfil)
       : [...atual, nomePerfil];
 
-    alterar(tipo.chave, "perfis", novo);
+    const final =
+      todosNomes.length > 0 && todosNomes.every((n) => novo.includes(n))
+        ? []
+        : novo;
+
+    alterar(tipo.chave, "perfis", final);
 
   }
 
@@ -409,14 +421,14 @@ export default function NotificacoesAdminPage() {
                             <div className="border-t border-[var(--border-token)] pt-4">
 
                               <label className="block text-xs font-semibold text-[var(--text-muted)] mb-2">
-                                Disparar só para estes perfis (nenhum marcado = todos os perfis)
+                                Quem recebe (desmarque quem não deve receber)
                               </label>
 
                               <div className="flex flex-wrap gap-2">
 
                                 {perfis.map((p) => {
 
-                                  const marcado = (t.perfis || []).includes(p.nome);
+                                  const marcado = (t.perfis?.length > 0 ? t.perfis : perfis.map((x) => x.nome)).includes(p.nome);
 
                                   return (
                                     <button
