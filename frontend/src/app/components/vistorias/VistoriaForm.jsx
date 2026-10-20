@@ -592,9 +592,9 @@ export default function VistoriaForm({
       // Um de cada vez (não em paralelo) pra somar o total certo --
       // senão vários arquivos grandes escolhidos juntos passariam cada
       // um na checagem individual e só estourariam o limite do
-      // backend (25MB) depois, todos juntos no mesmo envio. O total
-      // roda numa variável local (não no estado do React, que só
-      // atualiza de verdade depois do fim desta função).
+      // backend depois, todos juntos no mesmo envio. O total roda numa
+      // variável local (não no estado do React, que só atualiza de
+      // verdade depois do fim desta função).
       let totalAtualMB = tamanhoTotalMB(formData.fotos);
 
       for (const arquivo of arquivos) {

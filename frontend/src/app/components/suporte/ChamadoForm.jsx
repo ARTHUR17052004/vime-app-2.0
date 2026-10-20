@@ -8,6 +8,8 @@ import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
 
+import { lerArquivoComoDataUrl, LIMITE_MIDIA_MB } from "@/utils/arquivoMidia";
+
 const CATEGORIAS = ["Bug", "Dúvida", "Sugestão", "Outro"];
 const CRITICIDADES = ["Baixa", "Média", "Alta", "Urgente"];
 
@@ -66,30 +68,28 @@ export default function ChamadoForm({
     }));
   }
 
-  function selecionarArquivo(e) {
+  async function selecionarArquivo(e) {
 
     const arquivo = e.target.files?.[0];
+    e.target.value = "";
 
     if (!arquivo) return;
 
-    if (arquivo.size > 8 * 1024 * 1024) {
-      alert("Arquivo muito grande (máximo 8 MB) -- vídeos grandes não cabem aqui, tente um print ou um vídeo curto.");
-      return;
-    }
+    try {
 
-    const leitor = new FileReader();
-
-    leitor.onload = () => {
+      const dados = await lerArquivoComoDataUrl(arquivo);
 
       setAnexo({
         nome: arquivo.name,
         tipo: arquivo.type || "application/octet-stream",
-        dados: leitor.result,
+        dados,
       });
 
-    };
+    } catch (erro) {
 
-    leitor.readAsDataURL(arquivo);
+      alert(erro.message);
+
+    }
 
   }
 
@@ -276,7 +276,7 @@ export default function ChamadoForm({
             "
           >
             <Paperclip size={16} />
-            Anexar print ou vídeo curto (até 8 MB)
+            Anexar print ou vídeo (até {LIMITE_MIDIA_MB} MB)
           </button>
 
         )}

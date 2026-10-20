@@ -1,12 +1,11 @@
-// Fotos/vídeos de vistoria viram base64 dentro do próprio JSON da
-// requisição (mesmo padrão de Usuario.foto/Contrato.arquivoDados -- sem
-// disco/S3). O backend recusa corpo acima de 25MB (ver server.js), e
-// base64 infla o arquivo original em ~37% -- por isso os limites aqui
-// são bem mais apertados que 25MB: dá pra pegar o erro ANTES de tentar
-// enviar (com uma mensagem que explica o motivo, em vez do genérico
-// "request entity too large" que vinha do servidor).
-export const LIMITE_MIDIA_MB = 15;
-export const LIMITE_TOTAL_MIDIA_MB = 18;
+// Fotos/vídeos viram base64 dentro do próprio JSON da requisição (mesmo
+// padrão de Usuario.foto/Contrato.arquivoDados -- sem disco/S3). O
+// servidor (Express + Nginx, ver server.js/infra) aceita corpo bem
+// maior que isso -- os limites aqui ficam uma margem abaixo só pra
+// dar o erro ANTES de tentar enviar, com uma mensagem que explica o
+// motivo, em vez do genérico "request entity too large".
+export const LIMITE_MIDIA_MB = 50;
+export const LIMITE_TOTAL_MIDIA_MB = 150;
 
 function bytesDoDataUrl(dataUrl) {
   if (!dataUrl) return 0;

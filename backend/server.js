@@ -83,9 +83,13 @@ app.use(morgan("dev"));
 // `verify` guarda os bytes originais em req.rawBody -- necessário pra
 // conferir a assinatura HMAC do webhook da Clicksign, que precisa do
 // corpo exato recebido, não de uma versão reserializada do JSON.
+// 250mb: fotos/vídeos (base64, ~37% maior que o arquivo original) não
+// têm mais um teto apertado -- ver utils/arquivoMidia.js no frontend
+// (checa antes de enviar) e o client_max_body_size do Nginx na frente
+// (sem isso aqui combinado lá, um upload grande nunca chega no Node).
 app.use(
   express.json({
-    limit: "25mb",
+    limit: "250mb",
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },

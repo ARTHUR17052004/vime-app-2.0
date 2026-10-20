@@ -6,6 +6,7 @@ import { Paperclip, Send, X, Download } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { SolicitacaoService } from "@/services/solicitacao.service";
 import { usePermissao } from "@/hooks/usePermissao";
+import { lerArquivoComoDataUrl } from "@/utils/arquivoMidia";
 
 const STATUS_OPCOES = [
   "SOLICITADA",
@@ -87,30 +88,28 @@ export default function SolicitacaoChat({
 
   }, [mensagens]);
 
-  function selecionarArquivo(e) {
+  async function selecionarArquivo(e) {
 
     const arquivo = e.target.files?.[0];
+    e.target.value = "";
 
     if (!arquivo) return;
 
-    if (arquivo.size > 8 * 1024 * 1024) {
-      alert("Arquivo muito grande (máximo 8 MB).");
-      return;
-    }
+    try {
 
-    const leitor = new FileReader();
-
-    leitor.onload = () => {
+      const dados = await lerArquivoComoDataUrl(arquivo);
 
       setAnexo({
         nome: arquivo.name,
         tipo: arquivo.type || "application/octet-stream",
-        dados: leitor.result,
+        dados,
       });
 
-    };
+    } catch (erro) {
 
-    leitor.readAsDataURL(arquivo);
+      alert(erro.message);
+
+    }
 
   }
 
