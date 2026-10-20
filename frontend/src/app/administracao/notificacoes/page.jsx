@@ -71,6 +71,7 @@ export default function NotificacoesAdminPage() {
 
   const [expandido, setExpandido] = useState(null);
   const [rascunhoMensagem, setRascunhoMensagem] = useState("");
+  const [rascunhoOriginal, setRascunhoOriginal] = useState("");
   const [salvandoMensagem, setSalvandoMensagem] = useState(false);
 
   const carregar = useCallback(async () => {
@@ -153,21 +154,30 @@ export default function NotificacoesAdminPage() {
     }
 
     setExpandido(tipo.chave);
-    setRascunhoMensagem(tipo.mensagemTemplate || "");
+
+    // Já abre preenchido (customizada ou, na falta dela, a própria
+    // mensagem padrão) -- assim dá pra só ajustar um detalhe em vez de
+    // reescrever a mensagem inteira do zero.
+    const partida = tipo.mensagemTemplate || tipo.mensagemPadrao || "";
+    setRascunhoMensagem(partida);
+    setRascunhoOriginal(partida);
 
   }
 
-  async function salvarMensagem(tipo) {
+  async function salvarMensagem(tipo, mensagem = rascunhoMensagem) {
 
     setSalvandoMensagem(true);
 
     try {
 
-      await NotificacaoService.atualizarConfig(tipo.chave, { mensagemTemplate: rascunhoMensagem });
+      await NotificacaoService.atualizarConfig(tipo.chave, { mensagemTemplate: mensagem });
 
       setTipos((atual) =>
-        atual.map((t) => (t.chave === tipo.chave ? { ...t, mensagemTemplate: rascunhoMensagem || null } : t))
+        atual.map((t) => (t.chave === tipo.chave ? { ...t, mensagemTemplate: mensagem || null } : t))
       );
+
+      setRascunhoMensagem(mensagem);
+      setRascunhoOriginal(mensagem);
 
     } catch (err) {
 
@@ -182,8 +192,10 @@ export default function NotificacoesAdminPage() {
   }
 
   async function restaurarMensagemPadrao(tipo) {
-    setRascunhoMensagem("");
-    await salvarMensagem({ ...tipo, mensagemTemplate: "" });
+    await salvarMensagem(tipo, "");
+    const padrao = tipo.mensagemPadrao || "";
+    setRascunhoMensagem(padrao);
+    setRascunhoOriginal(padrao);
   }
 
   if (!podeVisualizar) {
@@ -389,17 +401,22 @@ export default function NotificacoesAdminPage() {
 
                               <p className="mt-1.5 text-xs text-[var(--text-faint)]">
                                 Variáveis disponíveis: {t.variaveis.map((v) => `{{${v}}}`).join(", ")}.
-                                {" "}Em branco = usa o texto padrão mostrado acima como exemplo.
+                                {" "}Apague tudo e salve em branco pra voltar a usar o texto padrão.
                               </p>
 
                               <div className="flex gap-2 mt-3">
 
                                 <Button
                                   size="sm"
-                                  disabled={!podeEditar || salvandoMensagem}
+                                  variant={rascunhoMensagem !== rascunhoOriginal ? "primary" : "secondary"}
+                                  disabled={!podeEditar || salvandoMensagem || rascunhoMensagem === rascunhoOriginal}
                                   onClick={() => salvarMensagem(t)}
                                 >
-                                  {salvandoMensagem ? "Salvando..." : "Salvar mensagem"}
+                                  {salvandoMensagem
+                                    ? "Salvando..."
+                                    : rascunhoMensagem !== rascunhoOriginal
+                                    ? "Salvar alteração"
+                                    : "Mensagem salva"}
                                 </Button>
 
                                 {t.mensagemTemplate && (
