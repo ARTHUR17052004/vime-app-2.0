@@ -133,9 +133,20 @@ const remover = async (id) => {
     descricao: `Chamado ${chamado.id} excluído.`
   });
 
-  return prisma.chamado.delete({
+  const removido = await prisma.chamado.delete({
     where: { id }
   });
+
+  // Sem isso, uma notificação antiga continua linkando pra um id que
+  // não existe mais -- clicar nela cai em "não encontrado" em vez de
+  // abrir alguma coisa. Nunca pode impedir a exclusão em si.
+  try {
+    await notificacaoService.removerPorLink(`/suporte/${id}`);
+  } catch (erro) {
+    console.error('[notificacao] Falha ao limpar notificações do chamado excluído:', erro.message);
+  }
+
+  return removido;
 
 };
 

@@ -152,9 +152,21 @@ const remover = async (id) => {
     descricao: `Solicitação ${solicitacao.id} excluída.`
   });
 
-  return prisma.solicitacao.delete({
+  const removida = await prisma.solicitacao.delete({
     where: { id }
   });
+
+  // Sem isso, uma notificação antiga (ex.: "Nova solicitação") continua
+  // linkando pra um id que não existe mais -- clicar nela cai em
+  // "Solicitação não encontrada" em vez de abrir alguma coisa. Nunca
+  // pode impedir a exclusão em si.
+  try {
+    await notificacaoService.removerPorLink(`/solicitacoes/${id}`);
+  } catch (erro) {
+    console.error('[notificacao] Falha ao limpar notificações da solicitação excluída:', erro.message);
+  }
+
+  return removida;
 
 };
 
