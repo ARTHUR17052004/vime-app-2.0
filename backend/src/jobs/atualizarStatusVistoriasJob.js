@@ -41,10 +41,15 @@ module.exports = async () => {
     });
 
     try {
+      const prazo = new Date(vistoria.dataProxima).toLocaleDateString("pt-BR");
       await notificacaoService.criar({
         origem: "SISTEMA",
         titulo: "Vistoria pendente",
-        mensagem: `🕒 A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) entrou no prazo -- faltam menos de 72h para ${new Date(vistoria.dataProxima).toLocaleDateString("pt-BR")}.`,
+        mensagem: await notificacaoService.renderizarMensagem(
+          'VISTORIA_PENDENTE',
+          { titulo: vistoria.titulo, local: localDe(vistoria), prazo },
+          `🕒 A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) entrou no prazo -- faltam menos de 72h para ${prazo}.`
+        ),
         link: `/vistorias/${vistoria.id}`,
       });
     } catch (erro) {
@@ -72,7 +77,11 @@ module.exports = async () => {
       await notificacaoService.criar({
         origem: "SISTEMA",
         titulo: "Vistoria atrasada",
-        mensagem: `⏰ A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) venceu e ainda não foi realizada.`,
+        mensagem: await notificacaoService.renderizarMensagem(
+          'VISTORIA_ATRASADA',
+          { titulo: vistoria.titulo, local: localDe(vistoria), dias: 0 },
+          `⏰ A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) venceu e ainda não foi realizada.`
+        ),
         link: `/vistorias/${vistoria.id}`,
       });
     } catch (erro) {

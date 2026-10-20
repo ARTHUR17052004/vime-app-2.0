@@ -90,7 +90,11 @@ const sincronizar = async (payload) => {
     await notificacaoService.criar({
       origem: 'SISTEMA',
       titulo: 'Cobrança paga',
-      mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ''} — R$ ${receita.valor} foi confirmado como pago no Banco do Brasil.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'COBRANCA_PAGA',
+        { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor, banco: 'Banco do Brasil' },
+        `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ''} — R$ ${receita.valor} foi confirmado como pago no Banco do Brasil.`
+      ),
       link: '/financeiro',
       locadorId: await locadorDaReceita(receita.id),
     });

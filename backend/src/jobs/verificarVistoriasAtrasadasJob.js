@@ -39,7 +39,11 @@ module.exports = async () => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Vistoria atrasada",
-      mensagem: `⏰ Psst! A vistoria "${vistoria.titulo}" (${local}) já passou do prazo há ${dias} dia(s). Dá um tempinho pra resolver isso hoje?`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'VISTORIA_ATRASADA',
+        { titulo: vistoria.titulo, local, dias },
+        `⏰ Psst! A vistoria "${vistoria.titulo}" (${local}) já passou do prazo há ${dias} dia(s). Dá um tempinho pra resolver isso hoje?`
+      ),
       link: `/vistorias/${vistoria.id}`,
     });
 

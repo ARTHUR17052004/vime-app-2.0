@@ -617,7 +617,11 @@ const sincronizar = async (evento) => {
         await notificacaoService.criar({
           origem: "ASAAS",
           titulo: "Cobrança paga",
-          mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`,
+          mensagem: await notificacaoService.renderizarMensagem(
+            'COBRANCA_PAGA',
+            { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor, banco: 'Asaas' },
+            `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi confirmado como pago no Asaas.`
+          ),
           link: "/asaas-transacoes",
           locadorId: await locadorDaReceita(receita.id),
         });
@@ -648,7 +652,11 @@ const sincronizar = async (evento) => {
       await notificacaoService.criar({
         origem: "ASAAS",
         titulo: "Cobrança atrasada",
-        mensagem: `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`,
+        mensagem: await notificacaoService.renderizarMensagem(
+          'COBRANCA_ATRASADA',
+          { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
+          `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`
+        ),
         link: "/asaas-transacoes",
         locadorId: await locadorDaReceita(receita.id),
       });

@@ -48,7 +48,11 @@ const criar = async (solicitacaoId, dados, autor) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Solicitação classificada",
-      mensagem: `${autorNome} classificou ${referencia} como ${dados.statusAlterado}.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'SOLICITACAO_ATUALIZADA',
+        { autor: autorNome, referencia, situacao: `classificada como ${dados.statusAlterado}` },
+        `${autorNome} classificou ${referencia} como ${dados.statusAlterado}.`
+      ),
       link: `/solicitacoes/${solicitacaoId}`,
     });
 
@@ -57,7 +61,11 @@ const criar = async (solicitacaoId, dados, autor) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Nova resposta em solicitação",
-      mensagem: `${autorNome} respondeu ${referencia}.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'SOLICITACAO_ATUALIZADA',
+        { autor: autorNome, referencia, situacao: "respondida" },
+        `${autorNome} respondeu ${referencia}.`
+      ),
       link: `/solicitacoes/${solicitacaoId}`,
     });
 

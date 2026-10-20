@@ -4,7 +4,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BellRing, Smartphone } from "lucide-react";
+import { ArrowLeft, BellRing, Smartphone, ChevronDown, Pencil, Users, RotateCcw } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import FadeIn from "../../components/ui/FadeIn";
@@ -16,6 +16,7 @@ import Button from "../../components/ui/Button";
 import SemPermissao from "../../components/ui/SemPermissao";
 
 import { NotificacaoService } from "@/services/notificacao.service";
+import { PerfilService } from "@/services/perfis.service";
 import { useAuth } from "@/context/AuthContext";
 
 function Interruptor({ ligado, onChange, desabilitado, rotulo }) {
@@ -64,8 +65,13 @@ export default function NotificacoesAdminPage() {
   const podeEditar = podeVisualizar;
 
   const [tipos, setTipos] = useState([]);
+  const [perfis, setPerfis] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+
+  const [expandido, setExpandido] = useState(null);
+  const [rascunhoMensagem, setRascunhoMensagem] = useState("");
+  const [salvandoMensagem, setSalvandoMensagem] = useState(false);
 
   const carregar = useCallback(async () => {
 
@@ -74,8 +80,13 @@ export default function NotificacoesAdminPage() {
       setLoading(true);
       setErro("");
 
-      const resposta = await NotificacaoService.listarConfig();
-      setTipos(resposta.data || []);
+      const [respostaTipos, respostaPerfis] = await Promise.all([
+        NotificacaoService.listarConfig(),
+        PerfilService.listar(),
+      ]);
+
+      setTipos(respostaTipos.data || []);
+      setPerfis(Array.isArray(respostaPerfis) ? respostaPerfis : respostaPerfis.data || []);
 
     } catch (err) {
 
@@ -109,6 +120,58 @@ export default function NotificacoesAdminPage() {
       setErro(err.message || "Não foi possível salvar.");
     }
 
+  }
+
+  function alternarPerfil(tipo, nomePerfil) {
+
+    const atual = tipo.perfis || [];
+    const novo = atual.includes(nomePerfil)
+      ? atual.filter((p) => p !== nomePerfil)
+      : [...atual, nomePerfil];
+
+    alterar(tipo.chave, "perfis", novo);
+
+  }
+
+  function abrirEdicaoMensagem(tipo) {
+
+    if (expandido === tipo.chave) {
+      setExpandido(null);
+      return;
+    }
+
+    setExpandido(tipo.chave);
+    setRascunhoMensagem(tipo.mensagemTemplate || "");
+
+  }
+
+  async function salvarMensagem(tipo) {
+
+    setSalvandoMensagem(true);
+
+    try {
+
+      await NotificacaoService.atualizarConfig(tipo.chave, { mensagemTemplate: rascunhoMensagem });
+
+      setTipos((atual) =>
+        atual.map((t) => (t.chave === tipo.chave ? { ...t, mensagemTemplate: rascunhoMensagem || null } : t))
+      );
+
+    } catch (err) {
+
+      setErro(err.message || "Não foi possível salvar a mensagem.");
+
+    } finally {
+
+      setSalvandoMensagem(false);
+
+    }
+
+  }
+
+  async function restaurarMensagemPadrao(tipo) {
+    setRascunhoMensagem("");
+    await salvarMensagem({ ...tipo, mensagemTemplate: "" });
   }
 
   if (!podeVisualizar) {
@@ -147,8 +210,9 @@ export default function NotificacoesAdminPage() {
                 <p className="mt-1 text-sm text-[var(--text-subtle)]">
                   Escolha o que o sistema avisa. <b>Notificar</b> desligado = o
                   aviso nem é criado. <b>Celular</b> desligado = aparece só
-                  dentro do sistema, sem mandar para o celular. Vale para todos
-                  os usuários.
+                  dentro do sistema, sem mandar para o celular. Clique no lápis
+                  pra personalizar o texto do aviso ou escolher pra quais
+                  perfis ele vale (em branco = todos os perfis).
                 </p>
               </div>
 
@@ -193,47 +257,199 @@ export default function NotificacoesAdminPage() {
                           border-b
                           border-[var(--border-token)]
                           last:border-b-0
-                          flex
-                          items-center
-                          gap-4
-                          flex-wrap
                         "
                       >
 
-                        <div className="flex-1 min-w-[220px]">
-                          <p className="text-[15px] font-semibold text-[var(--text)]">
-                            {t.rotulo}
-                          </p>
-                          <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
-                            {t.descricao}
-                          </p>
+                        <div
+                          className="
+                            flex
+                            items-center
+                            gap-4
+                            flex-wrap
+                          "
+                        >
+
+                          <div className="flex-1 min-w-[220px]">
+                            <p className="text-[15px] font-semibold text-[var(--text)]">
+                              {t.rotulo}
+                            </p>
+                            <p className="mt-0.5 text-sm text-[var(--text-subtle)]">
+                              {t.descricao}
+                            </p>
+                            {t.perfis?.length > 0 && (
+                              <p className="mt-1.5 flex items-center gap-1.5 text-xs text-emerald-400">
+                                <Users size={13} />
+                                Só para: {t.perfis.join(", ")}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-6">
+
+                            <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                              <BellRing size={15} />
+                              Notificar
+                              <Interruptor
+                                ligado={t.ativo}
+                                desabilitado={!podeEditar}
+                                rotulo={`Notificar: ${t.rotulo}`}
+                                onChange={(v) => alterar(t.chave, "ativo", v)}
+                              />
+                            </label>
+
+                            <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+                              <Smartphone size={15} />
+                              Celular
+                              <Interruptor
+                                ligado={t.ativo && t.push}
+                                desabilitado={!podeEditar || !t.ativo}
+                                rotulo={`Enviar para o celular: ${t.rotulo}`}
+                                onChange={(v) => alterar(t.chave, "push", v)}
+                              />
+                            </label>
+
+                            {podeEditar && t.mensagemPadrao && (
+                              <button
+                                onClick={() => abrirEdicaoMensagem(t)}
+                                title="Personalizar mensagem e perfis"
+                                className={`
+                                  p-2
+                                  rounded-lg
+                                  border
+                                  border-[var(--border-token)]
+                                  text-[var(--text-subtle)]
+                                  hover:bg-[var(--surface-2)]
+                                  hover:text-[var(--text)]
+                                  transition
+                                `}
+                              >
+                                <Pencil size={15} />
+                              </button>
+                            )}
+
+                            {podeEditar && t.mensagemPadrao && (
+                              <button
+                                onClick={() => abrirEdicaoMensagem(t)}
+                                className="p-1 text-[var(--text-faint)]"
+                              >
+                                <ChevronDown
+                                  size={16}
+                                  className={`transition-transform ${expandido === t.chave ? "rotate-180" : ""}`}
+                                />
+                              </button>
+                            )}
+
+                          </div>
+
                         </div>
 
-                        <div className="flex items-center gap-6">
+                        {expandido === t.chave && (
 
-                          <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                            <BellRing size={15} />
-                            Notificar
-                            <Interruptor
-                              ligado={t.ativo}
-                              desabilitado={!podeEditar}
-                              rotulo={`Notificar: ${t.rotulo}`}
-                              onChange={(v) => alterar(t.chave, "ativo", v)}
-                            />
-                          </label>
+                          <div className="mt-4 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 space-y-4">
 
-                          <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-                            <Smartphone size={15} />
-                            Celular
-                            <Interruptor
-                              ligado={t.ativo && t.push}
-                              desabilitado={!podeEditar || !t.ativo}
-                              rotulo={`Enviar para o celular: ${t.rotulo}`}
-                              onChange={(v) => alterar(t.chave, "push", v)}
-                            />
-                          </label>
+                            <div>
 
-                        </div>
+                              <label className="block text-xs font-semibold text-[var(--text-muted)] mb-1.5">
+                                Mensagem personalizada
+                              </label>
+
+                              <textarea
+                                value={rascunhoMensagem}
+                                onChange={(e) => setRascunhoMensagem(e.target.value)}
+                                placeholder={t.mensagemPadrao}
+                                rows={3}
+                                disabled={!podeEditar}
+                                className="
+                                  w-full
+                                  rounded-lg
+                                  border
+                                  border-[var(--border-token)]
+                                  bg-[var(--surface)]
+                                  px-3
+                                  py-2
+                                  text-sm
+                                  text-[var(--text)]
+                                  outline-none
+                                  focus:border-emerald-500
+                                  resize-none
+                                "
+                              />
+
+                              <p className="mt-1.5 text-xs text-[var(--text-faint)]">
+                                Variáveis disponíveis: {t.variaveis.map((v) => `{{${v}}}`).join(", ")}.
+                                {" "}Em branco = usa o texto padrão mostrado acima como exemplo.
+                              </p>
+
+                              <div className="flex gap-2 mt-3">
+
+                                <Button
+                                  size="sm"
+                                  disabled={!podeEditar || salvandoMensagem}
+                                  onClick={() => salvarMensagem(t)}
+                                >
+                                  {salvandoMensagem ? "Salvando..." : "Salvar mensagem"}
+                                </Button>
+
+                                {t.mensagemTemplate && (
+                                  <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    leftIcon={<RotateCcw size={14} />}
+                                    disabled={!podeEditar || salvandoMensagem}
+                                    onClick={() => restaurarMensagemPadrao(t)}
+                                  >
+                                    Voltar ao padrão
+                                  </Button>
+                                )}
+
+                              </div>
+
+                            </div>
+
+                            <div className="border-t border-[var(--border-token)] pt-4">
+
+                              <label className="block text-xs font-semibold text-[var(--text-muted)] mb-2">
+                                Disparar só para estes perfis (nenhum marcado = todos os perfis)
+                              </label>
+
+                              <div className="flex flex-wrap gap-2">
+
+                                {perfis.map((p) => {
+
+                                  const marcado = (t.perfis || []).includes(p.nome);
+
+                                  return (
+                                    <button
+                                      key={p.id}
+                                      disabled={!podeEditar}
+                                      onClick={() => alternarPerfil(t, p.nome)}
+                                      className={`
+                                        px-3
+                                        py-1.5
+                                        rounded-full
+                                        text-xs
+                                        font-semibold
+                                        border
+                                        transition
+                                        ${marcado
+                                          ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+                                          : "bg-[var(--surface)] border-[var(--border-token)] text-[var(--text-muted)] hover:border-emerald-500/30"
+                                        }
+                                      `}
+                                    >
+                                      {p.nome}
+                                    </button>
+                                  );
+
+                                })}
+
+                              </div>
+
+                            </div>
+
+                          </div>
+
+                        )}
 
                       </div>
 

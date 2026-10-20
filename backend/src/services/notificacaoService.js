@@ -10,11 +10,42 @@ const { notificarSistemaWhatsapp } = require("./whatsappAutomacaoService");
 //  - usuário que vê o sistema inteiro (sem locador): tudo, como sempre;
 //  - usuário restrito a um locador: só o que é pra ele (usuarioId dele) ou
 //    aviso geral marcado com o locador dele -- nunca aviso de outro
-//    locador nem aviso sem locador conhecido.
-const filtroVisivel = (usuarioId, locadorId) =>
-  locadorId
-    ? { OR: [{ usuarioId }, { usuarioId: null, locadorId }] }
-    : { OR: [{ usuarioId }, { usuarioId: null }] };
+//    locador nem aviso sem locador conhecido;
+//  - perfisAlvo (ver Administração > Notificações): se não for vazio,
+//    só quem tem um desses perfis enxerga -- "fotografado" na hora de
+//    criar, não muda se a regra for alterada depois.
+const filtroVisivel = (usuarioId, locadorId, perfil) => ({
+  AND: [
+    locadorId
+      ? { OR: [{ usuarioId }, { usuarioId: null, locadorId }] }
+      : { OR: [{ usuarioId }, { usuarioId: null }] },
+    { OR: [{ perfisAlvo: { isEmpty: true } }, { perfisAlvo: { has: perfil || "" } }] },
+  ],
+});
+
+// Troca {{variavel}} pelo valor de verdade -- variavel ausente/null vira
+// string vazia (melhor um buraco discreto do que "undefined" na tela).
+const interpolar = (template, variaveis = {}) =>
+  template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, chave) => {
+    const valor = variaveis[chave];
+    return valor === undefined || valor === null ? "" : String(valor);
+  });
+
+// Cada ponto que cria uma notificação já tem seu próprio texto padrão
+// (sempre existiu) -- isso só troca pelo texto customizado quando o
+// admin configurou um em Administração > Notificações. Sem
+// customização, nada muda: mesmo texto de sempre.
+const renderizarMensagem = async (tipoChave, variaveis, textoPadrao) => {
+
+  const config = await notificacaoConfigService.obter(tipoChave);
+
+  if (config.mensagemTemplate) {
+    return interpolar(config.mensagemTemplate, variaveis);
+  }
+
+  return textoPadrao;
+
+};
 
 /* ==========================================
    CRIAR (usado pelos outros serviços:
@@ -34,6 +65,11 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
 
   if (locadorId === undefined) locadorId = await doLink(link);
 
+  // Restrição de perfil só vale pra aviso geral (sem usuarioId) -- um
+  // aviso endereçado a uma pessoa específica já é por definição só
+  // pra ela, independente do perfil dela.
+  const perfisAlvo = !usuarioId ? config.perfis : [];
+
   const notificacao = await prisma.notificacao.create({
     data: {
       usuarioId: usuarioId || null,
@@ -42,6 +78,7 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
       mensagem,
       link: link || null,
       locadorId: locadorId || null,
+      perfisAlvo,
     },
   });
 
@@ -53,6 +90,18 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
 
       // Em tempo real só pro usuário dono, se especificado
       io.to(`usuario:${usuarioId}`).emit("notificacao:nova", notificacao);
+
+    } else if (perfisAlvo.length > 0) {
+
+      // Restrito a perfil: não dá pra confiar só em rooms de
+      // locador/irrestritos pra não vazar pra quem não devia (ver
+      // tiposNotificacao.js) -- manda só um sinal de "tem coisa nova"
+      // pros perfis certos, sem o conteúdo. O cliente confirma visibilidade
+      // de verdade buscando de novo pela API (já filtrada por
+      // perfisAlvo) antes de mostrar som/popup.
+      perfisAlvo.forEach((perfilAlvo) => {
+        io.to(`perfil:${perfilAlvo}`).emit("notificacao:verificar");
+      });
 
     } else {
 
@@ -80,7 +129,7 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   if (config.push) Promise.resolve(
     usuarioId
       ? pushService.enviarPara(usuarioId, payloadPush)
-      : pushService.enviarParaTodos(payloadPush, locadorId || null)
+      : pushService.enviarParaTodos(payloadPush, locadorId || null, perfisAlvo)
   ).catch((erro) => console.error("[push] Falha ao notificar:", erro.message));
 
   // WhatsApp: mesmo aviso, pra quem ligou "Receber avisos no WhatsApp" no
@@ -97,6 +146,9 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
           : locadorId
             ? { OR: [{ locadorId: null }, { locadorId }] }
             : { locadorId: null }),
+        ...(perfisAlvo.length > 0
+          ? { perfil: { nome: { in: perfisAlvo } } }
+          : {}),
       },
     });
 
@@ -113,12 +165,12 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
    LISTAR NÃO LIDAS (pro sininho)
 ========================================== */
 
-const listarNaoLidas = async (usuarioId, locadorId) => {
+const listarNaoLidas = async (usuarioId, locadorId, perfil) => {
 
   return prisma.notificacao.findMany({
     where: {
       lida: false,
-      ...filtroVisivel(usuarioId, locadorId),
+      ...filtroVisivel(usuarioId, locadorId, perfil),
     },
     orderBy: {
       createdAt: "desc",
@@ -131,12 +183,12 @@ const listarNaoLidas = async (usuarioId, locadorId) => {
    LISTAR HISTÓRICO (já lidas)
 ========================================== */
 
-const listarHistorico = async (usuarioId, locadorId) => {
+const listarHistorico = async (usuarioId, locadorId, perfil) => {
 
   return prisma.notificacao.findMany({
     where: {
       lida: true,
-      ...filtroVisivel(usuarioId, locadorId),
+      ...filtroVisivel(usuarioId, locadorId, perfil),
     },
     orderBy: {
       createdAt: "desc",
@@ -166,12 +218,12 @@ const marcarComoLida = async (id) => {
    MARCAR TODAS COMO LIDAS
 ========================================== */
 
-const marcarTodasComoLidas = async (usuarioId, locadorId) => {
+const marcarTodasComoLidas = async (usuarioId, locadorId, perfil) => {
 
   return prisma.notificacao.updateMany({
     where: {
       lida: false,
-      ...filtroVisivel(usuarioId, locadorId),
+      ...filtroVisivel(usuarioId, locadorId, perfil),
     },
     data: {
       lida: true,
@@ -197,6 +249,7 @@ const removerPorLink = async (link) => {
 
 module.exports = {
   criar,
+  renderizarMensagem,
   listarNaoLidas,
   listarHistorico,
   marcarComoLida,

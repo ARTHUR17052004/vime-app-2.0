@@ -44,6 +44,39 @@ export function useNotificacoes() {
       mostrarPopupNotificacao(notificacao);
     }
 
+    // Avisos restritos a perfil (ver Administração > Notificações) não
+    // vêm com o conteúdo direto no socket -- só um sinal de "busca de
+    // novo", pra garantir que quem não tem o perfil certo nunca recebe
+    // o texto por aqui. Busca de verdade na API (que já filtra por
+    // perfisAlvo) e só toca som/popup dos itens que realmente são
+    // novos pra essa pessoa.
+    async function aoVerificar() {
+
+      try {
+
+        const resposta = await NotificacaoService.listarNaoLidas();
+        const frescas = resposta.data || [];
+
+        setNaoLidas((atuais) => {
+
+          const idsConhecidos = new Set(atuais.map((n) => n.id));
+          const novas = frescas.filter((n) => !idsConhecidos.has(n.id));
+
+          novas.forEach((n) => {
+            tocarSomNotificacao(n);
+            mostrarPopupNotificacao(n);
+          });
+
+          return frescas;
+
+        });
+
+      } catch (err) {
+        console.error("Erro ao verificar notificações:", err);
+      }
+
+    }
+
     // Push que chegou com o app aberto: o service worker não mostra a
     // notificação do sistema (ver public/sw.js) e avisa a página, que
     // recarrega a lista e toca o som -- garante o aviso mesmo se o
@@ -58,10 +91,12 @@ export function useNotificacoes() {
     }
 
     socket.on("notificacao:nova", aoReceberNova);
+    socket.on("notificacao:verificar", aoVerificar);
     navigator.serviceWorker?.addEventListener("message", aoMensagemDoServiceWorker);
 
     return () => {
       socket.off("notificacao:nova", aoReceberNova);
+      socket.off("notificacao:verificar", aoVerificar);
       navigator.serviceWorker?.removeEventListener("message", aoMensagemDoServiceWorker);
     };
   }, [usuario, carregar]);

@@ -41,7 +41,11 @@ module.exports = async () => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Kitnet vazia",
-      mensagem: `${nomeKitnet} (${nomeUnidade}) está vazia há ${dias} dia(s) sem ser locada.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'KITNET_VAZIA',
+        { kitnet: nomeKitnet, unidade: nomeUnidade, dias },
+        `${nomeKitnet} (${nomeUnidade}) está vazia há ${dias} dia(s) sem ser locada.`
+      ),
       link: `/kitnets/${kitnet.id}`,
     });
 

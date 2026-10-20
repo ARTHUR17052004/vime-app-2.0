@@ -123,7 +123,11 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Vistoria urgente: kitnet vazia",
-      mensagem: `🔑🚨 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia!${endereco ? ` (${endereco})` : ""} Vai lá conferir a entrega assim que puder.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'VISTORIA_ENTREGA_VAZIA',
+        { kitnet: nomeKitnet, unidade: nomeUnidade, endereco: endereco || '' },
+        `🔑🚨 ${nomeKitnet} (${nomeUnidade}) acabou de ficar vazia!${endereco ? ` (${endereco})` : ""} Vai lá conferir a entrega assim que puder.`
+      ),
       link: `/vistorias/${vistoria.id}`,
     });
 

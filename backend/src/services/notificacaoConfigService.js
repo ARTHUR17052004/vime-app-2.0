@@ -21,13 +21,19 @@ const carregar = async () => {
 
 };
 
-// Tipo sem linha (ou "OUTROS") = tudo ligado.
+// Tipo sem linha (ou "OUTROS") = tudo ligado, sem mensagem customizada,
+// pra todos os perfis.
 const obter = async (tipo) => {
 
   const mapa = await carregar();
   const linha = mapa.get(tipo);
 
-  return { ativo: linha ? linha.ativo : true, push: linha ? linha.push : true };
+  return {
+    ativo: linha ? linha.ativo : true,
+    push: linha ? linha.push : true,
+    mensagemTemplate: linha?.mensagemTemplate || null,
+    perfis: linha?.perfis || [],
+  };
 
 };
 
@@ -35,18 +41,28 @@ const listar = async () => {
 
   const mapa = await carregar();
 
-  return TIPOS.map((t) => ({
-    chave: t.chave,
-    grupo: t.grupo,
-    rotulo: t.rotulo,
-    descricao: t.descricao,
-    ativo: mapa.has(t.chave) ? mapa.get(t.chave).ativo : true,
-    push: mapa.has(t.chave) ? mapa.get(t.chave).push : true,
-  }));
+  return TIPOS.map((t) => {
+
+    const linha = mapa.get(t.chave);
+
+    return {
+      chave: t.chave,
+      grupo: t.grupo,
+      rotulo: t.rotulo,
+      descricao: t.descricao,
+      variaveis: t.variaveis || [],
+      mensagemPadrao: t.mensagemPadrao || null,
+      ativo: linha ? linha.ativo : true,
+      push: linha ? linha.push : true,
+      mensagemTemplate: linha?.mensagemTemplate || null,
+      perfis: linha?.perfis || [],
+    };
+
+  });
 
 };
 
-const atualizar = async (tipo, { ativo, push }) => {
+const atualizar = async (tipo, { ativo, push, mensagemTemplate, perfis }) => {
 
   if (!TIPOS.some((t) => t.chave === tipo)) {
     throw new Error("Tipo de notificação inválido.");
@@ -55,6 +71,9 @@ const atualizar = async (tipo, { ativo, push }) => {
   const dados = {};
   if (typeof ativo === "boolean") dados.ativo = ativo;
   if (typeof push === "boolean") dados.push = push;
+  // string vazia = volta a usar o texto padrão do código (não grava "").
+  if (mensagemTemplate !== undefined) dados.mensagemTemplate = mensagemTemplate || null;
+  if (Array.isArray(perfis)) dados.perfis = perfis;
 
   await prisma.notificacaoConfig.upsert({
     where: { tipo },

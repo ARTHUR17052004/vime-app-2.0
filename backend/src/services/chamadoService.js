@@ -55,7 +55,11 @@ const criar = async (dados, autor) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Novo chamado de suporte",
-    mensagem: `${chamado.criadoPorNome || "Alguém"} abriu o chamado "${chamado.titulo}" (${chamado.numero}).`,
+    mensagem: await notificacaoService.renderizarMensagem(
+      'CHAMADO',
+      { autor: chamado.criadoPorNome || "Alguém", titulo: chamado.titulo, numero: chamado.numero, situacao: "aberto" },
+      `${chamado.criadoPorNome || "Alguém"} abriu o chamado "${chamado.titulo}" (${chamado.numero}).`
+    ),
     link: `/suporte/${chamado.id}`
   });
 

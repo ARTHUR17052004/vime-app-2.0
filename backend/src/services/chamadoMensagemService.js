@@ -48,7 +48,11 @@ const criar = async (chamadoId, dados, autor) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Chamado atualizado",
-      mensagem: `${autorNome} marcou ${referencia} como ${dados.statusAlterado}.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'CHAMADO',
+        { autor: autorNome, titulo: chamado?.titulo || '', numero: chamado?.numero || '', situacao: `marcado como ${dados.statusAlterado}` },
+        `${autorNome} marcou ${referencia} como ${dados.statusAlterado}.`
+      ),
       link: `/suporte/${chamadoId}`,
     });
 
@@ -57,7 +61,11 @@ const criar = async (chamadoId, dados, autor) => {
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Nova resposta em chamado",
-      mensagem: `${autorNome} respondeu ${referencia}.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'CHAMADO',
+        { autor: autorNome, titulo: chamado?.titulo || '', numero: chamado?.numero || '', situacao: "respondido" },
+        `${autorNome} respondeu ${referencia}.`
+      ),
       link: `/suporte/${chamadoId}`,
     });
 

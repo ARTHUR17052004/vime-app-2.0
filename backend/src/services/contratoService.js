@@ -65,10 +65,16 @@ const notificarSeVencimentoProximo = async (contrato) => {
     where: { id: contrato.inquilinoId }
   });
 
+  const prazoVencimento = diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`;
+
   await notificacaoService.criar({
     origem: 'SISTEMA',
     titulo: 'Contrato próximo do vencimento',
-    mensagem: `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`} (${fim.toLocaleDateString('pt-BR')}).`,
+    mensagem: await notificacaoService.renderizarMensagem(
+      'CONTRATO_VENCENDO',
+      { inquilino: inquilino?.nome || 'um inquilino', prazo: prazoVencimento, data: fim.toLocaleDateString('pt-BR') },
+      `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${prazoVencimento} (${fim.toLocaleDateString('pt-BR')}).`
+    ),
     link
   });
 
@@ -377,7 +383,11 @@ const criar = async (dados, usuario) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Novo contrato criado",
-    mensagem: `Contrato de ${inquilino.nome} na kitnet ${kitnet.numero} foi criado.`,
+    mensagem: await notificacaoService.renderizarMensagem(
+      'CONTRATO_NOVO',
+      { inquilino: inquilino.nome, kitnet: kitnet.numero },
+      `Contrato de ${inquilino.nome} na kitnet ${kitnet.numero} foi criado.`
+    ),
     link: `/contratos/${contrato.id}`
   });
 
@@ -621,7 +631,11 @@ const encerrar = async (id) => {
   await notificacaoService.criar({
     origem: "SISTEMA",
     titulo: "Contrato encerrado",
-    mensagem: `Contrato ${contrato.id} foi encerrado.`,
+    mensagem: await notificacaoService.renderizarMensagem(
+      'CONTRATO_ENCERRADO',
+      { contrato: contrato.id },
+      `Contrato ${contrato.id} foi encerrado.`
+    ),
     link: `/contratos/${contrato.id}`
   });
 
@@ -823,7 +837,11 @@ const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
   await notificacaoService.criar({
     origem: 'CLICKSIGN',
     titulo: 'Contrato enviado para assinatura',
-    mensagem: `Contrato de ${contrato.inquilino.nome} foi enviado à Clicksign para assinatura.`,
+    mensagem: await notificacaoService.renderizarMensagem(
+      'CONTRATO_ASSINATURA',
+      { inquilino: contrato.inquilino.nome, situacao: 'enviado para assinatura' },
+      `Contrato de ${contrato.inquilino.nome} foi enviado à Clicksign para assinatura.`
+    ),
     link: `/contratos/${contrato.id}`
   });
 

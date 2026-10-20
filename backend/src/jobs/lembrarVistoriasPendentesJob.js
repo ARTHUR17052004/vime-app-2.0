@@ -32,10 +32,16 @@ module.exports = async () => {
 
     if (jaAvisouHoje) continue;
 
+    const prazo = new Date(vistoria.dataProxima).toLocaleDateString("pt-BR");
+
     await notificacaoService.criar({
       origem: "SISTEMA",
       titulo: "Vistoria pendente",
-      mensagem: `🕒 Psst! A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) continua pendente -- o prazo é ${new Date(vistoria.dataProxima).toLocaleDateString("pt-BR")}.`,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'VISTORIA_PENDENTE',
+        { titulo: vistoria.titulo, local: localDe(vistoria), prazo },
+        `🕒 Psst! A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) continua pendente -- o prazo é ${prazo}.`
+      ),
       link: `/vistorias/${vistoria.id}`,
     });
 

@@ -87,12 +87,17 @@ const enviarPara = async (usuarioId, payload) => {
 
 // Aviso geral: vai pra quem vê o sistema inteiro e, se o aviso é de um
 // locador, também pros usuários restritos a ele -- nunca pra outro locador.
-const enviarParaTodos = async (payload, locadorId = null) => {
+// `perfis` (ver Administração > Notificações): vazio = todos; senão só
+// quem tem um desses perfis recebe o push de verdade no celular.
+const enviarParaTodos = async (payload, locadorId = null, perfis = []) => {
   const subscricoes = await prisma.pushSubscription.findMany({
     where: {
-      usuario: locadorId
-        ? { OR: [{ locadorId: null }, { locadorId }] }
-        : { locadorId: null },
+      usuario: {
+        ...(locadorId
+          ? { OR: [{ locadorId: null }, { locadorId }] }
+          : { locadorId: null }),
+        ...(perfis.length > 0 ? { perfil: { nome: { in: perfis } } } : {}),
+      },
     },
   });
   await enviarParaSubscricoes(subscricoes, payload);

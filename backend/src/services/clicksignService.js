@@ -276,7 +276,11 @@ const processarWebhook = async (evento) => {
         await notificacaoService.criar({
           origem: "CLICKSIGN",
           titulo: "Contrato assinado",
-          mensagem: `Contrato de ${documento.inquilino?.nome || "inquilino"} foi assinado na Clicksign.`,
+          mensagem: await notificacaoService.renderizarMensagem(
+            'CONTRATO_ASSINATURA',
+            { inquilino: documento.inquilino?.nome || "inquilino", situacao: "assinado na Clicksign" },
+            `Contrato de ${documento.inquilino?.nome || "inquilino"} foi assinado na Clicksign.`
+          ),
           link: `/contratos/${documento.id}`
         });
 
@@ -309,7 +313,11 @@ const processarWebhook = async (evento) => {
       await notificacaoService.criar({
         origem: "CLICKSIGN",
         titulo: "Contrato cancelado na Clicksign",
-        mensagem: `O envio para assinatura do contrato de ${documento.inquilino?.nome || "inquilino"} foi cancelado.`,
+        mensagem: await notificacaoService.renderizarMensagem(
+          'CONTRATO_ASSINATURA',
+          { inquilino: documento.inquilino?.nome || "inquilino", situacao: "cancelado antes de assinar" },
+          `O envio para assinatura do contrato de ${documento.inquilino?.nome || "inquilino"} foi cancelado.`
+        ),
         link: `/contratos/${documento.id}`
       });
 

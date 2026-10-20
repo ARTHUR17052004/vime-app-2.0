@@ -185,6 +185,12 @@ model Notificacao {
   // só quem vê o sistema inteiro recebe.
   locadorId   String?
 
+  // Perfis que podiam ver esse aviso no momento em que ele nasceu --
+  // "fotografado" de NotificacaoConfig.perfis na hora de criar (se o
+  // admin mudar a regra depois, avisos antigos não mudam de dono).
+  // Vazio = todos (igual sempre foi).
+  perfisAlvo  String[] @default([])
+
   lida        Boolean  @default(false)
   lidaEm      DateTime?
 
@@ -884,6 +890,16 @@ model NotificacaoConfig {
 
   ativo Boolean @default(true)
   push  Boolean @default(true)
+
+  // Texto customizado (com {{variaveis}}, ver tiposNotificacao.js) --
+  // null/vazio = usa o texto padrão já escrito no código de quem cria
+  // o aviso.
+  mensagemTemplate String?
+
+  // Perfis que recebem esse tipo de aviso -- vazio = todos (igual
+  // sempre foi). Nomes batem com Perfil.nome (ex.: "ADMINISTRADOR",
+  // "FINANCEIRO").
+  perfis String[] @default([])
 
   updatedAt DateTime @updatedAt
 }

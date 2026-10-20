@@ -207,6 +207,8 @@ io.on("connection", (socket) => {
     socket.join(`usuario:${socket.usuario.id}`);
     // Aviso geral só chega a quem vê tudo ou ao locador do usuário.
     socket.join(socket.usuario.locadorId ? `locador:${socket.usuario.locadorId}` : "irrestritos");
+    // Aviso restrito a perfil (ver Administração > Notificações).
+    if (socket.usuario.perfil) socket.join(`perfil:${socket.usuario.perfil}`);
     registrarConexao(socket);
   }
 
