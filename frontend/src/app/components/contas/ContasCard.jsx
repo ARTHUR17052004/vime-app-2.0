@@ -38,12 +38,25 @@ const CAMPOS_POR_PROVIDER = {
     { campo: "certificado", rotulo: "Certificado da aplicação (.p12 em base64)", obrigatorio: true, multilinha: true },
     { campo: "ambiente", rotulo: "Ambiente (homologacao ou producao)", obrigatorio: true },
   ],
+  // Campos ainda não confirmados com o BRB de verdade -- palpite a
+  // partir do formato do BB (ver BRBApi.js). Ajustar assim que o
+  // manual técnico deles chegar.
+  BRB: [
+    { campo: "clientId", rotulo: "Client ID", obrigatorio: true },
+    { campo: "clientSecret", rotulo: "Client Secret", obrigatorio: true },
+    { campo: "ambiente", rotulo: "Ambiente (homologacao ou producao)", obrigatorio: true },
+    { campo: "numeroConvenio", rotulo: "Número do Convênio", obrigatorio: true },
+    { campo: "numeroCarteira", rotulo: "Número da Carteira", obrigatorio: true },
+    { campo: "agencia", rotulo: "Agência", obrigatorio: true },
+    { campo: "conta", rotulo: "Conta", obrigatorio: true },
+  ],
 };
 
 const NOME_PROVIDER = {
   ASAAS: "Asaas",
   BB: "Banco do Brasil",
   EFI: "Efí Bank",
+  BRB: "BRB - Banco de Brasília",
 };
 
 const FORM_INICIAL = {
@@ -298,6 +311,7 @@ export default function ContasCard() {
               <option value="ASAAS" className="bg-[#1b2430]">Asaas</option>
               <option value="BB" className="bg-[#1b2430]">Banco do Brasil</option>
               <option value="EFI" className="bg-[#1b2430]">Efí Bank</option>
+              <option value="BRB" className="bg-[#1b2430]">BRB - Banco de Brasília</option>
             </select>
             {form.id && (
               <p className="text-xs text-[var(--text-faint)] mt-1">

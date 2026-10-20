@@ -3,6 +3,8 @@ const prisma = require('../config/prisma');
 const asaasService = require('./asaasService');
 const contaPagamentoService = require('./contaPagamentoService');
 const BBApi = require('./BBApi');
+const EFIApi = require('./EFIApi');
+const BRBApi = require('./BRBApi');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 const emailAutomacaoService = require('./emailAutomacaoService');
 const { emitirAtualizacao } = require('../socket');
@@ -157,12 +159,190 @@ const enviarPeloBB = async (receita, conta) => {
 
 };
 
+// Mesmo roteiro de enviarPeloBB, só trocando o provedor -- ver
+// EFIApi.js (payload/endpoint ainda não confirmados contra a EFI de
+// verdade, testar em homologação antes de usar pra valer).
+const enviarPelaEFI = async (receita, conta) => {
+
+  if (receita.gatewayReferencia) {
+    return {
+      success: false,
+      mensagem: 'Esta receita já foi enviada ao banco.',
+    };
+  }
+
+  const pagador = resolverPagador(receita);
+
+  if (!pagador) {
+    return {
+      success: false,
+      mensagem: 'Informe um inquilino ou os dados do pagador (nome e CPF) antes de enviar ao banco.',
+    };
+  }
+
+  const cpfDigitos = (pagador.cpf || '').replace(/\D/g, '');
+
+  try {
+
+    const resultado = await EFIApi.criarBoleto({
+      descricao: receita.descricao,
+      valor: Number(receita.valor),
+      dataVencimento: receita.vencimento
+        ? new Date(receita.vencimento).toISOString().slice(0, 10)
+        : new Date().toISOString().slice(0, 10),
+      pagador: {
+        nome: pagador.nome,
+        cpf: cpfDigitos,
+        email: pagador.email,
+        telefone: (pagador.telefone || '').replace(/\D/g, ''),
+      },
+    }, conta.credenciais);
+
+    const atualizada = await prisma.receita.update({
+      where: { id: receita.id },
+      data: {
+        contaPagamentoId: conta.id,
+        gatewayProvider: 'EFI',
+        gatewayReferencia: resultado.numero,
+        linkBoleto: resultado.urlImagemBoleto || null,
+        linhaDigitavel: resultado.linhaDigitavel || null,
+      },
+    });
+
+    if (pagador.inquilino) {
+
+      whatsappAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[WhatsApp] nova_cobranca (EFI):', erro.message));
+
+      emailAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[E-mail] nova_cobranca (EFI):', erro.message));
+
+    }
+
+    emitirAtualizacao('receita');
+
+    return {
+      success: true,
+      mensagem: 'Cobrança enviada à EFI com sucesso.',
+      gatewayProvider: 'EFI',
+      linhaDigitavel: resultado.linhaDigitavel,
+      urlBoleto: resultado.urlImagemBoleto,
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      mensagem: error.message || 'Erro ao gerar boleto na EFI.',
+    };
+
+  }
+
+};
+
+// Mesmo roteiro de enviarPeloBB -- ver BRBApi.js: esqueleto não
+// confirmado contra o BRB de verdade ainda (sem manual técnico deles
+// em mãos). Não vincular nenhum locador de verdade a uma conta BRB
+// antes de testar em homologação.
+const enviarPeloBRB = async (receita, conta) => {
+
+  if (receita.gatewayReferencia) {
+    return {
+      success: false,
+      mensagem: 'Esta receita já foi enviada ao banco.',
+    };
+  }
+
+  const pagador = resolverPagador(receita);
+
+  if (!pagador) {
+    return {
+      success: false,
+      mensagem: 'Informe um inquilino ou os dados do pagador (nome e CPF) antes de enviar ao banco.',
+    };
+  }
+
+  const unidade =
+    receita.contrato?.unidade ||
+    receita.inquilino?.kitnet?.unidade;
+
+  const cpfDigitos = (pagador.cpf || '').replace(/\D/g, '');
+
+  const numeroControle = numeroControleParaReceita(receita.id);
+
+  try {
+
+    const resultado = await BRBApi.criarBoleto({
+      dataEmissao: formatarDataBB(new Date()),
+      dataVencimento: formatarDataBB(receita.vencimento || new Date()),
+      valor: Number(receita.valor),
+      numeroTituloBeneficiario: receita.id.replace(/-/g, '').slice(0, 15).toUpperCase(),
+      numeroControle,
+      pagador: {
+        tipoInscricao: 1,
+        numeroInscricao: Number(cpfDigitos),
+        nome: pagador.nome,
+        endereco: unidade ? `${unidade.logradouro || ''} ${unidade.numero || ''}`.trim() : undefined,
+        cep: unidade?.cep ? Number(String(unidade.cep).replace(/\D/g, '')) : undefined,
+        cidade: unidade?.cidade,
+        bairro: unidade?.bairro,
+        uf: unidade?.uf,
+      },
+    }, conta.credenciais);
+
+    const atualizada = await prisma.receita.update({
+      where: { id: receita.id },
+      data: {
+        contaPagamentoId: conta.id,
+        gatewayProvider: 'BRB',
+        gatewayReferencia: resultado.numero,
+        linkBoleto: resultado.urlImagemBoleto || null,
+        linhaDigitavel: resultado.linhaDigitavel || null,
+      },
+    });
+
+    if (pagador.inquilino) {
+
+      whatsappAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[WhatsApp] nova_cobranca (BRB):', erro.message));
+
+      emailAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[E-mail] nova_cobranca (BRB):', erro.message));
+
+    }
+
+    emitirAtualizacao('receita');
+
+    return {
+      success: true,
+      mensagem: 'Cobrança enviada ao BRB com sucesso.',
+      gatewayProvider: 'BRB',
+      linhaDigitavel: resultado.linhaDigitavel,
+      urlBoleto: resultado.urlImagemBoleto,
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      mensagem: error.message || 'Erro ao gerar boleto no BRB.',
+    };
+
+  }
+
+};
+
 // Ponto único de envio de cobrança -- decide o banco certo pelo
-// locador do contrato/inquilino e manda pro provedor correto. Pra
-// Asaas (inclusive o caminho antigo, locador com asaasToken próprio,
-// ou a conta padrão do sistema), reaproveita o asaasService já
-// existente sem mexer nele -- só entra um caminho novo quando o
-// locador está de fato numa ContaPagamento do tipo BB.
+// locador do contrato/inquilino e manda pro provedor correto (BB, EFI
+// ou BRB, cada um no seu próprio caminho abaixo). Pra Asaas (inclusive
+// o caminho antigo, locador com asaasToken próprio, ou a conta padrão
+// do sistema), reaproveita o asaasService já existente sem mexer
+// nele -- só entra um caminho novo quando o locador está de fato numa
+// ContaPagamento de outro provider.
 const enviarCobranca = async (receitaId) => {
 
   const receita = await prisma.receita.findUnique({
@@ -187,7 +367,15 @@ const enviarCobranca = async (receitaId) => {
     return enviarPeloBB(receita, conta);
   }
 
-  // Sem conta BB vinculada -- segue o fluxo Asaas de sempre.
+  if (conta?.provider === 'EFI') {
+    return enviarPelaEFI(receita, conta);
+  }
+
+  if (conta?.provider === 'BRB') {
+    return enviarPeloBRB(receita, conta);
+  }
+
+  // Sem conta BB/EFI/BRB vinculada -- segue o fluxo Asaas de sempre.
   const resultado = await asaasService.enviarCobranca(receitaId);
 
   if (resultado.success) {
