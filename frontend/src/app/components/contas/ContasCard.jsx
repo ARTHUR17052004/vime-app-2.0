@@ -28,11 +28,22 @@ const CAMPOS_POR_PROVIDER = {
     { campo: "agencia", rotulo: "Agência", obrigatorio: true },
     { campo: "conta", rotulo: "Conta", obrigatorio: true },
   ],
+  // EFI (ex-Gerencianet) exige certificado da aplicação (mTLS) em toda
+  // chamada, além de Client ID/Secret -- sem ele a autenticação nem
+  // começa. Conteúdo do .p12 colado aqui em base64 (não dá pra
+  // anexar arquivo nessa tela ainda).
+  EFI: [
+    { campo: "clientId", rotulo: "Client ID", obrigatorio: true },
+    { campo: "clientSecret", rotulo: "Client Secret", obrigatorio: true },
+    { campo: "certificado", rotulo: "Certificado da aplicação (.p12 em base64)", obrigatorio: true, multilinha: true },
+    { campo: "ambiente", rotulo: "Ambiente (homologacao ou producao)", obrigatorio: true },
+  ],
 };
 
 const NOME_PROVIDER = {
   ASAAS: "Asaas",
   BB: "Banco do Brasil",
+  EFI: "Efí Bank",
 };
 
 const FORM_INICIAL = {
@@ -286,6 +297,7 @@ export default function ContasCard() {
             >
               <option value="ASAAS" className="bg-[#1b2430]">Asaas</option>
               <option value="BB" className="bg-[#1b2430]">Banco do Brasil</option>
+              <option value="EFI" className="bg-[#1b2430]">Efí Bank</option>
             </select>
             {form.id && (
               <p className="text-xs text-[var(--text-faint)] mt-1">
@@ -312,11 +324,20 @@ export default function ContasCard() {
                 <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
                   {c.rotulo}{c.obrigatorio && <span className="text-red-400"> *</span>}
                 </label>
-                <input
-                  value={form.credenciais[c.campo] || ""}
-                  onChange={(e) => alterarCampoCredencial(c.campo, e.target.value)}
-                  className={inputStyle}
-                />
+                {c.multilinha ? (
+                  <textarea
+                    value={form.credenciais[c.campo] || ""}
+                    onChange={(e) => alterarCampoCredencial(c.campo, e.target.value)}
+                    rows={4}
+                    className={`${inputStyle} font-mono text-xs resize-none`}
+                  />
+                ) : (
+                  <input
+                    value={form.credenciais[c.campo] || ""}
+                    onChange={(e) => alterarCampoCredencial(c.campo, e.target.value)}
+                    className={inputStyle}
+                  />
+                )}
               </div>
             ))}
           </div>
