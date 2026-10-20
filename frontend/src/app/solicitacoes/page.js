@@ -103,9 +103,7 @@ export default function SolicitacoesPage() {
 
       } else {
 
-        const criada = await SolicitacaoService.criar(payload);
-
-        const solicitacaoCriada = criada.data || criada;
+        const solicitacaoCriada = await SolicitacaoService.criar(payload);
 
         if (dados.anexo) {
 
