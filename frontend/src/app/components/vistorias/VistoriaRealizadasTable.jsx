@@ -77,7 +77,10 @@ export default function VistoriaRealizadasTable({
 
     try {
       await VistoriaService.excluirMissao(item.vistoriaId, item.missaoId);
-      await onRecarregarMissoes?.();
+      // Missão excluída muda quantas residências faltam no ciclo -- o
+      // "X/Y VIMEs concluídas" do card vem da lista de vistorias, não
+      // do histórico de missões, então precisa recarregar as duas.
+      await Promise.all([onRecarregarMissoes?.(), onRecarregarVistorias?.()]);
     } catch (err) {
       alert(err.message || "Erro ao excluir o registro.");
     }
