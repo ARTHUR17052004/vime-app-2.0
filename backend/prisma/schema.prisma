@@ -370,6 +370,14 @@ model Receita {
   // ou pelo usuário restrito que lançou) -- é o que faz a receita avulsa, sem
   // contrato nem inquilino, aparecer pro locador certo.
   locadorId       String?
+  // Pagador avulso: dados digitados na hora, pra mandar boleto sem
+  // precisar cadastrar um Inquilino completo (kitnet, contrato...) só
+  // pra uma cobrança única. Só usado quando não tem inquilino/contrato
+  // vinculado -- ver gatewayPagamentoService.resolverPagador.
+  pagadorNome     String?
+  pagadorCpf      String?
+  pagadorEmail    String?
+  pagadorTelefone String?
   categoria       String
   descricao       String
   valor           Float

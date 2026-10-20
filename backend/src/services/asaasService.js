@@ -299,6 +299,14 @@ const mapearTransacao = (receita) => {
     jurosValor: receita.jurosValor,
     locadorId: locador?.id || null,
     locadorNome: locador?.nome || null,
+    // Pagador avulso (nome+CPF digitados na hora, sem cadastrar
+    // inquilino) -- só importa quando não tem inquilino/contrato
+    // vinculado (ver gatewayPagamentoService.resolverPagador).
+    temInquilino: !!(receita.inquilino || receita.contrato?.inquilino),
+    pagadorNome: receita.pagadorNome,
+    pagadorCpf: receita.pagadorCpf,
+    pagadorEmail: receita.pagadorEmail,
+    pagadorTelefone: receita.pagadorTelefone,
   };
 
 };
@@ -376,14 +384,32 @@ const enviarCobranca = async (receitaId) => {
     };
   }
 
-  // Cobrança pode vir de um contrato (aluguel) ou vinculada direto a um
-  // inquilino (ex: multa avulsa, sem precisar de contrato).
+  // Cobrança pode vir de um contrato (aluguel), vinculada direto a um
+  // inquilino (ex: multa avulsa, sem precisar de contrato), ou de um
+  // pagador avulso (nome+CPF digitados na hora, sem cadastrar
+  // ninguém -- ver model Receita).
   const inquilino = receita.inquilino || receita.contrato?.inquilino;
 
-  if (!inquilino) {
+  const pagador = inquilino
+    ? {
+        nome: inquilino.nome,
+        email: inquilino.email,
+        telefone: inquilino.telefone,
+        cpf: inquilino.cpf,
+      }
+    : (receita.pagadorNome && receita.pagadorCpf)
+      ? {
+          nome: receita.pagadorNome,
+          email: receita.pagadorEmail,
+          telefone: receita.pagadorTelefone,
+          cpf: receita.pagadorCpf,
+        }
+      : null;
+
+  if (!pagador) {
     return {
       success: false,
-      mensagem: 'Esta receita não está vinculada a um inquilino — não é possível gerar a cobrança.',
+      mensagem: 'Informe um inquilino ou os dados do pagador (nome e CPF) antes de enviar ao banco.',
     };
   }
 
@@ -412,20 +438,22 @@ const enviarCobranca = async (receitaId) => {
     // vice-versa). Sem um jeito de saber em qual conta o customerId
     // salvo foi criado, só reaproveita quando o envio é pra conta
     // padrão (sem override); com override, sempre cria de novo nessa
-    // conta específica.
-    let customerId = !override ? inquilino.asaasCustomerId : null;
+    // conta específica. Pagador avulso não tem cadastro de inquilino
+    // pra guardar o customerId -- cria de novo a cada envio (é sempre
+    // um "cliente" novo pra Asaas, cobrança única).
+    let customerId = (inquilino && !override) ? inquilino.asaasCustomerId : null;
 
     if (!customerId) {
 
-      // O cadastro de inquilino não tem máscara no telefone/CPF, então
-      // pode chegar aqui formatado ("(11) 98765-4321", "111.222.333-44").
-      // A Asaas recusa esses campos com qualquer caractere que não seja
-      // dígito.
+      // O cadastro de inquilino/pagador avulso não tem máscara no
+      // telefone/CPF, então pode chegar aqui formatado ("(11)
+      // 98765-4321", "111.222.333-44"). A Asaas recusa esses campos
+      // com qualquer caractere que não seja dígito.
       const cliente = await AsaasApi.criarCliente({
-        name: inquilino.nome,
-        email: inquilino.email,
-        mobilePhone: (inquilino.telefone || '').replace(/\D/g, ''),
-        cpfCnpj: (inquilino.cpf || '').replace(/\D/g, ''),
+        name: pagador.nome,
+        email: pagador.email,
+        mobilePhone: (pagador.telefone || '').replace(/\D/g, ''),
+        cpfCnpj: (pagador.cpf || '').replace(/\D/g, ''),
       }, override);
 
       customerId = cliente.id;
@@ -434,7 +462,7 @@ const enviarCobranca = async (receitaId) => {
       // gravar um customerId de conta de locador ali criaria confusão
       // se esse mesmo inquilino um dia tiver outra receita na conta
       // padrão (o campo é único, não dá pra guardar os dois).
-      if (!override) {
+      if (inquilino && !override) {
         await prisma.inquilino.update({
           where: { id: inquilino.id },
           data: { asaasCustomerId: customerId },

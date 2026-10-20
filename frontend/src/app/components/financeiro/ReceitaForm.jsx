@@ -35,6 +35,10 @@ export default function ReceitaForm({
       vencimento: "",
       dataPagamento: "",
       inquilinoId: "",
+      pagadorNome: "",
+      pagadorCpf: "",
+      pagadorEmail: "",
+      pagadorTelefone: "",
     });
 
   const [inquilinos, setInquilinos] = useState([]);
@@ -92,6 +96,10 @@ export default function ReceitaForm({
       setFormData({
         ...receitaEditando,
         inquilinoId: receitaEditando.inquilinoId || "",
+        pagadorNome: receitaEditando.pagadorNome || "",
+        pagadorCpf: receitaEditando.pagadorCpf || "",
+        pagadorEmail: receitaEditando.pagadorEmail || "",
+        pagadorTelefone: receitaEditando.pagadorTelefone || "",
       });
     }
   }, [receitaEditando]);
@@ -128,6 +136,12 @@ export default function ReceitaForm({
       dataPagamento: formData.dataPagamento,
       inquilinoId: formData.inquilinoId || null,
       contratoId: formData.contratoId || undefined,
+      // Pagador avulso: só importa quando não tem inquilino escolhido
+      // (é a alternativa pra gerar boleto sem cadastrar ninguém).
+      pagadorNome: formData.inquilinoId ? null : (formData.pagadorNome || null),
+      pagadorCpf: formData.inquilinoId ? null : (formData.pagadorCpf || null),
+      pagadorEmail: formData.inquilinoId ? null : (formData.pagadorEmail || null),
+      pagadorTelefone: formData.inquilinoId ? null : (formData.pagadorTelefone || null),
     });
   };
 
@@ -169,7 +183,6 @@ export default function ReceitaForm({
         <div>
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">
             Inquilino{obrigatorios.has("inquilinoId") && <span className="text-red-400"> *</span>}
-            {" "}(necessário pra enviar ao Asaas se não houver contrato)
           </label>
           <select
             name="inquilinoId"
@@ -178,7 +191,7 @@ export default function ReceitaForm({
             required={obrigatorios.has("inquilinoId")}
             className={inputStyle}
           >
-            <option value="">Nenhum (vinculado só pelo contrato, se houver)</option>
+            <option value="">Nenhum (preencha o pagador avulso abaixo, se for enviar ao banco)</option>
             {inquilinos.map((inq) => (
               <option key={inq.id} value={inq.id}>
                 {inq.nome}
@@ -186,6 +199,76 @@ export default function ReceitaForm({
             ))}
           </select>
         </div>
+
+        {!formData.inquilinoId && (
+
+          <div className="md:col-span-2 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 space-y-4">
+
+            <p className="text-xs text-[var(--text-faint)]">
+              Pagador avulso -- preencha só se for enviar essa receita ao banco (BB/Asaas)
+              sem vincular a um inquilino cadastrado. Sem contrato nem inquilino, nome e CPF
+              são o mínimo que o banco exige pra emitir o boleto.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-5">
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Nome do Pagador
+                </label>
+                <input
+                  name="pagadorNome"
+                  placeholder="Nome completo"
+                  value={formData.pagadorNome}
+                  onChange={handleChange}
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  CPF do Pagador
+                </label>
+                <input
+                  name="pagadorCpf"
+                  placeholder="000.000.000-00"
+                  value={formData.pagadorCpf}
+                  onChange={handleChange}
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  E-mail do Pagador (opcional)
+                </label>
+                <input
+                  name="pagadorEmail"
+                  placeholder="email@exemplo.com"
+                  value={formData.pagadorEmail}
+                  onChange={handleChange}
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Telefone do Pagador (opcional)
+                </label>
+                <input
+                  name="pagadorTelefone"
+                  placeholder="(00) 00000-0000"
+                  value={formData.pagadorTelefone}
+                  onChange={handleChange}
+                  className={inputStyle}
+                />
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
 
         <div>
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">

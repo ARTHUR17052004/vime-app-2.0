@@ -29,6 +29,38 @@ const resolverLocadorId = (receita) => {
   );
 };
 
+// Inquilino cadastrado (com kitnet/contrato) ou pagador avulso
+// (nome+CPF digitados na hora, sem precisar cadastrar ninguém) -- ver
+// comentário do model Receita. Nenhum dos dois = não dá pra gerar
+// boleto nenhum (banco exige CPF/nome de verdade pelo pagador).
+const resolverPagador = (receita) => {
+
+  const inquilino = receita.inquilino || receita.contrato?.inquilino;
+
+  if (inquilino) {
+    return {
+      nome: inquilino.nome,
+      cpf: inquilino.cpf,
+      email: inquilino.email,
+      telefone: inquilino.telefone,
+      inquilino,
+    };
+  }
+
+  if (receita.pagadorNome && receita.pagadorCpf) {
+    return {
+      nome: receita.pagadorNome,
+      cpf: receita.pagadorCpf,
+      email: receita.pagadorEmail,
+      telefone: receita.pagadorTelefone,
+      inquilino: null,
+    };
+  }
+
+  return null;
+
+};
+
 const enviarPeloBB = async (receita, conta) => {
 
   // Mesma trava que o asaasService já tem pro lado Asaas -- não manda
@@ -40,14 +72,12 @@ const enviarPeloBB = async (receita, conta) => {
     };
   }
 
-  const inquilino =
-    receita.inquilino ||
-    receita.contrato?.inquilino;
+  const pagador = resolverPagador(receita);
 
-  if (!inquilino) {
+  if (!pagador) {
     return {
       success: false,
-      mensagem: 'Esta receita não está vinculada a um inquilino — não é possível gerar a cobrança.',
+      mensagem: 'Informe um inquilino ou os dados do pagador (nome e CPF) antes de enviar ao banco.',
     };
   }
 
@@ -55,7 +85,7 @@ const enviarPeloBB = async (receita, conta) => {
     receita.contrato?.unidade ||
     receita.inquilino?.kitnet?.unidade;
 
-  const cpfDigitos = (inquilino.cpf || '').replace(/\D/g, '');
+  const cpfDigitos = (pagador.cpf || '').replace(/\D/g, '');
 
   const numeroControle = numeroControleParaReceita(receita.id);
 
@@ -68,9 +98,9 @@ const enviarPeloBB = async (receita, conta) => {
       numeroTituloBeneficiario: receita.id.replace(/-/g, '').slice(0, 15).toUpperCase(),
       numeroControle,
       pagador: {
-        tipoInscricao: 1, // Inquilino é sempre pessoa física no VIME
+        tipoInscricao: 1, // Pessoa física -- inquilino ou pagador avulso, sempre CPF no VIME
         numeroInscricao: Number(cpfDigitos),
-        nome: inquilino.nome,
+        nome: pagador.nome,
         endereco: unidade ? `${unidade.logradouro || ''} ${unidade.numero || ''}`.trim() : undefined,
         cep: unidade?.cep ? Number(String(unidade.cep).replace(/\D/g, '')) : undefined,
         cidade: unidade?.cidade,
@@ -91,14 +121,20 @@ const enviarPeloBB = async (receita, conta) => {
     });
 
     // Não trava o envio da cobrança se o WhatsApp/e-mail falharem -- o
-    // boleto já foi criado no banco de qualquer forma.
-    whatsappAutomacaoService
-      .notificarNovaCobranca(atualizada, inquilino)
-      .catch((erro) => console.error('[WhatsApp] nova_cobranca (BB):', erro.message));
+    // boleto já foi criado no banco de qualquer forma. Pagador avulso
+    // não é usuário do sistema (sem telefone/e-mail cadastrado aqui
+    // de verdade), então não tem quem avisar.
+    if (pagador.inquilino) {
 
-    emailAutomacaoService
-      .notificarNovaCobranca(atualizada, inquilino)
-      .catch((erro) => console.error('[E-mail] nova_cobranca (BB):', erro.message));
+      whatsappAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[WhatsApp] nova_cobranca (BB):', erro.message));
+
+      emailAutomacaoService
+        .notificarNovaCobranca(atualizada, pagador.inquilino)
+        .catch((erro) => console.error('[E-mail] nova_cobranca (BB):', erro.message));
+
+    }
 
     emitirAtualizacao('receita');
 

@@ -30,6 +30,10 @@ export default function AsaasEditarModal({
     descontoDias: "",
     multaValor: "",
     jurosValor: "",
+    pagadorNome: "",
+    pagadorCpf: "",
+    pagadorEmail: "",
+    pagadorTelefone: "",
   });
 
   useEffect(() => {
@@ -43,6 +47,10 @@ export default function AsaasEditarModal({
         descontoDias: transacaoOriginal.descontoDias ?? "",
         multaValor: transacaoOriginal.multaValor ?? "",
         jurosValor: transacaoOriginal.jurosValor ?? "",
+        pagadorNome: transacaoOriginal.pagadorNome || "",
+        pagadorCpf: transacaoOriginal.pagadorCpf || "",
+        pagadorEmail: transacaoOriginal.pagadorEmail || "",
+        pagadorTelefone: transacaoOriginal.pagadorTelefone || "",
       });
     }
   }, [transacaoOriginal]);
@@ -64,6 +72,12 @@ export default function AsaasEditarModal({
       descontoDias: formData.descontoDias,
       multaValor: formData.multaValor,
       jurosValor: formData.jurosValor,
+      ...(!transacaoOriginal.temInquilino && {
+        pagadorNome: formData.pagadorNome || null,
+        pagadorCpf: formData.pagadorCpf || null,
+        pagadorEmail: formData.pagadorEmail || null,
+        pagadorTelefone: formData.pagadorTelefone || null,
+      }),
     });
   };
 
@@ -117,6 +131,65 @@ export default function AsaasEditarModal({
               />
             </div>
           </div>
+
+          {!transacaoOriginal.temInquilino && (
+            <div className="border-t border-[var(--border-token)] pt-6">
+              <h3 className="text-[var(--text)] font-semibold mb-2">
+                Pagador avulso
+              </h3>
+
+              <p className="text-sm text-[var(--text-subtle)] mb-4">
+                Essa cobrança não está vinculada a um inquilino cadastrado --
+                preencha nome e CPF do pagador pra poder enviar ao banco.
+              </p>
+
+              <div className="grid md:grid-cols-2 gap-5">
+                <div>
+                  <label className={labelStyle}>Nome do Pagador</label>
+                  <input
+                    name="pagadorNome"
+                    placeholder="Nome completo"
+                    value={formData.pagadorNome}
+                    onChange={handleChange}
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyle}>CPF do Pagador</label>
+                  <input
+                    name="pagadorCpf"
+                    placeholder="000.000.000-00"
+                    value={formData.pagadorCpf}
+                    onChange={handleChange}
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyle}>E-mail do Pagador (opcional)</label>
+                  <input
+                    name="pagadorEmail"
+                    placeholder="email@exemplo.com"
+                    value={formData.pagadorEmail}
+                    onChange={handleChange}
+                    className={inputStyle}
+                  />
+                </div>
+
+                <div>
+                  <label className={labelStyle}>Telefone do Pagador (opcional)</label>
+                  <input
+                    name="pagadorTelefone"
+                    placeholder="(00) 00000-0000"
+                    value={formData.pagadorTelefone}
+                    onChange={handleChange}
+                    className={inputStyle}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="border-t border-[var(--border-token)] pt-6">
             <h3 className="text-[var(--text)] font-semibold mb-4">
