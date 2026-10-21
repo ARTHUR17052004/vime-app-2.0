@@ -254,11 +254,11 @@ export default function AsaasEditarModal({
           </div>
         </div>
 
-        <div className="border-t border-[var(--border-token)] px-8 py-5 flex justify-end gap-4">
+        <div className="sticky bottom-0 border-t border-[var(--border-token)] bg-[var(--surface)] px-8 py-5 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="border border-[var(--border-token)] text-[var(--text-1)] rounded-xl px-5 py-3 hover:bg-[var(--surface-2)]"
+            className="w-full sm:w-auto border border-[var(--border-token)] text-[var(--text-1)] rounded-xl px-5 py-3 hover:bg-[var(--surface-2)]"
           >
             Cancelar
           </button>
@@ -266,7 +266,7 @@ export default function AsaasEditarModal({
           <button
             type="submit"
             disabled={salvando}
-            className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-[var(--text)] rounded-xl px-5 py-3"
+            className="w-full sm:w-auto bg-green-700 hover:bg-green-800 disabled:opacity-50 text-[var(--text)] rounded-xl px-5 py-3"
           >
             {salvando ? "Salvando..." : "Salvar"}
           </button>

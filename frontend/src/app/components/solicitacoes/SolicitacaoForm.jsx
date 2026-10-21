@@ -22,6 +22,7 @@ const ROTULOS = {
 
 export default function SolicitacaoForm({
   onSave,
+  onCancelar,
   solicitacaoEditando,
 }) {
 
@@ -369,9 +370,27 @@ export default function SolicitacaoForm({
         </div>
       )}
 
-      <div className="flex justify-end pt-2">
+      {/* Fixo embaixo do modal (não rola junto com o formulário) --
+          padrão do sistema no mobile: botão de enviar sempre visível,
+          com Cancelar logo abaixo dele. */}
+      <div
+        className="
+          sticky bottom-0 -mx-8 -mb-8 mt-6
+          flex flex-col-reverse sm:flex-row sm:justify-end
+          gap-3
+          border-t border-[var(--border-token)]
+          bg-[var(--surface)]
+          px-8 py-5
+        "
+      >
 
-        <Button type="submit">
+        {onCancelar && (
+          <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={onCancelar}>
+            Cancelar
+          </Button>
+        )}
+
+        <Button type="submit" className="w-full sm:w-auto">
           {solicitacaoEditando
             ? "Salvar Alterações"
             : "Salvar Solicitação"}

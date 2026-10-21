@@ -130,17 +130,27 @@ export default function SolicitacaoRespostaModal({
 
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div
+          className="
+            sticky bottom-0 -mx-8 -mb-8 mt-2
+            flex flex-col-reverse sm:flex-row sm:justify-end
+            gap-3 sm:gap-4
+            border-t border-[var(--border-token)]
+            bg-[var(--surface)]
+            px-8 py-5
+          "
+        >
 
           <Button
             type="button"
             variant="secondary"
+            className="w-full sm:w-auto"
             onClick={onClose}
           >
             Cancelar
           </Button>
 
-          <Button type="submit">
+          <Button type="submit" className="w-full sm:w-auto">
             Enviar Resposta
           </Button>
 

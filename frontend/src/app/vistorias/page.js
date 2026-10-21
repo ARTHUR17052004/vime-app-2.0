@@ -640,6 +640,10 @@ const fixarVistoria = async (id, fixado) => {
           <VistoriaForm
             onSave={salvarVistoria}
             vistoriaEditando={vistoriaEditando}
+            onCancelar={() => {
+              setModalOpen(false);
+              setVistoriaEditando(null);
+            }}
           />
 
         </VistoriaModal>

@@ -18,11 +18,18 @@ const kitnetAindaOcupada = async (kitnetId, { ignorarInquilinoId, ignorarContrat
 
   if (outroInquilino) return true;
 
+  // Excluir o inquilino (onDelete: Cascade) também apaga o(s) contrato(s)
+  // dele junto -- sem filtrar por inquilinoId aqui, essa query achava o
+  // próprio contrato do inquilino sendo excluído (ainda ATIVO nesse
+  // instante, antes do delete em cascata acontecer) e achava que
+  // "sobrou" outro contrato, deixando a kitnet presa como OCUPADA pra
+  // sempre depois de excluir o único inquilino dela.
   const outroContrato = await prisma.contrato.findFirst({
     where: {
       kitnetId,
       status: { in: ["ATIVO", "PENDENTE"] },
       ...(ignorarContratoId ? { id: { not: ignorarContratoId } } : {}),
+      ...(ignorarInquilinoId ? { inquilinoId: { not: ignorarInquilinoId } } : {}),
     },
   });
 
@@ -67,12 +74,17 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
 
     // Evita duplicar: já existe uma vistoria de entrega em aberto pra
     // essa kitnet (ex.: dois gatilhos quase juntos, tipo editar e
-    // excluir o mesmo inquilino em sequência)?
+    // excluir o mesmo inquilino em sequência)? Só conta se ela for
+    // dessa MESMA vacância (criada depois de vazioDesde) -- senão uma
+    // vistoria antiga nunca realizada (de um inquilino anterior que já
+    // saiu, kitnet foi ocupada de novo e esvaziou outra vez) calava o
+    // aviso novo pra sempre, mesmo a kitnet tendo ficado vazia de novo.
     const jaExiste = await prisma.vistoria.findFirst({
       where: {
         kitnetId,
         categoria: "Entrega de kitnet vazia",
         status: { notIn: ["REALIZADA", "CANCELADA"] },
+        ...(kitnet.vazioDesde ? { createdAt: { gte: kitnet.vazioDesde } } : {}),
       },
     });
 

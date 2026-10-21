@@ -120,12 +120,12 @@ export default function AlterarSenhaModal({ isOpen, onClose }) {
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button type="button" variant="secondary" onClick={fechar}>
+        <div className="sticky bottom-0 -mx-8 -mb-8 mt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-[var(--border-token)] bg-[var(--surface)] px-8 py-5">
+          <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={fechar}>
             Cancelar
           </Button>
 
-          <Button type="submit" disabled={salvando}>
+          <Button type="submit" className="w-full sm:w-auto" disabled={salvando}>
             <KeyRound size={16} className="mr-2" />
             {salvando ? "Salvando..." : "Alterar Senha"}
           </Button>

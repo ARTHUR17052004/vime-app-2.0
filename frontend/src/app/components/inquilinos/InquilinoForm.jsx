@@ -400,7 +400,16 @@ export default function InquilinoForm({
 
       )}
 
-      <div className="flex justify-between">
+      <div
+        className="
+          sticky bottom-0 -mx-8 -mb-8 mt-4
+          flex justify-between items-center
+          gap-3
+          border-t border-[var(--border-token)]
+          bg-[var(--surface)]
+          px-8 py-5
+        "
+      >
 
         {step > 1 ? (
 

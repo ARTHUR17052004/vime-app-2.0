@@ -301,12 +301,22 @@ export default function AsaasNovaCobrancaModal({
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div
+          className="
+            sticky bottom-0 -mx-8 -mb-8 mt-2
+            flex flex-col-reverse sm:flex-row sm:justify-end
+            gap-3
+            border-t border-[var(--border-token)]
+            bg-[var(--surface)]
+            px-8 py-5
+          "
+        >
 
           <button
             type="button"
             onClick={onClose}
             className="
+              w-full sm:w-auto
               border
               border-[var(--border-token)]
               text-[var(--text-1)]
@@ -323,6 +333,7 @@ export default function AsaasNovaCobrancaModal({
             type="submit"
             disabled={salvando}
             className="
+              w-full sm:w-auto
               bg-green-700
               hover:bg-green-800
               disabled:opacity-50

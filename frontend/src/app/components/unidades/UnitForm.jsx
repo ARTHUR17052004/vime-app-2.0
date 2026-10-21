@@ -791,16 +791,17 @@ export default function UnitForm({
 
       <div
         className="
-          pt-8
+          sticky bottom-0 -mx-8 -mb-8 mt-4
 
           border-t
           border-[var(--border-token)]
+          bg-[var(--surface)]
 
-          flex
-          items-center
-          justify-end
+          flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end
 
-          gap-4
+          gap-3 sm:gap-4
+
+          px-8 py-5
         "
       >
 
@@ -809,6 +810,7 @@ export default function UnitForm({
           type="button"
 
           variant="secondary"
+          className="w-full sm:w-auto"
 
           onClick={onCancel}
 
@@ -821,6 +823,7 @@ export default function UnitForm({
         <Button
 
           type="submit"
+          className="w-full sm:w-auto"
 
         >
 

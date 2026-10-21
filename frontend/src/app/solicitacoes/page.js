@@ -330,6 +330,10 @@ export default function SolicitacoesPage() {
           <SolicitacaoForm
             onSave={salvarSolicitacao}
             solicitacaoEditando={solicitacaoEditando}
+            onCancelar={() => {
+              setModalOpen(false);
+              setSolicitacaoEditando(null);
+            }}
           />
 
         </SolicitacaoModal>

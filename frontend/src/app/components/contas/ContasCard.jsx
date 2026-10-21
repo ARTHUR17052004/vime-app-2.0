@@ -384,18 +384,18 @@ export default function ContasCard() {
             Marcar como padrão faz essa conta receber as cobranças de qualquer locador que não tenha uma conta própria vinculada.
           </p>
 
-          <div className="flex justify-end gap-3 pt-2">
+          <div className="sticky bottom-0 -mx-8 -mb-8 mt-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 border-t border-[var(--border-token)] bg-[var(--surface)] px-8 py-5">
             <button
               type="button"
               onClick={() => setModalOpen(false)}
-              className="border border-[var(--border-token)] text-[var(--text-1)] rounded-xl px-5 py-3 hover:bg-[var(--surface-2)]"
+              className="w-full sm:w-auto border border-[var(--border-token)] text-[var(--text-1)] rounded-xl px-5 py-3 hover:bg-[var(--surface-2)]"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={salvando}
-              className="bg-green-700 hover:bg-green-800 disabled:opacity-50 text-[var(--text)] rounded-xl px-5 py-3"
+              className="w-full sm:w-auto bg-green-700 hover:bg-green-800 disabled:opacity-50 text-[var(--text)] rounded-xl px-5 py-3"
             >
               {salvando ? "Salvando..." : "Salvar"}
             </button>

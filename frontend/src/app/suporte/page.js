@@ -280,6 +280,7 @@ export default function SuportePage() {
 
             <ChamadoForm
               onSave={salvarChamado}
+              onCancelar={() => setModalOpen(false)}
             />
 
           </Modal>

@@ -44,6 +44,7 @@ function Campo({ label, obrigatorio, children }) {
 
 export default function LocadorForm({
   onSave,
+  onCancelar,
   locadorEditando,
 }) {
 
@@ -827,19 +828,44 @@ export default function LocadorForm({
 
       <div
         className="
-          flex
-          justify-end
+          sticky bottom-0 -mx-8 -mb-8 mt-4
+          flex flex-col-reverse sm:flex-row sm:justify-end
+          gap-3
 
           border-t
           border-[var(--border-token)]
+          bg-[var(--surface)]
 
-          pt-6
+          px-8 py-5
         "
       >
+
+        {onCancelar && (
+          <button
+            type="button"
+            onClick={onCancelar}
+            className="
+              w-full sm:w-auto
+              rounded-2xl
+              border
+              border-[var(--border-token)]
+              bg-[var(--surface-2)]
+              px-8
+              py-3
+              font-semibold
+              text-[var(--text)]
+              transition-all
+              hover:bg-[var(--surface-3)]
+            "
+          >
+            Cancelar
+          </button>
+        )}
 
         <button
           type="submit"
           className="
+            w-full sm:w-auto
             rounded-2xl
 
             bg-emerald-600

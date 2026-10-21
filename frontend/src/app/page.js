@@ -89,14 +89,16 @@ function DashboardConteudo() {
   if (isMobile) {
     return (
       <MainLayout>
-        <DashboardMobile
-          dados={dados}
-          primeiroNome={primeiroNome}
-          podeIndicadores={podeIndicadores}
-          podeFinanceiro={podeFinanceiro}
-          podeOcupacao={podeOcupacao}
-          podeAlertas={podeAlertas}
-        />
+        <FadeIn>
+          <DashboardMobile
+            dados={dados}
+            primeiroNome={primeiroNome}
+            podeIndicadores={podeIndicadores}
+            podeFinanceiro={podeFinanceiro}
+            podeOcupacao={podeOcupacao}
+            podeAlertas={podeAlertas}
+          />
+        </FadeIn>
       </MainLayout>
     );
   }

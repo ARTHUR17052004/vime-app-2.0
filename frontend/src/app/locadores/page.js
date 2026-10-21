@@ -327,6 +327,10 @@ export default function LocadoresPage() {
           <LocadorForm
             onSave={salvarLocador}
             locadorEditando={locadorEditando}
+            onCancelar={() => {
+              setModalOpen(false);
+              setLocadorEditando(null);
+            }}
           />
 
         </LocadorModal>
