@@ -8,6 +8,10 @@ const whatsappAutomacaoService = require("../services/whatsappAutomacaoService")
   então pega toda Receita já marcada ATRASADA que ainda não recebeu o
   aviso. Dispara UMA vez por cobrança -- `Receita.avisoVencidoEnviadoEm`
   evita reenviar todo dia enquanto ela continuar vencida.
+
+  A marca é reivindicada no banco (updateMany atômico) ANTES de mandar,
+  não depois -- evita duas execuções do job quase simultâneas mandando
+  o mesmo aviso duas vezes (ver mesma correção em lembreteVencimentoJob.js).
 */
 
 module.exports = async () => {
@@ -37,21 +41,34 @@ module.exports = async () => {
       continue;
     }
 
+    const reivindicada = await prisma.receita.updateMany({
+      where: { id: receita.id, avisoVencidoEnviadoEm: null },
+      data: { avisoVencidoEnviadoEm: new Date() },
+    });
+
+    if (reivindicada.count === 0) {
+      ignorados++;
+      continue;
+    }
+
     try {
       const resultado = await whatsappAutomacaoService.notificarCobrancaVencida(receita, inquilino);
 
       if (!resultado.success) {
+        await prisma.receita.update({
+          where: { id: receita.id },
+          data: { avisoVencidoEnviadoEm: null },
+        });
         ignorados++;
         continue;
       }
 
-      await prisma.receita.update({
-        where: { id: receita.id },
-        data: { avisoVencidoEnviadoEm: new Date() },
-      });
-
       enviados++;
     } catch (error) {
+      await prisma.receita.update({
+        where: { id: receita.id },
+        data: { avisoVencidoEnviadoEm: null },
+      });
       console.error(
         `[JOB] Falha ao enviar aviso de atraso da receita ${receita.id}:`,
         error.message

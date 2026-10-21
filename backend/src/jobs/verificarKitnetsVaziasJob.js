@@ -28,10 +28,21 @@ module.exports = async () => {
 
   for (const kitnet of candidatas) {
 
-    const jaAlertouHoje = kitnet.ultimoAlertaVaziaEm &&
-      (agora.getTime() - new Date(kitnet.ultimoAlertaVaziaEm).getTime()) < MS_DIA;
+    // Reivindica ANTES de mandar (atômico) -- duas execuções do job
+    // quase simultâneas não conseguem as duas casar esse WHERE, então
+    // só uma manda o alerta (evita duplicar notificação/push).
+    const reivindicada = await prisma.kitnet.updateMany({
+      where: {
+        id: kitnet.id,
+        OR: [
+          { ultimoAlertaVaziaEm: null },
+          { ultimoAlertaVaziaEm: { lt: new Date(agora.getTime() - MS_DIA) } },
+        ],
+      },
+      data: { ultimoAlertaVaziaEm: agora },
+    });
 
-    if (jaAlertouHoje) continue;
+    if (reivindicada.count === 0) continue;
 
     const { dias } = calcularAlerta(kitnet.vazioDesde, agora);
 
@@ -47,11 +58,6 @@ module.exports = async () => {
         `${nomeKitnet} (${nomeUnidade}) está vazia há ${dias} dia(s) sem ser locada.`
       ),
       link: `/kitnets/${kitnet.id}`,
-    });
-
-    await prisma.kitnet.update({
-      where: { id: kitnet.id },
-      data: { ultimoAlertaVaziaEm: agora },
     });
 
     alertadas++;

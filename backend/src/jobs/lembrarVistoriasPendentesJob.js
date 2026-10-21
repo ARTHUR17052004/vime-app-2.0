@@ -27,10 +27,19 @@ module.exports = async () => {
 
   for (const vistoria of pendentes) {
 
-    const jaAvisouHoje = vistoria.ultimoAlertaPendenteEm &&
-      (agora.getTime() - new Date(vistoria.ultimoAlertaPendenteEm).getTime()) < MS_DIA;
+    // Reivindica ANTES de mandar (atômico) -- ver verificarKitnetsVaziasJob.js.
+    const reivindicada = await prisma.vistoria.updateMany({
+      where: {
+        id: vistoria.id,
+        OR: [
+          { ultimoAlertaPendenteEm: null },
+          { ultimoAlertaPendenteEm: { lt: new Date(agora.getTime() - MS_DIA) } },
+        ],
+      },
+      data: { ultimoAlertaPendenteEm: agora },
+    });
 
-    if (jaAvisouHoje) continue;
+    if (reivindicada.count === 0) continue;
 
     const prazo = new Date(vistoria.dataProxima).toLocaleDateString("pt-BR");
 
@@ -43,11 +52,6 @@ module.exports = async () => {
         `🕒 Psst! A vistoria "${vistoria.titulo}" (${localDe(vistoria)}) continua pendente -- o prazo é ${prazo}.`
       ),
       link: `/vistorias/${vistoria.id}`,
-    });
-
-    await prisma.vistoria.update({
-      where: { id: vistoria.id },
-      data: { ultimoAlertaPendenteEm: agora },
     });
 
     avisadas++;

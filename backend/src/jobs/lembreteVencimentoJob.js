@@ -13,8 +13,15 @@ const whatsappAutomacaoService = require("../services/whatsappAutomacaoService")
 
   Duplicidade: usamos `Receita.lembreteEnviadoEm` para não reenviar o
   lembrete no mesmo dia caso o job rode mais de uma vez (ex.: reinício
-  do servidor). Guardamos a data/hora do último envio e só disparamos
-  de novo se ainda não foi enviado nesse mesmo dia.
+  do servidor, ou o cron disparando duas vezes perto uma da outra --
+  já aconteceu). Só checar e mandar pra DEPOIS gravar não é seguro:
+  duas execuções quase simultâneas podem passar pela checagem ANTES de
+  qualquer uma gravar, e as duas mandam a mensagem (foi o que causou o
+  lembrete duplicado em 21/10/2026). Por isso a marca é "reivindicada"
+  no banco de forma atômica (updateMany com WHERE ainda-não-enviado-
+  hoje) ANTES de mandar -- só quem realmente ganhar a corrida chega a
+  enviar; se o envio falhar depois, devolve a reivindicação pra não
+  perder a tentativa de amanhã.
 */
 
 const DIAS_ANTECEDENCIA = 3;
@@ -66,11 +73,23 @@ module.exports = async () => {
       continue;
     }
 
-    // já enviamos um lembrete hoje para essa receita? não reenvia.
-    if (
-      receita.lembreteEnviadoEm &&
-      inicioDoDia(receita.lembreteEnviadoEm).getTime() === hoje.getTime()
-    ) {
+    // Reivindica a receita ANTES de mandar (não depois) -- atômico no
+    // banco, então se duas execuções do job caírem aqui ao mesmo tempo,
+    // só uma consegue casar o WHERE e seguir em frente.
+    const agoraDoEnvio = new Date();
+
+    const reivindicada = await prisma.receita.updateMany({
+      where: {
+        id: receita.id,
+        OR: [
+          { lembreteEnviadoEm: null },
+          { lembreteEnviadoEm: { lt: hoje } },
+        ],
+      },
+      data: { lembreteEnviadoEm: agoraDoEnvio },
+    });
+
+    if (reivindicada.count === 0) {
       ignorados++;
       continue;
     }
@@ -79,17 +98,22 @@ module.exports = async () => {
       const resultado = await whatsappAutomacaoService.notificarLembreteVencimento(receita, inquilino);
 
       if (!resultado.success) {
+        // Não conseguiu mandar de verdade -- devolve a reivindicação
+        // pra não perder a chance de tentar de novo amanhã.
+        await prisma.receita.update({
+          where: { id: receita.id },
+          data: { lembreteEnviadoEm: receita.lembreteEnviadoEm },
+        });
         ignorados++;
         continue;
       }
 
-      await prisma.receita.update({
-        where: { id: receita.id },
-        data: { lembreteEnviadoEm: new Date() },
-      });
-
       enviados++;
     } catch (error) {
+      await prisma.receita.update({
+        where: { id: receita.id },
+        data: { lembreteEnviadoEm: receita.lembreteEnviadoEm },
+      });
       console.error(
         `[JOB] Falha ao enviar lembrete da receita ${receita.id}:`,
         error.message

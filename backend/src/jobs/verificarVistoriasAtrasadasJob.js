@@ -22,10 +22,19 @@ module.exports = async () => {
 
   for (const vistoria of atrasadas) {
 
-    const jaAlertouHoje = vistoria.ultimoAlertaAtrasadaEm &&
-      (agora.getTime() - new Date(vistoria.ultimoAlertaAtrasadaEm).getTime()) < MS_DIA;
+    // Reivindica ANTES de mandar (atômico) -- ver verificarKitnetsVaziasJob.js.
+    const reivindicada = await prisma.vistoria.updateMany({
+      where: {
+        id: vistoria.id,
+        OR: [
+          { ultimoAlertaAtrasadaEm: null },
+          { ultimoAlertaAtrasadaEm: { lt: new Date(agora.getTime() - MS_DIA) } },
+        ],
+      },
+      data: { ultimoAlertaAtrasadaEm: agora },
+    });
 
-    if (jaAlertouHoje) continue;
+    if (reivindicada.count === 0) continue;
 
     const dias = Math.max(
       1,
@@ -45,11 +54,6 @@ module.exports = async () => {
         `⏰ Psst! A vistoria "${vistoria.titulo}" (${local}) já passou do prazo há ${dias} dia(s). Dá um tempinho pra resolver isso hoje?`
       ),
       link: `/vistorias/${vistoria.id}`,
-    });
-
-    await prisma.vistoria.update({
-      where: { id: vistoria.id },
-      data: { ultimoAlertaAtrasadaEm: agora },
     });
 
     alertadas++;

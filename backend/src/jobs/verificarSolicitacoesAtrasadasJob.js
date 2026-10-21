@@ -30,10 +30,19 @@ module.exports = async () => {
 
   for (const solicitacao of candidatas) {
 
-    const jaAlertouHoje = solicitacao.ultimoAlertaPrazoEm &&
-      (agora.getTime() - new Date(solicitacao.ultimoAlertaPrazoEm).getTime()) < MS_DIA;
+    // Reivindica ANTES de mandar (atômico) -- ver verificarKitnetsVaziasJob.js.
+    const reivindicada = await prisma.solicitacao.updateMany({
+      where: {
+        id: solicitacao.id,
+        OR: [
+          { ultimoAlertaPrazoEm: null },
+          { ultimoAlertaPrazoEm: { lt: new Date(agora.getTime() - MS_DIA) } },
+        ],
+      },
+      data: { ultimoAlertaPrazoEm: agora },
+    });
 
-    if (jaAlertouHoje) continue;
+    if (reivindicada.count === 0) continue;
 
     const { dias } = calcularAlerta(solicitacao.prazo, agora);
 
@@ -46,11 +55,6 @@ module.exports = async () => {
         `⏰ Ei, a solicitação "${solicitacao.titulo}" (${solicitacao.numero}) está esperando há ${dias} dia(s) além do prazo. Vamos dar aquela resolvida?`
       ),
       link: `/solicitacoes/${solicitacao.id}`,
-    });
-
-    await prisma.solicitacao.update({
-      where: { id: solicitacao.id },
-      data: { ultimoAlertaPrazoEm: agora },
     });
 
     alertadas++;
