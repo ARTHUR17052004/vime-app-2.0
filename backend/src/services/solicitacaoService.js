@@ -5,6 +5,14 @@ const auditoriaService = require('./auditoriaService');
 const notificacaoService = require('./notificacaoService');
 const { filtroSolicitacao } = require('../utils/escopoLocador');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { diffCampos } = require('../utils/diffCampos');
+
+const CAMPOS_SOLICITACAO = {
+  titulo: 'título',
+  responsavel: 'responsável',
+  status: 'status',
+  prazo: { rotulo: 'prazo', tipo: 'data' },
+};
 
 const listar = (usuario) => {
   return prisma.solicitacao.findMany({
@@ -42,8 +50,8 @@ const criar = async (dados, autor) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     registroId: solicitacao.id,
     acao: "CRIAR",
@@ -52,11 +60,11 @@ const criar = async (dados, autor) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     acao: "CRIAR",
-    descricao: `Solicitação ${solicitacao.id} criada.`
+    descricao: `Solicitação "${solicitacao.titulo}" (${solicitacao.numero}) criada por ${autor?.nome || "Sistema"}.`
   });
 
   await notificacaoService.criar({
@@ -75,7 +83,7 @@ const criar = async (dados, autor) => {
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   // Atualização parcial (ex.: só classificar/responder) não pode
   // reprovar por "faltar" um campo que já está preenchido desde a
@@ -107,8 +115,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     registroId: solicitacao.id,
     acao: "ATUALIZAR",
@@ -116,19 +124,21 @@ const atualizar = async (id, dados) => {
     valorNovo: solicitacao
   });
 
+  const alteracoes = diffCampos(anterior, solicitacao, CAMPOS_SOLICITACAO);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     acao: "ATUALIZAR",
-    descricao: `Solicitação ${solicitacao.id} atualizada.`
+    descricao: `Solicitação "${solicitacao.titulo}" (${solicitacao.numero}) atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return solicitacao;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const solicitacao = await prisma.solicitacao.findUnique({
     where: { id }
@@ -139,8 +149,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     registroId: solicitacao.id,
     acao: "EXCLUIR",
@@ -149,11 +159,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SOLICITACOES",
     acao: "EXCLUIR",
-    descricao: `Solicitação ${solicitacao.id} excluída.`
+    descricao: `Solicitação "${solicitacao.titulo}" (${solicitacao.numero}) excluída por ${autor?.nome || "Sistema"}.`
   });
 
   const removida = await prisma.solicitacao.delete({

@@ -3,6 +3,14 @@ const prisma = require('../config/prisma');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const notificacaoService = require('./notificacaoService');
+const { diffCampos } = require('../utils/diffCampos');
+
+const CAMPOS_CHAMADO = {
+  titulo: 'título',
+  categoria: 'categoria',
+  criticidade: 'criticidade',
+  status: 'status',
+};
 
 const listar = () => {
   return prisma.chamado.findMany({
@@ -35,8 +43,8 @@ const criar = async (dados, autor) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     registroId: chamado.id,
     acao: "CRIAR",
@@ -45,11 +53,11 @@ const criar = async (dados, autor) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     acao: "CRIAR",
-    descricao: `Chamado ${chamado.id} aberto.`
+    descricao: `Chamado "${chamado.titulo}" (${chamado.numero}) aberto por ${autor?.nome || "Sistema"}.`
   });
 
   await notificacaoService.criar({
@@ -67,7 +75,7 @@ const criar = async (dados, autor) => {
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   delete dados.id;
   delete dados.createdAt;
@@ -88,8 +96,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     registroId: chamado.id,
     acao: "ATUALIZAR",
@@ -97,19 +105,21 @@ const atualizar = async (id, dados) => {
     valorNovo: chamado
   });
 
+  const alteracoes = diffCampos(anterior, chamado, CAMPOS_CHAMADO);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     acao: "ATUALIZAR",
-    descricao: `Chamado ${chamado.id} atualizado.`
+    descricao: `Chamado "${chamado.titulo}" (${chamado.numero}) atualizado por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return chamado;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const chamado = await prisma.chamado.findUnique({
     where: { id }
@@ -120,8 +130,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     registroId: chamado.id,
     acao: "EXCLUIR",
@@ -130,11 +140,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "SUPORTE",
     acao: "EXCLUIR",
-    descricao: `Chamado ${chamado.id} excluído.`
+    descricao: `Chamado "${chamado.titulo}" (${chamado.numero}) excluído por ${autor?.nome || "Sistema"}.`
   });
 
   const removido = await prisma.chamado.delete({

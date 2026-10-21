@@ -111,7 +111,8 @@ const atualizar = async (req, res) => {
 
   const contrato = await contratoService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   return res.json({
@@ -127,7 +128,7 @@ const remover = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
   }
 
-  await contratoService.remover(req.params.id);
+  await contratoService.remover(req.params.id, req.usuario);
 
   return res.json({
     success: true,
@@ -142,7 +143,7 @@ const encerrar = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
   }
 
-  const contrato = await contratoService.encerrar(req.params.id);
+  const contrato = await contratoService.encerrar(req.params.id, req.usuario);
 
   return res.json({
     success: true,
@@ -158,7 +159,8 @@ const renovar = async (req, res) => {
   }
 
   const contrato = await contratoService.renovar(
-    req.params.id
+    req.params.id,
+    req.usuario
   );
 
   return res.json({
@@ -235,7 +237,8 @@ const enviarClicksign = async (req, res) => {
 
   const resultado = await contratoService.enviarParaClicksign(
     req.params.id,
-    req.body?.signatariosExtras
+    req.body?.signatariosExtras,
+    req.usuario
   );
 
   return res.json({

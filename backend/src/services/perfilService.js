@@ -2,6 +2,28 @@ const prisma = require("../config/prisma");
 
 const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
+const { diffCampos } = require("../utils/diffCampos");
+
+const CAMPOS_PERFIL = {
+    nome: "nome",
+    descricao: "descrição",
+    ativo: "ativo",
+};
+
+// Permissões é array -- diffCampos não dá conta disso (só compara
+// igual/diferente), então lista separadamente o que foi ligado/desligado.
+const diffPermissoes = (antes = [], depois = []) => {
+
+    const adicionadas = depois.filter((p) => !antes.includes(p));
+    const removidas = antes.filter((p) => !depois.includes(p));
+
+    const partes = [];
+    if (adicionadas.length) partes.push(`+${adicionadas.length} permissão(ões)`);
+    if (removidas.length) partes.push(`-${removidas.length} permissão(ões)`);
+
+    return partes.join(", ");
+
+};
 
 /* =====================================================
    LISTAR
@@ -74,7 +96,7 @@ const buscarPorId = (id) => {
    CRIAR
 ===================================================== */
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
 
     const perfil = await prisma.perfil.create({
 
@@ -90,8 +112,8 @@ const criar = async (dados) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
@@ -107,14 +129,14 @@ const criar = async (dados) => {
 
     await logService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
         acao: "CRIAR",
 
-        descricao: `Perfil ${perfil.nome} criado.`,
+        descricao: `Perfil "${perfil.nome}" criado por ${autor?.nome || "Sistema"}.`,
 
     });
 
@@ -126,7 +148,7 @@ const criar = async (dados) => {
    ATUALIZAR
 ===================================================== */
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
     const anterior = await prisma.perfil.findUnique({
 
@@ -166,8 +188,8 @@ const atualizar = async (id, dados) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
@@ -181,16 +203,21 @@ const atualizar = async (id, dados) => {
 
     });
 
+    const alteracoes = [
+        diffCampos(anterior, perfil, CAMPOS_PERFIL),
+        dados.permissoes !== undefined ? diffPermissoes(anterior.permissoes, perfil.permissoes) : "",
+    ].filter(Boolean).join("; ");
+
     await logService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
         acao: "ATUALIZAR",
 
-        descricao: `Perfil ${perfil.nome} atualizado.`,
+        descricao: `Perfil "${perfil.nome}" atualizado por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`,
 
     });
 
@@ -202,7 +229,7 @@ const atualizar = async (id, dados) => {
    REMOVER
 ===================================================== */
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
     const perfil = await prisma.perfil.findUnique({
 
@@ -246,8 +273,8 @@ const remover = async (id) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
@@ -263,14 +290,14 @@ const remover = async (id) => {
 
     await logService.registrar({
 
-        usuarioId: null,
-        usuarioNome: "Sistema",
+        usuarioId: autor?.id || null,
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "PERFIS",
 
         acao: "EXCLUIR",
 
-        descricao: `Perfil ${perfil.nome} removido.`,
+        descricao: `Perfil "${perfil.nome}" removido por ${autor?.nome || "Sistema"}.`,
 
     });
 

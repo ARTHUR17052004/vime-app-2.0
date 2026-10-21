@@ -128,7 +128,9 @@ const criar = async (req, res) => {
 
         const usuario = await usuarioService.criar(
 
-            req.body
+            req.body,
+
+            req.usuario
 
         );
 
@@ -168,7 +170,9 @@ const atualizar = async (req, res) => {
 
             req.params.id,
 
-            req.body
+            req.body,
+
+            req.usuario
 
         );
 
@@ -206,7 +210,9 @@ const remover = async (req, res) => {
 
         await usuarioService.remover(
 
-            req.params.id
+            req.params.id,
+
+            req.usuario
 
         );
 

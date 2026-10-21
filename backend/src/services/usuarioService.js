@@ -6,6 +6,33 @@ const logService = require("./logService");
 const auditoriaService = require("./auditoriaService");
 const emailService = require("./emailService");
 const { validarTelefone } = require("../utils/validadores");
+const { diffCampos } = require("../utils/diffCampos");
+
+const CAMPOS_USUARIO = {
+    nome: "nome",
+    email: "email",
+    telefone: "telefone",
+    ativo: "ativo",
+    notificarWhatsapp: "notificar por WhatsApp",
+};
+
+// perfil/locador são relações -- diffCampos só compara o valor bruto,
+// então aqui compara pelo nome de cada um (mais legível que o id puro).
+const diffRelacoes = (anterior, usuario) => {
+
+    const partes = [];
+
+    if (anterior.perfilId !== usuario.perfilId) {
+        partes.push(`perfil: ${anterior.perfil?.nome || "nenhum"} → ${usuario.perfil?.nome || "nenhum"}`);
+    }
+
+    if (anterior.locadorId !== usuario.locadorId) {
+        partes.push(`locador: ${anterior.locador?.nome || "todos"} → ${usuario.locador?.nome || "todos"}`);
+    }
+
+    return partes.join("; ");
+
+};
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://vimesistema.online';
 
@@ -158,7 +185,7 @@ const buscarPorId = (id) => {
    CRIAR
 ===================================================== */
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
 
     if (dados.telefone && !validarTelefone(dados.telefone)) {
         throw new Error("Telefone inválido.");
@@ -222,9 +249,9 @@ const criar = async (dados) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
@@ -240,15 +267,15 @@ const criar = async (dados) => {
 
     await logService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
         acao: "CRIAR",
 
-        descricao: `Usuário ${usuario.nome} criado.`,
+        descricao: `Usuário "${usuario.nome}" (${usuario.email}) criado por ${autor?.nome || "Sistema"} com o perfil ${usuario.perfil?.nome || "nenhum"}.`,
 
     });
 
@@ -263,7 +290,7 @@ const criar = async (dados) => {
    ATUALIZAR
 ===================================================== */
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
     if (dados.telefone && !validarTelefone(dados.telefone)) {
         throw new Error("Telefone inválido.");
@@ -286,6 +313,7 @@ const atualizar = async (id, dados) => {
         include: {
 
             perfil: true,
+            locador: true,
 
         },
 
@@ -366,6 +394,7 @@ const atualizar = async (id, dados) => {
         include: {
 
             perfil: true,
+            locador: true,
 
         },
 
@@ -373,9 +402,9 @@ const atualizar = async (id, dados) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
@@ -389,17 +418,23 @@ const atualizar = async (id, dados) => {
 
     });
 
+    const alteracoes = [
+        diffCampos(anterior, usuario, CAMPOS_USUARIO),
+        diffRelacoes(anterior, usuario),
+        dados.senha ? "senha redefinida" : "",
+    ].filter(Boolean).join("; ");
+
     await logService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
         acao: "ATUALIZAR",
 
-        descricao: `Usuário ${usuario.nome} atualizado.`,
+        descricao: `Usuário "${usuario.nome}" atualizado por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`,
 
     });
 
@@ -411,7 +446,7 @@ const atualizar = async (id, dados) => {
    REMOVER
 ===================================================== */
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
     const usuario = await prisma.usuario.findUnique({
 
@@ -447,9 +482,9 @@ const remover = async (id) => {
 
     await auditoriaService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
@@ -465,15 +500,15 @@ const remover = async (id) => {
 
     await logService.registrar({
 
-        usuarioId: null,
+        usuarioId: autor?.id || null,
 
-        usuarioNome: "Sistema",
+        usuarioNome: autor?.nome || "Sistema",
 
         modulo: "USUARIOS",
 
         acao: "EXCLUIR",
 
-        descricao: `Usuário ${usuario.nome} removido.`,
+        descricao: `Usuário "${usuario.nome}" (${usuario.email}) removido por ${autor?.nome || "Sistema"}.`,
 
     });
 

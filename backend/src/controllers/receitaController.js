@@ -62,7 +62,8 @@ const atualizar = async (req, res) => {
 
   const receita = await receitaService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   return res.json({
@@ -81,7 +82,7 @@ const remover = async (req, res) => {
     });
   }
 
-  await receitaService.remover(req.params.id);
+  await receitaService.remover(req.params.id, req.usuario);
 
   return res.json({
     success: true,

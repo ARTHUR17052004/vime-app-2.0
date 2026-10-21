@@ -6,6 +6,17 @@ const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { doContrato, doInquilino } = require('../utils/locadorDeRegistro');
+const { diffCampos } = require('../utils/diffCampos');
+
+const CAMPOS_RECEITA = {
+  descricao: 'descrição',
+  categoria: 'categoria',
+  valor: { rotulo: 'valor', tipo: 'moeda' },
+  vencimento: { rotulo: 'vencimento', tipo: 'data' },
+  dataPagamento: { rotulo: 'data de pagamento', tipo: 'data' },
+  status: 'status',
+  pagadorNome: 'pagador',
+};
 
 const locadorDaReceita = async (dados) => {
   if (dados.contratoId) {
@@ -105,8 +116,8 @@ const criar = async (dados, autor) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     registroId: receita.id,
     acao: "CRIAR",
@@ -115,18 +126,18 @@ const criar = async (dados, autor) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     acao: "CRIAR",
-    descricao: `Receita ${receita.id} criada.`
+    descricao: `Receita "${receita.descricao || receita.id}" criada por ${autor?.nome || "Sistema"}.`
   });
 
   return receita;
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   const modulo = extrairModulo(dados);
 
@@ -146,8 +157,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     registroId: receita.id,
     acao: "ATUALIZAR",
@@ -155,19 +166,21 @@ const atualizar = async (id, dados) => {
     valorNovo: receita
   });
 
+  const alteracoes = diffCampos(anterior, receita, CAMPOS_RECEITA);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     acao: "ATUALIZAR",
-    descricao: `Receita ${receita.id} atualizada.`
+    descricao: `Receita "${receita.descricao || receita.id}" atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return receita;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const receita = await prisma.receita.findUnique({
     where: { id }
@@ -178,8 +191,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     registroId: receita.id,
     acao: "EXCLUIR",
@@ -188,11 +201,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     acao: "EXCLUIR",
-    descricao: `Receita ${receita.id} excluída.`
+    descricao: `Receita "${receita.descricao || receita.id}" excluída por ${autor?.nome || "Sistema"}.`
   });
 
   return prisma.receita.delete({

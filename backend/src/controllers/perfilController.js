@@ -94,7 +94,9 @@ const criar = async (req, res) => {
 
         const perfil = await perfilService.criar(
 
-            req.body
+            req.body,
+
+            req.usuario
 
         );
 
@@ -134,7 +136,9 @@ const atualizar = async (req, res) => {
 
             req.params.id,
 
-            req.body
+            req.body,
+
+            req.usuario
 
         );
 
@@ -172,7 +176,9 @@ const remover = async (req, res) => {
 
         await perfilService.remover(
 
-            req.params.id
+            req.params.id,
+
+            req.usuario
 
         );
 

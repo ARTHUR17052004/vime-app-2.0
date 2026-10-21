@@ -20,7 +20,7 @@ const buscarPorId = async (req, res) => {
 };
 
 const criar = async (req, res) => {
-  const vistoria = await vistoriaService.criar(req.body);
+  const vistoria = await vistoriaService.criar(req.body, req.usuario);
   res.status(201).json(vistoria);
 };
 
@@ -28,7 +28,8 @@ const atualizar = async (req, res) => {
 
   const vistoria = await vistoriaService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   res.json(vistoria);
@@ -37,7 +38,7 @@ const atualizar = async (req, res) => {
 
 const remover = async (req, res) => {
 
-  await vistoriaService.remover(req.params.id);
+  await vistoriaService.remover(req.params.id, req.usuario);
 
   res.json({
     mensagem: 'Vistoria removida com sucesso.'
@@ -51,12 +52,12 @@ const listarMissoes = async (req, res) => {
 };
 
 const concluirMissoes = async (req, res) => {
-  const dados = await vistoriaService.concluirMissoes(req.params.id, req.body);
+  const dados = await vistoriaService.concluirMissoes(req.params.id, req.body, req.usuario);
   res.json(dados);
 };
 
 const cancelarRealizacao = async (req, res) => {
-  const dados = await vistoriaService.cancelarRealizacao(req.params.id);
+  const dados = await vistoriaService.cancelarRealizacao(req.params.id, req.usuario);
   res.json(dados);
 };
 

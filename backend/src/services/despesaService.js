@@ -5,6 +5,16 @@ const { filtroDespesa } = require('../utils/escopoLocador');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const { diffCampos } = require('../utils/diffCampos');
+
+const CAMPOS_DESPESA = {
+  descricao: 'descrição',
+  categoria: 'categoria',
+  valor: { rotulo: 'valor', tipo: 'moeda' },
+  vencimento: { rotulo: 'vencimento', tipo: 'data' },
+  dataPagamento: { rotulo: 'data de pagamento', tipo: 'data' },
+  status: 'status',
+};
 
 const sanitizar = (dados) => {
 
@@ -49,7 +59,7 @@ const buscarPorId = (id) => {
   });
 };
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
 
   dados = sanitizar(dados);
 
@@ -60,8 +70,8 @@ const criar = async (dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     registroId: despesa.id,
     acao: "CRIAR",
@@ -70,18 +80,18 @@ const criar = async (dados) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     acao: "CRIAR",
-    descricao: `Despesa ${despesa.id} criada.`
+    descricao: `Despesa "${despesa.descricao || despesa.id}" criada por ${autor?.nome || "Sistema"}.`
   });
 
   return despesa;
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   dados = sanitizar(dados);
 
@@ -99,8 +109,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     registroId: despesa.id,
     acao: "ATUALIZAR",
@@ -108,19 +118,21 @@ const atualizar = async (id, dados) => {
     valorNovo: despesa
   });
 
+  const alteracoes = diffCampos(anterior, despesa, CAMPOS_DESPESA);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     acao: "ATUALIZAR",
-    descricao: `Despesa ${despesa.id} atualizada.`
+    descricao: `Despesa "${despesa.descricao || despesa.id}" atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return despesa;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const despesa = await prisma.despesa.findUnique({
     where: { id }
@@ -131,8 +143,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     registroId: despesa.id,
     acao: "EXCLUIR",
@@ -141,11 +153,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "DESPESAS",
     acao: "EXCLUIR",
-    descricao: `Despesa ${despesa.id} excluída.`
+    descricao: `Despesa "${despesa.descricao || despesa.id}" excluída por ${autor?.nome || "Sistema"}.`
   });
 
   return prisma.despesa.delete({

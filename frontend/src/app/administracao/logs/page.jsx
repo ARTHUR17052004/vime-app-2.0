@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, FileDown } from "lucide-react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import FadeIn from "../../components/ui/FadeIn";
@@ -12,9 +12,11 @@ import PageSection from "../../components/ui/PageSection";
 import Table from "../../components/ui/Table";
 import SearchInput from "../../components/ui/SearchInput";
 import SemPermissao from "../../components/ui/SemPermissao";
+import Button from "../../components/ui/Button";
 
 import { LogService } from "@/services/log.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { exportarPDF } from "@/utils/exportar";
 
 export default function LogsPage() {
 
@@ -79,6 +81,28 @@ export default function LogsPage() {
 
   }, [logs, busca]);
 
+  const handleExportarPDF = () => {
+
+    exportarPDF({
+      titulo: "Logs do Sistema",
+      subtitulo: `${logsFiltrados.length} registro(s)${busca.trim() ? ` -- filtro: "${busca}"` : ""}`,
+      secoes: [
+        {
+          colunas: ["Data", "Usuário", "Módulo", "Ação", "Descrição"],
+          linhas: logsFiltrados.map((log) => [
+            new Date(log.createdAt).toLocaleString("pt-BR"),
+            log.usuarioNome || "Sistema",
+            log.modulo || "-",
+            log.acao || "-",
+            log.descricao || "-",
+          ]),
+        },
+      ],
+      nomeArquivo: "logs-sistema",
+    });
+
+  };
+
   const columns = [
     {
       key: "createdAt",
@@ -139,23 +163,37 @@ export default function LogsPage() {
 
               </div>
 
-              <button
-                onClick={() => router.back()}
-                className="
-                  px-5
-                  py-3
-                  rounded-xl
-                  bg-[var(--surface-3)]
-                  hover:bg-[var(--surface-3)]
-                  text-[var(--text)]
-                  flex
-                  items-center
-                  gap-2
-                "
-              >
-                <ArrowLeft size={18} />
-                Voltar
-              </button>
+              <div className="flex items-center gap-3">
+
+                <Button
+                  size="md"
+                  variant="secondary"
+                  leftIcon={<FileDown size={18} />}
+                  disabled={logsFiltrados.length === 0}
+                  onClick={handleExportarPDF}
+                >
+                  Exportar PDF
+                </Button>
+
+                <button
+                  onClick={() => router.back()}
+                  className="
+                    px-5
+                    py-3
+                    rounded-xl
+                    bg-[var(--surface-3)]
+                    hover:bg-[var(--surface-3)]
+                    text-[var(--text)]
+                    flex
+                    items-center
+                    gap-2
+                  "
+                >
+                  <ArrowLeft size={18} />
+                  Voltar
+                </button>
+
+              </div>
 
             </div>
 

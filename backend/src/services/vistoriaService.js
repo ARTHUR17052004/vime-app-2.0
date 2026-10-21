@@ -6,6 +6,16 @@ const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { filtroVistoria } = require('../utils/escopoLocador');
 const notificacaoService = require('./notificacaoService');
+const { diffCampos } = require('../utils/diffCampos');
+
+const CAMPOS_VISTORIA = {
+  titulo: 'título',
+  categoria: 'categoria',
+  criticidade: 'criticidade',
+  status: 'status',
+  periodicidade: 'periodicidade',
+  dataProxima: { rotulo: 'data próxima', tipo: 'data' },
+};
 
 // Um passo da periodicidade (null = "Única", não repete). Mesma lógica
 // do frontend (vistorias/page.js) -- precisa existir aqui também pro
@@ -119,7 +129,7 @@ const converterDatas = (dados) => {
 
 };
 
-const criar = async (dados) => {
+const criar = async (dados, autor) => {
 
   dados = converterDatas(dados);
 
@@ -139,8 +149,8 @@ const criar = async (dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "CRIAR",
@@ -149,11 +159,11 @@ const criar = async (dados) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "CRIAR",
-    descricao: `Vistoria ${vistoria.id} criada.`
+    descricao: `Vistoria "${vistoria.titulo}" criada por ${autor?.nome || "Sistema"}.`
   });
 
   // Aviso na hora (sino, som e popup no celular) -- o locador é descoberto
@@ -177,7 +187,7 @@ const criar = async (dados) => {
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   dados = converterDatas(dados);
 
@@ -204,8 +214,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
@@ -213,19 +223,21 @@ const atualizar = async (id, dados) => {
     valorNovo: vistoria
   });
 
+  const alteracoes = diffCampos(anterior, vistoria, CAMPOS_VISTORIA);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "ATUALIZAR",
-    descricao: `Vistoria ${vistoria.id} atualizada.`
+    descricao: `Vistoria "${vistoria.titulo}" atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return vistoria;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const vistoria = await prisma.vistoria.findUnique({
     where: { id }
@@ -236,8 +248,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "EXCLUIR",
@@ -246,11 +258,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "EXCLUIR",
-    descricao: `Vistoria ${vistoria.id} excluída.`
+    descricao: `Vistoria "${vistoria.titulo}" excluída por ${autor?.nome || "Sistema"}.`
   });
 
   const removida = await prisma.vistoria.delete({
@@ -315,7 +327,7 @@ const listarMissoes = async (vistoriaId) => {
 // as residências ativas tiverem missão no ciclo, fecha a rodada --
 // igual concluir uma vistoria normal (renova sozinha pra próxima data
 // se tiver periodicidade) -- e abre um ciclo novo e vazio.
-const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor, observacoes }) => {
+const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor, observacoes }, autor) => {
 
   if (!Array.isArray(unidadeIds) || unidadeIds.length === 0) {
     throw new Error('Selecione ao menos uma residência.');
@@ -394,8 +406,8 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
@@ -404,11 +416,11 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "ATUALIZAR",
-    descricao: `Vistoria ${vistoria.id}: todas as missões do ciclo ${vistoria.cicloAtual} concluídas, rodada fechada.`
+    descricao: `Vistoria "${vistoria.titulo}": todas as missões do ciclo ${vistoria.cicloAtual} concluídas por ${autor?.nome || "Sistema"}, rodada fechada.`
   });
 
   return {
@@ -425,7 +437,7 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
 // a própria auditoria (ver atualizar()) já guarda de toda alteração.
 // Para vistoria "Geral" é a missão específica que se desfaz (ver
 // removerMissao), não a vistoria inteira.
-const cancelarRealizacao = async (vistoriaId) => {
+const cancelarRealizacao = async (vistoriaId, autor) => {
 
   const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
 
@@ -473,8 +485,8 @@ const cancelarRealizacao = async (vistoriaId) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
@@ -483,11 +495,11 @@ const cancelarRealizacao = async (vistoriaId) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "ATUALIZAR",
-    descricao: `Vistoria ${vistoria.id}: conclusão desfeita (cancelada pelo usuário).`,
+    descricao: `Vistoria "${vistoria.titulo}": conclusão desfeita por ${autor?.nome || "Sistema"}.`,
   });
 
   return revertida;

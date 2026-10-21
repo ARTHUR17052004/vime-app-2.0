@@ -31,7 +31,7 @@ const buscarPorId = async (req, res) => {
 
 const criar = async (req, res) => {
 
-  const despesa = await despesaService.criar(req.body);
+  const despesa = await despesaService.criar(req.body, req.usuario);
 
   return res.status(201).json({
     success: true,
@@ -44,7 +44,8 @@ const atualizar = async (req, res) => {
 
   const despesa = await despesaService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   return res.json({
@@ -56,7 +57,7 @@ const atualizar = async (req, res) => {
 
 const remover = async (req, res) => {
 
-  await despesaService.remover(req.params.id);
+  await despesaService.remover(req.params.id, req.usuario);
 
   return res.json({
     success: true,

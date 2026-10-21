@@ -11,6 +11,15 @@ const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
 const { filtroContrato } = require("../utils/escopoLocador");
 const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
+const { diffCampos } = require("../utils/diffCampos");
+
+const CAMPOS_CONTRATO = {
+  status: 'status',
+  valorAluguel: { rotulo: 'valor do aluguel', tipo: 'moeda' },
+  diaVencimento: 'dia de vencimento',
+  dataInicio: { rotulo: 'data de início', tipo: 'data' },
+  dataFim: { rotulo: 'data de fim', tipo: 'data' },
+};
 
 const {
   formatarDataExtensa,
@@ -373,11 +382,11 @@ const criar = async (dados, usuario) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: usuario?.id || null,
+    usuarioNome: usuario?.nome || "Sistema",
     modulo: "CONTRATOS",
     acao: "CRIAR",
-    descricao: `Contrato ${contrato.id} criado.`
+    descricao: `Contrato de "${inquilino.nome}" na kitnet ${kitnet.numero} criado por ${usuario?.nome || "Sistema"}.`
   });
 
   await notificacaoService.criar({
@@ -401,7 +410,7 @@ const criar = async (dados, usuario) => {
 
 };
 
-const atualizar = async (id, dados) => {
+const atualizar = async (id, dados, autor) => {
 
   dados = sanitizar(dados);
 
@@ -444,8 +453,8 @@ const atualizar = async (id, dados) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "ATUALIZAR",
@@ -453,19 +462,21 @@ const atualizar = async (id, dados) => {
     valorNovo: contrato
   });
 
+  const alteracoes = diffCampos(anterior, contrato, CAMPOS_CONTRATO);
+
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     acao: "ATUALIZAR",
-    descricao: `Contrato ${contrato.id} atualizado.`
+    descricao: `Contrato ${contrato.id} atualizado por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
   return contrato;
 
 };
 
-const remover = async (id) => {
+const remover = async (id, autor) => {
 
   const contrato = await prisma.contrato.findUnique({
     where: { id },
@@ -485,8 +496,8 @@ const remover = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "EXCLUIR",
@@ -495,11 +506,11 @@ const remover = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     acao: "EXCLUIR",
-    descricao: `Contrato ${contrato.id} excluído.`
+    descricao: `Contrato ${contrato.id} excluído por ${autor?.nome || "Sistema"}.`
   });
 
   // Só esvazia a kitnet/desativa o inquilino se não sobrou outro
@@ -555,7 +566,7 @@ const anexarArquivo = (id, { arquivoDados, arquivoTipo, arquivoNomeOriginal }) =
   });
 };
 
-const encerrar = async (id) => {
+const encerrar = async (id, autor) => {
 
   const contrato = await prisma.contrato.findUnique({
     where: { id }
@@ -598,8 +609,8 @@ const encerrar = async (id) => {
   }
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "ENCERRAR",
@@ -621,11 +632,11 @@ const encerrar = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     acao: "ENCERRAR",
-    descricao: `Contrato ${contrato.id} encerrado.`
+    descricao: `Contrato ${contrato.id} encerrado por ${autor?.nome || "Sistema"}.`
   });
 
   await notificacaoService.criar({
@@ -657,7 +668,7 @@ const encerrar = async (id) => {
 // -- combinado com o usuário: a renovação conta da data do clique).
 const MESES_RENOVACAO = 4;
 
-const renovar = async (id) => {
+const renovar = async (id, autor) => {
 
   const anterior = await prisma.contrato.findUnique({
     where: { id }
@@ -678,8 +689,8 @@ const renovar = async (id) => {
   });
 
   await auditoriaService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "RENOVAR",
@@ -688,11 +699,11 @@ const renovar = async (id) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CONTRATOS",
     acao: "RENOVAR",
-    descricao: `Contrato ${contrato.id} renovado.`
+    descricao: `Contrato ${contrato.id} renovado até ${new Date(novaDataFim).toLocaleDateString("pt-BR", { timeZone: "UTC" })} por ${autor?.nome || "Sistema"}.`
   });
 
   return contrato;
@@ -748,7 +759,7 @@ const montarDadosModeloClicksign = (contrato) => {
 // demonstrativo e clica em "Enviar à Clicksign". `signatariosExtras`
 // são signatários só deste envio específico (além do inquilino e dos
 // signatários fixos, que entram sempre).
-const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
+const enviarParaClicksign = async (contratoId, signatariosExtras = [], autor) => {
 
   const contrato = await buscarPorId(contratoId);
 
@@ -827,11 +838,11 @@ const enviarParaClicksign = async (contratoId, signatariosExtras = []) => {
   });
 
   await logService.registrar({
-    usuarioId: null,
-    usuarioNome: "Sistema",
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
     modulo: "CLICKSIGN",
     acao: "ENVIAR_ENVELOPE",
-    descricao: `Contrato ${contrato.id} enviado à Clicksign (envelope ${envelopeId}).`
+    descricao: `Contrato de "${contrato.inquilino.nome}" enviado à Clicksign por ${autor?.nome || "Sistema"} (envelope ${envelopeId}).`
   });
 
   await notificacaoService.criar({

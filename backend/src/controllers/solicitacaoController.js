@@ -39,7 +39,8 @@ const atualizar = async (req, res) => {
 
   const solicitacao = await solicitacaoService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   res.json(solicitacao);
@@ -48,7 +49,7 @@ const atualizar = async (req, res) => {
 
 const remover = async (req, res) => {
 
-  await solicitacaoService.remover(req.params.id);
+  await solicitacaoService.remover(req.params.id, req.usuario);
 
   res.json({
     mensagem: 'Solicitação removida com sucesso.'

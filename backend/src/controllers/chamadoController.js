@@ -39,7 +39,8 @@ const atualizar = async (req, res) => {
 
   const chamado = await chamadoService.atualizar(
     req.params.id,
-    req.body
+    req.body,
+    req.usuario
   );
 
   res.json(chamado);
@@ -48,7 +49,7 @@ const atualizar = async (req, res) => {
 
 const remover = async (req, res) => {
 
-  await chamadoService.remover(req.params.id);
+  await chamadoService.remover(req.params.id, req.usuario);
 
   res.json({
     mensagem: 'Chamado removido com sucesso.'
