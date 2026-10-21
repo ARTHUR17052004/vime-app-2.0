@@ -526,6 +526,11 @@ model Chamado {
   // sozinho 24h depois, sem precisar vasculhar a auditoria.
   resolvidoEm DateTime?
 
+  // Some das abas de status (Todos, Aberto, Em Andamento, Resolvido,
+  // Fechado) sem apagar o chamado -- só quem está em FECHADO pode ser
+  // arquivado (ver ChamadoCard.jsx). Só aparece na aba "Arquivados".
+  arquivado Boolean @default(false)
+
   criadoPorId String?
 
   criadoPorNome String?

@@ -29,6 +29,7 @@ const ABAS = [
   { chave: "EM_ANDAMENTO", rotulo: "Em Andamento" },
   { chave: "RESOLVIDO", rotulo: "Resolvidos" },
   { chave: "FECHADO", rotulo: "Fechados" },
+  { chave: "arquivados", rotulo: "Arquivados" },
 ];
 
 export default function SuportePage() {
@@ -145,6 +146,38 @@ export default function SuportePage() {
 
   }
 
+  async function arquivarChamado(id) {
+
+    try {
+
+      await ChamadoService.atualizar(id, { arquivado: true });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao arquivar chamado.");
+
+    }
+
+  }
+
+  async function desarquivarChamado(id) {
+
+    try {
+
+      await ChamadoService.atualizar(id, { arquivado: false });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao desarquivar chamado.");
+
+    }
+
+  }
+
   const chamadosFiltrados = chamados.filter((item) => {
 
     const texto = `
@@ -162,6 +195,11 @@ export default function SuportePage() {
     ) {
       return false;
     }
+
+    // Arquivado some de todas as outras abas -- só aparece na própria
+    // aba "Arquivados".
+    if (abaSelecionada === "arquivados") return item.arquivado;
+    if (item.arquivado) return false;
 
     if (abaSelecionada === "todos") return true;
 
@@ -263,6 +301,8 @@ export default function SuportePage() {
               <ChamadoCard
                 chamados={chamadosFiltrados}
                 onDelete={excluirChamado}
+                onArquivar={arquivarChamado}
+                onDesarquivar={desarquivarChamado}
               />
 
             </PageSection>

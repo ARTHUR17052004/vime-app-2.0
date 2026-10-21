@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Trash2, MessageCircle } from "lucide-react";
+import { Trash2, MessageCircle, Archive, ArchiveRestore } from "lucide-react";
 
 import Badge from "../ui/Badge";
 import { usePermissao } from "@/hooks/usePermissao";
@@ -23,6 +23,8 @@ const CRITICIDADE_COR = {
 export default function ChamadoCard({
   chamados,
   onDelete,
+  onArquivar,
+  onDesarquivar,
 }) {
 
   const router = useRouter();
@@ -129,6 +131,52 @@ export default function ChamadoCard({
               <div className="flex items-center gap-2 shrink-0">
 
                 <MessageCircle size={18} className="text-[var(--text-faint)]" />
+
+                {podeExcluir && item.status === "FECHADO" && !item.arquivado && onArquivar && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onArquivar(item.id);
+                    }}
+                    title="Arquivar"
+                    className="
+                      w-10
+                      h-10
+                      rounded-xl
+                      bg-[var(--surface-2)]
+                      hover:bg-[var(--surface-3)]
+                      flex
+                      items-center
+                      justify-center
+                      transition
+                    "
+                  >
+                    <Archive size={17} className="text-[var(--text-subtle)]" />
+                  </button>
+                )}
+
+                {podeExcluir && item.arquivado && onDesarquivar && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDesarquivar(item.id);
+                    }}
+                    title="Desarquivar"
+                    className="
+                      w-10
+                      h-10
+                      rounded-xl
+                      bg-[var(--surface-2)]
+                      hover:bg-[var(--surface-3)]
+                      flex
+                      items-center
+                      justify-center
+                      transition
+                    "
+                  >
+                    <ArchiveRestore size={17} className="text-[var(--text-subtle)]" />
+                  </button>
+                )}
 
                 {podeExcluir && (
                   <button

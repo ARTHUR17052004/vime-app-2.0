@@ -10,6 +10,7 @@ const CAMPOS_CHAMADO = {
   categoria: 'categoria',
   criticidade: 'criticidade',
   status: 'status',
+  arquivado: 'arquivado',
 };
 
 const listar = () => {
