@@ -521,6 +521,11 @@ model Chamado {
 
   status String @default("ABERTO") // ABERTO, EM_ANDAMENTO, RESOLVIDO, FECHADO
 
+  // Quando entrou em RESOLVIDO (null se nunca esteve, ou limpo de novo se
+  // reaberto) -- fecharChamadosResolvidosJob.js usa isso pra fechar
+  // sozinho 24h depois, sem precisar vasculhar a auditoria.
+  resolvidoEm DateTime?
+
   criadoPorId String?
 
   criadoPorNome String?

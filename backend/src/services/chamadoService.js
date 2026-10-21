@@ -90,6 +90,17 @@ const atualizar = async (id, dados, autor) => {
     where: { id }
   });
 
+  // resolvidoEm marca quando entrou em RESOLVIDO -- usado pelo job que
+  // fecha sozinho 24h depois. Limpa se mudar pra qualquer outro status
+  // (reabriu), senão o job fecharia contando a partir da vez errada.
+  if (dados.status !== undefined) {
+    if (dados.status === "RESOLVIDO" && anterior?.status !== "RESOLVIDO") {
+      dados.resolvidoEm = new Date();
+    } else if (dados.status !== "RESOLVIDO") {
+      dados.resolvidoEm = null;
+    }
+  }
+
   const chamado = await prisma.chamado.update({
     where: { id },
     data: dados

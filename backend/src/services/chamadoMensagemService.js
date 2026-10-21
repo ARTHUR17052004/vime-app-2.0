@@ -27,9 +27,24 @@ const criar = async (chamadoId, dados, autor) => {
 
   if (dados.statusAlterado) {
 
+    const atual = await prisma.chamado.findUnique({
+      where: { id: chamadoId },
+      select: { status: true },
+    });
+
+    const dadosChamado = { status: dados.statusAlterado };
+
+    // Mesma lógica de chamadoService.atualizar: marca quando entrou em
+    // RESOLVIDO (pro job de fechar sozinho 24h depois), limpa se saiu.
+    if (dados.statusAlterado === "RESOLVIDO" && atual?.status !== "RESOLVIDO") {
+      dadosChamado.resolvidoEm = new Date();
+    } else if (dados.statusAlterado !== "RESOLVIDO") {
+      dadosChamado.resolvidoEm = null;
+    }
+
     await prisma.chamado.update({
       where: { id: chamadoId },
-      data: { status: dados.statusAlterado },
+      data: dadosChamado,
     });
 
   }

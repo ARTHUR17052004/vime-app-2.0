@@ -13,14 +13,18 @@ const verificarSolicitacoesAtrasadas = require("./verificarSolicitacoesAtrasadas
 const verificarVistoriasAtrasadas = require("./verificarVistoriasAtrasadasJob");
 const atualizarStatusVistorias = require("./atualizarStatusVistoriasJob");
 const lembrarVistoriasPendentes = require("./lembrarVistoriasPendentesJob");
+const fecharChamadosResolvidos = require("./fecharChamadosResolvidosJob");
 
 const iniciarJobs = () => {
 
   // Status (Programada -> Pendente -> Atrasada) depende de estar perto
   // ou ter passado do prazo na hora certa -- de hora em hora é fino o
   // bastante pra uma janela de 72h, sem precisar rodar o resto dos jobs
-  // (notificações, cobranças...) nesse ritmo também.
+  // (notificações, cobranças...) nesse ritmo também. Fechar chamado
+  // resolvido há 24h é a mesma ideia (24h é uma janela fina, uma vez
+  // por dia deixaria passar de 24h até 48h).
   cron.schedule("0 * * * *", atualizarStatusVistorias);
+  cron.schedule("0 * * * *", fecharChamadosResolvidos);
 
   cron.schedule("0 8 * * *", async () => {
 
