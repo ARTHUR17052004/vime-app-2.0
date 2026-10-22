@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -39,6 +39,17 @@ import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
 
 export default function FinanceiroPage() {
+  return (
+    <Suspense fallback={null}>
+      <FinanceiroPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pra pré-aplicar o filtro que vem do
+// VIME Insights) só funciona dentro de um Suspense -- sem isso o build
+// de produção do Next recusa gerar a página.
+function FinanceiroPageConteudo() {
   const podeVisualizar = usePermissao("financeiro.visualizar");
   const podeEditar = usePermissao("financeiro.editar");
 
