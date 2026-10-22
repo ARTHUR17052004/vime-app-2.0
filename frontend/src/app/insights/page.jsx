@@ -11,6 +11,7 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   RefreshCw,
   MessagesSquare,
   Building2,
@@ -195,28 +196,42 @@ function LinhaIndicador({ indicador, expandido, onToggleInfo, onClick, carregand
   );
 }
 
-// Linha de módulo (fase seguinte) -- lista, não grade de caixas, igual
-// o desenho pedido. `disponivel` fica pronto pra quando esses módulos
-// ganharem indicadores de verdade -- até lá, mensagem clara de "ainda
-// não" em vez de ficar ambíguo (ex.: parecer que não tem o que mostrar).
-function LinhaModulo({ titulo, subtitulo, icone: Icone, disponivel = false }) {
+// Linha de módulo -- fechada por padrão, mostra só um resumo de uma
+// linha; clicar expande e revela o conteúdo de verdade embaixo. Mesma
+// linha serve pros módulos ainda não integrados (sem seta, nada pra
+// abrir) e pro Financeiro (com seta, abre os indicadores). Pedido
+// explícito: tudo começa resumido, o usuário escolhe o que quer abrir.
+function LinhaModulo({ titulo, resumo, icone: Icone, expansivel = false, aberto = false, onToggle, children }) {
   return (
-    <div
-      className={`
-        flex items-center gap-3
-        px-6 py-4
-        border-t border-[var(--border-token)]
-        ${disponivel ? "hover:bg-[var(--surface-2)] cursor-pointer transition" : ""}
-      `}
-    >
-      <Icone size={18} className={disponivel ? "text-[var(--text-muted)] shrink-0" : "text-[var(--text-faint)] shrink-0"} />
-      <div className="min-w-0 flex-1">
-        <p className={`font-semibold ${disponivel ? "text-[var(--text)]" : "text-[var(--text-muted)]"}`}>{titulo}</p>
-        <p className="text-xs text-[var(--text-faint)]">
-          {disponivel ? subtitulo : "Ainda não integrado ao VIME Insights -- chega numa próxima etapa."}
-        </p>
-      </div>
-      {disponivel && <ChevronRight size={16} className="text-[var(--text-faint)] shrink-0" />}
+    <div className="border-t border-[var(--border-token)]">
+
+      <button
+        onClick={expansivel ? onToggle : undefined}
+        disabled={!expansivel}
+        className={`
+          w-full flex items-center gap-3
+          px-6 py-4
+          text-left
+          ${expansivel ? "hover:bg-[var(--surface-2)] transition cursor-pointer" : "cursor-default"}
+        `}
+      >
+        <Icone size={18} className={expansivel ? "text-emerald-400 shrink-0" : "text-[var(--text-faint)] shrink-0"} />
+        <div className="min-w-0 flex-1">
+          <p className={`font-semibold ${expansivel ? "text-[var(--text)]" : "text-[var(--text-muted)]"}`}>{titulo}</p>
+          <p className="text-xs text-[var(--text-faint)] truncate">
+            {resumo}
+          </p>
+        </div>
+        {expansivel && (
+          <ChevronDown
+            size={16}
+            className={`text-[var(--text-faint)] shrink-0 transition-transform ${aberto ? "rotate-180" : ""}`}
+          />
+        )}
+      </button>
+
+      {expansivel && aberto && children}
+
     </div>
   );
 }
@@ -248,6 +263,9 @@ export default function InsightsPage() {
       return novo;
     });
   };
+
+  // Começa fechado -- tudo na tela abre só quando o usuário pedir.
+  const [financeiroAberto, setFinanceiroAberto] = useState(false);
 
   const carregar = useCallback(async () => {
 
@@ -297,6 +315,16 @@ export default function InsightsPage() {
   const indicadores = resumo?.indicadores || [];
   const indicadoresPeriodo = indicadores.filter((i) => i.escopo === "periodo");
   const indicadoresAtual = indicadores.filter((i) => i.escopo === "atual");
+
+  const recebido = indicadores.find((i) => i.chave === "recebido_periodo");
+  const vencidas = indicadores.find((i) => i.chave === "cobrancas_vencidas");
+
+  const resumoFinanceiro =
+    carregando && indicadores.length === 0
+      ? "Calculando..."
+      : recebido && vencidas
+        ? `Recebido ${formatCurrency(recebido.valor)} no período -- ${formatCurrency(vencidas.valor)} vencido agora`
+        : "Toque para ver os indicadores.";
 
   return (
 
@@ -433,79 +461,78 @@ export default function InsightsPage() {
           </FadeIn>
 
           <FadeIn delay={0.18}>
-            <div className="mt-4">
-              <Cartao
-                icone={TrendingUp}
-                titulo="Financeiro"
-                subtitulo={carregando && indicadores.length === 0 ? "Calculando..." : null}
-              >
-
-                {indicadoresPeriodo.length > 0 && (
-                  <>
-                    <DivisoriaGrupo
-                      titulo="Nesse período"
-                      descricao="Muda quando você troca o mês no cartão acima."
-                    />
-                    {indicadoresPeriodo.map((ind) => (
-                      <LinhaIndicador
-                        key={ind.chave}
-                        indicador={ind}
-                        expandido={expandidos.has(ind.chave)}
-                        onToggleInfo={toggleInfo}
-                        carregando={carregando}
-                        onClick={() => router.push(construirUrl(ind.navegacao))}
-                      />
-                    ))}
-                  </>
-                )}
-
-                {indicadoresAtual.length > 0 && (
-                  <>
-                    <DivisoriaGrupo
-                      titulo="Situação agora"
-                      descricao="Não muda com o período -- é sempre o momento atual."
-                    />
-                    {indicadoresAtual.map((ind) => (
-                      <LinhaIndicador
-                        key={ind.chave}
-                        indicador={ind}
-                        expandido={expandidos.has(ind.chave)}
-                        onToggleInfo={toggleInfo}
-                        carregando={carregando}
-                        onClick={() => router.push(construirUrl(ind.navegacao))}
-                      />
-                    ))}
-                  </>
-                )}
-
-              </Cartao>
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.22}>
             <div className="mt-8">
 
               <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-3 px-1">
-                Visão operacional
+                Módulos
               </h2>
 
               <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
 
                 <LinhaModulo
+                  titulo="Financeiro"
+                  resumo={resumoFinanceiro}
+                  icone={TrendingUp}
+                  expansivel
+                  aberto={financeiroAberto}
+                  onToggle={() => setFinanceiroAberto((v) => !v)}
+                >
+
+                  {indicadoresPeriodo.length > 0 && (
+                    <>
+                      <DivisoriaGrupo
+                        titulo="Nesse período"
+                        descricao="Muda quando você troca o mês no cartão acima."
+                      />
+                      {indicadoresPeriodo.map((ind) => (
+                        <LinhaIndicador
+                          key={ind.chave}
+                          indicador={ind}
+                          expandido={expandidos.has(ind.chave)}
+                          onToggleInfo={toggleInfo}
+                          carregando={carregando}
+                          onClick={() => router.push(construirUrl(ind.navegacao))}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                  {indicadoresAtual.length > 0 && (
+                    <>
+                      <DivisoriaGrupo
+                        titulo="Situação agora"
+                        descricao="Não muda com o período -- é sempre o momento atual."
+                      />
+                      {indicadoresAtual.map((ind) => (
+                        <LinhaIndicador
+                          key={ind.chave}
+                          indicador={ind}
+                          expandido={expandidos.has(ind.chave)}
+                          onToggleInfo={toggleInfo}
+                          carregando={carregando}
+                          onClick={() => router.push(construirUrl(ind.navegacao))}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                </LinhaModulo>
+
+                <LinhaModulo
                   titulo="Imóveis e Kitnets"
-                  subtitulo="Ocupação e disponibilidade."
+                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
                   icone={Building2}
                 />
 
                 <LinhaModulo
                   titulo="Contratos"
-                  subtitulo="Vencimentos e renovações."
+                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
                   icone={FileText}
                 />
 
                 <LinhaModulo
                   titulo="Solicitações e Vistorias"
-                  subtitulo="Pendências e prazos."
+                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
                   icone={ClipboardList}
                 />
 
