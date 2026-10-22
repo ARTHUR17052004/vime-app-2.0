@@ -161,62 +161,65 @@ export default function InsightsPage() {
 
               <div
                 className="
-                  flex items-center justify-between flex-wrap gap-4
                   rounded-2xl border border-[var(--border-token)] bg-[var(--surface)]
                   px-6 py-4
                 "
               >
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between flex-wrap gap-4">
 
-                  <CalendarClock size={16} className="text-emerald-400" />
+                  <div className="flex items-center gap-2">
 
-                  <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
-                    Nesse período
-                  </h2>
+                    <CalendarClock size={16} className="text-emerald-400" />
 
-                  {resumo?.periodo && (
-                    <span className="text-sm text-[var(--text-subtle)]">
-                      -- {formatarDataCurta(resumo.periodo.inicio)} a {formatarDataCurta(resumo.periodo.fim)}
-                    </span>
-                  )}
+                    <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
+                      Nesse período
+                    </h2>
 
-                </div>
+                    {resumo?.periodo && (
+                      <span className="text-sm text-[var(--text-muted)]">
+                        -- {formatarDataCurta(resumo.periodo.inicio)} a {formatarDataCurta(resumo.periodo.fim)}
+                      </span>
+                    )}
 
-                <div className="flex items-center gap-2">
+                  </div>
 
-                  <button
-                    onClick={() => setMesOffset((v) => v - 1)}
-                    className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
-                    title="Mês anterior"
-                  >
-                    <ChevronLeft size={16} className="text-[var(--text-subtle)]" />
-                  </button>
+                  <div className="flex items-center gap-2">
 
-                  {mesOffset !== 0 && (
                     <button
-                      onClick={() => setMesOffset(0)}
-                      className="text-xs text-emerald-400 hover:underline px-1"
+                      onClick={() => setMesOffset((v) => v - 1)}
+                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
+                      title="Mês anterior"
                     >
-                      Voltar pro mês atual
+                      <ChevronLeft size={16} className="text-[var(--text-muted)]" />
                     </button>
-                  )}
 
-                  <button
-                    onClick={() => setMesOffset((v) => v + 1)}
-                    className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
-                    title="Próximo mês"
-                  >
-                    <ChevronRight size={16} className="text-[var(--text-subtle)]" />
-                  </button>
+                    {mesOffset !== 0 && (
+                      <button
+                        onClick={() => setMesOffset(0)}
+                        className="text-xs text-emerald-400 hover:underline px-1"
+                      >
+                        Voltar pro mês atual
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => setMesOffset((v) => v + 1)}
+                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
+                      title="Próximo mês"
+                    >
+                      <ChevronRight size={16} className="text-[var(--text-muted)]" />
+                    </button>
+
+                  </div>
 
                 </div>
+
+                <p className="mt-3 text-xs text-[var(--text-muted)]">
+                  Esses dois cards mudam conforme o período acima -- os outros embaixo são uma foto de agora, não do mês selecionado.
+                </p>
 
               </div>
-
-              <p className="mt-2 text-xs text-[var(--text-faint)]">
-                Esses dois cards mudam conforme o período acima -- os outros embaixo são uma foto de agora, não do mês selecionado.
-              </p>
 
             </PageSection>
 
@@ -269,12 +272,18 @@ export default function InsightsPage() {
 
             <PageSection spacing="xxl">
 
-              <div className="flex items-center gap-2 mb-3">
+              <div
+                className="
+                  flex items-center gap-2 flex-wrap
+                  rounded-2xl border border-[var(--border-token)] bg-[var(--surface)]
+                  px-6 py-4 mb-4
+                "
+              >
                 <Clock size={16} className="text-emerald-400" />
                 <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
                   Situação agora
                 </h2>
-                <span className="text-sm text-[var(--text-subtle)]">
+                <span className="text-sm text-[var(--text-muted)]">
                   -- não muda com o período acima, é sempre o momento atual
                 </span>
               </div>
@@ -341,7 +350,7 @@ export default function InsightsPage() {
 
           {resumo?.geradoEm && (
             <FadeIn delay={0.25}>
-              <p className="text-center text-xs text-[var(--text-faint)] mt-2">
+              <p className="text-center text-xs text-[var(--text-muted)] mt-2">
                 Última atualização: {new Date(resumo.geradoEm).toLocaleString("pt-BR")}
               </p>
             </FadeIn>
