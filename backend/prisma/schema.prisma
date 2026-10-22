@@ -628,9 +628,9 @@ model Vistoria {
   // Realizadas), já que a mesma Vistoria se repete pra sempre.
   cicloAtual Int @default(1)
 
-  unidade Unidade? @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+  unidade Unidade? @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
 
-  kitnet Kitnet? @relation(fields: [kitnetId], references: [id], onDelete: SetNull)
+  kitnet Kitnet? @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 
   ocorrencias Ocorrencia[]
 
