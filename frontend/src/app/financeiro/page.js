@@ -3,6 +3,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -67,6 +68,29 @@ export default function FinanceiroPage() {
   const [dataDe, setDataDe] = useState("");
 
   const [dataAte, setDataAte] = useState("");
+
+  const [statusFiltro, setStatusFiltro] = useState("");
+
+  // Chegou aqui vindo do VIME Insights (ex.: "12 cobranças atrasadas"
+  // -> clica -> abre direto filtrado)? Lê os parâmetros da URL uma vez,
+  // na entrada, e já pré-aplica aba/status/período -- sem isso o clique
+  // no indicador levaria só até a tela, sem o filtro de verdade.
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+
+    const aba = searchParams.get("aba");
+    const status = searchParams.get("status");
+    const de = searchParams.get("de");
+    const ate = searchParams.get("ate");
+
+    if (aba) setAbaSelecionada(aba);
+    if (status) setStatusFiltro(status);
+    if (de) setDataDe(de);
+    if (ate) setDataAte(ate);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const carregar = useCallback(async () => {
 
@@ -267,7 +291,7 @@ export default function FinanceiroPage() {
     try {
 
       await ReceitaService.atualizar(id, {
-        status: "PAGO",
+        status: "PAGA",
         dataPagamento: new Date().toISOString(),
       });
 
@@ -338,6 +362,8 @@ export default function FinanceiroPage() {
       item.contrato?.unidadeId !== residenciaSelecionada
     )
       return false;
+
+    if (statusFiltro && item.status !== statusFiltro) return false;
 
     if (!dentroDoIntervalo(item.vencimento)) return false;
 
@@ -487,6 +513,23 @@ export default function FinanceiroPage() {
             </button>
           )}
 
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+            Status
+          </label>
+          <select
+            value={statusFiltro}
+            onChange={(e) => setStatusFiltro(e.target.value)}
+            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="" className="bg-[#1b2430]">Todos</option>
+            <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
+            <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
+            <option value="PAGA" className="bg-[#1b2430]">Paga</option>
+            <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
+          </select>
         </div>
 
         <div className="flex items-center gap-2">

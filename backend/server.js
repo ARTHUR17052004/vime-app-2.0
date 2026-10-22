@@ -43,6 +43,7 @@ const campoObrigatorioRoutes = require("./src/routes/campoObrigatorioRoutes");
 const signatarioFixoRoutes = require("./src/routes/signatarioFixoRoutes");
 const pushRoutes = require("./src/routes/pushRoutes");
 const relatorioRoutes = require("./src/routes/relatorioRoutes");
+const insightsRoutes = require("./src/routes/insightsRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -139,6 +140,7 @@ app.use("/modelos-documento", modeloDocumentoRoutes);
 app.use("/campos-obrigatorios", campoObrigatorioRoutes);
 app.use("/signatarios-fixos", signatarioFixoRoutes);
 app.use("/relatorios", relatorioRoutes);
+app.use("/insights", insightsRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({

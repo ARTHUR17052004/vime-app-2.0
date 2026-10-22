@@ -16,6 +16,7 @@ import {
   Settings,
   BadgeDollarSign,
   LifeBuoy,
+  Sparkles,
 } from "lucide-react";
 
 // `permissao` é a chave conferida contra usuario.permissoes (ver
@@ -31,6 +32,13 @@ const menuConfig = [
         href: "/",
         icon: LayoutDashboard,
         permissao: "dashboard.visualizar",
+      },
+      {
+        label: "VIME Insights",
+        href: "/insights",
+        icon: Sparkles,
+        badge: "Novo",
+        permissao: "insights.visualizar",
       },
     ],
   },

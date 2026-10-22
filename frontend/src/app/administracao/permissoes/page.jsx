@@ -45,6 +45,13 @@ const CATALOGO = [
     acoes: ["visualizar", "indicadores", "financeiro", "ocupacao", "atividades", "alertas", "acoesRapidas", "statusSistema"],
   },
   {
+    // Resumo inteligente de todo o sistema (ver /insights) -- só mostra
+    // o que o perfil já pode ver nas telas de origem, nunca mais que isso.
+    modulo: "VIME Insights",
+    chave: "insights",
+    acoes: ["visualizar"],
+  },
+  {
     modulo: "Locadores",
     chave: "locadores",
     acoes: ["visualizar", "criar", "editar", "excluir"],
