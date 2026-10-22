@@ -2,7 +2,8 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -34,6 +35,17 @@ import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
 
 export default function ContratosPage() {
+  return (
+    <Suspense fallback={null}>
+      <ContratosPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pra pré-aplicar o filtro que vem do VIME
+// Insights) só funciona dentro de um Suspense -- sem isso o build de
+// produção do Next recusa gerar a página.
+function ContratosPageConteudo() {
 
   const podeVisualizar = usePermissao("contratos.visualizar");
   const podeCriar = usePermissao("contratos.criar");
@@ -46,6 +58,18 @@ export default function ContratosPage() {
 
   const [filtroSelecionado, setFiltroSelecionado] =
     useState("Todos");
+
+  // Chegou aqui vindo do VIME Insights (ex.: "contratos vigentes" ->
+  // clica -> abre já filtrado)? Lê o status da URL uma vez, na entrada.
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+
+    const status = searchParams.get("status");
+    if (status) setFiltroSelecionado(status);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");

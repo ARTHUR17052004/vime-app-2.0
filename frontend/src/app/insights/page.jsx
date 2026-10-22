@@ -22,6 +22,9 @@ import {
   Home,
   PieChart,
   FileWarning,
+  FileCheck2,
+  FileClock,
+  Archive,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -46,6 +49,10 @@ const ICONES = {
   kitnets_vazias: Home,
   taxa_ocupacao: PieChart,
   imoveis_incompletos: FileWarning,
+  contratos_vigentes: FileCheck2,
+  contratos_vencendo: FileClock,
+  contratos_pendentes: FileClock,
+  contratos_encerrados: Archive,
 };
 
 function formatarDataCurta(iso) {
@@ -265,6 +272,9 @@ export default function InsightsPage() {
   const [resumoImoveisDados, setResumoImoveisDados] = useState(null);
   const [erroImoveis, setErroImoveis] = useState("");
 
+  const [resumoContratosDados, setResumoContratosDados] = useState(null);
+  const [erroContratos, setErroContratos] = useState("");
+
   // 0 = mês atual (o backend decide sozinho). Trocar de mês manda
   // inicio/fim explícitos -- sempre o 1º e o último dia do mês escolhido.
   const [mesOffset, setMesOffset] = useState(0);
@@ -286,6 +296,7 @@ export default function InsightsPage() {
   // Começa fechado -- tudo na tela abre só quando o usuário pedir.
   const [financeiroAberto, setFinanceiroAberto] = useState(false);
   const [imoveisAberto, setImoveisAberto] = useState(false);
+  const [contratosAberto, setContratosAberto] = useState(false);
 
   const carregar = useCallback(async () => {
 
@@ -306,12 +317,16 @@ export default function InsightsPage() {
         params = { inicio: paraISO(inicio), fim: paraISO(fim) };
       }
 
-      const [respostaFinanceiro, respostaImoveis] = await Promise.all([
+      const [respostaFinanceiro, respostaImoveis, respostaContratos] = await Promise.all([
         InsightsService.financeiro(params),
         InsightsService.imoveis().catch((err) => {
-          // Imóveis não pode travar a tela inteira se falhar sozinho --
-          // guarda o erro dele à parte e segue com o Financeiro normal.
+          // Cada módulo falha sozinho sem travar os outros -- guarda o
+          // erro à parte e segue com o resto normalmente.
           setErroImoveis(err.message || "Não foi possível carregar Imóveis e Kitnets.");
+          return null;
+        }),
+        InsightsService.contratos().catch((err) => {
+          setErroContratos(err.message || "Não foi possível carregar Contratos.");
           return null;
         }),
       ]);
@@ -321,6 +336,11 @@ export default function InsightsPage() {
       if (respostaImoveis) {
         setErroImoveis("");
         setResumoImoveisDados(respostaImoveis.data || respostaImoveis);
+      }
+
+      if (respostaContratos) {
+        setErroContratos("");
+        setResumoContratosDados(respostaContratos.data || respostaContratos);
       }
 
     } catch (err) {
@@ -369,6 +389,18 @@ export default function InsightsPage() {
       ? "Calculando..."
       : taxaOcupacao && kitnetsVaziasInd
         ? `${taxaOcupacao.valor}% ocupado -- ${kitnetsVaziasInd.valor} kitnet(s) disponível(is)`
+        : "Toque para ver os indicadores.";
+
+  const indicadoresContratos = resumoContratosDados?.indicadores || [];
+  const contratosVigentesInd = indicadoresContratos.find((i) => i.chave === "contratos_vigentes");
+  const contratosVencendoInd = indicadoresContratos.find((i) => i.chave === "contratos_vencendo");
+
+  const resumoContratosTexto = erroContratos
+    ? "Não foi possível carregar."
+    : carregando && indicadoresContratos.length === 0
+      ? "Calculando..."
+      : contratosVigentesInd && contratosVencendoInd
+        ? `${contratosVigentesInd.valor} vigente(s) -- ${contratosVencendoInd.valor} vencendo em breve`
         : "Toque para ver os indicadores.";
 
   return (
@@ -601,9 +633,39 @@ export default function InsightsPage() {
 
                 <LinhaModulo
                   titulo="Contratos"
-                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
+                  resumo={resumoContratosTexto}
                   icone={FileText}
-                />
+                  expansivel
+                  aberto={contratosAberto}
+                  onToggle={() => setContratosAberto((v) => !v)}
+                >
+
+                  {erroContratos && (
+                    <div className="px-6 pb-4 pt-1">
+                      <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                        <span className="text-xs text-red-300">{erroContratos}</span>
+                        <button
+                          onClick={carregar}
+                          className="text-xs font-semibold text-red-200 hover:text-white underline shrink-0"
+                        >
+                          Tentar novamente
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {indicadoresContratos.map((ind) => (
+                    <LinhaIndicador
+                      key={ind.chave}
+                      indicador={ind}
+                      expandido={expandidos.has(ind.chave)}
+                      onToggleInfo={toggleInfo}
+                      carregando={carregando}
+                      onClick={() => router.push(construirUrl(ind.navegacao))}
+                    />
+                  ))}
+
+                </LinhaModulo>
 
                 <LinhaModulo
                   titulo="Solicitações e Vistorias"

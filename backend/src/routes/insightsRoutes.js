@@ -11,5 +11,6 @@ router.use(authMiddleware);
 
 router.get("/financeiro", permissaoMiddleware("insights.visualizar"), insightsController.financeiro);
 router.get("/imoveis", permissaoMiddleware("insights.visualizar"), insightsController.imoveis);
+router.get("/contratos", permissaoMiddleware("insights.visualizar"), insightsController.contratos);
 
 module.exports = router;

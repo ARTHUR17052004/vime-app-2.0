@@ -1,5 +1,5 @@
 const prisma = require("../config/prisma");
-const { filtroReceita, filtroKitnet, filtroUnidade } = require("../utils/escopoLocador");
+const { filtroReceita, filtroKitnet, filtroUnidade, filtroContrato } = require("../utils/escopoLocador");
 const campoObrigatorioService = require("./campoObrigatorioService");
 
 /*
@@ -381,4 +381,91 @@ const resumoImoveis = async (usuario) => {
 
 };
 
-module.exports = { resumoFinanceiro, resumoImoveis };
+// Mesmo prazo que contratoService.js (DIAS_ALERTA_VENCIMENTO) já usa
+// pra avisar de contrato vencendo -- reaproveitado aqui de propósito,
+// não é um número novo escolhido pelo Insights.
+const DIAS_CONTRATO_VENCENDO = 10;
+
+const resumoContratos = async (usuario) => {
+
+  const escopo = filtroContrato(usuario);
+
+  const hoje = new Date();
+  const emDiasVencendo = new Date(hoje.getTime() + DIAS_CONTRATO_VENCENDO * 24 * 60 * 60 * 1000);
+
+  const [vigentes, vencendo, pendentes, encerrados] = await Promise.all([
+
+    prisma.contrato.count({ where: { ...escopo, status: "ATIVO" } }),
+
+    // Mesma regra de contratoService.notificarSeVencimentoProximo:
+    // ATIVO com dataFim dentro dos próximos 10 dias.
+    prisma.contrato.count({
+      where: { ...escopo, status: "ATIVO", dataFim: { not: null, gte: hoje, lte: emDiasVencendo } },
+    }),
+
+    // PENDENTE = aguardando assinatura (enviado pra Clicksign ou nem
+    // isso ainda) -- é a "pendência" real do contrato, não um estado de
+    // erro.
+    prisma.contrato.count({ where: { ...escopo, status: "PENDENTE" } }),
+
+    prisma.contrato.count({ where: { ...escopo, status: "ENCERRADO" } }),
+
+  ]);
+
+  return {
+
+    geradoEm: new Date().toISOString(),
+
+    indicadores: [
+
+      {
+        chave: "contratos_vigentes",
+        rotulo: "Contratos vigentes",
+        valor: vigentes,
+        formato: "numero",
+        quantidade: vigentes,
+        escopo: "atual",
+        criterio: "Contratos com status \"Ativo\" neste momento.",
+        navegacao: { href: "/contratos", query: { status: "ATIVO" } },
+      },
+
+      {
+        chave: "contratos_vencendo",
+        rotulo: `Vencendo em até ${DIAS_CONTRATO_VENCENDO} dias`,
+        valor: vencendo,
+        formato: "numero",
+        quantidade: vencendo,
+        escopo: "atual",
+        criterio: `Contratos "Ativo" cujo fim de vigência cai nos próximos ${DIAS_CONTRATO_VENCENDO} dias -- mesmo prazo que já dispara o aviso de vencimento próximo em Contratos.`,
+        navegacao: { href: "/contratos", query: { status: "ATIVO" } },
+      },
+
+      {
+        chave: "contratos_pendentes",
+        rotulo: "Aguardando assinatura",
+        valor: pendentes,
+        formato: "numero",
+        quantidade: pendentes,
+        escopo: "atual",
+        criterio: "Contratos com status \"Pendente\" -- ainda não foram assinados (enviados ou não pra Clicksign).",
+        navegacao: { href: "/contratos", query: { status: "PENDENTE" } },
+      },
+
+      {
+        chave: "contratos_encerrados",
+        rotulo: "Contratos encerrados",
+        valor: encerrados,
+        formato: "numero",
+        quantidade: encerrados,
+        escopo: "atual",
+        criterio: "Contratos com status \"Encerrado\".",
+        navegacao: { href: "/contratos", query: { status: "ENCERRADO" } },
+      },
+
+    ],
+
+  };
+
+};
+
+module.exports = { resumoFinanceiro, resumoImoveis, resumoContratos };
