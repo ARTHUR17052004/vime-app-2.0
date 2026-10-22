@@ -52,6 +52,14 @@ const CATALOGO = [
     acoes: ["visualizar"],
   },
   {
+    // SABADO é a IA que explica os números do Insights -- permissão
+    // separada da de "insights.visualizar" porque cada chamada tem custo
+    // (API de IA), então dá pra controlar quem pode acionar isso.
+    modulo: "SABADO (IA)",
+    chave: "sabado",
+    acoes: ["usar"],
+  },
+  {
     modulo: "Locadores",
     chave: "locadores",
     acoes: ["visualizar", "criar", "editar", "excluir"],

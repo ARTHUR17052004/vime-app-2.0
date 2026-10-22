@@ -39,6 +39,7 @@ import PageContainer from "../components/ui/PageContainer";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { InsightsService } from "@/services/insights.service";
+import { SabadoService } from "@/services/sabado.service";
 import { usePermissao } from "../../hooks/usePermissao";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -273,8 +274,13 @@ function LinhaModulo({ titulo, resumo, icone: Icone, expansivel = false, aberto 
 export default function InsightsPage() {
 
   const podeVisualizar = usePermissao("insights.visualizar");
+  const podeUsarSabado = usePermissao("sabado.usar");
 
   const router = useRouter();
+
+  const [sabadoTexto, setSabadoTexto] = useState("");
+  const [sabadoCarregando, setSabadoCarregando] = useState(false);
+  const [sabadoErro, setSabadoErro] = useState("");
 
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -305,6 +311,39 @@ export default function InsightsPage() {
       else novo.add(chave);
       return novo;
     });
+  };
+
+  // Gerado só quando o usuário pede (botão) -- cada chamada custa uma
+  // requisição de IA de verdade, então não dispara sozinho ao abrir a
+  // tela nem ao trocar de período.
+  const gerarResumoSabado = async () => {
+
+    try {
+
+      setSabadoCarregando(true);
+      setSabadoErro("");
+
+      let params = {};
+
+      if (mesOffset !== 0) {
+        const base = new Date();
+        base.setDate(1);
+        base.setMonth(base.getMonth() + mesOffset);
+        const inicio = new Date(base.getFullYear(), base.getMonth(), 1);
+        const fim = new Date(base.getFullYear(), base.getMonth() + 1, 0);
+        const paraISO = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        params = { inicio: paraISO(inicio), fim: paraISO(fim) };
+      }
+
+      const resposta = await SabadoService.resumoExecutivo(params);
+      setSabadoTexto(resposta.data.texto);
+
+    } catch (erro) {
+      setSabadoErro(erro.message || "Não foi possível gerar o resumo agora.");
+    } finally {
+      setSabadoCarregando(false);
+    }
+
   };
 
   // Começa fechado -- tudo na tela abre só quando o usuário pedir.
@@ -567,9 +606,37 @@ export default function InsightsPage() {
             <div className="mt-4">
               <Cartao
                 icone={MessagesSquare}
-                titulo="Resumo executivo e Pergunte ao VIME"
-                subtitulo="Principais acontecimentos, pendências e campo de perguntas -- chega quando a IA (SABADO) entrar numa próxima fase. Por enquanto, os números abaixo já são reais."
-              />
+                titulo="Resumo executivo (SABADO)"
+                subtitulo={
+                  podeUsarSabado
+                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. \"Pergunte ao VIME\" chega numa próxima fase."
+                    : "Você não tem permissão para gerar o resumo com IA."
+                }
+                acao={
+                  podeUsarSabado && (
+                    <button
+                      onClick={gerarResumoSabado}
+                      disabled={sabadoCarregando}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
+                    >
+                      <Sparkles size={14} />
+                      {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
+                    </button>
+                  )
+                }
+              >
+                {podeUsarSabado && (sabadoTexto || sabadoErro) && (
+                  <div className="px-5 sm:px-6 pb-4 pt-0">
+                    {sabadoErro ? (
+                      <p className="text-xs text-red-400">{sabadoErro}</p>
+                    ) : (
+                      <p className="text-sm text-[var(--text)] whitespace-pre-line leading-relaxed">
+                        {sabadoTexto}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </Cartao>
             </div>
           </FadeIn>
 

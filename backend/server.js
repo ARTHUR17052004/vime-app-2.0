@@ -44,6 +44,7 @@ const signatarioFixoRoutes = require("./src/routes/signatarioFixoRoutes");
 const pushRoutes = require("./src/routes/pushRoutes");
 const relatorioRoutes = require("./src/routes/relatorioRoutes");
 const insightsRoutes = require("./src/routes/insightsRoutes");
+const sabadoRoutes = require("./src/routes/sabadoRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -141,6 +142,7 @@ app.use("/campos-obrigatorios", campoObrigatorioRoutes);
 app.use("/signatarios-fixos", signatarioFixoRoutes);
 app.use("/relatorios", relatorioRoutes);
 app.use("/insights", insightsRoutes);
+app.use("/sabado", sabadoRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
