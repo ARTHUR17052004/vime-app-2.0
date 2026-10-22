@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 
 import {
   House,
@@ -31,6 +32,17 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import { usePermissao } from "../../hooks/usePermissao";
 
 export default function KitnetsPage() {
+  return (
+    <Suspense fallback={null}>
+      <KitnetsPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pra pré-aplicar o filtro que vem do VIME
+// Insights) só funciona dentro de um Suspense -- sem isso o build de
+// produção do Next recusa gerar a página.
+function KitnetsPageConteudo() {
 
   const podeVisualizar = usePermissao("kitnets.visualizar");
   const podeCriar = usePermissao("kitnets.criar");
@@ -48,6 +60,20 @@ export default function KitnetsPage() {
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
   const [ordenacao, setOrdenacao] = useState("numero-asc");
+
+  const [statusFiltro, setStatusFiltro] = useState("");
+
+  // Chegou aqui vindo do VIME Insights (ex.: "kitnets ocupadas" -> clica
+  // -> abre já filtrado)? Lê o status da URL uma vez, na entrada.
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+
+    const status = searchParams.get("status");
+    if (status) setStatusFiltro(status);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* ==========================================
      CARREGAR DADOS
@@ -192,11 +218,9 @@ export default function KitnetsPage() {
     "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
   };
 
-  const kitnetsFiltradas = (
-    residenciaSelecionada
-      ? kitnets.filter((k) => k.unidadeId === residenciaSelecionada)
-      : kitnets
-  )
+  const kitnetsFiltradas = kitnets
+    .filter((k) => !residenciaSelecionada || k.unidadeId === residenciaSelecionada)
+    .filter((k) => !statusFiltro || k.status === statusFiltro)
     .slice()
     .sort(COMPARADORES_KITNET[ordenacao] || COMPARADORES_KITNET["numero-asc"]);
 
@@ -329,6 +353,22 @@ export default function KitnetsPage() {
                   value={residenciaSelecionada}
                   onChange={setResidenciaSelecionada}
                 />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                  Status
+                </label>
+                <select
+                  value={statusFiltro}
+                  onChange={(e) => setStatusFiltro(e.target.value)}
+                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                >
+                  <option value="" className="bg-[#1b2430]">Todos</option>
+                  <option value="DISPONIVEL" className="bg-[#1b2430]">Disponível</option>
+                  <option value="OCUPADA" className="bg-[#1b2430]">Ocupada</option>
+                  <option value="MANUTENCAO" className="bg-[#1b2430]">Manutenção</option>
+                </select>
               </div>
 
               <div className="flex items-center gap-2">

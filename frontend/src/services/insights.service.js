@@ -14,4 +14,8 @@ export const InsightsService = {
 
   },
 
+  imoveis() {
+    return api("/insights/imoveis");
+  },
+
 };

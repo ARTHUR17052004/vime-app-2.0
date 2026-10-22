@@ -19,6 +19,9 @@ import {
   ClipboardList,
   Info,
   TriangleAlert,
+  Home,
+  PieChart,
+  FileWarning,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -37,12 +40,25 @@ const ICONES = {
   cobrancas_vencidas: AlertTriangle,
   cobrancas_a_vencer: Clock,
   pagamentos_pendentes: Wallet,
+  residencias_total: Building2,
+  kitnets_total: Home,
+  kitnets_ocupadas: Home,
+  kitnets_vazias: Home,
+  taxa_ocupacao: PieChart,
+  imoveis_incompletos: FileWarning,
 };
 
 function formatarDataCurta(iso) {
   if (!iso) return "";
   const [ano, mes, dia] = iso.split("-");
   return `${dia}/${mes}/${ano}`;
+}
+
+function formatarValor(indicador) {
+  if (!indicador) return "";
+  if (indicador.formato === "moeda") return formatCurrency(indicador.valor);
+  if (indicador.formato === "percentual") return `${indicador.valor}%`;
+  return String(indicador.valor);
 }
 
 function construirUrl(navegacao) {
@@ -152,7 +168,7 @@ function LinhaIndicador({ indicador, expandido, onToggleInfo, onClick, carregand
               {indicador.rotulo}
             </p>
             <p className="text-xl font-black text-[var(--text)] mt-0.5">
-              {indicador.formato === "moeda" ? formatCurrency(indicador.valor) : indicador.valor}
+              {formatarValor(indicador)}
             </p>
             <p className="text-xs text-[var(--text-faint)] mt-0.5">
               {contexto}
@@ -246,6 +262,9 @@ export default function InsightsPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
+  const [resumoImoveisDados, setResumoImoveisDados] = useState(null);
+  const [erroImoveis, setErroImoveis] = useState("");
+
   // 0 = mês atual (o backend decide sozinho). Trocar de mês manda
   // inicio/fim explícitos -- sempre o 1º e o último dia do mês escolhido.
   const [mesOffset, setMesOffset] = useState(0);
@@ -266,6 +285,7 @@ export default function InsightsPage() {
 
   // Começa fechado -- tudo na tela abre só quando o usuário pedir.
   const [financeiroAberto, setFinanceiroAberto] = useState(false);
+  const [imoveisAberto, setImoveisAberto] = useState(false);
 
   const carregar = useCallback(async () => {
 
@@ -286,9 +306,22 @@ export default function InsightsPage() {
         params = { inicio: paraISO(inicio), fim: paraISO(fim) };
       }
 
-      const resposta = await InsightsService.financeiro(params);
+      const [respostaFinanceiro, respostaImoveis] = await Promise.all([
+        InsightsService.financeiro(params),
+        InsightsService.imoveis().catch((err) => {
+          // Imóveis não pode travar a tela inteira se falhar sozinho --
+          // guarda o erro dele à parte e segue com o Financeiro normal.
+          setErroImoveis(err.message || "Não foi possível carregar Imóveis e Kitnets.");
+          return null;
+        }),
+      ]);
 
-      setResumo(resposta.data || resposta);
+      setResumo(respostaFinanceiro.data || respostaFinanceiro);
+
+      if (respostaImoveis) {
+        setErroImoveis("");
+        setResumoImoveisDados(respostaImoveis.data || respostaImoveis);
+      }
 
     } catch (err) {
 
@@ -324,6 +357,18 @@ export default function InsightsPage() {
       ? "Calculando..."
       : recebido && vencidas
         ? `Recebido ${formatCurrency(recebido.valor)} no período -- ${formatCurrency(vencidas.valor)} vencido agora`
+        : "Toque para ver os indicadores.";
+
+  const indicadoresImoveis = resumoImoveisDados?.indicadores || [];
+  const taxaOcupacao = indicadoresImoveis.find((i) => i.chave === "taxa_ocupacao");
+  const kitnetsVaziasInd = indicadoresImoveis.find((i) => i.chave === "kitnets_vazias");
+
+  const resumoImoveisTexto = erroImoveis
+    ? "Não foi possível carregar."
+    : carregando && indicadoresImoveis.length === 0
+      ? "Calculando..."
+      : taxaOcupacao && kitnetsVaziasInd
+        ? `${taxaOcupacao.valor}% ocupado -- ${kitnetsVaziasInd.valor} kitnet(s) disponível(is)`
         : "Toque para ver os indicadores.";
 
   return (
@@ -520,9 +565,39 @@ export default function InsightsPage() {
 
                 <LinhaModulo
                   titulo="Imóveis e Kitnets"
-                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
+                  resumo={resumoImoveisTexto}
                   icone={Building2}
-                />
+                  expansivel
+                  aberto={imoveisAberto}
+                  onToggle={() => setImoveisAberto((v) => !v)}
+                >
+
+                  {erroImoveis && (
+                    <div className="px-6 pb-4 pt-1">
+                      <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                        <span className="text-xs text-red-300">{erroImoveis}</span>
+                        <button
+                          onClick={carregar}
+                          className="text-xs font-semibold text-red-200 hover:text-white underline shrink-0"
+                        >
+                          Tentar novamente
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {indicadoresImoveis.map((ind) => (
+                    <LinhaIndicador
+                      key={ind.chave}
+                      indicador={ind}
+                      expandido={expandidos.has(ind.chave)}
+                      onToggleInfo={toggleInfo}
+                      carregando={carregando}
+                      onClick={() => router.push(construirUrl(ind.navegacao))}
+                    />
+                  ))}
+
+                </LinhaModulo>
 
                 <LinhaModulo
                   titulo="Contratos"

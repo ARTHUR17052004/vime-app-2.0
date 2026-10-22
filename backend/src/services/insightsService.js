@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
-const { filtroReceita } = require("../utils/escopoLocador");
+const { filtroReceita, filtroKitnet, filtroUnidade } = require("../utils/escopoLocador");
+const campoObrigatorioService = require("./campoObrigatorioService");
 
 /*
   VIME Insights -- Fase 1/2 (sem IA ainda): números corretos, com
@@ -220,4 +221,164 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
 
 };
 
-module.exports = { resumoFinanceiro };
+// Campo -> { tipo, nullable }, direto do schema.prisma: o Prisma rejeita
+// comparar `null` com um campo NOT NULL (vira "Argument X is missing"),
+// então um campo sem `?` no schema nunca entra na checagem de null --
+// só os que realmente podem ficar vazios no banco. Campo numérico
+// obrigatório sem ser nullable (ex.: Kitnet.aluguel) não tem como
+// detectar "faltando" por aqui -- o próprio banco já garante que tem
+// algum valor -- então fica de fora da checagem.
+const CAMPOS_KITNET = {
+  aluguel: { tipo: "numero", nullable: false },
+  metragem: { tipo: "numero", nullable: false },
+  numero: { tipo: "texto", nullable: false },
+  nome: { tipo: "texto", nullable: true },
+  status: { tipo: "texto", nullable: false },
+};
+
+const CAMPOS_RESIDENCIA = {
+  vencimento: { tipo: "numero", nullable: true },
+  nome: { tipo: "texto", nullable: false },
+  cidade: { tipo: "texto", nullable: false },
+  uf: { tipo: "texto", nullable: false },
+  kitnets: { tipo: "numero", nullable: false },
+  status: { tipo: "texto", nullable: false },
+  cep: { tipo: "texto", nullable: true },
+  logradouro: { tipo: "texto", nullable: true },
+  bairro: { tipo: "texto", nullable: true },
+  locadorId: { tipo: "texto", nullable: true },
+  aluguel: { tipo: "numero", nullable: true },
+};
+
+const DEFINICOES_CAMPO = { kitnet: CAMPOS_KITNET, residencia: CAMPOS_RESIDENCIA };
+
+// Devolve a condição pra esse campo, ou null se não dá pra checar
+// (numérico não-nulo -- nunca "vazio" do jeito que o banco permite).
+function condicaoVazio(campo, def) {
+  if (!def) return { [campo]: "" }; // campo desconhecido: assume texto, melhor esforço
+  if (def.tipo === "numero") return def.nullable ? { [campo]: null } : null;
+  return def.nullable ? { OR: [{ [campo]: null }, { [campo]: "" }] } : { [campo]: "" };
+}
+
+// Conta quantos registros estão faltando QUALQUER campo que o admin
+// marcou como obrigatório pro módulo (Administração > Campos
+// Obrigatórios -- mesma config que já trava o cadastro/edição). Sem
+// nenhum campo configurado (ou nenhum checável), não há "incompleto"
+// possível: devolve 0.
+async function contarIncompletos(prismaModel, modulo, escopo) {
+
+  const configurados = await campoObrigatorioService.listarPorModulo(modulo);
+  const obrigatorios = configurados.filter((c) => c.obrigatorio).map((c) => c.campo);
+
+  const condicoes = obrigatorios
+    .map((campo) => condicaoVazio(campo, DEFINICOES_CAMPO[modulo]?.[campo]))
+    .filter(Boolean);
+
+  if (condicoes.length === 0) return 0;
+
+  return prismaModel.count({ where: { ...escopo, OR: condicoes } });
+
+}
+
+const resumoImoveis = async (usuario) => {
+
+  const escopoKitnet = filtroKitnet(usuario);
+  const escopoUnidade = filtroUnidade(usuario);
+
+  const [
+    totalUnidades,
+    totalKitnets,
+    kitnetsOcupadas,
+    kitnetsVazias,
+    kitnetsIncompletas,
+    unidadesIncompletas,
+  ] = await Promise.all([
+    prisma.unidade.count({ where: escopoUnidade }),
+    prisma.kitnet.count({ where: escopoKitnet }),
+    prisma.kitnet.count({ where: { ...escopoKitnet, status: "OCUPADA" } }),
+    prisma.kitnet.count({ where: { ...escopoKitnet, status: "DISPONIVEL" } }),
+    contarIncompletos(prisma.kitnet, "kitnet", escopoKitnet),
+    contarIncompletos(prisma.unidade, "residencia", escopoUnidade),
+  ]);
+
+  const percentualOcupacao = totalKitnets > 0 ? Math.round((kitnetsOcupadas / totalKitnets) * 100) : 0;
+
+  return {
+
+    geradoEm: new Date().toISOString(),
+
+    indicadores: [
+
+      {
+        chave: "residencias_total",
+        rotulo: "Residências cadastradas",
+        valor: totalUnidades,
+        formato: "numero",
+        quantidade: totalUnidades,
+        escopo: "atual",
+        criterio: "Total de residências (Unidades) cadastradas no sistema.",
+        navegacao: { href: "/unidades", query: {} },
+      },
+
+      {
+        chave: "kitnets_total",
+        rotulo: "Kitnets cadastradas",
+        valor: totalKitnets,
+        formato: "numero",
+        quantidade: totalKitnets,
+        escopo: "atual",
+        criterio: "Total de kitnets cadastradas, de todas as residências.",
+        navegacao: { href: "/kitnets", query: {} },
+      },
+
+      {
+        chave: "kitnets_ocupadas",
+        rotulo: "Kitnets ocupadas",
+        valor: kitnetsOcupadas,
+        formato: "numero",
+        quantidade: kitnetsOcupadas,
+        escopo: "atual",
+        criterio: "Kitnets com status \"Ocupada\" -- mesma definição que a tela de Kitnets já usa.",
+        navegacao: { href: "/kitnets", query: { status: "OCUPADA" } },
+      },
+
+      {
+        chave: "kitnets_vazias",
+        rotulo: "Kitnets disponíveis",
+        valor: kitnetsVazias,
+        formato: "numero",
+        quantidade: kitnetsVazias,
+        escopo: "atual",
+        criterio: "Kitnets com status \"Disponível\" -- prontas pra locação, mesma definição do alerta de \"kitnet vazia\".",
+        navegacao: { href: "/kitnets", query: { status: "DISPONIVEL" } },
+      },
+
+      {
+        chave: "taxa_ocupacao",
+        rotulo: "Taxa de ocupação",
+        valor: percentualOcupacao,
+        formato: "percentual",
+        quantidade: totalKitnets,
+        escopo: "atual",
+        criterio: "Kitnets ocupadas dividido pelo total de kitnets, em porcentagem.",
+        navegacao: { href: "/kitnets", query: {} },
+      },
+
+      {
+        chave: "imoveis_incompletos",
+        rotulo: "Imóveis com dados incompletos",
+        valor: kitnetsIncompletas + unidadesIncompletas,
+        formato: "numero",
+        quantidade: kitnetsIncompletas + unidadesIncompletas,
+        escopo: "atual",
+        criterio: `Kitnets (${kitnetsIncompletas}) e residências (${unidadesIncompletas}) com algum campo em branco que o admin marcou como obrigatório em Administração > Campos Obrigatórios. Clicar leva pra Kitnets -- a lista não filtra só as incompletas ainda.`,
+        navegacao: { href: "/kitnets", query: {} },
+      },
+
+    ],
+
+  };
+
+};
+
+module.exports = { resumoFinanceiro, resumoImoveis };

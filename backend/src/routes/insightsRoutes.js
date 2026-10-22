@@ -10,5 +10,6 @@ const permissaoMiddleware = require("../middlewares/permissaoMiddleware");
 router.use(authMiddleware);
 
 router.get("/financeiro", permissaoMiddleware("insights.visualizar"), insightsController.financeiro);
+router.get("/imoveis", permissaoMiddleware("insights.visualizar"), insightsController.imoveis);
 
 module.exports = router;

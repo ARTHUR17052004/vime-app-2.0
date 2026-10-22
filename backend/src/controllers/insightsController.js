@@ -23,4 +23,24 @@ const financeiro = async (req, res) => {
   }
 };
 
-module.exports = { financeiro };
+const imoveis = async (req, res) => {
+  try {
+
+    const dados = await insightsService.resumoImoveis(req.usuario);
+
+    return res.status(200).json({
+      success: true,
+      data: dados,
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+module.exports = { financeiro, imoveis };
