@@ -142,6 +142,11 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         valor: valorRecebido,
         formato: "moeda",
         quantidade: recebidoPeriodo._count,
+        // "periodo": muda conforme o mês escolhido no navegador de
+        // período. "atual": é sempre uma foto de agora, não respeita o
+        // período selecionado -- o front precisa diferenciar na hora de
+        // mostrar, senão parece que o número "não bateu" com o mês.
+        escopo: "periodo",
         comparacao: {
           valorAnterior: valorRecebidoAnterior,
           variacaoPercentual,
@@ -158,6 +163,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         valor: previstoPeriodo._sum.valor || 0,
         formato: "moeda",
         quantidade: previstoPeriodo._count,
+        escopo: "periodo",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", de: dataISO(periodoInicio), ate: dataISO(periodoFim) },
@@ -170,6 +176,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         valor: vencidas._sum.valor || 0,
         formato: "moeda",
         quantidade: vencidas._count,
+        escopo: "atual",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "ATRASADA" },
@@ -182,6 +189,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         valor: aVencer._sum.valor || 0,
         formato: "moeda",
         quantidade: aVencer._count,
+        escopo: "atual",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "PENDENTE", de: dataISO(agora), ate: dataISO(limiteAVencer) },
@@ -194,6 +202,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         valor: pendentesTotal._sum.valor || 0,
         formato: "moeda",
         quantidade: pendentesTotal._count,
+        escopo: "atual",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "PENDENTE" },

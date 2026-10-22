@@ -169,10 +169,10 @@ export default function InsightsPage() {
 
                 <div className="flex items-center gap-2">
 
-                  <TrendingUp size={16} className="text-emerald-400" />
+                  <CalendarClock size={16} className="text-emerald-400" />
 
                   <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
-                    Financeiro
+                    Nesse período
                   </h2>
 
                   {resumo?.periodo && (
@@ -214,15 +214,19 @@ export default function InsightsPage() {
 
               </div>
 
+              <p className="mt-2 text-xs text-[var(--text-faint)]">
+                Esses dois cards mudam conforme o período acima -- os outros embaixo são uma foto de agora, não do mês selecionado.
+              </p>
+
             </PageSection>
 
           </FadeIn>
 
           <FadeIn delay={0.15}>
 
-            <PageSection spacing="xxl">
+            <PageSection spacing="lg">
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                 {carregando && indicadores.length === 0 && (
                   <p className="col-span-full text-center text-[var(--text-subtle)] py-10">
@@ -230,7 +234,7 @@ export default function InsightsPage() {
                   </p>
                 )}
 
-                {indicadores.map((ind) => {
+                {indicadores.filter((ind) => ind.escopo === "periodo").map((ind) => {
 
                   const Icone = ICONES[ind.chave] || TrendingUp;
 
@@ -248,6 +252,46 @@ export default function InsightsPage() {
                       title={ind.rotulo}
                       value={ind.formato === "moeda" ? formatCurrency(ind.valor) : ind.valor}
                       subtitle={subtitulo}
+                      icon={Icone}
+                      onClick={() => router.push(construirUrl(ind.navegacao))}
+                    />
+                  );
+
+                })}
+
+              </div>
+
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.18}>
+
+            <PageSection spacing="xxl">
+
+              <div className="flex items-center gap-2 mb-3">
+                <Clock size={16} className="text-emerald-400" />
+                <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
+                  Situação agora
+                </h2>
+                <span className="text-sm text-[var(--text-subtle)]">
+                  -- não muda com o período acima, é sempre o momento atual
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+
+                {indicadores.filter((ind) => ind.escopo === "atual").map((ind) => {
+
+                  const Icone = ICONES[ind.chave] || TrendingUp;
+
+                  return (
+                    <DashboardStatsCard
+                      key={ind.chave}
+                      compact
+                      title={ind.rotulo}
+                      value={ind.formato === "moeda" ? formatCurrency(ind.valor) : ind.valor}
+                      subtitle={`${ind.quantidade} registro(s)`}
                       icon={Icone}
                       onClick={() => router.push(construirUrl(ind.navegacao))}
                     />
