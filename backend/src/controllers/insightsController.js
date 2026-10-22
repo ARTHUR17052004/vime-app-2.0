@@ -63,4 +63,24 @@ const contratos = async (req, res) => {
   }
 };
 
-module.exports = { financeiro, imoveis, contratos };
+const solicitacoesVistorias = async (req, res) => {
+  try {
+
+    const dados = await insightsService.resumoSolicitacoesVistorias(req.usuario);
+
+    return res.status(200).json({
+      success: true,
+      data: dados,
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+
+  }
+};
+
+module.exports = { financeiro, imoveis, contratos, solicitacoesVistorias };

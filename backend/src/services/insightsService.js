@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
-const { filtroReceita, filtroKitnet, filtroUnidade, filtroContrato } = require("../utils/escopoLocador");
+const { filtroReceita, filtroKitnet, filtroUnidade, filtroContrato, filtroSolicitacao, filtroVistoria } = require("../utils/escopoLocador");
 const campoObrigatorioService = require("./campoObrigatorioService");
+const { MS_LIMITE } = require("../utils/prazoAlerta");
 
 /*
   VIME Insights -- Fase 1/2 (sem IA ainda): números corretos, com
@@ -468,4 +469,126 @@ const resumoContratos = async (usuario) => {
 
 };
 
-module.exports = { resumoFinanceiro, resumoImoveis, resumoContratos };
+// Mesmos status que verificarSolicitacoesAtrasadasJob.js considera
+// "encerrado" -- solicitação resolvida ou rejeitada não conta mais
+// como aberta.
+const STATUS_SOLICITACAO_ENCERRADOS = ["ATENDIDA", "REJEITADA"];
+
+const resumoSolicitacoesVistorias = async (usuario) => {
+
+  const escopoSolicitacao = filtroSolicitacao(usuario);
+  const escopoVistoria = filtroVistoria(usuario);
+
+  const agora = new Date();
+  const limiteAtraso = new Date(agora.getTime() - MS_LIMITE);
+
+  const [
+    solicitacoesAbertas,
+    solicitacoesAtrasadas,
+    vistoriasAgendadas,
+    vistoriasPendentes,
+    vistoriasAtrasadas,
+    ocorrenciasRegistradas,
+  ] = await Promise.all([
+
+    prisma.solicitacao.count({
+      where: { ...escopoSolicitacao, status: { notIn: STATUS_SOLICITACAO_ENCERRADOS } },
+    }),
+
+    // Mesma regra de verificarSolicitacoesAtrasadasJob.js: aberta E com
+    // prazo vencido há mais de 72h (tolerância padrão do sistema).
+    prisma.solicitacao.count({
+      where: {
+        ...escopoSolicitacao,
+        status: { notIn: STATUS_SOLICITACAO_ENCERRADOS },
+        prazo: { not: null, lte: limiteAtraso },
+      },
+    }),
+
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "PROGRAMADA" } }),
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "PENDENTE" } }),
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "ATRASADA" } }),
+
+    prisma.ocorrencia.count({ where: { vistoria: escopoVistoria } }),
+
+  ]);
+
+  return {
+
+    geradoEm: new Date().toISOString(),
+
+    indicadores: [
+
+      {
+        chave: "solicitacoes_abertas",
+        rotulo: "Solicitações abertas",
+        valor: solicitacoesAbertas,
+        formato: "numero",
+        quantidade: solicitacoesAbertas,
+        escopo: "atual",
+        criterio: "Solicitações com status diferente de \"Atendida\" ou \"Rejeitada\" -- mesma definição usada no Dashboard e no job de prazo vencido.",
+        navegacao: { href: "/solicitacoes", query: { aba: "abertas" } },
+      },
+
+      {
+        chave: "solicitacoes_atrasadas",
+        rotulo: "Solicitações atrasadas",
+        valor: solicitacoesAtrasadas,
+        formato: "numero",
+        quantidade: solicitacoesAtrasadas,
+        escopo: "atual",
+        criterio: "Solicitações abertas cujo prazo venceu há mais de 72h -- mesma tolerância que o alerta automático de prazo vencido já usa. A lista em Solicitações ainda não abre pré-filtrada por este número.",
+        navegacao: { href: "/solicitacoes", query: {} },
+      },
+
+      {
+        chave: "vistorias_agendadas",
+        rotulo: "Vistorias agendadas",
+        valor: vistoriasAgendadas,
+        formato: "numero",
+        quantidade: vistoriasAgendadas,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Programada\" -- prazo confortável, mais de 72h de folga.",
+        navegacao: { href: "/vistorias", query: { aba: "agendadas" } },
+      },
+
+      {
+        chave: "vistorias_pendentes",
+        rotulo: "Vistorias pendentes",
+        valor: vistoriasPendentes,
+        formato: "numero",
+        quantidade: vistoriasPendentes,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Pendente\" -- faltam 72h ou menos pro prazo.",
+        navegacao: { href: "/vistorias", query: { aba: "pendentes" } },
+      },
+
+      {
+        chave: "vistorias_atrasadas",
+        rotulo: "Vistorias atrasadas",
+        valor: vistoriasAtrasadas,
+        formato: "numero",
+        quantidade: vistoriasAtrasadas,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Atrasada\" -- o prazo já venceu sem resposta.",
+        navegacao: { href: "/vistorias", query: { aba: "atrasadas" } },
+      },
+
+      {
+        chave: "ocorrencias_registradas",
+        rotulo: "Ocorrências registradas",
+        valor: ocorrenciasRegistradas,
+        formato: "numero",
+        quantidade: ocorrenciasRegistradas,
+        escopo: "atual",
+        criterio: "Total de ocorrências (problemas/achados) anotadas em vistorias, de todas as datas.",
+        navegacao: { href: "/vistorias", query: {} },
+      },
+
+    ],
+
+  };
+
+};
+
+module.exports = { resumoFinanceiro, resumoImoveis, resumoContratos, resumoSolicitacoesVistorias };

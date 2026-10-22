@@ -2,7 +2,8 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -30,6 +31,17 @@ import SolicitacaoRelatorios from "../components/solicitacoes/SolicitacaoRelator
 import { usePermissao } from "../../hooks/usePermissao";
 
 export default function SolicitacoesPage() {
+  return (
+    <Suspense fallback={null}>
+      <SolicitacoesPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pra pré-aplicar a aba que vem do VIME
+// Insights) só funciona dentro de um Suspense -- sem isso o build de
+// produção do Next recusa gerar a página.
+function SolicitacoesPageConteudo() {
 
   const podeVisualizar = usePermissao("solicitacoes.visualizar");
   const podeCriar = usePermissao("solicitacoes.criar");
@@ -51,6 +63,16 @@ export default function SolicitacoesPage() {
 
   const [pesquisa, setPesquisa] =
     useState("");
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+
+    const aba = searchParams.get("aba");
+    if (aba) setAbaSelecionada(aba);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const carregar = useCallback(async () => {
 
@@ -201,6 +223,9 @@ export default function SolicitacoesPage() {
     }
 
     switch (abaSelecionada) {
+
+      case "abertas":
+        return !["ATENDIDA", "REJEITADA"].includes(item.status);
 
       case "solicitadas":
         return item.status === "SOLICITADA";

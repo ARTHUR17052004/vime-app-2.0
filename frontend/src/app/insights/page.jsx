@@ -25,6 +25,11 @@ import {
   FileCheck2,
   FileClock,
   Archive,
+  ClipboardCheck,
+  ClipboardX,
+  CalendarCheck,
+  ListChecks,
+  ShieldAlert,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -53,6 +58,12 @@ const ICONES = {
   contratos_vencendo: FileClock,
   contratos_pendentes: FileClock,
   contratos_encerrados: Archive,
+  solicitacoes_abertas: ClipboardCheck,
+  solicitacoes_atrasadas: ClipboardX,
+  vistorias_agendadas: CalendarCheck,
+  vistorias_pendentes: Clock,
+  vistorias_atrasadas: ShieldAlert,
+  ocorrencias_registradas: ListChecks,
 };
 
 function formatarDataCurta(iso) {
@@ -275,6 +286,9 @@ export default function InsightsPage() {
   const [resumoContratosDados, setResumoContratosDados] = useState(null);
   const [erroContratos, setErroContratos] = useState("");
 
+  const [resumoSolicVistDados, setResumoSolicVistDados] = useState(null);
+  const [erroSolicVist, setErroSolicVist] = useState("");
+
   // 0 = mês atual (o backend decide sozinho). Trocar de mês manda
   // inicio/fim explícitos -- sempre o 1º e o último dia do mês escolhido.
   const [mesOffset, setMesOffset] = useState(0);
@@ -297,6 +311,7 @@ export default function InsightsPage() {
   const [financeiroAberto, setFinanceiroAberto] = useState(false);
   const [imoveisAberto, setImoveisAberto] = useState(false);
   const [contratosAberto, setContratosAberto] = useState(false);
+  const [solicVistAberto, setSolicVistAberto] = useState(false);
 
   const carregar = useCallback(async () => {
 
@@ -317,7 +332,7 @@ export default function InsightsPage() {
         params = { inicio: paraISO(inicio), fim: paraISO(fim) };
       }
 
-      const [respostaFinanceiro, respostaImoveis, respostaContratos] = await Promise.all([
+      const [respostaFinanceiro, respostaImoveis, respostaContratos, respostaSolicVist] = await Promise.all([
         InsightsService.financeiro(params),
         InsightsService.imoveis().catch((err) => {
           // Cada módulo falha sozinho sem travar os outros -- guarda o
@@ -327,6 +342,10 @@ export default function InsightsPage() {
         }),
         InsightsService.contratos().catch((err) => {
           setErroContratos(err.message || "Não foi possível carregar Contratos.");
+          return null;
+        }),
+        InsightsService.solicitacoesVistorias().catch((err) => {
+          setErroSolicVist(err.message || "Não foi possível carregar Solicitações e Vistorias.");
           return null;
         }),
       ]);
@@ -341,6 +360,11 @@ export default function InsightsPage() {
       if (respostaContratos) {
         setErroContratos("");
         setResumoContratosDados(respostaContratos.data || respostaContratos);
+      }
+
+      if (respostaSolicVist) {
+        setErroSolicVist("");
+        setResumoSolicVistDados(respostaSolicVist.data || respostaSolicVist);
       }
 
     } catch (err) {
@@ -401,6 +425,18 @@ export default function InsightsPage() {
       ? "Calculando..."
       : contratosVigentesInd && contratosVencendoInd
         ? `${contratosVigentesInd.valor} vigente(s) -- ${contratosVencendoInd.valor} vencendo em breve`
+        : "Toque para ver os indicadores.";
+
+  const indicadoresSolicVist = resumoSolicVistDados?.indicadores || [];
+  const solicitacoesAbertasInd = indicadoresSolicVist.find((i) => i.chave === "solicitacoes_abertas");
+  const vistoriasAtrasadasInd = indicadoresSolicVist.find((i) => i.chave === "vistorias_atrasadas");
+
+  const resumoSolicVistTexto = erroSolicVist
+    ? "Não foi possível carregar."
+    : carregando && indicadoresSolicVist.length === 0
+      ? "Calculando..."
+      : solicitacoesAbertasInd && vistoriasAtrasadasInd
+        ? `${solicitacoesAbertasInd.valor} solicitação(ões) aberta(s) -- ${vistoriasAtrasadasInd.valor} vistoria(s) atrasada(s)`
         : "Toque para ver os indicadores.";
 
   return (
@@ -669,9 +705,39 @@ export default function InsightsPage() {
 
                 <LinhaModulo
                   titulo="Solicitações e Vistorias"
-                  resumo="Ainda não integrado ao VIME Insights -- chega numa próxima etapa."
+                  resumo={resumoSolicVistTexto}
                   icone={ClipboardList}
-                />
+                  expansivel
+                  aberto={solicVistAberto}
+                  onToggle={() => setSolicVistAberto((v) => !v)}
+                >
+
+                  {erroSolicVist && (
+                    <div className="px-6 pb-4 pt-1">
+                      <div className="flex items-center justify-between gap-3 flex-wrap rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                        <span className="text-xs text-red-300">{erroSolicVist}</span>
+                        <button
+                          onClick={carregar}
+                          className="text-xs font-semibold text-red-200 hover:text-white underline shrink-0"
+                        >
+                          Tentar novamente
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {indicadoresSolicVist.map((ind) => (
+                    <LinhaIndicador
+                      key={ind.chave}
+                      indicador={ind}
+                      expandido={expandidos.has(ind.chave)}
+                      onToggleInfo={toggleInfo}
+                      carregando={carregando}
+                      onClick={() => router.push(construirUrl(ind.navegacao))}
+                    />
+                  ))}
+
+                </LinhaModulo>
 
               </div>
 

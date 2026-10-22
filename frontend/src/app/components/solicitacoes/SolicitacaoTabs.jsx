@@ -10,6 +10,10 @@ export default function SolicitacaoTabs({
       nome: "Todas",
     },
     {
+      id: "abertas",
+      nome: "Abertas",
+    },
+    {
       id: "solicitadas",
       nome: "Solicitadas",
     },

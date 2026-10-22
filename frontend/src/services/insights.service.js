@@ -22,4 +22,8 @@ export const InsightsService = {
     return api("/insights/contratos");
   },
 
+  solicitacoesVistorias() {
+    return api("/insights/solicitacoes-vistorias");
+  },
+
 };

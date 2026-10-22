@@ -4,7 +4,8 @@
 
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -32,6 +33,17 @@ import { usePermissao } from "../../hooks/usePermissao";
 import { avancarUmaVez } from "../../utils/periodicidade";
 
 export default function VistoriasPage() {
+  return (
+    <Suspense fallback={null}>
+      <VistoriasPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pra pré-aplicar a aba que vem do VIME
+// Insights) só funciona dentro de um Suspense -- sem isso o build de
+// produção do Next recusa gerar a página.
+function VistoriasPageConteudo() {
 
   const podeVisualizar = usePermissao("vistorias.visualizar");
   const podeCriar = usePermissao("vistorias.criar");
@@ -50,6 +62,16 @@ export default function VistoriasPage() {
 
   const [search, setSearch] =
     useState("");
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+
+    const aba = searchParams.get("aba");
+    if (aba) setAbaSelecionada(aba);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [vistorias, setVistorias] =
     useState([]);
