@@ -147,6 +147,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         // período selecionado -- o front precisa diferenciar na hora de
         // mostrar, senão parece que o número "não bateu" com o mês.
         escopo: "periodo",
+        criterio: `Soma das receitas com status "Paga" cuja data de pagamento caiu entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}.`,
         comparacao: {
           valorAnterior: valorRecebidoAnterior,
           variacaoPercentual,
@@ -164,6 +165,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         formato: "moeda",
         quantidade: previstoPeriodo._count,
         escopo: "periodo",
+        criterio: `Soma de todas as receitas (pagas, pendentes ou atrasadas -- exceto canceladas) com vencimento entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}.`,
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", de: dataISO(periodoInicio), ate: dataISO(periodoFim) },
@@ -177,6 +179,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         formato: "moeda",
         quantidade: vencidas._count,
         escopo: "atual",
+        criterio: "Soma das receitas com status \"Atrasada\" neste momento -- mesma regra que já dispara os alertas do Dashboard e o job diário de vencimentos. Não depende do período escolhido acima.",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "ATRASADA" },
@@ -190,6 +193,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         formato: "moeda",
         quantidade: aVencer._count,
         escopo: "atual",
+        criterio: `Soma das receitas "Pendente" com vencimento entre hoje (${dataISO(agora)}) e os próximos ${DIAS_A_VENCER} dias (${dataISO(limiteAVencer)}). Prazo definido pelo VIME Insights -- ainda não existia em outro lugar do sistema.`,
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "PENDENTE", de: dataISO(agora), ate: dataISO(limiteAVencer) },
@@ -203,6 +207,7 @@ const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
         formato: "moeda",
         quantidade: pendentesTotal._count,
         escopo: "atual",
+        criterio: "Soma de todas as receitas com status \"Pendente\", sem corte de data -- inclui as que vencem nos próximos dias (acima) e as que vencem mais à frente.",
         navegacao: {
           href: "/financeiro",
           query: { aba: "receitas", status: "PENDENTE" },

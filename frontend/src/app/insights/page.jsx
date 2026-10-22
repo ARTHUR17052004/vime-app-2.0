@@ -11,18 +11,20 @@ import {
   Wallet,
   ChevronLeft,
   ChevronRight,
+  RefreshCw,
+  MessagesSquare,
   Building2,
   FileText,
   ClipboardList,
+  Info,
+  TriangleAlert,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
 import FadeIn from "../components/ui/FadeIn";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
-import PageSection from "../components/ui/PageSection";
 import SemPermissao from "../components/ui/SemPermissao";
-import DashboardStatsCard from "../components/dashboard/DashboardStatsCard";
 
 import { InsightsService } from "@/services/insights.service";
 import { usePermissao } from "../../hooks/usePermissao";
@@ -49,6 +51,176 @@ function construirUrl(navegacao) {
   return `${navegacao.href}${query ? `?${query}` : ""}`;
 }
 
+// Cartão -- título, subtítulo e um "slot" de conteúdo embaixo. É a base
+// visual repetida em toda a tela (Período, Resumo/Pergunte, Visão
+// operacional) -- de propósito mais enxuto que o DashboardStatsCard do
+// Dashboard (sem número gigante, sem ícone grande colorido): o pedido
+// foi justamente não parecer "mais um Dashboard".
+function Cartao({ icone: Icone, titulo, subtitulo, acao, children }) {
+  return (
+    <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 px-5 sm:px-6 py-4">
+
+        <div className="flex items-center gap-2.5 min-w-0">
+          {Icone && <Icone size={16} className="text-emerald-400 shrink-0" />}
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
+              {titulo}
+            </h2>
+            {subtitulo && (
+              <p className="text-xs text-[var(--text-muted)] mt-0.5">
+                {subtitulo}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {acao && <div className="shrink-0">{acao}</div>}
+
+      </div>
+
+      {children}
+
+    </div>
+  );
+}
+
+// Divisória entre os dois grupos (o que muda com o período x o que é
+// sempre "agora") -- pedido explícito pra ficar bem visível, não só
+// um texto pequeno junto do título do cartão.
+function DivisoriaGrupo({ titulo, descricao }) {
+  return (
+    <div className="px-6 py-2.5 border-t border-[var(--border-token)] bg-[var(--surface-2)]">
+      <p className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">
+        {titulo}
+      </p>
+      <p className="text-[11px] text-[var(--text-faint)] mt-0.5">
+        {descricao}
+      </p>
+    </div>
+  );
+}
+
+// Linha compacta de indicador: ícone pequeno + título + valor + uma
+// linha de contexto. Clicar no corpo da linha leva pro módulo já
+// filtrado; o botão "i" separado revela o critério de cálculo exato
+// sem sair da tela (clique, não hover -- precisa funcionar no celular).
+function LinhaIndicador({ indicador, expandido, onToggleInfo, onClick, carregando }) {
+
+  const Icone = ICONES[indicador.chave] || TrendingUp;
+
+  let contexto = `${indicador.quantidade} registro(s)`;
+
+  if (indicador.comparacao && indicador.comparacao.variacaoPercentual !== null && indicador.comparacao.variacaoPercentual !== undefined) {
+    const sinal = indicador.comparacao.variacaoPercentual >= 0 ? "+" : "";
+    contexto += ` -- ${sinal}${indicador.comparacao.variacaoPercentual}% vs. período anterior`;
+  }
+
+  return (
+    <div className={`border-t border-[var(--border-token)] transition-opacity ${carregando ? "opacity-50" : ""}`}>
+
+      <div className="flex items-start gap-1 sm:gap-2">
+
+        <button
+          onClick={onClick}
+          disabled={carregando}
+          className="
+            flex items-start gap-3
+            pl-6 pr-2 py-4
+            text-left
+            hover:bg-[var(--surface-2)]
+            transition
+            flex-1 min-w-0
+          "
+        >
+
+          <div
+            className="
+              w-9 h-9 shrink-0 mt-0.5
+              rounded-xl
+              bg-emerald-500/10 border border-emerald-500/20
+              flex items-center justify-center
+            "
+          >
+            <Icone size={15} className="text-emerald-400" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+              {indicador.rotulo}
+            </p>
+            <p className="text-xl font-black text-[var(--text)] mt-0.5">
+              {indicador.formato === "moeda" ? formatCurrency(indicador.valor) : indicador.valor}
+            </p>
+            <p className="text-xs text-[var(--text-faint)] mt-0.5">
+              {contexto}
+            </p>
+          </div>
+
+          <ChevronRight size={16} className="text-[var(--text-faint)] mt-2 shrink-0 hidden sm:block" />
+
+        </button>
+
+        {indicador.criterio && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleInfo(indicador.chave);
+            }}
+            title="Como esse número é calculado"
+            className={`
+              shrink-0 w-9 h-9 mt-2 mr-4
+              rounded-full
+              flex items-center justify-center
+              transition
+              ${expandido ? "bg-emerald-500/15 text-emerald-400" : "bg-[var(--surface-2)] text-[var(--text-faint)] hover:bg-[var(--surface-3)]"}
+            `}
+          >
+            <Info size={15} />
+          </button>
+        )}
+
+      </div>
+
+      {expandido && indicador.criterio && (
+        <div className="px-6 pb-4 -mt-2">
+          <p className="text-xs text-[var(--text-muted)] bg-[var(--surface-2)] rounded-xl px-4 py-3 leading-relaxed">
+            {indicador.criterio}
+          </p>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+// Linha de módulo (fase seguinte) -- lista, não grade de caixas, igual
+// o desenho pedido. `disponivel` fica pronto pra quando esses módulos
+// ganharem indicadores de verdade -- até lá, mensagem clara de "ainda
+// não" em vez de ficar ambíguo (ex.: parecer que não tem o que mostrar).
+function LinhaModulo({ titulo, subtitulo, icone: Icone, disponivel = false }) {
+  return (
+    <div
+      className={`
+        flex items-center gap-3
+        px-6 py-4
+        border-t border-[var(--border-token)]
+        ${disponivel ? "hover:bg-[var(--surface-2)] cursor-pointer transition" : ""}
+      `}
+    >
+      <Icone size={18} className={disponivel ? "text-[var(--text-muted)] shrink-0" : "text-[var(--text-faint)] shrink-0"} />
+      <div className="min-w-0 flex-1">
+        <p className={`font-semibold ${disponivel ? "text-[var(--text)]" : "text-[var(--text-muted)]"}`}>{titulo}</p>
+        <p className="text-xs text-[var(--text-faint)]">
+          {disponivel ? subtitulo : "Ainda não integrado ao VIME Insights -- chega numa próxima etapa."}
+        </p>
+      </div>
+      {disponivel && <ChevronRight size={16} className="text-[var(--text-faint)] shrink-0" />}
+    </div>
+  );
+}
+
 export default function InsightsPage() {
 
   const podeVisualizar = usePermissao("insights.visualizar");
@@ -59,9 +231,23 @@ export default function InsightsPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  // null = mês atual (o backend decide). Trocar de mês manda inicio/fim
-  // explícitos -- sempre o 1º e o último dia do mês escolhido.
+  // 0 = mês atual (o backend decide sozinho). Trocar de mês manda
+  // inicio/fim explícitos -- sempre o 1º e o último dia do mês escolhido.
   const [mesOffset, setMesOffset] = useState(0);
+
+  // Quais indicadores estão com o critério de cálculo aberto (clique no
+  // botão "i" de cada linha) -- guarda por chave, não precisa resetar
+  // ao trocar de período.
+  const [expandidos, setExpandidos] = useState(() => new Set());
+
+  const toggleInfo = (chave) => {
+    setExpandidos((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(chave)) novo.delete(chave);
+      else novo.add(chave);
+      return novo;
+    });
+  };
 
   const carregar = useCallback(async () => {
 
@@ -109,6 +295,8 @@ export default function InsightsPage() {
   }
 
   const indicadores = resumo?.indicadores || [];
+  const indicadoresPeriodo = indicadores.filter((i) => i.escopo === "periodo");
+  const indicadoresAtual = indicadores.filter((i) => i.escopo === "atual");
 
   return (
 
@@ -120,28 +308,48 @@ export default function InsightsPage() {
 
           <FadeIn>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
 
-              <div
+              <div className="flex items-center gap-3">
+
+                <div
+                  className="
+                    w-12 h-12
+                    rounded-2xl
+                    bg-emerald-500/10
+                    border border-emerald-500/20
+                    flex items-center justify-center
+                  "
+                >
+                  <Sparkles size={22} className="text-emerald-400" />
+                </div>
+
+                <div>
+                  <h1 className="text-4xl font-black text-[var(--text)]">
+                    VIME Insights
+                  </h1>
+                  <p className="text-[var(--text-subtle)]">
+                    Visão executiva da operação -- clique em qualquer número pra ver os registros por trás dele.
+                  </p>
+                </div>
+
+              </div>
+
+              <button
+                onClick={carregar}
+                disabled={carregando}
+                title="Atualizar"
                 className="
-                  w-12 h-12
-                  rounded-2xl
-                  bg-emerald-500/10
-                  border border-emerald-500/20
+                  w-11 h-11 shrink-0
+                  rounded-xl
+                  bg-[var(--surface-2)] hover:bg-[var(--surface-3)]
                   flex items-center justify-center
+                  transition
+                  disabled:opacity-50
                 "
               >
-                <Sparkles size={22} className="text-emerald-400" />
-              </div>
-
-              <div>
-                <h1 className="text-4xl font-black text-[var(--text)]">
-                  VIME Insights
-                </h1>
-                <p className="text-[var(--text-subtle)]">
-                  Resumo executivo do sistema -- clique em qualquer número pra ver os registros por trás dele.
-                </p>
-              </div>
+                <RefreshCw size={18} className={`text-[var(--text-muted)] ${carregando ? "animate-spin" : ""}`} />
+              </button>
 
             </div>
 
@@ -149,42 +357,39 @@ export default function InsightsPage() {
 
           {erro && (
             <FadeIn delay={0.05}>
-              <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-red-300">
-                {erro}
+              <div
+                className="
+                  mt-6 flex items-center justify-between gap-4 flex-wrap
+                  rounded-2xl border border-red-500/20 bg-red-500/10
+                  px-5 py-4
+                "
+              >
+                <div className="flex items-center gap-2.5 text-red-300">
+                  <TriangleAlert size={18} className="shrink-0" />
+                  {erro}
+                </div>
+                <button
+                  onClick={carregar}
+                  className="text-sm font-semibold text-red-200 hover:text-white underline shrink-0"
+                >
+                  Tentar novamente
+                </button>
               </div>
             </FadeIn>
           )}
 
           <FadeIn delay={0.1}>
-
-            <PageSection spacing="lg">
-
-              <div
-                className="
-                  rounded-2xl border border-[var(--border-token)] bg-[var(--surface)]
-                  px-6 py-4
-                "
-              >
-
-                <div className="flex items-center justify-between flex-wrap gap-4">
-
-                  <div className="flex items-center gap-2">
-
-                    <CalendarClock size={16} className="text-emerald-400" />
-
-                    <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
-                      Nesse período
-                    </h2>
-
-                    {resumo?.periodo && (
-                      <span className="text-sm text-[var(--text-muted)]">
-                        -- {formatarDataCurta(resumo.periodo.inicio)} a {formatarDataCurta(resumo.periodo.fim)}
-                      </span>
-                    )}
-
-                  </div>
-
-                  <div className="flex items-center gap-2">
+            <div className="mt-8">
+              <Cartao
+                icone={CalendarClock}
+                titulo="Período de análise"
+                subtitulo={
+                  resumo?.periodo
+                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)}`
+                    : "Seletor de datas e indicação clara do período consultado."
+                }
+                acao={
+                  <div className="flex items-center gap-2 shrink-0">
 
                     <button
                       onClick={() => setMesOffset((v) => v - 1)}
@@ -197,9 +402,9 @@ export default function InsightsPage() {
                     {mesOffset !== 0 && (
                       <button
                         onClick={() => setMesOffset(0)}
-                        className="text-xs text-emerald-400 hover:underline px-1"
+                        className="text-xs text-emerald-400 hover:underline px-1 whitespace-nowrap"
                       >
-                        Voltar pro mês atual
+                        Mês atual
                       </button>
                     )}
 
@@ -212,145 +417,106 @@ export default function InsightsPage() {
                     </button>
 
                   </div>
-
-                </div>
-
-                <p className="mt-3 text-xs text-[var(--text-muted)]">
-                  Esses dois cards mudam conforme o período acima -- os outros embaixo são uma foto de agora, não do mês selecionado.
-                </p>
-
-              </div>
-
-            </PageSection>
-
+                }
+              />
+            </div>
           </FadeIn>
 
-          <FadeIn delay={0.15}>
-
-            <PageSection spacing="lg">
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                {carregando && indicadores.length === 0 && (
-                  <p className="col-span-full text-center text-[var(--text-subtle)] py-10">
-                    Calculando os indicadores...
-                  </p>
-                )}
-
-                {indicadores.filter((ind) => ind.escopo === "periodo").map((ind) => {
-
-                  const Icone = ICONES[ind.chave] || TrendingUp;
-
-                  let subtitulo = `${ind.quantidade} registro(s)`;
-
-                  if (ind.comparacao && ind.comparacao.variacaoPercentual !== null && ind.comparacao.variacaoPercentual !== undefined) {
-                    const sinal = ind.comparacao.variacaoPercentual >= 0 ? "+" : "";
-                    subtitulo = `${sinal}${ind.comparacao.variacaoPercentual}% vs. período anterior`;
-                  }
-
-                  return (
-                    <DashboardStatsCard
-                      key={ind.chave}
-                      compact
-                      title={ind.rotulo}
-                      value={ind.formato === "moeda" ? formatCurrency(ind.valor) : ind.valor}
-                      subtitle={subtitulo}
-                      icon={Icone}
-                      onClick={() => router.push(construirUrl(ind.navegacao))}
-                    />
-                  );
-
-                })}
-
-              </div>
-
-            </PageSection>
-
+          <FadeIn delay={0.14}>
+            <div className="mt-4">
+              <Cartao
+                icone={MessagesSquare}
+                titulo="Resumo executivo e Pergunte ao VIME"
+                subtitulo="Principais acontecimentos, pendências e campo de perguntas -- chega quando a IA (SABADO) entrar numa próxima fase. Por enquanto, os números abaixo já são reais."
+              />
+            </div>
           </FadeIn>
 
           <FadeIn delay={0.18}>
-
-            <PageSection spacing="xxl">
-
-              <div
-                className="
-                  flex items-center gap-2 flex-wrap
-                  rounded-2xl border border-[var(--border-token)] bg-[var(--surface)]
-                  px-6 py-4 mb-4
-                "
+            <div className="mt-4">
+              <Cartao
+                icone={TrendingUp}
+                titulo="Financeiro"
+                subtitulo={carregando && indicadores.length === 0 ? "Calculando..." : null}
               >
-                <Clock size={16} className="text-emerald-400" />
-                <h2 className="text-sm font-bold text-[var(--text)] uppercase tracking-wide">
-                  Situação agora
-                </h2>
-                <span className="text-sm text-[var(--text-muted)]">
-                  -- não muda com o período acima, é sempre o momento atual
-                </span>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-
-                {indicadores.filter((ind) => ind.escopo === "atual").map((ind) => {
-
-                  const Icone = ICONES[ind.chave] || TrendingUp;
-
-                  return (
-                    <DashboardStatsCard
-                      key={ind.chave}
-                      compact
-                      title={ind.rotulo}
-                      value={ind.formato === "moeda" ? formatCurrency(ind.valor) : ind.valor}
-                      subtitle={`${ind.quantidade} registro(s)`}
-                      icon={Icone}
-                      onClick={() => router.push(construirUrl(ind.navegacao))}
+                {indicadoresPeriodo.length > 0 && (
+                  <>
+                    <DivisoriaGrupo
+                      titulo="Nesse período"
+                      descricao="Muda quando você troca o mês no cartão acima."
                     />
-                  );
+                    {indicadoresPeriodo.map((ind) => (
+                      <LinhaIndicador
+                        key={ind.chave}
+                        indicador={ind}
+                        expandido={expandidos.has(ind.chave)}
+                        onToggleInfo={toggleInfo}
+                        carregando={carregando}
+                        onClick={() => router.push(construirUrl(ind.navegacao))}
+                      />
+                    ))}
+                  </>
+                )}
 
-                })}
+                {indicadoresAtual.length > 0 && (
+                  <>
+                    <DivisoriaGrupo
+                      titulo="Situação agora"
+                      descricao="Não muda com o período -- é sempre o momento atual."
+                    />
+                    {indicadoresAtual.map((ind) => (
+                      <LinhaIndicador
+                        key={ind.chave}
+                        indicador={ind}
+                        expandido={expandidos.has(ind.chave)}
+                        onToggleInfo={toggleInfo}
+                        carregando={carregando}
+                        onClick={() => router.push(construirUrl(ind.navegacao))}
+                      />
+                    ))}
+                  </>
+                )}
 
-              </div>
-
-            </PageSection>
-
+              </Cartao>
+            </div>
           </FadeIn>
 
-          <FadeIn delay={0.2}>
+          <FadeIn delay={0.22}>
+            <div className="mt-8">
 
-            <PageSection spacing="xxl">
+              <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-3 px-1">
+                Visão operacional
+              </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
 
-                {[
-                  { titulo: "Imóveis e Kitnets", icone: Building2 },
-                  { titulo: "Contratos", icone: FileText },
-                  { titulo: "Solicitações e Vistorias", icone: ClipboardList },
-                ].map(({ titulo, icone: Icone }) => (
+                <LinhaModulo
+                  titulo="Imóveis e Kitnets"
+                  subtitulo="Ocupação e disponibilidade."
+                  icone={Building2}
+                />
 
-                  <div
-                    key={titulo}
-                    className="
-                      rounded-2xl border border-dashed border-[var(--border-token)]
-                      bg-[var(--surface)] px-6 py-8 text-center
-                    "
-                  >
-                    <Icone size={22} className="mx-auto text-[var(--text-faint)]" />
-                    <p className="mt-3 font-semibold text-[var(--text-muted)]">{titulo}</p>
-                    <p className="mt-1 text-xs text-[var(--text-faint)]">
-                      Próxima etapa -- ainda não calculado aqui.
-                    </p>
-                  </div>
+                <LinhaModulo
+                  titulo="Contratos"
+                  subtitulo="Vencimentos e renovações."
+                  icone={FileText}
+                />
 
-                ))}
+                <LinhaModulo
+                  titulo="Solicitações e Vistorias"
+                  subtitulo="Pendências e prazos."
+                  icone={ClipboardList}
+                />
 
               </div>
 
-            </PageSection>
-
+            </div>
           </FadeIn>
 
           {resumo?.geradoEm && (
-            <FadeIn delay={0.25}>
-              <p className="text-center text-xs text-[var(--text-muted)] mt-2">
+            <FadeIn delay={0.26}>
+              <p className="text-center text-xs text-[var(--text-muted)] mt-6">
                 Última atualização: {new Date(resumo.geradoEm).toLocaleString("pt-BR")}
               </p>
             </FadeIn>
