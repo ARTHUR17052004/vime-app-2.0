@@ -17,6 +17,11 @@ export default function VistoriaConcluirModal({
   onMissoesConcluidas,
 }) {
   const [data, setData] = useState("");
+  // Só true se o usuário mexeu manualmente no seletor -- nesse caso é
+  // uma data escolhida (ex.: "esqueci de registrar ontem"), sem hora
+  // real pra capturar. Se não mexer (ficou na data de hoje, valor
+  // padrão), manda o instante exato de agora, com hora de verdade.
+  const [dataAlterada, setDataAlterada] = useState(false);
   const [midias, setMidias] = useState([]);
   const [observacoes, setObservacoes] = useState("");
   const [erro, setErro] = useState("");
@@ -36,6 +41,7 @@ export default function VistoriaConcluirModal({
     if (isOpen) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setData(new Date().toISOString().split("T")[0]);
+      setDataAlterada(false);
       setMidias([]);
       setObservacoes("");
       setErro("");
@@ -93,6 +99,13 @@ export default function VistoriaConcluirModal({
     }
   };
 
+  // Data não mexida (ficou em "hoje"): manda o instante exato de agora,
+  // com hora real. Data escolhida manualmente: meio-dia daquele dia --
+  // nunca meia-noite, pra um fuso atrás de UTC (Brasil) não "voltar" um
+  // dia na conversão de exibição depois.
+  const dataRealizacaoParaEnviar = () =>
+    dataAlterada ? `${data}T12:00:00` : new Date().toISOString();
+
   const handleConfirmar = async () => {
 
     if (isGeral) {
@@ -109,7 +122,7 @@ export default function VistoriaConcluirModal({
 
         await VistoriaService.concluirMissoes(vistoria.id, {
           unidadeIds: [...selecionadas],
-          dataRealizacao: data,
+          dataRealizacao: dataRealizacaoParaEnviar(),
           fotos: midias,
           realizadoPor: vistoria.responsavel || null,
           observacoes: observacoes || null,
@@ -132,7 +145,7 @@ export default function VistoriaConcluirModal({
     }
 
     onConfirm({
-      dataUltima: data,
+      dataUltima: dataRealizacaoParaEnviar(),
       fotosConclusao: midias,
       observacoesConclusao: observacoes || null,
     });
@@ -158,7 +171,10 @@ export default function VistoriaConcluirModal({
           <input
             type="date"
             value={data}
-            onChange={(e) => setData(e.target.value)}
+            onChange={(e) => {
+              setData(e.target.value);
+              setDataAlterada(true);
+            }}
             className="
               w-full
               rounded-xl

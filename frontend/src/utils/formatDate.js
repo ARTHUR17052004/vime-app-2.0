@@ -17,9 +17,11 @@ export function formatDate(date) {
 export function formatDateTime(date) {
   if (!date) return "-";
 
-  const dataFormatada = new Date(date);
-
-  return `${formatDate(dataFormatada)} ${dataFormatada.toLocaleTimeString("pt-BR", {
+  // Passa o valor original (string) pro formatDate, não um Date já
+  // convertido -- senão a proteção contra "AAAA-MM-DD vira meia-noite
+  // UTC" lá dentro nunca dispara, porque ela só reconhece esse formato
+  // como string, não como Date.
+  return `${formatDate(date)} ${new Date(date).toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   })}`;
