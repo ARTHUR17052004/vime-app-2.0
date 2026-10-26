@@ -539,6 +539,7 @@ const fixarVistoria = async (id, fixado) => {
 
             <VistoriaStats
               vistorias={vistorias}
+              missoesRealizadas={missoesRealizadas}
               abaSelecionada={abaSelecionada}
               setAbaSelecionada={trocarAba}
             />

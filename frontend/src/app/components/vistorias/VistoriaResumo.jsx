@@ -1,7 +1,21 @@
 "use client";
 
+// Mesmo dia local (não UTC) -- comparar por componente de data evita o
+// mesmo bug de fuso já corrigido em outros lugares do sistema.
+function ehHoje(data) {
+  if (!data) return false;
+  const d = new Date(data);
+  const hoje = new Date();
+  return (
+    d.getFullYear() === hoje.getFullYear() &&
+    d.getMonth() === hoje.getMonth() &&
+    d.getDate() === hoje.getDate()
+  );
+}
+
 export default function VistoriaResumo({
   vistorias,
+  missoesRealizadas = [],
   abaSelecionada,
   setAbaSelecionada,
 }) {
@@ -13,12 +27,22 @@ export default function VistoriaResumo({
         "PROGRAMADA"
     ).length;
 
-  const realizadas =
-    vistorias.filter(
-      (vistoria) =>
-        vistoria.status ===
-        "REALIZADA"
-    ).length;
+  // "Realizadas" = atividade de hoje, não histórico total -- senão o
+  // card só cresceria pra sempre e pararia de refletir o estado atual
+  // (diferente dos outros 3 cards, que são uma foto de agora). Soma
+  // vistorias "normais" concluídas hoje com missões (vistorias
+  // "Geral", por residência) concluídas hoje -- essas últimas nunca
+  // deixam a vistoria-mãe com status "Realizada", por isso não
+  // apareciam antes.
+  const regularesRealizadasHoje = vistorias.filter(
+    (vistoria) => vistoria.status === "REALIZADA" && ehHoje(vistoria.concluidaEm)
+  ).length;
+
+  const missoesRealizadasHoje = missoesRealizadas.filter((missao) =>
+    ehHoje(missao.dataRealizacao)
+  ).length;
+
+  const realizadas = regularesRealizadasHoje + missoesRealizadasHoje;
 
   const atrasadas =
     vistorias.filter(
@@ -50,7 +74,7 @@ export default function VistoriaResumo({
 
     {
       aba: "realizadas",
-      titulo: "Realizadas",
+      titulo: "Realizadas hoje",
       valor: realizadas,
       cor: "text-emerald-400",
       fundo: "bg-emerald-500/10",
