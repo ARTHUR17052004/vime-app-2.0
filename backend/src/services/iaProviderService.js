@@ -15,7 +15,7 @@ const CONFIGS = {
   groq: {
     baseURL: "https://api.groq.com/openai/v1",
     apiKey: process.env.GROQ_API_KEY,
-    modelo: process.env.GROQ_MODELO || "llama-3.3-70b-versatile",
+    modelo: process.env.GROQ_MODELO || "openai/gpt-oss-120b",
     envVar: "GROQ_API_KEY",
   },
   openai: {
