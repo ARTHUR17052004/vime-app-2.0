@@ -332,33 +332,6 @@ function FinanceiroPageConteudo() {
 
   };
 
-  const receitaPrevista =
-    receitas.reduce(
-      (total, item) =>
-        total + Number(item.valor || 0),
-      0
-    );
-
-  const totalDespesas =
-    despesas.reduce(
-      (total, item) =>
-        total + Number(item.valor || 0),
-      0
-    );
-
-  const lucroLiquido =
-    receitaPrevista - totalDespesas;
-
-  // Só das pagas -- taxa de boleto de uma cobrança ainda pendente
-  // nunca "aconteceu" de verdade (pode nem chegar a ser paga, cair
-  // vencida, etc). Sem valorLiquido preenchido, não entra na conta
-  // (nunca assume uma taxa que não foi calculada).
-  const taxasBoleto = Math.round(
-    receitas
-      .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.valorLiquido != null)
-      .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0) * 100
-  ) / 100;
-
   const dentroDoIntervalo = (data) => {
 
     if (!dataDe && !dataAte) return true;
@@ -434,6 +407,48 @@ function FinanceiroPageConteudo() {
     (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0) || ordenarFinanceiro(a, b)
   );
 
+  // Os 4 cards do topo seguem o MESMO filtro da tabela abaixo (busca,
+  // status, residência, período) -- antes somavam tudo que já foi
+  // cadastrado, sem nenhum filtro, e dava a impressão de número
+  // errado quando a tabela estava filtrada por um período menor.
+  const receitaPrevista =
+    receitasFiltradas.reduce(
+      (total, item) =>
+        total + Number(item.valor || 0),
+      0
+    );
+
+  const totalDespesas =
+    despesasFiltradas.reduce(
+      (total, item) =>
+        total + Number(item.valor || 0),
+      0
+    );
+
+  const lucroLiquido =
+    receitaPrevista - totalDespesas;
+
+  const estaVencido = (item) =>
+    item.vencimento &&
+    item.vencimento.slice(0, 10) < new Date().toISOString().split("T")[0] &&
+    item.status !== "PAGO" &&
+    item.status !== "PAGA";
+
+  const vencidos =
+    [...receitasFiltradas, ...despesasFiltradas]
+      .filter(estaVencido)
+      .reduce((total, item) => total + Number(item.valor || 0), 0);
+
+  // Só das pagas -- taxa de boleto de uma cobrança ainda pendente
+  // nunca "aconteceu" de verdade (pode nem chegar a ser paga, cair
+  // vencida, etc). Sem valorLiquido preenchido, não entra na conta
+  // (nunca assume uma taxa que não foi calculada).
+  const taxasBoleto = Math.round(
+    receitasFiltradas
+      .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.valorLiquido != null)
+      .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0) * 100
+  ) / 100;
+
  if (!podeVisualizar) {
     return <SemPermissao />;
   }
@@ -492,6 +507,7 @@ function FinanceiroPageConteudo() {
       <FinanceiroStats
         receitaPrevista={receitaPrevista}
         totalDespesas={totalDespesas}
+        vencidos={vencidos}
         lucroLiquido={lucroLiquido}
         taxasBoleto={taxasBoleto}
       />

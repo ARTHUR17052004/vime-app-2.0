@@ -5,6 +5,7 @@ import {
   TrendingDown,
   Landmark,
   Receipt,
+  TriangleAlert,
 } from "lucide-react";
 
 import PageGrid from "../ui/PageGrid";
@@ -13,11 +14,12 @@ import DashboardStatsCard from "../dashboard/DashboardStatsCard";
 export default function FinanceiroResumo({
   receitaPrevista,
   totalDespesas,
+  vencidos,
   lucroLiquido,
   taxasBoleto,
 }) {
   return (
-    <PageGrid cols={4}>
+    <PageGrid cols={5}>
 
       <DashboardStatsCard
         title="Receita Prevista"
@@ -31,6 +33,13 @@ export default function FinanceiroResumo({
         value={`R$ ${totalDespesas}`}
         subtitle="Total de despesas"
         icon={TrendingDown}
+      />
+
+      <DashboardStatsCard
+        title="Vencidos"
+        value={`R$ ${vencidos}`}
+        subtitle="Receitas e despesas vencidas"
+        icon={TriangleAlert}
       />
 
       <DashboardStatsCard
