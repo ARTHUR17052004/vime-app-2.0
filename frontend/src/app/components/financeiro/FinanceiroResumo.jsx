@@ -43,7 +43,7 @@ export default function FinanceiroResumo({
       <DashboardStatsCard
         title="Taxas de Boleto"
         value={`R$ ${taxasBoleto}`}
-        subtitle="Gasto com taxa nas pagas"
+        subtitle="Valor de taxa acumulado"
         icon={Receipt}
       />
 
