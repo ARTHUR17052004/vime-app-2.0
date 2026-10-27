@@ -28,7 +28,6 @@ import {
   ClipboardX,
   CalendarCheck,
   ListChecks,
-  ShieldAlert,
   LayoutGrid,
 } from "lucide-react";
 
@@ -49,6 +48,8 @@ const ICONES = {
   cobrancas_vencidas: AlertTriangle,
   cobrancas_a_vencer: Clock,
   pagamentos_pendentes: Wallet,
+  pendentes_periodo: Clock,
+  vencidas_periodo: AlertTriangle,
   residencias_total: Building2,
   kitnets_total: Home,
   kitnets_ocupadas: Home,
@@ -61,9 +62,7 @@ const ICONES = {
   contratos_encerrados: Archive,
   solicitacoes_abertas: ClipboardCheck,
   solicitacoes_atrasadas: ClipboardX,
-  vistorias_agendadas: CalendarCheck,
-  vistorias_pendentes: Clock,
-  vistorias_atrasadas: ShieldAlert,
+  vistorias_concluidas: CalendarCheck,
   ocorrencias_registradas: ListChecks,
 };
 
@@ -346,11 +345,11 @@ export default function InsightsPage() {
           setErroImoveis(err.message || "Não foi possível carregar Imóveis e Kitnets.");
           return null;
         }),
-        InsightsService.contratos().catch((err) => {
+        InsightsService.contratos(params).catch((err) => {
           setErroContratos(err.message || "Não foi possível carregar Contratos.");
           return null;
         }),
-        InsightsService.solicitacoesVistorias().catch((err) => {
+        InsightsService.solicitacoesVistorias(params).catch((err) => {
           setErroSolicVist(err.message || "Não foi possível carregar Solicitações e Vistorias.");
           return null;
         }),
@@ -400,13 +399,13 @@ export default function InsightsPage() {
   const indicadoresAtual = indicadores.filter((i) => i.escopo === "atual");
 
   const recebido = indicadores.find((i) => i.chave === "recebido_periodo");
-  const vencidas = indicadores.find((i) => i.chave === "cobrancas_vencidas");
+  const vencidasPeriodo = indicadores.find((i) => i.chave === "vencidas_periodo");
 
   const resumoFinanceiro =
     carregando && indicadores.length === 0
       ? "Calculando..."
-      : recebido && vencidas
-        ? `Recebido ${formatCurrency(recebido.valor)} no período -- ${formatCurrency(vencidas.valor)} vencido agora`
+      : recebido && vencidasPeriodo
+        ? `Recebido ${formatCurrency(recebido.valor)} no período -- ${formatCurrency(vencidasPeriodo.valor)} vencido no período`
         : "Toque para ver os indicadores.";
 
   const indicadoresImoveis = resumoImoveisDados?.indicadores || [];
@@ -418,7 +417,7 @@ export default function InsightsPage() {
     : carregando && indicadoresImoveis.length === 0
       ? "Calculando..."
       : taxaOcupacao && kitnetsVaziasInd
-        ? `${taxaOcupacao.valor}% ocupado -- ${kitnetsVaziasInd.valor} kitnet(s) disponível(is)`
+        ? `${taxaOcupacao.valor}% ocupado agora -- ${kitnetsVaziasInd.valor} kitnet(s) disponível(is)`
         : "Toque para ver os indicadores.";
 
   const indicadoresContratos = resumoContratosDados?.indicadores || [];
@@ -430,19 +429,19 @@ export default function InsightsPage() {
     : carregando && indicadoresContratos.length === 0
       ? "Calculando..."
       : contratosVigentesInd && contratosVencendoInd
-        ? `${contratosVigentesInd.valor} vigente(s) -- ${contratosVencendoInd.valor} vencendo em breve`
+        ? `${contratosVigentesInd.valor} vigente(s) no período -- ${contratosVencendoInd.valor} com término no período`
         : "Toque para ver os indicadores.";
 
   const indicadoresSolicVist = resumoSolicVistDados?.indicadores || [];
   const solicitacoesAbertasInd = indicadoresSolicVist.find((i) => i.chave === "solicitacoes_abertas");
-  const vistoriasAtrasadasInd = indicadoresSolicVist.find((i) => i.chave === "vistorias_atrasadas");
+  const vistoriasConcluidasInd = indicadoresSolicVist.find((i) => i.chave === "vistorias_concluidas");
 
   const resumoSolicVistTexto = erroSolicVist
     ? "Não foi possível carregar."
     : carregando && indicadoresSolicVist.length === 0
       ? "Calculando..."
-      : solicitacoesAbertasInd && vistoriasAtrasadasInd
-        ? `${solicitacoesAbertasInd.valor} solicitação(ões) aberta(s) -- ${vistoriasAtrasadasInd.valor} vistoria(s) atrasada(s)`
+      : solicitacoesAbertasInd && vistoriasConcluidasInd
+        ? `${solicitacoesAbertasInd.valor} solicitação(ões) no período -- ${vistoriasConcluidasInd.valor} vistoria(s) concluída(s)`
         : "Toque para ver os indicadores.";
 
   return (
@@ -575,12 +574,12 @@ export default function InsightsPage() {
           <FadeIn delay={0.1}>
             <div className="mt-8">
               <Cartao
-                icone={TrendingUp}
-                titulo="Financeiro"
+                icone={CalendarClock}
+                titulo="Período de análise"
                 subtitulo={
                   resumo?.periodo
-                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- único módulo que muda com o período`
-                    : "Seletor de período -- só este módulo muda com a data escolhida."
+                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- todos os módulos abaixo mostram esse período`
+                    : "Seletor de datas e indicação clara do período consultado."
                 }
                 acao={
                   <div className="flex items-center gap-2 shrink-0">
@@ -610,84 +609,69 @@ export default function InsightsPage() {
                       <ChevronRight size={16} className="text-[var(--text-muted)]" />
                     </button>
 
-                    <button
-                      onClick={() => setFinanceiroAberto((v) => !v)}
-                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
-                      title="Ver indicadores"
-                    >
-                      <ChevronDown
-                        size={16}
-                        className={`text-[var(--text-muted)] transition-transform ${financeiroAberto ? "rotate-180" : ""}`}
-                      />
-                    </button>
-
                   </div>
                 }
-              >
-
-                <div className="px-5 sm:px-6 pb-4 pt-0">
-                  <p className="text-sm text-[var(--text-muted)]">{resumoFinanceiro}</p>
-                </div>
-
-                {financeiroAberto && (
-                  <>
-
-                    {indicadoresPeriodo.length > 0 && (
-                      <>
-                        <DivisoriaGrupo
-                          titulo="Nesse período"
-                          descricao="Muda quando você troca o mês acima."
-                        />
-                        {indicadoresPeriodo.map((ind) => (
-                          <LinhaIndicador
-                            key={ind.chave}
-                            indicador={ind}
-                            expandido={expandidos.has(ind.chave)}
-                            onToggleInfo={toggleInfo}
-                            carregando={carregando}
-                            onClick={() => router.push(construirUrl(ind.navegacao))}
-                          />
-                        ))}
-                      </>
-                    )}
-
-                    {indicadoresAtual.length > 0 && (
-                      <>
-                        <DivisoriaGrupo
-                          titulo="Situação agora"
-                          descricao="Não muda com o período -- é sempre o momento atual."
-                        />
-                        {indicadoresAtual.map((ind) => (
-                          <LinhaIndicador
-                            key={ind.chave}
-                            indicador={ind}
-                            expandido={expandidos.has(ind.chave)}
-                            onToggleInfo={toggleInfo}
-                            carregando={carregando}
-                            onClick={() => router.push(construirUrl(ind.navegacao))}
-                          />
-                        ))}
-                      </>
-                    )}
-
-                  </>
-                )}
-
-              </Cartao>
+              />
             </div>
           </FadeIn>
 
           <FadeIn delay={0.18}>
             <div className="mt-8">
 
-              <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-1 px-1">
+              <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-3 px-1">
                 Módulos
               </h2>
-              <p className="text-xs text-[var(--text-faint)] mb-3 px-1">
-                Sempre a situação atual do sistema -- não mudam com o período do Financeiro acima.
-              </p>
 
               <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
+
+                <LinhaModulo
+                  titulo="Financeiro"
+                  resumo={resumoFinanceiro}
+                  icone={TrendingUp}
+                  expansivel
+                  aberto={financeiroAberto}
+                  onToggle={() => setFinanceiroAberto((v) => !v)}
+                >
+
+                  {indicadoresPeriodo.length > 0 && (
+                    <>
+                      <DivisoriaGrupo
+                        titulo="Nesse período"
+                        descricao="Muda quando você troca o mês no cartão acima."
+                      />
+                      {indicadoresPeriodo.map((ind) => (
+                        <LinhaIndicador
+                          key={ind.chave}
+                          indicador={ind}
+                          expandido={expandidos.has(ind.chave)}
+                          onToggleInfo={toggleInfo}
+                          carregando={carregando}
+                          onClick={() => router.push(construirUrl(ind.navegacao))}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                  {indicadoresAtual.length > 0 && (
+                    <>
+                      <DivisoriaGrupo
+                        titulo="Situação agora"
+                        descricao="Não muda com o período -- é sempre o momento atual."
+                      />
+                      {indicadoresAtual.map((ind) => (
+                        <LinhaIndicador
+                          key={ind.chave}
+                          indicador={ind}
+                          expandido={expandidos.has(ind.chave)}
+                          onToggleInfo={toggleInfo}
+                          carregando={carregando}
+                          onClick={() => router.push(construirUrl(ind.navegacao))}
+                        />
+                      ))}
+                    </>
+                  )}
+
+                </LinhaModulo>
 
                 <LinhaModulo
                   titulo="Imóveis e Kitnets"

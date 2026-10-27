@@ -46,7 +46,10 @@ const imoveis = async (req, res) => {
 const contratos = async (req, res) => {
   try {
 
-    const dados = await insightsService.resumoContratos(req.usuario);
+    const dados = await insightsService.resumoContratos(req.usuario, {
+      inicio: req.query.inicio,
+      fim: req.query.fim,
+    });
 
     return res.status(200).json({
       success: true,
@@ -66,7 +69,10 @@ const contratos = async (req, res) => {
 const solicitacoesVistorias = async (req, res) => {
   try {
 
-    const dados = await insightsService.resumoSolicitacoesVistorias(req.usuario);
+    const dados = await insightsService.resumoSolicitacoesVistorias(req.usuario, {
+      inicio: req.query.inicio,
+      fim: req.query.fim,
+    });
 
     return res.status(200).json({
       success: true,
