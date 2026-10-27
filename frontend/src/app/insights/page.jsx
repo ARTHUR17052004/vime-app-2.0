@@ -150,6 +150,8 @@ function LinhaIndicador({ indicador, expandido, onToggleInfo, onClick, carregand
   if (indicador.comparacao && indicador.comparacao.variacaoPercentual !== null && indicador.comparacao.variacaoPercentual !== undefined) {
     const sinal = indicador.comparacao.variacaoPercentual >= 0 ? "+" : "";
     contexto += ` -- ${sinal}${indicador.comparacao.variacaoPercentual}% vs. período anterior`;
+  } else if (indicador.escopo === "atual") {
+    contexto += " -- agora, não muda com o período";
   }
 
   return (
@@ -578,7 +580,7 @@ export default function InsightsPage() {
                 titulo="Período de análise"
                 subtitulo={
                   resumo?.periodo
-                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- todos os módulos abaixo mostram esse período`
+                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- vale pra Financeiro, Contratos e Solicitações/Vistorias. Imóveis e Kitnets é sempre a situação de agora.`
                     : "Seletor de datas e indicação clara do período consultado."
                 }
                 acao={
