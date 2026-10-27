@@ -575,12 +575,12 @@ export default function InsightsPage() {
           <FadeIn delay={0.1}>
             <div className="mt-8">
               <Cartao
-                icone={CalendarClock}
-                titulo="Período de análise"
+                icone={TrendingUp}
+                titulo="Financeiro"
                 subtitulo={
                   resumo?.periodo
-                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)}`
-                    : "Seletor de datas e indicação clara do período consultado."
+                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- único módulo que muda com o período`
+                    : "Seletor de período -- só este módulo muda com a data escolhida."
                 }
                 acao={
                   <div className="flex items-center gap-2 shrink-0">
@@ -610,69 +610,84 @@ export default function InsightsPage() {
                       <ChevronRight size={16} className="text-[var(--text-muted)]" />
                     </button>
 
+                    <button
+                      onClick={() => setFinanceiroAberto((v) => !v)}
+                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
+                      title="Ver indicadores"
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={`text-[var(--text-muted)] transition-transform ${financeiroAberto ? "rotate-180" : ""}`}
+                      />
+                    </button>
+
                   </div>
                 }
-              />
+              >
+
+                <div className="px-5 sm:px-6 pb-4 pt-0">
+                  <p className="text-sm text-[var(--text-muted)]">{resumoFinanceiro}</p>
+                </div>
+
+                {financeiroAberto && (
+                  <>
+
+                    {indicadoresPeriodo.length > 0 && (
+                      <>
+                        <DivisoriaGrupo
+                          titulo="Nesse período"
+                          descricao="Muda quando você troca o mês acima."
+                        />
+                        {indicadoresPeriodo.map((ind) => (
+                          <LinhaIndicador
+                            key={ind.chave}
+                            indicador={ind}
+                            expandido={expandidos.has(ind.chave)}
+                            onToggleInfo={toggleInfo}
+                            carregando={carregando}
+                            onClick={() => router.push(construirUrl(ind.navegacao))}
+                          />
+                        ))}
+                      </>
+                    )}
+
+                    {indicadoresAtual.length > 0 && (
+                      <>
+                        <DivisoriaGrupo
+                          titulo="Situação agora"
+                          descricao="Não muda com o período -- é sempre o momento atual."
+                        />
+                        {indicadoresAtual.map((ind) => (
+                          <LinhaIndicador
+                            key={ind.chave}
+                            indicador={ind}
+                            expandido={expandidos.has(ind.chave)}
+                            onToggleInfo={toggleInfo}
+                            carregando={carregando}
+                            onClick={() => router.push(construirUrl(ind.navegacao))}
+                          />
+                        ))}
+                      </>
+                    )}
+
+                  </>
+                )}
+
+              </Cartao>
             </div>
           </FadeIn>
 
           <FadeIn delay={0.18}>
             <div className="mt-8">
 
-              <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-3 px-1">
+              <h2 className="text-sm font-bold text-[var(--text-muted)] uppercase tracking-wide mb-1 px-1">
                 Módulos
               </h2>
+              <p className="text-xs text-[var(--text-faint)] mb-3 px-1">
+                Sempre a situação atual do sistema -- não mudam com o período do Financeiro acima.
+              </p>
 
               <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
-
-                <LinhaModulo
-                  titulo="Financeiro"
-                  resumo={resumoFinanceiro}
-                  icone={TrendingUp}
-                  expansivel
-                  aberto={financeiroAberto}
-                  onToggle={() => setFinanceiroAberto((v) => !v)}
-                >
-
-                  {indicadoresPeriodo.length > 0 && (
-                    <>
-                      <DivisoriaGrupo
-                        titulo="Nesse período"
-                        descricao="Muda quando você troca o mês no cartão acima."
-                      />
-                      {indicadoresPeriodo.map((ind) => (
-                        <LinhaIndicador
-                          key={ind.chave}
-                          indicador={ind}
-                          expandido={expandidos.has(ind.chave)}
-                          onToggleInfo={toggleInfo}
-                          carregando={carregando}
-                          onClick={() => router.push(construirUrl(ind.navegacao))}
-                        />
-                      ))}
-                    </>
-                  )}
-
-                  {indicadoresAtual.length > 0 && (
-                    <>
-                      <DivisoriaGrupo
-                        titulo="Situação agora"
-                        descricao="Não muda com o período -- é sempre o momento atual."
-                      />
-                      {indicadoresAtual.map((ind) => (
-                        <LinhaIndicador
-                          key={ind.chave}
-                          indicador={ind}
-                          expandido={expandidos.has(ind.chave)}
-                          onToggleInfo={toggleInfo}
-                          carregando={carregando}
-                          onClick={() => router.push(construirUrl(ind.navegacao))}
-                        />
-                      ))}
-                    </>
-                  )}
-
-                </LinhaModulo>
 
                 <LinhaModulo
                   titulo="Imóveis e Kitnets"

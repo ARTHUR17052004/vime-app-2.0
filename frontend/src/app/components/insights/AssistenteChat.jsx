@@ -255,11 +255,11 @@ export default function AssistenteChat() {
 
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-5 h-[65vh]">
+      <div className="flex flex-col lg:flex-row gap-5 h-[65dvh]">
 
-        <div className="flex-1 min-w-0 flex flex-col">
+        <div className="flex-1 min-w-0 flex flex-col min-h-0">
 
-          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-1">
 
             {mensagens.length === 0 && !carregandoConversa && (
               <div className="h-full flex flex-col items-center justify-center text-center gap-3 px-4">
@@ -377,7 +377,7 @@ export default function AssistenteChat() {
         <div
           className={`
             ${historicoAberto ? "flex" : "hidden"} lg:flex
-            flex-col w-full lg:w-72 shrink-0
+            flex-col w-full lg:w-72 shrink-0 min-h-0
             lg:border-l lg:border-[var(--border-token)] lg:pl-5
           `}
         >
@@ -409,7 +409,7 @@ export default function AssistenteChat() {
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-1">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-1">
 
             {conversas.length === 0 && (
               <p className="text-xs text-[var(--text-faint)] px-1">Nenhuma conversa ainda.</p>
