@@ -14,4 +14,13 @@ export const SabadoService = {
 
   },
 
+  chat(mensagens) {
+
+    return api("/sabado/chat", {
+      method: "POST",
+      body: JSON.stringify({ mensagens }),
+    });
+
+  },
+
 };

@@ -30,6 +30,7 @@ import {
   CalendarCheck,
   ListChecks,
   ShieldAlert,
+  MessageCircleQuestion,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -37,6 +38,7 @@ import FadeIn from "../components/ui/FadeIn";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import SemPermissao from "../components/ui/SemPermissao";
+import PerguntarAoVimeModal from "../components/insights/PerguntarAoVimeModal";
 
 import { InsightsService } from "@/services/insights.service";
 import { SabadoService } from "@/services/sabado.service";
@@ -281,6 +283,7 @@ export default function InsightsPage() {
   const [sabadoTexto, setSabadoTexto] = useState("");
   const [sabadoCarregando, setSabadoCarregando] = useState(false);
   const [sabadoErro, setSabadoErro] = useState("");
+  const [chatAberto, setChatAberto] = useState(false);
 
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -609,19 +612,29 @@ export default function InsightsPage() {
                 titulo="Resumo executivo (SABADO)"
                 subtitulo={
                   podeUsarSabado
-                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. \"Pergunte ao VIME\" chega numa próxima fase."
+                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. Ou pergunte qualquer coisa ao VIME."
                     : "Você não tem permissão para gerar o resumo com IA."
                 }
                 acao={
                   podeUsarSabado && (
-                    <button
-                      onClick={gerarResumoSabado}
-                      disabled={sabadoCarregando}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
-                    >
-                      <Sparkles size={14} />
-                      {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setChatAberto(true)}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 px-3 py-1.5 rounded-lg border border-sky-400/30 hover:bg-sky-400/10 transition-colors"
+                      >
+                        <MessageCircleQuestion size={14} />
+                        Pergunte ao VIME
+                      </button>
+
+                      <button
+                        onClick={gerarResumoSabado}
+                        disabled={sabadoCarregando}
+                        className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
+                      >
+                        <Sparkles size={14} />
+                        {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
+                      </button>
+                    </div>
                   )
                 }
               >
@@ -637,6 +650,10 @@ export default function InsightsPage() {
                   </div>
                 )}
               </Cartao>
+
+              {podeUsarSabado && (
+                <PerguntarAoVimeModal isOpen={chatAberto} onClose={() => setChatAberto(false)} />
+              )}
             </div>
           </FadeIn>
 

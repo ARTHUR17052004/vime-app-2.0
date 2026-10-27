@@ -30,7 +30,11 @@ function disponivel() {
   return Boolean(CONFIGS[PROVEDOR]?.apiKey);
 }
 
-async function gerarResposta(mensagens, { temperatura = 0.3 } = {}) {
+// Devolve a mensagem bruta do modelo (não só o texto) -- quem chama
+// pode passar `ferramentas` (formato "tools" da OpenAI) e precisa
+// inspecionar `tool_calls` antes de decidir se já é a resposta final
+// ou se precisa rodar uma função e mandar o resultado de volta.
+async function gerarRespostaBruta(mensagens, { temperatura = 0.3, ferramentas } = {}) {
 
   const config = CONFIGS[PROVEDOR];
 
@@ -42,26 +46,46 @@ async function gerarResposta(mensagens, { temperatura = 0.3 } = {}) {
     throw new Error(`Chave de API ausente para o provedor "${PROVEDOR}" -- defina ${config.envVar} no .env.`);
   }
 
+  const corpo = {
+    model: config.modelo,
+    messages: mensagens,
+    temperature: temperatura,
+  };
+
+  if (ferramentas) {
+    corpo.tools = ferramentas;
+    corpo.tool_choice = "auto";
+  }
+
   const resposta = await fetch(`${config.baseURL}/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${config.apiKey}`,
     },
-    body: JSON.stringify({
-      model: config.modelo,
-      messages: mensagens,
-      temperature: temperatura,
-    }),
+    body: JSON.stringify(corpo),
   });
 
   if (!resposta.ok) {
-    const corpo = await resposta.text().catch(() => "");
-    throw new Error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}): ${corpo.slice(0, 500)}`);
+    const corpoErro = await resposta.text().catch(() => "");
+    throw new Error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}): ${corpoErro.slice(0, 500)}`);
   }
 
   const dados = await resposta.json();
-  const texto = dados.choices?.[0]?.message?.content?.trim();
+  const mensagem = dados.choices?.[0]?.message;
+
+  if (!mensagem) {
+    throw new Error(`Provedor de IA (${PROVEDOR}) retornou resposta vazia.`);
+  }
+
+  return mensagem;
+
+}
+
+async function gerarResposta(mensagens, opcoes) {
+
+  const mensagem = await gerarRespostaBruta(mensagens, opcoes);
+  const texto = mensagem.content?.trim();
 
   if (!texto) {
     throw new Error(`Provedor de IA (${PROVEDOR}) retornou resposta vazia.`);
@@ -71,4 +95,4 @@ async function gerarResposta(mensagens, { temperatura = 0.3 } = {}) {
 
 }
 
-module.exports = { gerarResposta, disponivel, PROVEDOR };
+module.exports = { gerarResposta, gerarRespostaBruta, disponivel, PROVEDOR };
