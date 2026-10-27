@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
-const configuracaoFinanceiroService = require("../services/configuracaoFinanceiroService");
+const contaPagamentoService = require("../services/contaPagamentoService");
 
 /*
   Recorrência de Receita direto (sem Contrato -- esse já tem seu
@@ -28,9 +28,6 @@ module.exports = async () => {
   const pagasRecorrentes = await prisma.receita.findMany({
     where: { recorrente: true, status: "PAGA" },
   });
-
-  const config = await configuracaoFinanceiroService.buscar();
-  const taxa = config.taxaBoletoPercentual || 0;
 
   let criadas = 0;
   let jaExistiam = 0;
@@ -64,6 +61,12 @@ module.exports = async () => {
       jaExistiam++;
       continue;
     }
+
+    // Taxa é da conta de PAGAMENTO, não do sistema inteiro -- resolve
+    // pelo locador desta receita de novo a cada uma (pode mudar entre
+    // locadores diferentes).
+    const conta = await contaPagamentoService.resolverParaLocador(receita.locadorId);
+    const taxa = conta?.taxaBoletoPercentual || 0;
 
     const valorLiquido = Math.round(receita.valor * (1 - taxa / 100) * 100) / 100;
 

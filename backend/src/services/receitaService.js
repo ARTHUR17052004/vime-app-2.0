@@ -5,7 +5,7 @@ const { filtroReceita } = require('../utils/escopoLocador');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
-const configuracaoFinanceiroService = require('./configuracaoFinanceiroService');
+const contaPagamentoService = require('./contaPagamentoService');
 const { doContrato, doInquilino } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
 
@@ -98,17 +98,23 @@ const buscarPorId = (id, usuario) => {
   });
 };
 
-// Quando o valor líquido não vier preenchido (undefined/null), calcula
-// sozinho a partir da taxa de boleto configurada -- só mexe quando
+// Valor líquido NUNCA vem do front (campo só de exibição lá) -- sempre
+// recalculado aqui pela taxa da conta que processa essa receita (do
+// locador do contrato/inquilino, ou a conta padrão do sistema -- mesma
+// resolução de gatewayPagamentoService.enviarCobranca). Só mexe quando
 // "valor" também está sendo definido nesta chamada, pra uma atualização
 // parcial (ex.: só marcar como paga) não recalcular por engano.
-async function aplicarValorLiquidoPadrao(dados) {
+// `registroExistente` é a Receita já salva, usada como fallback de
+// contratoId/inquilinoId/locadorId numa atualização parcial que não
+// reenvia esses campos.
+async function aplicarValorLiquidoPadrao(dados, registroExistente) {
 
   if (dados.valor === undefined) return dados;
-  if (dados.valorLiquido !== undefined && dados.valorLiquido !== null) return dados;
 
-  const config = await configuracaoFinanceiroService.buscar();
-  const taxa = config.taxaBoletoPercentual || 0;
+  const base = { ...registroExistente, ...dados };
+  const locadorId = base.locadorId || await locadorDaReceita(base);
+  const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+  const taxa = conta?.taxaBoletoPercentual || 0;
 
   dados.valorLiquido = Math.round(dados.valor * (1 - taxa / 100) * 100) / 100;
 
@@ -164,11 +170,12 @@ const atualizar = async (id, dados, autor) => {
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
-  dados = await aplicarValorLiquidoPadrao(dados);
 
   const anterior = await prisma.receita.findUnique({
     where: { id }
   });
+
+  dados = await aplicarValorLiquidoPadrao(dados, anterior);
 
   // Atualização parcial (ex.: só marcar como paga) não pode reprovar
   // por "faltar" um campo que já está preenchido desde a criação.
@@ -237,10 +244,26 @@ const remover = async (id, autor) => {
 
 };
 
+// Pro front mostrar a conta/taxa que vai valer ANTES de salvar --
+// mesma resolução usada de verdade na criação (locadorDaReceita +
+// contaPagamentoService), só que sem gravar nada.
+const previsaoTaxaBoleto = async ({ inquilinoId, contratoId }) => {
+
+  const locadorId = await locadorDaReceita({ inquilinoId, contratoId });
+  const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+
+  return {
+    contaNome: conta?.nome || null,
+    taxaBoletoPercentual: conta?.taxaBoletoPercentual || 0,
+  };
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
   criar,
   atualizar,
-  remover
+  remover,
+  previsaoTaxaBoleto
 };

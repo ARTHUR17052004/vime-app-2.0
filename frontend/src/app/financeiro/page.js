@@ -15,7 +15,6 @@ import FinanceiroModal from "../components/financeiro/FinanceiroModal";
 
 import ReceitaForm from "../components/financeiro/ReceitaForm";
 import DespesaForm from "../components/financeiro/DespesaForm";
-import TaxaBoletoModal from "../components/financeiro/TaxaBoletoModal";
 
 import FinanceiroRelatorios from "../components/financeiro/FinanceiroRelatorios";
 import FinanceiroDashboard from "../components/financeiro/FinanceiroDashboard";
@@ -58,7 +57,6 @@ function FinanceiroPageConteudo() {
   const [despesas, setDespesas] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
-  const [taxaBoletoModalOpen, setTaxaBoletoModalOpen] = useState(false);
 
   const [tipoModal, setTipoModal] =
     useState("receita");
@@ -283,6 +281,22 @@ function FinanceiroPageConteudo() {
 
   };
 
+  const toggleRecorrenteReceita = async (id, recorrente) => {
+
+    try {
+
+      await ReceitaService.atualizar(id, { recorrente });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao atualizar a recorrência.");
+
+    }
+
+  };
+
   const fixarDespesa = async (id, fixado) => {
 
     try {
@@ -452,13 +466,6 @@ function FinanceiroPageConteudo() {
             <>
               <Button
                 variant="secondary"
-                onClick={() => setTaxaBoletoModalOpen(true)}
-              >
-                Taxa de Boleto
-              </Button>
-
-              <Button
-                variant="secondary"
                 onClick={() => {
                   setTipoModal("despesa");
                   setModalOpen(true);
@@ -606,6 +613,7 @@ function FinanceiroPageConteudo() {
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
           onFixar={fixarReceita}
+          onToggleRecorrente={toggleRecorrenteReceita}
           onNovo={() => {
             setTipoModal("receita");
             setModalOpen(true);
@@ -646,6 +654,7 @@ function FinanceiroPageConteudo() {
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
         onFixar={fixarReceita}
+        onToggleRecorrente={toggleRecorrenteReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);
@@ -693,11 +702,6 @@ function FinanceiroPageConteudo() {
         />
       )}
     </FinanceiroModal>
-
-    <TaxaBoletoModal
-      isOpen={taxaBoletoModalOpen}
-      onClose={() => setTaxaBoletoModalOpen(false)}
-    />
 
       </PageContainer>
 

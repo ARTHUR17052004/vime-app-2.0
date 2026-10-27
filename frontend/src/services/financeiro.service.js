@@ -24,6 +24,18 @@ export const ReceitaService = {
     return api("/receitas");
   },
 
+  taxaBoleto({ inquilinoId, contratoId } = {}) {
+
+    const params = new URLSearchParams();
+    if (inquilinoId) params.set("inquilinoId", inquilinoId);
+    if (contratoId) params.set("contratoId", contratoId);
+
+    const query = params.toString();
+
+    return api(`/receitas/taxa-boleto${query ? `?${query}` : ""}`);
+
+  },
+
   criar(dados) {
     return api("/receitas", {
       method: "POST",

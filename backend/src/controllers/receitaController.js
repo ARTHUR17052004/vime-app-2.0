@@ -40,6 +40,20 @@ const buscarPorId = async (req, res) => {
 
 };
 
+const taxaBoleto = async (req, res) => {
+
+  const dados = await receitaService.previsaoTaxaBoleto({
+    inquilinoId: req.query.inquilinoId || null,
+    contratoId: req.query.contratoId || null,
+  });
+
+  return res.json({
+    success: true,
+    data: dados
+  });
+
+};
+
 const criar = async (req, res) => {
 
   const receita = await receitaService.criar(req.body, req.usuario);
@@ -94,6 +108,7 @@ const remover = async (req, res) => {
 module.exports = {
   listar,
   buscarPorId,
+  taxaBoleto,
   criar,
   atualizar,
   remover

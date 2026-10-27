@@ -16,6 +16,10 @@ const FORM_INICIAL = {
   descricao: "",
   valor: "",
   vencimento: "",
+  pagadorNome: "",
+  pagadorCpf: "",
+  pagadorEmail: "",
+  pagadorTelefone: "",
 };
 
 // Categoria/Descrição/Valor são colunas obrigatórias no banco da
@@ -133,7 +137,16 @@ export default function AsaasNovaCobrancaModal({
         valor: Number(form.valor),
         vencimento: form.vencimento || null,
         status: "PENDENTE",
-        ...(form.contratoId && { contratoId: form.contratoId }),
+        ...(form.contratoId
+          ? { contratoId: form.contratoId }
+          : {
+              // Sem contrato: pagador avulso -- digitado na hora, sem
+              // precisar cadastrar um inquilino só pra essa cobrança.
+              pagadorNome: form.pagadorNome || null,
+              pagadorCpf: form.pagadorCpf || null,
+              pagadorEmail: form.pagadorEmail || null,
+              pagadorTelefone: form.pagadorTelefone || null,
+            }),
       };
 
       const resposta = await ReceitaService.criar(dados);
@@ -234,6 +247,72 @@ export default function AsaasNovaCobrancaModal({
             vira o pagador da cobrança).
           </p>
         </div>
+
+        {!form.contratoId && (
+
+          <div className="rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 space-y-4">
+
+            <p className="text-xs text-[var(--text-faint)]">
+              Pagador avulso -- preencha pra enviar essa cobrança ao banco (BB/Asaas) sem
+              vincular a um contrato. Nome e CPF são o mínimo que o banco exige pra emitir
+              o boleto.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-5">
+
+              <div>
+                <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                  Nome do Pagador
+                </label>
+                <input
+                  value={form.pagadorNome}
+                  onChange={handleChange("pagadorNome")}
+                  placeholder="Nome completo"
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                  CPF do Pagador
+                </label>
+                <input
+                  value={form.pagadorCpf}
+                  onChange={handleChange("pagadorCpf")}
+                  placeholder="000.000.000-00"
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                  E-mail do Pagador (opcional)
+                </label>
+                <input
+                  value={form.pagadorEmail}
+                  onChange={handleChange("pagadorEmail")}
+                  placeholder="email@exemplo.com"
+                  className={inputStyle}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                  Telefone do Pagador (opcional)
+                </label>
+                <input
+                  value={form.pagadorTelefone}
+                  onChange={handleChange("pagadorTelefone")}
+                  placeholder="(00) 00000-0000"
+                  className={inputStyle}
+                />
+              </div>
+
+            </div>
+
+          </div>
+
+        )}
 
         <div className="grid md:grid-cols-2 gap-5">
 

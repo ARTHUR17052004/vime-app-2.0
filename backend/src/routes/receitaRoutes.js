@@ -11,6 +11,8 @@ router.use(authMiddleware);
 
 router.get('/', permissaoMiddleware('financeiro.visualizar'), receitaController.listar);
 
+router.get('/taxa-boleto', permissaoMiddleware('financeiro.visualizar'), receitaController.taxaBoleto);
+
 router.get('/:id', permissaoMiddleware('financeiro.visualizar'), receitaController.buscarPorId);
 
 router.post('/', permissaoMiddleware('financeiro.editar'), receitaController.criar);

@@ -4,22 +4,12 @@ import { useEffect, useState } from "react";
 
 import { InquilinoService } from "../../../services/inquilinos.service";
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
-import { ConfiguracaoFinanceiroService } from "../../../services/configuracaoFinanceiro.service";
+import { ReceitaService } from "../../../services/financeiro.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
 
 // Categoria/Descrição/Valor são colunas obrigatórias no banco -- não
 // tem como ficarem em branco independente do que for configurado.
 const SEMPRE_OBRIGATORIOS = new Set(["categoria", "descricao", "valor"]);
-
-// Calcula o valor líquido a partir do bruto e da taxa de boleto (%) --
-// mesma conta que o backend faz sozinho quando valorLiquido não vem
-// preenchido; replicado aqui só pra já mostrar a sugestão em tempo
-// real, sem esperar o salvar.
-function calcularValorLiquido(valor, taxaPercentual) {
-  const numero = Number(String(valor).replace(",", "."));
-  if (Number.isNaN(numero)) return "";
-  return (Math.round(numero * (1 - taxaPercentual / 100) * 100) / 100).toString();
-}
 
 const CAMPOS = ["categoria", "descricao", "valor", "inquilinoId", "status", "vencimento", "dataPagamento"];
 
@@ -46,22 +36,15 @@ export default function ReceitaForm({
       vencimento: "",
       dataPagamento: "",
       inquilinoId: "",
-      pagadorNome: "",
-      pagadorCpf: "",
-      pagadorEmail: "",
-      pagadorTelefone: "",
-      valorLiquido: "",
-      recorrente: false,
     });
 
   const [inquilinos, setInquilinos] = useState([]);
 
-  const [taxaBoleto, setTaxaBoleto] = useState(0);
-
-  // Só true se o usuário mexeu manualmente no campo "Valor a receber"
-  // -- enquanto isso não acontece, ele acompanha sozinho o cálculo
-  // automático toda vez que o "Valor" muda.
-  const [valorLiquidoEditadoManualmente, setValorLiquidoEditadoManualmente] = useState(false);
+  // Conta/taxa que vai valer pra essa receita -- resolvida pelo
+  // backend (locador do inquilino -> conta dele, ou a conta padrão do
+  // sistema). Só pra exibir; Valor a Receber e Taxa Cobrada são
+  // sempre campos calculados, nunca editáveis aqui.
+  const [contaInfo, setContaInfo] = useState({ contaNome: null, taxaBoletoPercentual: 0 });
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
@@ -105,26 +88,8 @@ export default function ReceitaForm({
 
     }
 
-    async function carregarTaxaBoleto() {
-
-      try {
-
-        const resposta = await ConfiguracaoFinanceiroService.buscar();
-        const dados = resposta.data || resposta;
-
-        setTaxaBoleto(dados.taxaBoletoPercentual || 0);
-
-      } catch (err) {
-
-        console.error("Erro ao carregar taxa de boleto:", err);
-
-      }
-
-    }
-
     carregarInquilinos();
     carregarObrigatorios();
-    carregarTaxaBoleto();
 
   }, []);
 
@@ -134,34 +99,33 @@ export default function ReceitaForm({
       setFormData({
         ...receitaEditando,
         inquilinoId: receitaEditando.inquilinoId || "",
-        pagadorNome: receitaEditando.pagadorNome || "",
-        pagadorCpf: receitaEditando.pagadorCpf || "",
-        pagadorEmail: receitaEditando.pagadorEmail || "",
-        pagadorTelefone: receitaEditando.pagadorTelefone || "",
-        valorLiquido: receitaEditando.valorLiquido ?? "",
-        recorrente: receitaEditando.recorrente || false,
       });
-      // Já tem valor líquido salvo -- editar o Valor não deve
-      // recalcular por cima sem avisar, então trata como "manual".
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setValorLiquidoEditadoManualmente(true);
     }
   }, [receitaEditando]);
 
-  // Acompanha o Valor sozinho até o usuário mexer direto no Valor a
-  // Receber -- mesmo cálculo que o backend faz quando não vem
-  // preenchido, só que aqui já mostra em tempo real.
+  // A conta (e a taxa dela) depende de quem vai pagar -- refaz a
+  // consulta toda vez que o inquilino muda, pra sempre mostrar o par
+  // certo valor/taxa antes mesmo de salvar.
   useEffect(() => {
-    if (valorLiquidoEditadoManualmente) return;
-    if (formData.valor === "") return;
 
-    setFormData((atual) => ({
-      ...atual,
-      valorLiquido: calcularValorLiquido(formData.valor, taxaBoleto),
-    }));
+    let cancelado = false;
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.valor, taxaBoleto]);
+    ReceitaService.taxaBoleto({ inquilinoId: formData.inquilinoId || undefined })
+      .then((resposta) => {
+        if (cancelado) return;
+        const dados = resposta.data || resposta;
+        setContaInfo({
+          contaNome: dados.contaNome || null,
+          taxaBoletoPercentual: dados.taxaBoletoPercentual || 0,
+        });
+      })
+      .catch((err) => console.error("Erro ao buscar taxa de boleto:", err));
+
+    return () => {
+      cancelado = true;
+    };
+
+  }, [formData.inquilinoId]);
 
   const handleChange = (e) => {
     setFormData({
@@ -171,14 +135,47 @@ export default function ReceitaForm({
     });
   };
 
-  const handleChangeValorLiquido = (e) => {
-    setValorLiquidoEditadoManualmente(true);
-    setFormData({ ...formData, valorLiquido: e.target.value });
+  // Inquilino já tem o valor do aluguel cadastrado na kitnet -- puxa
+  // sozinho pra Valor e monta a Descrição no mesmo padrão já usado na
+  // recorrência automática (cobrancaRecorrenteService). Continua
+  // editável depois, é só um ponto de partida.
+  const handleChangeInquilino = (e) => {
+
+    const inquilinoId = e.target.value;
+    const inquilino = inquilinos.find((i) => i.id === inquilinoId);
+
+    setFormData((atual) => {
+
+      const atualizado = { ...atual, inquilinoId };
+
+      if (inquilino && atual.categoria === "Aluguel") {
+
+        const agora = new Date();
+
+        if (inquilino.kitnet?.aluguel != null) {
+          atualizado.valor = String(inquilino.kitnet.aluguel);
+        }
+
+        atualizado.descricao = `Aluguel - ${agora.getMonth() + 1}/${agora.getFullYear()}`;
+
+      }
+
+      return atualizado;
+
+    });
+
   };
 
-  const handleChangeRecorrente = (e) => {
-    setFormData({ ...formData, recorrente: e.target.checked });
-  };
+  const numeroValor = Number(String(formData.valor).replace(",", "."));
+  const valorValido = formData.valor !== "" && !Number.isNaN(numeroValor);
+
+  const valorLiquidoCalculado = valorValido
+    ? Math.round(numeroValor * (1 - contaInfo.taxaBoletoPercentual / 100) * 100) / 100
+    : null;
+
+  const taxaCobradaCalculada = valorValido && valorLiquidoCalculado !== null
+    ? Math.round((numeroValor - valorLiquidoCalculado) * 100) / 100
+    : null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -204,22 +201,18 @@ export default function ReceitaForm({
       dataPagamento: formData.dataPagamento,
       inquilinoId: formData.inquilinoId || null,
       contratoId: formData.contratoId || undefined,
-      // Pagador avulso: só importa quando não tem inquilino escolhido
-      // (é a alternativa pra gerar boleto sem cadastrar ninguém).
-      pagadorNome: formData.inquilinoId ? null : (formData.pagadorNome || null),
-      pagadorCpf: formData.inquilinoId ? null : (formData.pagadorCpf || null),
-      pagadorEmail: formData.inquilinoId ? null : (formData.pagadorEmail || null),
-      pagadorTelefone: formData.inquilinoId ? null : (formData.pagadorTelefone || null),
-      // "" (nunca mexeu) manda undefined de propósito -- deixa o
-      // backend calcular sozinho pela taxa configurada, em vez de
-      // mandar null e achar que foi um "zerar" deliberado.
-      valorLiquido: formData.valorLiquido === "" ? undefined : formData.valorLiquido,
-      recorrente: formData.recorrente,
+      // valorLiquido não vai no payload -- é sempre calculado pelo
+      // backend a partir da conta de pagamento, nunca editável aqui.
+      // Recorrência também não -- vira uma ação na própria linha da
+      // receita, depois de criada (igual Enviar ao Banco).
     });
   };
 
   const inputStyle =
     "border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full";
+
+  const inputCalculadoStyle =
+    "border border-[var(--border-token)] bg-[var(--surface-3)] text-[var(--text-muted)] rounded-xl p-3 w-full cursor-not-allowed";
 
   return (
     <form
@@ -260,88 +253,21 @@ export default function ReceitaForm({
           <select
             name="inquilinoId"
             value={formData.inquilinoId}
-            onChange={handleChange}
+            onChange={handleChangeInquilino}
             required={obrigatorios.has("inquilinoId")}
             className={inputStyle}
           >
-            <option value="">Nenhum (preencha o pagador avulso abaixo, se for enviar ao banco)</option>
+            <option value="">Selecione um inquilino</option>
             {inquilinos.map((inq) => (
               <option key={inq.id} value={inq.id}>
                 {inq.nome}
               </option>
             ))}
           </select>
+          <p className="text-[10px] text-[var(--text-faint)] mt-1">
+            Cobrança avulsa, sem inquilino cadastrado? Use Transações &gt; Nova Cobrança.
+          </p>
         </div>
-
-        {!formData.inquilinoId && (
-
-          <div className="md:col-span-2 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 space-y-4">
-
-            <p className="text-xs text-[var(--text-faint)]">
-              Pagador avulso -- preencha só se for enviar essa receita ao banco (BB/Asaas)
-              sem vincular a um inquilino cadastrado. Sem contrato nem inquilino, nome e CPF
-              são o mínimo que o banco exige pra emitir o boleto.
-            </p>
-
-            <div className="grid md:grid-cols-2 gap-5">
-
-              <div>
-                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-                  Nome do Pagador
-                </label>
-                <input
-                  name="pagadorNome"
-                  placeholder="Nome completo"
-                  value={formData.pagadorNome}
-                  onChange={handleChange}
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-                  CPF do Pagador
-                </label>
-                <input
-                  name="pagadorCpf"
-                  placeholder="000.000.000-00"
-                  value={formData.pagadorCpf}
-                  onChange={handleChange}
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-                  E-mail do Pagador (opcional)
-                </label>
-                <input
-                  name="pagadorEmail"
-                  placeholder="email@exemplo.com"
-                  value={formData.pagadorEmail}
-                  onChange={handleChange}
-                  className={inputStyle}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-                  Telefone do Pagador (opcional)
-                </label>
-                <input
-                  name="pagadorTelefone"
-                  placeholder="(00) 00000-0000"
-                  value={formData.pagadorTelefone}
-                  onChange={handleChange}
-                  className={inputStyle}
-                />
-              </div>
-
-            </div>
-
-          </div>
-
-        )}
 
         <div>
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">
@@ -379,30 +305,31 @@ export default function ReceitaForm({
             Valor a receber
           </label>
           <input
-            name="valorLiquido"
-            placeholder="Valor a receber"
-            value={formData.valorLiquido}
-            onChange={handleChangeValorLiquido}
-            className={inputStyle}
+            disabled
+            value={valorLiquidoCalculado !== null ? valorLiquidoCalculado : ""}
+            placeholder="--"
+            className={inputCalculadoStyle}
           />
           <p className="text-[10px] text-[var(--text-faint)] mt-1">
-            {taxaBoleto > 0
-              ? `Calculado sozinho com a taxa de boleto configurada (${taxaBoleto}%) -- edite se essa cobrança tiver uma taxa diferente.`
-              : "Sem taxa de boleto configurada ainda -- some igual ao valor cobrado."}
+            Calculado sozinho -- não editável aqui.
           </p>
         </div>
 
-        <div className="md:col-span-2 flex items-center gap-2.5 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4">
-          <input
-            type="checkbox"
-            id="recorrente"
-            checked={formData.recorrente}
-            onChange={handleChangeRecorrente}
-            className="w-4 h-4 accent-emerald-500"
-          />
-          <label htmlFor="recorrente" className="text-sm text-[var(--text)] cursor-pointer">
-            Repetir essa cobrança todo mês (gera a próxima automaticamente assim que esta for paga)
+        <div>
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Taxa cobrada
           </label>
+          <input
+            disabled
+            value={taxaCobradaCalculada !== null ? taxaCobradaCalculada : ""}
+            placeholder="--"
+            className={inputCalculadoStyle}
+          />
+          <p className="text-[10px] text-[var(--text-faint)] mt-1">
+            {contaInfo.contaNome
+              ? `Conta "${contaInfo.contaNome}" -- ${contaInfo.taxaBoletoPercentual}% de taxa de boleto.`
+              : "Nenhuma conta de pagamento cadastrada ainda."}
+          </p>
         </div>
 
         <div>

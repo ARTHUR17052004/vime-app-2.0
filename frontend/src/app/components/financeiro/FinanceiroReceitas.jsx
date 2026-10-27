@@ -52,6 +52,7 @@ export default function FinanceiroReceitas({
   onUpdate,
   onMarcarPago,
   onFixar,
+  onToggleRecorrente,
   onNovo,
 }) {
   const podeEditar = usePermissao("financeiro.editar");
@@ -131,6 +132,16 @@ export default function FinanceiroReceitas({
             setMenuAberto(null);
           }}
         />
+
+        {podeEditar && (
+          <MenuButton
+            label={item.recorrente ? "Desativar Recorrência" : "Ativar Recorrência"}
+            onClick={() => {
+              onToggleRecorrente?.(item.id, !item.recorrente);
+              setMenuAberto(null);
+            }}
+          />
+        )}
 
         {podeEditar && (
           <MenuButton

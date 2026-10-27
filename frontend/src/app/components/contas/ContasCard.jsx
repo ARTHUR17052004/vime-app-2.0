@@ -63,6 +63,7 @@ const FORM_INICIAL = {
   id: null,
   provider: "ASAAS",
   nome: "",
+  taxaBoletoPercentual: "",
   padrao: false,
   ativo: true,
   credenciais: {},
@@ -106,6 +107,7 @@ export default function ContasCard() {
       id: conta.id,
       provider: conta.provider,
       nome: conta.nome,
+      taxaBoletoPercentual: conta.taxaBoletoPercentual ?? "",
       padrao: conta.padrao,
       ativo: conta.ativo,
       credenciais: conta.credenciais || {},
@@ -147,6 +149,7 @@ export default function ContasCard() {
       const payload = {
         provider: form.provider,
         nome: form.nome,
+        taxaBoletoPercentual: form.taxaBoletoPercentual,
         padrao: form.padrao,
         ativo: form.ativo,
         credenciais: form.credenciais,
@@ -330,6 +333,21 @@ export default function ContasCard() {
               placeholder='Ex: "BB - Locador SH"'
               className={inputStyle}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+              Taxa de boleto (%)
+            </label>
+            <input
+              value={form.taxaBoletoPercentual}
+              onChange={(e) => setForm((a) => ({ ...a, taxaBoletoPercentual: e.target.value }))}
+              placeholder="Ex: 3,85"
+              className={inputStyle}
+            />
+            <p className="text-xs text-[var(--text-faint)] mt-1">
+              % descontado por essa conta na emissão do boleto -- usado pra calcular sozinho o Valor a Receber em Financeiro &gt; Nova Receita.
+            </p>
           </div>
 
           <div className="border-t border-[var(--border-token)] pt-5 space-y-4">

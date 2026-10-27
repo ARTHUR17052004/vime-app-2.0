@@ -39,12 +39,19 @@ const criar = async (dados) => {
       provider: dados.provider,
       nome: dados.nome,
       credenciais: dados.credenciais || {},
+      taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
       padrao: dados.padrao === true,
       ativo: dados.ativo !== false,
     },
   });
 
 };
+
+function paraTaxaOuZero(valor) {
+  if (valor === undefined || valor === null || valor === "") return 0;
+  const numero = Number(String(valor).replace(",", "."));
+  return Number.isNaN(numero) ? 0 : numero;
+}
 
 const atualizar = async (id, dados) => {
 
@@ -60,6 +67,7 @@ const atualizar = async (id, dados) => {
     data: {
       nome: dados.nome,
       credenciais: dados.credenciais,
+      taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
       padrao: dados.padrao,
       ativo: dados.ativo,
     },
