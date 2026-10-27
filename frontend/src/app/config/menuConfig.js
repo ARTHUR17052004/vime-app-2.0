@@ -34,7 +34,7 @@ const menuConfig = [
         permissao: "dashboard.visualizar",
       },
       {
-        label: "Assistente IA",
+        label: "Assistente VIME",
         href: "/insights",
         icon: Sparkles,
         badge: "Beta",

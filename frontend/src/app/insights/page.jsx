@@ -279,7 +279,7 @@ export default function InsightsPage() {
   const router = useRouter();
 
   // Assistente é a aba padrão quando o usuário tem permissão pra ele
-  // -- é o motivo da tela se chamar "Assistente IA" no menu agora.
+  // -- é o motivo da tela se chamar "Assistente VIME" no menu agora.
   const [aba, setAba] = useState(podeUsarSabado ? "assistente" : "visao-geral");
 
   const [resumo, setResumo] = useState(null);
@@ -473,7 +473,7 @@ export default function InsightsPage() {
 
                 <div>
                   <h1 className="text-4xl font-black text-[var(--text)]">
-                    Assistente IA
+                    Assistente VIME
                   </h1>
                   <p className="text-[var(--text-subtle)]">
                     Converse com o SABADO sobre a operação ou veja os indicadores direto.
@@ -539,7 +539,7 @@ export default function InsightsPage() {
                   <AssistenteChat />
                 ) : (
                   <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-6 text-center text-sm text-[var(--text-muted)]">
-                    Você não tem permissão para usar o Assistente IA.
+                    Você não tem permissão para usar o Assistente VIME.
                   </div>
                 )}
               </div>
