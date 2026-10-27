@@ -27,6 +27,21 @@ function inicioDoDia(data) {
   return d;
 }
 
+// "AAAA-MM-DD" (query ?inicio=/?fim= vindo do front) interpretado pelo
+// construtor do Date vira meia-noite UTC -- num fuso atrás de UTC
+// (Brasil, servidor roda em -03:00) isso "volta" um dia quando o resto
+// do código lê os componentes locais depois (ex.: inicioDoDia faz
+// setHours(0,0,0,0) em cima de um Date que já virou o dia anterior às
+// 21h local). Monta a data a partir dos componentes direto, sem passar
+// por UTC, igual ao fix já aplicado no formatDate.js do front.
+function dataLocalDoISO(valor) {
+  if (typeof valor === "string" && /^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+    const [ano, mes, dia] = valor.split("-").map(Number);
+    return new Date(ano, mes - 1, dia);
+  }
+  return new Date(valor);
+}
+
 function inicioMes(data) {
   return new Date(data.getFullYear(), data.getMonth(), 1);
 }
@@ -57,8 +72,8 @@ function dataISO(data) {
 const resumoFinanceiro = async (usuario, { inicio, fim } = {}) => {
 
   const agora = new Date();
-  const periodoInicio = inicio ? inicioDoDia(new Date(inicio)) : inicioMes(agora);
-  const periodoFim = fim ? new Date(new Date(fim).setHours(23, 59, 59, 999)) : fimMes(agora);
+  const periodoInicio = inicio ? inicioDoDia(dataLocalDoISO(inicio)) : inicioMes(agora);
+  const periodoFim = fim ? new Date(dataLocalDoISO(fim).setHours(23, 59, 59, 999)) : fimMes(agora);
 
   const { inicio: anteriorInicio, fim: anteriorFim } = periodoAnteriorDe(periodoInicio, periodoFim);
 
