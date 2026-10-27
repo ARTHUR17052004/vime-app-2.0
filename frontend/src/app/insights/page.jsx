@@ -30,7 +30,7 @@ import {
   CalendarCheck,
   ListChecks,
   ShieldAlert,
-  MessageCircleQuestion,
+  LayoutGrid,
 } from "lucide-react";
 
 import MainLayout from "../components/layout/MainLayout";
@@ -38,7 +38,7 @@ import FadeIn from "../components/ui/FadeIn";
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import SemPermissao from "../components/ui/SemPermissao";
-import PerguntarAoVimeModal from "../components/insights/PerguntarAoVimeModal";
+import AssistenteChat from "../components/insights/AssistenteChat";
 
 import { InsightsService } from "@/services/insights.service";
 import { SabadoService } from "@/services/sabado.service";
@@ -280,10 +280,13 @@ export default function InsightsPage() {
 
   const router = useRouter();
 
+  // Assistente é a aba padrão quando o usuário tem permissão pra ele
+  // -- é o motivo da tela se chamar "Assistente IA" no menu agora.
+  const [aba, setAba] = useState(podeUsarSabado ? "assistente" : "visao-geral");
+
   const [sabadoTexto, setSabadoTexto] = useState("");
   const [sabadoCarregando, setSabadoCarregando] = useState(false);
   const [sabadoErro, setSabadoErro] = useState("");
-  const [chatAberto, setChatAberto] = useState(false);
 
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
@@ -509,36 +512,80 @@ export default function InsightsPage() {
 
                 <div>
                   <h1 className="text-4xl font-black text-[var(--text)]">
-                    VIME Insights
+                    Assistente IA
                   </h1>
                   <p className="text-[var(--text-subtle)]">
-                    Visão executiva da operação -- clique em qualquer número pra ver os registros por trás dele.
+                    Converse com o SABADO sobre a operação ou veja os indicadores direto.
                   </p>
                 </div>
 
               </div>
 
-              <button
-                onClick={carregar}
-                disabled={carregando}
-                title="Atualizar"
-                className="
-                  w-11 h-11 shrink-0
-                  rounded-xl
-                  bg-[var(--surface-2)] hover:bg-[var(--surface-3)]
-                  flex items-center justify-center
-                  transition
-                  disabled:opacity-50
-                "
-              >
-                <RefreshCw size={18} className={`text-[var(--text-muted)] ${carregando ? "animate-spin" : ""}`} />
-              </button>
+              {aba === "visao-geral" && (
+                <button
+                  onClick={carregar}
+                  disabled={carregando}
+                  title="Atualizar"
+                  className="
+                    w-11 h-11 shrink-0
+                    rounded-xl
+                    bg-[var(--surface-2)] hover:bg-[var(--surface-3)]
+                    flex items-center justify-center
+                    transition
+                    disabled:opacity-50
+                  "
+                >
+                  <RefreshCw size={18} className={`text-[var(--text-muted)] ${carregando ? "animate-spin" : ""}`} />
+                </button>
+              )}
 
             </div>
 
           </FadeIn>
 
-          {erro && (
+          <FadeIn delay={0.06}>
+            <div className="mt-6 inline-flex rounded-xl border border-[var(--border-token)] bg-[var(--surface)] p-1 gap-1">
+
+              <button
+                onClick={() => setAba("assistente")}
+                className={`
+                  flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-colors
+                  ${aba === "assistente" ? "bg-emerald-500/15 text-emerald-400" : "text-[var(--text-muted)] hover:text-[var(--text)]"}
+                `}
+              >
+                <Sparkles size={14} />
+                Assistente
+              </button>
+
+              <button
+                onClick={() => setAba("visao-geral")}
+                className={`
+                  flex items-center gap-1.5 text-xs font-semibold px-4 py-2 rounded-lg transition-colors
+                  ${aba === "visao-geral" ? "bg-emerald-500/15 text-emerald-400" : "text-[var(--text-muted)] hover:text-[var(--text)]"}
+                `}
+              >
+                <LayoutGrid size={14} />
+                Visão geral
+              </button>
+
+            </div>
+          </FadeIn>
+
+          {aba === "assistente" && (
+            <FadeIn delay={0.1}>
+              <div className="mt-6">
+                {podeUsarSabado ? (
+                  <AssistenteChat />
+                ) : (
+                  <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-6 text-center text-sm text-[var(--text-muted)]">
+                    Você não tem permissão para usar o Assistente IA.
+                  </div>
+                )}
+              </div>
+            </FadeIn>
+          )}
+
+          {aba === "visao-geral" && erro && (
             <FadeIn delay={0.05}>
               <div
                 className="
@@ -560,6 +607,9 @@ export default function InsightsPage() {
               </div>
             </FadeIn>
           )}
+
+          {aba === "visao-geral" && (
+          <>
 
           <FadeIn delay={0.1}>
             <div className="mt-8">
@@ -612,29 +662,19 @@ export default function InsightsPage() {
                 titulo="Resumo executivo (SABADO)"
                 subtitulo={
                   podeUsarSabado
-                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. Ou pergunte qualquer coisa ao VIME."
+                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. Pra conversar, use a aba Assistente."
                     : "Você não tem permissão para gerar o resumo com IA."
                 }
                 acao={
                   podeUsarSabado && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setChatAberto(true)}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 px-3 py-1.5 rounded-lg border border-sky-400/30 hover:bg-sky-400/10 transition-colors"
-                      >
-                        <MessageCircleQuestion size={14} />
-                        Pergunte ao VIME
-                      </button>
-
-                      <button
-                        onClick={gerarResumoSabado}
-                        disabled={sabadoCarregando}
-                        className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
-                      >
-                        <Sparkles size={14} />
-                        {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
-                      </button>
-                    </div>
+                    <button
+                      onClick={gerarResumoSabado}
+                      disabled={sabadoCarregando}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
+                    >
+                      <Sparkles size={14} />
+                      {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
+                    </button>
                   )
                 }
               >
@@ -650,10 +690,6 @@ export default function InsightsPage() {
                   </div>
                 )}
               </Cartao>
-
-              {podeUsarSabado && (
-                <PerguntarAoVimeModal isOpen={chatAberto} onClose={() => setChatAberto(false)} />
-              )}
             </div>
           </FadeIn>
 
@@ -834,6 +870,9 @@ export default function InsightsPage() {
                 Última atualização: {new Date(resumo.geradoEm).toLocaleString("pt-BR")}
               </p>
             </FadeIn>
+          )}
+
+          </>
           )}
 
         </PageContainer>

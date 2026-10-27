@@ -34,10 +34,10 @@ const menuConfig = [
         permissao: "dashboard.visualizar",
       },
       {
-        label: "VIME Insights",
+        label: "Assistente IA",
         href: "/insights",
         icon: Sparkles,
-        badge: "Novo",
+        badge: "Beta",
         permissao: "insights.visualizar",
       },
     ],

@@ -80,6 +80,7 @@ Regras obrigatórias:
 - Se a pergunta pedir algo que nenhuma ferramenta cobre, diga claramente que não tem esse dado disponível -- nunca tente adivinhar.
 - Você só EXPLICA dados -- nunca executa ação nenhuma (não cria, edita, exclui ou envia nada). Se pedirem uma ação, explique que você só consulta informações.
 - Tom profissional, direto e em português. Respostas curtas (poucas frases ou uma lista curta), sem repetir tabela inteira de números.
+- Quando usar a ferramenta visao_geral pra responder sobre financeiro, seja BREVE no texto (uma frase introdutória só) -- os números do financeiro já aparecem em cartões visuais junto da sua resposta, não repita cada valor em texto.
 - Nunca revele detalhes técnicos internos (nomes de tabelas, campos do banco, nomes de ferramentas).`;
 
 const MAX_RODADAS_FERRAMENTA = 5;
@@ -104,6 +105,11 @@ async function responderChat(usuario, { conversaId, mensagem } = {}) {
     ...historico.map((m) => ({ role: m.role, content: m.conteudo })),
   ];
 
+  // Guardado à parte (não só o texto) pra montar os cartões coloridos
+  // de financeiro no front -- vem direto do tool result (dado real),
+  // nunca do texto que a IA escreveu, então não tem risco de divergir.
+  let ultimaVisaoGeral = null;
+
   for (let rodada = 0; rodada < MAX_RODADAS_FERRAMENTA; rodada++) {
 
     const mensagemModelo = await iaProviderService.gerarRespostaBruta(conversaModelo, {
@@ -124,6 +130,7 @@ async function responderChat(usuario, { conversaId, mensagem } = {}) {
         conversaId: conversaRegistro.id,
         titulo: conversaRegistro.titulo,
         texto: respostaTexto,
+        cards: ultimaVisaoGeral?.financeiro || [],
         provedor: iaProviderService.PROVEDOR,
       };
 
@@ -140,6 +147,10 @@ async function responderChat(usuario, { conversaId, mensagem } = {}) {
       }
 
       const resultado = await sabadoFerramentasService.executar(chamada.function.name, usuario, argumentos);
+
+      if (chamada.function.name === "visao_geral" && !resultado.erro) {
+        ultimaVisaoGeral = resultado;
+      }
 
       conversaModelo.push({
         role: "tool",

@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, User, Plus, Search, History } from "lucide-react";
+import { Send, Sparkles, User, Plus, Search, History, TrendingUp, Clock, AlertTriangle, Wallet } from "lucide-react";
 
-import Modal from "../ui/Modal";
 import { SabadoService } from "@/services/sabado.service";
 import { useAuth } from "../../../context/AuthContext";
+import { formatCurrency } from "@/utils/formatCurrency";
 
 // "Hoje 08:21" / "Ontem" / "25/10" -- igual qualquer chat de IA
 // comum, sem repetir a data inteira pra conversa de hoje.
@@ -29,7 +29,69 @@ function formatarQuando(data) {
 
 }
 
-export default function PerguntarAoVimeModal({ isOpen, onClose }) {
+// Visual de cada cartão financeiro -- a cor é só semântica (recebido
+// em verde, vencido em vermelho...), os NÚMEROS vêm sempre do
+// visao_geral de verdade (ver sabadoService.js), nunca escritos aqui.
+const CARTAO_VISUAL = {
+  recebido_periodo: { icone: TrendingUp, cor: "emerald" },
+  previsto_periodo: { icone: Clock, cor: "sky" },
+  cobrancas_vencidas: { icone: AlertTriangle, cor: "red" },
+  cobrancas_a_vencer: { icone: Clock, cor: "amber" },
+  pagamentos_pendentes: { icone: Wallet, cor: "amber" },
+};
+
+const CORES = {
+  emerald: { bg: "bg-emerald-500/15", text: "text-emerald-400" },
+  sky: { bg: "bg-sky-500/15", text: "text-sky-400" },
+  red: { bg: "bg-red-500/15", text: "text-red-400" },
+  amber: { bg: "bg-amber-500/15", text: "text-amber-400" },
+};
+
+function formatarValorCartao(cartao) {
+  if (cartao.formato === "moeda") return formatCurrency(cartao.valor);
+  if (cartao.formato === "percentual") return `${cartao.valor}%`;
+  return String(cartao.valor);
+}
+
+function CartoesFinanceiro({ cards }) {
+
+  if (!cards?.length) return null;
+
+  return (
+    <div className="grid grid-cols-2 gap-2 mt-3">
+      {cards.map((c) => {
+
+        const visual = CARTAO_VISUAL[c.chave] || { icone: TrendingUp, cor: "emerald" };
+        const Icone = visual.icone;
+        const cores = CORES[visual.cor];
+
+        return (
+          <div key={c.chave} className="rounded-xl border border-[var(--border-token)] bg-[var(--surface)] p-3">
+
+            <div className={`w-7 h-7 rounded-lg flex items-center justify-center mb-2 ${cores.bg} ${cores.text}`}>
+              <Icone size={14} />
+            </div>
+
+            <p className="text-[11px] text-[var(--text-faint)] leading-tight">{c.rotulo}</p>
+            <p className="text-sm font-bold text-[var(--text)] mt-0.5">{formatarValorCartao(c)}</p>
+
+            {c.comparacao?.variacaoPercentual !== null && c.comparacao?.variacaoPercentual !== undefined && (
+              <p className="text-[10px] text-[var(--text-faint)] mt-0.5">
+                {c.comparacao.variacaoPercentual >= 0 ? "+" : ""}
+                {c.comparacao.variacaoPercentual}% vs. período anterior
+              </p>
+            )}
+
+          </div>
+        );
+
+      })}
+    </div>
+  );
+
+}
+
+export default function AssistenteChat() {
   const { usuario } = useAuth();
 
   const [mensagens, setMensagens] = useState([]);
@@ -59,20 +121,11 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
   };
 
   useEffect(() => {
-    if (!isOpen) return;
-
-    setMensagens([]);
-    setConversaAtualId(null);
-    setBusca("");
-    setErro("");
-    setHistoricoAberto(false);
     carregarConversas();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
-    if (!isOpen) return;
-
     const handle = setTimeout(() => carregarConversas(busca), 300);
     return () => clearTimeout(handle);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -127,7 +180,10 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
 
       const resposta = await SabadoService.chat({ conversaId: conversaAtualId, mensagem: texto });
 
-      setMensagens((prev) => [...prev, { role: "assistant", content: resposta.data.texto }]);
+      setMensagens((prev) => [
+        ...prev,
+        { role: "assistant", content: resposta.data.texto, cards: resposta.data.cards },
+      ]);
       setConversaAtualId(resposta.data.conversaId);
       carregarConversas(busca);
 
@@ -153,42 +209,55 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
   const primeiroNome = usuario?.nome?.trim().split(" ")[0] || "";
 
   return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      title={
-        <span className="flex items-center gap-2">
-          Assistente VIME
-          <span className="text-[10px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
-            Beta
-          </span>
-        </span>
-      }
-      subtitle="Converse com o SABADO sobre os dados reais do sistema -- ele só explica o que já está cadastrado, nunca inventa número."
-      size="xl"
-      scrollable={false}
-    >
-      <div className="flex flex-col lg:flex-row gap-5 h-[72vh]">
+    <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5 sm:p-6">
+
+      <div className="flex items-center justify-between gap-3 pb-4 mb-4 border-b border-[var(--border-token)]">
+
+        <div className="flex items-center gap-3 min-w-0">
+
+          <div className="w-10 h-10 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+            <Sparkles size={20} />
+          </div>
+
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-[var(--text)] flex items-center gap-2">
+              Assistente VIME
+              <span className="text-[10px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                Beta
+              </span>
+            </p>
+            <p className="text-xs text-[var(--text-faint)] truncate">
+              Converse sobre os dados reais do sistema -- nunca inventa número.
+            </p>
+          </div>
+
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+
+          <button
+            onClick={() => setHistoricoAberto((v) => !v)}
+            className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] px-3 py-1.5 rounded-lg border border-[var(--border-token)] hover:bg-[var(--surface-2)] transition-colors"
+          >
+            <History size={14} />
+            Histórico
+          </button>
+
+          <button
+            onClick={novoChat}
+            className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
+          >
+            <Plus size={14} />
+            Novo chat
+          </button>
+
+        </div>
+
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-5 h-[65vh]">
 
         <div className="flex-1 min-w-0 flex flex-col">
-
-          <div className="flex items-center justify-between mb-3 lg:hidden">
-            <button
-              onClick={() => setHistoricoAberto((v) => !v)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-muted)] px-3 py-1.5 rounded-lg border border-[var(--border-token)] hover:bg-[var(--surface-2)] transition-colors"
-            >
-              <History size={14} />
-              Histórico
-            </button>
-
-            <button
-              onClick={novoChat}
-              className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
-            >
-              <Plus size={14} />
-              Novo chat
-            </button>
-          </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
 
@@ -201,7 +270,7 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
                   {primeiroNome ? `Olá, ${primeiroNome}!` : "Olá!"}
                 </p>
                 <p className="text-sm text-[var(--text-faint)] max-w-sm">
-                  Pergunte algo como &quot;quais contratos vencem esse mês?&quot; ou &quot;quantas vistorias estão atrasadas?&quot;
+                  Pergunte algo como &quot;me mostre um resumo financeiro desse mês&quot; ou &quot;quantas vistorias estão atrasadas?&quot;
                 </p>
               </div>
             )}
@@ -224,7 +293,7 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
 
                 <div
                   className={`
-                    max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-line leading-relaxed
+                    max-w-[85%] rounded-2xl px-4 py-3 text-sm whitespace-pre-line leading-relaxed
                     ${
                       m.role === "user"
                         ? "bg-sky-500/10 border border-sky-500/20 text-[var(--text)]"
@@ -233,6 +302,7 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
                   `}
                 >
                   {m.content}
+                  <CartoesFinanceiro cards={m.cards} />
                 </div>
 
               </div>
@@ -314,14 +384,6 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
 
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-bold text-[var(--text-muted)]">Histórico</h4>
-
-            <button
-              onClick={novoChat}
-              className="hidden lg:flex items-center gap-1.5 text-xs font-semibold text-emerald-400 px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
-            >
-              <Plus size={14} />
-              Novo chat
-            </button>
           </div>
 
           <div className="relative mb-3">
@@ -376,6 +438,7 @@ export default function PerguntarAoVimeModal({ isOpen, onClose }) {
         </div>
 
       </div>
-    </Modal>
+
+    </div>
   );
 }

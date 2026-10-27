@@ -218,6 +218,13 @@ async function listarKitnets(usuario, { status } = {}) {
 
 // Definição no formato "tools" da OpenAI/Groq -- nome aqui tem que
 // bater exatamente com a chave em EXECUTORES abaixo.
+//
+// Todo parâmetro opcional aceita null além do tipo de verdade --
+// alguns modelos (confirmado no gpt-oss-120b via Groq) preenchem
+// parâmetro opcional que não vem ao caso com `null` explícito em vez
+// de simplesmente omitir a chave, e um schema só com "string" rejeita
+// isso com erro 400 ("expected string, but got null") antes mesmo da
+// ferramenta rodar.
 const FERRAMENTAS = [
   {
     type: "function",
@@ -228,8 +235,8 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          periodo_inicio: { type: "string", description: "Data inicial AAAA-MM-DD (opcional, padrão início do mês atual)" },
-          periodo_fim: { type: "string", description: "Data final AAAA-MM-DD (opcional, padrão fim do mês atual)" },
+          periodo_inicio: { type: ["string", "null"], description: "Data inicial AAAA-MM-DD (opcional, padrão início do mês atual)" },
+          periodo_fim: { type: ["string", "null"], description: "Data final AAAA-MM-DD (opcional, padrão fim do mês atual)" },
         },
       },
     },
@@ -242,8 +249,8 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", enum: ["ATIVO", "PENDENTE", "ENCERRADO"], description: "Filtrar por status (opcional)" },
-          vencendo_em_dias: { type: "number", description: "Só contratos ativos vencendo em até N dias (opcional, ignora 'status' se usado)" },
+          status: { type: ["string", "null"], enum: ["ATIVO", "PENDENTE", "ENCERRADO", null], description: "Filtrar por status (opcional)" },
+          vencendo_em_dias: { type: ["number", "null"], description: "Só contratos ativos vencendo em até N dias (opcional, ignora 'status' se usado)" },
         },
       },
     },
@@ -256,9 +263,9 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", enum: ["PENDENTE", "PAGA", "ATRASADA", "CANCELADA"], description: "Filtrar por status (opcional)" },
-          de: { type: "string", description: "Vencimento a partir de AAAA-MM-DD (opcional)" },
-          ate: { type: "string", description: "Vencimento até AAAA-MM-DD (opcional)" },
+          status: { type: ["string", "null"], enum: ["PENDENTE", "PAGA", "ATRASADA", "CANCELADA", null], description: "Filtrar por status (opcional)" },
+          de: { type: ["string", "null"], description: "Vencimento a partir de AAAA-MM-DD (opcional)" },
+          ate: { type: ["string", "null"], description: "Vencimento até AAAA-MM-DD (opcional)" },
         },
       },
     },
@@ -271,7 +278,7 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", enum: ["PROGRAMADA", "PENDENTE", "ATRASADA", "REALIZADA", "CANCELADA"], description: "Filtrar por status (opcional)" },
+          status: { type: ["string", "null"], enum: ["PROGRAMADA", "PENDENTE", "ATRASADA", "REALIZADA", "CANCELADA", null], description: "Filtrar por status (opcional)" },
         },
       },
     },
@@ -284,7 +291,7 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", description: "Filtrar por status (opcional, ex.: SOLICITADA, EM_ANDAMENTO, ATENDIDA, REJEITADA)" },
+          status: { type: ["string", "null"], description: "Filtrar por status (opcional, ex.: SOLICITADA, EM_ANDAMENTO, ATENDIDA, REJEITADA)" },
         },
       },
     },
@@ -297,7 +304,7 @@ const FERRAMENTAS = [
       parameters: {
         type: "object",
         properties: {
-          status: { type: "string", enum: ["DISPONIVEL", "OCUPADA", "MANUTENCAO", "INDISPONIVEL"], description: "Filtrar por status (opcional)" },
+          status: { type: ["string", "null"], enum: ["DISPONIVEL", "OCUPADA", "MANUTENCAO", "INDISPONIVEL", null], description: "Filtrar por status (opcional)" },
         },
       },
     },
