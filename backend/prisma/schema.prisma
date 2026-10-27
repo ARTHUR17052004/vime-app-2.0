@@ -954,3 +954,28 @@ model SabadoMensagem {
 
   createdAt DateTime @default(now())
 }
+
+// Fotografia diária da ocupação de kitnets -- criada 1x por dia pelo
+// snapshotOcupacaoJob, a partir de quando essa feature existe (não dá
+// pra reconstruir dias anteriores a isso: Kitnet.status é só "agora",
+// sem histórico). É o que permite o SABADO responder "qual minha
+// ocupação em tal período" sem inventar número -- só responde pros
+// dias que já têm snapshot salvo.
+model SnapshotOcupacao {
+  id String @id @default(uuid())
+
+  data DateTime // meia-noite do dia do snapshot
+
+  // null = sistema inteiro (visão sem locador); com valor = só aquele
+  // locador -- mesmo espírito de usuario.locadorId no resto do app.
+  locadorId String?
+
+  residenciasTotal Int
+  kitnetsTotal     Int
+  kitnetsOcupadas  Int
+  taxaOcupacao     Int // 0-100
+
+  createdAt DateTime @default(now())
+
+  @@unique([data, locadorId])
+}

@@ -14,6 +14,7 @@ const verificarVistoriasAtrasadas = require("./verificarVistoriasAtrasadasJob");
 const atualizarStatusVistorias = require("./atualizarStatusVistoriasJob");
 const lembrarVistoriasPendentes = require("./lembrarVistoriasPendentesJob");
 const fecharChamadosResolvidos = require("./fecharChamadosResolvidosJob");
+const snapshotOcupacao = require("./snapshotOcupacaoJob");
 
 const iniciarJobs = () => {
 
@@ -56,6 +57,8 @@ const iniciarJobs = () => {
     await lembrarVistoriasPendentes();
 
     await verificarVistoriasAtrasadas();
+
+    await snapshotOcupacao();
 
     console.log("==========================");
 

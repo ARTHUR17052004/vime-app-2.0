@@ -216,6 +216,55 @@ async function listarKitnets(usuario, { status } = {}) {
 
 }
 
+const LIMITE_HISTORICO_OCUPACAO = 400; // folga confortável acima de 1 ano de snapshots diários
+
+// Taxa de ocupação não tem como ser reconstruída pra datas antigas
+// (Kitnet.status só reflete agora, sem histórico) -- por isso só
+// existe a partir de quando o snapshotOcupacaoJob passou a rodar
+// (1x por dia). Período anterior a isso simplesmente não tem dado:
+// a ferramenta devolve um aviso em vez de inventar número.
+// "AAAA-MM-DD" direto no construtor do Date vira meia-noite UTC -- no
+// fuso -03:00 do servidor isso quase sempre bate certo pro gte, mas
+// pro lte cortava fora o snapshot do próprio dia escolhido (salvo às
+// 03:00 UTC, depois da meia-noite UTC usada como limite). Monta a
+// data pelos componentes locais pra não depender de fuso nenhum.
+function dataLocalDoISO(valor) {
+  if (typeof valor !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) return new Date(valor);
+  const [ano, mes, dia] = valor.split("-").map(Number);
+  return new Date(ano, mes - 1, dia);
+}
+
+async function historicoOcupacao(usuario, { data_inicio, data_fim } = {}) {
+
+  const where = { locadorId: usuario?.locadorId || null };
+
+  if (data_inicio || data_fim) {
+    where.data = {};
+    if (data_inicio) where.data.gte = dataLocalDoISO(data_inicio);
+    if (data_fim) where.data.lte = new Date(dataLocalDoISO(data_fim).setHours(23, 59, 59, 999));
+  }
+
+  const registros = await prisma.snapshotOcupacao.findMany({
+    where,
+    orderBy: { data: "asc" },
+    take: LIMITE_HISTORICO_OCUPACAO,
+  });
+
+  if (registros.length === 0) {
+    return {
+      aviso: "Nenhum snapshot de ocupação guardado para esse período -- o histórico só existe a partir do dia em que essa funcionalidade foi criada (1 fotografia por dia). Não invente um número pra isso, diga que não tem esse dado.",
+    };
+  }
+
+  return registros.map((r) => ({
+    data: r.data.toISOString().slice(0, 10),
+    kitnetsTotal: r.kitnetsTotal,
+    kitnetsOcupadas: r.kitnetsOcupadas,
+    taxaOcupacao: r.taxaOcupacao,
+  }));
+
+}
+
 // Definição no formato "tools" da OpenAI/Groq -- nome aqui tem que
 // bater exatamente com a chave em EXECUTORES abaixo.
 //
@@ -309,6 +358,21 @@ const FERRAMENTAS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "historico_ocupacao",
+      description:
+        "Retorna a taxa de ocupação de kitnets por dia (1 fotografia/dia), pra perguntas sobre ocupação em datas passadas ou evolução ao longo do tempo. Só existe a partir do dia em que essa funcionalidade foi criada -- datas antes disso não têm dado, e a resposta vem com um aviso nesse caso (nunca invente o número).",
+      parameters: {
+        type: "object",
+        properties: {
+          data_inicio: { type: ["string", "null"], description: "Data inicial AAAA-MM-DD (opcional)" },
+          data_fim: { type: ["string", "null"], description: "Data final AAAA-MM-DD (opcional)" },
+        },
+      },
+    },
+  },
 ];
 
 const EXECUTORES = {
@@ -318,6 +382,7 @@ const EXECUTORES = {
   listar_vistorias: listarVistorias,
   listar_solicitacoes: listarSolicitacoes,
   listar_kitnets: listarKitnets,
+  historico_ocupacao: historicoOcupacao,
 };
 
 async function executar(nome, usuario, argumentos) {
