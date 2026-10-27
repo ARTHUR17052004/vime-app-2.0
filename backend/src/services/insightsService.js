@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { filtroReceita, filtroKitnet, filtroUnidade, filtroContrato, filtroSolicitacao, filtroVistoria } = require("../utils/escopoLocador");
 const campoObrigatorioService = require("./campoObrigatorioService");
+const { MS_LIMITE } = require("../utils/prazoAlerta");
 
 /*
   VIME Insights -- Fase 1/2 (sem IA ainda): números corretos, com
@@ -462,95 +463,88 @@ const resumoImoveis = async (usuario) => {
 
 };
 
-const resumoContratos = async (usuario, { inicio, fim } = {}) => {
+// Mesmo prazo que contratoService.js (DIAS_ALERTA_VENCIMENTO) já usa
+// pra avisar de contrato vencendo -- reaproveitado aqui de propósito,
+// não é um número novo escolhido pelo Insights.
+const DIAS_CONTRATO_VENCENDO = 10;
 
-  const { periodoInicio, periodoFim } = resolverPeriodo({ inicio, fim });
+// Voltou a ser "situação atual" (não respeita o período de Financeiro)
+// -- tentamos reconstruir pelas datas do contrato, funcionava, mas o
+// pedido final foi manter o período só dentro do Financeiro e todo o
+// resto do Insights como retrato de agora, mais simples de entender.
+const resumoContratos = async (usuario) => {
 
   const escopo = filtroContrato(usuario);
 
-  const [vigentes, terminoNoPeriodo, criadosNoPeriodo, encerradosTotal] = await Promise.all([
+  const hoje = new Date();
+  const emDiasVencendo = new Date(hoje.getTime() + DIAS_CONTRATO_VENCENDO * 24 * 60 * 60 * 1000);
 
-    // Vigência reconstruída pelas DATAS do contrato (início/fim), não
-    // pelo status atual -- um contrato hoje "Encerrado" ainda conta
-    // como vigente num período passado em que ele esteve ativo de
-    // verdade. "Pendente" nunca chegou a vigorar, por isso fica fora.
+  const [vigentes, vencendo, pendentes, encerrados] = await Promise.all([
+
+    prisma.contrato.count({ where: { ...escopo, status: "ATIVO" } }),
+
+    // Mesma regra de contratoService.notificarSeVencimentoProximo:
+    // ATIVO com dataFim dentro dos próximos 10 dias.
     prisma.contrato.count({
-      where: {
-        ...escopo,
-        status: { not: "PENDENTE" },
-        dataInicio: { lte: periodoFim },
-        OR: [{ dataFim: null }, { dataFim: { gte: periodoInicio } }],
-      },
+      where: { ...escopo, status: "ATIVO", dataFim: { not: null, gte: hoje, lte: emDiasVencendo } },
     }),
 
-    prisma.contrato.count({
-      where: { ...escopo, dataFim: { not: null, gte: periodoInicio, lte: periodoFim } },
-    }),
+    // PENDENTE = aguardando assinatura (enviado pra Clicksign ou nem
+    // isso ainda) -- é a "pendência" real do contrato, não um estado de
+    // erro.
+    prisma.contrato.count({ where: { ...escopo, status: "PENDENTE" } }),
 
-    // Todo contrato nasce "Pendente" (aguardando assinatura) -- contar
-    // os criados no período é o jeito honesto de saber quantos
-    // "entraram pendentes" naquele mês, sem depender do status atual
-    // (que pode já ter virado Ativo ou Encerrado desde então).
-    prisma.contrato.count({
-      where: { ...escopo, createdAt: { gte: periodoInicio, lte: periodoFim } },
-    }),
-
-    // Acumulado, não só do período -- "quantos contratos já se
-    // encerraram até esse momento da história".
-    prisma.contrato.count({
-      where: { ...escopo, status: "ENCERRADO", dataFim: { not: null, lte: periodoFim } },
-    }),
+    prisma.contrato.count({ where: { ...escopo, status: "ENCERRADO" } }),
 
   ]);
 
   return {
 
-    periodo: { inicio: dataISO(periodoInicio), fim: dataISO(periodoFim) },
     geradoEm: new Date().toISOString(),
 
     indicadores: [
 
       {
         chave: "contratos_vigentes",
-        rotulo: "Contratos vigentes no período",
+        rotulo: "Contratos vigentes",
         valor: vigentes,
         formato: "numero",
         quantidade: vigentes,
-        escopo: "periodo",
-        criterio: `Contratos (exceto "Pendente") cuja vigência se sobrepõe a ${dataISO(periodoInicio)} - ${dataISO(periodoFim)} -- calculado pelas datas de início/fim do contrato, não pelo status atual, pra valer também em períodos passados.`,
+        escopo: "atual",
+        criterio: "Contratos com status \"Ativo\" neste momento.",
         navegacao: { href: "/contratos", query: { status: "ATIVO" } },
       },
 
       {
         chave: "contratos_vencendo",
-        rotulo: "Com término no período",
-        valor: terminoNoPeriodo,
+        rotulo: `Vencendo em até ${DIAS_CONTRATO_VENCENDO} dias`,
+        valor: vencendo,
         formato: "numero",
-        quantidade: terminoNoPeriodo,
-        escopo: "periodo",
-        criterio: `Contratos cuja data de fim caiu entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}.`,
-        navegacao: { href: "/contratos", query: {} },
+        quantidade: vencendo,
+        escopo: "atual",
+        criterio: `Contratos "Ativo" cujo fim de vigência cai nos próximos ${DIAS_CONTRATO_VENCENDO} dias -- mesmo prazo que já dispara o aviso de vencimento próximo em Contratos.`,
+        navegacao: { href: "/contratos", query: { status: "ATIVO" } },
       },
 
       {
         chave: "contratos_pendentes",
-        rotulo: "Criados no período",
-        valor: criadosNoPeriodo,
+        rotulo: "Aguardando assinatura",
+        valor: pendentes,
         formato: "numero",
-        quantidade: criadosNoPeriodo,
-        escopo: "periodo",
-        criterio: `Contratos cadastrados no sistema entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)} -- todo contrato novo começa como "Pendente", aguardando assinatura.`,
-        navegacao: { href: "/contratos", query: {} },
+        quantidade: pendentes,
+        escopo: "atual",
+        criterio: "Contratos com status \"Pendente\" -- ainda não foram assinados (enviados ou não pra Clicksign).",
+        navegacao: { href: "/contratos", query: { status: "PENDENTE" } },
       },
 
       {
         chave: "contratos_encerrados",
-        rotulo: "Total já encerrados",
-        valor: encerradosTotal,
+        rotulo: "Contratos encerrados",
+        valor: encerrados,
         formato: "numero",
-        quantidade: encerradosTotal,
-        escopo: "periodo",
-        criterio: `Contratos com status "Encerrado" e data de fim até ${dataISO(periodoFim)} -- acumulado histórico, não só os encerrados dentro do período.`,
+        quantidade: encerrados,
+        escopo: "atual",
+        criterio: "Contratos com status \"Encerrado\".",
         navegacao: { href: "/contratos", query: { status: "ENCERRADO" } },
       },
 
@@ -560,104 +554,121 @@ const resumoContratos = async (usuario, { inicio, fim } = {}) => {
 
 };
 
-const resumoSolicitacoesVistorias = async (usuario, { inicio, fim } = {}) => {
+// Mesmos status que verificarSolicitacoesAtrasadasJob.js considera
+// "encerrado" -- solicitação resolvida ou rejeitada não conta mais
+// como aberta.
+const STATUS_SOLICITACAO_ENCERRADOS = ["ATENDIDA", "REJEITADA"];
 
-  const { periodoInicio, periodoFim } = resolverPeriodo({ inicio, fim });
+// Também voltou a ser "situação atual" -- mesmo motivo do Contratos
+// acima: período fica só no Financeiro.
+const resumoSolicitacoesVistorias = async (usuario) => {
 
   const escopoSolicitacao = filtroSolicitacao(usuario);
   const escopoVistoria = filtroVistoria(usuario);
 
-  // VistoriaMissao (vistorias "Geral", por residência) não tem helper
-  // em escopoLocador -- mesmo filtro por locador, mas via a unidade da
-  // missão, não da vistoria-mãe (essa não tem unidadeId quando é Geral).
-  const escopoMissao = usuario?.locadorId ? { unidade: { locadorId: usuario.locadorId } } : {};
+  const agora = new Date();
+  const limiteAtraso = new Date(agora.getTime() - MS_LIMITE);
 
   const [
-    solicitacoesNoPeriodo,
-    prazosNoPeriodo,
-    vistoriasConcluidasUma,
-    missoesConcluidas,
-    ocorrenciasNoPeriodo,
+    solicitacoesAbertas,
+    solicitacoesAtrasadas,
+    vistoriasAgendadas,
+    vistoriasPendentes,
+    vistoriasAtrasadas,
+    ocorrenciasRegistradas,
   ] = await Promise.all([
 
     prisma.solicitacao.count({
-      where: { ...escopoSolicitacao, createdAt: { gte: periodoInicio, lte: periodoFim } },
+      where: { ...escopoSolicitacao, status: { notIn: STATUS_SOLICITACAO_ENCERRADOS } },
     }),
 
+    // Mesma regra de verificarSolicitacoesAtrasadasJob.js: aberta E com
+    // prazo vencido há mais de 72h (tolerância padrão do sistema).
     prisma.solicitacao.count({
-      where: { ...escopoSolicitacao, prazo: { not: null, gte: periodoInicio, lte: periodoFim } },
+      where: {
+        ...escopoSolicitacao,
+        status: { notIn: STATUS_SOLICITACAO_ENCERRADOS },
+        prazo: { not: null, lte: limiteAtraso },
+      },
     }),
 
-    // Vistoria "normal" (de uma residência só) conclui mudando o
-    // status pra REALIZADA e carimbando concluidaEm -- mas a "Geral"
-    // (várias residências, um ciclo por vez) NUNCA vira REALIZADA; o
-    // que ela conclui fica em VistoriaMissao, por residência (mesma
-    // lição do bug corrigido no contador "Realizadas" de Vistorias).
-    // Somar os dois é o único jeito de não subcontar.
-    prisma.vistoria.count({
-      where: { ...escopoVistoria, status: "REALIZADA", concluidaEm: { gte: periodoInicio, lte: periodoFim } },
-    }),
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "PROGRAMADA" } }),
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "PENDENTE" } }),
+    prisma.vistoria.count({ where: { ...escopoVistoria, status: "ATRASADA" } }),
 
-    prisma.vistoriaMissao.count({
-      where: { ...escopoMissao, dataRealizacao: { gte: periodoInicio, lte: periodoFim } },
-    }),
-
-    prisma.ocorrencia.count({
-      where: { vistoria: escopoVistoria, createdAt: { gte: periodoInicio, lte: periodoFim } },
-    }),
+    prisma.ocorrencia.count({ where: { vistoria: escopoVistoria } }),
 
   ]);
 
-  const vistoriasConcluidas = vistoriasConcluidasUma + missoesConcluidas;
-
   return {
 
-    periodo: { inicio: dataISO(periodoInicio), fim: dataISO(periodoFim) },
     geradoEm: new Date().toISOString(),
 
     indicadores: [
 
       {
         chave: "solicitacoes_abertas",
-        rotulo: "Solicitações abertas no período",
-        valor: solicitacoesNoPeriodo,
+        rotulo: "Solicitações abertas",
+        valor: solicitacoesAbertas,
         formato: "numero",
-        quantidade: solicitacoesNoPeriodo,
-        escopo: "periodo",
-        criterio: `Solicitações criadas entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)} -- não dá pra reconstruir se cada uma "ainda estava aberta" num dia específico do passado (o sistema não guarda histórico de status), então conta quantas entraram naquele período.`,
-        navegacao: { href: "/solicitacoes", query: {} },
+        quantidade: solicitacoesAbertas,
+        escopo: "atual",
+        criterio: "Solicitações com status diferente de \"Atendida\" ou \"Rejeitada\" -- mesma definição usada no Dashboard e no job de prazo vencido.",
+        navegacao: { href: "/solicitacoes", query: { aba: "abertas" } },
       },
 
       {
         chave: "solicitacoes_atrasadas",
-        rotulo: "Prazos no período",
-        valor: prazosNoPeriodo,
+        rotulo: "Solicitações atrasadas",
+        valor: solicitacoesAtrasadas,
         formato: "numero",
-        quantidade: prazosNoPeriodo,
-        escopo: "periodo",
-        criterio: `Solicitações cujo prazo caiu entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}, independente do status atual.`,
+        quantidade: solicitacoesAtrasadas,
+        escopo: "atual",
+        criterio: "Solicitações abertas cujo prazo venceu há mais de 72h -- mesma tolerância que o alerta automático de prazo vencido já usa. A lista em Solicitações ainda não abre pré-filtrada por este número.",
         navegacao: { href: "/solicitacoes", query: {} },
       },
 
       {
-        chave: "vistorias_concluidas",
-        rotulo: "Vistorias concluídas no período",
-        valor: vistoriasConcluidas,
+        chave: "vistorias_agendadas",
+        rotulo: "Vistorias agendadas",
+        valor: vistoriasAgendadas,
         formato: "numero",
-        quantidade: vistoriasConcluidas,
-        escopo: "periodo",
-        criterio: `Vistorias normais concluídas (${vistoriasConcluidasUma}) + residências vistoriadas em ciclos de vistoria "Geral" (${missoesConcluidas}) entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}. Status como "Atrasada"/"Pendente" não tem histórico guardado, por isso o foco aqui é o que foi efetivamente realizado no período.`,
-        navegacao: { href: "/vistorias", query: {} },
+        quantidade: vistoriasAgendadas,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Programada\" -- prazo confortável, mais de 72h de folga.",
+        navegacao: { href: "/vistorias", query: { aba: "agendadas" } },
+      },
+
+      {
+        chave: "vistorias_pendentes",
+        rotulo: "Vistorias pendentes",
+        valor: vistoriasPendentes,
+        formato: "numero",
+        quantidade: vistoriasPendentes,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Pendente\" -- faltam 72h ou menos pro prazo.",
+        navegacao: { href: "/vistorias", query: { aba: "pendentes" } },
+      },
+
+      {
+        chave: "vistorias_atrasadas",
+        rotulo: "Vistorias atrasadas",
+        valor: vistoriasAtrasadas,
+        formato: "numero",
+        quantidade: vistoriasAtrasadas,
+        escopo: "atual",
+        criterio: "Vistorias com status \"Atrasada\" -- o prazo já venceu sem resposta.",
+        navegacao: { href: "/vistorias", query: { aba: "atrasadas" } },
       },
 
       {
         chave: "ocorrencias_registradas",
-        rotulo: "Ocorrências registradas no período",
-        valor: ocorrenciasNoPeriodo,
+        rotulo: "Ocorrências registradas",
+        valor: ocorrenciasRegistradas,
         formato: "numero",
-        quantidade: ocorrenciasNoPeriodo,
-        escopo: "periodo",
-        criterio: `Ocorrências (problemas/achados) anotadas em vistorias entre ${dataISO(periodoInicio)} e ${dataISO(periodoFim)}.`,
+        quantidade: ocorrenciasRegistradas,
+        escopo: "atual",
+        criterio: "Total de ocorrências (problemas/achados) anotadas em vistorias, de todas as datas.",
         navegacao: { href: "/vistorias", query: {} },
       },
 

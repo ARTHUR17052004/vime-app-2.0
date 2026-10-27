@@ -32,8 +32,8 @@ async function visaoGeral(usuario, { periodo_inicio, periodo_fim } = {}) {
   const [financeiro, imoveis, contratos, solicitacoesVistorias] = await Promise.all([
     insightsService.resumoFinanceiro(usuario, { inicio: periodo_inicio, fim: periodo_fim }),
     insightsService.resumoImoveis(usuario),
-    insightsService.resumoContratos(usuario, { inicio: periodo_inicio, fim: periodo_fim }),
-    insightsService.resumoSolicitacoesVistorias(usuario, { inicio: periodo_inicio, fim: periodo_fim }),
+    insightsService.resumoContratos(usuario),
+    insightsService.resumoSolicitacoesVistorias(usuario),
   ]);
 
   return {

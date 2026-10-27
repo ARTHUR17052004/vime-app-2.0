@@ -28,6 +28,7 @@ import {
   ClipboardX,
   CalendarCheck,
   ListChecks,
+  ShieldAlert,
   LayoutGrid,
 } from "lucide-react";
 
@@ -62,7 +63,9 @@ const ICONES = {
   contratos_encerrados: Archive,
   solicitacoes_abertas: ClipboardCheck,
   solicitacoes_atrasadas: ClipboardX,
-  vistorias_concluidas: CalendarCheck,
+  vistorias_agendadas: CalendarCheck,
+  vistorias_pendentes: Clock,
+  vistorias_atrasadas: ShieldAlert,
   ocorrencias_registradas: ListChecks,
 };
 
@@ -347,11 +350,11 @@ export default function InsightsPage() {
           setErroImoveis(err.message || "Não foi possível carregar Imóveis e Kitnets.");
           return null;
         }),
-        InsightsService.contratos(params).catch((err) => {
+        InsightsService.contratos().catch((err) => {
           setErroContratos(err.message || "Não foi possível carregar Contratos.");
           return null;
         }),
-        InsightsService.solicitacoesVistorias(params).catch((err) => {
+        InsightsService.solicitacoesVistorias().catch((err) => {
           setErroSolicVist(err.message || "Não foi possível carregar Solicitações e Vistorias.");
           return null;
         }),
@@ -431,19 +434,19 @@ export default function InsightsPage() {
     : carregando && indicadoresContratos.length === 0
       ? "Calculando..."
       : contratosVigentesInd && contratosVencendoInd
-        ? `${contratosVigentesInd.valor} vigente(s) no período -- ${contratosVencendoInd.valor} com término no período`
+        ? `${contratosVigentesInd.valor} vigente(s) -- ${contratosVencendoInd.valor} vencendo em breve`
         : "Toque para ver os indicadores.";
 
   const indicadoresSolicVist = resumoSolicVistDados?.indicadores || [];
   const solicitacoesAbertasInd = indicadoresSolicVist.find((i) => i.chave === "solicitacoes_abertas");
-  const vistoriasConcluidasInd = indicadoresSolicVist.find((i) => i.chave === "vistorias_concluidas");
+  const vistoriasAtrasadasInd = indicadoresSolicVist.find((i) => i.chave === "vistorias_atrasadas");
 
   const resumoSolicVistTexto = erroSolicVist
     ? "Não foi possível carregar."
     : carregando && indicadoresSolicVist.length === 0
       ? "Calculando..."
-      : solicitacoesAbertasInd && vistoriasConcluidasInd
-        ? `${solicitacoesAbertasInd.valor} solicitação(ões) no período -- ${vistoriasConcluidasInd.valor} vistoria(s) concluída(s)`
+      : solicitacoesAbertasInd && vistoriasAtrasadasInd
+        ? `${solicitacoesAbertasInd.valor} solicitação(ões) aberta(s) -- ${vistoriasAtrasadasInd.valor} vistoria(s) atrasada(s)`
         : "Toque para ver os indicadores.";
 
   return (
@@ -573,50 +576,6 @@ export default function InsightsPage() {
           {aba === "visao-geral" && (
           <>
 
-          <FadeIn delay={0.1}>
-            <div className="mt-8">
-              <Cartao
-                icone={CalendarClock}
-                titulo="Período de análise"
-                subtitulo={
-                  resumo?.periodo
-                    ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)} -- vale pra Financeiro, Contratos e Solicitações/Vistorias. Imóveis e Kitnets é sempre a situação de agora.`
-                    : "Seletor de datas e indicação clara do período consultado."
-                }
-                acao={
-                  <div className="flex items-center gap-2 shrink-0">
-
-                    <button
-                      onClick={() => setMesOffset((v) => v - 1)}
-                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
-                      title="Mês anterior"
-                    >
-                      <ChevronLeft size={16} className="text-[var(--text-muted)]" />
-                    </button>
-
-                    {mesOffset !== 0 && (
-                      <button
-                        onClick={() => setMesOffset(0)}
-                        className="text-xs text-emerald-400 hover:underline px-1 whitespace-nowrap"
-                      >
-                        Mês atual
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => setMesOffset((v) => v + 1)}
-                      className="w-9 h-9 rounded-xl bg-[var(--surface-2)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
-                      title="Próximo mês"
-                    >
-                      <ChevronRight size={16} className="text-[var(--text-muted)]" />
-                    </button>
-
-                  </div>
-                }
-              />
-            </div>
-          </FadeIn>
-
           <FadeIn delay={0.18}>
             <div className="mt-8">
 
@@ -635,11 +594,55 @@ export default function InsightsPage() {
                   onToggle={() => setFinanceiroAberto((v) => !v)}
                 >
 
+                  <div className="px-6 py-4 flex items-center justify-between gap-3 flex-wrap bg-[var(--surface-2)]">
+
+                    <div>
+                      <p className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wide">
+                        Período
+                      </p>
+                      <p className="text-sm text-[var(--text)] mt-0.5">
+                        {resumo?.periodo
+                          ? `${formatarDataCurta(resumo.periodo.inicio)} a ${formatarDataCurta(resumo.periodo.fim)}`
+                          : "Carregando..."}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMesOffset((v) => v - 1); }}
+                        className="w-9 h-9 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
+                        title="Mês anterior"
+                      >
+                        <ChevronLeft size={16} className="text-[var(--text-muted)]" />
+                      </button>
+
+                      {mesOffset !== 0 && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setMesOffset(0); }}
+                          className="text-xs text-emerald-400 hover:underline px-1 whitespace-nowrap"
+                        >
+                          Mês atual
+                        </button>
+                      )}
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setMesOffset((v) => v + 1); }}
+                        className="w-9 h-9 rounded-xl bg-[var(--surface)] hover:bg-[var(--surface-3)] flex items-center justify-center transition"
+                        title="Próximo mês"
+                      >
+                        <ChevronRight size={16} className="text-[var(--text-muted)]" />
+                      </button>
+
+                    </div>
+
+                  </div>
+
                   {indicadoresPeriodo.length > 0 && (
                     <>
                       <DivisoriaGrupo
                         titulo="Nesse período"
-                        descricao="Muda quando você troca o mês no cartão acima."
+                        descricao="Muda quando você troca o mês acima."
                       />
                       {indicadoresPeriodo.map((ind) => (
                         <LinhaIndicador
