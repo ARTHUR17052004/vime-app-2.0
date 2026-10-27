@@ -148,6 +148,7 @@ model Usuario {
 
   pushSubscriptions PushSubscription[]
   credenciaisBiometria CredencialBiometria[]
+  sabadoConversas SabadoConversa[]
 }
 
 // Uma inscrição de push por navegador/aparelho -- o mesmo usuário pode
@@ -923,4 +924,33 @@ model RelatorioConfig {
   ativo Boolean @default(true)
 
   updatedAt DateTime @updatedAt
+}
+
+// Histórico de conversas do "Pergunte ao VIME" (chat do SABADO, em
+// Insights) -- cada usuário só vê as próprias conversas. titulo é
+// gerado a partir da primeira pergunta, igual um chat de IA comum.
+model SabadoConversa {
+  id String @id @default(uuid())
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  titulo String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  mensagens SabadoMensagem[]
+}
+
+model SabadoMensagem {
+  id String @id @default(uuid())
+
+  conversaId String
+  conversa   SabadoConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  role    String // "user" ou "assistant"
+  conteudo String
+
+  createdAt DateTime @default(now())
 }

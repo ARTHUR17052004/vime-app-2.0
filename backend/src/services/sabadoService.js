@@ -1,6 +1,7 @@
 const insightsService = require("./insightsService");
 const iaProviderService = require("./iaProviderService");
 const sabadoFerramentasService = require("./sabadoFerramentasService");
+const sabadoConversaService = require("./sabadoConversaService");
 
 /*
   SABADO -- Fase 4 do VIME Insights. A regra de ouro: a IA só EXPLICA
@@ -83,36 +84,48 @@ Regras obrigatórias:
 
 const MAX_RODADAS_FERRAMENTA = 5;
 
-async function responderChat(usuario, mensagens) {
+// conversaId null = começa uma conversa nova (título tirado da própria
+// pergunta). O histórico usado no prompt vem sempre do banco -- o
+// front só manda a pergunta nova, nunca a conversa inteira.
+async function responderChat(usuario, { conversaId, mensagem } = {}) {
 
-  const historico = (mensagens || [])
-    .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
-    .slice(-20);
+  const texto = typeof mensagem === "string" ? mensagem.trim() : "";
 
-  if (historico.length === 0) {
-    throw new Error("Nenhuma mensagem para responder.");
-  }
+  if (!texto) throw new Error("Mensagem vazia.");
 
-  const conversa = [
+  const conversaRegistro = await sabadoConversaService.obterOuCriarConversa(usuario, conversaId, texto);
+
+  await sabadoConversaService.salvarMensagem(conversaRegistro.id, "user", texto);
+
+  const historico = await sabadoConversaService.mensagensDaConversa(conversaRegistro.id);
+
+  const conversaModelo = [
     { role: "system", content: PROMPT_CHAT },
-    ...historico.map((m) => ({ role: m.role, content: m.content })),
+    ...historico.map((m) => ({ role: m.role, content: m.conteudo })),
   ];
 
   for (let rodada = 0; rodada < MAX_RODADAS_FERRAMENTA; rodada++) {
 
-    const mensagemModelo = await iaProviderService.gerarRespostaBruta(conversa, {
+    const mensagemModelo = await iaProviderService.gerarRespostaBruta(conversaModelo, {
       ferramentas: sabadoFerramentasService.FERRAMENTAS,
     });
 
-    conversa.push(mensagemModelo);
+    conversaModelo.push(mensagemModelo);
 
     if (!mensagemModelo.tool_calls?.length) {
 
-      const texto = mensagemModelo.content?.trim();
+      const respostaTexto = mensagemModelo.content?.trim();
 
-      if (!texto) throw new Error("SABADO não retornou uma resposta.");
+      if (!respostaTexto) throw new Error("SABADO não retornou uma resposta.");
 
-      return { texto, provedor: iaProviderService.PROVEDOR };
+      await sabadoConversaService.salvarMensagem(conversaRegistro.id, "assistant", respostaTexto);
+
+      return {
+        conversaId: conversaRegistro.id,
+        titulo: conversaRegistro.titulo,
+        texto: respostaTexto,
+        provedor: iaProviderService.PROVEDOR,
+      };
 
     }
 
@@ -128,7 +141,7 @@ async function responderChat(usuario, mensagens) {
 
       const resultado = await sabadoFerramentasService.executar(chamada.function.name, usuario, argumentos);
 
-      conversa.push({
+      conversaModelo.push({
         role: "tool",
         tool_call_id: chamada.id,
         content: JSON.stringify(resultado),
