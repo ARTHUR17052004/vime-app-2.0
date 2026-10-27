@@ -104,7 +104,7 @@ export default function FinanceiroDashboard({
         <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-6">
 
           <div className="text-[var(--text-subtle)]">
-            Receitas Pendentes
+            A Receber
           </div>
 
           <div className="text-3xl font-bold text-yellow-400 mt-3">
