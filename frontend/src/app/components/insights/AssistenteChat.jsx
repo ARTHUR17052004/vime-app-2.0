@@ -270,7 +270,7 @@ export default function AssistenteChat() {
                   {primeiroNome ? `Olá, ${primeiroNome}!` : "Olá!"}
                 </p>
                 <p className="text-sm text-[var(--text-faint)] max-w-sm">
-                  Pergunte algo como &quot;me mostre um resumo financeiro desse mês&quot; ou &quot;quantas vistorias estão atrasadas?&quot;
+                  Pergunte o que quiser do sistema, estou aqui para facilitar sua vida 😉
                 </p>
               </div>
             )}
