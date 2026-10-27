@@ -4,11 +4,22 @@ import { useEffect, useState } from "react";
 
 import { InquilinoService } from "../../../services/inquilinos.service";
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
+import { ConfiguracaoFinanceiroService } from "../../../services/configuracaoFinanceiro.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
 
 // Categoria/Descrição/Valor são colunas obrigatórias no banco -- não
 // tem como ficarem em branco independente do que for configurado.
 const SEMPRE_OBRIGATORIOS = new Set(["categoria", "descricao", "valor"]);
+
+// Calcula o valor líquido a partir do bruto e da taxa de boleto (%) --
+// mesma conta que o backend faz sozinho quando valorLiquido não vem
+// preenchido; replicado aqui só pra já mostrar a sugestão em tempo
+// real, sem esperar o salvar.
+function calcularValorLiquido(valor, taxaPercentual) {
+  const numero = Number(String(valor).replace(",", "."));
+  if (Number.isNaN(numero)) return "";
+  return (Math.round(numero * (1 - taxaPercentual / 100) * 100) / 100).toString();
+}
 
 const CAMPOS = ["categoria", "descricao", "valor", "inquilinoId", "status", "vencimento", "dataPagamento"];
 
@@ -39,9 +50,18 @@ export default function ReceitaForm({
       pagadorCpf: "",
       pagadorEmail: "",
       pagadorTelefone: "",
+      valorLiquido: "",
+      recorrente: false,
     });
 
   const [inquilinos, setInquilinos] = useState([]);
+
+  const [taxaBoleto, setTaxaBoleto] = useState(0);
+
+  // Só true se o usuário mexeu manualmente no campo "Valor a receber"
+  // -- enquanto isso não acontece, ele acompanha sozinho o cálculo
+  // automático toda vez que o "Valor" muda.
+  const [valorLiquidoEditadoManualmente, setValorLiquidoEditadoManualmente] = useState(false);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
@@ -85,8 +105,26 @@ export default function ReceitaForm({
 
     }
 
+    async function carregarTaxaBoleto() {
+
+      try {
+
+        const resposta = await ConfiguracaoFinanceiroService.buscar();
+        const dados = resposta.data || resposta;
+
+        setTaxaBoleto(dados.taxaBoletoPercentual || 0);
+
+      } catch (err) {
+
+        console.error("Erro ao carregar taxa de boleto:", err);
+
+      }
+
+    }
+
     carregarInquilinos();
     carregarObrigatorios();
+    carregarTaxaBoleto();
 
   }, []);
 
@@ -100,9 +138,30 @@ export default function ReceitaForm({
         pagadorCpf: receitaEditando.pagadorCpf || "",
         pagadorEmail: receitaEditando.pagadorEmail || "",
         pagadorTelefone: receitaEditando.pagadorTelefone || "",
+        valorLiquido: receitaEditando.valorLiquido ?? "",
+        recorrente: receitaEditando.recorrente || false,
       });
+      // Já tem valor líquido salvo -- editar o Valor não deve
+      // recalcular por cima sem avisar, então trata como "manual".
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setValorLiquidoEditadoManualmente(true);
     }
   }, [receitaEditando]);
+
+  // Acompanha o Valor sozinho até o usuário mexer direto no Valor a
+  // Receber -- mesmo cálculo que o backend faz quando não vem
+  // preenchido, só que aqui já mostra em tempo real.
+  useEffect(() => {
+    if (valorLiquidoEditadoManualmente) return;
+    if (formData.valor === "") return;
+
+    setFormData((atual) => ({
+      ...atual,
+      valorLiquido: calcularValorLiquido(formData.valor, taxaBoleto),
+    }));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.valor, taxaBoleto]);
 
   const handleChange = (e) => {
     setFormData({
@@ -110,6 +169,15 @@ export default function ReceitaForm({
       [e.target.name]:
         e.target.value,
     });
+  };
+
+  const handleChangeValorLiquido = (e) => {
+    setValorLiquidoEditadoManualmente(true);
+    setFormData({ ...formData, valorLiquido: e.target.value });
+  };
+
+  const handleChangeRecorrente = (e) => {
+    setFormData({ ...formData, recorrente: e.target.checked });
   };
 
   const handleSubmit = (e) => {
@@ -142,6 +210,11 @@ export default function ReceitaForm({
       pagadorCpf: formData.inquilinoId ? null : (formData.pagadorCpf || null),
       pagadorEmail: formData.inquilinoId ? null : (formData.pagadorEmail || null),
       pagadorTelefone: formData.inquilinoId ? null : (formData.pagadorTelefone || null),
+      // "" (nunca mexeu) manda undefined de propósito -- deixa o
+      // backend calcular sozinho pela taxa configurada, em vez de
+      // mandar null e achar que foi um "zerar" deliberado.
+      valorLiquido: formData.valorLiquido === "" ? undefined : formData.valorLiquido,
+      recorrente: formData.recorrente,
     });
   };
 
@@ -286,7 +359,7 @@ export default function ReceitaForm({
 
         <div>
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-            Valor<span className="ml-1 text-red-400">*</span>
+            Valor cobrado<span className="ml-1 text-red-400">*</span>
           </label>
           <input
             name="valor"
@@ -296,6 +369,40 @@ export default function ReceitaForm({
             className={inputStyle}
             required
           />
+          <p className="text-[10px] text-[var(--text-faint)] mt-1">
+            O que o pagador vai pagar no boleto.
+          </p>
+        </div>
+
+        <div>
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Valor a receber
+          </label>
+          <input
+            name="valorLiquido"
+            placeholder="Valor a receber"
+            value={formData.valorLiquido}
+            onChange={handleChangeValorLiquido}
+            className={inputStyle}
+          />
+          <p className="text-[10px] text-[var(--text-faint)] mt-1">
+            {taxaBoleto > 0
+              ? `Calculado sozinho com a taxa de boleto configurada (${taxaBoleto}%) -- edite se essa cobrança tiver uma taxa diferente.`
+              : "Sem taxa de boleto configurada ainda -- some igual ao valor cobrado."}
+          </p>
+        </div>
+
+        <div className="md:col-span-2 flex items-center gap-2.5 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4">
+          <input
+            type="checkbox"
+            id="recorrente"
+            checked={formData.recorrente}
+            onChange={handleChangeRecorrente}
+            className="w-4 h-4 accent-emerald-500"
+          />
+          <label htmlFor="recorrente" className="text-sm text-[var(--text)] cursor-pointer">
+            Repetir essa cobrança todo mês (gera a próxima automaticamente assim que esta for paga)
+          </label>
         </div>
 
         <div>

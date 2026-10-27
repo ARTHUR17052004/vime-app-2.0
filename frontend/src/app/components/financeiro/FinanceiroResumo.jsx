@@ -4,6 +4,7 @@ import {
   Wallet,
   TrendingDown,
   Landmark,
+  Receipt,
 } from "lucide-react";
 
 import PageGrid from "../ui/PageGrid";
@@ -13,9 +14,10 @@ export default function FinanceiroResumo({
   receitaPrevista,
   totalDespesas,
   lucroLiquido,
+  taxasBoleto,
 }) {
   return (
-    <PageGrid cols={3}>
+    <PageGrid cols={4}>
 
       <DashboardStatsCard
         title="Receita Prevista"
@@ -36,6 +38,13 @@ export default function FinanceiroResumo({
         value={`R$ ${lucroLiquido}`}
         subtitle="Resultado financeiro"
         icon={Landmark}
+      />
+
+      <DashboardStatsCard
+        title="Taxas de Boleto"
+        value={`R$ ${taxasBoleto}`}
+        subtitle="Gasto com taxa nas pagas"
+        icon={Receipt}
       />
 
     </PageGrid>

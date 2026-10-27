@@ -5,6 +5,7 @@ const { filtroReceita } = require('../utils/escopoLocador');
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
+const configuracaoFinanceiroService = require('./configuracaoFinanceiroService');
 const { doContrato, doInquilino } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
 
@@ -61,6 +62,8 @@ const sanitizar = (dados) => {
   if (dados.descontoDias !== undefined) dados.descontoDias = dados.descontoDias === '' || dados.descontoDias === null ? null : parseInt(dados.descontoDias, 10);
   if (dados.multaValor !== undefined) dados.multaValor = paraNumeroOuNull(dados.multaValor);
   if (dados.jurosValor !== undefined) dados.jurosValor = paraNumeroOuNull(dados.jurosValor);
+  if (dados.valorLiquido !== undefined) dados.valorLiquido = paraNumeroOuNull(dados.valorLiquido);
+  if (dados.recorrente !== undefined) dados.recorrente = Boolean(dados.recorrente);
 
   delete dados.id;
   delete dados.createdAt;
@@ -95,11 +98,30 @@ const buscarPorId = (id, usuario) => {
   });
 };
 
+// Quando o valor líquido não vier preenchido (undefined/null), calcula
+// sozinho a partir da taxa de boleto configurada -- só mexe quando
+// "valor" também está sendo definido nesta chamada, pra uma atualização
+// parcial (ex.: só marcar como paga) não recalcular por engano.
+async function aplicarValorLiquidoPadrao(dados) {
+
+  if (dados.valor === undefined) return dados;
+  if (dados.valorLiquido !== undefined && dados.valorLiquido !== null) return dados;
+
+  const config = await configuracaoFinanceiroService.buscar();
+  const taxa = config.taxaBoletoPercentual || 0;
+
+  dados.valorLiquido = Math.round(dados.valor * (1 - taxa / 100) * 100) / 100;
+
+  return dados;
+
+}
+
 const criar = async (dados, autor) => {
 
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
+  dados = await aplicarValorLiquidoPadrao(dados);
 
   await campoObrigatorioService.validar(modulo, dados);
 
@@ -142,6 +164,7 @@ const atualizar = async (id, dados, autor) => {
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
+  dados = await aplicarValorLiquidoPadrao(dados);
 
   const anterior = await prisma.receita.findUnique({
     where: { id }

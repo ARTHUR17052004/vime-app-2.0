@@ -15,6 +15,7 @@ import FinanceiroModal from "../components/financeiro/FinanceiroModal";
 
 import ReceitaForm from "../components/financeiro/ReceitaForm";
 import DespesaForm from "../components/financeiro/DespesaForm";
+import TaxaBoletoModal from "../components/financeiro/TaxaBoletoModal";
 
 import FinanceiroRelatorios from "../components/financeiro/FinanceiroRelatorios";
 import FinanceiroDashboard from "../components/financeiro/FinanceiroDashboard";
@@ -57,6 +58,7 @@ function FinanceiroPageConteudo() {
   const [despesas, setDespesas] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
+  const [taxaBoletoModalOpen, setTaxaBoletoModalOpen] = useState(false);
 
   const [tipoModal, setTipoModal] =
     useState("receita");
@@ -333,6 +335,16 @@ function FinanceiroPageConteudo() {
   const lucroLiquido =
     receitaPrevista - totalDespesas;
 
+  // Só das pagas -- taxa de boleto de uma cobrança ainda pendente
+  // nunca "aconteceu" de verdade (pode nem chegar a ser paga, cair
+  // vencida, etc). Sem valorLiquido preenchido, não entra na conta
+  // (nunca assume uma taxa que não foi calculada).
+  const taxasBoleto = Math.round(
+    receitas
+      .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.valorLiquido != null)
+      .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0) * 100
+  ) / 100;
+
   const dentroDoIntervalo = (data) => {
 
     if (!dataDe && !dataAte) return true;
@@ -440,6 +452,13 @@ function FinanceiroPageConteudo() {
             <>
               <Button
                 variant="secondary"
+                onClick={() => setTaxaBoletoModalOpen(true)}
+              >
+                Taxa de Boleto
+              </Button>
+
+              <Button
+                variant="secondary"
                 onClick={() => {
                   setTipoModal("despesa");
                   setModalOpen(true);
@@ -467,6 +486,7 @@ function FinanceiroPageConteudo() {
         receitaPrevista={receitaPrevista}
         totalDespesas={totalDespesas}
         lucroLiquido={lucroLiquido}
+        taxasBoleto={taxasBoleto}
       />
     </FadeIn>
 
@@ -673,6 +693,11 @@ function FinanceiroPageConteudo() {
         />
       )}
     </FinanceiroModal>
+
+    <TaxaBoletoModal
+      isOpen={taxaBoletoModalOpen}
+      onClose={() => setTaxaBoletoModalOpen(false)}
+    />
 
       </PageContainer>
 

@@ -6,6 +6,7 @@ import {
   Wallet,
   Plus,
   Pin,
+  Repeat,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -263,6 +264,9 @@ export default function FinanceiroReceitas({
                       {item.fixado && (
                         <Pin size={13} className="text-emerald-400 fill-emerald-400 shrink-0" />
                       )}
+                      {item.recorrente && (
+                        <Repeat size={13} className="text-sky-400 shrink-0" title="Cobrança recorrente" />
+                      )}
                       <p className="font-semibold text-[var(--text)] truncate">
                         {item.descricao}
                       </p>
@@ -438,6 +442,9 @@ export default function FinanceiroReceitas({
                           size={14}
                           className="text-emerald-400 fill-emerald-400"
                         />
+                      )}
+                      {item.recorrente && (
+                        <Repeat size={14} className="text-sky-400" title="Cobrança recorrente" />
                       )}
                       {item.descricao}
                     </div>

@@ -388,6 +388,17 @@ model Receita {
   categoria       String
   descricao       String
   valor           Float
+  // Valor líquido de verdade, depois de descontar a taxa do boleto
+  // (ex.: 3% cobrado pelo banco/Asaas) -- "valor" continua sendo o
+  // valor COBRADO do pagador (bruto), nunca mudou de significado.
+  // Calculado sozinho a partir de ConfiguracaoFinanceiro.taxaBoletoPercentual
+  // quando não vem preenchido na criação/edição, mas pode ser
+  // sobrescrito manualmente por cobrança.
+  valorLiquido    Float?
+  // true = quando esta ficar PAGA, o job de recorrência gera
+  // automaticamente a cobrança do mês seguinte (mesmo inquilino,
+  // mesmo valor) -- ver gerarRecorrenciaReceitasJob.js.
+  recorrente      Boolean   @default(false)
   vencimento      DateTime?
   dataPagamento   DateTime?
   status          String    @default("PENDENTE")
@@ -978,4 +989,17 @@ model SnapshotOcupacao {
   createdAt DateTime @default(now())
 
   @@unique([data, locadorId])
+}
+
+// Ajustes do módulo Financeiro -- registro único (sempre o de menor
+// id). Hoje só guarda a taxa de boleto, mas fica pronto pra crescer
+// sem precisar de migração nova a cada ajuste.
+model ConfiguracaoFinanceiro {
+  id Int @id @default(autoincrement())
+
+  // % descontado pelo banco/Asaas na emissão do boleto -- usado pra
+  // calcular Receita.valorLiquido sozinho quando não informado na hora.
+  taxaBoletoPercentual Float @default(0)
+
+  updatedAt DateTime @updatedAt
 }
