@@ -1,23 +1,6 @@
 const sabadoService = require("../services/sabadoService");
 const sabadoConversaService = require("../services/sabadoConversaService");
 
-const resumoExecutivo = async (req, res) => {
-  try {
-
-    const dados = await sabadoService.gerarResumoExecutivo(req.usuario, {
-      inicio: req.query.inicio,
-      fim: req.query.fim,
-    });
-
-    return res.status(200).json({ success: true, data: dados });
-
-  } catch (error) {
-
-    return res.status(500).json({ success: false, message: error.message });
-
-  }
-};
-
 const chat = async (req, res) => {
   try {
 
@@ -77,4 +60,4 @@ const excluirConversa = async (req, res) => {
   }
 };
 
-module.exports = { resumoExecutivo, chat, listarConversas, buscarConversa, excluirConversa };
+module.exports = { chat, listarConversas, buscarConversa, excluirConversa };

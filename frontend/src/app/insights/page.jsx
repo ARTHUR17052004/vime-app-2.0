@@ -13,7 +13,6 @@ import {
   ChevronRight,
   ChevronDown,
   RefreshCw,
-  MessagesSquare,
   Building2,
   FileText,
   ClipboardList,
@@ -41,7 +40,6 @@ import SemPermissao from "../components/ui/SemPermissao";
 import AssistenteChat from "../components/insights/AssistenteChat";
 
 import { InsightsService } from "@/services/insights.service";
-import { SabadoService } from "@/services/sabado.service";
 import { usePermissao } from "../../hooks/usePermissao";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -284,10 +282,6 @@ export default function InsightsPage() {
   // -- é o motivo da tela se chamar "Assistente IA" no menu agora.
   const [aba, setAba] = useState(podeUsarSabado ? "assistente" : "visao-geral");
 
-  const [sabadoTexto, setSabadoTexto] = useState("");
-  const [sabadoCarregando, setSabadoCarregando] = useState(false);
-  const [sabadoErro, setSabadoErro] = useState("");
-
   const [resumo, setResumo] = useState(null);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -317,39 +311,6 @@ export default function InsightsPage() {
       else novo.add(chave);
       return novo;
     });
-  };
-
-  // Gerado só quando o usuário pede (botão) -- cada chamada custa uma
-  // requisição de IA de verdade, então não dispara sozinho ao abrir a
-  // tela nem ao trocar de período.
-  const gerarResumoSabado = async () => {
-
-    try {
-
-      setSabadoCarregando(true);
-      setSabadoErro("");
-
-      let params = {};
-
-      if (mesOffset !== 0) {
-        const base = new Date();
-        base.setDate(1);
-        base.setMonth(base.getMonth() + mesOffset);
-        const inicio = new Date(base.getFullYear(), base.getMonth(), 1);
-        const fim = new Date(base.getFullYear(), base.getMonth() + 1, 0);
-        const paraISO = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-        params = { inicio: paraISO(inicio), fim: paraISO(fim) };
-      }
-
-      const resposta = await SabadoService.resumoExecutivo(params);
-      setSabadoTexto(resposta.data.texto);
-
-    } catch (erro) {
-      setSabadoErro(erro.message || "Não foi possível gerar o resumo agora.");
-    } finally {
-      setSabadoCarregando(false);
-    }
-
   };
 
   // Começa fechado -- tudo na tela abre só quando o usuário pedir.
@@ -652,44 +613,6 @@ export default function InsightsPage() {
                   </div>
                 }
               />
-            </div>
-          </FadeIn>
-
-          <FadeIn delay={0.14}>
-            <div className="mt-4">
-              <Cartao
-                icone={MessagesSquare}
-                titulo="Resumo executivo (SABADO)"
-                subtitulo={
-                  podeUsarSabado
-                    ? "Resumo em linguagem simples dos números abaixo, gerado por IA. Pra conversar, use a aba Assistente."
-                    : "Você não tem permissão para gerar o resumo com IA."
-                }
-                acao={
-                  podeUsarSabado && (
-                    <button
-                      onClick={gerarResumoSabado}
-                      disabled={sabadoCarregando}
-                      className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 hover:text-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-lg border border-emerald-400/30 hover:bg-emerald-400/10 transition-colors"
-                    >
-                      <Sparkles size={14} />
-                      {sabadoCarregando ? "Gerando..." : sabadoTexto ? "Gerar de novo" : "Gerar resumo"}
-                    </button>
-                  )
-                }
-              >
-                {podeUsarSabado && (sabadoTexto || sabadoErro) && (
-                  <div className="px-5 sm:px-6 pb-4 pt-0">
-                    {sabadoErro ? (
-                      <p className="text-xs text-red-400">{sabadoErro}</p>
-                    ) : (
-                      <p className="text-sm text-[var(--text)] whitespace-pre-line leading-relaxed">
-                        {sabadoTexto}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </Cartao>
             </div>
           </FadeIn>
 

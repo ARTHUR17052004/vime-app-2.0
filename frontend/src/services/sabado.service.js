@@ -2,18 +2,6 @@ import { api } from "./api";
 
 export const SabadoService = {
 
-  resumoExecutivo({ inicio, fim } = {}) {
-
-    const params = new URLSearchParams();
-    if (inicio) params.set("inicio", inicio);
-    if (fim) params.set("fim", fim);
-
-    const query = params.toString();
-
-    return api(`/sabado/resumo-executivo${query ? `?${query}` : ""}`);
-
-  },
-
   chat({ conversaId, mensagem }) {
 
     return api("/sabado/chat", {
