@@ -7,6 +7,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
+import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
 
 import { lerArquivoComoDataUrl, LIMITE_MIDIA_MB } from "@/utils/arquivoMidia";
 
@@ -33,6 +34,7 @@ export default function ChamadoForm({
 
   const inputArquivoRef = useRef(null);
   const inputCameraRef = useRef(null);
+  const [cameraAberta, setCameraAberta] = useState(false);
 
   useEffect(() => {
 
@@ -93,6 +95,19 @@ export default function ChamadoForm({
 
     }
 
+  }
+
+  function abrirCamera() {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      inputCameraRef.current?.click();
+    }
+  }
+
+  function aoCapturarFoto(arquivo) {
+    setCameraAberta(false);
+    selecionarArquivo({ target: { files: [arquivo], value: "" } });
   }
 
   function removerArquivo() {
@@ -264,7 +279,7 @@ export default function ChamadoForm({
 
             <button
               type="button"
-              onClick={() => inputCameraRef.current?.click()}
+              onClick={abrirCamera}
               title="Tirar foto"
               className="
                 flex
@@ -331,6 +346,12 @@ export default function ChamadoForm({
           accept="image/*,video/*"
           onChange={selecionarArquivo}
           className="hidden"
+        />
+
+        <CameraCapture
+          aberto={cameraAberta}
+          onFechar={() => setCameraAberta(false)}
+          onCapturar={aoCapturarFoto}
         />
 
         <p className="mt-2 text-xs text-[var(--text-faint)]">

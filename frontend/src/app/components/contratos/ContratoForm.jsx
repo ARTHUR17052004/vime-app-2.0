@@ -7,6 +7,7 @@ import { Paperclip, Download, Trash2, Camera } from "lucide-react";
 
 import Button from "../ui/Button";
 import SeletorBusca from "../ui/SeletorBusca";
+import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
 
 import { LocadorService } from "@/services/locadores.service";
 import { UnidadeService } from "@/services/unidades.service";
@@ -59,6 +60,15 @@ export default function ContratoForm({
   const [erro, setErro] = useState("");
 
   const inputCameraArquivoRef = useRef(null);
+  const [cameraAberta, setCameraAberta] = useState(false);
+
+  function abrirCamera() {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      inputCameraArquivoRef.current?.click();
+    }
+  }
 
   useEffect(() => {
 
@@ -847,7 +857,7 @@ export default function ContratoForm({
 
       <button
         type="button"
-        onClick={() => inputCameraArquivoRef.current?.click()}
+        onClick={abrirCamera}
         title="Tirar foto"
         className="
           w-10 h-10 rounded-xl
@@ -877,6 +887,15 @@ export default function ContratoForm({
         capture="environment"
         onChange={(e) => onArquivoSelecionado?.(e.target.files?.[0] || null)}
         className="hidden"
+      />
+
+      <CameraCapture
+        aberto={cameraAberta}
+        onFechar={() => setCameraAberta(false)}
+        onCapturar={(arquivo) => {
+          setCameraAberta(false);
+          onArquivoSelecionado?.(arquivo);
+        }}
       />
 
     </div>

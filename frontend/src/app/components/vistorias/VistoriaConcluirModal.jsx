@@ -343,19 +343,22 @@ export default function VistoriaConcluirModal({
         <div
           className="
             sticky bottom-0 -mx-8 -mb-8 mt-2
-            flex flex-col-reverse sm:flex-row sm:justify-end
+            flex flex-row sm:justify-end
             gap-3
             border-t border-[var(--border-token)]
             bg-[var(--surface)]
             px-8 py-5
           "
         >
-          <Button variant="secondary" className="w-full sm:w-auto" onClick={onClose}>
+          <Button variant="secondary" className="flex-1 sm:flex-none" onClick={onClose}>
             Cancelar
           </Button>
 
-          <Button className="w-full sm:w-auto" onClick={handleConfirmar} disabled={enviando}>
-            {isGeral ? "Confirmar Residências Vistoriadas" : "Confirmar Realização"}
+          <Button className="flex-1 sm:flex-none" onClick={handleConfirmar} disabled={enviando}>
+            <span className="sm:hidden">Confirmar</span>
+            <span className="hidden sm:inline">
+              {isGeral ? "Confirmar Residências Vistoriadas" : "Confirmar Realização"}
+            </span>
           </Button>
         </div>
       </div>

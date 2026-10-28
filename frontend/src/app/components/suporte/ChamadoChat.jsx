@@ -6,6 +6,7 @@ import { Paperclip, Send, X, Download, Camera } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { ChamadoService } from "@/services/chamado.service";
 import { lerArquivoComoDataUrl } from "@/utils/arquivoMidia";
+import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
 
 const STATUS_OPCOES = [
   "ABERTO",
@@ -54,6 +55,7 @@ export default function ChamadoChat({
   const inputArquivoRef = useRef(null);
   const inputCameraRef = useRef(null);
   const fimRef = useRef(null);
+  const [cameraAberta, setCameraAberta] = useState(false);
 
   const carregarMensagens = async () => {
 
@@ -115,6 +117,19 @@ export default function ChamadoChat({
 
     }
 
+  }
+
+  function abrirCamera() {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      inputCameraRef.current?.click();
+    }
+  }
+
+  function aoCapturarFoto(arquivo) {
+    setCameraAberta(false);
+    selecionarArquivo({ target: { files: [arquivo], value: "" } });
   }
 
   async function enviar(e) {
@@ -408,7 +423,7 @@ export default function ChamadoChat({
 
             <button
               type="button"
-              onClick={() => inputCameraRef.current?.click()}
+              onClick={abrirCamera}
               title="Tirar foto"
               className="
                 flex
@@ -466,6 +481,12 @@ export default function ChamadoChat({
               accept="image/*,video/*"
               onChange={selecionarArquivo}
               className="hidden"
+            />
+
+            <CameraCapture
+              aberto={cameraAberta}
+              onFechar={() => setCameraAberta(false)}
+              onCapturar={aoCapturarFoto}
             />
 
             <select

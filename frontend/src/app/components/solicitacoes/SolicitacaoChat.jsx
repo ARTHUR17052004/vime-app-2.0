@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { SolicitacaoService } from "@/services/solicitacao.service";
 import { usePermissao } from "@/hooks/usePermissao";
 import { lerArquivoComoDataUrl } from "@/utils/arquivoMidia";
+import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
 
 const STATUS_OPCOES = [
   "SOLICITADA",
@@ -51,6 +52,7 @@ export default function SolicitacaoChat({
   const inputArquivoRef = useRef(null);
   const inputCameraRef = useRef(null);
   const fimRef = useRef(null);
+  const [cameraAberta, setCameraAberta] = useState(false);
 
   const carregarMensagens = async () => {
 
@@ -112,6 +114,19 @@ export default function SolicitacaoChat({
 
     }
 
+  }
+
+  function abrirCamera() {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      inputCameraRef.current?.click();
+    }
+  }
+
+  function aoCapturarFoto(arquivo) {
+    setCameraAberta(false);
+    selecionarArquivo({ target: { files: [arquivo], value: "" } });
   }
 
   async function enviar(e) {
@@ -397,7 +412,7 @@ export default function SolicitacaoChat({
 
             <button
               type="button"
-              onClick={() => inputCameraRef.current?.click()}
+              onClick={abrirCamera}
               title="Tirar foto"
               className="
                 flex
@@ -454,6 +469,12 @@ export default function SolicitacaoChat({
               type="file"
               onChange={selecionarArquivo}
               className="hidden"
+            />
+
+            <CameraCapture
+              aberto={cameraAberta}
+              onFechar={() => setCameraAberta(false)}
+              onCapturar={aoCapturarFoto}
             />
 
             {podeClassificar && (

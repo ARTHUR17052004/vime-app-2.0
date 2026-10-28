@@ -1,22 +1,17 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Camera, Image as ImageIcon } from "lucide-react";
 
-// Em vários aparelhos/navegadores, um <input type="file"> sozinho abre
-// direto a galeria (ou direto a câmera, se tiver `capture`) sem deixar
-// escolher -- dois inputs escondidos (um com capture="environment",
-// outro sem) atrás de dois botões visíveis garantem as duas opções em
-// qualquer navegador, mobile ou desktop (no desktop "Tirar foto" não
-// tem câmera pra abrir, então vira só mais um seletor de arquivo igual
-// o outro -- não tem como evitar, é o próprio navegador quem decide).
-//
-// O input da câmera NUNCA pode ir com multiple=true: a maioria dos
-// navegadores mobile (confirmado no Chrome Android) ignora o
-// `capture` inteiro quando `multiple` também está presente, caindo no
-// seletor comum (Google Fotos) em vez de abrir a câmera -- exatamente
-// o bug que "Tirar foto" estava fazendo. Tirar uma de cada vez e
-// apertar de novo pra próxima continua funcionando igual.
+import CameraCapture, { cameraSuportada } from "./CameraCapture";
+
+// "Escolher do aparelho" é um <input type="file"> normal, sempre
+// funciona. "Tirar foto" NÃO pode depender de <input capture> -- é só
+// uma dica que vários Chrome Android ignoram (confirmado: cai direto
+// no Seletor de Fotos do Android em vez da câmera, mesmo sem
+// `multiple`), então abre a câmera de verdade dentro da página
+// (getUserMedia, ver CameraCapture.jsx) e só cai pro <input capture>
+// como último recurso, se o navegador nem isso suportar.
 export default function SeletorMidia({
   accept = "image/*",
   multiple = false,
@@ -25,8 +20,55 @@ export default function SeletorMidia({
   compacto = false,
 }) {
 
-  const refCamera = useRef(null);
+  const refCameraFallback = useRef(null);
   const refGaleria = useRef(null);
+
+  const [cameraAberta, setCameraAberta] = useState(false);
+
+  const abrirCamera = () => {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      refCameraFallback.current?.click();
+    }
+  };
+
+  const aoCapturar = (arquivo) => {
+    setCameraAberta(false);
+    onArquivos?.({ target: { files: [arquivo], value: "" } });
+  };
+
+  const botoes = (
+
+    <>
+
+      <input
+        ref={refCameraFallback}
+        type="file"
+        accept={accept}
+        capture="environment"
+        onChange={onArquivos}
+        className="hidden"
+      />
+
+      <input
+        ref={refGaleria}
+        type="file"
+        accept={accept}
+        multiple={multiple}
+        onChange={onArquivos}
+        className="hidden"
+      />
+
+      <CameraCapture
+        aberto={cameraAberta}
+        onFechar={() => setCameraAberta(false)}
+        onCapturar={aoCapturar}
+      />
+
+    </>
+
+  );
 
   if (compacto) {
 
@@ -34,27 +76,11 @@ export default function SeletorMidia({
 
       <div className={`flex items-center gap-2 ${className}`}>
 
-        <input
-          ref={refCamera}
-          type="file"
-          accept={accept}
-          capture="environment"
-          onChange={onArquivos}
-          className="hidden"
-        />
-
-        <input
-          ref={refGaleria}
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          onChange={onArquivos}
-          className="hidden"
-        />
+        {botoes}
 
         <button
           type="button"
-          onClick={() => refCamera.current?.click()}
+          onClick={abrirCamera}
           title="Tirar foto"
           className="
             w-10 h-10 rounded-xl
@@ -96,27 +122,11 @@ export default function SeletorMidia({
 
     <div className={`flex flex-col sm:flex-row gap-3 ${className}`}>
 
-      <input
-        ref={refCamera}
-        type="file"
-        accept={accept}
-        capture="environment"
-        onChange={onArquivos}
-        className="hidden"
-      />
-
-      <input
-        ref={refGaleria}
-        type="file"
-        accept={accept}
-        multiple={multiple}
-        onChange={onArquivos}
-        className="hidden"
-      />
+      {botoes}
 
       <button
         type="button"
-        onClick={() => refCamera.current?.click()}
+        onClick={abrirCamera}
         className="
           flex-1 flex items-center justify-center gap-2
           rounded-xl border border-[var(--border-token)]

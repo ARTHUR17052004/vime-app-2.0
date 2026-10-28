@@ -6,6 +6,7 @@ import { Paperclip, X, Camera } from "lucide-react";
 import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Textarea from "../ui/Textarea";
+import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
 
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
@@ -69,6 +70,7 @@ export default function SolicitacaoForm({
 
   const inputArquivoRef = useRef(null);
   const inputCameraRef = useRef(null);
+  const [cameraAberta, setCameraAberta] = useState(false);
 
   useEffect(() => {
 
@@ -144,6 +146,20 @@ export default function SolicitacaoForm({
       alert(erro.message);
 
     }
+
+  }
+
+  function abrirCamera() {
+    if (cameraSuportada()) {
+      setCameraAberta(true);
+    } else {
+      inputCameraRef.current?.click();
+    }
+  }
+
+  function aoCapturarFoto(arquivo) {
+    setCameraAberta(false);
+    selecionarArquivo({ target: { files: [arquivo], value: "" } });
 
   }
 
@@ -337,7 +353,7 @@ export default function SolicitacaoForm({
 
             <button
               type="button"
-              onClick={() => inputCameraRef.current?.click()}
+              onClick={abrirCamera}
               title="Tirar foto"
               className="
                 flex
@@ -403,6 +419,12 @@ export default function SolicitacaoForm({
           type="file"
           onChange={selecionarArquivo}
           className="hidden"
+        />
+
+        <CameraCapture
+          aberto={cameraAberta}
+          onFechar={() => setCameraAberta(false)}
+          onCapturar={aoCapturarFoto}
         />
 
       </div>
