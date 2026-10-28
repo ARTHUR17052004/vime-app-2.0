@@ -84,7 +84,11 @@ export default function Modal({
 
         backdrop-blur-md
 
-        p-8
+        p-4
+        sm:p-8
+
+        pb-[max(1rem,env(safe-area-inset-bottom))]
+        sm:pb-8
 
         animate-in
         fade-in
@@ -102,7 +106,7 @@ export default function Modal({
 
           ${sizes[size]}
 
-          max-h-[92vh]
+          max-h-[92dvh]
 
           overflow-hidden
 
@@ -206,7 +210,7 @@ export default function Modal({
 
             ${
               scrollable
-                ? "overflow-y-auto max-h-[calc(92vh-105px)]"
+                ? "overflow-y-auto max-h-[calc(92dvh-105px)]"
                 : ""
             }
           `}

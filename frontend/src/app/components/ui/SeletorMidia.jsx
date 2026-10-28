@@ -10,6 +10,13 @@ import { Camera, Image as ImageIcon } from "lucide-react";
 // qualquer navegador, mobile ou desktop (no desktop "Tirar foto" não
 // tem câmera pra abrir, então vira só mais um seletor de arquivo igual
 // o outro -- não tem como evitar, é o próprio navegador quem decide).
+//
+// O input da câmera NUNCA pode ir com multiple=true: a maioria dos
+// navegadores mobile (confirmado no Chrome Android) ignora o
+// `capture` inteiro quando `multiple` também está presente, caindo no
+// seletor comum (Google Fotos) em vez de abrir a câmera -- exatamente
+// o bug que "Tirar foto" estava fazendo. Tirar uma de cada vez e
+// apertar de novo pra próxima continua funcionando igual.
 export default function SeletorMidia({
   accept = "image/*",
   multiple = false,
@@ -32,7 +39,6 @@ export default function SeletorMidia({
           type="file"
           accept={accept}
           capture="environment"
-          multiple={multiple}
           onChange={onArquivos}
           className="hidden"
         />
@@ -95,7 +101,6 @@ export default function SeletorMidia({
         type="file"
         accept={accept}
         capture="environment"
-        multiple={multiple}
         onChange={onArquivos}
         className="hidden"
       />
