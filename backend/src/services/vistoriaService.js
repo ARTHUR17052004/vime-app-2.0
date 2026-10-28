@@ -51,34 +51,26 @@ const residenciasAtivasIds = async () => {
   return residencias.map((u) => u.id);
 };
 
-// Mesma janela de 72h do atualizarStatusVistoriasJob (PROGRAMADA ->
-// PENDENTE perto do prazo) -- "em dia" aqui precisa bater com isso, ou
-// o card mostra "7/7 em dia" bonitinho bem do lado de um status
-// PENDENTE com relógio contando, que é contraditório.
-const MS_PENDENTE = 72 * 60 * 60 * 1000;
-
 // Resumo de uma vistoria "Geral" pro card da lista -- cada residência
-// tem seu PRÓPRIO relógio (ver VistoriaProgresso), então "concluídas"
-// virou "em dia": quantas não estão vencidas nem perto de vencer (mesma
-// janela de 72h do status PENDENTE) agora (residência nunca tocada usa
-// dataProximaBase/dataProxima da vistoria como seed).
+// tem seu PRÓPRIO relógio (ver VistoriaProgresso). "concluídas" é
+// literal: quantas JÁ tiveram pelo menos uma vistoria de verdade
+// registrada (tem VistoriaProgresso = já apareceu em alguma
+// VistoriaMissao). Residência nunca tocada NÃO conta, mesmo que o
+// prazo dela ainda nem tenha vencido -- "em dia" tinha o problema de
+// contar quem nunca foi vistoriada como se já tivesse sido, só porque
+// o primeiro prazo ainda não chegou (ex.: vistoria recém-criada,
+// ninguém fez nada, mas mostrava "7/7" preenchido).
 const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
 
   if (vistoria.unidadeId) return null; // não é "Geral", não tem missão
 
-  const agora = new Date();
-  const seed = vistoria.dataProximaBase || vistoria.dataProxima;
   const progressoPorUnidade = new Map((vistoria.progressos || []).map((p) => [p.unidadeId, p]));
 
-  let emDia = 0;
+  const concluidas = idsResidenciasAtivas.filter(
+    (unidadeId) => progressoPorUnidade.get(unidadeId)?.dataUltima
+  ).length;
 
-  for (const unidadeId of idsResidenciasAtivas) {
-    const progresso = progressoPorUnidade.get(unidadeId);
-    const dataProxima = progresso ? progresso.dataProxima : seed;
-    if (!dataProxima || (dataProxima - agora) > MS_PENDENTE) emDia++;
-  }
-
-  return { concluidas: emDia, total: idsResidenciasAtivas.length };
+  return { concluidas, total: idsResidenciasAtivas.length };
 
 };
 
@@ -359,6 +351,7 @@ const listarMissoes = async (vistoriaId) => {
         cicloAtual: progresso?.cicloAtual || 1,
         dataUltima: progresso?.dataUltima || null,
         dataProxima,
+        nuncaVistoriada: !progresso?.dataUltima,
         atrasada: !!dataProxima && dataProxima <= agora,
         realizadoPor: ultimaMissao?.realizadoPor || null,
         fotos: ultimaMissao?.fotos || null,

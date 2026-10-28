@@ -156,7 +156,7 @@ export default function VistoriaConcluirModal({
 
   };
 
-  const totalEmDia = missoes?.residencias.filter((r) => !r.atrasada).length || 0;
+  const totalJaVistoriadas = missoes?.residencias.filter((r) => !r.nuncaVistoriada).length || 0;
 
   return (
     <Modal
@@ -213,7 +213,7 @@ export default function VistoriaConcluirModal({
             {missoes && (
               <>
                 <p className="text-xs text-[var(--text-faint)] mb-3">
-                  {totalEmDia} de {missoes.residencias.length} residências em dia -- cada uma reprograma sozinha, na hora, quando marcada.
+                  {totalJaVistoriadas} de {missoes.residencias.length} residências já vistoriadas alguma vez -- cada uma reprograma sozinha, na hora, quando marcada.
                 </p>
 
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -245,7 +245,11 @@ export default function VistoriaConcluirModal({
                         )}
                       </div>
 
-                      {r.dataProxima && (
+                      {r.nuncaVistoriada ? (
+                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-sky-400">
+                          Nunca vistoriada
+                        </span>
+                      ) : r.dataProxima && (
                         r.atrasada ? (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-400">
                             <TriangleAlert size={14} />

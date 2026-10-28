@@ -179,7 +179,7 @@ export default function VistoriaCard({
                       transition
                     "
                   >
-                    {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs em dia
+                    {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs já vistoriadas
                   </button>
                 )}
 
