@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Paperclip, X } from "lucide-react";
+import { Paperclip, X, Camera } from "lucide-react";
 
 import Button from "../ui/Button";
 import Input from "../ui/Input";
@@ -68,6 +68,7 @@ export default function SolicitacaoForm({
   const [anexo, setAnexo] = useState(null);
 
   const inputArquivoRef = useRef(null);
+  const inputCameraRef = useRef(null);
 
   useEffect(() => {
 
@@ -152,6 +153,10 @@ export default function SolicitacaoForm({
 
     if (inputArquivoRef.current) {
       inputArquivoRef.current.value = "";
+    }
+
+    if (inputCameraRef.current) {
+      inputCameraRef.current.value = "";
     }
 
   }
@@ -328,32 +333,70 @@ export default function SolicitacaoForm({
 
         ) : (
 
-          <button
-            type="button"
-            onClick={() => inputArquivoRef.current?.click()}
-            className="
-              flex
-              items-center
-              gap-2
-              rounded-xl
-              border
-              border-dashed
-              border-[var(--border-token)]
-              bg-[var(--surface-2)]
-              px-4
-              py-3
-              text-sm
-              text-[var(--text-subtle)]
-              hover:bg-[var(--surface-3)]
-              hover:text-[var(--text-1)]
-              transition
-            "
-          >
-            <Paperclip size={16} />
-            Anexar arquivo (imagem, PDF, etc.)
-          </button>
+          <div className="flex items-center gap-2">
+
+            <button
+              type="button"
+              onClick={() => inputCameraRef.current?.click()}
+              title="Tirar foto"
+              className="
+                flex
+                items-center
+                justify-center
+                rounded-xl
+                border
+                border-dashed
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
+                px-4
+                py-3
+                text-[var(--text-subtle)]
+                hover:bg-[var(--surface-3)]
+                hover:text-[var(--text-1)]
+                transition
+              "
+            >
+              <Camera size={16} />
+            </button>
+
+            <button
+              type="button"
+              onClick={() => inputArquivoRef.current?.click()}
+              className="
+                flex-1
+                flex
+                items-center
+                gap-2
+                rounded-xl
+                border
+                border-dashed
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
+                px-4
+                py-3
+                text-sm
+                text-[var(--text-subtle)]
+                hover:bg-[var(--surface-3)]
+                hover:text-[var(--text-1)]
+                transition
+              "
+            >
+              <Paperclip size={16} />
+              Anexar arquivo (imagem, PDF, etc.)
+            </button>
+
+          </div>
 
         )}
+
+        <input
+          ref={inputCameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={selecionarArquivo}
+          className="hidden"
+        />
 
         <input
           ref={inputArquivoRef}

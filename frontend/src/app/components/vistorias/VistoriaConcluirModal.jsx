@@ -7,6 +7,7 @@ import { Clock, TriangleAlert } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import SeletorMidia from "../ui/SeletorMidia";
 import { formatDate } from "@/utils/formatDate";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 import { VistoriaService } from "@/services/vistoria.service";
@@ -271,22 +272,10 @@ export default function VistoriaConcluirModal({
             Fotos e vídeos da execução (opcional)
           </label>
 
-          <input
-            type="file"
-            multiple
+          <SeletorMidia
             accept="image/*,video/*"
-            onChange={handleArquivos}
-            className="
-              w-full
-              rounded-xl
-              border
-              border-[var(--border-token)]
-              bg-[var(--surface-2)]
-              px-4
-              py-3
-              text-[var(--text)]
-              text-sm
-            "
+            multiple
+            onArquivos={handleArquivos}
           />
 
           {midias.length > 0 && (

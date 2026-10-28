@@ -7,6 +7,7 @@ import Table from "../ui/Table";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
+import SeletorMidia from "../ui/SeletorMidia";
 import VistoriaMissaoActionsMenu from "./VistoriaMissaoActionsMenu";
 import { VistoriaService } from "@/services/vistoria.service";
 import { formatDateTime } from "@/utils/formatDate";
@@ -424,12 +425,10 @@ function EditarModal({ item, onClose, onSalvo }) {
               Fotos e vídeos
             </label>
 
-            <input
-              type="file"
-              multiple
+            <SeletorMidia
               accept="image/*,video/*"
-              onChange={handleArquivos}
-              className="w-full rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] px-4 py-3 text-[var(--text)] text-sm"
+              multiple
+              onArquivos={handleArquivos}
             />
 
             {fotos.length > 0 && (

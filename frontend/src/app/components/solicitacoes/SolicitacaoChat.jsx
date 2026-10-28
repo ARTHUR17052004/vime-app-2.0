@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Paperclip, Send, X, Download } from "lucide-react";
+import { Paperclip, Send, X, Download, Camera } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 import { SolicitacaoService } from "@/services/solicitacao.service";
@@ -49,6 +49,7 @@ export default function SolicitacaoChat({
   const [anexo, setAnexo] = useState(null);
 
   const inputArquivoRef = useRef(null);
+  const inputCameraRef = useRef(null);
   const fimRef = useRef(null);
 
   const carregarMensagens = async () => {
@@ -136,6 +137,10 @@ export default function SolicitacaoChat({
 
       if (inputArquivoRef.current) {
         inputArquivoRef.current.value = "";
+      }
+
+      if (inputCameraRef.current) {
+        inputCameraRef.current.value = "";
       }
 
       if (novoStatus) {
@@ -352,6 +357,9 @@ export default function SolicitacaoChat({
                 if (inputArquivoRef.current) {
                   inputArquivoRef.current.value = "";
                 }
+                if (inputCameraRef.current) {
+                  inputCameraRef.current.value = "";
+                }
               }}
               className="text-[var(--text-subtle)] hover:text-red-400 transition"
             >
@@ -389,6 +397,28 @@ export default function SolicitacaoChat({
 
             <button
               type="button"
+              onClick={() => inputCameraRef.current?.click()}
+              title="Tirar foto"
+              className="
+                flex
+                items-center
+                justify-center
+                rounded-xl
+                border
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
+                px-4
+                py-3
+                text-[var(--text-muted)]
+                hover:bg-[var(--surface-3)]
+                transition
+              "
+            >
+              <Camera size={16} />
+            </button>
+
+            <button
+              type="button"
               onClick={() => inputArquivoRef.current?.click()}
               className="
                 flex
@@ -409,6 +439,15 @@ export default function SolicitacaoChat({
               <Paperclip size={16} />
               Anexar arquivo
             </button>
+
+            <input
+              ref={inputCameraRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={selecionarArquivo}
+              className="hidden"
+            />
 
             <input
               ref={inputArquivoRef}

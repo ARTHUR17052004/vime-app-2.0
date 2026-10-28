@@ -2,8 +2,8 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useMemo, useState } from "react";
-import { Paperclip, Download, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Paperclip, Download, Trash2, Camera } from "lucide-react";
 
 import Button from "../ui/Button";
 import SeletorBusca from "../ui/SeletorBusca";
@@ -57,6 +57,8 @@ export default function ContratoForm({
     useState(new Set());
 
   const [erro, setErro] = useState("");
+
+  const inputCameraArquivoRef = useRef(null);
 
   useEffect(() => {
 
@@ -841,12 +843,43 @@ export default function ContratoForm({
       </div>
     )}
 
-    <input
-      type="file"
-      accept=".pdf,image/*"
-      onChange={(e) => onArquivoSelecionado?.(e.target.files?.[0] || null)}
-      className="text-sm text-[var(--text-subtle)] file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-600"
-    />
+    <div className="flex items-center gap-2">
+
+      <button
+        type="button"
+        onClick={() => inputCameraArquivoRef.current?.click()}
+        title="Tirar foto"
+        className="
+          w-10 h-10 rounded-xl
+          border border-[var(--border-token)]
+          bg-[var(--surface)]
+          text-[var(--text-subtle)]
+          hover:border-emerald-500/40 hover:text-emerald-400
+          transition
+          flex items-center justify-center
+          shrink-0
+        "
+      >
+        <Camera size={16} />
+      </button>
+
+      <input
+        type="file"
+        accept=".pdf,image/*"
+        onChange={(e) => onArquivoSelecionado?.(e.target.files?.[0] || null)}
+        className="text-sm text-[var(--text-subtle)] file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-emerald-600"
+      />
+
+      <input
+        ref={inputCameraArquivoRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={(e) => onArquivoSelecionado?.(e.target.files?.[0] || null)}
+        className="hidden"
+      />
+
+    </div>
 
     {arquivoSelecionado && (
       <p className="text-xs text-emerald-400">Selecionado: {arquivoSelecionado.name}</p>

@@ -6,6 +6,7 @@ import Button from "../ui/Button";
 import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
+import SeletorMidia from "../ui/SeletorMidia";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
@@ -577,12 +578,10 @@ export default function VistoriaForm({
     Fotos e Vídeos da Vistoria
   </label>
 
-  <Input
-    type="file"
-    multiple
+  <SeletorMidia
     accept="image/*,video/*"
-    className={input}
-    onChange={async (e) => {
+    multiple
+    onArquivos={async (e) => {
 
       const arquivos = Array.from(
         e.target.files || []
