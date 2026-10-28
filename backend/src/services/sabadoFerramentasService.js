@@ -323,7 +323,7 @@ const FERRAMENTAS = [
     type: "function",
     function: {
       name: "listar_vistorias",
-      description: "Lista vistorias reais (título, imóvel, responsável, datas, status).",
+      description: "Lista vistorias reais (título, imóvel, responsável, datas, status). ATENÇÃO: uma vistoria \"Geral\" (imóvel = \"Geral (várias residências)\") cobre várias residências e o status dela aqui nunca vira \"REALIZADA\" sozinho -- cada residência é concluída à parte (não aparece nesta lista). Pra contagem de quantas foram realizadas (hoje ou status atual), use visao_geral primeiro, que já soma isso certo.",
       parameters: {
         type: "object",
         properties: {

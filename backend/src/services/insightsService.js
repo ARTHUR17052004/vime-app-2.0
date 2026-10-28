@@ -569,12 +569,23 @@ const resumoSolicitacoesVistorias = async (usuario) => {
   const agora = new Date();
   const limiteAtraso = new Date(agora.getTime() - MS_LIMITE);
 
+  // Mesmo corte de "hoje" (local, não UTC) que VistoriaResumo.jsx usa
+  // no card "Realizadas hoje" -- sem isso o assistente responde pelo
+  // status bruto da Vistoria, que pra uma vistoria "Geral" quase nunca
+  // vira "Realizada" (ela some em PROGRAMADA/PENDENTE/ATRASADA pra
+  // sempre, residência por residência -- ver VistoriaMissao), então
+  // "quantas foram realizadas" sempre batia 0, contradizendo o card.
+  const inicioHoje = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+  const fimHoje = new Date(inicioHoje.getTime() + 24 * 60 * 60 * 1000);
+
   const [
     solicitacoesAbertas,
     solicitacoesAtrasadas,
     vistoriasAgendadas,
     vistoriasPendentes,
     vistoriasAtrasadas,
+    vistoriasRealizadasHojeRegulares,
+    missoesRealizadasHoje,
     ocorrenciasRegistradas,
   ] = await Promise.all([
 
@@ -596,9 +607,18 @@ const resumoSolicitacoesVistorias = async (usuario) => {
     prisma.vistoria.count({ where: { ...escopoVistoria, status: "PENDENTE" } }),
     prisma.vistoria.count({ where: { ...escopoVistoria, status: "ATRASADA" } }),
 
+    prisma.vistoria.count({
+      where: { ...escopoVistoria, status: "REALIZADA", concluidaEm: { gte: inicioHoje, lt: fimHoje } },
+    }),
+    prisma.vistoriaMissao.count({
+      where: { dataRealizacao: { gte: inicioHoje, lt: fimHoje }, vistoria: escopoVistoria },
+    }),
+
     prisma.ocorrencia.count({ where: { vistoria: escopoVistoria } }),
 
   ]);
+
+  const vistoriasRealizadasHoje = vistoriasRealizadasHojeRegulares + missoesRealizadasHoje;
 
   return {
 
@@ -659,6 +679,17 @@ const resumoSolicitacoesVistorias = async (usuario) => {
         escopo: "atual",
         criterio: "Vistorias com status \"Atrasada\" -- o prazo já venceu sem resposta.",
         navegacao: { href: "/vistorias", query: { aba: "atrasadas" } },
+      },
+
+      {
+        chave: "vistorias_realizadas_hoje",
+        rotulo: "Vistorias realizadas hoje",
+        valor: vistoriasRealizadasHoje,
+        formato: "numero",
+        quantidade: vistoriasRealizadasHoje,
+        escopo: "hoje",
+        criterio: "Vistoria normal concluída hoje (status \"Realizada\") somada a cada residência concluída hoje numa vistoria \"Geral\" (uma vistoria assim cobre várias residências e nunca muda seu próprio status pra \"Realizada\" -- cada conclusão individual é contada à parte). É o mesmo número do card \"Realizadas hoje\" em Vistorias. Não existe um número de \"total de vistorias já realizadas\" (histórico completo) pronto -- só hoje.",
+        navegacao: { href: "/vistorias", query: { aba: "realizadas" } },
       },
 
       {
