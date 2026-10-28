@@ -1,4 +1,5 @@
 const vistoriaService = require('../services/vistoriaService');
+const notificacaoService = require('../services/notificacaoService');
 
 const listar = async (req, res) => {
   const dados = await vistoriaService.listar(req.usuario);
@@ -10,6 +11,19 @@ const buscarPorId = async (req, res) => {
   const vistoria = await vistoriaService.buscarPorId(req.params.id);
 
   if (!vistoria) {
+
+    // Auto-cura: uma vistoria "some" quando o Kitnet/Unidade dela é
+    // excluído (cascade no banco) sem passar por vistoriaService.remover
+    // -- e aí fica notificação velha ("Vistoria pendente"/"urgente")
+    // apontando pra um link que não existe mais, pra sempre. Limpa aqui
+    // pra não ficar reaparecendo "não encontrada" toda vez que alguém
+    // clicar de novo na mesma notificação.
+    try {
+      await notificacaoService.removerPorLink(`/vistorias/${req.params.id}`);
+    } catch (erro) {
+      console.error('[notificacao] Falha ao limpar notificação órfã de vistoria:', erro.message);
+    }
+
     return res.status(404).json({
       mensagem: 'Vistoria não encontrada.'
     });

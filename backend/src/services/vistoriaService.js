@@ -42,71 +42,84 @@ const avancarUmaVez = (data, periodicidade) => {
 
 };
 
-// "Missões" (ver VistoriaMissao) cobrem TODAS as residências ativas do
-// sistema, não só as do locador de quem está concluindo -- vistoria
-// "Geral" foi definida assim de propósito (ver decisão do usuário).
-const contarResidenciasAtivas = () => {
-  return prisma.unidade.count({ where: { status: 'Ativa' } });
+// "Missões" (ver VistoriaMissao/VistoriaProgresso) cobrem TODAS as
+// residências ativas do sistema, não só as do locador de quem está
+// concluindo -- vistoria "Geral" foi definida assim de propósito (ver
+// decisão do usuário).
+const residenciasAtivasIds = async () => {
+  const residencias = await prisma.unidade.findMany({ where: { status: 'Ativa' }, select: { id: true } });
+  return residencias.map((u) => u.id);
 };
 
-// Progresso da rodada atual de uma vistoria "Geral" -- só as missões
-// batidas no cicloAtual contam (rodadas antigas já fecharam e viram
-// histórico no Arquivo).
-const progressoMissoes = (vistoria, totalResidenciasAtivas) => {
+// Resumo de uma vistoria "Geral" pro card da lista -- cada residência
+// tem seu PRÓPRIO relógio (ver VistoriaProgresso), então "concluídas"
+// virou "em dia": quantas não estão com a própria dataProxima vencida
+// agora (residência nunca tocada usa dataProximaBase/dataProxima da
+// vistoria como seed).
+const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
 
   if (vistoria.unidadeId) return null; // não é "Geral", não tem missão
 
-  const concluidas = (vistoria.missoes || []).filter(
-    (m) => m.ciclo === vistoria.cicloAtual
-  ).length;
+  const agora = new Date();
+  const seed = vistoria.dataProximaBase || vistoria.dataProxima;
+  const progressoPorUnidade = new Map((vistoria.progressos || []).map((p) => [p.unidadeId, p]));
 
-  return { concluidas, total: totalResidenciasAtivas };
+  let emDia = 0;
+
+  for (const unidadeId of idsResidenciasAtivas) {
+    const progresso = progressoPorUnidade.get(unidadeId);
+    const dataProxima = progresso ? progresso.dataProxima : seed;
+    if (!dataProxima || dataProxima > agora) emDia++;
+  }
+
+  return { concluidas: emDia, total: idsResidenciasAtivas.length };
 
 };
 
 const listar = async (usuario) => {
 
-  const [vistorias, totalResidenciasAtivas] = await Promise.all([
+  const [vistorias, idsResidenciasAtivas] = await Promise.all([
     prisma.vistoria.findMany({
       where: filtroVistoria(usuario),
       include: {
         ocorrencias: true,
         unidade: true,
         kitnet: true,
-        missoes: true,
+        progressos: true,
       },
       orderBy: {
         createdAt: 'desc'
       }
     }),
-    contarResidenciasAtivas(),
+    residenciasAtivasIds(),
   ]);
 
   return vistorias.map((v) => ({
     ...v,
-    progressoMissoes: progressoMissoes(v, totalResidenciasAtivas),
+    progressoMissoes: progressoMissoes(v, idsResidenciasAtivas),
   }));
 
 };
 
 const buscarPorId = async (id) => {
 
-  const [vistoria, totalResidenciasAtivas] = await Promise.all([
+  const [vistoria, idsResidenciasAtivas] = await Promise.all([
     prisma.vistoria.findUnique({
       where: { id },
       include: {
         ocorrencias: true,
         unidade: true,
         kitnet: true,
+        progressos: { include: { unidade: true } },
         missoes: { include: { unidade: true }, orderBy: { createdAt: 'desc' } },
       }
     }),
-    contarResidenciasAtivas(),
+    residenciasAtivasIds(),
   ]);
 
   if (!vistoria) return null;
 
-  return { ...vistoria, progressoMissoes: progressoMissoes(vistoria, totalResidenciasAtivas) };
+  return { ...vistoria, progressoMissoes: progressoMissoes(vistoria, idsResidenciasAtivas) };
 
 };
 
@@ -114,8 +127,16 @@ const converterDatas = (dados) => {
 
   if (dados.data !== undefined) dados.data = paraDataOuNull(dados.data);
   if (dados.dataUltima !== undefined) dados.dataUltima = paraDataOuNull(dados.dataUltima);
-  if (dados.dataProxima !== undefined) dados.dataProxima = paraDataOuNull(dados.dataProxima);
   if (dados.concluidaEm !== undefined) dados.concluidaEm = paraDataOuNull(dados.concluidaEm);
+
+  if (dados.dataProxima !== undefined) {
+    dados.dataProxima = paraDataOuNull(dados.dataProxima);
+    // "Próxima Execução" editada à mão vira a nova âncora pras
+    // residências de uma vistoria "Geral" que ainda não têm relógio
+    // próprio (ver VistoriaProgresso/dataProximaBase) -- concluirMissoes
+    // nunca passa por aqui, só essa edição manual do usuário.
+    dados.dataProximaBase = dados.dataProxima;
+  }
 
   delete dados.id;
   delete dados.createdAt;
@@ -283,8 +304,11 @@ const remover = async (id, autor) => {
 
 };
 
-// Checklist da rodada atual (ciclo) de uma vistoria "Geral" -- uma
-// "missão" por residência ativa, batida ou não.
+// Checklist de uma vistoria "Geral" -- uma linha por residência ativa,
+// cada uma com o SEU PRÓPRIO relógio (cicloAtual/dataProxima, ver
+// VistoriaProgresso): uma não espera a outra pra reprogramar.
+// Residência que nunca teve VistoriaProgresso (nunca foi tocada) usa
+// dataProximaBase da vistoria como sua data inicial.
 const listarMissoes = async (vistoriaId) => {
 
   const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
@@ -297,36 +321,54 @@ const listarMissoes = async (vistoriaId) => {
     throw new Error('Essa vistoria não é "Geral" -- não tem missões por residência.');
   }
 
-  const [residencias, missoes] = await Promise.all([
+  const [residencias, progressos, missoes] = await Promise.all([
     prisma.unidade.findMany({ where: { status: 'Ativa' }, orderBy: { nome: 'asc' } }),
-    prisma.vistoriaMissao.findMany({ where: { vistoriaId, ciclo: vistoria.cicloAtual } }),
+    prisma.vistoriaProgresso.findMany({ where: { vistoriaId } }),
+    prisma.vistoriaMissao.findMany({ where: { vistoriaId }, orderBy: { ciclo: 'desc' } }),
   ]);
 
-  const porUnidade = new Map(missoes.map((m) => [m.unidadeId, m]));
+  const progressoPorUnidade = new Map(progressos.map((p) => [p.unidadeId, p]));
+
+  const ultimaMissaoPorUnidade = new Map();
+  for (const missao of missoes) {
+    if (!ultimaMissaoPorUnidade.has(missao.unidadeId)) {
+      ultimaMissaoPorUnidade.set(missao.unidadeId, missao);
+    }
+  }
+
+  const seed = vistoria.dataProximaBase || vistoria.dataProxima;
+  const agora = new Date();
 
   return {
     vistoriaId,
-    ciclo: vistoria.cicloAtual,
     residencias: residencias.map((u) => {
-      const missao = porUnidade.get(u.id);
+
+      const progresso = progressoPorUnidade.get(u.id);
+      const ultimaMissao = ultimaMissaoPorUnidade.get(u.id);
+      const dataProxima = progresso ? progresso.dataProxima : seed;
+
       return {
         unidadeId: u.id,
         unidadeNome: u.nome,
-        concluida: !!missao,
-        dataRealizacao: missao?.dataRealizacao || null,
-        realizadoPor: missao?.realizadoPor || null,
-        fotos: missao?.fotos || null,
-        observacoes: missao?.observacoes || null,
+        cicloAtual: progresso?.cicloAtual || 1,
+        dataUltima: progresso?.dataUltima || null,
+        dataProxima,
+        atrasada: !!dataProxima && dataProxima <= agora,
+        realizadoPor: ultimaMissao?.realizadoPor || null,
+        fotos: ultimaMissao?.fotos || null,
+        observacoes: ultimaMissao?.observacoes || null,
       };
+
     }),
   };
 
 };
 
-// Bate o check de uma ou mais residências na rodada atual. Quando todas
-// as residências ativas tiverem missão no ciclo, fecha a rodada --
-// igual concluir uma vistoria normal (renova sozinha pra próxima data
-// se tiver periodicidade) -- e abre um ciclo novo e vazio.
+// Bate o check de uma ou mais residências -- cada uma reprograma SÓ O
+// PRÓPRIO relógio na hora (VistoriaProgresso), sem esperar as outras:
+// VIME I concluída hoje e VIME II concluída amanhã saem com próximas
+// datas diferentes, cada uma contada a partir do que já estava
+// programado PRA ELA.
 const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, realizadoPor, observacoes }, autor) => {
 
   if (!Array.isArray(unidadeIds) || unidadeIds.length === 0) {
@@ -344,16 +386,29 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
   }
 
   const dataEscolhida = dataRealizacao ? new Date(dataRealizacao) : new Date();
+  const agora = new Date();
+  const seed = vistoria.dataProximaBase || vistoria.dataProxima;
 
-  await Promise.all(unidadeIds.map((unidadeId) =>
-    prisma.vistoriaMissao.upsert({
+  const progressosExistentes = await prisma.vistoriaProgresso.findMany({
+    where: { vistoriaId, unidadeId: { in: unidadeIds } },
+  });
+  const progressoPorUnidade = new Map(progressosExistentes.map((p) => [p.unidadeId, p]));
+
+  const progressosAtualizados = [];
+
+  for (const unidadeId of unidadeIds) {
+
+    const progresso = progressoPorUnidade.get(unidadeId);
+    const cicloDaResidencia = progresso?.cicloAtual || 1;
+
+    await prisma.vistoriaMissao.upsert({
       where: {
-        vistoriaId_unidadeId_ciclo: { vistoriaId, unidadeId, ciclo: vistoria.cicloAtual },
+        vistoriaId_unidadeId_ciclo: { vistoriaId, unidadeId, ciclo: cicloDaResidencia },
       },
       create: {
         vistoriaId,
         unidadeId,
-        ciclo: vistoria.cicloAtual,
+        ciclo: cicloDaResidencia,
         dataRealizacao: dataEscolhida,
         realizadoPor: realizadoPor || null,
         fotos: fotos || null,
@@ -365,43 +420,85 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
         fotos: fotos || null,
         observacoes: observacoes || null,
       },
-    })
-  ));
+    });
 
-  const [totalAtivas, concluidas] = await Promise.all([
-    contarResidenciasAtivas(),
-    prisma.vistoriaMissao.count({ where: { vistoriaId, ciclo: vistoria.cicloAtual } }),
-  ]);
+    // Avança a partir da data que JÁ estava programada PRA ESSA
+    // residência (não da data de hoje, nem da de outra residência),
+    // com salto de ciclos se concluiu bem atrasada, pra não perder o
+    // dia fixo da recorrência.
+    const baseAncora = new Date(progresso?.dataProxima || seed || dataEscolhida);
+    let proximaData = avancarUmaVez(baseAncora, vistoria.periodicidade);
+    const recorrente = proximaData !== null;
 
-  const fechouCiclo = concluidas >= totalAtivas;
+    if (recorrente) {
+      while (proximaData <= agora) {
+        proximaData = avancarUmaVez(proximaData, vistoria.periodicidade);
+      }
+    }
 
-  if (!fechouCiclo) {
-    return { fechouCiclo: false, progresso: { concluidas, total: totalAtivas } };
+    const progressoAtualizado = await prisma.vistoriaProgresso.upsert({
+      where: {
+        vistoriaId_unidadeId: { vistoriaId, unidadeId },
+      },
+      create: {
+        vistoriaId,
+        unidadeId,
+        cicloAtual: cicloDaResidencia + 1,
+        dataUltima: dataEscolhida,
+        dataProxima: recorrente ? proximaData : null,
+      },
+      update: {
+        cicloAtual: cicloDaResidencia + 1,
+        dataUltima: dataEscolhida,
+        dataProxima: recorrente ? proximaData : null,
+      },
+    });
+
+    progressosAtualizados.push(progressoAtualizado);
+
   }
 
-  // Igual ao fluxo de "Realizar" de uma vistoria normal: avança a partir
-  // da data que JÁ estava programada (não da data de conclusão), com
-  // salto de ciclos se concluiu bem atrasado, pra não perder o dia fixo
-  // da recorrência.
-  const baseAncora = vistoria.dataProxima ? new Date(vistoria.dataProxima) : dataEscolhida;
-  let proximaData = avancarUmaVez(baseAncora, vistoria.periodicidade);
-  const recorrente = proximaData !== null;
+  // O card da vistoria mostra um resumo geral -- "Próxima Execução"
+  // vira a data mais próxima entre TODAS as residências ativas (o que
+  // tiver vencendo primeiro), "Última Execução" a mais recente feita.
+  // Residência ainda sem VistoriaProgresso (nunca tocada) entra na
+  // conta com o seed.
+  const [residenciasAtivas, todosProgressos] = await Promise.all([
+    prisma.unidade.findMany({ where: { status: 'Ativa' }, select: { id: true } }),
+    prisma.vistoriaProgresso.findMany({ where: { vistoriaId } }),
+  ]);
 
-  if (recorrente) {
-    const agora = new Date();
-    while (proximaData <= agora) {
-      proximaData = avancarUmaVez(proximaData, vistoria.periodicidade);
+  const progressoPorUnidadeFinal = new Map(todosProgressos.map((p) => [p.unidadeId, p]));
+
+  let proximaAgregada = null;
+  let ultimaAgregada = null;
+  let algumaRecorrente = false;
+
+  for (const u of residenciasAtivas) {
+
+    const p = progressoPorUnidadeFinal.get(u.id);
+    const dataProximaDaResidencia = p ? p.dataProxima : seed;
+
+    if (dataProximaDaResidencia) {
+      algumaRecorrente = true;
+      if (!proximaAgregada || dataProximaDaResidencia < proximaAgregada) {
+        proximaAgregada = dataProximaDaResidencia;
+      }
     }
+
+    if (p?.dataUltima && (!ultimaAgregada || p.dataUltima > ultimaAgregada)) {
+      ultimaAgregada = p.dataUltima;
+    }
+
   }
 
   const vistoriaAtualizada = await prisma.vistoria.update({
     where: { id: vistoriaId },
     data: {
-      status: recorrente ? 'PROGRAMADA' : 'REALIZADA',
-      dataUltima: dataEscolhida,
-      dataProxima: recorrente ? proximaData : null,
+      status: algumaRecorrente ? 'PROGRAMADA' : 'REALIZADA',
+      dataUltima: ultimaAgregada,
+      dataProxima: proximaAgregada,
       concluidaEm: new Date(),
-      cicloAtual: vistoria.cicloAtual + 1,
     },
   });
 
@@ -420,12 +517,11 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
     usuarioNome: autor?.nome || "Sistema",
     modulo: "VISTORIAS",
     acao: "ATUALIZAR",
-    descricao: `Vistoria "${vistoria.titulo}": todas as missões do ciclo ${vistoria.cicloAtual} concluídas por ${autor?.nome || "Sistema"}, rodada fechada.`
+    descricao: `Vistoria "${vistoria.titulo}": ${unidadeIds.length} residência(s) concluída(s) por ${autor?.nome || "Sistema"}, cada uma com sua própria próxima data.`
   });
 
   return {
-    fechouCiclo: true,
-    progresso: { concluidas, total: totalAtivas },
+    progresso: progressosAtualizados,
     vistoria: vistoriaAtualizada,
   };
 
@@ -536,9 +632,12 @@ const atualizarMissao = async (missaoId, { dataRealizacao, realizadoPor, observa
 };
 
 // Desfaz o registro de uma missão (ex.: marcou a residência errada).
-// Se for do ciclo atual (ainda aberto), simplesmente "desmarca" a
-// residência -- a vistoria não fecha a rodada até ela ser batida de
-// novo. Não mexe no status/data da vistoria em si.
+// Cada conclusão já reprograma na hora o relógio DAQUELA residência
+// (ver concluirMissoes) -- se o registro apagado era o mais recente
+// dela, o relógio (VistoriaProgresso) volta pro que sobrar do
+// histórico, ou zera se não sobrar nada. Não mexe no resumo
+// (status/dataProxima) da vistoria em si -- esse só se reajusta sozinho
+// na próxima conclusão.
 const removerMissao = async (missaoId) => {
 
   const missao = await prisma.vistoriaMissao.findUnique({ where: { id: missaoId } });
@@ -548,6 +647,41 @@ const removerMissao = async (missaoId) => {
   }
 
   await prisma.vistoriaMissao.delete({ where: { id: missaoId } });
+
+  const restantes = await prisma.vistoriaMissao.findMany({
+    where: { vistoriaId: missao.vistoriaId, unidadeId: missao.unidadeId },
+    orderBy: { ciclo: 'desc' },
+    take: 1,
+  });
+
+  if (restantes.length > 0) {
+
+    const ultima = restantes[0];
+    const vistoria = await prisma.vistoria.findUnique({ where: { id: missao.vistoriaId } });
+
+    await prisma.vistoriaProgresso.upsert({
+      where: { vistoriaId_unidadeId: { vistoriaId: missao.vistoriaId, unidadeId: missao.unidadeId } },
+      create: {
+        vistoriaId: missao.vistoriaId,
+        unidadeId: missao.unidadeId,
+        cicloAtual: ultima.ciclo + 1,
+        dataUltima: ultima.dataRealizacao,
+        dataProxima: vistoria ? avancarUmaVez(new Date(ultima.dataRealizacao), vistoria.periodicidade) : null,
+      },
+      update: {
+        cicloAtual: ultima.ciclo + 1,
+        dataUltima: ultima.dataRealizacao,
+        dataProxima: vistoria ? avancarUmaVez(new Date(ultima.dataRealizacao), vistoria.periodicidade) : null,
+      },
+    });
+
+  } else {
+
+    await prisma.vistoriaProgresso.deleteMany({
+      where: { vistoriaId: missao.vistoriaId, unidadeId: missao.unidadeId },
+    });
+
+  }
 
   return missao;
 

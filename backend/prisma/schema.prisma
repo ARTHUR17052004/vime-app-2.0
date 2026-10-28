@@ -33,6 +33,7 @@ model Unidade {
   despesas            Despesa[]
   vistorias           Vistoria[]
   vistoriaMissoes     VistoriaMissao[]
+  vistoriaProgressos  VistoriaProgresso[]
 }
 
 model Kitnet {
@@ -613,6 +614,13 @@ model Vistoria {
 
   dataProxima DateTime?
 
+  // Âncora do relógio de uma vistoria "Geral" (unidadeId null) -- a
+  // data que uma residência ainda não tocada usa como seu próprio
+  // "próximo prazo" inicial (ver VistoriaProgresso). Só é tocada
+  // quando o usuário edita "Próxima Execução" dessa vistoria --
+  // concluirMissoes NUNCA escreve aqui, só lê.
+  dataProximaBase DateTime?
+
   concluidaEm DateTime?
 
   fixado Boolean @default(false)
@@ -653,6 +661,8 @@ model Vistoria {
   ocorrencias Ocorrencia[]
 
   missoes VistoriaMissao[]
+
+  progressos VistoriaProgresso[]
 }
 
 // Uma "missão" = a vistoria de UMA residência específica, dentro de uma
@@ -680,6 +690,32 @@ model VistoriaMissao {
   createdAt DateTime @default(now())
 
   @@unique([vistoriaId, unidadeId, ciclo])
+}
+
+// Relógio PRÓPRIO de cada residência dentro de uma vistoria "Geral" --
+// antes disso, o ciclo era um só pra todas (uma missão fechada não
+// reprogramava nada até a ÚLTIMA residência ativa bater a dela). Agora
+// cada residência tem seu cicloAtual/dataProxima independentes: VIME I
+// concluída hoje já reprograma só a VIME I pra sua próxima data; VIME
+// II continua com a dela até ser concluída também.
+model VistoriaProgresso {
+  id String @id @default(uuid())
+
+  vistoriaId String
+  vistoria   Vistoria @relation(fields: [vistoriaId], references: [id], onDelete: Cascade)
+
+  unidadeId String
+  unidade   Unidade @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+
+  cicloAtual Int @default(1)
+
+  dataUltima  DateTime?
+  dataProxima DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([vistoriaId, unidadeId])
 }
 
 model Ocorrencia {

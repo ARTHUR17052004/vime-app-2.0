@@ -2,6 +2,7 @@ const prisma = require('../config/prisma');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const { filtroKitnet } = require('../utils/escopoLocador');
 const { gerarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
+const notificacaoService = require('./notificacaoService');
 
 const listar = (usuario) => {
   return prisma.kitnet.findMany({
@@ -115,10 +116,28 @@ const atualizar = async (id, dados) => {
   return resultado;
 };
 
-const remover = (id) => {
-  return prisma.kitnet.delete({
+// Excluir o kitnet derruba (cascade no banco) todas as vistorias dele
+// junto -- sem isso, notificação velha ("Vistoria pendente"/"urgente")
+// fica apontando pra um link que não existe mais, pra sempre (ver
+// vistoriaController.buscarPorId pra auto-cura das que já ficaram
+// órfãs antes dessa correção).
+const remover = async (id) => {
+
+  const vistorias = await prisma.vistoria.findMany({
+    where: { kitnetId: id },
+    select: { id: true },
+  });
+
+  const removido = await prisma.kitnet.delete({
     where: { id }
   });
+
+  await Promise.all(
+    vistorias.map((v) => notificacaoService.removerPorLink(`/vistorias/${v.id}`))
+  );
+
+  return removido;
+
 };
 
 module.exports = {

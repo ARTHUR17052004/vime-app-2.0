@@ -3,6 +3,7 @@ const campoObrigatorioService = require('./campoObrigatorioService');
 const { validarCep } = require('../utils/validadores');
 const { filtroUnidade } = require('../utils/escopoLocador');
 const { gerarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
+const notificacaoService = require('./notificacaoService');
 
 const sanitizar = (dados) => {
 
@@ -256,10 +257,28 @@ const atualizar = async (id, dados) => {
   return avisoKitnets ? { ...unidade, avisoKitnets } : unidade;
 };
 
-const remover = (id) => {
-  return prisma.unidade.delete({
+// Excluir a residência derruba (cascade no banco) todos os kitnets e
+// vistorias dela junto -- sem isso, notificação velha ("Vistoria
+// pendente"/"urgente") fica apontando pra um link que não existe mais,
+// pra sempre (ver vistoriaController.buscarPorId pra auto-cura das que
+// já ficaram órfãs antes dessa correção).
+const remover = async (id) => {
+
+  const vistorias = await prisma.vistoria.findMany({
+    where: { OR: [{ unidadeId: id }, { kitnet: { unidadeId: id } }] },
+    select: { id: true },
+  });
+
+  const removido = await prisma.unidade.delete({
     where: { id }
   });
+
+  await Promise.all(
+    vistorias.map((v) => notificacaoService.removerPorLink(`/vistorias/${v.id}`))
+  );
+
+  return removido;
+
 };
 
 module.exports = {
