@@ -51,11 +51,17 @@ const residenciasAtivasIds = async () => {
   return residencias.map((u) => u.id);
 };
 
+// Mesma janela de 72h do atualizarStatusVistoriasJob (PROGRAMADA ->
+// PENDENTE perto do prazo) -- "em dia" aqui precisa bater com isso, ou
+// o card mostra "7/7 em dia" bonitinho bem do lado de um status
+// PENDENTE com relógio contando, que é contraditório.
+const MS_PENDENTE = 72 * 60 * 60 * 1000;
+
 // Resumo de uma vistoria "Geral" pro card da lista -- cada residência
 // tem seu PRÓPRIO relógio (ver VistoriaProgresso), então "concluídas"
-// virou "em dia": quantas não estão com a própria dataProxima vencida
-// agora (residência nunca tocada usa dataProximaBase/dataProxima da
-// vistoria como seed).
+// virou "em dia": quantas não estão vencidas nem perto de vencer (mesma
+// janela de 72h do status PENDENTE) agora (residência nunca tocada usa
+// dataProximaBase/dataProxima da vistoria como seed).
 const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
 
   if (vistoria.unidadeId) return null; // não é "Geral", não tem missão
@@ -69,7 +75,7 @@ const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
   for (const unidadeId of idsResidenciasAtivas) {
     const progresso = progressoPorUnidade.get(unidadeId);
     const dataProxima = progresso ? progresso.dataProxima : seed;
-    if (!dataProxima || dataProxima > agora) emDia++;
+    if (!dataProxima || (dataProxima - agora) > MS_PENDENTE) emDia++;
   }
 
   return { concluidas: emDia, total: idsResidenciasAtivas.length };
