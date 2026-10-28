@@ -76,9 +76,7 @@ export default function Modal({
 
         z-[999]
 
-        flex
-        items-center
-        justify-center
+        overflow-y-auto
 
         bg-[var(--surface-inset)]
 
@@ -95,38 +93,45 @@ export default function Modal({
         duration-300
       "
     >
-      <div
-        onClick={(e) =>
-          e.stopPropagation()
-        }
-        className={`
-          relative
+      {/* O overlay inteiro rola como UMA página normal (não o modal
+          "por dentro") -- depender de dvh/vh pra travar a altura e
+          rolar só o miolo já deixou o rodapé (Cancelar/Confirmar) sumir
+          de vez em pelo menos um navegador mobile, por mais de uma
+          tentativa. Isso aqui não depende de conta de altura nenhuma:
+          se o conteúdo for mais alto que a tela, dá pra rolar a
+          página inteira até o fim e sempre chegar nos botões. */}
+      <div className="min-h-full flex items-center justify-center">
 
-          w-full
+        <div
+          onClick={(e) =>
+            e.stopPropagation()
+          }
+          className={`
+            relative
 
-          ${sizes[size]}
+            w-full
 
-          max-h-[92dvh]
+            ${sizes[size]}
 
-          overflow-hidden
+            overflow-hidden
 
-          rounded-[26px]
+            rounded-[26px]
 
-          border
-          border-[var(--border-token)]
+            border
+            border-[var(--border-token)]
 
-          bg-[var(--surface)]
+            bg-[var(--surface)]
 
-          backdrop-blur-3xl
+            backdrop-blur-3xl
 
-          shadow-[0_30px_80px_rgba(0,0,0,.45)]
+            shadow-[0_30px_80px_rgba(0,0,0,.45)]
 
-          animate-in
-          zoom-in-95
-          fade-in
-          duration-300
-        `}
-      >
+            animate-in
+            zoom-in-95
+            fade-in
+            duration-300
+          `}
+        >
         {(title || subtitle || showCloseButton) && (
           <div
             className="
@@ -204,17 +209,7 @@ export default function Modal({
           </div>
         )}
 
-        <div
-          className={`
-            p-8
-
-            ${
-              scrollable
-                ? `overflow-y-auto ${footer ? "max-h-[calc(92dvh-195px)]" : "max-h-[calc(92dvh-105px)]"}`
-                : ""
-            }
-          `}
-        >
+        <div className="p-8">
           {children}
         </div>
 
@@ -231,6 +226,8 @@ export default function Modal({
             {footer}
           </div>
         )}
+
+        </div>
 
       </div>
     </div>,
