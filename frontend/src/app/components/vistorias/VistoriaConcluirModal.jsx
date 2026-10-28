@@ -165,6 +165,25 @@ export default function VistoriaConcluirModal({
       title="Registrar Vistoria Realizada"
       subtitle={vistoria?.nomeVistoria}
       size="md"
+      footer={
+        // Rodapé de VERDADE do Modal (fora da área com rolagem) -- um
+        // "sticky" dentro do conteúdo que rola dependia de conta de
+        // altura (dvh) que alguns navegadores mobile não acertam, e o
+        // botão ficava cortado embaixo da tela. Aqui ele sempre aparece
+        // inteiro, não importa o quão alto for o conteúdo acima.
+        <div className="flex flex-row sm:justify-end gap-3">
+          <Button variant="secondary" className="flex-1 sm:flex-none" onClick={onClose}>
+            Cancelar
+          </Button>
+
+          <Button className="flex-1 sm:flex-none" onClick={handleConfirmar} disabled={enviando}>
+            <span className="sm:hidden">Confirmar</span>
+            <span className="hidden sm:inline">
+              {isGeral ? "Confirmar Residências Vistoriadas" : "Confirmar Realização"}
+            </span>
+          </Button>
+        </div>
+      }
     >
       <div className="space-y-6">
         <div>
@@ -335,31 +354,6 @@ export default function VistoriaConcluirModal({
               resize-none
             "
           />
-        </div>
-
-        {/* Fixo embaixo do modal (não rola junto com o conteúdo) --
-            padrão do sistema no mobile: botão de enviar sempre visível,
-            com Cancelar logo abaixo dele. */}
-        <div
-          className="
-            sticky bottom-0 -mx-8 -mb-8 mt-2
-            flex flex-row sm:justify-end
-            gap-3
-            border-t border-[var(--border-token)]
-            bg-[var(--surface)]
-            px-8 py-5
-          "
-        >
-          <Button variant="secondary" className="flex-1 sm:flex-none" onClick={onClose}>
-            Cancelar
-          </Button>
-
-          <Button className="flex-1 sm:flex-none" onClick={handleConfirmar} disabled={enviando}>
-            <span className="sm:hidden">Confirmar</span>
-            <span className="hidden sm:inline">
-              {isGeral ? "Confirmar Residências Vistoriadas" : "Confirmar Realização"}
-            </span>
-          </Button>
         </div>
       </div>
     </Modal>

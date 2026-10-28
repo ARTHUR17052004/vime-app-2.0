@@ -210,7 +210,7 @@ export default function Modal({
 
             ${
               scrollable
-                ? "overflow-y-auto max-h-[calc(92dvh-105px)]"
+                ? `overflow-y-auto ${footer ? "max-h-[calc(92dvh-195px)]" : "max-h-[calc(92dvh-105px)]"}`
                 : ""
             }
           `}
