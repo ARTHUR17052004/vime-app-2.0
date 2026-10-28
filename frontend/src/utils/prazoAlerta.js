@@ -7,13 +7,18 @@ export const HORAS_LIMITE = 72;
 export const MS_LIMITE = HORAS_LIMITE * 60 * 60 * 1000;
 export const MS_DIA = 24 * 60 * 60 * 1000;
 
+// Só HH:MM:SS vira ilegível rápido num prazo de dias (ex.: "396:55:55"
+// -- ninguém bate o olho e sabe quantos dias são isso). A partir de 24h
+// quebra o dia pra fora, o resto continua no relógio: "16d 12:54:16".
 export function formatarRelogio(ms) {
   const totalSegundos = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(totalSegundos / 3600);
+  const dias = Math.floor(totalSegundos / 86400);
+  const h = Math.floor((totalSegundos % 86400) / 3600);
   const m = Math.floor((totalSegundos % 3600) / 60);
   const s = totalSegundos % 60;
   const pad = (n) => String(n).padStart(2, "0");
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+  const relogio = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  return dias > 0 ? `${dias}d ${relogio}` : relogio;
 }
 
 // `desdeMs`/`agoraMs`: timestamps em ms (Date.getTime()). `desde` é
