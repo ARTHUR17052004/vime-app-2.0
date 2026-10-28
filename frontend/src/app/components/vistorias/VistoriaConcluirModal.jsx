@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Image as ImageIcon, CheckCircle2, NotebookPen } from "lucide-react";
+import { Image as ImageIcon, NotebookPen } from "lucide-react";
+
+import { Clock, TriangleAlert } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
@@ -29,8 +31,9 @@ export default function VistoriaConcluirModal({
 
   // Vistoria "Geral" (sem residência fixa) vira um "mundo com várias
   // missões" -- uma por residência ativa do sistema -- em vez de
-  // concluir tudo de uma vez. O mundo só fecha (e renova pra próxima
-  // data) quando todas as missões do ciclo forem batidas.
+  // concluir tudo de uma vez. Cada residência tem seu PRÓPRIO relógio:
+  // marcar a VIME I como feita hoje já reprograma só ela, sem esperar
+  // as outras.
   const isGeral = !vistoria?.unidadeId;
 
   const [missoes, setMissoes] = useState(null);
@@ -152,7 +155,7 @@ export default function VistoriaConcluirModal({
 
   };
 
-  const totalConcluidas = missoes?.residencias.filter((r) => r.concluida).length || 0;
+  const totalEmDia = missoes?.residencias.filter((r) => !r.atrasada).length || 0;
 
   return (
     <Modal
@@ -209,12 +212,7 @@ export default function VistoriaConcluirModal({
             {missoes && (
               <>
                 <p className="text-xs text-[var(--text-faint)] mb-3">
-                  {totalConcluidas} de {missoes.residencias.length} residências já concluídas neste ciclo.
-                  {totalConcluidas + selecionadas.size >= missoes.residencias.length && (
-                    <span className="text-emerald-400 font-semibold">
-                      {" "}Vai fechar o ciclo e já marcar a próxima data!
-                    </span>
-                  )}
+                  {totalEmDia} de {missoes.residencias.length} residências em dia -- cada uma reprograma sozinha, na hora, quando marcada.
                 </p>
 
                 <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
@@ -222,25 +220,43 @@ export default function VistoriaConcluirModal({
                     <label
                       key={r.unidadeId}
                       className={`
-                        flex items-center gap-3 rounded-xl border px-4 py-3 transition
+                        flex items-center gap-3 rounded-xl border px-4 py-3 transition cursor-pointer
                         ${
-                          r.concluida
-                            ? "border-emerald-500/30 bg-emerald-500/5 opacity-70"
-                            : "border-[var(--border-token)] bg-[var(--surface-2)] cursor-pointer hover:border-emerald-500/40"
+                          selecionadas.has(r.unidadeId)
+                            ? "border-emerald-500/30 bg-emerald-500/5"
+                            : "border-[var(--border-token)] bg-[var(--surface-2)] hover:border-emerald-500/40"
                         }
                       `}
                     >
                       <input
                         type="checkbox"
-                        checked={r.concluida || selecionadas.has(r.unidadeId)}
-                        disabled={r.concluida}
+                        checked={selecionadas.has(r.unidadeId)}
                         onChange={() => alternarSelecionada(r.unidadeId)}
                         className="w-4 h-4 accent-emerald-500"
                       />
 
-                      <span className="flex-1 text-[var(--text)]">{r.unidadeNome}</span>
+                      <div className="flex-1">
+                        <span className="text-[var(--text)]">{r.unidadeNome}</span>
+                        {r.dataUltima && (
+                          <p className="text-xs text-[var(--text-faint)]">
+                            Última vez: {formatDate(r.dataUltima)}
+                          </p>
+                        )}
+                      </div>
 
-                      {r.concluida && <CheckCircle2 size={16} className="text-emerald-400" />}
+                      {r.dataProxima && (
+                        r.atrasada ? (
+                          <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-400">
+                            <TriangleAlert size={14} />
+                            Atrasada
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-[var(--text-faint)]">
+                            <Clock size={14} />
+                            {formatDate(r.dataProxima)}
+                          </span>
+                        )
+                      )}
                     </label>
                   ))}
                 </div>

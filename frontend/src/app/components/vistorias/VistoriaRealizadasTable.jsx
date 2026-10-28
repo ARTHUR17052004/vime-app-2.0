@@ -6,6 +6,7 @@ import { Image as ImageIcon, NotebookPen } from "lucide-react";
 import Table from "../ui/Table";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
+import MidiaLightbox from "../ui/MidiaLightbox";
 import VistoriaMissaoActionsMenu from "./VistoriaMissaoActionsMenu";
 import { VistoriaService } from "@/services/vistoria.service";
 import { formatDateTime } from "@/utils/formatDate";
@@ -70,7 +71,7 @@ export default function VistoriaRealizadasTable({
   const excluirMissao = async (item) => {
 
     const confirmar = window.confirm(
-      `Excluir o registro de "${item.residencia}" (${item.vistoria})? A residência volta a aparecer como pendente neste ciclo.`
+      `Excluir o registro de "${item.residencia}" (${item.vistoria})? O relógio dessa residência volta pro que sobrar do histórico dela.`
     );
 
     if (!confirmar) return;
@@ -179,6 +180,8 @@ export default function VistoriaRealizadasTable({
 
 function DetalheModal({ item, onClose }) {
 
+  const [lightboxIndice, setLightboxIndice] = useState(null);
+
   return (
 
     <Modal
@@ -230,19 +233,32 @@ function DetalheModal({ item, onClose }) {
               <div className="grid grid-cols-3 gap-3">
                 {item.fotos.map((midia, index) =>
                   midia.startsWith("data:video") ? (
-                    <video
+                    <button
                       key={index}
-                      src={midia}
-                      controls
-                      className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
-                    />
+                      type="button"
+                      onClick={() => setLightboxIndice(index)}
+                      className="relative group"
+                    >
+                      <video
+                        src={midia}
+                        className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
+                      />
+                      <span className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/20 transition" />
+                    </button>
                   ) : (
-                    <img
+                    <button
                       key={index}
-                      src={midia}
-                      alt={`Mídia ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
-                    />
+                      type="button"
+                      onClick={() => setLightboxIndice(index)}
+                      className="relative group"
+                    >
+                      <img
+                        src={midia}
+                        alt={`Mídia ${index + 1}`}
+                        className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
+                      />
+                      <span className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/20 transition" />
+                    </button>
                   )
                 )}
               </div>
@@ -258,6 +274,13 @@ function DetalheModal({ item, onClose }) {
         </div>
 
       )}
+
+      <MidiaLightbox
+        itens={item?.fotos || []}
+        indice={lightboxIndice}
+        onClose={() => setLightboxIndice(null)}
+        onMudarIndice={setLightboxIndice}
+      />
 
     </Modal>
 

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
 import SemPermissao from "../../components/ui/SemPermissao";
+import MidiaLightbox from "../../components/ui/MidiaLightbox";
 
 import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
@@ -33,6 +34,9 @@ export default function DetalhesVistoriaPage() {
 
   const [carregando, setCarregando] =
     useState(true);
+
+  const [lightbox, setLightbox] =
+    useState({ grupo: null, indice: null });
 
   useEffect(() => {
 
@@ -236,44 +240,37 @@ export default function DetalhesVistoriaPage() {
 
             <div className="grid md:grid-cols-3 gap-4">
 
-              {vistoria.fotos.map((foto, index) =>
-                foto.startsWith("data:video") ? (
-                  <video
-                    key={index}
-                    src={foto}
-                    controls
-                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                  />
-                ) : (
-                  <a
-                    key={index}
-                    href={foto}
-                    target="_blank"
-                    rel="noreferrer"
-                    download={`vistoria-${index + 1}.png`}
-                  >
-
+              {vistoria.fotos.map((foto, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => setLightbox({ grupo: "fotos", indice: index })}
+                  className="relative group"
+                >
+                  {foto.startsWith("data:video") ? (
+                    <video
+                      src={foto}
+                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                    />
+                  ) : (
                     <img
                       src={foto}
                       alt={`Foto ${index + 1}`}
-                      className="
-                        w-full
-                        h-52
-                        object-cover
-                        rounded-2xl
-                        border
-                        border-[var(--border-token)]
-                        cursor-pointer
-                        hover:scale-105
-                        transition
-                      "
+                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)] group-hover:scale-105 transition"
                     />
-
-                  </a>
-                )
-              )}
+                  )}
+                  <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
+                </button>
+              ))}
 
             </div>
+
+            <MidiaLightbox
+              itens={vistoria.fotos}
+              indice={lightbox.grupo === "fotos" ? lightbox.indice : null}
+              onClose={() => setLightbox({ grupo: null, indice: null })}
+              onMudarIndice={(i) => setLightbox({ grupo: "fotos", indice: i })}
+            />
 
           </div>
 
@@ -295,27 +292,43 @@ export default function DetalhesVistoriaPage() {
 
             {vistoria.fotosConclusao?.length > 0 && (
 
-              <div className="grid md:grid-cols-3 gap-4">
+              <>
 
-                {vistoria.fotosConclusao.map((midia, index) =>
-                  midia.startsWith("data:video") ? (
-                    <video
-                      key={index}
-                      src={midia}
-                      controls
-                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                    />
-                  ) : (
-                    <img
-                      key={index}
-                      src={midia}
-                      alt={`Mídia ${index + 1}`}
-                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                    />
-                  )
-                )}
+                <div className="grid md:grid-cols-3 gap-4">
 
-              </div>
+                  {vistoria.fotosConclusao.map((midia, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      onClick={() => setLightbox({ grupo: "fotosConclusao", indice: index })}
+                      className="relative group"
+                    >
+                      {midia.startsWith("data:video") ? (
+                        <video
+                          src={midia}
+                          className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                        />
+                      ) : (
+                        <img
+                          src={midia}
+                          alt={`Mídia ${index + 1}`}
+                          className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                        />
+                      )}
+                      <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
+                    </button>
+                  ))}
+
+                </div>
+
+                <MidiaLightbox
+                  itens={vistoria.fotosConclusao}
+                  indice={lightbox.grupo === "fotosConclusao" ? lightbox.indice : null}
+                  onClose={() => setLightbox({ grupo: null, indice: null })}
+                  onMudarIndice={(i) => setLightbox({ grupo: "fotosConclusao", indice: i })}
+                />
+
+              </>
 
             )}
 

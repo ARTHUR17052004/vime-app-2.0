@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import Button from "../ui/Button";
+import MidiaLightbox from "../ui/MidiaLightbox";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
 import AtrasoVistoria from "./AtrasoVistoria";
@@ -33,6 +34,9 @@ export default function VistoriaCard({
 
   const [aberto, setAberto] =
     useState(null);
+
+  const [lightbox, setLightbox] =
+    useState({ vistoriaId: null, indice: null });
 
   if (!vistorias.length) {
 
@@ -160,7 +164,7 @@ export default function VistoriaCard({
                 {vistoria.progressoMissoes && (
                   <button
                     onClick={() => onVerMissoes?.(vistoria.id)}
-                    title="Ver residências já vistoriadas neste ciclo"
+                    title="Ver histórico de residências vistoriadas"
                     className="
                       text-xs
                       font-semibold
@@ -175,7 +179,7 @@ export default function VistoriaCard({
                       transition
                     "
                   >
-                    {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs concluídas
+                    {vistoria.progressoMissoes.concluidas}/{vistoria.progressoMissoes.total} VIMEs em dia
                   </button>
                 )}
 
@@ -541,25 +545,37 @@ export default function VistoriaCard({
 
                   <div className="grid md:grid-cols-3 gap-4">
 
-                    {vistoria.fotosConclusao.map((midia, index) =>
-                      midia.startsWith("data:video") ? (
-                        <video
-                          key={index}
-                          src={midia}
-                          controls
-                          className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
-                        />
-                      ) : (
-                        <img
-                          key={index}
-                          src={midia}
-                          alt={`Mídia ${index + 1}`}
-                          className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
-                        />
-                      )
-                    )}
+                    {vistoria.fotosConclusao.map((midia, index) => (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setLightbox({ vistoriaId: vistoria.id, indice: index })}
+                        className="relative group"
+                      >
+                        {midia.startsWith("data:video") ? (
+                          <video
+                            src={midia}
+                            className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
+                          />
+                        ) : (
+                          <img
+                            src={midia}
+                            alt={`Mídia ${index + 1}`}
+                            className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
+                          />
+                        )}
+                        <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
+                      </button>
+                    ))}
 
                   </div>
+
+                  <MidiaLightbox
+                    itens={vistoria.fotosConclusao}
+                    indice={lightbox.vistoriaId === vistoria.id ? lightbox.indice : null}
+                    onClose={() => setLightbox({ vistoriaId: null, indice: null })}
+                    onMudarIndice={(i) => setLightbox({ vistoriaId: vistoria.id, indice: i })}
+                  />
 
                 </div>
 
