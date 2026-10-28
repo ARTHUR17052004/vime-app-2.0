@@ -19,14 +19,21 @@ export function exportarPDF({
   doc.setFontSize(16);
   doc.text(titulo, 14, 18);
 
-  if (subtitulo) {
+  // Aceita uma linha só (string) ou várias (array) -- relatório
+  // financeiro usa várias: residência, período consultado e quando
+  // foi gerado, cada info na sua linha.
+  const linhasSubtitulo = Array.isArray(subtitulo) ? subtitulo : subtitulo ? [subtitulo] : [];
+
+  if (linhasSubtitulo.length > 0) {
     doc.setFontSize(10);
     doc.setTextColor(120);
-    doc.text(subtitulo, 14, 25);
+    linhasSubtitulo.forEach((linha, i) => {
+      doc.text(linha, 14, 25 + i * 5);
+    });
     doc.setTextColor(0);
   }
 
-  let cursorY = subtitulo ? 32 : 26;
+  let cursorY = linhasSubtitulo.length > 0 ? 25 + linhasSubtitulo.length * 5 + 7 : 26;
 
   secoes.forEach((secao) => {
 
@@ -56,6 +63,7 @@ export function exportarPDF({
 export function exportarExcel({
   abas,
   nomeArquivo,
+  infoLinhas,
 }) {
 
   const workbook = XLSX.utils.book_new();
@@ -63,6 +71,11 @@ export function exportarExcel({
   abas.forEach((aba) => {
 
     const planilha = XLSX.utils.aoa_to_sheet([
+      // Mesma info de residência/período/geração do PDF, uma linha
+      // acima dos cabeçalhos -- cada linha de info numa célula só
+      // (coluna A), o resto da linha fica vazio.
+      ...(infoLinhas || []).map((linha) => [linha]),
+      ...(infoLinhas?.length ? [[]] : []),
       aba.colunas,
       ...aba.linhas,
     ]);

@@ -7,6 +7,7 @@ import Modal from "../ui/Modal";
 import { ContratoService } from "@/services/contratos.service";
 import { ReceitaService } from "@/services/financeiro.service";
 import { AsaasService } from "@/services/asaas.service";
+import { LocadorService } from "@/services/locadores.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 
@@ -16,6 +17,7 @@ const FORM_INICIAL = {
   descricao: "",
   valor: "",
   vencimento: "",
+  locadorId: "",
   pagadorNome: "",
   pagadorCpf: "",
   pagadorEmail: "",
@@ -63,6 +65,9 @@ export default function AsaasNovaCobrancaModal({
   const [contratos, setContratos] =
     useState([]);
 
+  const [locadores, setLocadores] =
+    useState([]);
+
   const [salvando, setSalvando] =
     useState(false);
 
@@ -89,6 +94,15 @@ export default function AsaasNovaCobrancaModal({
       })
       .catch((err) => {
         console.error("Erro ao carregar contratos:", err);
+      });
+
+    LocadorService.listarOpcoes()
+      .then((resposta) => {
+        const lista = Array.isArray(resposta) ? resposta : resposta.data || [];
+        setLocadores(lista);
+      })
+      .catch((err) => {
+        console.error("Erro ao carregar locadores:", err);
       });
 
     CamposObrigatoriosService.listar("cobranca")
@@ -125,6 +139,15 @@ export default function AsaasNovaCobrancaModal({
       return;
     }
 
+    // Sem contrato (avulso), o locador precisa vir explícito -- sem
+    // isso a cobrança fica "órfã": some do filtro "Locador: X" no
+    // topo, só aparece em "Todos", e o dinheiro acaba invisível pra
+    // quem devia estar vendo ele.
+    if (!form.contratoId && !form.locadorId) {
+      setErro("Selecione de qual locador é essa cobrança avulsa.");
+      return;
+    }
+
     setErro("");
     setSalvando(true);
 
@@ -142,6 +165,7 @@ export default function AsaasNovaCobrancaModal({
           : {
               // Sem contrato: pagador avulso -- digitado na hora, sem
               // precisar cadastrar um inquilino só pra essa cobrança.
+              locadorId: form.locadorId,
               pagadorNome: form.pagadorNome || null,
               pagadorCpf: form.pagadorCpf || null,
               pagadorEmail: form.pagadorEmail || null,
@@ -257,6 +281,34 @@ export default function AsaasNovaCobrancaModal({
               vincular a um contrato. Nome e CPF são o mínimo que o banco exige pra emitir
               o boleto.
             </p>
+
+            <div>
+              <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                Locador<span className="text-red-400"> *</span>
+              </label>
+
+              <select
+                value={form.locadorId}
+                onChange={handleChange("locadorId")}
+                required
+                className={inputStyle}
+              >
+                <option value="" className="bg-[#1b2430]">
+                  Selecione o locador
+                </option>
+
+                {locadores.map((locador) => (
+                  <option key={locador.id} value={locador.id} className="bg-[#1b2430]">
+                    {locador.nome}
+                  </option>
+                ))}
+              </select>
+
+              <p className="text-xs text-[var(--text-faint)] mt-1">
+                De qual locador é esse dinheiro -- sem contrato pra inferir sozinho, isso
+                garante que a cobrança apareça certinho no filtro "Locador" lá em cima.
+              </p>
+            </div>
 
             <div className="grid md:grid-cols-2 gap-5">
 

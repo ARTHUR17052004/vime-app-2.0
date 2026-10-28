@@ -45,7 +45,7 @@ export default function FinanceiroResumo({
       <DashboardStatsCard
         title="Lucro Líquido"
         value={`R$ ${lucroLiquido}`}
-        subtitle="Resultado financeiro"
+        subtitle="Só o já pago/recebido, líquido"
         icon={Landmark}
       />
 

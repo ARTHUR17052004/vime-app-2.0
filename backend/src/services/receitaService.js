@@ -131,12 +131,17 @@ const criar = async (dados, autor) => {
 
   await campoObrigatorioService.validar(modulo, dados);
 
-  // Restrito a um locador: a receita é sempre dele. Senão, deriva do contrato
-  // ou do inquilino (e do valor enviado, se o admin escolheu um locador).
-  if (autor?.locadorId) {
-    dados.locadorId = autor.locadorId;
-  } else if (!dados.locadorId) {
-    dados.locadorId = await locadorDaReceita(dados);
+  // Escolha explícita no formulário (ex.: cobrança avulsa em Nova
+  // Cobrança, sem contrato/inquilino pra inferir sozinho) tem
+  // prioridade e nunca é sobrescrita. Sem isso: usuário restrito a um
+  // locador -- a receita é sempre dele; senão, deriva do contrato ou
+  // do inquilino.
+  if (!dados.locadorId) {
+    if (autor?.locadorId) {
+      dados.locadorId = autor.locadorId;
+    } else {
+      dados.locadorId = await locadorDaReceita(dados);
+    }
   }
 
   const receita = await prisma.receita.create({

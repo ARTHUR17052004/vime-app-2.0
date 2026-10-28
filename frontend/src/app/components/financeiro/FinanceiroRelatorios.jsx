@@ -8,6 +8,7 @@ import {
 
 import Table from "../ui/Table";
 import { exportarPDF, exportarExcel } from "@/utils/exportar";
+import { formatDate } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
 
 const COLUNAS_RECEITAS = ["Categoria", "Descrição", "Valor", "Vencimento", "Status"];
@@ -24,9 +25,23 @@ function formatarData(data) {
 export default function FinanceiroRelatorios({
   receitas = [],
   despesas = [],
+  nomeResidencia,
+  dataDe,
+  dataAte,
 }) {
 
   const podeExportar = usePermissao("financeiro.exportar");
+
+  // dataDe/dataAte vêm cru de <input type="date"> ("AAAA-MM-DD") --
+  // formatDate() (não formatarData() local) é o que trata esse formato
+  // sem o bug de fuso (new Date() direto nessa string "volta" um dia).
+  const linhasInfo = [
+    nomeResidencia ? `Residência: ${nomeResidencia}` : "Residência: Todas as residências",
+    dataDe || dataAte
+      ? `Período: ${dataDe ? formatDate(dataDe) : "início"} até ${dataAte ? formatDate(dataAte) : "hoje"}`
+      : "Período: todos os registros (sem filtro de data)",
+    `Gerado em: ${new Date().toLocaleString("pt-BR")}`,
+  ];
 
   const linhasReceitas = receitas.map((item) => [
     item.categoria || "-",
@@ -47,8 +62,8 @@ export default function FinanceiroRelatorios({
   const handleExportarPDF = () => {
 
     exportarPDF({
-      titulo: "Relatório Financeiro",
-      subtitulo: `Receitas: ${receitas.length} · Despesas: ${despesas.length}`,
+      titulo: `Relatório Financeiro - ${nomeResidencia || "Todas as Residências"}`,
+      subtitulo: [...linhasInfo, `Receitas: ${receitas.length} · Despesas: ${despesas.length}`],
       secoes: [
         { titulo: "Receitas", colunas: COLUNAS_RECEITAS, linhas: linhasReceitas },
         { titulo: "Despesas", colunas: COLUNAS_DESPESAS, linhas: linhasDespesas },
@@ -65,6 +80,7 @@ export default function FinanceiroRelatorios({
         { nome: "Receitas", colunas: COLUNAS_RECEITAS, linhas: linhasReceitas },
         { nome: "Despesas", colunas: COLUNAS_DESPESAS, linhas: linhasDespesas },
       ],
+      infoLinhas: [`Relatório Financeiro - ${nomeResidencia || "Todas as Residências"}`, ...linhasInfo],
       nomeArquivo: "relatorio-financeiro",
     });
 

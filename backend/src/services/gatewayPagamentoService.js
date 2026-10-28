@@ -23,8 +23,14 @@ const numeroControleParaReceita = (receitaId) => {
   return numero.toString().padStart(10, '0');
 };
 
+// O próprio locadorId já salvo na receita (ex.: pagador avulso, onde
+// não tem contrato nem inquilino pra inferir nada) sempre vem
+// primeiro -- antes disso não era checado aqui, então uma cobrança
+// avulsa com locadorId certo salvo direto nela ainda caía na conta
+// PADRÃO do sistema em vez da conta do locador de verdade.
 const resolverLocadorId = (receita) => {
   return (
+    receita.locadorId ||
     receita.contrato?.locadorId ||
     receita.inquilino?.kitnet?.unidade?.locadorId ||
     null
@@ -362,6 +368,29 @@ const enviarCobranca = async (receitaId) => {
 
   const locadorId = resolverLocadorId(receita);
   const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+
+  // Rede de segurança: receita sem locadorId nenhum (nem direto, nem
+  // via contrato/inquilino) que acabou de ser resolvida pra uma conta
+  // específica de um único locador -- trava esse locadorId nela agora,
+  // em vez de deixar órfã (some do filtro "Locador: X", só aparece em
+  // "Todos"). Conta compartilhada/padrão por mais de um locador fica
+  // de fora de propósito -- aí não tem como saber qual é o dono certo.
+  if (!locadorId && conta?.id) {
+
+    const locadoresDaConta = await prisma.locador.findMany({
+      where: { contaPagamentoId: conta.id },
+      select: { id: true },
+    });
+
+    if (locadoresDaConta.length === 1) {
+      receita.locadorId = locadoresDaConta[0].id;
+      await prisma.receita.update({
+        where: { id: receita.id },
+        data: { locadorId: receita.locadorId },
+      });
+    }
+
+  }
 
   if (conta?.provider === 'BB') {
     return enviarPeloBB(receita, conta);

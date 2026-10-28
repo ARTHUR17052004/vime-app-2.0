@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import MainLayout from "../components/layout/MainLayout";
 
 import { ReceitaService, DespesaService } from "@/services/financeiro.service";
+import { UnidadeService } from "@/services/unidades.service";
 
 import FadeIn from "../components/ui/FadeIn";
 
@@ -72,6 +73,31 @@ function FinanceiroPageConteudo() {
 
   const [residenciaSelecionada, setResidenciaSelecionada] =
     useState("");
+
+  // Só pro título do relatório (PDF/Excel) -- ResidenciaFiltro busca a
+  // própria lista internamente e não a expõe, então busca de novo aqui
+  // só pra resolver o id escolhido num nome.
+  const [residencias, setResidencias] =
+    useState([]);
+
+  useEffect(() => {
+
+    async function carregarResidencias() {
+      try {
+        const resposta = await UnidadeService.listar();
+        setResidencias(Array.isArray(resposta) ? resposta : resposta.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar residências:", err);
+      }
+    }
+
+    carregarResidencias();
+
+  }, []);
+
+  const nomeResidenciaSelecionada = residencias.find(
+    (r) => r.id === residenciaSelecionada
+  )?.nome;
 
   const [ordenacao, setOrdenacao] =
     useState("vencimento-proximo");
@@ -425,8 +451,19 @@ function FinanceiroPageConteudo() {
       0
     );
 
+  // Diferente de "Receita Prevista" (que soma tudo, pago ou não) --
+  // isso aqui é o que REALMENTE entrou/saiu da conta: só receita
+  // já PAGA (e no valor líquido, depois da taxa de boleto -- não é
+  // lucro o que o banco descontou) menos só despesa já PAGA. Pendente,
+  // atrasada e taxa de boleto não contam, de propósito.
   const lucroLiquido =
-    receitaPrevista - totalDespesas;
+    receitasFiltradas
+      .filter((item) => item.status === "PAGO" || item.status === "PAGA")
+      .reduce((total, item) => total + Number(item.valorLiquido ?? item.valor ?? 0), 0)
+    -
+    despesasFiltradas
+      .filter((item) => item.status === "PAGO" || item.status === "PAGA")
+      .reduce((total, item) => total + Number(item.valor || 0), 0);
 
   const estaVencido = (item) =>
     item.vencimento &&
@@ -658,6 +695,9 @@ function FinanceiroPageConteudo() {
         <FinanceiroRelatorios
           receitas={receitasFiltradas}
           despesas={despesasFiltradas}
+          nomeResidencia={nomeResidenciaSelecionada}
+          dataDe={dataDe}
+          dataAte={dataAte}
         />
 
       </div>
