@@ -988,6 +988,14 @@ model SabadoConversa {
   usuarioId String
   usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
+  // Empresa de quem perguntou, "fotografada" na hora de criar a conversa
+  // (mesmo padrão de Notificacao.locadorId) -- quem só enxerga uma empresa
+  // (SH ou ARA) só vê as conversas dela, de qualquer usuário da mesma
+  // empresa, não só as próprias (ver sabadoConversaService.js). Nulo =
+  // criada por quem vê o sistema inteiro (Administrador/Gerência/Operador
+  // sem locador escolhido no momento).
+  locadorId String?
+
   titulo String
 
   createdAt DateTime @default(now())

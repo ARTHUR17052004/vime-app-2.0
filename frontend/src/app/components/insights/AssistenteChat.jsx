@@ -596,24 +596,31 @@ export default function AssistenteChat() {
                   className="flex-1 min-w-0 text-left px-3 py-2.5"
                 >
                   <p className="text-sm font-medium text-[var(--text)] truncate">{c.titulo}</p>
-                  <p className="text-xs text-[var(--text-faint)] mt-0.5">{formatarQuando(c.updatedAt)}</p>
+                  <p className="text-xs text-[var(--text-faint)] mt-0.5">
+                    {formatarQuando(c.updatedAt)}
+                    {c.usuarioId !== usuario?.id && c.usuario?.nome && (
+                      <> · {c.usuario.nome.split(" ")[0]}</>
+                    )}
+                  </p>
                 </button>
 
-                <button
-                  onClick={() => excluirConversa(c.id)}
-                  disabled={excluindoId === c.id}
-                  title={confirmandoId === c.id ? "Clique de novo pra confirmar" : "Excluir conversa"}
-                  className={`
-                    shrink-0 mr-2 p-1.5 rounded-lg transition-colors
-                    ${confirmandoId === c.id
-                      ? "bg-red-500/20 text-red-400"
-                      : "text-[var(--text-faint)] opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400"
-                    }
-                    disabled:opacity-50
-                  `}
-                >
-                  <Trash2 size={14} />
-                </button>
+                {c.usuarioId === usuario?.id && (
+                  <button
+                    onClick={() => excluirConversa(c.id)}
+                    disabled={excluindoId === c.id}
+                    title={confirmandoId === c.id ? "Clique de novo pra confirmar" : "Excluir conversa"}
+                    className={`
+                      shrink-0 mr-2 p-1.5 rounded-lg transition-colors
+                      ${confirmandoId === c.id
+                        ? "bg-red-500/20 text-red-400"
+                        : "text-[var(--text-faint)] opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400"
+                      }
+                      disabled:opacity-50
+                    `}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                )}
               </div>
             ))}
 

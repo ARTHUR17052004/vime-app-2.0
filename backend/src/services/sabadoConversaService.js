@@ -1,10 +1,21 @@
 const prisma = require("../config/prisma");
 
 /*
-  Histórico de conversas do "Pergunte ao VIME" -- cada usuário só vê e
-  mexe nas próprias conversas (sem escopo por locador aqui, é dado
-  pessoal de uso, não dado operacional do sistema).
+  Histórico de conversas do "Pergunte ao VIME" -- compartilhado por
+  empresa, igual ao resto do sistema (ver escopoLocador.js): usuário de
+  uma empresa só (SH ou ARA) vê as conversas de todo mundo da própria
+  empresa, não só as que ele mesmo criou -- é um histórico de equipe, não
+  um caderno pessoal. Quem vê o sistema inteiro (Administrador/Gerência/
+  Operador sem locador escolhido) vê de todas as empresas. Excluir
+  continua só pra quem criou (ver excluirConversa) -- ver, todo mundo da
+  empresa; apagar, só o dono, pra ninguém sumir com a pergunta de outro.
 */
+
+// `usuario.locadorId` aqui já vem pronto do authMiddleware (locador fixo
+// do cadastro OU o "locador de trabalho" escolhido na tela, quando dá) --
+// mesma regra que qualquer outra lista do sistema já segue.
+const escopoLocadorConversa = (usuario) =>
+  usuario?.locadorId ? { locadorId: usuario.locadorId } : {};
 
 // Só as últimas N mensagens entram no prompt a cada pergunta nova --
 // controla custo/tamanho sem perder o contexto recente da conversa.
@@ -20,12 +31,19 @@ async function listarConversas(usuario, { busca } = {}) {
 
   return prisma.sabadoConversa.findMany({
     where: {
-      usuarioId: usuario.id,
+      ...escopoLocadorConversa(usuario),
       ...(busca ? { titulo: { contains: busca, mode: "insensitive" } } : {}),
     },
     orderBy: { updatedAt: "desc" },
     take: 50,
-    select: { id: true, titulo: true, updatedAt: true, createdAt: true },
+    select: {
+      id: true,
+      titulo: true,
+      updatedAt: true,
+      createdAt: true,
+      usuarioId: true,
+      usuario: { select: { nome: true } },
+    },
   });
 
 }
@@ -33,7 +51,7 @@ async function listarConversas(usuario, { busca } = {}) {
 async function buscarConversa(usuario, id) {
 
   const conversa = await prisma.sabadoConversa.findFirst({
-    where: { id, usuarioId: usuario.id },
+    where: { id, ...escopoLocadorConversa(usuario) },
     include: { mensagens: { orderBy: { createdAt: "asc" } } },
   });
 
@@ -48,7 +66,7 @@ async function obterOuCriarConversa(usuario, conversaId, primeiraMensagem) {
   if (conversaId) {
 
     const existente = await prisma.sabadoConversa.findFirst({
-      where: { id: conversaId, usuarioId: usuario.id },
+      where: { id: conversaId, ...escopoLocadorConversa(usuario) },
     });
 
     if (!existente) throw new Error("Conversa não encontrada.");
@@ -58,7 +76,11 @@ async function obterOuCriarConversa(usuario, conversaId, primeiraMensagem) {
   }
 
   return prisma.sabadoConversa.create({
-    data: { usuarioId: usuario.id, titulo: gerarTitulo(primeiraMensagem) },
+    data: {
+      usuarioId: usuario.id,
+      locadorId: usuario.locadorId || null,
+      titulo: gerarTitulo(primeiraMensagem),
+    },
   });
 
 }
