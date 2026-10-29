@@ -36,6 +36,7 @@ const CAMPOS_POR_PROVIDER = {
     { campo: "clientId", rotulo: "Client ID", obrigatorio: true },
     { campo: "clientSecret", rotulo: "Client Secret", obrigatorio: true },
     { campo: "certificado", rotulo: "Certificado da aplicação (.p12 em base64)", obrigatorio: true, multilinha: true },
+    { campo: "certificadoSenha", rotulo: "Senha do certificado (só se o painel da EFI pediu uma ao gerar)" },
     { campo: "ambiente", rotulo: "Ambiente (homologacao ou producao)", obrigatorio: true },
   ],
   // Campos ainda não confirmados com o BRB de verdade -- palpite a
