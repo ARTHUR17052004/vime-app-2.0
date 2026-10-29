@@ -25,6 +25,7 @@ import AnimatedNumber, { useAnimatedNumber } from "../components/ui/AnimatedNumb
 
 import { DashboardService } from "@/services/dashboard.service";
 import { formatCurrency } from "@/utils/formatCurrency";
+import { ativarModoTv } from "@/utils/sessao";
 
 const INTERVALO_ATUALIZACAO_MS = 25000;
 const ANO_ATUAL = new Date().getFullYear();
@@ -60,6 +61,13 @@ function TvConteudo() {
     } catch (err) {
       console.error("Modo TV: falha ao atualizar", err);
     }
+  }, []);
+
+  // Marca a guia como Modo TV mesmo se ela chegar aqui já autenticada
+  // (sem passar pelo /login?next=/tv) -- garante que a PRÓXIMA sessão,
+  // se essa cair, já nasça persistente (ver utils/sessao.js).
+  useEffect(() => {
+    ativarModoTv();
   }, []);
 
   useEffect(() => {

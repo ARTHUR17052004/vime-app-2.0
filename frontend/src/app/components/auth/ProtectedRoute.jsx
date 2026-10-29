@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 import { useAuth } from "../../../context/AuthContext";
 
@@ -11,6 +11,7 @@ export default function ProtectedRoute({
   children,
 }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   const {
     autenticado,
@@ -18,12 +19,16 @@ export default function ProtectedRoute({
   } = useAuth();
 
   useEffect(() => {
+    // Leva o destino original junto (?next=...) -- sem isso, o Modo TV
+    // (ver /tv) nunca voltava sozinho pra tela certa depois de relogar,
+    // e o login nem sabia que devia pedir uma sessão de 30 dias pra ele.
     if (!loading && !autenticado) {
-      router.replace("/login");
+      router.replace(`/login?next=${encodeURIComponent(pathname || "/")}`);
     }
   }, [
     autenticado,
     loading,
+    pathname,
     router,
   ]);
 

@@ -9,7 +9,17 @@ import LoginInput from "./LoginInput";
 
 import { api } from "../../../services/api";
 import { BiometriaService } from "../../../services/biometria.service";
-import { emAppInstalado } from "../../../utils/sessao";
+import { emAppInstalado, ativarModoTv } from "../../../utils/sessao";
+
+// Destino depois do login (ver ProtectedRoute) -- se for o Modo TV,
+// marca a sessão como persistente (ativarModoTv) ANTES de logar, pra já
+// salvar o token de 30 dias direto no localStorage da guia, em vez do
+// sessionStorage de 1 dia de uma sessão normal de navegador.
+function proximaRota() {
+  if (typeof window === "undefined") return "/";
+  const proximo = new URLSearchParams(window.location.search).get("next");
+  return proximo || "/";
+}
 
 export default function LoginForm() {
 
@@ -57,11 +67,14 @@ export default function LoginForm() {
 
     try {
 
+      const proximo = proximaRota();
+      if (proximo.startsWith("/tv")) ativarModoTv();
+
       const dados = await BiometriaService.entrar();
 
       login(dados.token, dados.usuario);
 
-      router.replace("/");
+      router.replace(proximo);
 
     } catch (err) {
 
@@ -85,12 +98,16 @@ export default function LoginForm() {
 
     try {
 
+      const proximo = proximaRota();
+      const modoTv = proximo.startsWith("/tv");
+      if (modoTv) ativarModoTv();
+
       const response = await api("/auth/login", {
         method: "POST",
         body: JSON.stringify({
           email,
           senha,
-          app: emAppInstalado(),
+          app: emAppInstalado() || modoTv,
         }),
       });
 
@@ -106,7 +123,7 @@ export default function LoginForm() {
         );
       }
 
-      router.replace("/");
+      router.replace(proximo);
 
     } catch (err) {
 

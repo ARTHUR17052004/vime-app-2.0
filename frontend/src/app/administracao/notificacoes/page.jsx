@@ -332,10 +332,10 @@ export default function NotificacoesAdminPage() {
                               />
                             </label>
 
-                            {podeEditar && t.mensagemPadrao && (
+                            {podeEditar && (
                               <button
                                 onClick={() => abrirEdicaoMensagem(t)}
-                                title="Personalizar mensagem e perfis"
+                                title="Escolher quem recebe (e, se tiver, personalizar a mensagem)"
                                 className={`
                                   p-2
                                   rounded-lg
@@ -351,7 +351,7 @@ export default function NotificacoesAdminPage() {
                               </button>
                             )}
 
-                            {podeEditar && t.mensagemPadrao && (
+                            {podeEditar && (
                               <button
                                 onClick={() => abrirEdicaoMensagem(t)}
                                 className="p-1 text-[var(--text-faint)]"
@@ -370,6 +370,8 @@ export default function NotificacoesAdminPage() {
                         {expandido === t.chave && (
 
                           <div className="mt-4 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] p-4 space-y-4">
+
+                            {t.mensagemPadrao && (
 
                             <div>
 
@@ -435,7 +437,9 @@ export default function NotificacoesAdminPage() {
 
                             </div>
 
-                            <div className="border-t border-[var(--border-token)] pt-4">
+                            )}
+
+                            <div className={t.mensagemPadrao ? "border-t border-[var(--border-token)] pt-4" : ""}>
 
                               <label className="block text-xs font-semibold text-[var(--text-muted)] mb-2">
                                 Quem recebe (desmarque quem não deve receber)

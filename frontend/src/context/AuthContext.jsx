@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { api } from "../services/api";
 import { socket } from "../services/socket";
-import { Sessao, emAppInstalado } from "../utils/sessao";
+import { Sessao, emAppInstalado, emModoTv } from "../utils/sessao";
 
 export const AuthContext = createContext({});
 
@@ -15,8 +15,8 @@ export function AuthProvider({ children }) {
     try {
       // No navegador a sessão é por guia (ver utils/sessao.js): sobra de
       // login antigo, que era compartilhado entre guias, é descartada. No
-      // app instalado o localStorage É a sessão, então fica.
-      if (!emAppInstalado()) {
+      // app instalado e no Modo TV o localStorage É a sessão, então fica.
+      if (!emAppInstalado() && !emModoTv()) {
         localStorage.removeItem("token");
         localStorage.removeItem("usuario");
       }
