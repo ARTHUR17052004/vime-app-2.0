@@ -13,22 +13,38 @@ const https = require("https");
 // aviso que já existe em BBApi.js.
 const USAR_MOCK = process.env.EFI_MOCK === "true";
 
+// EFI expõe a Cobranças e o Pix como APIs/hosts separados (mesmo
+// Client ID/Secret + certificado da aplicação servem pras duas, ver
+// painel: "Selecione a API" alterna entre elas) -- cada uma com seu
+// próprio caminho de token.
 const API_URLS = {
-  homologacao: "https://cobrancas-h.api.efipay.com.br",
-  producao: "https://cobrancas.api.efipay.com.br",
+  cobrancas: {
+    homologacao: "https://cobrancas-h.api.efipay.com.br",
+    producao: "https://cobrancas.api.efipay.com.br",
+  },
+  pix: {
+    homologacao: "https://pix-h.api.efipay.com.br",
+    producao: "https://pix.api.efipay.com.br",
+  },
+};
+
+const CAMINHO_TOKEN = {
+  cobrancas: "/v1/authorize",
+  pix: "/oauth/token",
 };
 
 class EFIApi {
 
   constructor() {
-    // Token dura pouco (igual BB) -- cache em memória por clientId,
-    // uma conta EFI por locador no futuro vai ter client_id diferente.
+    // Token dura pouco (igual BB) -- cache em memória por
+    // clientId+produto (Cobranças e Pix são hosts diferentes, token de
+    // um não serve pro outro).
     this._tokens = {};
   }
 
   // `override` é o JSON `credenciais` de um ContaPagamento (provider
   // "EFI") -- mesmo padrão de BBApi.obterConfig/AsaasApi.obterConfig.
-  obterConfig(override = null) {
+  obterConfig(override = null, produto = "cobrancas") {
 
     const ambiente = override?.ambiente || process.env.EFI_AMBIENTE || "homologacao";
 
@@ -40,7 +56,7 @@ class EFIApi {
       // autentica com mTLS, não só client_id/secret.
       certificadoBase64: override?.certificado || process.env.EFI_CERTIFICADO || "",
       ambiente,
-      apiURL: API_URLS[ambiente] || API_URLS.homologacao,
+      apiURL: (API_URLS[produto] || API_URLS.cobrancas)[ambiente] || API_URLS.cobrancas.homologacao,
     };
 
   }
@@ -66,16 +82,17 @@ class EFIApi {
 
   }
 
-  async obterToken(override = null) {
+  async obterToken(override = null, produto = "cobrancas") {
 
-    const { clientId, clientSecret, apiURL } = this.obterConfig(override);
+    const { clientId, clientSecret, apiURL } = this.obterConfig(override, produto);
 
     if (!clientId || !clientSecret) {
       throw new Error("Client ID/Secret da EFI não configurados.");
     }
 
     const agora = Date.now();
-    const cache = this._tokens[clientId];
+    const chaveCache = `${clientId}:${produto}`;
+    const cache = this._tokens[chaveCache];
 
     if (cache && agora < cache.expiraEm) {
       return cache.token;
@@ -86,7 +103,7 @@ class EFIApi {
     try {
 
       const resposta = await axios.post(
-        `${apiURL}/v1/authorize`,
+        `${apiURL}${CAMINHO_TOKEN[produto] || CAMINHO_TOKEN.cobrancas}`,
         { grant_type: "client_credentials" },
         {
           headers: {
@@ -100,7 +117,7 @@ class EFIApi {
 
       // EFI costuma dar token de 1h (3600s) -- renova 30s antes de
       // vencer, mesma margem de segurança do BB.
-      this._tokens[clientId] = {
+      this._tokens[chaveCache] = {
         token: resposta.data.access_token,
         expiraEm: agora + ((resposta.data.expires_in || 3600) - 30) * 1000,
       };
@@ -114,21 +131,21 @@ class EFIApi {
         error.response?.data?.mensagem ||
         error.message;
 
-      throw new Error(`Erro ao autenticar na EFI: ${mensagem}`);
+      throw new Error(`Erro ao autenticar na EFI (${produto}): ${mensagem}`);
 
     }
 
   }
 
-  async request(method, endpoint, body = null, override = null) {
+  async request(method, endpoint, body = null, override = null, produto = "cobrancas") {
 
-    const { apiURL } = this.obterConfig(override);
+    const { apiURL } = this.obterConfig(override, produto);
 
     if (USAR_MOCK) {
       return { success: true, mock: true, method, endpoint, body };
     }
 
-    const token = await this.obterToken(override);
+    const token = await this.obterToken(override, produto);
 
     try {
 
@@ -206,6 +223,52 @@ class EFIApi {
       numero: dadosCobranca?.charge_id || dadosCobranca?.identifiers?.charge_id,
       linhaDigitavel: dadosCobranca?.payment?.banking_billet?.barcode,
       urlImagemBoleto: dadosCobranca?.payment?.banking_billet?.pdf?.charge,
+    };
+
+  }
+
+  // ==========================
+  // PIX -- extrato de recebidos
+  // ==========================
+  //
+  // Pra contas EFI que não emitem boleto pelo sistema (ex: uma conta
+  // só pra receber Pix em paralelo ao banco principal do locador) --
+  // soma o que entrou num período, pra mostrar "quanto recebemos no
+  // mês" sem precisar lançar nada manual.
+  //
+  // ATENÇÃO: igual todo o resto desse arquivo -- formato de endpoint e
+  // resposta é o melhor palpite a partir da documentação pública da
+  // API Pix (padrão comum entre PSPs, baseado no Bacen), NÃO testado
+  // ao vivo ainda. Testar em homologação (a EFI tem um simulador de
+  // Pix recebido no sandbox) antes de confiar no valor mostrado.
+  async listarPixRecebidos({ dataInicio, dataFim }, override = null) {
+
+    const todosOsPix = [];
+    let pagina = 0;
+    let totalDePaginas = 1;
+
+    while (pagina < totalDePaginas) {
+
+      const resultado = await this.request(
+        "GET",
+        `/v2/pix?inicio=${encodeURIComponent(dataInicio)}&fim=${encodeURIComponent(dataFim)}` +
+          `&paginacao.paginaAtual=${pagina}&paginacao.itensPorPagina=100`,
+        null,
+        override,
+        "pix"
+      );
+
+      todosOsPix.push(...(resultado?.pix || []));
+
+      totalDePaginas = resultado?.parametros?.paginacao?.quantidadeDePaginas || 1;
+      pagina += 1;
+
+    }
+
+    return {
+      quantidade: todosOsPix.length,
+      total: todosOsPix.reduce((soma, p) => soma + Number(p.valor || 0), 0),
+      pix: todosOsPix,
     };
 
   }

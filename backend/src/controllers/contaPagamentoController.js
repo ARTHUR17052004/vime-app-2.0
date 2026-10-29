@@ -64,9 +64,26 @@ const remover = async (req, res) => {
 
 };
 
+const extratoPix = async (req, res) => {
+
+  try {
+
+    const extrato = await contaPagamentoService.extratoPixDoMes(req.params.id, req.query.mes);
+
+    return res.json({ success: true, data: extrato });
+
+  } catch (error) {
+
+    return res.status(400).json({ success: false, message: error.message });
+
+  }
+
+};
+
 module.exports = {
   listar,
   criar,
   atualizar,
   remover,
+  extratoPix,
 };

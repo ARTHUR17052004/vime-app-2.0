@@ -14,6 +14,8 @@ router.use(authMiddleware);
 
 router.get('/', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoController.listar);
 
+router.get('/:id/extrato-pix', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoController.extratoPix);
+
 router.post('/', permissaoMiddleware('asaasConfig.editar'), contaPagamentoController.criar);
 
 router.put('/:id', permissaoMiddleware('asaasConfig.editar'), contaPagamentoController.atualizar);

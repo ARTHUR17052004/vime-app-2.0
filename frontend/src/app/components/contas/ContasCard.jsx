@@ -8,7 +8,15 @@ import Button from "../ui/Button";
 import { ContaPagamentoService } from "../../../services/contaPagamento.service";
 import { usePermissao } from "../../../hooks/usePermissao";
 
-import { Landmark, Plus, Pencil, Trash2, Star } from "lucide-react";
+import { Landmark, Plus, Pencil, Trash2, Star, Receipt, ChevronDown, ChevronUp } from "lucide-react";
+
+function mesAtual() {
+  return new Date().toISOString().slice(0, 7);
+}
+
+function formatarMoeda(valor) {
+  return `R$ ${Number(valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+}
 
 // Cada provedor pede campos bem diferentes -- ver ContaPagamento.credenciais
 // no backend. Adicionar um banco novo é só acrescentar uma entrada aqui.
@@ -80,6 +88,8 @@ export default function ContasCard() {
   const [salvando, setSalvando] = useState(false);
   const [form, setForm] = useState(FORM_INICIAL);
   const [erro, setErro] = useState("");
+  const [extratoAbertoId, setExtratoAbertoId] = useState(null);
+  const [extratos, setExtratos] = useState({});
 
   async function carregar() {
     try {
@@ -169,6 +179,39 @@ export default function ContasCard() {
       setErro(err.message || "Erro ao salvar a conta.");
     } finally {
       setSalvando(false);
+    }
+
+  }
+
+  function alternarExtrato(conta) {
+    if (extratoAbertoId === conta.id) {
+      setExtratoAbertoId(null);
+      return;
+    }
+    setExtratoAbertoId(conta.id);
+    if (!extratos[conta.id]) {
+      consultarExtrato(conta.id, mesAtual());
+    }
+  }
+
+  async function consultarExtrato(contaId, mes) {
+
+    setExtratos((atual) => ({
+      ...atual,
+      [contaId]: { ...atual[contaId], mes, loading: true, erro: "" },
+    }));
+
+    try {
+      const resposta = await ContaPagamentoService.extratoPix(contaId, mes);
+      setExtratos((atual) => ({
+        ...atual,
+        [contaId]: { mes, loading: false, erro: "", resultado: resposta.data },
+      }));
+    } catch (err) {
+      setExtratos((atual) => ({
+        ...atual,
+        [contaId]: { mes, loading: false, erro: err.message || "Erro ao consultar extrato.", resultado: null },
+      }));
     }
 
   }
@@ -280,6 +323,50 @@ export default function ContasCard() {
               )}
 
             </div>
+
+            {conta.provider === "EFI" && (
+              <div className="mt-4 border-t border-[var(--border-token)] pt-3">
+
+                <button
+                  onClick={() => alternarExtrato(conta)}
+                  className="flex items-center gap-2 text-sm font-semibold text-emerald-400 hover:text-emerald-300"
+                >
+                  <Receipt size={16} />
+                  Extrato Pix recebido
+                  {extratoAbertoId === conta.id ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+
+                {extratoAbertoId === conta.id && (
+                  <div className="mt-3 space-y-3">
+
+                    <input
+                      type="month"
+                      value={extratos[conta.id]?.mes || mesAtual()}
+                      onChange={(e) => consultarExtrato(conta.id, e.target.value)}
+                      className="border border-[var(--border-token)] bg-[var(--surface)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                    />
+
+                    {extratos[conta.id]?.loading && (
+                      <p className="text-sm text-[var(--text-subtle)]">Consultando na EFI...</p>
+                    )}
+
+                    {extratos[conta.id]?.erro && (
+                      <p className="text-sm text-red-400">{extratos[conta.id].erro}</p>
+                    )}
+
+                    {extratos[conta.id]?.resultado && !extratos[conta.id]?.loading && (
+                      <div className="bg-[var(--surface)] rounded-lg p-3 text-sm text-[var(--text)]">
+                        <span className="font-bold">{formatarMoeda(extratos[conta.id].resultado.total)}</span>
+                        {" "}recebidos via Pix ({extratos[conta.id].resultado.quantidade} transação
+                        {extratos[conta.id].resultado.quantidade === 1 ? "" : "ões"})
+                      </div>
+                    )}
+
+                  </div>
+                )}
+
+              </div>
+            )}
 
           </div>
         ))}

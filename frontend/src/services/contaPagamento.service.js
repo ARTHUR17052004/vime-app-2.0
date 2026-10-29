@@ -26,4 +26,9 @@ export const ContaPagamentoService = {
     });
   },
 
+  extratoPix(id, mes) {
+    const query = mes ? `?mes=${mes}` : "";
+    return api(`/contas-pagamento/${id}/extrato-pix${query}`);
+  },
+
 };

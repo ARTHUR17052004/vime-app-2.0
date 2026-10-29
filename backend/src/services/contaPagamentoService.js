@@ -1,4 +1,5 @@
 const prisma = require('../config/prisma');
+const EFIApi = require('./EFIApi');
 
 const listar = () => {
   return prisma.contaPagamento.findMany({
@@ -112,6 +113,35 @@ const resolverParaLocador = async (locadorId) => {
 
 };
 
+// Extrato Pix recebido no mês -- só faz sentido pra conta EFI (único
+// banco com esse endpoint implementado até agora). `mes` no formato
+// "AAAA-MM"; sem informar, usa o mês atual.
+const extratoPixDoMes = async (id, mes) => {
+
+  const conta = await buscarPorId(id);
+
+  if (!conta) {
+    throw new Error('Conta não encontrada.');
+  }
+
+  if (conta.provider !== 'EFI') {
+    throw new Error('Extrato Pix só está disponível pra contas do banco Efí.');
+  }
+
+  const [ano, mesNumero] = (mes || new Date().toISOString().slice(0, 7)).split('-').map(Number);
+
+  const inicio = new Date(Date.UTC(ano, mesNumero - 1, 1, 0, 0, 0));
+  const fim = new Date(Date.UTC(ano, mesNumero, 0, 23, 59, 59, 999));
+
+  const extrato = await EFIApi.listarPixRecebidos(
+    { dataInicio: inicio.toISOString(), dataFim: fim.toISOString() },
+    conta.credenciais
+  );
+
+  return { ...extrato, mes: `${ano}-${String(mesNumero).padStart(2, '0')}` };
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -119,4 +149,5 @@ module.exports = {
   atualizar,
   remover,
   resolverParaLocador,
+  extratoPixDoMes,
 };
