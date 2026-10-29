@@ -16,12 +16,14 @@ const CONFIGS = {
     baseURL: "https://api.groq.com/openai/v1",
     apiKey: process.env.GROQ_API_KEY,
     modelo: process.env.GROQ_MODELO || "openai/gpt-oss-120b",
+    modeloTranscricao: process.env.GROQ_MODELO_TRANSCRICAO || "whisper-large-v3-turbo",
     envVar: "GROQ_API_KEY",
   },
   openai: {
     baseURL: "https://api.openai.com/v1",
     apiKey: process.env.OPENAI_API_KEY,
     modelo: process.env.OPENAI_MODELO || "gpt-4o-mini",
+    modeloTranscricao: process.env.OPENAI_MODELO_TRANSCRICAO || "whisper-1",
     envVar: "OPENAI_API_KEY",
   },
 };
@@ -95,4 +97,52 @@ async function gerarResposta(mensagens, opcoes) {
 
 }
 
-module.exports = { gerarResposta, gerarRespostaBruta, disponivel, PROVEDOR };
+// Comando de voz do SABADO (ver sabadoController.transcrever) -- manda o
+// áudio gravado no navegador pro mesmo provedor de IA já configurado, que
+// também expõe um modelo Whisper na mesma chave/baseURL (endpoint
+// diferente do chat). Usado em vez da Web Speech API do navegador porque
+// Safari/iOS não implementa reconhecimento de fala nenhum -- gravar áudio
+// (getUserMedia) e transcrever no servidor funciona igual em qualquer
+// aparelho, iPhone incluído.
+async function transcrever(buffer, { nomeArquivo = "audio.webm", mimeType = "audio/webm" } = {}) {
+
+  const config = CONFIGS[PROVEDOR];
+
+  if (!config) {
+    throw new Error(`Provedor de IA desconhecido: "${PROVEDOR}". Use "groq" ou "openai" em IA_PROVEDOR.`);
+  }
+
+  if (!config.apiKey) {
+    throw new Error(`Chave de API ausente para o provedor "${PROVEDOR}" -- defina ${config.envVar} no .env.`);
+  }
+
+  const formData = new FormData();
+  formData.append("file", new Blob([buffer], { type: mimeType }), nomeArquivo);
+  formData.append("model", config.modeloTranscricao);
+  formData.append("language", "pt");
+
+  const resposta = await fetch(`${config.baseURL}/audio/transcriptions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${config.apiKey}`,
+    },
+    body: formData,
+  });
+
+  if (!resposta.ok) {
+    const corpoErro = await resposta.text().catch(() => "");
+    throw new Error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}) ao transcrever áudio: ${corpoErro.slice(0, 500)}`);
+  }
+
+  const dados = await resposta.json();
+  const texto = dados.text?.trim();
+
+  if (!texto) {
+    throw new Error("Não consegui entender nada no áudio gravado.");
+  }
+
+  return texto;
+
+}
+
+module.exports = { gerarResposta, gerarRespostaBruta, transcrever, disponivel, PROVEDOR };

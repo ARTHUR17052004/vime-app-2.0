@@ -22,8 +22,6 @@ const authMiddleware = async (req, res, next) => {
       process.env.JWT_SECRET || "vime_secret_dev"
     );
 
-    req.usuario = decoded;
-
     // "Locador de trabalho": Administrador/Gerência/Operador enxergam todo
     // mundo por padrão (locadorId null no cadastro), mas podem escolher, só
     // na tela deles, focar num locador só (ARA ou SH) -- manda o id escolhido
@@ -36,8 +34,15 @@ const authMiddleware = async (req, res, next) => {
     const podeEscolherLocador = !decoded.locadorId && ["ADMINISTRADOR", "GERENCIA", "OPERADOR"].includes(perfilSemEspaco);
     const locadorEscolhido = req.headers["x-locador-filtro"];
 
+    // Guardado à parte (não dá pra reconstruir depois de locadorId já ter
+    // sido sobrescrito abaixo) -- usado pelo SABADO (ver
+    // sabadoFerramentasService.js) pra saber se pode trocar de locador
+    // dentro da própria pergunta ("quantas vazias tem na ARA?") ou se
+    // esse usuário só enxerga o locador fixo dele mesmo.
+    req.usuario = { ...decoded, podeEscolherLocador };
+
     if (podeEscolherLocador && locadorEscolhido) {
-      req.usuario = { ...decoded, locadorId: locadorEscolhido };
+      req.usuario = { ...req.usuario, locadorId: locadorEscolhido };
     }
 
     // Modo manutenção: só o Administrador continua passando -- todo o

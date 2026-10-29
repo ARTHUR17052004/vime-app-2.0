@@ -34,4 +34,13 @@ export const SabadoService = {
 
   },
 
+  transcrever(audioBase64) {
+
+    return api("/sabado/transcrever", {
+      method: "POST",
+      body: JSON.stringify({ audio: audioBase64 }),
+    });
+
+  },
+
 };

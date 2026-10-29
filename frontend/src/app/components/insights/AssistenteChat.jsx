@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, User, Plus, Search, History, TrendingUp, Clock, AlertTriangle, Wallet } from "lucide-react";
+import { Send, Sparkles, User, Plus, Search, History, TrendingUp, Clock, AlertTriangle, Wallet, Trash2, Mic, Square } from "lucide-react";
 
 import { SabadoService } from "@/services/sabado.service";
 import { useAuth } from "../../../context/AuthContext";
@@ -104,12 +104,39 @@ export default function AssistenteChat() {
   const [enviando, setEnviando] = useState(false);
   const [carregandoConversa, setCarregandoConversa] = useState(false);
   const [erro, setErro] = useState("");
+  const [excluindoId, setExcluindoId] = useState(null);
+  const [confirmandoId, setConfirmandoId] = useState(null);
+
+  // Só mostra o microfone se o aparelho realmente suporta gravar áudio
+  // (getUserMedia + MediaRecorder) -- existe desde o iOS 14.3 no Safari,
+  // mas melhor confirmar do que assumir e deixar um botão quebrado. Não
+  // muda depois de montar, então calcula uma vez (lazy initial state) em
+  // vez de um efeito -- no servidor (sem window) sempre dá false, igual
+  // à primeira renderização no cliente, sem risco de hydration mismatch.
+  const [microfoneDisponivel] = useState(() =>
+    typeof window !== "undefined" &&
+    Boolean(navigator.mediaDevices?.getUserMedia) &&
+    typeof window.MediaRecorder !== "undefined"
+  );
+  const [gravando, setGravando] = useState(false);
+  const [transcrevendo, setTranscrevendo] = useState(false);
+  const gravadorRef = useRef(null);
+  const pedacosRef = useRef([]);
 
   const fimRef = useRef(null);
 
   useEffect(() => {
     fimRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [mensagens, enviando]);
+
+  // Sai da tela com o microfone ainda ligado (trocou de aba, fechou o
+  // modal) -- desliga a gravação, não deixa o navegador com o indicador
+  // de microfone ativo pendurado.
+  useEffect(() => {
+    return () => {
+      if (gravadorRef.current?.state === "recording") gravadorRef.current.stop();
+    };
+  }, []);
 
   const carregarConversas = async (termo) => {
     try {
@@ -194,6 +221,117 @@ export default function AssistenteChat() {
     } finally {
 
       setEnviando(false);
+
+    }
+
+  };
+
+  const excluirConversa = async (id) => {
+
+    if (confirmandoId !== id) {
+      setConfirmandoId(id);
+      // Desarma sozinho se ninguém confirmar -- não deixa um clique em
+      // "excluir" antigo, esquecido, valendo se a pessoa voltar bem depois.
+      setTimeout(() => setConfirmandoId((atual) => (atual === id ? null : atual)), 3000);
+      return;
+    }
+
+    setExcluindoId(id);
+
+    try {
+
+      await SabadoService.excluirConversa(id);
+
+      setConversas((prev) => prev.filter((c) => c.id !== id));
+
+      if (id === conversaAtualId) novoChat();
+
+    } catch (err) {
+
+      setErro(err.message || "Não foi possível excluir essa conversa.");
+
+    } finally {
+
+      setExcluindoId(null);
+      setConfirmandoId(null);
+
+    }
+
+  };
+
+  // Tipo de áudio preferido por aparelho: Safari/iOS só grava em
+  // audio/mp4 (não tem audio/webm) -- por isso a lista testa os dois
+  // em vez de cravar um só, com a ordem priorizando o que Chrome usa.
+  const TIPOS_AUDIO = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/aac", "audio/mpeg"];
+
+  const iniciarGravacao = async () => {
+
+    if (gravando || transcrevendo) return;
+
+    setErro("");
+
+    try {
+
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = TIPOS_AUDIO.find((t) => window.MediaRecorder.isTypeSupported?.(t));
+      const gravador = new window.MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+
+      pedacosRef.current = [];
+
+      gravador.ondataavailable = (e) => {
+        if (e.data.size > 0) pedacosRef.current.push(e.data);
+      };
+
+      gravador.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        const blob = new Blob(pedacosRef.current, { type: gravador.mimeType || mimeType || "audio/webm" });
+        transcreverAudio(blob);
+      };
+
+      gravadorRef.current = gravador;
+      gravador.start();
+      setGravando(true);
+
+    } catch (err) {
+
+      setErro("Não deu pra acessar o microfone -- verifique a permissão do navegador.");
+
+    }
+
+  };
+
+  const pararGravacao = () => {
+    gravadorRef.current?.stop();
+    setGravando(false);
+  };
+
+  const transcreverAudio = async (blob) => {
+
+    setTranscrevendo(true);
+
+    try {
+
+      const base64 = await new Promise((resolve, reject) => {
+        const leitor = new FileReader();
+        leitor.onloadend = () => resolve(leitor.result);
+        leitor.onerror = () => reject(new Error("Falha ao ler o áudio gravado."));
+        leitor.readAsDataURL(blob);
+      });
+
+      const resposta = await SabadoService.transcrever(base64);
+      const texto = resposta.data?.texto?.trim();
+
+      if (texto) {
+        setPergunta((atual) => (atual.trim() ? `${atual.trim()} ${texto}` : texto));
+      }
+
+    } catch (err) {
+
+      setErro(err.message || "Não consegui transcrever o áudio.");
+
+    } finally {
+
+      setTranscrevendo(false);
 
     }
 
@@ -332,8 +470,8 @@ export default function AssistenteChat() {
               onChange={(e) => setPergunta(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Digite sua pergunta..."
-              disabled={enviando}
+              placeholder={gravando ? "Gravando... fale sua pergunta" : transcrevendo ? "Transcrevendo o áudio..." : "Digite sua pergunta..."}
+              disabled={enviando || gravando || transcrevendo}
               className="
                 flex-1
                 resize-none
@@ -351,9 +489,35 @@ export default function AssistenteChat() {
               "
             />
 
+            {microfoneDisponivel && (
+              <button
+                onClick={gravando ? pararGravacao : iniciarGravacao}
+                disabled={enviando || transcrevendo}
+                title={gravando ? "Parar gravação" : "Perguntar por voz"}
+                className={`
+                  flex items-center justify-center
+                  w-11 h-11 shrink-0 rounded-xl
+                  border transition-colors
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  ${gravando
+                    ? "bg-red-500/15 border-red-500/40 text-red-400 animate-pulse"
+                    : "bg-[var(--surface-2)] border-[var(--border-token)] text-[var(--text-muted)] hover:bg-[var(--surface-3)]"
+                  }
+                `}
+              >
+                {transcrevendo ? (
+                  <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : gravando ? (
+                  <Square size={16} />
+                ) : (
+                  <Mic size={18} />
+                )}
+              </button>
+            )}
+
             <button
               onClick={enviarPergunta}
-              disabled={enviando || !pergunta.trim()}
+              disabled={enviando || gravando || transcrevendo || !pergunta.trim()}
               className="
                 flex items-center justify-center
                 w-11 h-11 shrink-0 rounded-xl
@@ -416,11 +580,10 @@ export default function AssistenteChat() {
             )}
 
             {conversas.map((c) => (
-              <button
+              <div
                 key={c.id}
-                onClick={() => abrirConversa(c.id)}
                 className={`
-                  w-full text-left rounded-xl px-3 py-2.5 transition-colors
+                  group relative flex items-center gap-1 rounded-xl transition-colors
                   ${
                     c.id === conversaAtualId
                       ? "bg-emerald-500/10 border border-emerald-500/30"
@@ -428,9 +591,30 @@ export default function AssistenteChat() {
                   }
                 `}
               >
-                <p className="text-sm font-medium text-[var(--text)] truncate">{c.titulo}</p>
-                <p className="text-xs text-[var(--text-faint)] mt-0.5">{formatarQuando(c.updatedAt)}</p>
-              </button>
+                <button
+                  onClick={() => abrirConversa(c.id)}
+                  className="flex-1 min-w-0 text-left px-3 py-2.5"
+                >
+                  <p className="text-sm font-medium text-[var(--text)] truncate">{c.titulo}</p>
+                  <p className="text-xs text-[var(--text-faint)] mt-0.5">{formatarQuando(c.updatedAt)}</p>
+                </button>
+
+                <button
+                  onClick={() => excluirConversa(c.id)}
+                  disabled={excluindoId === c.id}
+                  title={confirmandoId === c.id ? "Clique de novo pra confirmar" : "Excluir conversa"}
+                  className={`
+                    shrink-0 mr-2 p-1.5 rounded-lg transition-colors
+                    ${confirmandoId === c.id
+                      ? "bg-red-500/20 text-red-400"
+                      : "text-[var(--text-faint)] opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400"
+                    }
+                    disabled:opacity-50
+                  `}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
             ))}
 
           </div>

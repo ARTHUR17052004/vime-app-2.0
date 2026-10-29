@@ -20,6 +20,36 @@ const insightsService = require("./insightsService");
 
 const LIMITE_LISTA = 25;
 
+// Deixa o usuário perguntar sobre uma empresa específica dentro da própria
+// pergunta ("quantas vazias tem na ARA?"), sem precisar trocar o seletor
+// "Locador de trabalho" da tela antes. Só funciona pra quem já é
+// irrestrito (ver authMiddleware -- podeEscolherLocador); quem só
+// enxerga uma empresa (locador fixo no cadastro) continua só vendo a
+// dele mesmo, e esse argumento é ignorado nesse caso, nunca usado como
+// jeito de ver dado de outra empresa.
+async function resolverLocador(usuario, nomeLocador) {
+
+  if (!nomeLocador || !usuario?.podeEscolherLocador) return usuario;
+
+  const achado = await prisma.locador.findFirst({
+    where: { nome: { contains: String(nomeLocador).trim(), mode: "insensitive" } },
+    select: { id: true },
+  });
+
+  if (!achado) return usuario;
+
+  return { ...usuario, locadorId: achado.id };
+
+}
+
+const PARAM_LOCADOR = {
+  locador: {
+    type: ["string", "null"],
+    description:
+      "Nome da empresa/locador pra filtrar (ex.: \"SH\", \"ARA\") -- só preencha se o usuário citar uma empresa explicitamente na pergunta. Deixe null pra manter o escopo atual do usuário (pode já ser uma empresa só, dependendo de quem está perguntando, ou todas).",
+  },
+};
+
 function enxugarIndicadores(indicadores) {
   return indicadores.map(({ chave, rotulo, valor, formato, escopo, criterio, comparacao }) => ({
     chave, rotulo, valor, formato, escopo, criterio,
@@ -286,6 +316,7 @@ const FERRAMENTAS = [
         properties: {
           periodo_inicio: { type: ["string", "null"], description: "Data inicial AAAA-MM-DD (opcional, padrão início do mês atual)" },
           periodo_fim: { type: ["string", "null"], description: "Data final AAAA-MM-DD (opcional, padrão fim do mês atual)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -300,6 +331,7 @@ const FERRAMENTAS = [
         properties: {
           status: { type: ["string", "null"], enum: ["ATIVO", "PENDENTE", "ENCERRADO", null], description: "Filtrar por status (opcional)" },
           vencendo_em_dias: { type: ["number", "null"], description: "Só contratos ativos vencendo em até N dias (opcional, ignora 'status' se usado)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -315,6 +347,7 @@ const FERRAMENTAS = [
           status: { type: ["string", "null"], enum: ["PENDENTE", "PAGA", "ATRASADA", "CANCELADA", null], description: "Filtrar por status (opcional)" },
           de: { type: ["string", "null"], description: "Vencimento a partir de AAAA-MM-DD (opcional)" },
           ate: { type: ["string", "null"], description: "Vencimento até AAAA-MM-DD (opcional)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -328,6 +361,7 @@ const FERRAMENTAS = [
         type: "object",
         properties: {
           status: { type: ["string", "null"], enum: ["PROGRAMADA", "PENDENTE", "ATRASADA", "REALIZADA", "CANCELADA", null], description: "Filtrar por status (opcional)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -341,6 +375,7 @@ const FERRAMENTAS = [
         type: "object",
         properties: {
           status: { type: ["string", "null"], description: "Filtrar por status (opcional, ex.: SOLICITADA, EM_ANDAMENTO, ATENDIDA, REJEITADA)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -354,6 +389,7 @@ const FERRAMENTAS = [
         type: "object",
         properties: {
           status: { type: ["string", "null"], enum: ["DISPONIVEL", "OCUPADA", "MANUTENCAO", "INDISPONIVEL", null], description: "Filtrar por status (opcional)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -369,6 +405,7 @@ const FERRAMENTAS = [
         properties: {
           data_inicio: { type: ["string", "null"], description: "Data inicial AAAA-MM-DD (opcional)" },
           data_fim: { type: ["string", "null"], description: "Data final AAAA-MM-DD (opcional)" },
+          ...PARAM_LOCADOR,
         },
       },
     },
@@ -394,7 +431,24 @@ async function executar(nome, usuario, argumentos) {
   }
 
   try {
-    return await executor(usuario, argumentos || {});
+
+    const nomeLocadorPedido = argumentos?.locador;
+    const usuarioEfetivo = await resolverLocador(usuario, nomeLocadorPedido);
+    const resultado = await executor(usuarioEfetivo, argumentos || {});
+
+    // Pediu pra filtrar por empresa, mas quem pergunta só enxerga uma
+    // empresa fixa mesmo (ver resolverLocador) -- sem isso a IA podia
+    // responder como se os dados fossem da empresa pedida, quando na
+    // verdade continuam sendo só os da empresa de quem perguntou.
+    if (nomeLocadorPedido && !usuario?.podeEscolherLocador) {
+      return {
+        aviso: `Quem perguntou só enxerga uma empresa do sistema (não "${nomeLocadorPedido}") -- os dados abaixo são dessa empresa dela mesma. Não diga que são de "${nomeLocadorPedido}".`,
+        resultado,
+      };
+    }
+
+    return resultado;
+
   } catch (error) {
     return { erro: `Falha ao consultar: ${error.message}` };
   }
