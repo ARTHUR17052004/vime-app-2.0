@@ -99,6 +99,16 @@ app.use(
 );
 app.use(cookieParser());
 
+// Sem isso, pelo menos um navegador mobile chegou a reabrir uma página
+// de detalhe (ex.: /vistorias/:id) com uma resposta 404 antiga guardada
+// em cache -- o registro já existia de novo no banco, mas a tela ainda
+// mostrava "não encontrada" até dar F5. A API nunca deveria ser cacheada
+// pelo navegador; isso é regra pra toda rota, não só pra essa.
+app.use((req, res, next) => {
+  res.set("Cache-Control", "no-store");
+  next();
+});
+
 app.get("/health", (req, res) => {
   return res.status(200).json({
     success: true,

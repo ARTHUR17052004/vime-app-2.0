@@ -16,6 +16,11 @@ export async function api(endpoint, options = {}) {
 
     credentials: "include",
 
+    // Sem isso, pelo menos um navegador mobile chegou a mostrar de novo
+    // uma resposta antiga guardada em cache (ex.: 404 de uma vistoria
+    // que já existia de novo) em vez de buscar o estado atual.
+    cache: "no-store",
+
     headers: {
 
       "Content-Type": "application/json",
