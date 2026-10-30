@@ -80,6 +80,18 @@ const listarMissoesRealizadas = async (req, res) => {
   res.json(dados);
 };
 
+const buscarMissao = async (req, res) => {
+
+  const missao = await vistoriaService.buscarMissao(req.params.missaoId);
+
+  if (!missao) {
+    return res.status(404).json({ mensagem: 'Registro não encontrado.' });
+  }
+
+  res.json(missao);
+
+};
+
 const atualizarMissao = async (req, res) => {
   const dados = await vistoriaService.atualizarMissao(req.params.missaoId, req.body);
   res.json(dados);
@@ -100,6 +112,7 @@ module.exports = {
   concluirMissoes,
   cancelarRealizacao,
   listarMissoesRealizadas,
+  buscarMissao,
   atualizarMissao,
   removerMissao,
 };

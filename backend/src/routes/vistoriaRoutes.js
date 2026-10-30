@@ -24,6 +24,11 @@ router.get('/:id', permissaoMiddleware('vistorias.visualizar'), vistoriaControll
 
 router.get('/:id/missoes', permissaoMiddleware('vistorias.visualizar'), vistoriaController.listarMissoes);
 
+// Uma missão só, com as fotos completas -- buscado sob demanda ao
+// abrir o detalhe/edição de um registro (ver comentário em
+// vistoriaService.listarMissoesRealizadas).
+router.get('/:id/missoes/:missaoId', permissaoMiddleware('vistorias.visualizar'), vistoriaController.buscarMissao);
+
 router.post('/:id/missoes/concluir', permissaoMiddleware('vistorias.editar'), vistoriaController.concluirMissoes);
 
 router.post('/:id/cancelar-realizacao', permissaoMiddleware('vistorias.editar'), vistoriaController.cancelarRealizacao);

@@ -13,6 +13,10 @@ import { VistoriaService } from "@/services/vistoria.service";
 import { formatDateTime } from "@/utils/formatDate";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 
+// Identifica um item só da lista -- usado como `key` dos modais abaixo,
+// pra remontar (e já nascer com o estado certo) ao trocar de registro.
+const chaveItem = (item) => item ? (item.missaoId || item.vistoriaId) : "fechado";
+
 // Junta as duas fontes de "realizada" que existem no sistema: cada
 // missão de uma vistoria "Geral" (uma por residência/ciclo -- registro
 // à parte, dá pra editar/excluir) e a última execução registrada de
@@ -36,6 +40,9 @@ export default function VistoriaRealizadasTable({
 
   const linhas = useMemo(() => {
 
+    // `m.fotos` não vem mais na lista (ver vistoriaService.listarMissoesRealizadas
+    // -- conteúdo pesado demais) -- só a contagem, pro badge. O conteúdo de
+    // verdade é buscado sob demanda nos modais abaixo quando abre um registro.
     const deMissoes = missoesRealizadas.map((m) => ({
       tipo: "missao",
       missaoId: m.id,
@@ -45,7 +52,7 @@ export default function VistoriaRealizadasTable({
       ciclo: m.ciclo,
       dataHora: m.dataRealizacao,
       responsavel: m.realizadoPor || "-",
-      fotos: m.fotos || [],
+      fotosCount: m.fotosCount || 0,
       observacoes: m.observacoes || "",
     }));
 
@@ -60,6 +67,7 @@ export default function VistoriaRealizadasTable({
         dataHora: v.concluidaEm,
         responsavel: v.responsavel || "-",
         fotos: v.fotosConclusao || [],
+        fotosCount: (v.fotosConclusao || []).length,
         observacoes: v.observacoesConclusao || "",
       }));
 
@@ -116,11 +124,11 @@ export default function VistoriaRealizadasTable({
       key: "fotos",
       title: "Fotos",
       render: (item) => (
-        item.fotos?.length > 0
+        item.fotosCount > 0
           ? (
             <span className="inline-flex items-center gap-1 text-[var(--text-subtle)]">
               <ImageIcon size={14} />
-              {item.fotos.length}
+              {item.fotosCount}
             </span>
           )
           : "-"
@@ -162,9 +170,14 @@ export default function VistoriaRealizadasTable({
         emptyMessage="Nenhuma vistoria realizada ainda."
       />
 
-      <DetalheModal item={detalhe} onClose={() => setDetalhe(null)} />
+      {/* `key` troca a cada registro aberto -- remonta do zero, pra
+          "fotos" e "carregandoFotos" partirem recalculados (via
+          useState preguiçoso) pro item certo, em vez de precisar de
+          um efeito só pra resetar estado de um item pro outro. */}
+      <DetalheModal key={chaveItem(detalhe)} item={detalhe} onClose={() => setDetalhe(null)} />
 
       <EditarModal
+        key={chaveItem(editando)}
         item={editando}
         onClose={() => setEditando(null)}
         onSalvo={async () => {
@@ -181,7 +194,36 @@ export default function VistoriaRealizadasTable({
 
 function DetalheModal({ item, onClose }) {
 
+  // Cada item aberto remonta esse componente (ver `key={chaveItem(...)}`
+  // lá em cima) -- então o estado inicial já pode nascer certo pro
+  // item em questão, sem precisar de um efeito só pra resetar.
   const [lightboxIndice, setLightboxIndice] = useState(null);
+  const [fotos, setFotos] = useState(() => (item && item.tipo !== "missao") ? (item.fotos || []) : []);
+  const [carregandoFotos, setCarregandoFotos] = useState(() => !!item && item.tipo === "missao");
+
+  useEffect(() => {
+
+    // "regular" já nasceu com fotos (lista separada, bem menor) -- só
+    // "missao" precisa buscar, porque a lista de Realizadas não traz
+    // o conteúdo pesado (ver comentário no backend).
+    if (!item || item.tipo !== "missao") return;
+
+    let cancelado = false;
+
+    VistoriaService.buscarMissao(item.vistoriaId, item.missaoId)
+      .then((missao) => {
+        if (!cancelado) setFotos(missao?.fotos || []);
+      })
+      .catch(() => {
+        if (!cancelado) setFotos([]);
+      })
+      .finally(() => {
+        if (!cancelado) setCarregandoFotos(false);
+      });
+
+    return () => { cancelado = true; };
+
+  }, [item]);
 
   return (
 
@@ -228,11 +270,15 @@ function DetalheModal({ item, onClose }) {
             </div>
           )}
 
-          {item.fotos?.length > 0 && (
+          {carregandoFotos && (
+            <p className="text-sm text-[var(--text-subtle)]">Carregando fotos...</p>
+          )}
+
+          {!carregandoFotos && fotos.length > 0 && (
             <div>
               <p className="text-[var(--text-faint)] uppercase text-xs mb-2">Fotos e Vídeos</p>
               <div className="grid grid-cols-3 gap-3">
-                {item.fotos.map((midia, index) =>
+                {fotos.map((midia, index) =>
                   midia.startsWith("data:video") ? (
                     <button
                       key={index}
@@ -277,7 +323,7 @@ function DetalheModal({ item, onClose }) {
       )}
 
       <MidiaLightbox
-        itens={item?.fotos || []}
+        itens={fotos}
         indice={lightboxIndice}
         onClose={() => setLightboxIndice(null)}
         onMudarIndice={setLightboxIndice}
@@ -296,7 +342,11 @@ function EditarModal({ item, onClose, onSalvo }) {
   const [dataHora, setDataHora] = useState("");
   const [responsavel, setResponsavel] = useState("");
   const [observacoes, setObservacoes] = useState("");
-  const [fotos, setFotos] = useState([]);
+  // Mesma ideia do DetalheModal: cada item aberto remonta esse
+  // componente (key lá em cima), então "fotos"/"carregandoFotos" já
+  // nascem certos, sem precisar de setState pra resetar entre itens.
+  const [fotos, setFotos] = useState(() => (item && item.tipo !== "missao") ? (item.fotos || []) : []);
+  const [carregandoFotos, setCarregandoFotos] = useState(() => !!item && item.tipo === "missao");
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
 
@@ -311,8 +361,28 @@ function EditarModal({ item, onClose, onSalvo }) {
     setDataHora(local);
     setResponsavel(item.responsavel === "-" ? "" : item.responsavel || "");
     setObservacoes(item.observacoes || "");
-    setFotos(item.fotos || []);
     setErro("");
+
+    // "regular" já nasceu com fotos -- "missao" não (ver acima).
+    // Enquanto não carrega, Salvar fica travado (ver disabled do
+    // botão): se o usuário salvasse antes, mandaria `fotos: []` e
+    // apagaria as que já existiam.
+    if (item.tipo !== "missao") return;
+
+    let cancelado = false;
+
+    VistoriaService.buscarMissao(item.vistoriaId, item.missaoId)
+      .then((missao) => {
+        if (!cancelado) setFotos(missao?.fotos || []);
+      })
+      .catch(() => {
+        if (!cancelado) setErro("Não foi possível carregar as fotos atuais. Tente abrir de novo.");
+      })
+      .finally(() => {
+        if (!cancelado) setCarregandoFotos(false);
+      });
+
+    return () => { cancelado = true; };
 
   }, [item]);
 
@@ -431,7 +501,11 @@ function EditarModal({ item, onClose, onSalvo }) {
               onArquivos={handleArquivos}
             />
 
-            {fotos.length > 0 && (
+            {carregandoFotos && (
+              <p className="mt-3 text-sm text-[var(--text-subtle)]">Carregando fotos atuais...</p>
+            )}
+
+            {!carregandoFotos && fotos.length > 0 && (
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {fotos.map((midia, index) => (
                   <div key={index} className="relative">
@@ -460,7 +534,7 @@ function EditarModal({ item, onClose, onSalvo }) {
             <Button variant="secondary" onClick={onClose}>
               Cancelar
             </Button>
-            <Button onClick={salvar} disabled={salvando}>
+            <Button onClick={salvar} disabled={salvando || carregandoFotos}>
               Salvar
             </Button>
           </div>

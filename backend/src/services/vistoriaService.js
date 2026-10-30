@@ -603,10 +603,57 @@ const cancelarRealizacao = async (vistoriaId, autor) => {
 
 // Histórico de missões concluídas (todas as rodadas, de todas as
 // vistorias "Geral") -- base da aba Realizadas.
-const listarMissoesRealizadas = () => {
-  return prisma.vistoriaMissao.findMany({
+//
+// De propósito SEM o conteúdo de "fotos" aqui: cada mídia é um `data:`
+// URL (texto gigante, até dezena de MB cada) e esse histórico só
+// cresce com o tempo -- já passou de 25MB só nessa coluna somando
+// tudo, e a consulta começou a falhar ("Server has closed the
+// connection") assim que acumulou uns dias de vistoria com foto. A
+// lista só precisa de QUANTAS fotos tem (pro badge) -- o conteúdo de
+// verdade só é buscado quando abre uma missão específica (ver
+// buscarMissao), uma de cada vez.
+const listarMissoesRealizadas = async () => {
+
+  const linhas = await prisma.$queryRaw`
+    SELECT
+      vm.id,
+      vm."vistoriaId",
+      vm."unidadeId",
+      vm.ciclo,
+      vm."dataRealizacao",
+      vm."realizadoPor",
+      vm.observacoes,
+      COALESCE(jsonb_array_length(vm.fotos), 0)::int AS "fotosCount",
+      v.titulo AS "vistoriaTitulo",
+      u.nome AS "unidadeNome"
+    FROM "VistoriaMissao" vm
+    JOIN "Vistoria" v ON v.id = vm."vistoriaId"
+    JOIN "Unidade" u ON u.id = vm."unidadeId"
+    ORDER BY vm."dataRealizacao" DESC
+  `;
+
+  return linhas.map((l) => ({
+    id: l.id,
+    vistoriaId: l.vistoriaId,
+    unidadeId: l.unidadeId,
+    ciclo: l.ciclo,
+    dataRealizacao: l.dataRealizacao,
+    realizadoPor: l.realizadoPor,
+    observacoes: l.observacoes,
+    fotosCount: l.fotosCount,
+    vistoria: { titulo: l.vistoriaTitulo },
+    unidade: { nome: l.unidadeNome },
+  }));
+
+};
+
+// Uma missão só, com o conteúdo de "fotos" completo -- usado quando
+// abre o detalhe/edição de UM registro (ver listarMissoesRealizadas
+// acima pro motivo de não vir tudo junto na lista).
+const buscarMissao = (missaoId) => {
+  return prisma.vistoriaMissao.findUnique({
+    where: { id: missaoId },
     include: { unidade: true, vistoria: true },
-    orderBy: { dataRealizacao: 'desc' },
   });
 };
 
@@ -696,6 +743,7 @@ module.exports = {
   concluirMissoes,
   cancelarRealizacao,
   listarMissoesRealizadas,
+  buscarMissao,
   atualizarMissao,
   removerMissao,
 };
