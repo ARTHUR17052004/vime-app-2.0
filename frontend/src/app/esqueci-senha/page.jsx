@@ -68,7 +68,7 @@ export default function EsqueciSenhaPage() {
             </p>
 
             <p className="mt-4 text-sm text-gray-400">
-              suporte@vimesistema.online
+              arthursintaxe@gmail.com ou +55 62984661680
             </p>
 
           </div>
