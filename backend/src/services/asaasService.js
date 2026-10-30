@@ -128,32 +128,37 @@ const testarConexao = async () => {
 
 };
 
-// Testa a conta Asaas própria de um locador específico (não a conta
-// padrão do sistema) -- usa o token salvo no cadastro dele.
-const testarConexaoLocador = async (locadorId) => {
+// Testa uma conta Asaas própria cadastrada na tela "Contas" (não a
+// conta padrão do sistema) -- usa a API Key guardada em
+// ContaPagamento.credenciais. Substitui o antigo testarConexaoLocador
+// (que olhava Locador.asaasToken direto, de antes da tela "Contas"
+// existir).
+const testarConexaoConta = async (contaPagamentoId) => {
 
-  const locador = await prisma.locador.findUnique({ where: { id: locadorId } });
+  const conta = await prisma.contaPagamento.findUnique({ where: { id: contaPagamentoId } });
 
-  if (!locador) {
-    return { success: false, mensagem: 'Locador não encontrado.' };
+  if (!conta || conta.provider !== 'ASAAS') {
+    return { success: false, mensagem: 'Essa conta não é do Asaas.' };
   }
 
-  if (!locador.asaasToken) {
-    return { success: false, mensagem: 'Este locador ainda não tem uma API Key do Asaas configurada.' };
+  const cred = conta.credenciais || {};
+
+  if (!cred.apiKey) {
+    return { success: false, mensagem: 'Essa conta ainda não tem uma API Key do Asaas configurada.' };
   }
 
-  const override = { apiKey: locador.asaasToken, walletId: locador.asaasWalletId || undefined };
+  const override = { apiKey: cred.apiKey, walletId: cred.walletId || undefined };
 
   try {
 
-    const conta = await AsaasApi.minhaConta(override);
+    const contaAsaas = await AsaasApi.minhaConta(override);
 
     return {
       success: true,
       mensagem: 'Conexão realizada com sucesso.',
       conta: {
-        nome: conta?.name || conta?.email || null,
-        email: conta?.email || null,
+        nome: contaAsaas?.name || contaAsaas?.email || null,
+        email: contaAsaas?.email || null,
       },
     };
 
@@ -161,7 +166,7 @@ const testarConexaoLocador = async (locadorId) => {
 
     return {
       success: false,
-      mensagem: error.message || 'Não foi possível conectar à conta Asaas deste locador.',
+      mensagem: error.message || 'Não foi possível conectar a essa conta Asaas.',
     };
 
   }
@@ -169,24 +174,28 @@ const testarConexaoLocador = async (locadorId) => {
 };
 
 // Registra o mesmo endpoint de webhook do sistema (/asaas/webhook)
-// dentro da conta Asaas própria do locador -- sem isso, pagamentos
-// feitos na conta dele nunca avisam o VIME quando são pagos/atrasam,
+// dentro de uma conta Asaas própria (tela "Contas") -- sem isso,
+// pagamentos feitos nela nunca avisam o VIME quando são pagos/atrasam,
 // já que cada conta Asaas tem sua própria configuração de webhook.
-const registrarWebhookLocador = async (locadorId, webhookUrl) => {
+// Substitui o antigo registrarWebhookLocador (mesmo motivo do
+// testarConexaoConta acima).
+const registrarWebhookConta = async (contaPagamentoId, webhookUrl) => {
 
-  const locador = await prisma.locador.findUnique({ where: { id: locadorId } });
+  const conta = await prisma.contaPagamento.findUnique({ where: { id: contaPagamentoId } });
 
-  if (!locador) {
-    return { success: false, mensagem: 'Locador não encontrado.' };
+  if (!conta || conta.provider !== 'ASAAS') {
+    return { success: false, mensagem: 'Essa conta não é do Asaas.' };
   }
 
-  if (!locador.asaasToken) {
-    return { success: false, mensagem: 'Este locador ainda não tem uma API Key do Asaas configurada.' };
+  const cred = conta.credenciais || {};
+
+  if (!cred.apiKey) {
+    return { success: false, mensagem: 'Essa conta ainda não tem uma API Key do Asaas configurada.' };
   }
 
   const { webhookToken } = await AsaasApi.obterConfig();
 
-  const override = { apiKey: locador.asaasToken, walletId: locador.asaasWalletId || undefined };
+  const override = { apiKey: cred.apiKey, walletId: cred.walletId || undefined };
 
   try {
 
@@ -199,7 +208,7 @@ const registrarWebhookLocador = async (locadorId, webhookUrl) => {
 
     return {
       success: true,
-      mensagem: 'Webhook registrado com sucesso na conta Asaas deste locador.',
+      mensagem: 'Webhook registrado com sucesso nessa conta Asaas.',
       url: webhookUrl,
     };
 
@@ -207,7 +216,7 @@ const registrarWebhookLocador = async (locadorId, webhookUrl) => {
 
     return {
       success: false,
-      mensagem: error.message || 'Não foi possível registrar o webhook na conta deste locador.',
+      mensagem: error.message || 'Não foi possível registrar o webhook nessa conta.',
     };
 
   }
@@ -719,8 +728,8 @@ module.exports = {
   config,
   status,
   testarConexao,
-  testarConexaoLocador,
-  registrarWebhookLocador,
+  testarConexaoConta,
+  registrarWebhookConta,
   buscarWallet,
   listarTransacoes,
   buscarTransacao,

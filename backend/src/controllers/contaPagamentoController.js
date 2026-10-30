@@ -1,4 +1,5 @@
 const contaPagamentoService = require('../services/contaPagamentoService');
+const asaasService = require('../services/asaasService');
 
 const listar = async (req, res) => {
 
@@ -80,10 +81,40 @@ const extratoPix = async (req, res) => {
 
 };
 
+// Só se aplica a contas do provider ASAAS (ver asaasService) -- BB/EFI/BRB
+// não têm esse conceito de "conectar numa conta deles" nem webhook ainda.
+const testarConexao = async (req, res) => {
+
+  const resultado = await asaasService.testarConexaoConta(req.params.id);
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado,
+  });
+
+};
+
+const registrarWebhook = async (req, res) => {
+
+  const webhookUrl = process.env.ASAAS_WEBHOOK_URL || `${req.protocol}://${req.get('host')}/asaas/webhook`;
+
+  const resultado = await asaasService.registrarWebhookConta(req.params.id, webhookUrl);
+
+  return res.status(resultado.success ? 200 : 400).json({
+    success: resultado.success,
+    message: resultado.mensagem,
+    data: resultado,
+  });
+
+};
+
 module.exports = {
   listar,
   criar,
   atualizar,
   remover,
   extratoPix,
+  testarConexao,
+  registrarWebhook,
 };

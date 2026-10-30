@@ -16,6 +16,11 @@ router.get('/', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoCon
 
 router.get('/:id/extrato-pix', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoController.extratoPix);
 
+// Só pra contas do provider ASAAS -- ver comentário no controller.
+router.post('/:id/testar-conexao', permissaoMiddleware('asaasConfig.testarConexao'), contaPagamentoController.testarConexao);
+
+router.post('/:id/registrar-webhook', permissaoMiddleware('asaasConfig.editar'), contaPagamentoController.registrarWebhook);
+
 router.post('/', permissaoMiddleware('asaasConfig.editar'), contaPagamentoController.criar);
 
 router.put('/:id', permissaoMiddleware('asaasConfig.editar'), contaPagamentoController.atualizar);

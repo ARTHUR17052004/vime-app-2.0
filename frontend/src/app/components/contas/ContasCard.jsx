@@ -90,6 +90,7 @@ export default function ContasCard() {
   const [erro, setErro] = useState("");
   const [extratoAbertoId, setExtratoAbertoId] = useState(null);
   const [extratos, setExtratos] = useState({});
+  const [acoesAsaas, setAcoesAsaas] = useState({});
 
   async function carregar() {
     try {
@@ -216,6 +217,62 @@ export default function ContasCard() {
 
   }
 
+  // Testar conexão / registrar webhook -- só pra contas ASAAS (ver
+  // contaPagamentoController.testarConexao/registrarWebhook).
+  async function testarConexao(conta) {
+
+    setAcoesAsaas((atual) => ({
+      ...atual,
+      [conta.id]: { ...atual[conta.id], testando: true, mensagem: null },
+    }));
+
+    try {
+      const resposta = await ContaPagamentoService.testarConexao(conta.id);
+      const dados = resposta.data || resposta;
+      setAcoesAsaas((atual) => ({
+        ...atual,
+        [conta.id]: {
+          ...atual[conta.id],
+          testando: false,
+          mensagem: { tipo: dados.success ? "sucesso" : "erro", texto: dados.mensagem },
+        },
+      }));
+    } catch (err) {
+      setAcoesAsaas((atual) => ({
+        ...atual,
+        [conta.id]: { ...atual[conta.id], testando: false, mensagem: { tipo: "erro", texto: err.message || "Erro ao testar conexão." } },
+      }));
+    }
+
+  }
+
+  async function registrarWebhook(conta) {
+
+    setAcoesAsaas((atual) => ({
+      ...atual,
+      [conta.id]: { ...atual[conta.id], registrando: true, mensagem: null },
+    }));
+
+    try {
+      const resposta = await ContaPagamentoService.registrarWebhook(conta.id);
+      const dados = resposta.data || resposta;
+      setAcoesAsaas((atual) => ({
+        ...atual,
+        [conta.id]: {
+          ...atual[conta.id],
+          registrando: false,
+          mensagem: { tipo: dados.success ? "sucesso" : "erro", texto: dados.mensagem },
+        },
+      }));
+    } catch (err) {
+      setAcoesAsaas((atual) => ({
+        ...atual,
+        [conta.id]: { ...atual[conta.id], registrando: false, mensagem: { tipo: "erro", texto: err.message || "Erro ao registrar webhook." } },
+      }));
+    }
+
+  }
+
   async function excluir(conta) {
     if (!confirm(`Excluir a conta "${conta.nome}"? Locadores vinculados a ela precisam ser trocados antes.`)) return;
 
@@ -323,6 +380,50 @@ export default function ContasCard() {
               )}
 
             </div>
+
+            {conta.provider === "ASAAS" && podeEditar && (
+              <div className="mt-4 border-t border-[var(--border-token)] pt-3 space-y-3">
+
+                <div className="flex flex-wrap items-center gap-3">
+
+                  <button
+                    type="button"
+                    onClick={() => testarConexao(conta)}
+                    disabled={acoesAsaas[conta.id]?.testando}
+                    className="rounded-xl border border-[var(--border-token)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--text)] hover:border-emerald-500/50 transition disabled:opacity-50"
+                  >
+                    {acoesAsaas[conta.id]?.testando ? "Testando..." : "Testar Conexão"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => registrarWebhook(conta)}
+                    disabled={acoesAsaas[conta.id]?.registrando}
+                    className="rounded-xl border border-[var(--border-token)] bg-[var(--surface)] px-4 py-2 text-sm text-[var(--text)] hover:border-emerald-500/50 transition disabled:opacity-50"
+                  >
+                    {acoesAsaas[conta.id]?.registrando ? "Registrando..." : "Registrar Webhook"}
+                  </button>
+
+                </div>
+
+                {acoesAsaas[conta.id]?.mensagem && (
+                  <div
+                    className={`rounded-lg px-3 py-2 text-sm border ${
+                      acoesAsaas[conta.id].mensagem.tipo === "sucesso"
+                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                        : "border-red-500/30 bg-red-500/10 text-red-400"
+                    }`}
+                  >
+                    {acoesAsaas[conta.id].mensagem.texto}
+                  </div>
+                )}
+
+                <p className="text-xs text-[var(--text-faint)]">
+                  &quot;Registrar Webhook&quot; é o que avisa o sistema quando um pagamento dessa conta é confirmado -- sem isso, cobranças pagas aqui não atualizam sozinhas em Financeiro. Precisa rodar só uma vez por conta.
+                </p>
+
+              </div>
+            )}
 
             {conta.provider === "EFI" && (
               <div className="mt-4 border-t border-[var(--border-token)] pt-3">
