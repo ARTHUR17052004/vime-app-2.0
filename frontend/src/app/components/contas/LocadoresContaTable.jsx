@@ -93,9 +93,30 @@ export default function LocadoresContaTable() {
               </tr>
             )}
 
-            {!loading && locadores.map((locador) => (
+            {!loading && locadores.map((locador) => {
+
+              const contasDoLocador = contas.filter((c) => c.locadorDono?.id === locador.id);
+
+              return (
               <tr key={locador.id} className="border-t border-[var(--border-token)]">
-                <td className="p-4 font-semibold text-[var(--text)]">{locador.nome}</td>
+                <td className="p-4 align-top">
+                  <div className="font-semibold text-[var(--text)]">{locador.nome}</div>
+
+                  {contasDoLocador.length > 0 ? (
+                    <div className="mt-1.5 flex flex-wrap gap-1.5">
+                      {contasDoLocador.map((c) => (
+                        <span
+                          key={c.id}
+                          className="inline-flex items-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-400"
+                        >
+                          {c.nome}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-xs text-[var(--text-faint)]">Nenhuma conta vinculada a esse locador ainda.</p>
+                  )}
+                </td>
                 <td className="p-4">
                   <select
                     value={locador.contaPagamentoId || ""}
@@ -114,7 +135,8 @@ export default function LocadoresContaTable() {
                   </select>
                 </td>
               </tr>
-            ))}
+              );
+            })}
 
           </tbody>
         </table>
