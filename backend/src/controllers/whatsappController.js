@@ -283,6 +283,66 @@ const webhook = async (req, res) => {
 
 };
 
+/* ==========================================
+   EXCLUIR CONVERSA
+========================================== */
+
+const excluirConversa = async (req, res) => {
+
+  try {
+
+    const dados = await whatsappService.excluirConversa(req.params.id);
+
+    return res.json({ success: true, data: dados });
+
+  } catch (error) {
+
+    return res.status(500).json({ success: false, message: error.message });
+
+  }
+
+};
+
+/* ==========================================
+   APAGAR MENSAGEM
+========================================== */
+
+const excluirMensagem = async (req, res) => {
+
+  try {
+
+    const dados = await whatsappService.excluirMensagem(req.params.id);
+
+    return res.json({ success: true, data: dados });
+
+  } catch (error) {
+
+    return res.status(500).json({ success: false, message: error.message });
+
+  }
+
+};
+
+/* ==========================================
+   EDITAR MENSAGEM
+========================================== */
+
+const editarMensagem = async (req, res) => {
+
+  try {
+
+    const dados = await whatsappService.editarMensagem(req.params.id, req.body.texto);
+
+    return res.json({ success: true, data: dados });
+
+  } catch (error) {
+
+    return res.status(500).json({ success: false, message: error.message });
+
+  }
+
+};
+
 module.exports = {
 
   validarWebhook,
@@ -306,5 +366,11 @@ module.exports = {
   receber,
 
   webhook,
+
+  excluirConversa,
+
+  excluirMensagem,
+
+  editarMensagem,
 
 };

@@ -553,6 +553,20 @@ const remover = async (id, autor) => {
     console.error('[notificacao] Falha ao limpar notificações do contrato excluído:', erro.message);
   }
 
+  // Se esse contrato tinha ido pra assinatura, cancela o envelope lá
+  // também -- senão o inquilino (ou qualquer signatário) continua
+  // conseguindo abrir o link e assinar um contrato que não existe mais
+  // aqui. Não há "excluir" de verdade na API da Clicksign, cancelar é
+  // o equivalente. Nunca pode impedir a exclusão em si, que já
+  // aconteceu de qualquer forma.
+  if (contrato.clicksignEnvelopeId) {
+    try {
+      await ClicksignApiV3.cancelarEnvelope(contrato.clicksignEnvelopeId);
+    } catch (erro) {
+      console.error('[clicksign] Falha ao cancelar envelope do contrato excluído:', erro.message);
+    }
+  }
+
   return removido;
 
 };
@@ -657,6 +671,16 @@ const encerrar = async (id, autor) => {
     });
   } catch (whatsappError) {
     console.error("Erro ao enviar WhatsApp de encerramento:", whatsappError.message);
+  }
+
+  // Mesma lógica de remover() -- contrato encerrado não pode continuar
+  // "assinável" na Clicksign. Nunca pode travar o encerramento em si.
+  if (contrato.clicksignEnvelopeId) {
+    try {
+      await ClicksignApiV3.cancelarEnvelope(contrato.clicksignEnvelopeId);
+    } catch (erro) {
+      console.error('[clicksign] Falha ao cancelar envelope do contrato encerrado:', erro.message);
+    }
   }
 
   return contratoEncerrado;

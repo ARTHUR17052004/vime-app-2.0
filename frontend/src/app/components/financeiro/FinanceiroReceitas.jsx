@@ -51,6 +51,7 @@ export default function FinanceiroReceitas({
   onDelete,
   onUpdate,
   onMarcarPago,
+  onEnviarCobranca,
   onFixar,
   onToggleRecorrente,
   onNovo,
@@ -115,6 +116,23 @@ export default function FinanceiroReceitas({
             }}
           />
         )}
+
+        {podeEditar &&
+          item.status !== "PAGO" &&
+          item.status !== "PAGA" &&
+          (item.gatewayReferencia ? (
+            <div className="px-4 py-3 text-xs text-[var(--text-faint)]">
+              Já enviada ({item.gatewayProvider || "banco"})
+            </div>
+          ) : (
+            <MenuButton
+              label="Enviar Cobrança"
+              onClick={() => {
+                onEnviarCobranca?.(item.id);
+                setMenuAberto(null);
+              }}
+            />
+          ))}
 
         <MenuButton
           label="Marcar Pago"

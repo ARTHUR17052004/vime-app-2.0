@@ -76,7 +76,11 @@ class MetaWhatsappService {
 
   }
 
-  async enviarMensagem(numero, mensagem) {
+  // `respostaAId` (opcional) é o wamid (mensagemIdMeta) de uma mensagem
+  // anterior -- quando informado, a Meta manda como resposta "citada"
+  // de verdade (igual responder uma mensagem específica no WhatsApp
+  // normal), não só um texto novo solto na conversa.
+  async enviarMensagem(numero, mensagem, respostaAId = null) {
 
     return await this.request(
 
@@ -95,6 +99,8 @@ class MetaWhatsappService {
           body: mensagem,
 
         },
+
+        ...(respostaAId ? { context: { message_id: respostaAId } } : {}),
 
       }
 

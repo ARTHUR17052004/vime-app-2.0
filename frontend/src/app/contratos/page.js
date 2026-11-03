@@ -337,9 +337,20 @@ function ContratosPageConteudo() {
       )
         return true;
 
+      // Os botões de filtro mostram o rótulo em português/plural
+      // ("Ativos", "Pendentes", "Encerrados"), mas o status gravado no
+      // contrato é o enum em maiúsculas ("ATIVO", "PENDENTE",
+      // "ENCERRADO") -- sem esse mapa a comparação direta nunca batia
+      // e todo filtro (menos "Todos") voltava vazio.
+      const STATUS_POR_FILTRO = {
+        Ativos: "ATIVO",
+        Pendentes: "PENDENTE",
+        Encerrados: "ENCERRADO",
+      };
+
       return (
         contrato.status ===
-        filtroSelecionado
+        STATUS_POR_FILTRO[filtroSelecionado]
       );
 
     }

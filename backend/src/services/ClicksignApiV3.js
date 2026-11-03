@@ -251,6 +251,22 @@ class ClicksignApiV3 {
 
   }
 
+  // A Clicksign não tem "excluir documento" de verdade pela API --
+  // cancelar o envelope é o equivalente (fecha pra sempre: ninguém
+  // mais consegue assinar nem abrir o link, some da fila de pendentes
+  // de quem ia assinar). Mesmo padrão PATCH de ativarEnvelope() acima.
+  async cancelarEnvelope(envelopeId) {
+
+    return this.request("PATCH", `/envelopes/${envelopeId}`, {
+      data: {
+        id: envelopeId,
+        type: "envelopes",
+        attributes: { status: "canceled" },
+      },
+    });
+
+  }
+
   async buscarDocumento(envelopeId, documentId) {
 
     return this.request("GET", `/envelopes/${envelopeId}/documents/${documentId}`);

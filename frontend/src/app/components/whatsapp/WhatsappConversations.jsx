@@ -5,7 +5,10 @@ import { useMemo, useState } from "react";
 import {
   Search,
   MessageCircle,
+  Trash2,
 } from "lucide-react";
+
+import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function WhatsappConversations({
 
@@ -15,7 +18,11 @@ export default function WhatsappConversations({
 
   onSelecionar,
 
+  onExcluir,
+
 }) {
+
+  const podeEnviar = usePermissao("whatsapp.enviar");
 
   const [pesquisa, setPesquisa] = useState("");
 
@@ -138,9 +145,9 @@ export default function WhatsappConversations({
 
         {lista.map((conversa) => (
 
-          <button
+          <div key={conversa.id} className="relative group">
 
-            key={conversa.id}
+          <button
 
             onClick={() =>
               onSelecionar(conversa)
@@ -164,7 +171,7 @@ export default function WhatsappConversations({
             `}
           >
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pr-8">
 
               <div
                 className="
@@ -244,6 +251,40 @@ export default function WhatsappConversations({
             </div>
 
           </button>
+
+          {podeEnviar && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (confirm(`Excluir a conversa com ${conversa.nome}? Todo o histórico de mensagens dela some.`)) {
+                  onExcluir?.(conversa.id);
+                }
+              }}
+              title="Excluir conversa"
+              className="
+                absolute
+                right-3
+                top-4
+                h-8
+                w-8
+                rounded-lg
+                flex
+                items-center
+                justify-center
+                text-[var(--text-faint)]
+                opacity-0
+                group-hover:opacity-100
+                hover:bg-red-500/10
+                hover:text-red-400
+                transition
+              "
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+
+          </div>
 
         ))}
 

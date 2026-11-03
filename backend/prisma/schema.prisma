@@ -892,6 +892,16 @@ model WhatsappMensagem {
 
   enviadaPorIA Boolean @default(false)
 
+  // Texto editado depois de enviada -- só corrige o nosso histórico
+  // (a Meta não deixa editar uma mensagem já entregue no aparelho de
+  // quem recebeu, então isso nunca reenvia nada, só o registro aqui).
+  editada Boolean @default(false)
+
+  // Id (nosso, não da Meta) da mensagem que essa está respondendo --
+  // sem relação formal do Prisma de propósito (evita nome de relação
+  // ambíguo num self-relation), resolvido na mão em whatsappService.
+  respostaDeId String?
+
   createdAt DateTime @default(now())
 
   conversa WhatsappConversa @relation(fields: [conversaId], references: [id])

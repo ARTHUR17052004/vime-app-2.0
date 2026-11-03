@@ -12,6 +12,10 @@ import {
   Check,
   CheckCheck,
   AlertTriangle,
+  Reply,
+  Pencil,
+  Trash2,
+  X,
 } from "lucide-react";
 
 // "controle se o inquilino recebeu ou não" -- status de entrega real,
@@ -51,11 +55,26 @@ export default function WhatsappChat({ conversa }) {
 
   const [mensagens, setMensagens] = useState([]);
 
+  // Respondendo (citação de verdade, via Meta) ou editando (só conserta
+  // o nosso histórico) -- os dois usam o mesmo campo de texto embaixo,
+  // nunca os dois ao mesmo tempo.
+  const [respondendoA, setRespondendoA] = useState(null);
+
+  const [editando, setEditando] = useState(null);
+
   const fimRef = useRef(null);
+
+  const inputRef = useRef(null);
 
   useEffect(() => {
 
     setMensagens(conversa?.mensagens || []);
+
+    setRespondendoA(null);
+
+    setEditando(null);
+
+    setTexto("");
 
   }, [conversa]);
 
@@ -69,17 +88,116 @@ export default function WhatsappChat({ conversa }) {
 
   }, [mensagens]);
 
+  function cancelarAcao() {
+
+    setRespondendoA(null);
+
+    setEditando(null);
+
+    setTexto("");
+
+  }
+
+  function iniciarResposta(msg) {
+
+    setEditando(null);
+
+    setRespondendoA(msg);
+
+    inputRef.current?.focus();
+
+  }
+
+  function iniciarEdicao(msg) {
+
+    setRespondendoA(null);
+
+    setEditando(msg);
+
+    setTexto(msg.texto);
+
+    inputRef.current?.focus();
+
+  }
+
+  async function apagarMensagem(msg) {
+
+    if (!confirm("Apagar essa mensagem? Some só do nosso histórico, não desfaz o que já chegou no WhatsApp de quem recebeu.")) {
+      return;
+    }
+
+    try {
+
+      await WhatsappService.excluirMensagem(msg.id);
+
+      setMensagens((old) => old.filter((m) => m.id !== msg.id));
+
+      if (respondendoA?.id === msg.id) setRespondendoA(null);
+      if (editando?.id === msg.id) cancelarAcao();
+
+    } catch (error) {
+
+      alert(error.message || "Erro ao apagar mensagem.");
+
+    }
+
+  }
+
   async function enviarMensagem() {
 
     if (!texto.trim()) return;
 
+    // Editar não manda nada pro WhatsApp -- só corrige o texto salvo
+    // aqui (a Meta não deixa editar mensagem já entregue de verdade).
+    if (editando) {
+
+      const textoEditado = texto;
+
+      try {
+
+        setEnviando(true);
+
+        await WhatsappService.editarMensagem(editando.id, textoEditado);
+
+        setMensagens((old) =>
+          old.map((m) =>
+            m.id === editando.id ? { ...m, texto: textoEditado, editada: true } : m
+          )
+        );
+
+        cancelarAcao();
+
+      } catch (error) {
+
+        alert(error.message || "Erro ao editar mensagem.");
+
+      } finally {
+
+        setEnviando(false);
+
+      }
+
+      return;
+
+    }
+
+    const mensagem = texto;
+
+    const idTemporario = `temp-${Date.now()}`;
+
+    const respostaDe = respondendoA;
+
     const novaMensagem = {
 
-      id: Date.now(),
+      id: idTemporario,
 
       tipo: "enviada",
 
-      texto,
+      texto: mensagem,
+
+      status: "enviada",
+
+      respostaDeTexto: respostaDe?.texto || null,
 
       hora: new Date().toLocaleTimeString("pt-BR", {
 
@@ -99,27 +217,52 @@ export default function WhatsappChat({ conversa }) {
 
     ]);
 
-    const mensagem = texto;
-
     setTexto("");
+    setRespondendoA(null);
 
     try {
 
       setEnviando(true);
 
-      await WhatsappService.enviar({
+      const resposta = await WhatsappService.enviar({
 
         numero: conversa.numero,
-
+        conversaId: conversa.id,
         mensagem,
+        respostaA: respostaDe?.mensagemIdMeta || null,
+        respostaDeId: respostaDe?.id || null,
 
       });
+
+      const criada = resposta.data?.mensagem;
+
+      if (criada) {
+
+        setMensagens((old) =>
+          old.map((m) =>
+            m.id === idTemporario
+              ? {
+                  ...m,
+                  id: criada.id,
+                  mensagemIdMeta: criada.mensagemIdMeta,
+                  hora: new Date(criada.createdAt).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }),
+                }
+              : m
+          )
+        );
+
+      }
 
     } catch (error) {
 
       console.error(error);
 
       alert("Erro ao enviar.");
+
+      setMensagens((old) => old.filter((m) => m.id !== idTemporario));
 
     } finally {
 
@@ -137,6 +280,10 @@ export default function WhatsappChat({ conversa }) {
 
       enviarMensagem();
 
+    }
+
+    if (e.key === "Escape" && (editando || respondendoA)) {
+      cancelarAcao();
     }
 
   }
@@ -246,6 +393,7 @@ export default function WhatsappChat({ conversa }) {
 
             className={`
 
+              group
               flex
 
               ${msg.tipo === "enviada"
@@ -263,7 +411,8 @@ export default function WhatsappChat({ conversa }) {
 
                 flex
 
-                gap-3
+                items-center
+                gap-2
 
                 ${msg.tipo === "enviada"
 
@@ -288,6 +437,7 @@ export default function WhatsappChat({ conversa }) {
                   items-center
 
                   justify-center
+                  shrink-0
 
                   ${msg.tipo === "enviada"
 
@@ -328,6 +478,12 @@ export default function WhatsappChat({ conversa }) {
                 `}
               >
 
+                {msg.respostaDeTexto && (
+                  <div className="mb-2 rounded-lg border-l-2 border-[var(--text)]/50 bg-black/15 px-3 py-1.5 text-sm text-[var(--text)]/80 truncate">
+                    {msg.respostaDeTexto}
+                  </div>
+                )}
+
                 {msg.texto}
 
                 <div
@@ -343,6 +499,8 @@ export default function WhatsappChat({ conversa }) {
                   "
                 >
 
+                  {msg.editada && <span className="text-[var(--text)]/60">editada</span>}
+
                   {msg.hora}
 
                   {msg.tipo === "enviada" && (
@@ -352,6 +510,41 @@ export default function WhatsappChat({ conversa }) {
                 </div>
 
               </div>
+
+              {podeEnviar && !String(msg.id).startsWith("temp-") && (
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition shrink-0">
+
+                  <button
+                    type="button"
+                    title="Responder"
+                    onClick={() => iniciarResposta(msg)}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-faint)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                  >
+                    <Reply size={14} />
+                  </button>
+
+                  {msg.tipo === "enviada" && (
+                    <button
+                      type="button"
+                      title="Editar"
+                      onClick={() => iniciarEdicao(msg)}
+                      className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-faint)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    title="Apagar"
+                    onClick={() => apagarMensagem(msg)}
+                    className="h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-faint)] hover:bg-red-500/10 hover:text-red-400"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+
+                </div>
+              )}
 
             </div>
 
@@ -371,6 +564,31 @@ export default function WhatsappChat({ conversa }) {
         "
       >
 
+        {(respondendoA || editando) && (
+
+          <div className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--surface-2)] px-4 py-2.5">
+
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-emerald-400">
+                {editando ? "Editando mensagem" : `Respondendo a ${conversa.nome}`}
+              </p>
+              <p className="text-sm text-[var(--text-subtle)] truncate">
+                {editando ? editando.texto : respondendoA.texto}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={cancelarAcao}
+              className="shrink-0 h-7 w-7 rounded-lg flex items-center justify-center text-[var(--text-faint)] hover:bg-[var(--surface-3)] hover:text-[var(--text)]"
+            >
+              <X size={16} />
+            </button>
+
+          </div>
+
+        )}
+
         <div
           className="
             flex
@@ -380,6 +598,8 @@ export default function WhatsappChat({ conversa }) {
         >
 
           <input
+
+            ref={inputRef}
 
             value={texto}
 

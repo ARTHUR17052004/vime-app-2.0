@@ -117,6 +117,24 @@ export default function WhatsappPage() {
 
   }, []);
 
+  async function excluirConversa(id) {
+
+    try {
+
+      await WhatsappService.excluirConversa(id);
+
+      setConversas((atual) => atual.filter((c) => c.id !== id));
+
+      setConversaSelecionada((atual) => (atual?.id === id ? null : atual));
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao excluir conversa.");
+
+    }
+
+  }
+
    useEffect(() => {
 
   socket.on("whatsapp:update", (dados) => {
@@ -265,6 +283,7 @@ export default function WhatsappPage() {
                     conversas={conversas}
                     conversaSelecionada={conversaSelecionada}
                     onSelecionar={setConversaSelecionada}
+                    onExcluir={excluirConversa}
                   />
 
                 </div>

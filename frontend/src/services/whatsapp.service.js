@@ -58,6 +58,25 @@ export const WhatsappService = {
       method: "POST",
       body: JSON.stringify(dados),
     });
-  }
+  },
+
+  async excluirConversa(id) {
+    return await api(`/whatsapp/conversas/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async excluirMensagem(id) {
+    return await api(`/whatsapp/mensagens/${id}`, {
+      method: "DELETE",
+    });
+  },
+
+  async editarMensagem(id, texto) {
+    return await api(`/whatsapp/mensagens/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ texto }),
+    });
+  },
 
 };

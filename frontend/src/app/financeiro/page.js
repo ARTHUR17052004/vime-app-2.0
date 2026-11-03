@@ -8,6 +8,7 @@ import { useSearchParams } from "next/navigation";
 import MainLayout from "../components/layout/MainLayout";
 
 import { ReceitaService, DespesaService } from "@/services/financeiro.service";
+import { AsaasService } from "@/services/asaas.service";
 import { UnidadeService } from "@/services/unidades.service";
 
 import FadeIn from "../components/ui/FadeIn";
@@ -365,6 +366,26 @@ function FinanceiroPageConteudo() {
 
   };
 
+  // A rota é "/asaas/transacoes/:id/enviar" por causa do nome antigo,
+  // mas resolve o gateway certo pra cada receita (BB, EFI, BRB ou
+  // Asaas, conforme a conta vinculada à kitnet/locador) -- é o mesmo
+  // caminho de envio usado em todo o sistema.
+  const enviarCobranca = async (id) => {
+
+    try {
+
+      await AsaasService.enviarCobranca(id);
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao enviar cobrança ao banco.");
+
+    }
+
+  };
+
   const dentroDoIntervalo = (data) => {
 
     if (!dataDe && !dataAte) return true;
@@ -694,6 +715,7 @@ function FinanceiroPageConteudo() {
           onDelete={excluirReceita}
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
+          onEnviarCobranca={enviarCobranca}
           onFixar={fixarReceita}
           onToggleRecorrente={toggleRecorrenteReceita}
           onNovo={() => {
@@ -738,6 +760,7 @@ function FinanceiroPageConteudo() {
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
+        onEnviarCobranca={enviarCobranca}
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onNovo={() => {

@@ -206,10 +206,19 @@ class WhatsappService {
           : "",
         mensagens: conversa.mensagens.map((m) => ({
           id: m.id,
+          mensagemIdMeta: m.mensagemIdMeta,
           tipo: m.tipo,
           texto: m.texto,
           status: m.status,
           erroDetalhe: m.erroDetalhe,
+          editada: m.editada,
+          respostaDeId: m.respostaDeId,
+          // Resolvido aqui (não é relação do Prisma) -- se a mensagem
+          // citada já não existir mais (foi apagada), fica undefined e
+          // o chat só não mostra a prévia, sem quebrar nada.
+          respostaDeTexto: m.respostaDeId
+            ? conversa.mensagens.find((outra) => outra.id === m.respostaDeId)?.texto
+            : null,
           hora: m.createdAt.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -294,9 +303,37 @@ class WhatsappService {
 
  /* ==========================================
      ENVIAR MENSAGEM
+
+     `dados.conversaId` vem da tela (já tem a conversa aberta) --
+     resolve pelo número como alternativa, criando contato/conversa se
+     for a primeira vez que mandamos pra esse número. `dados.respostaA`
+     (opcional) é o mensagemIdMeta de uma mensagem anterior, pra
+     responder citando ela de verdade.
   ========================================== */
 
   async enviarMensagem(dados) {
+
+    let conversa = dados.conversaId
+      ? await prisma.whatsappConversa.findUnique({ where: { id: dados.conversaId } })
+      : null;
+
+    if (!conversa) {
+
+      const numero = normalizarTelefoneChave(dados.numero);
+
+      let contato = await prisma.whatsappContato.findUnique({ where: { telefone: numero } });
+
+      if (!contato) {
+        contato = await prisma.whatsappContato.create({ data: { telefone: numero, nome: numero } });
+      }
+
+      conversa = await prisma.whatsappConversa.findFirst({ where: { contatoId: contato.id } });
+
+      if (!conversa) {
+        conversa = await prisma.whatsappConversa.create({ data: { contatoId: contato.id } });
+      }
+
+    }
 
     // Usa a Meta Cloud API quando token + phone number ID estiverem configurados
     // (na tela de Configuração ou via variáveis de ambiente)
@@ -304,27 +341,170 @@ class WhatsappService {
 
       const resultado = await metaWhatsappService.enviarMensagem(
         dados.numero,
-        dados.mensagem
+        dados.mensagem,
+        dados.respostaA || null
       );
+
+      const mensagemCriada = await prisma.whatsappMensagem.create({
+        data: {
+          conversaId: conversa.id,
+          texto: dados.mensagem,
+          tipo: "enviada",
+          status: "enviada",
+          mensagemIdMeta: resultado?.messages?.[0]?.id || null,
+          respostaDeId: dados.respostaDeId || null,
+        },
+      });
+
+      await prisma.whatsappConversa.update({
+        where: { id: conversa.id },
+        data: { ultimaMensagem: dados.mensagem, ultimaData: new Date() },
+      });
 
       const io = getIO();
       if (io) {
         io.emit("whatsapp:update", await this.conversas());
       }
 
-      return resultado;
+      return { ...resultado, mensagem: mensagemCriada };
     }
 
-    // Sem token configurado: modo mock
+    // Sem token configurado: modo mock -- mesmo assim grava no
+    // histórico, senão some igual sumia antes (nem em mock dava pra
+    // conferir depois o que tinha sido "enviado").
     console.log("Mensagem enviada (MOCK):");
     console.table(dados);
+
+    const mensagemCriada = await prisma.whatsappMensagem.create({
+      data: {
+        conversaId: conversa.id,
+        texto: dados.mensagem,
+        tipo: "enviada",
+        status: "enviada",
+        respostaDeId: dados.respostaDeId || null,
+      },
+    });
+
+    await prisma.whatsappConversa.update({
+      where: { id: conversa.id },
+      data: { ultimaMensagem: dados.mensagem, ultimaData: new Date() },
+    });
+
+    const io = getIO();
+    if (io) {
+      io.emit("whatsapp:update", await this.conversas());
+    }
 
     return {
       success: true,
       enviado: true,
       mock: true,
-      mensagem: dados,
+      mensagem: mensagemCriada,
     };
+  }
+
+  /* ==========================================
+     EXCLUIR CONVERSA
+
+     Apaga a conversa inteira e as mensagens dela -- só o nosso
+     histórico, não "desfaz" nada que já foi enviado/recebido de
+     verdade pelo WhatsApp. Mantém o WhatsappContato (telefone -->
+     inquilino), senão a próxima mensagem desse número perderia o
+     vínculo e voltaria a aparecer só com o número cru.
+  ========================================== */
+
+  async excluirConversa(id) {
+
+    await prisma.whatsappMensagem.deleteMany({ where: { conversaId: id } });
+
+    await prisma.whatsappConversa.delete({ where: { id } });
+
+    const io = getIO();
+    if (io) {
+      io.emit("whatsapp:update", await this.conversas());
+    }
+
+    return { success: true };
+
+  }
+
+  /* ==========================================
+     APAGAR MENSAGEM
+
+     Some só do nosso histórico -- a Meta não tem como "desfazer" a
+     entrega de uma mensagem já recebida no aparelho de quem recebeu.
+  ========================================== */
+
+  async excluirMensagem(id) {
+
+    const mensagem = await prisma.whatsappMensagem.findUnique({ where: { id } });
+
+    if (!mensagem) {
+      return { success: false, mensagem: "Mensagem não encontrada." };
+    }
+
+    await prisma.whatsappMensagem.delete({ where: { id } });
+
+    // Se era a última mensagem da conversa, a prévia na lista (lateral
+    // esquerda) precisa recuar pra penúltima -- senão ficaria mostrando
+    // um texto que não existe mais.
+    const ultimaRestante = await prisma.whatsappMensagem.findFirst({
+      where: { conversaId: mensagem.conversaId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    await prisma.whatsappConversa.update({
+      where: { id: mensagem.conversaId },
+      data: {
+        ultimaMensagem: ultimaRestante?.texto || "",
+        ultimaData: ultimaRestante?.createdAt || null,
+      },
+    });
+
+    const io = getIO();
+    if (io) {
+      io.emit("whatsapp:update", await this.conversas());
+    }
+
+    return { success: true };
+
+  }
+
+  /* ==========================================
+     EDITAR MENSAGEM
+
+     Corrige só o texto guardado aqui -- igual acima, a Meta não deixa
+     editar uma mensagem já entregue de verdade no WhatsApp de quem
+     recebeu, então isso NÃO reenvia nada, só conserta o nosso registro
+     (ex.: corrigir um valor digitado errado na hora).
+  ========================================== */
+
+  async editarMensagem(id, texto) {
+
+    const mensagem = await prisma.whatsappMensagem.update({
+      where: { id },
+      data: { texto, editada: true },
+    });
+
+    const ultima = await prisma.whatsappMensagem.findFirst({
+      where: { conversaId: mensagem.conversaId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (ultima?.id === mensagem.id) {
+      await prisma.whatsappConversa.update({
+        where: { id: mensagem.conversaId },
+        data: { ultimaMensagem: texto },
+      });
+    }
+
+    const io = getIO();
+    if (io) {
+      io.emit("whatsapp:update", await this.conversas());
+    }
+
+    return { success: true, mensagem };
+
   }
   /* ==========================================
      RECEBER MENSAGEM
