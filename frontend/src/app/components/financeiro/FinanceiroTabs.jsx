@@ -23,7 +23,7 @@ export default function FinanceiroTabs({
     },
     {
       id: "asaas",
-      nome: "Asaas",
+      nome: "Extratos",
     },
   ];
 
