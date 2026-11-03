@@ -9,7 +9,37 @@ import {
   Bot,
   User,
   SendHorizontal,
+  Check,
+  CheckCheck,
+  AlertTriangle,
 } from "lucide-react";
+
+// "controle se o inquilino recebeu ou não" -- status de entrega real,
+// vindo do webhook de status da Meta (ver whatsappService.processarStatus
+// no backend). Mensagem antiga, de antes dessa função existir, não tem
+// status salvo -- cai no "enviada" (não dá pra saber mais que isso).
+function StatusEntrega({ status, erroDetalhe }) {
+
+  if (status === "falhou") {
+    return (
+      <span title={erroDetalhe || "Falha no envio."} className="inline-flex items-center gap-1 text-red-300">
+        <AlertTriangle size={14} />
+        Não entregue
+      </span>
+    );
+  }
+
+  if (status === "lida") {
+    return <CheckCheck size={14} className="text-sky-300" />;
+  }
+
+  if (status === "entregue") {
+    return <CheckCheck size={14} className="text-[var(--text)]/70" />;
+  }
+
+  return <Check size={14} className="text-[var(--text)]/70" />;
+
+}
 
 export default function WhatsappChat({ conversa }) {
 
@@ -303,6 +333,10 @@ export default function WhatsappChat({ conversa }) {
                 <div
                   className="
                     mt-2
+                    flex
+                    items-center
+                    justify-end
+                    gap-1.5
                     text-right
                     text-xs
                     text-[var(--text)]
@@ -310,6 +344,10 @@ export default function WhatsappChat({ conversa }) {
                 >
 
                   {msg.hora}
+
+                  {msg.tipo === "enviada" && (
+                    <StatusEntrega status={msg.status} erroDetalhe={msg.erroDetalhe} />
+                  )}
 
                 </div>
 

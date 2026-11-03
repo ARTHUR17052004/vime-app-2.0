@@ -882,7 +882,13 @@ model WhatsappMensagem {
 
   tipo String
 
+  // "enviada" (saiu pra Meta), "entregue", "lida" (confirmação da Meta
+  // via webhook de status) ou "falhou" (Meta recusou/erro de envio).
   status String?
+
+  // Motivo quando status = "falhou" -- só pra exibir/depurar na tela,
+  // não tem lógica nenhuma em cima disso.
+  erroDetalhe String?
 
   enviadaPorIA Boolean @default(false)
 

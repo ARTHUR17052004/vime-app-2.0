@@ -2,6 +2,7 @@ const prisma = require("../config/prisma");
 const metaWhatsappService = require("./metaWhatsappService");
 const { getIO } = require("../socket");
 const { paraChave: normalizarTelefone } = require("../utils/telefoneWhatsapp");
+const { doInquilino: locadorDoInquilino } = require("../utils/locadorDeRegistro");
 
 /*
   Disparos automáticos de WhatsApp ligados ao ciclo de vida da cobrança:
@@ -82,14 +83,16 @@ async function obterOuCriarConversa(inquilino) {
 
 }
 
-async function registrarMensagemEnviada(conversa, texto) {
+async function registrarMensagemEnviada(conversa, texto, { mensagemIdMeta, status = "enviada", erroDetalhe } = {}) {
 
   await prisma.whatsappMensagem.create({
     data: {
       conversaId: conversa.id,
       texto,
       tipo: "enviada",
-      status: "enviada",
+      status,
+      mensagemIdMeta: mensagemIdMeta || null,
+      erroDetalhe: erroDetalhe || null,
     },
   });
 
@@ -143,14 +146,21 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
       return { success: false, mensagem: "Telefone inválido." };
     }
 
+    // ID que a Meta devolve pra mensagem de verdade que foi pro ar --
+    // é a chave que o webhook de status (enviada/entregue/lida/falhou)
+    // usa pra achar essa linha de volta e atualizar.
+    let mensagemIdMeta = null;
+
     try {
 
-      await metaWhatsappService.enviarTemplate(
+      const resultado = await metaWhatsappService.enviarTemplate(
         inquilino.telefone,
         nomeModelo,
         parametros,
         documentoUrl
       );
+
+      mensagemIdMeta = resultado?.messages?.[0]?.id || null;
 
     } catch (erroTemplate) {
 
@@ -163,7 +173,9 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
 
       console.warn(`[WhatsApp] Modelo "${nomeModelo}" indisponível (${erroTemplate.message}) -- tentando mensagem livre como alternativa.`);
 
-      await metaWhatsappService.enviarMensagem(inquilino.telefone, textoFallback || resumoParaHistorico);
+      const resultadoFallback = await metaWhatsappService.enviarMensagem(inquilino.telefone, textoFallback || resumoParaHistorico);
+
+      mensagemIdMeta = resultadoFallback?.messages?.[0]?.id || null;
 
       if (documentoUrl) {
         await metaWhatsappService.enviarDocumento(inquilino.telefone, documentoUrl, "Boleto para pagamento.");
@@ -171,13 +183,46 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
 
     }
 
-    await registrarMensagemEnviada(conversa, resumoParaHistorico);
+    await registrarMensagemEnviada(conversa, resumoParaHistorico, { mensagemIdMeta, status: "enviada" });
 
     return { success: true };
 
   } catch (error) {
 
     console.error(`[WhatsApp] Falha ao enviar modelo "${nomeModelo}" para ${inquilino?.nome}:`, error.message);
+
+    // Antes, uma falha de verdade (não só "modelo indisponível, caiu
+    // pro texto livre") simplesmente desaparecia -- não sobrava
+    // registro nenhum na tela de WhatsApp nem aviso pra equipe, então
+    // ninguém ficava sabendo que o inquilino NÃO recebeu a cobrança.
+    // Agora: registra a falha na própria conversa (aparece no
+    // histórico, com o motivo) e avisa a equipe pelo sino.
+    try {
+
+      const conversa = await obterOuCriarConversa(inquilino);
+
+      if (conversa) {
+        await registrarMensagemEnviada(conversa, `⚠️ Falha ao enviar: ${resumoParaHistorico}`, {
+          status: "falhou",
+          erroDetalhe: error.message,
+        });
+      }
+
+      const notificacaoService = require("./notificacaoService");
+
+      await notificacaoService.criar({
+        origem: "WHATSAPP",
+        titulo: `Falha ao enviar WhatsApp para ${inquilino?.nome || "inquilino"}`,
+        mensagem: `${resumoParaHistorico}\n\nMotivo: ${error.message}`,
+        link: "/whatsapp",
+        locadorId: inquilino?.id ? await locadorDoInquilino(inquilino.id) : null,
+      });
+
+    } catch (erroAoRegistrarFalha) {
+
+      console.error("[WhatsApp] Falha ao registrar/avisar sobre falha de envio:", erroAoRegistrarFalha.message);
+
+    }
 
     return { success: false, mensagem: error.message };
 

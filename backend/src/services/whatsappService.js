@@ -208,6 +208,8 @@ class WhatsappService {
           id: m.id,
           tipo: m.tipo,
           texto: m.texto,
+          status: m.status,
+          erroDetalhe: m.erroDetalhe,
           hora: m.createdAt.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -336,6 +338,83 @@ class WhatsappService {
   }
 
   /* ==========================================
+     STATUS DE ENTREGA (webhook "statuses" da Meta)
+
+     É isso que dá o "controle se o inquilino recebeu ou não": pra toda
+     mensagem que a gente manda (template ou texto livre), a Meta avisa
+     aqui quando sai do nosso lado ("sent"), chega no aparelho
+     ("delivered"), é lida ("read") ou falha ("failed", com motivo).
+     Casa pelo mensagemIdMeta gravado no envio -- mensagem antiga de
+     antes dessa função existir não tem esse ID, então fica sem
+     atualização (não dá pra casar, mas também não quebra nada).
+  ========================================== */
+
+  async processarStatus(statuses) {
+
+    const RANK = { enviada: 1, entregue: 2, lida: 3 };
+
+    for (const item of statuses) {
+
+      const mensagem = await prisma.whatsappMensagem.findFirst({
+        where: { mensagemIdMeta: item.id },
+        include: { conversa: { include: { contato: { include: { inquilino: true } } } } },
+      });
+
+      if (!mensagem) continue;
+
+      const mapa = { sent: "enviada", delivered: "entregue", read: "lida", failed: "falhou" };
+
+      const novoStatus = mapa[item.status];
+
+      if (!novoStatus) continue;
+
+      // Nunca deixa um evento atrasado/fora de ordem voltar o status pra
+      // trás (ex: "entregue" chegando depois de "lida" já ter sido
+      // processada) -- "falhou" é a única atualização que sempre entra,
+      // já que normalmente chega sem um "enviada" antes.
+      if (
+        novoStatus !== "falhou" &&
+        RANK[novoStatus] <= (RANK[mensagem.status] || 0)
+      ) {
+        continue;
+      }
+
+      const erroDetalhe = novoStatus === "falhou" ? (item.errors?.[0]?.title || "Falha não especificada.") : null;
+
+      await prisma.whatsappMensagem.update({
+        where: { id: mensagem.id },
+        data: { status: novoStatus, erroDetalhe },
+      });
+
+      // Essa é a falha mais comum na prática (número sem WhatsApp,
+      // bloqueado, política da Meta...) -- o envio em si retornou 200
+      // (aceito), só falha de verdade chega depois, por aqui. Sem isso
+      // a equipe nunca saberia que o inquilino não recebeu a cobrança.
+      if (novoStatus === "falhou") {
+
+        const contato = mensagem.conversa?.contato;
+
+        await notificacaoService.criar({
+          origem: "WHATSAPP",
+          titulo: `WhatsApp não entregue para ${contato?.nome || contato?.telefone || "inquilino"}`,
+          mensagem: `${mensagem.texto}\n\nMotivo: ${erroDetalhe}`,
+          link: "/whatsapp",
+          locadorId: contato?.inquilinoId ? await locadorDoInquilino(contato.inquilinoId) : null,
+        });
+
+      }
+
+    }
+
+    const io = getIO();
+
+    if (io) {
+      io.emit("whatsapp:update", await this.conversas());
+    }
+
+  }
+
+  /* ==========================================
      WEBHOOK
   ========================================== */
 
@@ -348,6 +427,14 @@ class WhatsappService {
 
       if (!changes)
         return { success: true };
+
+      // A Meta manda em dois eventos separados: "messages" (alguém nos
+      // escreveu) e "statuses" (confirmação de entrega/leitura/falha de
+      // uma mensagem NOSSA) -- tratados aqui dentro do mesmo webhook,
+      // mas são independentes (um payload normalmente só tem um dos dois).
+      if (changes.statuses?.length > 0) {
+        await this.processarStatus(changes.statuses);
+      }
 
       const mensagens = changes.messages || [];
 
