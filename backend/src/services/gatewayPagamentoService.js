@@ -8,19 +8,11 @@ const BRBApi = require('./BRBApi');
 const whatsappAutomacaoService = require('./whatsappAutomacaoService');
 const emailAutomacaoService = require('./emailAutomacaoService');
 const { emitirAtualizacao } = require('../socket');
+const { numeroControleParaReceita } = require('../utils/numeroControleBB');
 
 const formatarDataBB = (data) => {
   const d = new Date(data);
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-};
-
-// Número de controle do boleto (parte do "Nosso Número") derivado do
-// id da Receita -- determinístico, então reenviar a mesma Receita duas
-// vezes gera sempre o mesmo número, em vez de duplicar boleto.
-const numeroControleParaReceita = (receitaId) => {
-  const hex = receitaId.replace(/-/g, '').slice(0, 12);
-  const numero = BigInt('0x' + hex) % 10000000000n;
-  return numero.toString().padStart(10, '0');
 };
 
 // O próprio locadorId já salvo na receita (ex.: pagador avulso, onde

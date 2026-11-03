@@ -54,6 +54,26 @@ export default function ReceitaVisualizarModal({
             </div>
           </div>
 
+          {receita.dataPagamento && (
+            <div>
+              <strong className="text-[var(--text-subtle)]">Pago em:</strong>
+              <div>{new Date(receita.dataPagamento).toLocaleDateString("pt-BR")}</div>
+            </div>
+          )}
+
+          {receita.dataCredito && (
+            <div>
+              <strong className="text-[var(--text-subtle)]">Crédito na conta em:</strong>
+              <div>
+                {new Date(receita.dataCredito).toLocaleDateString("pt-BR")}
+                {receita.dataPagamento &&
+                  new Date(receita.dataCredito).toDateString() === new Date(receita.dataPagamento).toDateString() && (
+                    <span className="text-[var(--text-faint)] text-sm ml-2">(mesmo dia do pagamento)</span>
+                  )}
+              </div>
+            </div>
+          )}
+
         </div>
 
       </div>

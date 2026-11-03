@@ -35,8 +35,47 @@ const extrairSituacao = (payload) => {
 
 // Situações do BB que significam "pago" -- LIQUIDADO (pago no próprio
 // BB) e as variações de baixa operacional (pago em outro banco/canal).
-// Ver `codigoEstadoTituloCobranca` na doc oficial (6 = LIQUIDADO).
+// codigoEstadoTituloCobranca = 6 (LIQUIDADO) CONFIRMADO ao vivo em
+// 03/11/2026 contra um boleto pago de verdade (consulta direta, ver
+// jobs/verificarBoletosBBJob.js).
 const SITUACOES_PAGO = ['LIQUIDADO', 'PAGO', '6', 'BAIXA OPERACIONAL', 'BAIXA_OPERACIONAL'];
+
+// "DD.MM.YYYY" (formato que o BB usa em tudo) -- a GET de consulta
+// manda isso, CONFIRMADO ao vivo em 03/11/2026 (dataRecebimentoTitulo
+// e dataCreditoLiquidacao). O webhook de verdade nunca foi confirmado,
+// pode mandar outro formato -- por isso sempre com fallback pra "agora".
+function paraData(valor) {
+
+  if (!valor || typeof valor !== "string") return null;
+
+  const match = valor.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+
+  if (!match) return null;
+
+  const [, dia, mes, ano] = match;
+
+  return new Date(`${ano}-${mes}-${dia}T12:00:00`);
+
+}
+
+// dataPagamento = quando o inquilino pagou; dataCredito = quando o
+// dinheiro cai de verdade na conta do locador -- o BB separa os dois
+// (boleto não compensa sempre no mesmo dia), por isso dois campos.
+const extrairDataPagamento = (payload) => {
+  return (
+    paraData(payload?.dataRecebimentoTitulo) ||
+    paraData(payload?.dataPagamento) ||
+    new Date()
+  );
+};
+
+const extrairDataCredito = (payload) => {
+  return (
+    paraData(payload?.dataCreditoLiquidacao) ||
+    paraData(payload?.dataCredito) ||
+    null
+  );
+};
 
 const sincronizar = async (payload) => {
 
@@ -80,7 +119,8 @@ const sincronizar = async (payload) => {
       where: { id: receita.id },
       data: {
         status: 'PAGA',
-        dataPagamento: new Date(),
+        dataPagamento: extrairDataPagamento(payload),
+        dataCredito: extrairDataCredito(payload),
         confirmacaoPagtoEnviadaEm: new Date(),
       },
     });

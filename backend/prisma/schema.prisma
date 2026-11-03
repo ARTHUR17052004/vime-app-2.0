@@ -432,6 +432,11 @@ model Receita {
   recorrente      Boolean   @default(false)
   vencimento      DateTime?
   dataPagamento   DateTime?
+  // Quando o dinheiro É CREDITADO na conta do locador -- só o BB
+  // devolve isso separado de dataPagamento (compensação de boleto não
+  // é sempre no mesmo dia do pagamento). Pix/Asaas creditam na hora,
+  // então ficam iguais a dataPagamento nesses casos.
+  dataCredito     DateTime?
   status          String    @default("PENDENTE")
   formaPagamento  String?
   descontoValor   Float?

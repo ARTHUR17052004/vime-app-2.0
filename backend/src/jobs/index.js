@@ -16,6 +16,7 @@ const atualizarStatusVistorias = require("./atualizarStatusVistoriasJob");
 const lembrarVistoriasPendentes = require("./lembrarVistoriasPendentesJob");
 const fecharChamadosResolvidos = require("./fecharChamadosResolvidosJob");
 const snapshotOcupacao = require("./snapshotOcupacaoJob");
+const verificarBoletosBB = require("./verificarBoletosBBJob");
 
 const iniciarJobs = () => {
 
@@ -27,6 +28,12 @@ const iniciarJobs = () => {
   // por dia deixaria passar de 24h até 48h).
   cron.schedule("0 * * * *", atualizarStatusVistorias);
   cron.schedule("0 * * * *", fecharChamadosResolvidos);
+
+  // Não espera o lote diário das 8h -- quem pergunta "foi pago?" quer
+  // saber na hora, não no dia seguinte. O webhook do BB existe mas
+  // nunca foi confirmado ao vivo, então isso é o que garante de verdade
+  // que o sistema reconhece o pagamento sem depender dele disparar certo.
+  cron.schedule("*/15 * * * *", verificarBoletosBB);
 
   cron.schedule("0 8 * * *", async () => {
 
