@@ -105,7 +105,7 @@ export default function LocadoresPage() {
 
       console.error(err);
 
-      alert("Erro ao salvar locador.");
+      alert(err.message || "Erro ao salvar locador.");
 
     }
 
