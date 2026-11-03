@@ -102,7 +102,14 @@ function FinanceiroPageConteudo() {
   const [ordenacao, setOrdenacao] =
     useState("vencimento-proximo");
 
-  const [dataDe, setDataDe] = useState("");
+  // Por padrão, sempre o dia 1 do mês atual -- recalculado toda vez
+  // que a tela abre, então troca sozinho quando o mês vira. Usuário
+  // ainda pode mudar (ou "Limpar") pra ver outro período.
+  const [dataDe, setDataDe] = useState(() => {
+    const agora = new Date();
+    const mes = String(agora.getMonth() + 1).padStart(2, "0");
+    return `${agora.getFullYear()}-${mes}-01`;
+  });
 
   const [dataAte, setDataAte] = useState("");
 
