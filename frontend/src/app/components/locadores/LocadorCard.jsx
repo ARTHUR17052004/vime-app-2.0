@@ -303,29 +303,6 @@ export default function LocadorCard({
 
               </div>
 
-              {podeEditar && (
-                <button
-                  onClick={() => onEdit?.(locador)}
-                  title="Abre a edição do locador na seção Conta Asaas própria"
-                  className="
-                    w-full
-                    mt-5
-                    border
-                  border-emerald-500/20
-                  bg-emerald-500/10
-                  text-emerald-400
-                  hover:bg-emerald-500/20
-                  transition
-                  "
-                >
-
-                  {locador.asaasToken
-                    ? "Gerenciar Conta Asaas"
-                    : "Criar Subconta Asaas"}
-
-                </button>
-              )}
-
             </div>
             
             <LocadorDetailsModal
