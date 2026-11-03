@@ -6,6 +6,7 @@ import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 
 import { ContaPagamentoService } from "../../../services/contaPagamento.service";
+import { LocadorService } from "../../../services/locadores.service";
 import { usePermissao } from "../../../hooks/usePermissao";
 
 import { Landmark, Plus, Pencil, Trash2, Star, Receipt, ChevronDown, ChevronUp } from "lucide-react";
@@ -76,6 +77,7 @@ const FORM_INICIAL = {
   padrao: false,
   ativo: true,
   credenciais: {},
+  locadorId: "",
 };
 
 export default function ContasCard() {
@@ -83,6 +85,7 @@ export default function ContasCard() {
   const podeEditar = usePermissao("asaasConfig.editar");
 
   const [contas, setContas] = useState([]);
+  const [locadores, setLocadores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -106,6 +109,9 @@ export default function ContasCard() {
 
   useEffect(() => {
     carregar();
+    LocadorService.listarOpcoes()
+      .then((resposta) => setLocadores(resposta.data || resposta || []))
+      .catch((err) => console.error("Erro ao carregar locadores:", err));
   }, []);
 
   function abrirNova() {
@@ -123,6 +129,7 @@ export default function ContasCard() {
       padrao: conta.padrao,
       ativo: conta.ativo,
       credenciais: conta.credenciais || {},
+      locadorId: conta.locadorId || "",
     });
     setErro("");
     setModalOpen(true);
@@ -165,6 +172,7 @@ export default function ContasCard() {
         padrao: form.padrao,
         ativo: form.ativo,
         credenciais: form.credenciais,
+        locadorId: form.locadorId || null,
       };
 
       if (form.id) {
@@ -339,6 +347,12 @@ export default function ContasCard() {
                   {conta.padrao && (
                     <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-yellow-500/10 text-yellow-300 border border-yellow-500/20 flex items-center gap-1">
                       <Star size={12} /> Padrão do sistema
+                    </span>
+                  )}
+
+                  {conta.locadorDono && (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                      {conta.locadorDono.nome}
                     </span>
                   )}
 
@@ -522,6 +536,25 @@ export default function ContasCard() {
               placeholder='Ex: "BB - Locador SH"'
               className={inputStyle}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+              Locador (opcional)
+            </label>
+            <select
+              value={form.locadorId}
+              onChange={(e) => setForm((a) => ({ ...a, locadorId: e.target.value }))}
+              className={inputStyle}
+            >
+              <option value="" className="bg-[#1b2430]">Nenhum (conta avulsa/padrão do sistema)</option>
+              {locadores.map((l) => (
+                <option key={l.id} value={l.id} className="bg-[#1b2430]">{l.nome}</option>
+              ))}
+            </select>
+            <p className="text-xs text-[var(--text-faint)] mt-1">
+              Marca de qual locador é essa conta -- um locador pode ter várias (ex.: SH com BB-H, BB-S e Efí). Usado pra filtrar o seletor de conta na Kitnet.
+            </p>
           </div>
 
           <div>

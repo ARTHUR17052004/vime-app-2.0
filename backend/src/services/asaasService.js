@@ -37,6 +37,7 @@ const obterOverrideDoLocador = async (receita) => {
       return {
         apiKey: cred.apiKey,
         walletId: cred.walletId || undefined,
+        contaPagamentoId: locador.contaPagamento.id,
       };
     }
 
@@ -365,7 +366,7 @@ const buscarTransacao = async (id, usuario) => {
 
 };
 
-const enviarCobranca = async (receitaId) => {
+const enviarCobranca = async (receitaId, contaResolvida = null) => {
 
   const receita = await prisma.receita.findUnique({
     where: { id: receitaId },
@@ -422,11 +423,25 @@ const enviarCobranca = async (receitaId) => {
     };
   }
 
-  // Se o locador dono deste contrato/imóvel tiver a própria conta
-  // Asaas configurada, a cobrança nasce direto lá (o dinheiro cai na
-  // conta bancária dele) -- senão usa a conta padrão do sistema, como
-  // sempre foi.
-  const override = await obterOverrideDoLocador(receita);
+  // Se já veio uma conta resolvida de fora (sempre o caso vindo do
+  // gatewayPagamentoService -- por kitnet, depois locador) e ela for
+  // Asaas, usa as credenciais dela direto; senão (chamada direta, sem
+  // conta pré-resolvida) cai no caminho antigo por locador.
+  const contaAsaas = contaResolvida?.provider === 'ASAAS' ? contaResolvida : null;
+
+  const override = contaAsaas
+    ? {
+        apiKey: contaAsaas.credenciais?.apiKey,
+        walletId: contaAsaas.credenciais?.walletId || undefined,
+        contaPagamentoId: contaAsaas.id,
+      }
+    : await obterOverrideDoLocador(receita);
+
+  // "Conta padrão" = a mesma Asaas de sempre (reaproveita customerId
+  // já salvo no inquilino) -- sem override nenhum, OU a ContaPagamento
+  // marcada como padrão do sistema. Qualquer conta específica (de
+  // locador ou de kitnet) sempre cria o cliente de novo nela.
+  const usandoContaPadrao = !override || (contaAsaas ? contaAsaas.padrao === true : false);
 
   const { apiKey } = await AsaasApi.obterConfig(override);
 
@@ -434,7 +449,7 @@ const enviarCobranca = async (receitaId) => {
     return {
       success: false,
       mensagem: override
-        ? 'O locador deste contrato não tem uma API Key do Asaas configurada.'
+        ? 'A conta Asaas desta cobrança não tem uma API Key configurada.'
         : 'Configure a API Key do Asaas antes de enviar cobranças.',
     };
   }
@@ -442,15 +457,12 @@ const enviarCobranca = async (receitaId) => {
   try {
 
     // O customerId é específico da conta Asaas onde o cliente foi
-    // criado -- se este envio for pra conta própria de um locador, não
-    // dá pra reaproveitar um customerId criado na conta padrão (ou
-    // vice-versa). Sem um jeito de saber em qual conta o customerId
-    // salvo foi criado, só reaproveita quando o envio é pra conta
-    // padrão (sem override); com override, sempre cria de novo nessa
-    // conta específica. Pagador avulso não tem cadastro de inquilino
-    // pra guardar o customerId -- cria de novo a cada envio (é sempre
-    // um "cliente" novo pra Asaas, cobrança única).
-    let customerId = (inquilino && !override) ? inquilino.asaasCustomerId : null;
+    // criado -- se este envio for pra conta própria de um locador/
+    // kitnet, não dá pra reaproveitar um customerId criado na conta
+    // padrão (ou vice-versa). Pagador avulso não tem cadastro de
+    // inquilino pra guardar o customerId -- cria de novo a cada envio
+    // (é sempre um "cliente" novo pra Asaas, cobrança única).
+    let customerId = (inquilino && usandoContaPadrao) ? inquilino.asaasCustomerId : null;
 
     if (!customerId) {
 
@@ -468,10 +480,10 @@ const enviarCobranca = async (receitaId) => {
       customerId = cliente.id;
 
       // Só grava no cadastro do inquilino quando for a conta padrão --
-      // gravar um customerId de conta de locador ali criaria confusão
-      // se esse mesmo inquilino um dia tiver outra receita na conta
-      // padrão (o campo é único, não dá pra guardar os dois).
-      if (inquilino && !override) {
+      // gravar um customerId de conta de locador/kitnet ali criaria
+      // confusão se esse mesmo inquilino um dia tiver outra receita
+      // na conta padrão (o campo é único, não dá pra guardar os dois).
+      if (inquilino && usandoContaPadrao) {
         await prisma.inquilino.update({
           where: { id: inquilino.id },
           data: { asaasCustomerId: customerId },
@@ -529,6 +541,13 @@ const enviarCobranca = async (receitaId) => {
         enviadaAsaas: true,
         formaPagamento: cobranca.billingType || 'BOLETO',
         linkBoleto: cobranca.bankSlipUrl || cobranca.invoiceUrl || null,
+        // Genérico (ver comentário no model Receita) -- sem isso, o
+        // caminho Asaas era o único que não marcava por qual conta
+        // passou, e ficava de fora de qualquer relatório "recebido
+        // por conta".
+        contaPagamentoId: override?.contaPagamentoId || null,
+        gatewayProvider: 'ASAAS',
+        gatewayReferencia: cobranca.id,
       },
     });
 

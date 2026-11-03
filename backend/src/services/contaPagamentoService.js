@@ -5,6 +5,7 @@ const listar = () => {
   return prisma.contaPagamento.findMany({
     include: {
       locadores: { select: { id: true, nome: true } },
+      locadorDono: { select: { id: true, nome: true } },
     },
     orderBy: { createdAt: 'asc' },
   });
@@ -43,6 +44,7 @@ const criar = async (dados) => {
       taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
       padrao: dados.padrao === true,
       ativo: dados.ativo !== false,
+      locadorId: dados.locadorId || null,
     },
   });
 
@@ -71,6 +73,7 @@ const atualizar = async (id, dados) => {
       taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
       padrao: dados.padrao,
       ativo: dados.ativo,
+      ...(dados.locadorId !== undefined && { locadorId: dados.locadorId || null }),
     },
   });
 
@@ -113,6 +116,45 @@ const resolverParaLocador = async (locadorId) => {
 
 };
 
+// Mesma ideia de resolverParaLocador, só que checando primeiro a
+// conta própria da KITNET (um locador pode ter várias contas -- ex.:
+// SH com BB-H, BB-S e Efí, cada uma recebendo de kitnets diferentes).
+// Sem conta na kitnet, cai pro padrão do locador; sem isso também, cai
+// pro padrão do sistema -- mesma cadeia de sempre.
+const resolverParaKitnet = async (kitnetId, locadorId) => {
+
+  if (kitnetId) {
+
+    const kitnet = await prisma.kitnet.findUnique({
+      where: { id: kitnetId },
+      include: { contaPagamento: true },
+    });
+
+    if (kitnet?.contaPagamento?.ativo) {
+      return kitnet.contaPagamento;
+    }
+
+  }
+
+  return resolverParaLocador(locadorId);
+
+};
+
+// "AAAA-MM" -> início/fim daquele mês (UTC) -- sem informar, usa o
+// mês atual. Compartilhado por qualquer consulta "por mês" de conta.
+const intervaloDoMes = (mes) => {
+
+  const [ano, mesNumero] = (mes || new Date().toISOString().slice(0, 7)).split('-').map(Number);
+
+  return {
+    ano,
+    mesNumero,
+    inicio: new Date(Date.UTC(ano, mesNumero - 1, 1, 0, 0, 0)),
+    fim: new Date(Date.UTC(ano, mesNumero, 0, 23, 59, 59, 999)),
+  };
+
+};
+
 // Extrato Pix recebido no mês -- só faz sentido pra conta EFI (único
 // banco com esse endpoint implementado até agora). `mes` no formato
 // "AAAA-MM"; sem informar, usa o mês atual.
@@ -128,10 +170,7 @@ const extratoPixDoMes = async (id, mes) => {
     throw new Error('Extrato Pix só está disponível pra contas do banco Efí.');
   }
 
-  const [ano, mesNumero] = (mes || new Date().toISOString().slice(0, 7)).split('-').map(Number);
-
-  const inicio = new Date(Date.UTC(ano, mesNumero - 1, 1, 0, 0, 0));
-  const fim = new Date(Date.UTC(ano, mesNumero, 0, 23, 59, 59, 999));
+  const { ano, mesNumero, inicio, fim } = intervaloDoMes(mes);
 
   const extrato = await EFIApi.listarPixRecebidos(
     { dataInicio: inicio.toISOString(), dataFim: fim.toISOString() },
@@ -141,6 +180,67 @@ const extratoPixDoMes = async (id, mes) => {
   const pixComInquilino = await vincularPagadores(extrato.pix);
 
   return { ...extrato, pix: pixComInquilino, mes: `${ano}-${String(mesNumero).padStart(2, '0')}` };
+
+};
+
+// Quanto essa conta recebeu no mês, pelas Receitas de verdade do
+// sistema (qualquer provider -- BB, Asaas, EFI, BRB; todos marcam
+// Receita.contaPagamentoId quando enviam a cobrança, ver
+// gatewayPagamentoService/asaasService). Diferente do extrato Pix da
+// EFI acima (que pergunta direto pro banco, sem saber de contrato
+// nenhum) -- isso aqui é só o que o PRÓPRIO sistema cobrou e já
+// confirmou como pago, com o inquilino/kitnet certinho (não precisa
+// adivinhar por CPF).
+const recebidoDoMes = async (id, mes) => {
+
+  const conta = await buscarPorId(id);
+
+  if (!conta) {
+    throw new Error('Conta não encontrada.');
+  }
+
+  const { ano, mesNumero, inicio, fim } = intervaloDoMes(mes);
+
+  const receitas = await prisma.receita.findMany({
+    where: {
+      contaPagamentoId: id,
+      status: { in: ['PAGA', 'PAGO'] },
+      dataPagamento: { gte: inicio, lte: fim },
+    },
+    include: {
+      inquilino: { select: { nome: true, kitnet: { select: { numero: true, unidade: { select: { nome: true } } } } } },
+      contrato: {
+        select: {
+          inquilino: { select: { nome: true } },
+          kitnet: { select: { numero: true, unidade: { select: { nome: true } } } },
+        },
+      },
+    },
+    orderBy: { dataPagamento: 'desc' },
+  });
+
+  const linhas = receitas.map((r) => {
+
+    const kitnet = r.inquilino?.kitnet || r.contrato?.kitnet || null;
+
+    return {
+      id: r.id,
+      descricao: r.descricao,
+      valor: r.valorLiquido ?? r.valor,
+      dataPagamento: r.dataPagamento,
+      pagador: r.inquilino?.nome || r.contrato?.inquilino?.nome || r.pagadorNome || null,
+      unidade: kitnet?.unidade?.nome || null,
+      kitnet: kitnet?.numero || null,
+    };
+
+  });
+
+  return {
+    mes: `${ano}-${String(mesNumero).padStart(2, '0')}`,
+    total: linhas.reduce((soma, l) => soma + Number(l.valor || 0), 0),
+    quantidade: linhas.length,
+    receitas: linhas,
+  };
 
 };
 
@@ -200,5 +300,7 @@ module.exports = {
   atualizar,
   remover,
   resolverParaLocador,
+  resolverParaKitnet,
   extratoPixDoMes,
+  recebidoDoMes,
 };

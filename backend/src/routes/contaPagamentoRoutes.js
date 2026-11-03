@@ -16,6 +16,8 @@ router.get('/', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoCon
 
 router.get('/:id/extrato-pix', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoController.extratoPix);
 
+router.get('/:id/recebido', permissaoMiddleware('asaasConfig.visualizar'), contaPagamentoController.recebido);
+
 // Só pra contas do provider ASAAS -- ver comentário no controller.
 router.post('/:id/testar-conexao', permissaoMiddleware('asaasConfig.testarConexao'), contaPagamentoController.testarConexao);
 

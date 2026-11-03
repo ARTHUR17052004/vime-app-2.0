@@ -37,6 +37,19 @@ const resolverLocadorId = (receita) => {
   );
 };
 
+// Um locador pode ter várias contas (ex.: SH com BB-H, BB-S e Efí,
+// cada uma recebendo de kitnets diferentes) -- a kitnet da cobrança
+// decide, se ela tiver uma conta própria escolhida (ver
+// Kitnet.contaPagamentoId); senão cai na conta padrão do locador,
+// igual sempre foi.
+const resolverKitnetId = (receita) => {
+  return (
+    receita.contrato?.kitnetId ||
+    receita.inquilino?.kitnetId ||
+    null
+  );
+};
+
 // Inquilino cadastrado (com kitnet/contrato) ou pagador avulso
 // (nome+CPF digitados na hora, sem precisar cadastrar ninguém) -- ver
 // comentário do model Receita. Nenhum dos dois = não dá pra gerar
@@ -367,7 +380,8 @@ const enviarCobranca = async (receitaId) => {
   }
 
   const locadorId = resolverLocadorId(receita);
-  const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+  const kitnetId = resolverKitnetId(receita);
+  const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, locadorId);
 
   // Rede de segurança: receita sem locadorId nenhum (nem direto, nem
   // via contrato/inquilino) que acabou de ser resolvida pra uma conta
@@ -405,7 +419,10 @@ const enviarCobranca = async (receitaId) => {
   }
 
   // Sem conta BB/EFI/BRB vinculada -- segue o fluxo Asaas de sempre.
-  const resultado = await asaasService.enviarCobranca(receitaId);
+  // Passa a conta já resolvida aqui em cima (por kitnet, depois
+  // locador) pra não resolver de novo lá dentro com uma lógica
+  // separada que podia divergir desta.
+  const resultado = await asaasService.enviarCobranca(receitaId, conta);
 
   if (resultado.success) {
 

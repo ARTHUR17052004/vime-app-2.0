@@ -10,6 +10,7 @@ import Textarea from "../ui/Textarea";
 import { UnidadeService } from "@/services/unidades.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
+import { ContaPagamentoService } from "@/services/contaPagamento.service";
 
 const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "status", "observacoes"];
 
@@ -32,6 +33,7 @@ export default function KitnetForm({
 }) {
 
   const [unidades, setUnidades] = useState([]);
+  const [contas, setContas] = useState([]);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
 
@@ -46,6 +48,7 @@ export default function KitnetForm({
     aluguel: "",
     status: "DISPONIVEL",
     observacoes: "",
+    contaPagamentoId: "",
   });
 
   /* ======================================
@@ -97,8 +100,24 @@ export default function KitnetForm({
 
     }
 
+    async function carregarContas() {
+
+      try {
+
+        const resposta = await ContaPagamentoService.listar();
+        setContas(resposta.data || []);
+
+      } catch (err) {
+
+        console.error("Erro ao carregar contas:", err);
+
+      }
+
+    }
+
     carregarUnidades();
     carregarObrigatorios();
+    carregarContas();
 
   }, []);
 
@@ -135,6 +154,9 @@ export default function KitnetForm({
         observacoes:
           kitnet.observacoes || "",
 
+        contaPagamentoId:
+          kitnet.contaPagamentoId || "",
+
       });
 
     } else {
@@ -149,6 +171,7 @@ export default function KitnetForm({
         aluguel: "",
         status: "DISPONIVEL",
         observacoes: "",
+        contaPagamentoId: "",
 
       });
 
@@ -232,9 +255,22 @@ export default function KitnetForm({
 
       observacoes: formData.observacoes,
 
+      contaPagamentoId: formData.contaPagamentoId || null,
+
     });
 
   }
+
+  const locadorIdDaResidencia = unidades.find(
+    (u) => String(u.id) === formData.unidadeId
+  )?.locadorId;
+
+  // Só as contas marcadas como "dessa" residência/locador -- um
+  // locador pode ter várias (ex.: SH com BB-H, BB-S e Efí, cada uma
+  // recebendo de kitnets diferentes).
+  const contasDaResidencia = contas.filter(
+    (c) => c.locadorId && c.locadorId === locadorIdDaResidencia
+  );
 
   return (
 
@@ -355,7 +391,40 @@ export default function KitnetForm({
 
         </Select>
 
+        <Select
+          label="Conta de pagamento"
+          name="contaPagamentoId"
+          value={formData.contaPagamentoId}
+          onChange={handleChange}
+          disabled={!formData.unidadeId}
+        >
+
+          <option
+            value=""
+            style={{ backgroundColor: "#1d2833", color: "#fff" }}
+          >
+            {formData.unidadeId
+              ? "Usar a conta padrão do locador"
+              : "Escolha a residência primeiro"}
+          </option>
+
+          {contasDaResidencia.map((conta) => (
+            <option
+              key={conta.id}
+              value={conta.id}
+              style={{ backgroundColor: "#1d2833", color: "#fff" }}
+            >
+              {conta.nome}
+            </option>
+          ))}
+
+        </Select>
+
       </div>
+
+      <p className="text-xs text-[var(--text-faint)] -mt-5">
+        Só preencha &quot;Conta de pagamento&quot; se essa kitnet específica recebe por uma conta diferente da padrão do locador (ex.: locador com várias contas vinculadas).
+      </p>
 
       <Textarea
         label="Observações"

@@ -31,6 +31,11 @@ export const ContaPagamentoService = {
     return api(`/contas-pagamento/${id}/extrato-pix${query}`);
   },
 
+  recebido(id, mes) {
+    const query = mes ? `?mes=${mes}` : "";
+    return api(`/contas-pagamento/${id}/recebido${query}`);
+  },
+
   // Só se aplica a contas do provider ASAAS.
   testarConexao(id) {
     return api(`/contas-pagamento/${id}/testar-conexao`, { method: "POST" });

@@ -58,6 +58,12 @@ model Kitnet {
   // Último alerta "kitnet vazia" enviado por verificarKitnetsVaziasJob.js
   // (72h+ sem locar) -- evita reenviar mais de uma vez por dia.
   ultimoAlertaVaziaEm DateTime?
+  // Por qual conta bancária o aluguel DESSA kitnet sai -- um locador
+  // pode ter várias contas (ex.: SH com BB-H, BB-S e Efí, cada uma
+  // recebendo de kitnets diferentes). Sem nenhuma aqui, usa a conta
+  // padrão do locador (Locador.contaPagamentoId), igual sempre foi.
+  contaPagamentoId String?
+  contaPagamento   ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
   contratos  Contrato[]
   inquilinos Inquilino[]
   unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
@@ -303,7 +309,18 @@ model ContaPagamento {
 
   updatedAt DateTime @updatedAt
 
+  // A quem essa conta pertence, só pra organizar a tela Contas e
+  // filtrar o seletor de conta na Kitnet -- DIFERENTE de "locadores"
+  // abaixo (que são os locadores que usam ESTA como conta PADRÃO,
+  // uma coisa de cada vez). Um locador pode "ser dono" de várias
+  // ContaPagamento aqui (SH com BB-H, BB-S, Efí...), mas só uma delas
+  // vira a padrão dele.
+  locadorId   String?
+  locadorDono Locador? @relation("ContasDoLocador", fields: [locadorId], references: [id])
+
   locadores Locador[]
+
+  kitnets Kitnet[]
 
   receitas Receita[]
 }
@@ -360,10 +377,17 @@ model Locador {
   asaasWalletId String?
 
   // Qual conta de recebimento (Asaas, BB, o que vier depois) processa
-  // as cobranças deste locador. Sem isso definido, cai na conta padrão
-  // do sistema (ContaPagamento.padrao = true).
+  // as cobranças deste locador POR PADRÃO -- usada quando a Kitnet da
+  // cobrança não tem uma conta própria escolhida (ver
+  // Kitnet.contaPagamentoId). Sem isso definido também, cai na conta
+  // padrão do sistema (ContaPagamento.padrao = true).
   contaPagamentoId String?
   contaPagamento   ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
+
+  // Todas as contas "da" deste locador (ex.: SH com BB-H, BB-S, Efí) --
+  // só organização/filtro, não decide sozinho quem recebe o quê (ver
+  // Kitnet.contaPagamentoId e contaPagamentoId acima).
+  contasProprias ContaPagamento[] @relation("ContasDoLocador")
 
   createdAt DateTime @default(now())
 

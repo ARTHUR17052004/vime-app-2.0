@@ -81,6 +81,22 @@ const extratoPix = async (req, res) => {
 
 };
 
+const recebido = async (req, res) => {
+
+  try {
+
+    const resultado = await contaPagamentoService.recebidoDoMes(req.params.id, req.query.mes);
+
+    return res.json({ success: true, data: resultado });
+
+  } catch (error) {
+
+    return res.status(400).json({ success: false, message: error.message });
+
+  }
+
+};
+
 // Só se aplica a contas do provider ASAAS (ver asaasService) -- BB/EFI/BRB
 // não têm esse conceito de "conectar numa conta deles" nem webhook ainda.
 const testarConexao = async (req, res) => {
@@ -115,6 +131,7 @@ module.exports = {
   atualizar,
   remover,
   extratoPix,
+  recebido,
   testarConexao,
   registrarWebhook,
 };
