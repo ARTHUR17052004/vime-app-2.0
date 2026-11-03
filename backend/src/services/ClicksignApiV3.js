@@ -177,12 +177,36 @@ class ClicksignApiV3 {
 
   }
 
-  async adicionarSignatario(envelopeId, { nome, email }) {
+  // `telefone`, quando informado, liga a notificação por WhatsApp da
+  // própria Clicksign pra esse signatário (pedido de assinatura E
+  // aviso de "documento assinado por todos", confirmado contra a
+  // documentação oficial v3 -- "Aceite via WhatsApp") -- só funciona
+  // se o plano/complemento da conta tiver esse recurso habilitado,
+  // senão a Clicksign simplesmente ignora e manda só por e-mail. A
+  // Clicksign espera o telefone SEM o "55" (DDD + número, 10 ou 11
+  // dígitos) -- diferente do formato que a Meta Cloud API usa.
+  async adicionarSignatario(envelopeId, { nome, email, telefone }) {
+
+    let digitos = (telefone || "").replace(/\D/g, "");
+
+    if (digitos.length > 11 && digitos.startsWith("55")) {
+      digitos = digitos.slice(2);
+    }
+
+    const attributes = { name: nome, email };
+
+    if (digitos.length === 10 || digitos.length === 11) {
+      attributes.phone_number = digitos;
+      attributes.communicate_events = {
+        signature_request: "whatsapp",
+        document_signed: "whatsapp",
+      };
+    }
 
     const resposta = await this.request("POST", `/envelopes/${envelopeId}/signers`, {
       data: {
         type: "signers",
-        attributes: { name: nome, email },
+        attributes,
       },
     });
 

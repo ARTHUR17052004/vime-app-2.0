@@ -175,16 +175,31 @@ export default function FinanceiroReceitas({
     );
   }
 
-  const corStatus = (status) => {
-    if (status === "PAGO" || status === "PAGA") {
-      return "bg-emerald-500/10 text-emerald-400";
+  // "PENDENTE" sozinho não diz se já foi mandada pro banco ou não --
+  // olha gatewayReferencia (só fica preenchido depois do "Enviar
+  // Cobrança") pra separar "Pendente" (ainda não enviada) de "Em
+  // Aberto" (enviada, aguardando o inquilino pagar). ATRASADA/PAGA/
+  // CANCELADA continuam cada uma com seu próprio selo, sem mudar.
+  const statusExibido = (item) => {
+
+    if (item.status === "PAGO" || item.status === "PAGA") {
+      return { texto: "Pago", variant: "emerald" };
     }
 
-    if (status === "ATRASADA") {
-      return "bg-red-500/10 text-red-400";
+    if (item.status === "ATRASADA") {
+      return { texto: "Atrasada", variant: "red" };
     }
 
-    return "bg-yellow-500/10 text-yellow-400";
+    if (item.status === "CANCELADA") {
+      return { texto: "Cancelada", variant: "gray" };
+    }
+
+    if (item.gatewayReferencia) {
+      return { texto: "Em Aberto", variant: "blue" };
+    }
+
+    return { texto: "Pendente", variant: "yellow" };
+
   };
 
   return (
@@ -362,24 +377,15 @@ export default function FinanceiroReceitas({
 
                   <div className="flex items-center gap-2">
 
-                    <Badge
-                      variant={
-                        item.status === "PAGO" || item.status === "PAGA"
-                          ? "emerald"
-                          : item.status === "ATRASADA"
-                          ? "red"
-                          : "yellow"
-                      }
-                    >
-                      {item.status}
+                    <Badge variant={statusExibido(item).variant}>
+                      {statusExibido(item).texto}
                     </Badge>
 
-                    <Badge
-                      variant={item.gatewayProvider === "BB" || item.enviadaAsaas ? "blue" : "gray"}
-                      size="sm"
-                    >
-                      {item.gatewayProvider === "BB" ? "BB" : item.enviadaAsaas ? "Asaas" : "Local"}
-                    </Badge>
+                    {item.gatewayProvider && (
+                      <Badge variant="gray" size="sm">
+                        {item.gatewayProvider}
+                      </Badge>
+                    )}
 
                   </div>
 
@@ -516,37 +522,15 @@ export default function FinanceiroReceitas({
                   <td className="pr-4">
                     <div className="flex items-center gap-2 flex-wrap">
 
-                      <Badge
-                        variant={
-                          item.status === "PAGO" || item.status === "PAGA"
-                            ? "emerald"
-                            : item.status === "ATRASADA"
-                            ? "red"
-                            : "yellow"
-                        }
-                      >
-                        {item.status}
+                      <Badge variant={statusExibido(item).variant}>
+                        {statusExibido(item).texto}
                       </Badge>
 
-                      <Badge
-                        variant={item.gatewayProvider === "BB" || item.enviadaAsaas ? "blue" : "gray"}
-                        size="sm"
-                        title={
-                          item.gatewayProvider === "BB"
-                            ? `Sincronizada com o Banco do Brasil${
-                                item.gatewayReferencia ? ` (${item.gatewayReferencia})` : ""
-                              }`
-                            : item.enviadaAsaas
-                            ? `Sincronizada com Asaas${
-                                item.asaasPaymentId
-                                  ? ` (${item.asaasPaymentId})`
-                                  : ""
-                              }`
-                            : "Ainda não enviada a nenhum banco"
-                        }
-                      >
-                        {item.gatewayProvider === "BB" ? "BB" : item.enviadaAsaas ? "Asaas" : "Local"}
-                      </Badge>
+                      {item.gatewayProvider && (
+                        <Badge variant="gray" size="sm">
+                          {item.gatewayProvider}
+                        </Badge>
+                      )}
 
                     </div>
                   </td>

@@ -582,8 +582,13 @@ const anexarArquivo = (id, { arquivoDados, arquivoTipo, arquivoNomeOriginal }) =
 
 const encerrar = async (id, autor) => {
 
+  // Sem o include, contrato.inquilino ficava undefined e a mensagem de
+  // encerramento (mais abaixo) tentava mandar pro telefone vazio --
+  // nunca chegava a ninguém, só criava um contato "55" fantasma no
+  // WhatsApp a cada contrato encerrado.
   const contrato = await prisma.contrato.findUnique({
-    where: { id }
+    where: { id },
+    include: { inquilino: true }
   });
 
   if (!contrato) {
@@ -827,8 +832,12 @@ const enviarParaClicksign = async (contratoId, signatariosExtras = [], autor) =>
 
   const signatariosFixos = await signatarioFixoService.listarAtivos();
 
+  // Só o inquilino leva telefone (liga o WhatsApp nativo da Clicksign
+  // pra ele, ver comentário em adicionarSignatario) -- signatário fixo
+  // (representante da empresa) não tem telefone cadastrado nesse
+  // modelo, continua recebendo só por e-mail, como sempre.
   const listaSignatarios = [
-    { nome: contrato.inquilino.nome, email: contrato.inquilino.email },
+    { nome: contrato.inquilino.nome, email: contrato.inquilino.email, telefone: contrato.inquilino.telefone },
     ...signatariosFixos.map((s) => ({ nome: s.nome, email: s.email })),
     ...signatariosExtras.filter((s) => s?.nome && s?.email),
   ];

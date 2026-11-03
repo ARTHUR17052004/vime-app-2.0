@@ -186,12 +186,12 @@ export default function InquilinoDetalhesPage() {
                 />
 
                 <Info
-                  label="Contato de Emergência"
+                  label="Contato de Emergência (nome)"
                   value={inquilino.contatoEmergencia}
                 />
 
                 <Info
-                  label="Telefone de Emergência"
+                  label="Telefone de Emergência (numero)"
                   value={inquilino.telefoneEmergencia}
                 />
 

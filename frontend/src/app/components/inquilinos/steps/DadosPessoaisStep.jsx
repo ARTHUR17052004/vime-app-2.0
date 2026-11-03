@@ -3,7 +3,7 @@
 import { validarCpf } from "../../../../utils/cpf";
 import { validarTelefone } from "../../../../utils/validadores";
 
-function Campo({ label, obrigatorio, children }) {
+function Campo({ label, obrigatorio, hint, children }) {
   return (
     <div>
       <label className="block text-xs text-[var(--text-subtle)] mb-1.5">
@@ -11,6 +11,9 @@ function Campo({ label, obrigatorio, children }) {
         {obrigatorio && <span className="ml-1 text-red-400">*</span>}
       </label>
       {children}
+      {hint && (
+        <p className="mt-1.5 text-xs text-[var(--text-faint)]">{hint}</p>
+      )}
     </div>
   );
 }
@@ -103,10 +106,14 @@ export default function StepDadosPessoais({
         />
       </Campo>
 
-      <Campo label="Contato de Emergência" obrigatorio={obrigatorios.has("contatoEmergencia")}>
+      <Campo
+        label="Contato de Emergência (nome)"
+        obrigatorio={obrigatorios.has("contatoEmergencia")}
+        hint="Nome de alguém pra chamar em caso de emergência com o inquilino (não é o nome dele)."
+      >
         <input
           name="contatoEmergencia"
-          placeholder="Contato de Emergência"
+          placeholder="Nome da pessoa de contato"
           value={formData.contatoEmergencia}
           onChange={handleChange}
           className={inputStyle}
@@ -114,10 +121,14 @@ export default function StepDadosPessoais({
         />
       </Campo>
 
-      <Campo label="Telefone Emergência" obrigatorio={obrigatorios.has("telefoneEmergencia")}>
+      <Campo
+        label="Telefone de Emergência (número)"
+        obrigatorio={obrigatorios.has("telefoneEmergencia")}
+        hint="Telefone dessa mesma pessoa de contato (não é o telefone do inquilino)."
+      >
         <input
           name="telefoneEmergencia"
-          placeholder="Telefone Emergência"
+          placeholder="Telefone da pessoa de contato"
           value={formData.telefoneEmergencia}
           onChange={handleChange}
           className={`${inputStyle} ${
