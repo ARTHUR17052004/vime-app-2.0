@@ -138,7 +138,58 @@ const extratoPixDoMes = async (id, mes) => {
     conta.credenciais
   );
 
-  return { ...extrato, mes: `${ano}-${String(mesNumero).padStart(2, '0')}` };
+  const pixComInquilino = await vincularPagadores(extrato.pix);
+
+  return { ...extrato, pix: pixComInquilino, mes: `${ano}-${String(mesNumero).padStart(2, '0')}` };
+
+};
+
+// Cruza o CPF de quem mandou cada Pix com os inquilinos já
+// cadastrados -- só informativo (não grava nada, não muda nenhum
+// registro), é o "de quem é, de onde veio" que a EFI sozinha não
+// sabe dizer (ela só manda o CPF/nome de quem pagou). Sem o CPF bater
+// com ninguém cadastrado, fica como "Pix não identificado" na tela --
+// pode ser alguém de fora, ou um inquilino cujo CPF está diferente do
+// cadastrado.
+const vincularPagadores = async (pix) => {
+
+  const cpfsRecebidos = [...new Set(
+    pix.map((p) => (p.pagador?.cpf || '').replace(/\D/g, '')).filter(Boolean)
+  )];
+
+  if (cpfsRecebidos.length === 0) return pix;
+
+  // `cpf` é obrigatório no cadastro (String, não String?) -- sem
+  // filtro de null aqui, só descarta vazio/sem dígito no map abaixo.
+  const inquilinos = await prisma.inquilino.findMany({
+    select: {
+      nome: true,
+      cpf: true,
+      kitnet: { select: { numero: true, unidade: { select: { nome: true } } } },
+    },
+  });
+
+  const porCpf = new Map();
+  inquilinos.forEach((i) => {
+    const digitos = (i.cpf || '').replace(/\D/g, '');
+    if (digitos) porCpf.set(digitos, i);
+  });
+
+  return pix.map((p) => {
+
+    const cpfPagador = (p.pagador?.cpf || '').replace(/\D/g, '');
+    const inquilino = cpfPagador ? porCpf.get(cpfPagador) : null;
+
+    return {
+      ...p,
+      inquilinoVinculado: inquilino ? {
+        nome: inquilino.nome,
+        kitnet: inquilino.kitnet?.numero || null,
+        unidade: inquilino.kitnet?.unidade?.nome || null,
+      } : null,
+    };
+
+  });
 
 };
 

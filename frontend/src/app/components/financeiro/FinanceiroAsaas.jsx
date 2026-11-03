@@ -89,6 +89,7 @@ function ExtratoPainel({ contaId, mes }) {
               <tr>
                 <th className="text-left py-3">Data/Hora</th>
                 <th className="text-left py-3">Pagador</th>
+                <th className="text-left py-3">De onde veio</th>
                 <th className="text-left py-3">Valor</th>
               </tr>
             </thead>
@@ -97,6 +98,16 @@ function ExtratoPainel({ contaId, mes }) {
                 <tr key={item.endToEndId || index} className="border-b border-[var(--border-token)]">
                   <td className="py-3 text-[var(--text-subtle)]">{formatarDataHora(item.horario)}</td>
                   <td className="py-3 text-[var(--text-subtle)]">{item.pagador?.nome || "-"}</td>
+                  <td className="py-3 text-[var(--text-subtle)]">
+                    {item.inquilinoVinculado ? (
+                      <span className="text-emerald-400">
+                        {item.inquilinoVinculado.unidade || "-"}
+                        {item.inquilinoVinculado.kitnet ? ` · Kitnet ${item.inquilinoVinculado.kitnet}` : ""}
+                      </span>
+                    ) : (
+                      <span className="text-[var(--text-faint)]">Pix não identificado</span>
+                    )}
+                  </td>
                   <td className="py-3 font-semibold text-emerald-400">{formatarMoeda(item.valor)}</td>
                 </tr>
               ))}
