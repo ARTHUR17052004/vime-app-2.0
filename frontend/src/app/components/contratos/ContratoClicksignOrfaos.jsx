@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 
-import { FileWarning, Eye, Download, Loader2 } from "lucide-react";
+import { FileWarning, Eye, Download, Loader2, MoreVertical, Trash2 } from "lucide-react";
 
 import { ClicksignService } from "@/services/clicksign.service";
 import { obterLinkClicksign } from "@/utils/clicksignLink";
 import Button from "../ui/Button";
+import ActionMenu from "../ui/ActionMenu";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function extrairDocumentos(resposta) {
   const data = resposta?.data || resposta;
@@ -28,9 +30,14 @@ function statusLegivel(doc) {
 // pra assinatura.
 export default function ContratoClicksignOrfaos({ contratosLocais = [] }) {
 
+  const podeExcluir = usePermissao("clicksign.cancelar");
+
   const [documentos, setDocumentos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [baixando, setBaixando] = useState(null);
+  const [excluindo, setExcluindo] = useState(null);
+  const [menuAberto, setMenuAberto] = useState(null);
+  const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
 
   useEffect(() => {
 
@@ -129,6 +136,54 @@ export default function ContratoClicksignOrfaos({ contratosLocais = [] }) {
 
   }
 
+  function abrirMenu(e, id) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const largura = 180;
+
+    let left = rect.right - largura;
+    const top = rect.bottom + 8;
+
+    if (left < 16) left = 16;
+    if (left + largura > window.innerWidth - 16) {
+      left = window.innerWidth - largura - 16;
+    }
+
+    setPosicaoMenu({ top, left });
+    setMenuAberto(id);
+  }
+
+  // Cancela o envelope na própria Clicksign (não existe "excluir" na
+  // API deles) -- o link de assinatura, se ainda estiver aberto, para
+  // de funcionar. Some da lista aqui na hora, sem precisar recarregar.
+  async function excluir(doc) {
+    const id = doc.key || doc.id;
+    if (!id) return;
+
+    if (!confirm(`Cancelar/excluir "${doc.filename || "este documento"}" na Clicksign? Ninguém mais vai conseguir assinar nem abrir esse link.`)) {
+      return;
+    }
+
+    setExcluindo(id);
+    setMenuAberto(null);
+
+    try {
+
+      await ClicksignService.cancelarDocumento(id);
+
+      setDocumentos((old) => old.filter((d) => (d.key || d.id) !== id));
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao excluir o documento na Clicksign.");
+
+    } finally {
+
+      setExcluindo(null);
+
+    }
+
+  }
+
   if (carregando || documentos.length === 0) return null;
 
   return (
@@ -187,6 +242,38 @@ export default function ContratoClicksignOrfaos({ contratosLocais = [] }) {
                 )}
                 Baixar
               </Button>
+
+              {podeExcluir && (
+                <button
+                  type="button"
+                  onClick={(e) => abrirMenu(e, doc.key || doc.id)}
+                  disabled={excluindo === (doc.key || doc.id)}
+                  className="h-10 w-10 shrink-0 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] flex items-center justify-center text-[var(--text-subtle)] hover:bg-[var(--surface-3)] hover:text-[var(--text)] disabled:opacity-50"
+                >
+                  {excluindo === (doc.key || doc.id) ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <MoreVertical size={16} />
+                  )}
+                </button>
+              )}
+
+              {podeExcluir && (
+                <ActionMenu
+                  open={menuAberto === (doc.key || doc.id)}
+                  position={posicaoMenu}
+                  onClose={() => setMenuAberto(null)}
+                >
+                  <button
+                    type="button"
+                    onClick={() => excluir(doc)}
+                    className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 flex items-center gap-2"
+                  >
+                    <Trash2 size={16} />
+                    Excluir
+                  </button>
+                </ActionMenu>
+              )}
 
             </div>
 
