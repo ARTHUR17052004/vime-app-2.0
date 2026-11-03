@@ -214,15 +214,23 @@ class EFIApi {
       },
     }, override);
 
-    // Formato de resposta também é melhor palpite -- conferir contra
-    // o real assim que tivermos credencial, e ajustar o mapeamento em
-    // gatewayPagamentoService.enviarPelaEFI de acordo.
+    // CONFIRMADO ao vivo em 03/11/2026 contra a API real (não é mais
+    // palpite) -- a EFI devolve tudo direto em "data", não aninhado
+    // em "payment.banking_billet" como eu tinha chutado antes. Nesse
+    // teste real: data.barcode = linha digitável, data.pdf.charge =
+    // PDF do boleto, data.charge_id = número (veio como Int, por isso
+    // o String() abaixo). data.pix.qrcode/qrcode_image também vêm
+    // juntos (Pix Copia e Cola + QR code em SVG base64) -- não
+    // capturados ainda aqui -- o pagador já consegue pagar por Pix
+    // abrindo o link do boleto mesmo sem isso.
     const dadosCobranca = resultado?.data || resultado;
 
+    const chargeId = dadosCobranca?.charge_id;
+
     return {
-      numero: dadosCobranca?.charge_id || dadosCobranca?.identifiers?.charge_id,
-      linhaDigitavel: dadosCobranca?.payment?.banking_billet?.barcode,
-      urlImagemBoleto: dadosCobranca?.payment?.banking_billet?.pdf?.charge,
+      numero: chargeId != null ? String(chargeId) : null,
+      linhaDigitavel: dadosCobranca?.barcode || null,
+      urlImagemBoleto: dadosCobranca?.pdf?.charge || dadosCobranca?.billet_link || null,
     };
 
   }

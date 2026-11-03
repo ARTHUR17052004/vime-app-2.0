@@ -194,7 +194,11 @@ class BRBApi {
     }, {}, override);
 
     return {
-      numero: resultado?.numero,
+      // Receita.gatewayReferencia é String no banco -- mesma correção
+      // feita na EFI depois de confirmar que a API dela devolve
+      // número, não string (BRB ainda não testado contra o banco de
+      // verdade, mas mais vale prevenir o mesmo erro).
+      numero: resultado?.numero != null ? String(resultado.numero) : null,
       linhaDigitavel: resultado?.linhaDigitavel,
       urlImagemBoleto: resultado?.urlImagemBoleto,
     };
