@@ -5,6 +5,26 @@ import { useEffect, useState } from "react";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { validarTelefone, validarDocumento } from "@/utils/validadores";
+import SeletorBusca from "../ui/SeletorBusca";
+
+// Dados bancários do locador (informativo, pra referência -- não é a
+// mesma coisa que a conta de pagamento/gateway cadastrada em "Contas").
+const BANCOS = [
+  { value: "Asaas", label: "Asaas" },
+  { value: "001 - Banco do Brasil", label: "001 - Banco do Brasil" },
+  { value: "104 - Caixa Econômica Federal", label: "104 - Caixa Econômica Federal" },
+  { value: "237 - Bradesco", label: "237 - Bradesco" },
+  { value: "341 - Itaú", label: "341 - Itaú" },
+  { value: "033 - Santander", label: "033 - Santander" },
+  { value: "260 - Nubank", label: "260 - Nubank" },
+  { value: "077 - Inter", label: "077 - Inter" },
+  { value: "290 - PagBank", label: "290 - PagBank" },
+  { value: "323 - Mercado Pago", label: "323 - Mercado Pago" },
+  { value: "336 - C6 Bank", label: "336 - C6 Bank" },
+  { value: "364 - Efí", label: "364 - Efí" },
+  { value: "756 - Sicoob", label: "756 - Sicoob" },
+  { value: "748 - Sicredi", label: "748 - Sicredi" },
+];
 
 const CAMPOS = [
   "nome", "documento", "email", "telefone", "banco", "agencia", "conta", "pix",
@@ -369,160 +389,17 @@ export default function LocadorForm({
         <div className="grid md:grid-cols-2 gap-6">
 
           <Campo label="Banco" obrigatorio={obrigatorios.has("banco")}>
-          <select
-
-            name="banco"
-
-            value={formData.banco}
-
-            onChange={handleChange}
-
-            className={inputStyle}
-
-            required={obrigatorios.has("banco")}
-
-          >
-
-            <option
-              value=""
-              style={{
-                backgroundColor: "#1d2833",
-                color: "#ffffff",
+            <SeletorBusca
+              opcoes={BANCOS}
+              value={formData.banco}
+              onChange={(valor) => {
+                setErro("");
+                setFormData((prev) => ({ ...prev, banco: valor }));
               }}
-            >
-              Selecione um banco
-            </option>
-
-          <option
-            value="Asaas"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            Asaas
-          </option>
-
-          <option
-            value="001 - Banco do Brasil"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            001 - Banco do Brasil
-          </option>
-
-          <option
-            value="104 - Caixa Econômica Federal"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            104 - Caixa Econômica Federal
-          </option>
-
-          <option
-            value="237 - Bradesco"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            237 - Bradesco
-          </option>
-
-          <option
-            value="341 - Itaú"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            341 - Itaú
-          </option>
-
-          <option
-            value="033 - Santander"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            033 - Santander
-          </option>
-
-          <option
-            value="260 - Nubank"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            260 - Nubank
-          </option>
-
-          <option
-            value="077 - Inter"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            077 - Inter
-          </option>
-
-          <option
-            value="290 - PagBank"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            290 - PagBank
-          </option>
-
-          <option
-            value="323 - Mercado Pago"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            323 - Mercado Pago
-          </option>
-
-          <option
-            value="336 - C6 Bank"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            336 - C6 Bank
-          </option>
-
-          <option
-            value="756 - Sicoob"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            756 - Sicoob
-          </option>
-
-          <option
-            value="748 - Sicredi"
-            style={{
-              backgroundColor: "#1d2833",
-              color: "#ffffff",
-            }}
-          >
-            748 - Sicredi
-          </option>
-          </select>
+              placeholder="Selecione um banco"
+              className={inputStyle}
+              required={obrigatorios.has("banco")}
+            />
           </Campo>
 
           <Campo label="Agência" obrigatorio={obrigatorios.has("agencia")}>
