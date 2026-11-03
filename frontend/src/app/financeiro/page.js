@@ -476,6 +476,27 @@ function FinanceiroPageConteudo() {
       .filter(estaVencido)
       .reduce((total, item) => total + Number(item.valor || 0), 0);
 
+  // Independente dos filtros da tela (busca, período, status) --
+  // sempre o mês corrente de verdade, por dataPagamento (não
+  // vencimento), pra zerar sozinho todo dia 1. Usa `receitas` cru (não
+  // `receitasFiltradas`), senão um filtro de período aplicado na tela
+  // esconderia esse card também.
+  const recebidoNoMes = (() => {
+
+    const agora = new Date();
+    const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
+    const inicioProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
+
+    return receitas
+      .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.dataPagamento)
+      .filter((item) => {
+        const dataPagamento = new Date(item.dataPagamento);
+        return dataPagamento >= inicioMes && dataPagamento < inicioProximoMes;
+      })
+      .reduce((total, item) => total + Number(item.valorLiquido ?? item.valor ?? 0), 0);
+
+  })();
+
   // Só das pagas -- taxa de boleto de uma cobrança ainda pendente
   // nunca "aconteceu" de verdade (pode nem chegar a ser paga, cair
   // vencida, etc). Sem valorLiquido preenchido, não entra na conta
@@ -547,6 +568,7 @@ function FinanceiroPageConteudo() {
         vencidos={vencidos}
         lucroLiquido={lucroLiquido}
         taxasBoleto={taxasBoleto}
+        recebidoNoMes={recebidoNoMes}
       />
     </FadeIn>
 

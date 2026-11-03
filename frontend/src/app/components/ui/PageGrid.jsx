@@ -13,6 +13,8 @@ const layouts = {
 
   5: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-5",
 
+  6: "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3",
+
   "8-4": "grid-cols-12",
 
   "7-5": "grid-cols-12",

@@ -6,6 +6,7 @@ import {
   Landmark,
   Receipt,
   TriangleAlert,
+  CalendarCheck,
 } from "lucide-react";
 
 import PageGrid from "../ui/PageGrid";
@@ -17,9 +18,17 @@ export default function FinanceiroResumo({
   vencidos,
   lucroLiquido,
   taxasBoleto,
+  recebidoNoMes,
 }) {
   return (
-    <PageGrid cols={5}>
+    <PageGrid cols={6}>
+
+      <DashboardStatsCard
+        title="Recebido no Mês"
+        value={`R$ ${recebidoNoMes}`}
+        subtitle="Zera todo dia 1 -- só pagamento reconhecido este mês"
+        icon={CalendarCheck}
+      />
 
       <DashboardStatsCard
         title="Receita Prevista"

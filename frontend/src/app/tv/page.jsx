@@ -315,7 +315,7 @@ function TvConteudo() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 shrink-0">
-              <TvResumoFinanceiro titulo="Recebido" valor={financeiro?.recebido} cor="emerald" />
+              <TvResumoFinanceiro titulo="Recebido no Mês" valor={financeiro?.recebido} cor="emerald" />
               <TvResumoFinanceiro titulo="Pendente" valor={financeiro?.pendente} cor="yellow" />
               <TvResumoFinanceiro titulo="Atrasado" valor={financeiro?.atrasado} cor="red" />
             </div>

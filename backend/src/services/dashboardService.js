@@ -207,6 +207,16 @@ const financeiro = async (usuario) => {
     where: filtroReceita(usuario)
   });
 
+  // "Recebido" é só do MÊS ATUAL (por dataPagamento, não por
+  // vencimento) -- esse número precisa voltar pra zero sozinho todo
+  // dia 1, senão vira uma soma de tudo que já foi pago desde que o
+  // sistema existe, sem servir pra acompanhar o mês corrente. Pendente
+  // e atrasado continuam sendo "o que está em aberto agora", sem
+  // recorte de mês -- não fazem sentido zerar (uma cobrança atrasada
+  // de 3 meses atrás continua atrasada hoje).
+  const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const inicioProximoMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+
   let recebido = 0;
   let pendente = 0;
   let atrasado = 0;
@@ -214,8 +224,12 @@ const financeiro = async (usuario) => {
 
   receitas.forEach(r => {
 
-    if (r.status === 'PAGA')
-      recebido += r.valor;
+    if (r.status === 'PAGA') {
+      const dataPagamento = r.dataPagamento ? new Date(r.dataPagamento) : null;
+      if (dataPagamento && dataPagamento >= inicioMes && dataPagamento < inicioProximoMes) {
+        recebido += Number(r.valorLiquido ?? r.valor);
+      }
+    }
 
     if (r.status === 'PENDENTE')
       pendente += r.valor;

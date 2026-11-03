@@ -149,7 +149,7 @@ export default function FinancialCard({ financeiro }) {
           <ResumoFinanceiro
             titulo="Recebido"
             valor={recebido}
-            legenda="Valor recebido"
+            legenda="Só este mês -- zera todo dia 1"
             cor="emerald"
           />
 
