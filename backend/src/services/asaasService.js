@@ -546,6 +546,7 @@ const enviarCobranca = async (receitaId, contaResolvida = null) => {
         // passou, e ficava de fora de qualquer relatório "recebido
         // por conta".
         contaPagamentoId: override?.contaPagamentoId || null,
+        cobrancaEnviadaEm: new Date(),
         gatewayProvider: 'ASAAS',
         gatewayReferencia: cobranca.id,
       },

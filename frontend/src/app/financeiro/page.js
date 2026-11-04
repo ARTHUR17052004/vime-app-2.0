@@ -10,6 +10,7 @@ import MainLayout from "../components/layout/MainLayout";
 import { ReceitaService, DespesaService } from "@/services/financeiro.service";
 import { AsaasService } from "@/services/asaas.service";
 import { UnidadeService } from "@/services/unidades.service";
+import { ContaPagamentoService } from "@/services/contaPagamento.service";
 
 import FadeIn from "../components/ui/FadeIn";
 
@@ -115,6 +116,24 @@ function FinanceiroPageConteudo() {
   const [dataAte, setDataAte] = useState("");
 
   const [statusFiltro, setStatusFiltro] = useState("");
+
+  const [contas, setContas] = useState([]);
+  const [contaFiltro, setContaFiltro] = useState("");
+
+  useEffect(() => {
+
+    async function carregarContas() {
+      try {
+        const resposta = await ContaPagamentoService.listar();
+        setContas(Array.isArray(resposta) ? resposta : resposta.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar contas:", err);
+      }
+    }
+
+    carregarContas();
+
+  }, []);
 
   // Chegou aqui vindo do VIME Insights (ex.: "12 cobranças atrasadas"
   // -> clica -> abre direto filtrado)? Lê os parâmetros da URL uma vez,
@@ -429,6 +448,8 @@ function FinanceiroPageConteudo() {
 
     if (statusFiltro && item.status !== statusFiltro) return false;
 
+    if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
+
     if (!dentroDoIntervalo(item.vencimento)) return false;
 
     return true;
@@ -675,6 +696,24 @@ function FinanceiroPageConteudo() {
 
         <div className="flex items-center gap-2">
           <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+            Conta
+          </label>
+          <select
+            value={contaFiltro}
+            onChange={(e) => setContaFiltro(e.target.value)}
+            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+          >
+            <option value="" className="bg-[#1b2430]">Todas</option>
+            {contas.map((conta) => (
+              <option key={conta.id} value={conta.id} className="bg-[#1b2430]">
+                {conta.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
             Organizar por
           </label>
           <select
@@ -712,6 +751,7 @@ function FinanceiroPageConteudo() {
 
         <FinanceiroReceitas
           receitas={receitasFiltradas}
+          contas={contas}
           onDelete={excluirReceita}
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
@@ -757,6 +797,7 @@ function FinanceiroPageConteudo() {
     {abaSelecionada === "receitas" && (
       <FinanceiroReceitas
         receitas={receitasFiltradas}
+        contas={contas}
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}

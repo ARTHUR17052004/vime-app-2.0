@@ -15,6 +15,7 @@ import ActionMenu from "../ui/ActionMenu";
 
 import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
+import ReceitaMapaModal from "./ReceitaMapaModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -48,6 +49,7 @@ function MenuButton({ label, danger, success, warning, onClick }) {
 
 export default function FinanceiroReceitas({
   receitas,
+  contas,
   onDelete,
   onUpdate,
   onMarcarPago,
@@ -65,6 +67,9 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const [editarOpen, setEditarOpen] =
+    useState(false);
+
+  const [mapaOpen, setMapaOpen] =
     useState(false);
 
   const [menuAberto, setMenuAberto] = useState(null);
@@ -116,6 +121,15 @@ export default function FinanceiroReceitas({
             }}
           />
         )}
+
+        <MenuButton
+          label="Mapa da Cobrança"
+          onClick={() => {
+            setReceitaSelecionada(item);
+            setMapaOpen(true);
+            setMenuAberto(null);
+          }}
+        />
 
         {podeEditar &&
           item.status !== "PAGO" &&
@@ -599,6 +613,13 @@ export default function FinanceiroReceitas({
 
         setEditarOpen(false);
       }}
+    />
+
+    <ReceitaMapaModal
+      isOpen={mapaOpen}
+      onClose={() => setMapaOpen(false)}
+      receita={receitaSelecionada}
+      contaNome={contas?.find((c) => c.id === receitaSelecionada?.contaPagamentoId)?.nome}
     />
 
   </>

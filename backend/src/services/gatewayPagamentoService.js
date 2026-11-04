@@ -126,6 +126,7 @@ const enviarPeloBB = async (receita, conta) => {
       where: { id: receita.id },
       data: {
         contaPagamentoId: conta.id,
+        cobrancaEnviadaEm: new Date(),
         gatewayProvider: 'BB',
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,
@@ -213,6 +214,7 @@ const enviarPelaEFI = async (receita, conta) => {
       where: { id: receita.id },
       data: {
         contaPagamentoId: conta.id,
+        cobrancaEnviadaEm: new Date(),
         gatewayProvider: 'EFI',
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,
@@ -307,6 +309,7 @@ const enviarPeloBRB = async (receita, conta) => {
       where: { id: receita.id },
       data: {
         contaPagamentoId: conta.id,
+        cobrancaEnviadaEm: new Date(),
         gatewayProvider: 'BRB',
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,

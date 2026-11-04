@@ -457,6 +457,12 @@ model Receita {
   linkBoleto        String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
   linhaDigitavel    String? // só o BB devolve isso -- código pra digitar no app do banco em vez de abrir o link
   lembreteEnviadoEm DateTime?
+  // Quando a cobrança foi de fato mandada pro banco/provedor (botão
+  // "Enviar Cobrança") -- diferente de createdAt (quando a Receita foi
+  // cadastrada no sistema, pode ser bem antes do envio de verdade).
+  // Usado no "Mapa da Cobrança" (Financeiro > 3 pontinhos) pra montar
+  // a linha do tempo: enviada -> identificada -> creditada.
+  cobrancaEnviadaEm DateTime?
   // Dedupe dos avisos automáticos por WhatsApp -- cada um dispara só
   // uma vez por Receita, mesmo se o job rodar de novo.
   avisoVencidoEnviadoEm       DateTime?
