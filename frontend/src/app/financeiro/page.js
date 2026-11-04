@@ -189,11 +189,12 @@ function FinanceiroPageConteudo() {
 
     carregar();
 
-    // Receita pode mudar de status sozinha (banco confirmando
-    // pagamento, job de vencimento) sem ninguém mexer nesta tela --
-    // sem isso, só aparecia atualizado depois de dar F5.
+    // Receita/despesa pode mudar sozinha (banco confirmando pagamento,
+    // job de vencimento, OU outra guia/usuário criando e editando) sem
+    // ninguém mexer nesta tela -- sem isso, só aparecia atualizado
+    // depois de dar F5.
     function aoAtualizar(evento) {
-      if (evento?.tipo === "receita") {
+      if (evento?.tipo === "receita" || evento?.tipo === "despesa") {
         carregar();
       }
     }

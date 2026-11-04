@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const { paraDataOuNull } = require('../utils/data');
 const { filtroReceita } = require('../utils/escopoLocador');
+const { emitirAtualizacao } = require('../socket');
 
 const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
@@ -190,6 +191,8 @@ const criar = async (dados, autor) => {
     descricao: `Receita "${receita.descricao || receita.id}" criada por ${autor?.nome || "Sistema"}.`
   });
 
+  emitirAtualizacao("receita");
+
   return receita;
 
 };
@@ -235,6 +238,8 @@ const atualizar = async (id, dados, autor) => {
     descricao: `Receita "${receita.descricao || receita.id}" atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
+  emitirAtualizacao("receita");
+
   return receita;
 
 };
@@ -267,9 +272,13 @@ const remover = async (id, autor) => {
     descricao: `Receita "${receita.descricao || receita.id}" excluída por ${autor?.nome || "Sistema"}.`
   });
 
-  return prisma.receita.delete({
+  const removida = await prisma.receita.delete({
     where: { id }
   });
+
+  emitirAtualizacao("receita");
+
+  return removida;
 
 };
 
