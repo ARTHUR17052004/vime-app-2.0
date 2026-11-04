@@ -283,17 +283,6 @@ export default function KitnetForm({
 
   }
 
-  const locadorIdDaResidencia = unidades.find(
-    (u) => String(u.id) === formData.unidadeId
-  )?.locadorId;
-
-  // Só as contas marcadas como "dessa" residência/locador -- um
-  // locador pode ter várias (ex.: SH com BB-H, BB-S e Efí, cada uma
-  // recebendo de kitnets diferentes).
-  const contasDaResidencia = contas.filter(
-    (c) => c.locadorId && c.locadorId === locadorIdDaResidencia
-  );
-
   return (
 
     <>
@@ -420,19 +409,16 @@ export default function KitnetForm({
           name="contaPagamentoId"
           value={formData.contaPagamentoId}
           onChange={handleChange}
-          disabled={!formData.unidadeId}
         >
 
           <option
             value=""
             style={{ backgroundColor: "#1d2833", color: "#fff" }}
           >
-            {formData.unidadeId
-              ? "Usar a conta padrão do locador"
-              : "Escolha a residência primeiro"}
+            Usar a conta padrão do locador
           </option>
 
-          {contasDaResidencia.map((conta) => (
+          {contas.map((conta) => (
             <option
               key={conta.id}
               value={conta.id}
@@ -447,7 +433,7 @@ export default function KitnetForm({
       </div>
 
       <p className="text-xs text-[var(--text-faint)] -mt-5">
-        Só preencha &quot;Conta de pagamento&quot; se essa kitnet específica recebe por uma conta diferente da padrão do locador (ex.: locador com várias contas vinculadas).
+        Só preencha &quot;Conta de pagamento&quot; se essa kitnet específica recebe por uma conta diferente da padrão do locador -- qualquer conta do sistema pode ser escolhida, não só as do locador dessa residência.
       </p>
 
       <Textarea
