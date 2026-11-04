@@ -44,7 +44,7 @@ export default function ReceitaForm({
   // backend (locador do inquilino -> conta dele, ou a conta padrão do
   // sistema). Só pra exibir; Valor a Receber e Taxa Cobrada são
   // sempre campos calculados, nunca editáveis aqui.
-  const [contaInfo, setContaInfo] = useState({ contaNome: null, taxaBoletoPercentual: 0 });
+  const [contaInfo, setContaInfo] = useState({ contaNome: null, taxaBoletoValor: 0 });
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
@@ -116,7 +116,7 @@ export default function ReceitaForm({
         const dados = resposta.data || resposta;
         setContaInfo({
           contaNome: dados.contaNome || null,
-          taxaBoletoPercentual: dados.taxaBoletoPercentual || 0,
+          taxaBoletoValor: dados.taxaBoletoValor || 0,
         });
       })
       .catch((err) => console.error("Erro ao buscar taxa de boleto:", err));
@@ -170,7 +170,7 @@ export default function ReceitaForm({
   const valorValido = formData.valor !== "" && !Number.isNaN(numeroValor);
 
   const valorLiquidoCalculado = valorValido
-    ? Math.round(numeroValor * (1 - contaInfo.taxaBoletoPercentual / 100) * 100) / 100
+    ? Math.max(0, Math.round((numeroValor - contaInfo.taxaBoletoValor) * 100) / 100)
     : null;
 
   const taxaCobradaCalculada = valorValido && valorLiquidoCalculado !== null
@@ -327,7 +327,7 @@ export default function ReceitaForm({
           />
           <p className="text-[10px] text-[var(--text-faint)] mt-1">
             {contaInfo.contaNome
-              ? `Conta "${contaInfo.contaNome}" -- ${contaInfo.taxaBoletoPercentual}% de taxa de boleto.`
+              ? `Conta "${contaInfo.contaNome}" -- R$ ${contaInfo.taxaBoletoValor} de taxa de boleto.`
               : "Nenhuma conta de pagamento cadastrada ainda."}
           </p>
         </div>

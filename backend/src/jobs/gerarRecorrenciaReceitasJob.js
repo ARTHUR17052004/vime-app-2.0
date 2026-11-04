@@ -66,9 +66,9 @@ module.exports = async () => {
     // pelo locador desta receita de novo a cada uma (pode mudar entre
     // locadores diferentes).
     const conta = await contaPagamentoService.resolverParaLocador(receita.locadorId);
-    const taxa = conta?.taxaBoletoPercentual || 0;
+    const taxa = conta?.taxaBoletoValor || 0;
 
-    const valorLiquido = Math.round(receita.valor * (1 - taxa / 100) * 100) / 100;
+    const valorLiquido = Math.max(0, Math.round((receita.valor - taxa) * 100) / 100);
 
     await prisma.receita.create({
       data: {

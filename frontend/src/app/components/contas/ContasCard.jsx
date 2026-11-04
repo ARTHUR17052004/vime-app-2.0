@@ -73,7 +73,7 @@ const FORM_INICIAL = {
   id: null,
   provider: "ASAAS",
   nome: "",
-  taxaBoletoPercentual: "",
+  taxaBoletoValor: "",
   padrao: false,
   ativo: true,
   credenciais: {},
@@ -125,7 +125,7 @@ export default function ContasCard() {
       id: conta.id,
       provider: conta.provider,
       nome: conta.nome,
-      taxaBoletoPercentual: conta.taxaBoletoPercentual ?? "",
+      taxaBoletoValor: conta.taxaBoletoValor ?? "",
       padrao: conta.padrao,
       ativo: conta.ativo,
       credenciais: conta.credenciais || {},
@@ -168,7 +168,7 @@ export default function ContasCard() {
       const payload = {
         provider: form.provider,
         nome: form.nome,
-        taxaBoletoPercentual: form.taxaBoletoPercentual,
+        taxaBoletoValor: form.taxaBoletoValor,
         padrao: form.padrao,
         ativo: form.ativo,
         credenciais: form.credenciais,
@@ -559,16 +559,16 @@ export default function ContasCard() {
 
           <div>
             <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
-              Taxa de boleto (%)
+              Taxa de boleto (R$)
             </label>
             <input
-              value={form.taxaBoletoPercentual}
-              onChange={(e) => setForm((a) => ({ ...a, taxaBoletoPercentual: e.target.value }))}
-              placeholder="Ex: 3,85"
+              value={form.taxaBoletoValor}
+              onChange={(e) => setForm((a) => ({ ...a, taxaBoletoValor: e.target.value }))}
+              placeholder="Ex: 3,69"
               className={inputStyle}
             />
             <p className="text-xs text-[var(--text-faint)] mt-1">
-              % descontado por essa conta na emissão do boleto -- usado pra calcular sozinho o Valor a Receber em Financeiro &gt; Nova Receita.
+              Valor fixo em R$ descontado por essa conta na emissão do boleto (não é porcentagem) -- usado pra calcular sozinho o Valor a Receber em Financeiro &gt; Nova Receita.
             </p>
           </div>
 

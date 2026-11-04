@@ -41,7 +41,7 @@ const criar = async (dados) => {
       provider: dados.provider,
       nome: dados.nome,
       credenciais: dados.credenciais || {},
-      taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
+      taxaBoletoValor: paraTaxaOuZero(dados.taxaBoletoValor),
       padrao: dados.padrao === true,
       ativo: dados.ativo !== false,
       locadorId: dados.locadorId || null,
@@ -70,7 +70,7 @@ const atualizar = async (id, dados) => {
     data: {
       nome: dados.nome,
       credenciais: dados.credenciais,
-      taxaBoletoPercentual: paraTaxaOuZero(dados.taxaBoletoPercentual),
+      taxaBoletoValor: paraTaxaOuZero(dados.taxaBoletoValor),
       padrao: dados.padrao,
       ativo: dados.ativo,
       ...(dados.locadorId !== undefined && { locadorId: dados.locadorId || null }),

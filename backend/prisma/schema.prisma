@@ -295,11 +295,12 @@ model ContaPagamento {
   // migração de schema.
   credenciais Json
 
-  // % descontado por ESSA conta na emissão do boleto -- cada
-  // banco/provedor cobra uma taxa diferente (ex.: 3,85% numa conta,
-  // 0,99% noutra), por isso fica aqui e não num valor único do
-  // sistema. Usado pra calcular Receita.valorLiquido sozinho.
-  taxaBoletoPercentual Float @default(0)
+  // R$ descontado por ESSA conta na emissão do boleto -- valor FIXO
+  // em reais, não porcentagem (ex.: R$ 3,69 numa conta, R$ 0,99
+  // noutra), cada banco/provedor cobra um valor diferente, por isso
+  // fica aqui e não num valor único do sistema. Usado pra calcular
+  // Receita.valorLiquido sozinho (valor - taxaBoletoValor).
+  taxaBoletoValor Float @default(0)
 
   padrao Boolean @default(false) // usada quando um locador não tem conta própria
 
@@ -422,7 +423,7 @@ model Receita {
   // Valor líquido de verdade, depois de descontar a taxa do boleto --
   // "valor" continua sendo o valor COBRADO do pagador (bruto), nunca
   // mudou de significado. Calculado sozinho (não editável no front)
-  // pela ContaPagamento.taxaBoletoPercentual da conta que processa
+  // pela ContaPagamento.taxaBoletoValor da conta que processa
   // essa receita (locador -> Locador.contaPagamentoId, senão a conta
   // padrão do sistema -- mesma resolução de gatewayPagamentoService).
   valorLiquido    Float?

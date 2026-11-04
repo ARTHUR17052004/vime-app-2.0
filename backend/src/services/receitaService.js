@@ -114,9 +114,9 @@ async function aplicarValorLiquidoPadrao(dados, registroExistente) {
   const base = { ...registroExistente, ...dados };
   const locadorId = base.locadorId || await locadorDaReceita(base);
   const conta = await contaPagamentoService.resolverParaLocador(locadorId);
-  const taxa = conta?.taxaBoletoPercentual || 0;
+  const taxa = conta?.taxaBoletoValor || 0;
 
-  dados.valorLiquido = Math.round(dados.valor * (1 - taxa / 100) * 100) / 100;
+  dados.valorLiquido = Math.max(0, Math.round((dados.valor - taxa) * 100) / 100);
 
   return dados;
 
@@ -259,7 +259,7 @@ const previsaoTaxaBoleto = async ({ inquilinoId, contratoId }) => {
 
   return {
     contaNome: conta?.nome || null,
-    taxaBoletoPercentual: conta?.taxaBoletoPercentual || 0,
+    taxaBoletoValor: conta?.taxaBoletoValor || 0,
   };
 
 };
