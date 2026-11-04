@@ -190,6 +190,12 @@ const criar = async (dados) => {
 
 const atualizar = async (id, dados) => {
 
+  // Default true pra não quebrar chamada antiga que não manda esse
+  // campo -- só vira "não" quando o popup "Enviar vistoria de
+  // entrega?" (ver InquilinoForm/página de edição) for respondido assim.
+  const gerarVistoriaEntrega = dados.gerarVistoriaEntrega !== false;
+  delete dados.gerarVistoriaEntrega;
+
   const anterior = await prisma.inquilino.findUnique({
     where: { id }
   });
@@ -224,7 +230,9 @@ const atualizar = async (id, dados) => {
           status: 'DISPONIVEL'
         }
       });
-      gerarVistoriaDeEntrega(anterior.kitnetId);
+      if (gerarVistoriaEntrega) {
+        gerarVistoriaDeEntrega(anterior.kitnetId);
+      }
     }
 
     await prisma.kitnet.update({
@@ -242,7 +250,9 @@ const atualizar = async (id, dados) => {
   return inquilino;
 };
 
-const remover = async (id) => {
+const remover = async (id, opcoes = {}) => {
+
+  const gerarVistoriaEntrega = opcoes.gerarVistoriaEntrega !== false;
 
   const inquilino = await prisma.inquilino.findUnique({
     where: { id }
@@ -258,7 +268,9 @@ const remover = async (id) => {
         status: 'DISPONIVEL'
       }
     });
-    gerarVistoriaDeEntrega(inquilino.kitnetId);
+    if (gerarVistoriaEntrega) {
+      gerarVistoriaDeEntrega(inquilino.kitnetId);
+    }
   }
 
   return prisma.inquilino.delete({

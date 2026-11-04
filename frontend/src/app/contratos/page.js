@@ -28,6 +28,7 @@ import ContratoFilters from "../components/contratos/ContratoFilters";
 import ContratoTable from "../components/contratos/ContratoTable";
 import ContratoClicksignOrfaos from "../components/contratos/ContratoClicksignOrfaos";
 import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
+import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
@@ -78,6 +79,9 @@ function ContratosPageConteudo() {
     useState("inicio-recente");
 
   const [demonstrativoContratoId, setDemonstrativoContratoId] =
+    useState(null);
+
+  const [vistoriaPendente, setVistoriaPendente] =
     useState(null);
 
   const [contratos, setContratos] =
@@ -231,9 +235,26 @@ function ContratosPageConteudo() {
 
     if (!confirmar) return;
 
+    const contrato = contratos.find((c) => c.id === id);
+
+    setVistoriaPendente({
+      id,
+      kitnetNome: contrato?.kitnet?.nome || contrato?.kitnetNome || null,
+    });
+
+  }
+
+  async function confirmarExclusaoContrato(gerarVistoriaEntrega) {
+
+    const pendente = vistoriaPendente;
+
+    setVistoriaPendente(null);
+
+    if (!pendente) return;
+
     try {
 
-      await ContratoService.excluir(id);
+      await ContratoService.excluir(pendente.id, { gerarVistoriaEntrega });
 
       await carregarContratos();
 
@@ -563,6 +584,12 @@ function ContratosPageConteudo() {
           contratoId={demonstrativoContratoId}
           onClose={() => setDemonstrativoContratoId(null)}
           onEnviado={carregarContratos}
+        />
+
+        <ConfirmVistoriaEntregaModal
+          isOpen={!!vistoriaPendente}
+          nomeKitnet={vistoriaPendente?.kitnetNome}
+          onEscolher={confirmarExclusaoContrato}
         />
 
       </PageContainer>

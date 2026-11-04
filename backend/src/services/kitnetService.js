@@ -76,6 +76,12 @@ const criar = async (dados, usuario) => {
 
 const atualizar = async (id, dados) => {
 
+  // Só pergunta/gera quando a kitnet está de fato esvaziando aqui
+  // (status virando DISPONIVEL) -- ver mais abaixo. Default true pra
+  // não quebrar nenhuma chamada antiga que não manda esse campo.
+  const gerarVistoriaEntrega = dados.gerarVistoriaEntrega !== false;
+  delete dados.gerarVistoriaEntrega;
+
   const atual = await prisma.kitnet.findUnique({ where: { id } });
 
   // Atualização parcial (ex.: só o status) não pode reprovar por
@@ -108,8 +114,11 @@ const atualizar = async (id, dados) => {
   });
 
   // Ficou vazia agora mesmo (editada direto nesta tela, não por um
-  // contrato/inquilino) -- mesmo gatilho de vistoria automática.
-  if (dados.status === 'DISPONIVEL' && atual?.status !== 'DISPONIVEL') {
+  // contrato/inquilino) -- mesmo gatilho de vistoria automática, mas só
+  // se o usuário confirmou no popup "Enviar vistoria de entrega?" (ver
+  // KitnetForm.jsx) -- evita vistoria órfã quando a kitnet já tem
+  // locação marcada pro mesmo dia.
+  if (dados.status === 'DISPONIVEL' && atual?.status !== 'DISPONIVEL' && gerarVistoriaEntrega) {
     gerarVistoriaDeEntrega(id);
   }
 

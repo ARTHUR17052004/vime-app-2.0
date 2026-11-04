@@ -52,9 +52,10 @@ export const ContratoService = {
     });
   },
 
-  excluir(id) {
+  excluir(id, opcoes = {}) {
     return api(`/contratos/${id}`, {
       method: "DELETE",
+      body: JSON.stringify(opcoes),
     });
   },
 

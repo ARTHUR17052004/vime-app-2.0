@@ -22,6 +22,7 @@ import ResidenciaFiltro from "../../components/common/ResidenciaFiltro";
 import ContratoModal from "../../components/contratos/ContratoModal";
 import ContratoForm from "../../components/contratos/ContratoForm";
 import ContratoArquivoTable from "../../components/contratos/ContratoArquivoTable";
+import ConfirmVistoriaEntregaModal from "../../components/common/ConfirmVistoriaEntregaModal";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -42,6 +43,8 @@ export default function ContratosArquivoPage() {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [contratoEditando, setContratoEditando] = useState(null);
+
+  const [vistoriaPendente, setVistoriaPendente] = useState(null);
   const [arquivoPendente, setArquivoPendente] = useState(null);
 
   async function carregarContratos() {
@@ -159,9 +162,26 @@ export default function ContratosArquivoPage() {
 
     if (!confirmar) return;
 
+    const contrato = contratos.find((c) => c.id === id);
+
+    setVistoriaPendente({
+      id,
+      kitnetNome: contrato?.kitnet?.nome || contrato?.kitnetNome || null,
+    });
+
+  }
+
+  async function confirmarExclusaoContrato(gerarVistoriaEntrega) {
+
+    const pendente = vistoriaPendente;
+
+    setVistoriaPendente(null);
+
+    if (!pendente) return;
+
     try {
 
-      await ContratoService.excluir(id);
+      await ContratoService.excluir(pendente.id, { gerarVistoriaEntrega });
 
       await carregarContratos();
 
@@ -383,6 +403,12 @@ export default function ContratosArquivoPage() {
             />
 
           </ContratoModal>
+
+          <ConfirmVistoriaEntregaModal
+            isOpen={!!vistoriaPendente}
+            nomeKitnet={vistoriaPendente?.kitnetNome}
+            onEscolher={confirmarExclusaoContrato}
+          />
 
         </PageContainer>
 

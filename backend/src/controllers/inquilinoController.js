@@ -33,7 +33,7 @@ const atualizar = async (req, res) => {
 };
 
 const remover = async (req, res) => {
-  await inquilinoService.remover(req.params.id);
+  await inquilinoService.remover(req.params.id, req.body);
 
   res.json({
     mensagem: 'Inquilino removido com sucesso'

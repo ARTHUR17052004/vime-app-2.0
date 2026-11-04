@@ -476,7 +476,9 @@ const atualizar = async (id, dados, autor) => {
 
 };
 
-const remover = async (id, autor) => {
+const remover = async (id, autor, opcoes = {}) => {
+
+  const gerarVistoriaEntrega = opcoes.gerarVistoriaEntrega !== false;
 
   const contrato = await prisma.contrato.findUnique({
     where: { id },
@@ -526,7 +528,9 @@ const remover = async (id, autor) => {
         status: "DISPONIVEL"
       }
     });
-    gerarVistoriaDeEntrega(contrato.kitnetId);
+    if (gerarVistoriaEntrega) {
+      gerarVistoriaDeEntrega(contrato.kitnetId);
+    }
   }
 
   if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {
@@ -580,7 +584,9 @@ const anexarArquivo = (id, { arquivoDados, arquivoTipo, arquivoNomeOriginal }) =
   });
 };
 
-const encerrar = async (id, autor) => {
+const encerrar = async (id, autor, opcoes = {}) => {
+
+  const gerarVistoriaEntrega = opcoes.gerarVistoriaEntrega !== false;
 
   // Sem o include, contrato.inquilino ficava undefined e a mensagem de
   // encerramento (mais abaixo) tentava mandar pro telefone vazio --
@@ -613,7 +619,9 @@ const encerrar = async (id, autor) => {
         status: 'DISPONIVEL'
       }
     });
-    gerarVistoriaDeEntrega(contrato.kitnetId);
+    if (gerarVistoriaEntrega) {
+      gerarVistoriaDeEntrega(contrato.kitnetId);
+    }
   }
 
   if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: id }))) {

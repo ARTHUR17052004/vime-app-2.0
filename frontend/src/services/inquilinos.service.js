@@ -24,9 +24,10 @@ export const InquilinoService = {
     });
   },
 
-  excluir(id) {
+  excluir(id, opcoes = {}) {
     return api(`/inquilinos/${id}`, {
       method: "DELETE",
+      body: JSON.stringify(opcoes),
     });
   },
 

@@ -19,6 +19,7 @@ import InquilinoModal from "../components/inquilinos/InquilinoModal";
 import InquilinoForm from "../components/inquilinos/InquilinoForm";
 import ExplicacaoInquilinoModal from "../components/inquilinos/ExplicacaoInquilinoModal";
 import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
+import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { InquilinoService } from "../../services/inquilinos.service";
@@ -46,6 +47,9 @@ export default function InquilinosPage() {
     useState(false);
 
   const [demonstrativoContratoId, setDemonstrativoContratoId] =
+    useState(null);
+
+  const [vistoriaPendente, setVistoriaPendente] =
     useState(null);
 
   const [loading, setLoading] =
@@ -199,9 +203,26 @@ export default function InquilinosPage() {
 
     if (!confirmar) return;
 
+    const inquilino = inquilinos.find((i) => i.id === id);
+
+    setVistoriaPendente({
+      id,
+      kitnetNome: inquilino?.kitnet?.nome || inquilino?.kitnet?.numero || null,
+    });
+
+  };
+
+  const confirmarExclusaoInquilino = async (gerarVistoriaEntrega) => {
+
+    const pendente = vistoriaPendente;
+
+    setVistoriaPendente(null);
+
+    if (!pendente) return;
+
     try {
 
-      await InquilinoService.excluir(id);
+      await InquilinoService.excluir(pendente.id, { gerarVistoriaEntrega });
 
       await carregarInquilinos();
 
@@ -524,6 +545,12 @@ export default function InquilinosPage() {
             open={!!demonstrativoContratoId}
             contratoId={demonstrativoContratoId}
             onClose={() => setDemonstrativoContratoId(null)}
+          />
+
+          <ConfirmVistoriaEntregaModal
+            isOpen={!!vistoriaPendente}
+            nomeKitnet={vistoriaPendente?.kitnetNome}
+            onEscolher={confirmarExclusaoInquilino}
           />
 
         </PageContainer>

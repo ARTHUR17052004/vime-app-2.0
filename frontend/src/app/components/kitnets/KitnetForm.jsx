@@ -11,6 +11,7 @@ import { UnidadeService } from "@/services/unidades.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { ContaPagamentoService } from "@/services/contaPagamento.service";
+import ConfirmVistoriaEntregaModal from "../common/ConfirmVistoriaEntregaModal";
 
 const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "status", "observacoes"];
 
@@ -38,6 +39,8 @@ export default function KitnetForm({
   const [obrigatorios, setObrigatorios] = useState(new Set());
 
   const [erro, setErro] = useState("");
+
+  const [confirmVistoriaAberto, setConfirmVistoriaAberto] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: "",
@@ -239,6 +242,23 @@ export default function KitnetForm({
 
     setErro("");
 
+    // Kitnet existente ficando vazia agora (Ocupada/Manutenção ->
+    // Disponível) -- pergunta antes de salvar se é pra gerar a vistoria
+    // de entrega automática, pra não deixar uma órfã quando já tem
+    // locação marcada pro mesmo dia.
+    if (kitnet && kitnet.status !== "DISPONIVEL" && formData.status === "DISPONIVEL") {
+      setConfirmVistoriaAberto(true);
+      return;
+    }
+
+    salvar();
+
+  }
+
+  function salvar(gerarVistoriaEntrega = true) {
+
+    setConfirmVistoriaAberto(false);
+
     onSave({
 
       nome: formData.nome,
@@ -257,6 +277,8 @@ export default function KitnetForm({
 
       contaPagamentoId: formData.contaPagamentoId || null,
 
+      gerarVistoriaEntrega,
+
     });
 
   }
@@ -273,6 +295,8 @@ export default function KitnetForm({
   );
 
   return (
+
+    <>
 
     <form
       onSubmit={handleSubmit}
@@ -473,6 +497,14 @@ export default function KitnetForm({
       </div>
 
     </form>
+
+    <ConfirmVistoriaEntregaModal
+      isOpen={confirmVistoriaAberto}
+      nomeKitnet={formData.nome || kitnet?.nome}
+      onEscolher={salvar}
+    />
+
+    </>
 
   );
 

@@ -128,7 +128,7 @@ const remover = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
   }
 
-  await contratoService.remover(req.params.id, req.usuario);
+  await contratoService.remover(req.params.id, req.usuario, req.body);
 
   return res.json({
     success: true,
@@ -143,7 +143,7 @@ const encerrar = async (req, res) => {
     return res.status(404).json({ success: false, message: 'Contrato não encontrado.' });
   }
 
-  const contrato = await contratoService.encerrar(req.params.id, req.usuario);
+  const contrato = await contratoService.encerrar(req.params.id, req.usuario, req.body);
 
   return res.json({
     success: true,
