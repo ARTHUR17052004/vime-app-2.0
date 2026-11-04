@@ -52,23 +52,27 @@ const residenciasAtivasIds = async () => {
 };
 
 // Resumo de uma vistoria "Geral" pro card da lista -- cada residência
-// tem seu PRÓPRIO relógio (ver VistoriaProgresso). "concluídas" é
-// literal: quantas JÁ tiveram pelo menos uma vistoria de verdade
-// registrada (tem VistoriaProgresso = já apareceu em alguma
-// VistoriaMissao). Residência nunca tocada NÃO conta, mesmo que o
-// prazo dela ainda nem tenha vencido -- "em dia" tinha o problema de
-// contar quem nunca foi vistoriada como se já tivesse sido, só porque
-// o primeiro prazo ainda não chegou (ex.: vistoria recém-criada,
-// ninguém fez nada, mas mostrava "7/7" preenchido).
+// tem seu PRÓPRIO relógio (ver VistoriaProgresso). "concluídas" conta
+// quem está EM DIA no ciclo atual: já teve vistoria de verdade
+// registrada E o próprio prazo dela ainda não venceu de novo.
+// Residência nunca tocada não conta (prazo ainda não chegou não é a
+// mesma coisa que já ter sido feita), e residência que já foi feita
+// mas cujo próximo prazo já passou de novo também não conta -- senão
+// o card mostrava "7/7" (todo mundo já foi vistoriado alguma vez)
+// junto com o badge ATRASADA (porque alguma dessas 7 está devendo o
+// ciclo atual), o que para o usuário parecia contraditório.
 const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
 
   if (vistoria.unidadeId) return null; // não é "Geral", não tem missão
 
+  const agora = new Date();
   const progressoPorUnidade = new Map((vistoria.progressos || []).map((p) => [p.unidadeId, p]));
 
-  const concluidas = idsResidenciasAtivas.filter(
-    (unidadeId) => progressoPorUnidade.get(unidadeId)?.dataUltima
-  ).length;
+  const concluidas = idsResidenciasAtivas.filter((unidadeId) => {
+    const progresso = progressoPorUnidade.get(unidadeId);
+    if (!progresso?.dataUltima) return false;
+    return !progresso.dataProxima || progresso.dataProxima > agora;
+  }).length;
 
   return { concluidas, total: idsResidenciasAtivas.length };
 
