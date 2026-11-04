@@ -29,6 +29,37 @@ const locadorDaReceita = async (dados) => {
   return null;
 };
 
+// Trava duplicata de Aluguel: mesmo inquilino (ou mesmo pagador avulso,
+// pelo CPF) com cobrança vencendo no MESMO mês não pode ganhar uma
+// segunda -- os motores automáticos (cobrancaRecorrenteService,
+// gerarRecorrenciaReceitasJob) já se protegiam disso, mas a criação
+// manual (Nova Receita/Nova Cobrança) não tinha trava nenhuma, então
+// um duplo-clique no "Salvar" empilhava cobrança igual em cima da
+// outra. Só olha a categoria "Aluguel" -- Multa/Taxa/Outros podem ter
+// mais de um lançamento legítimo no mesmo mês.
+const existeAluguelDuplicado = async (dados) => {
+
+  if (dados.categoria !== 'Aluguel' || !dados.vencimento) return false;
+  if (!dados.inquilinoId && !dados.pagadorCpf) return false;
+
+  const vencimento = new Date(dados.vencimento);
+  const inicioMes = new Date(vencimento.getFullYear(), vencimento.getMonth(), 1);
+  const inicioProximoMes = new Date(vencimento.getFullYear(), vencimento.getMonth() + 1, 1);
+
+  const existente = await prisma.receita.findFirst({
+    where: {
+      categoria: 'Aluguel',
+      vencimento: { gte: inicioMes, lt: inicioProximoMes },
+      ...(dados.inquilinoId
+        ? { inquilinoId: dados.inquilinoId }
+        : { pagadorCpf: dados.pagadorCpf }),
+    },
+  });
+
+  return Boolean(existente);
+
+};
+
 // Mesma ideia de locadorDaReceita, mas pra descobrir a KITNET -- um
 // locador pode ter várias contas (ex.: SH com BB-H, BB-S e Efí, cada
 // uma recebendo de kitnets diferentes), então quem decide a conta de
@@ -155,6 +186,10 @@ const criar = async (dados, autor) => {
   dados = await aplicarValorLiquidoPadrao(dados);
 
   await campoObrigatorioService.validar(modulo, dados);
+
+  if (await existeAluguelDuplicado(dados)) {
+    throw new Error('Já existe uma cobrança de Aluguel para esse inquilino/pagador nesse mês.');
+  }
 
   // Escolha explícita no formulário (ex.: cobrança avulsa em Nova
   // Cobrança, sem contrato/inquilino pra inferir sozinho) tem

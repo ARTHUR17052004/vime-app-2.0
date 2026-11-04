@@ -49,6 +49,7 @@ export default function ReceitaForm({
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
+  const [salvando, setSalvando] = useState(false);
 
   useEffect(() => {
 
@@ -177,8 +178,13 @@ export default function ReceitaForm({
     ? Math.round((numeroValor - valorLiquidoCalculado) * 100) / 100
     : null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Trava clique duplo no "Salvar" -- sem isso, dois cliques rápidos
+    // (ou uma rede lenta) mandavam duas receitas idênticas antes do
+    // modal fechar.
+    if (salvando) return;
 
     const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
@@ -190,22 +196,31 @@ export default function ReceitaForm({
     }
 
     setErro("");
+    setSalvando(true);
 
-    onSave({
-      id: formData.id,
-      categoria: formData.categoria,
-      descricao: formData.descricao,
-      valor: formData.valor,
-      status: formData.status,
-      vencimento: formData.vencimento,
-      dataPagamento: formData.dataPagamento,
-      inquilinoId: formData.inquilinoId || null,
-      contratoId: formData.contratoId || undefined,
-      // valorLiquido não vai no payload -- é sempre calculado pelo
-      // backend a partir da conta de pagamento, nunca editável aqui.
-      // Recorrência também não -- vira uma ação na própria linha da
-      // receita, depois de criada (igual Enviar ao Banco).
-    });
+    try {
+
+      await onSave({
+        id: formData.id,
+        categoria: formData.categoria,
+        descricao: formData.descricao,
+        valor: formData.valor,
+        status: formData.status,
+        vencimento: formData.vencimento,
+        dataPagamento: formData.dataPagamento,
+        inquilinoId: formData.inquilinoId || null,
+        contratoId: formData.contratoId || undefined,
+        // valorLiquido não vai no payload -- é sempre calculado pelo
+        // backend a partir da conta de pagamento, nunca editável aqui.
+        // Recorrência também não -- vira uma ação na própria linha da
+        // receita, depois de criada (igual Enviar ao Banco).
+      });
+
+    } finally {
+
+      setSalvando(false);
+
+    }
   };
 
   const inputStyle =
@@ -395,15 +410,19 @@ export default function ReceitaForm({
       <div className="flex justify-end">
 
         <button
+          type="submit"
+          disabled={salvando}
           className="
             bg-green-700
             text-[var(--text)]
             px-6
             py-3
             rounded-xl
+            disabled:opacity-60
+            disabled:cursor-not-allowed
           "
         >
-          Salvar
+          {salvando ? "Salvando..." : "Salvar"}
         </button>
 
       </div>
