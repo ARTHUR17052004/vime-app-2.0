@@ -88,9 +88,9 @@ export default function SelectBusca({
       {aberto && !disabled && (
         <div
           className="
-            absolute z-20 mt-1 w-full max-h-64 overflow-y-auto
+            absolute z-30 mt-1 w-full max-h-64 overflow-y-auto
             rounded-xl border border-[var(--border-token)]
-            bg-[var(--surface-2)] shadow-xl
+            bg-[var(--surface)] backdrop-blur-xl shadow-xl
           "
         >
           {filtradas.length === 0 && (

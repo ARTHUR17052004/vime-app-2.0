@@ -28,6 +28,29 @@ const locadorDaReceita = async (dados) => {
   return null;
 };
 
+// Mesma ideia de locadorDaReceita, mas pra descobrir a KITNET -- um
+// locador pode ter várias contas (ex.: SH com BB-H, BB-S e Efí, cada
+// uma recebendo de kitnets diferentes), então quem decide a conta de
+// verdade é a kitnet da receita (ver ContaPagamentoService.resolverParaKitnet),
+// não só o locador dela.
+const kitnetDaReceita = async (dados) => {
+  if (dados.contratoId) {
+    const contrato = await prisma.contrato.findUnique({
+      where: { id: dados.contratoId },
+      select: { kitnetId: true },
+    });
+    if (contrato?.kitnetId) return contrato.kitnetId;
+  }
+  if (dados.inquilinoId) {
+    const inquilino = await prisma.inquilino.findUnique({
+      where: { id: dados.inquilinoId },
+      select: { kitnetId: true },
+    });
+    if (inquilino?.kitnetId) return inquilino.kitnetId;
+  }
+  return null;
+};
+
 // "Nova Receita" e "Nova Cobrança" criam a mesma Receita por baixo,
 // mas são telas diferentes -- cada uma com sua própria configuração em
 // Campos Obrigatórios ("receita" vs "cobranca"). `origemFormulario` diz
@@ -113,7 +136,8 @@ async function aplicarValorLiquidoPadrao(dados, registroExistente) {
 
   const base = { ...registroExistente, ...dados };
   const locadorId = base.locadorId || await locadorDaReceita(base);
-  const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+  const kitnetId = await kitnetDaReceita(base);
+  const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, locadorId);
   const taxa = conta?.taxaBoletoValor || 0;
 
   dados.valorLiquido = Math.max(0, Math.round((dados.valor - taxa) * 100) / 100);
@@ -255,7 +279,8 @@ const remover = async (id, autor) => {
 const previsaoTaxaBoleto = async ({ inquilinoId, contratoId }) => {
 
   const locadorId = await locadorDaReceita({ inquilinoId, contratoId });
-  const conta = await contaPagamentoService.resolverParaLocador(locadorId);
+  const kitnetId = await kitnetDaReceita({ inquilinoId, contratoId });
+  const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, locadorId);
 
   return {
     contaNome: conta?.nome || null,
@@ -270,5 +295,6 @@ module.exports = {
   criar,
   atualizar,
   remover,
-  previsaoTaxaBoleto
+  previsaoTaxaBoleto,
+  kitnetDaReceita
 };

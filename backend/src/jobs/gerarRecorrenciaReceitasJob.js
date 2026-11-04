@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
 const contaPagamentoService = require("../services/contaPagamentoService");
+const { kitnetDaReceita } = require("../services/receitaService");
 
 /*
   Recorrência de Receita direto (sem Contrato -- esse já tem seu
@@ -63,9 +64,11 @@ module.exports = async () => {
     }
 
     // Taxa é da conta de PAGAMENTO, não do sistema inteiro -- resolve
-    // pelo locador desta receita de novo a cada uma (pode mudar entre
-    // locadores diferentes).
-    const conta = await contaPagamentoService.resolverParaLocador(receita.locadorId);
+    // pela kitnet desta receita de novo a cada uma (uma kitnet pode ter
+    // conta própria, diferente da padrão do locador -- ver
+    // ContaPagamentoService.resolverParaKitnet).
+    const kitnetId = await kitnetDaReceita(receita);
+    const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, receita.locadorId);
     const taxa = conta?.taxaBoletoValor || 0;
 
     const valorLiquido = Math.max(0, Math.round((receita.valor - taxa) * 100) / 100);
