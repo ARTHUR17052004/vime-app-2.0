@@ -107,13 +107,13 @@ export default function StepDadosPessoais({
       </Campo>
 
       <Campo
-        label="Contato de Emergência (nome)"
+        label="Nome do Contato de Emergência"
         obrigatorio={obrigatorios.has("contatoEmergencia")}
-        hint="Nome de alguém pra chamar em caso de emergência com o inquilino (não é o nome dele)."
+        hint="Quem avisar se o inquilino tiver uma emergência (não é o inquilino)."
       >
         <input
           name="contatoEmergencia"
-          placeholder="Nome da pessoa de contato"
+          placeholder="Ex: Maria da Silva"
           value={formData.contatoEmergencia}
           onChange={handleChange}
           className={inputStyle}
@@ -122,13 +122,13 @@ export default function StepDadosPessoais({
       </Campo>
 
       <Campo
-        label="Telefone de Emergência (número)"
+        label="Telefone do Contato de Emergência"
         obrigatorio={obrigatorios.has("telefoneEmergencia")}
-        hint="Telefone dessa mesma pessoa de contato (não é o telefone do inquilino)."
+        hint="Telefone dessa pessoa (não é o telefone do inquilino)."
       >
         <input
           name="telefoneEmergencia"
-          placeholder="Telefone da pessoa de contato"
+          placeholder="(00) 00000-0000"
           value={formData.telefoneEmergencia}
           onChange={handleChange}
           className={`${inputStyle} ${
