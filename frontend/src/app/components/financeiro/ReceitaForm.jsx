@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { InquilinoService } from "../../../services/inquilinos.service";
+import SelectBusca from "../common/SelectBusca";
 import { CamposObrigatoriosService } from "../../../services/camposObrigatorios.service";
 import { ReceitaService } from "../../../services/financeiro.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "../../../utils/validacaoObrigatorios";
@@ -139,9 +140,8 @@ export default function ReceitaForm({
   // sozinho pra Valor e monta a Descrição no mesmo padrão já usado na
   // recorrência automática (cobrancaRecorrenteService). Continua
   // editável depois, é só um ponto de partida.
-  const handleChangeInquilino = (e) => {
+  const handleChangeInquilino = (inquilinoId) => {
 
-    const inquilinoId = e.target.value;
     const inquilino = inquilinos.find((i) => i.id === inquilinoId);
 
     setFormData((atual) => {
@@ -250,20 +250,13 @@ export default function ReceitaForm({
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">
             Inquilino{obrigatorios.has("inquilinoId") && <span className="text-red-400"> *</span>}
           </label>
-          <select
-            name="inquilinoId"
+          <SelectBusca
             value={formData.inquilinoId}
             onChange={handleChangeInquilino}
+            options={inquilinos.map((inq) => ({ id: inq.id, label: inq.nome }))}
+            placeholder="Digite pra buscar um inquilino..."
             required={obrigatorios.has("inquilinoId")}
-            className={inputStyle}
-          >
-            <option value="">Selecione um inquilino</option>
-            {inquilinos.map((inq) => (
-              <option key={inq.id} value={inq.id}>
-                {inq.nome}
-              </option>
-            ))}
-          </select>
+          />
           <p className="text-[10px] text-[var(--text-faint)] mt-1">
             Cobrança avulsa, sem inquilino cadastrado? Use Transações &gt; Nova Cobrança.
           </p>
