@@ -377,6 +377,20 @@ export default function ReceitaForm({
           />
         </div>
 
+        <div>
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Conta do boleto
+          </label>
+          <input
+            disabled
+            value={contaInfo.contaNome || "Conta padrão do sistema"}
+            className={inputCalculadoStyle}
+          />
+          <p className="text-[10px] text-[var(--text-faint)] mt-1">
+            Só pra conferir -- é onde o boleto dessa cobrança vai ser gerado.
+          </p>
+        </div>
+
       </div>
 
       {erro && (

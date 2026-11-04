@@ -44,8 +44,16 @@ const slugificarNomeArquivo = (nome) => {
 
 const DIAS_ALERTA_VENCIMENTO = 10;
 
-// Notifica (uma única vez por contrato) quando o contrato está a até
-// DIAS_ALERTA_VENCIMENTO dias do fim. Chamado tanto na hora de criar o
+// Mais de um lembrete conforme o prazo aperta -- um aviso só lá na
+// primeira marca (10 dias) é fácil de passar batido; 5 e 3 dias dão
+// mais uma chance de lembrar o funcionário de clicar em "Renovar".
+// Checa da MAIOR pra MENOR: se o job ficou fora do ar um dia e pulou
+// uma marca exata, a próxima rodada ainda manda os avisos que
+// ficaram pra trás (cada um dedupado pelo próprio título).
+const MARCOS_LEMBRETE_VENCIMENTO = [10, 5, 3];
+
+// Notifica (uma única vez por contrato POR MARCO) quando o contrato
+// está a até DIAS_ALERTA_VENCIMENTO dias do fim. Chamado tanto na hora de criar o
 // contrato (pra já avisar se ele já nascer perto do vencimento) quanto
 // pelo job diário que varre os contratos já em andamento.
 const notificarSeVencimentoProximo = async (contrato) => {
@@ -63,29 +71,50 @@ const notificarSeVencimentoProximo = async (contrato) => {
   if (diasRestantes < 0 || diasRestantes > DIAS_ALERTA_VENCIMENTO) return;
 
   const link = `/contratos/${contrato.id}`;
+  const prazoVencimento = diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`;
 
-  const jaNotificado = await prisma.notificacao.findFirst({
-    where: { link, titulo: 'Contrato próximo do vencimento' }
-  });
+  // Todo marco já atingido (diasRestantes <= marco) que ainda não foi
+  // notificado manda o lembrete dele -- ordem decrescente só pra sair
+  // em ordem cronológica quando mais de um marco é pego de uma vez
+  // (ex.: job ficou fora do ar e pulou o de 5 dias, aí quando roda de
+  // novo com 3 dias restantes manda os dois: o de 5 e o de 3).
+  const marcosAtingidos = MARCOS_LEMBRETE_VENCIMENTO
+    .filter((marco) => diasRestantes <= marco)
+    .sort((a, b) => b - a);
 
-  if (jaNotificado) return;
+  if (marcosAtingidos.length === 0) return;
 
   const inquilino = contrato.inquilino || await prisma.inquilino.findUnique({
     where: { id: contrato.inquilinoId }
   });
 
-  const prazoVencimento = diasRestantes === 0 ? 'hoje' : `em ${diasRestantes} dia(s)`;
+  for (const marco of marcosAtingidos) {
 
-  await notificacaoService.criar({
-    origem: 'SISTEMA',
-    titulo: 'Contrato próximo do vencimento',
-    mensagem: await notificacaoService.renderizarMensagem(
-      'CONTRATO_VENCENDO',
-      { inquilino: inquilino?.nome || 'um inquilino', prazo: prazoVencimento, data: fim.toLocaleDateString('pt-BR') },
-      `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${prazoVencimento} (${fim.toLocaleDateString('pt-BR')}).`
-    ),
-    link
-  });
+    // Marco 10 mantém o título original (notificação já em produção,
+    // dedupada por ele) -- 5 e 3 são lembretes extras, cada um com o
+    // próprio título pra não dedupar em cima do primeiro aviso.
+    const titulo = marco === 10
+      ? 'Contrato próximo do vencimento'
+      : `Contrato quase vencendo -- lembrete de ${marco} dias`;
+
+    const jaNotificado = await prisma.notificacao.findFirst({
+      where: { link, titulo }
+    });
+
+    if (jaNotificado) continue;
+
+    await notificacaoService.criar({
+      origem: 'SISTEMA',
+      titulo,
+      mensagem: await notificacaoService.renderizarMensagem(
+        'CONTRATO_VENCENDO',
+        { inquilino: inquilino?.nome || 'um inquilino', prazo: prazoVencimento, data: fim.toLocaleDateString('pt-BR') },
+        `O contrato de ${inquilino?.nome || 'um inquilino'} vence ${prazoVencimento} (${fim.toLocaleDateString('pt-BR')}) -- lembre de clicar em "Renovar" se for o caso.`
+      ),
+      link
+    });
+
+  }
 
 };
 
