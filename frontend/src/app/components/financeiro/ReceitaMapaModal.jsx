@@ -92,11 +92,17 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
             <Linha
               icon={Send}
               titulo="Cobrança enviada"
-              tone={receita.cobrancaEnviadaEm ? "done" : "pending"}
+              tone={(receita.cobrancaEnviadaEm || receita.gatewayReferencia) ? "done" : "pending"}
               valor={
                 receita.cobrancaEnviadaEm
                   ? formatarDataHora(receita.cobrancaEnviadaEm)
-                  : "Ainda não enviada ao banco"
+                  // Boleto antigo, enviado antes do sistema passar a
+                  // registrar a hora exata (cobrancaEnviadaEm) -- tem
+                  // número de referência do banco, então foi enviado
+                  // de verdade, só não sabemos quando ao certo.
+                  : receita.gatewayReferencia
+                    ? "Enviada (data exata não registrada)"
+                    : "Ainda não enviada ao banco"
               }
               detalhe={
                 receita.gatewayProvider
