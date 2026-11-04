@@ -518,7 +518,10 @@ const remover = async (id, autor, opcoes = {}) => {
   // Só esvazia a kitnet/desativa o inquilino se não sobrou outro
   // inquilino/contrato ativo ligado a eles (ex.: kitnet compartilhada,
   // ou um contrato novo já criado antes de excluir o antigo).
-  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id }))) {
+  // ignorarInquilinoId é necessário aqui: nesse ponto o inquilino desse
+  // próprio contrato ainda está com ativo:true (só é desativado abaixo),
+  // então sem isso ele sempre contava como "sobrou morador".
+  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id, ignorarInquilinoId: contrato.inquilinoId }))) {
     await prisma.kitnet.update({
       where: {
         id: contrato.kitnetId
@@ -609,7 +612,7 @@ const encerrar = async (id, autor, opcoes = {}) => {
     }
   });
 
-  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id }))) {
+  if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: id, ignorarInquilinoId: contrato.inquilinoId }))) {
     await prisma.kitnet.update({
       where: {
         id: contrato.kitnetId

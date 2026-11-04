@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
 const logService = require("../services/logService");
 const { emitirAtualizacao } = require("../socket");
-const { kitnetAindaOcupada, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
+const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 
 module.exports = async () => {
 
@@ -30,7 +30,11 @@ module.exports = async () => {
       }
     });
 
-    if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: contrato.id }))) {
+    // Sem ignorarInquilinoId, kitnetAindaOcupada encontrava o PRÓPRIO
+    // inquilino desse contrato (ainda com ativo:true nesse instante) e
+    // achava que "sobrou" morador -- a kitnet nunca era liberada
+    // sozinha pelo job, mesmo sem ninguém mais morando lá.
+    if (!(await kitnetAindaOcupada(contrato.kitnetId, { ignorarContratoId: contrato.id, ignorarInquilinoId: contrato.inquilinoId }))) {
       await prisma.kitnet.update({
         where: {
           id: contrato.kitnetId
@@ -41,6 +45,16 @@ module.exports = async () => {
         }
       });
       gerarVistoriaDeEntrega(contrato.kitnetId);
+    }
+
+    // Mesma lógica de inquilinoService/contratoService.encerrar -- o
+    // job não desativava o inquilino, então ele continuava "ativo"
+    // para sempre mesmo depois do contrato vencer sozinho.
+    if (!(await inquilinoTemOutroContratoAtivo(contrato.inquilinoId, { ignorarContratoId: contrato.id }))) {
+      await prisma.inquilino.update({
+        where: { id: contrato.inquilinoId },
+        data: { ativo: false }
+      });
     }
 
     await logService.registrar({
