@@ -199,14 +199,30 @@ class EFIApi {
   // em homologação e ajustar aqui o que vier diferente.
   async criarBoleto(dados, override = null) {
 
-    // E-mail é opcional pra EFI, mas se for mandado precisa bater com
-    // o formato de e-mail de verdade -- um cadastro com e-mail vazio,
-    // com espaço ou mal formatado (ex.: "sem email", "-") faz a API
-    // rejeitar o boleto inteiro. Melhor simplesmente não mandar esse
-    // campo do que travar a cobrança por isso.
-    const emailValido = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
-      String(dados.pagador.email || "").trim()
-    );
+    // A EFI exige CPF, e-mail e telefone válidos pra registrar o
+    // boleto -- cadastro incompleto/errado (inquilino sem e-mail, CPF
+    // faltando dígito, etc.) tem que travar aqui com mensagem clara,
+    // em vez de chegar a chamar a API e voltar com um erro genérico/
+    // código difícil de entender. Força corrigir o cadastro do
+    // inquilino antes de reenviar.
+    const nome = dados.pagador?.nome || "";
+    const cpfDigitos = String(dados.pagador?.cpf || "").replace(/\D/g, "");
+    const emailBruto = String(dados.pagador?.email || "").trim();
+    const telefoneDigitos = String(dados.pagador?.telefone || "").replace(/\D/g, "");
+
+    const emailValido = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(emailBruto);
+
+    if (cpfDigitos.length !== 11) {
+      throw new Error(`CPF do inquilino ${nome ? `"${nome}" ` : ""}está ausente ou inválido. Corrija o cadastro antes de enviar a cobrança.`);
+    }
+
+    if (!emailValido) {
+      throw new Error(`E-mail do inquilino ${nome ? `"${nome}" ` : ""}está ausente ou em formato inválido. Corrija o cadastro antes de enviar a cobrança.`);
+    }
+
+    if (!telefoneDigitos) {
+      throw new Error(`Telefone do inquilino ${nome ? `"${nome}" ` : ""}está ausente. Corrija o cadastro antes de enviar a cobrança.`);
+    }
 
     const resultado = await this.request("POST", "/v1/charge/one-step", {
       items: [
@@ -219,10 +235,10 @@ class EFIApi {
       payment: {
         banking_billet: {
           customer: {
-            name: dados.pagador.nome,
-            cpf: dados.pagador.cpf, // só dígitos
-            email: emailValido ? dados.pagador.email.trim() : undefined,
-            phone_number: dados.pagador.telefone || undefined,
+            name: nome,
+            cpf: cpfDigitos,
+            email: emailBruto,
+            phone_number: telefoneDigitos,
           },
           expire_at: dados.dataVencimento, // formato AAAA-MM-DD
         },
