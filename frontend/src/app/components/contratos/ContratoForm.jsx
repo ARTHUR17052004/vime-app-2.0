@@ -313,12 +313,21 @@ export default function ContratoForm({
     }
 
     // Escolher o inquilino direto (sem ter escolhido locador/residência/
-    // kitnet antes) já preenche os três sozinho, a partir da kitnet dele --
-    // é o caminho mais rápido pra quem já sabe quem é o inquilino (ex.:
-    // "Adicionar Contrato" no Arquivo).
+    // kitnet antes) já preenche tudo sozinho, puxando do próprio
+    // cadastro dele (etapa 3: garantia, caução, reajuste, datas) e da
+    // kitnet (valor do aluguel) -- é o caminho mais rápido pra quem já
+    // sabe quem é o inquilino (ex.: "Adicionar Contrato" no Arquivo),
+    // sem precisar redigitar o que já foi cadastrado.
     if (name === "inquilinoId") {
 
       const inquilino = inquilinos.find((i) => i.id === value);
+
+      // Mesmo padrão default do contrato gerado automático na etapa 3
+      // do cadastro de inquilino (ver inquilinoService.js) -- dia fixo
+      // da Residência, senão o dia do mês do início do contrato.
+      const diaVencimentoPadrao =
+        inquilino?.kitnet?.unidade?.vencimento ||
+        (inquilino?.dataInicioContrato ? new Date(inquilino.dataInicioContrato).getDate() : null);
 
       setFormData((prev) => ({
 
@@ -330,6 +339,22 @@ export default function ContratoForm({
           kitnetId: inquilino.kitnetId,
           unidadeId: inquilino.kitnet?.unidadeId || prev.unidadeId,
           locadorId: inquilino.kitnet?.unidade?.locadorId || prev.locadorId,
+        }),
+
+        ...(inquilino?.kitnet?.aluguel != null && { valorAluguel: String(inquilino.kitnet.aluguel) }),
+        ...(diaVencimentoPadrao && { diaVencimento: String(diaVencimentoPadrao) }),
+        ...(inquilino?.tipoGarantia && { tipoGarantia: inquilino.tipoGarantia }),
+        ...(inquilino?.valorCaucao != null && { valorCaucao: String(inquilino.valorCaucao) }),
+        ...(inquilino?.indiceReajuste && { indiceReajuste: inquilino.indiceReajuste }),
+
+        // No Arquivo essas datas nem aparecem na tela (salvar() já puxa
+        // dataInicio do inquilino sozinho na hora de enviar) -- só vale
+        // a pena preencher aqui pro modo normal, onde os campos existem.
+        ...(!modoManual && inquilino?.dataInicioContrato && {
+          dataInicio: String(inquilino.dataInicioContrato).slice(0, 10),
+        }),
+        ...(!modoManual && inquilino?.dataFimContrato && {
+          dataFim: String(inquilino.dataFimContrato).slice(0, 10),
         }),
 
       }));
