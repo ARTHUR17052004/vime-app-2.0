@@ -370,21 +370,28 @@ const criar = async (dados, usuario) => {
   // fica só salvo no VIME. O envio agora é uma ação separada e
   // deliberada (ver enviarParaClicksign), pedida depois que o usuário
   // confere o demonstrativo do contrato na tela.
-  try {
+  //
+  // Arquivo de Contratos (origem MANUAL) é contrato antigo, de outro
+  // sistema -- o inquilino já sabe que tem contrato, não é novidade
+  // nenhuma pra ele. Esse aviso é só pro fluxo normal (contrato novo,
+  // gerado aqui dentro).
+  if (contrato.origem !== 'MANUAL') {
 
-    await WhatsappService.enviarMensagem({
-      numero: inquilino.telefone,
-      mensagem: contrato.origem === 'MANUAL'
-        ? `Olá ${inquilino.nome}, seu contrato foi registrado com sucesso no sistema.`
-        : `Olá ${inquilino.nome}, seu contrato foi criado com sucesso. Em breve você receberá o link para assinatura.`
-    });
+    try {
 
-  } catch (integracaoError) {
+      await WhatsappService.enviarMensagem({
+        numero: inquilino.telefone,
+        mensagem: `Olá ${inquilino.nome}, seu contrato foi criado com sucesso. Em breve você receberá o link para assinatura.`
+      });
 
-    console.error(
-      "Erro ao enviar mensagem de WhatsApp na criação do contrato:",
-      integracaoError.message
-    );
+    } catch (integracaoError) {
+
+      console.error(
+        "Erro ao enviar mensagem de WhatsApp na criação do contrato:",
+        integracaoError.message
+      );
+
+    }
 
   }
 
