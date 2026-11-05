@@ -629,21 +629,35 @@ function FinanceiroPageConteudo() {
     </FadeIn>
 
     <FadeIn delay={0.20}>
-      <FinanceiroFilters
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div
+        className="
+          mt-8
+          rounded-2xl
+          border
+          border-[var(--border-token)]
+          bg-[var(--surface)]
+          backdrop-blur-xl
+          p-6
+          space-y-5
+        "
+      >
 
-      <div className="mt-4 flex flex-col md:flex-row gap-4">
+        <FinanceiroFilters
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        <div className="flex-1">
-          <ResidenciaFiltro
-            value={residenciaSelecionada}
-            onChange={setResidenciaSelecionada}
-          />
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
 
-        <div className="flex items-center gap-3">
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Residência
+            </label>
+            <ResidenciaFiltro
+              value={residenciaSelecionada}
+              onChange={setResidenciaSelecionada}
+            />
+          </div>
 
           <div>
             <label className="block text-xs text-[var(--text-faint)] mb-1.5">
@@ -653,7 +667,7 @@ function FinanceiroPageConteudo() {
               type="date"
               value={dataDe}
               onChange={(e) => setDataDe(e.target.value)}
-              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3"
+              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
             />
           </div>
 
@@ -665,76 +679,76 @@ function FinanceiroPageConteudo() {
               type="date"
               value={dataAte}
               onChange={(e) => setDataAte(e.target.value)}
-              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3"
+              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
             />
           </div>
 
-          {(dataDe || dataAte) && (
-            <button
-              type="button"
-              onClick={() => {
-                setDataDe("");
-                setDataAte("");
-              }}
-              className="mt-6 text-xs text-[var(--text-faint)] hover:text-[var(--text)] underline"
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Status
+            </label>
+            <select
+              value={statusFiltro}
+              onChange={(e) => setStatusFiltro(e.target.value)}
+              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
             >
-              Limpar
-            </button>
-          )}
+              <option value="" className="bg-[#1b2430]">Todos</option>
+              <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
+              <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
+              <option value="PAGA" className="bg-[#1b2430]">Paga</option>
+              <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Conta
+            </label>
+            <select
+              value={contaFiltro}
+              onChange={(e) => setContaFiltro(e.target.value)}
+              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
+            >
+              <option value="" className="bg-[#1b2430]">Todas</option>
+              {contas.map((conta) => (
+                <option key={conta.id} value={conta.id} className="bg-[#1b2430]">
+                  {conta.nome}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Organizar por
+            </label>
+            <select
+              value={ordenacao}
+              onChange={(e) => setOrdenacao(e.target.value)}
+              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
+            >
+              <option value="vencimento-proximo" className="bg-[#1b2430]">Vencimento (mais próximo)</option>
+              <option value="vencimento-distante" className="bg-[#1b2430]">Vencimento (mais distante)</option>
+              <option value="valor-maior" className="bg-[#1b2430]">Valor (maior)</option>
+              <option value="valor-menor" className="bg-[#1b2430]">Valor (menor)</option>
+              <option value="status" className="bg-[#1b2430]">Status</option>
+            </select>
+          </div>
 
         </div>
 
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-            Status
-          </label>
-          <select
-            value={statusFiltro}
-            onChange={(e) => setStatusFiltro(e.target.value)}
-            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+        {(dataDe || dataAte) && (
+          <button
+            type="button"
+            onClick={() => {
+              setDataDe("");
+              setDataAte("");
+            }}
+            className="text-xs text-[var(--text-faint)] hover:text-[var(--text)] underline"
           >
-            <option value="" className="bg-[#1b2430]">Todos</option>
-            <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
-            <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
-            <option value="PAGA" className="bg-[#1b2430]">Paga</option>
-            <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-            Conta
-          </label>
-          <select
-            value={contaFiltro}
-            onChange={(e) => setContaFiltro(e.target.value)}
-            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="" className="bg-[#1b2430]">Todas</option>
-            {contas.map((conta) => (
-              <option key={conta.id} value={conta.id} className="bg-[#1b2430]">
-                {conta.nome}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-            Organizar por
-          </label>
-          <select
-            value={ordenacao}
-            onChange={(e) => setOrdenacao(e.target.value)}
-            className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-          >
-            <option value="vencimento-proximo" className="bg-[#1b2430]">Vencimento (mais próximo)</option>
-            <option value="vencimento-distante" className="bg-[#1b2430]">Vencimento (mais distante)</option>
-            <option value="valor-maior" className="bg-[#1b2430]">Valor (maior)</option>
-            <option value="valor-menor" className="bg-[#1b2430]">Valor (menor)</option>
-            <option value="status" className="bg-[#1b2430]">Status</option>
-          </select>
-        </div>
+            Limpar período
+          </button>
+        )}
 
       </div>
     </FadeIn>
