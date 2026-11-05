@@ -16,6 +16,7 @@ import { InquilinoService } from "@/services/inquilinos.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 import { ordenarPorNumero } from "@/utils/ordenarKitnets";
+import { calcularFimCicloAtual } from "@/utils/cicloContrato";
 
 const CAMPOS = [
   "locadorId", "unidadeId", "kitnetId", "inquilinoId", "dataInicio", "dataFim",
@@ -31,7 +32,7 @@ const ROTULOS = {
   unidadeId: "Residência",
   kitnetId: "Kitnet",
   inquilinoId: "Inquilino",
-  dataInicio: "Data de Criação do Contrato",
+  dataInicio: "Início do Contrato",
   dataFim: "Data Final do Contrato",
   valorAluguel: "Valor do Aluguel",
   diaVencimento: "Dia do Vencimento",
@@ -347,10 +348,12 @@ export default function ContratoForm({
         ...(inquilino?.valorCaucao != null && { valorCaucao: String(inquilino.valorCaucao) }),
         ...(inquilino?.indiceReajuste && { indiceReajuste: inquilino.indiceReajuste }),
 
-        // No Arquivo essas datas nem aparecem na tela (salvar() já puxa
-        // dataInicio do inquilino sozinho na hora de enviar) -- só vale
-        // a pena preencher aqui pro modo normal, onde os campos existem.
-        ...(!modoManual && inquilino?.dataInicioContrato && {
+        // Início vale a pena puxar nos dois modos (quem cadastrou o
+        // inquilino já digitou essa data lá na etapa 3) -- dá pra
+        // sobrescrever na mão se o Arquivo for de uma data diferente.
+        // Fim só existe como campo no modo normal -- no Arquivo é
+        // sempre calculado (ver salvar()), nunca digitado.
+        ...(inquilino?.dataInicioContrato && {
           dataInicio: String(inquilino.dataInicioContrato).slice(0, 10),
         }),
         ...(!modoManual && inquilino?.dataFimContrato && {
@@ -407,21 +410,14 @@ export default function ContratoForm({
 
     e.preventDefault();
 
-    // No Arquivo de Contratos (modoManual) a Data Final é obrigatória
-    // sempre, não só quando o admin marcar em Campos Obrigatórios --
-    // sem ela o job de fim de contrato (que encerra a cobrança, libera
-    // a kitnet, etc.) nunca sabe quando agir nesse contrato.
-    const exigidos = new Set([
-      ...obrigatorios,
-      ...SEMPRE_OBRIGATORIOS,
-      ...(modoManual ? ["dataFim"] : []),
-    ]);
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
     // No Arquivo de Contratos (modoManual) esses campos nem aparecem na
-    // tela (ver abaixo) -- não faz sentido exigi-los. dataInicio é
-    // preenchida sozinha logo abaixo, antes de enviar.
+    // tela -- não faz sentido exigi-los. dataFim também sai da lista:
+    // não é mais digitada, é calculada sozinha a partir do Início (ver
+    // calcularFimCicloAtual logo abaixo).
     const campos = modoManual
-      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataInicio"].includes(c))
+      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataFim"].includes(c))
       : CAMPOS;
 
     const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
@@ -437,14 +433,16 @@ export default function ContratoForm({
 
     try {
 
-      // No Arquivo, dataInicio some da tela mas a coluna não aceita
-      // vazio -- usa o início de contrato do inquilino escolhido (se
-      // tiver) ou hoje, sem incomodar quem está cadastrando.
-      const inquilinoEscolhido = inquilinos.find((i) => i.id === formData.inquilinoId);
-
-      const dataInicioFinal = modoManual
-        ? (formData.dataInicio || inquilinoEscolhido?.dataInicioContrato?.slice(0, 10) || new Date().toISOString().slice(0, 10))
-        : formData.dataInicio;
+      // No Arquivo, o Início é digitado na tela (geralmente bem antigo
+      // -- o contrato pode já ter "renovado" várias vezes sozinho desde
+      // então). O Fim não é mais digitado: é sempre o fim do ciclo de 4
+      // meses em que "hoje" cai (ver calcularFimCicloAtual) -- bater só
+      // "início + 4 meses" podia gerar uma data lá no passado e o job
+      // de fim de contrato fecharia o contrato (e esvaziaria a kitnet!)
+      // na hora seguinte, mesmo o inquilino ainda morando lá.
+      const dataFimCalculada = modoManual
+        ? calcularFimCicloAtual(formData.dataInicio)
+        : null;
 
       await onSave({
 
@@ -452,7 +450,14 @@ export default function ContratoForm({
 
         ...(modoManual && !contrato ? { origem: "MANUAL" } : {}),
 
-        dataInicio: dataInicioFinal,
+        // O admin pode ter marcado Garantia/Caução/Reajuste como
+        // obrigatórios em Campos Obrigatórios (pro contrato normal,
+        // gerado pela Clicksign) -- isso não pode travar o Arquivo, que
+        // nem mostra esses campos na tela. dataFim idem: sempre
+        // calculada aqui, nunca "faltando".
+        ...(modoManual && { ignorarObrigatorios: ["tipoGarantia", "valorCaucao", "indiceReajuste", "dataFim"] }),
+
+        dataInicio: formData.dataInicio,
 
         valorAluguel: Number(formData.valorAluguel),
 
@@ -462,8 +467,9 @@ export default function ContratoForm({
           ? Number(formData.valorCaucao)
           : null,
 
-        dataFim:
-          formData.dataFim || null,
+        dataFim: modoManual
+          ? (dataFimCalculada ? dataFimCalculada.fimCiclo.toISOString().slice(0, 10) : null)
+          : (formData.dataFim || null),
 
       });
 
@@ -478,6 +484,12 @@ export default function ContratoForm({
     }
 
   }
+
+  // Preview em tempo real pro usuário ver o que vai ser calculado antes
+  // de salvar -- mesma conta que salvar() usa de verdade.
+  const cicloAtual = useMemo(() => {
+    return modoManual ? calcularFimCicloAtual(formData.dataInicio) : null;
+  }, [modoManual, formData.dataInicio]);
 
   const input = `
     w-full
@@ -673,11 +685,7 @@ export default function ContratoForm({
 
       <div className="grid md:grid-cols-2 gap-5">
 
-        {/* No Arquivo (modoManual) essa data já está no papel do
-            contrato -- dataInicio é preenchida sozinha (pelo início de
-            contrato do inquilino, ou hoje) na hora de salvar. */}
-        {!modoManual && (
-        <Campo label="Data de Criação do Contrato" obrigatorio>
+        <Campo label="Início do Contrato" obrigatorio>
           <input
             className={input}
             type="date"
@@ -687,22 +695,39 @@ export default function ContratoForm({
             required
           />
         </Campo>
-        )}
 
-        {/* Data Final É obrigatória no Arquivo (modoManual), mesmo que
-            o admin não tenha marcado em Campos Obrigatórios -- sem ela
-            o job de fim de contrato nunca sabe quando encerrar a
-            cobrança/liberar a kitnet desses contratos importados. */}
-        <Campo label="Data Final do Contrato" obrigatorio={modoManual || obrigatorios.has("dataFim")}>
-          <input
-            className={input}
-            type="date"
-            name="dataFim"
-            value={formData.dataFim}
-            onChange={alterarCampo}
-            required={modoManual || obrigatorios.has("dataFim")}
-          />
-        </Campo>
+        {/* No Arquivo (contrato antigo, de outro sistema) o Fim não é
+            digitado -- é calculado sozinho a partir do Início, em
+            ciclos de 4 meses, pra achar em qual ciclo "hoje" cai (o
+            contrato pode já ter "renovado" várias vezes sozinho desde
+            aquele Início, que costuma ser de anos atrás). */}
+        {modoManual ? (
+          <Campo label="Data Final do Contrato (calculada)">
+            <div className={`${input} flex items-center justify-between gap-2`}>
+              <span>
+                {cicloAtual
+                  ? cicloAtual.fimCiclo.toLocaleDateString("pt-BR")
+                  : "Preencha o Início do Contrato"}
+              </span>
+              {cicloAtual && (
+                <span className="shrink-0 text-xs text-[var(--text-faint)]">
+                  {cicloAtual.numeroCiclo}º ciclo de 4 meses
+                </span>
+              )}
+            </div>
+          </Campo>
+        ) : (
+          <Campo label="Data Final do Contrato" obrigatorio={obrigatorios.has("dataFim")}>
+            <input
+              className={input}
+              type="date"
+              name="dataFim"
+              value={formData.dataFim}
+              onChange={alterarCampo}
+              required={obrigatorios.has("dataFim")}
+            />
+          </Campo>
+        )}
 
         <Campo label="Valor do Aluguel" obrigatorio>
         <input

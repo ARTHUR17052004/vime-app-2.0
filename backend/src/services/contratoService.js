@@ -443,6 +443,16 @@ const atualizar = async (id, dados, autor) => {
 
   dados = sanitizar(dados);
 
+  // Mesma saída que criar() já tem pro Arquivo de Contratos (origem
+  // MANUAL) -- sem isso, editar um contrato do Arquivo reprovava pelos
+  // campos que o admin marcou obrigatório em Campos Obrigatórios pro
+  // contrato normal (Garantia/Caução/Reajuste), mesmo esses campos nem
+  // aparecendo na tela do Arquivo. ignorarObrigatorios não é coluna do
+  // model -- sai do payload antes do update, senão o Prisma quebra com
+  // "Unknown argument".
+  const ignorarObrigatorios = dados.ignorarObrigatorios || [];
+  delete dados.ignorarObrigatorios;
+
   if (dados.dataInicio !== undefined) {
     if (!dados.dataInicio) {
       throw new Error('Data de início do contrato é obrigatória.');
@@ -458,7 +468,7 @@ const atualizar = async (id, dados, autor) => {
   // Atualização parcial não pode reprovar por "faltar" um campo que já
   // está preenchido desde a criação -- valida o resultado final
   // (anterior + alterações), não só o pedaço enviado nesta chamada.
-  await campoObrigatorioService.validar('contrato', { ...anterior, ...dados });
+  await campoObrigatorioService.validar('contrato', { ...anterior, ...dados }, { ignorar: ignorarObrigatorios });
 
   if (dados.inquilinoId && dados.inquilinoId !== anterior?.inquilinoId) {
 
