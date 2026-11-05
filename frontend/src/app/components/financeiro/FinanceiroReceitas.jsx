@@ -332,7 +332,7 @@ export default function FinanceiroReceitas({
 
                   <div className="flex items-center gap-1 shrink-0">
 
-                    {(item.linkBoleto || item.linhaDigitavel) && (
+                    {(item.linkBoleto || item.linhaDigitavel || item.pixCopiaECola) && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -574,7 +574,7 @@ export default function FinanceiroReceitas({
 
                     <div className="flex items-center gap-1">
 
-                      {(item.linkBoleto || item.linhaDigitavel) && (
+                      {(item.linkBoleto || item.linhaDigitavel || item.pixCopiaECola) && (
                         <button
                           onClick={(e) => {
                             e.stopPropagation();

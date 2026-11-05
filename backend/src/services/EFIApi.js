@@ -219,10 +219,9 @@ class EFIApi {
     // em "payment.banking_billet" como eu tinha chutado antes. Nesse
     // teste real: data.barcode = linha digitável, data.pdf.charge =
     // PDF do boleto, data.charge_id = número (veio como Int, por isso
-    // o String() abaixo). data.pix.qrcode/qrcode_image também vêm
-    // juntos (Pix Copia e Cola + QR code em SVG base64) -- não
-    // capturados ainda aqui -- o pagador já consegue pagar por Pix
-    // abrindo o link do boleto mesmo sem isso.
+    // o String() abaixo). data.pix.qrcode = Pix Copia e Cola (texto),
+    // data.pix.qrcode_image = o mesmo QR em SVG base64 (não usado aqui
+    // -- o pagador já consegue pagar por Pix só com o copia e cola).
     const dadosCobranca = resultado?.data || resultado;
 
     const chargeId = dadosCobranca?.charge_id;
@@ -231,6 +230,7 @@ class EFIApi {
       numero: chargeId != null ? String(chargeId) : null,
       linhaDigitavel: dadosCobranca?.barcode || null,
       urlImagemBoleto: dadosCobranca?.pdf?.charge || dadosCobranca?.billet_link || null,
+      pixCopiaECola: dadosCobranca?.pix?.qrcode || null,
     };
 
   }

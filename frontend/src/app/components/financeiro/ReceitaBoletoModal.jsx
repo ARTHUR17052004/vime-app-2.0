@@ -3,22 +3,18 @@
 import { useState } from "react";
 import { Copy, Check, ExternalLink, FileWarning } from "lucide-react";
 
-// Boleto já enviado ao banco -- linkBoleto/linhaDigitavel só existem
-// depois do "Enviar Cobrança" dar certo (ver gatewayPagamentoService).
-// Serve pra pegar o boleto na mão e mandar manualmente (ex.: WhatsApp,
-// e-mail) quando o envio automático pro inquilino falhar por algum
-// motivo -- sem precisar reemitir nada.
-export default function ReceitaBoletoModal({ isOpen, onClose, receita }) {
+// Boleto já enviado ao banco -- linkBoleto/linhaDigitavel/pixCopiaECola
+// só existem depois do "Enviar Cobrança" dar certo (ver
+// gatewayPagamentoService). Serve pra pegar o boleto/Pix na mão e
+// mandar manualmente (ex.: WhatsApp, e-mail) quando o envio automático
+// pro inquilino falhar por algum motivo -- sem precisar reemitir nada.
+function CampoCopiavel({ rotulo, valor }) {
 
   const [copiado, setCopiado] = useState(false);
 
-  if (!isOpen || !receita) return null;
-
-  const temBoleto = Boolean(receita.linkBoleto || receita.linhaDigitavel);
-
-  const copiarLinhaDigitavel = async () => {
+  const copiar = async () => {
     try {
-      await navigator.clipboard.writeText(receita.linhaDigitavel);
+      await navigator.clipboard.writeText(valor);
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
     } catch {
@@ -26,6 +22,45 @@ export default function ReceitaBoletoModal({ isOpen, onClose, receita }) {
       // sem travar a tela, só não copia sozinho.
     }
   };
+
+  return (
+    <div>
+      <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+        {rotulo}
+      </label>
+      <div className="flex items-center gap-2">
+        <input
+          readOnly
+          value={valor}
+          onFocus={(e) => e.target.select()}
+          className="flex-1 min-w-0 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 text-sm font-mono truncate"
+        />
+        <button
+          type="button"
+          onClick={copiar}
+          title="Copiar"
+          className="shrink-0 w-11 h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] flex items-center justify-center hover:bg-[var(--surface-3)] transition"
+        >
+          {copiado ? (
+            <Check size={18} className="text-emerald-400" />
+          ) : (
+            <Copy size={18} className="text-[var(--text-muted)]" />
+          )}
+        </button>
+      </div>
+      {copiado && (
+        <p className="text-xs text-emerald-400 mt-1.5">Copiado!</p>
+      )}
+    </div>
+  );
+
+}
+
+export default function ReceitaBoletoModal({ isOpen, onClose, receita }) {
+
+  if (!isOpen || !receita) return null;
+
+  const temBoleto = Boolean(receita.linkBoleto || receita.linhaDigitavel || receita.pixCopiaECola);
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--surface-inset)] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -60,35 +95,12 @@ export default function ReceitaBoletoModal({ isOpen, onClose, receita }) {
 
             <div className="space-y-5">
 
+              {receita.pixCopiaECola && (
+                <CampoCopiavel rotulo="Pix Copia e Cola" valor={receita.pixCopiaECola} />
+              )}
+
               {receita.linhaDigitavel && (
-                <div>
-                  <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-                    Linha digitável
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      readOnly
-                      value={receita.linhaDigitavel}
-                      onFocus={(e) => e.target.select()}
-                      className="flex-1 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 text-sm font-mono"
-                    />
-                    <button
-                      type="button"
-                      onClick={copiarLinhaDigitavel}
-                      title="Copiar"
-                      className="shrink-0 w-11 h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] flex items-center justify-center hover:bg-[var(--surface-3)] transition"
-                    >
-                      {copiado ? (
-                        <Check size={18} className="text-emerald-400" />
-                      ) : (
-                        <Copy size={18} className="text-[var(--text-muted)]" />
-                      )}
-                    </button>
-                  </div>
-                  {copiado && (
-                    <p className="text-xs text-emerald-400 mt-1.5">Copiado!</p>
-                  )}
-                </div>
+                <CampoCopiavel rotulo="Linha digitável" valor={receita.linhaDigitavel} />
               )}
 
               {receita.linkBoleto && (

@@ -455,7 +455,11 @@ model Receita {
   gatewayProvider   String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
   gatewayReferencia String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
   linkBoleto        String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
-  linhaDigitavel    String? // só o BB devolve isso -- código pra digitar no app do banco em vez de abrir o link
+  linhaDigitavel    String? // código pra digitar/colar no app do banco em vez de abrir o link
+  // Pix "copia e cola" do próprio boleto (BB: qrCode.emv da resposta de
+  // registro; EFI: pix.qrcode) -- quando a conta tem Pix habilitado,
+  // dá pra pagar sem nem abrir o link/PDF do boleto.
+  pixCopiaECola     String?
   lembreteEnviadoEm DateTime?
   // Quando a cobrança foi de fato mandada pro banco/provedor (botão
   // "Enviar Cobrança") -- diferente de createdAt (quando a Receita foi

@@ -131,6 +131,10 @@ const enviarPeloBB = async (receita, conta) => {
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,
         linhaDigitavel: resultado.linhaDigitavel || null,
+        // Resposta de registro do BB traz um QR Code Pix junto do
+        // boleto (indicadorPix: "S") -- qrCode.emv é o Pix Copia e
+        // Cola. Dá pro inquilino pagar sem nem abrir a página do BB.
+        pixCopiaECola: resultado.qrCode?.emv || null,
       },
     });
 
@@ -219,6 +223,7 @@ const enviarPelaEFI = async (receita, conta) => {
         gatewayReferencia: resultado.numero,
         linkBoleto: resultado.urlImagemBoleto || null,
         linhaDigitavel: resultado.linhaDigitavel || null,
+        pixCopiaECola: resultado.pixCopiaECola || null,
       },
     });
 
