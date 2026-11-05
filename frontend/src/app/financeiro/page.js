@@ -104,16 +104,26 @@ function FinanceiroPageConteudo() {
   const [ordenacao, setOrdenacao] =
     useState("vencimento-proximo");
 
-  // Por padrão, sempre o dia 1 do mês atual -- recalculado toda vez
-  // que a tela abre, então troca sozinho quando o mês vira. Usuário
-  // ainda pode mudar (ou "Limpar") pra ver outro período.
+  // Por padrão, sempre o mês atual inteiro (dia 1 até o último dia) --
+  // recalculado toda vez que a tela abre, então troca sozinho quando o
+  // mês vira. Usuário ainda pode mudar (ou "Limpar") pra ver outro
+  // período. SEM o "até" aqui, uma cobrança já emitida de antemão pro
+  // mês seguinte (ex.: recorrência gerada com alguns dias de
+  // antecedência) entrava nos cards de totais do mês atual antes da
+  // hora -- só deve contar no mês do vencimento dela.
   const [dataDe, setDataDe] = useState(() => {
     const agora = new Date();
     const mes = String(agora.getMonth() + 1).padStart(2, "0");
     return `${agora.getFullYear()}-${mes}-01`;
   });
 
-  const [dataAte, setDataAte] = useState("");
+  const [dataAte, setDataAte] = useState(() => {
+    const agora = new Date();
+    const ultimoDia = new Date(agora.getFullYear(), agora.getMonth() + 1, 0);
+    const mes = String(ultimoDia.getMonth() + 1).padStart(2, "0");
+    const dia = String(ultimoDia.getDate()).padStart(2, "0");
+    return `${ultimoDia.getFullYear()}-${mes}-${dia}`;
+  });
 
   const [statusFiltro, setStatusFiltro] = useState("");
 
@@ -446,14 +456,14 @@ function FinanceiroPageConteudo() {
 
   const ordenarFinanceiro = COMPARADORES_FINANCEIRO[ordenacao] || COMPARADORES_FINANCEIRO["vencimento-proximo"];
 
-  // Enviada pro histórico some da lista normal -- senão cobrança
-  // recorrente já paga fica acumulando mês após mês misturada com as
-  // em aberto (ver aba "Histórico").
+  // Enviada pro histórico some só da LISTA de Receitas (ver abaixo,
+  // receitasListaVisivel) -- continua contando nos cards de totais e
+  // no Fluxo de Caixa/Relatórios normalmente, porque o dinheiro foi
+  // emitido/pago de verdade nesse mês. "Histórico" é só organização da
+  // lista, nunca deixa de contabilizar nada.
   const receitasHistorico = receitas.filter((item) => item.arquivadaNoHistorico);
 
   const receitasFiltradas = receitas.filter((item) => {
-
-    if (item.arquivadaNoHistorico) return false;
 
     // A maioria das receitas é lançada só com Inquilino, sem Contrato
     // nenhum vinculado (ver kitnetOcupacao/contratoService) -- olhar só
@@ -492,6 +502,11 @@ function FinanceiroPageConteudo() {
   }).sort(
     (a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0) || ordenarFinanceiro(a, b)
   );
+
+  // Só pra exibição na lista de Receitas (Visão Geral e aba Receitas) --
+  // os cards de totais e os outros painéis usam receitasFiltradas
+  // direto, arquivada ou não.
+  const receitasListaVisivel = receitasFiltradas.filter((item) => !item.arquivadaNoHistorico);
 
   const despesasFiltradas = despesas.filter((item) => {
 
@@ -795,7 +810,7 @@ function FinanceiroPageConteudo() {
       <div className="space-y-8">
 
         <FinanceiroReceitas
-          receitas={receitasFiltradas}
+          receitas={receitasListaVisivel}
           contas={contas}
           onDelete={excluirReceita}
           onUpdate={atualizarReceita}
@@ -842,7 +857,7 @@ function FinanceiroPageConteudo() {
 
     {abaSelecionada === "receitas" && (
       <FinanceiroReceitas
-        receitas={receitasFiltradas}
+        receitas={receitasListaVisivel}
         contas={contas}
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
