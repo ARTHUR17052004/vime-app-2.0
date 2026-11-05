@@ -1,5 +1,7 @@
 const prisma = require("../config/prisma");
 const logService = require("../services/logService");
+const notificacaoService = require("../services/notificacaoService");
+const WhatsappService = require("../services/whatsappService");
 const { emitirAtualizacao } = require("../socket");
 const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 
@@ -16,6 +18,9 @@ module.exports = async () => {
         not: null,
         lte: hoje
       }
+    },
+    include: {
+      inquilino: true
     }
   });
 
@@ -85,6 +90,39 @@ module.exports = async () => {
       acao: "ENCERRAMENTO_AUTOMATICO",
       descricao: `Contrato ${contrato.id} encerrado automaticamente.`
     });
+
+    // O fechamento MANUAL (contratoService.encerrar) já avisa o sistema
+    // e o inquilino -- esse job automático fazia tudo isso calado (só o
+    // log de auditoria, que ninguém olha no dia a dia). Nenhuma ação
+    // automática pode acontecer sem o usuário ficar sabendo -- os
+    // lembretes de 10/5/3 dias (notificarVencimentoContratoJob) já
+    // avisam ANTES; esse aqui avisa DEPOIS, que a ação de verdade
+    // aconteceu.
+    try {
+      await notificacaoService.criar({
+        origem: "SISTEMA",
+        titulo: "Contrato encerrado automaticamente",
+        mensagem: await notificacaoService.renderizarMensagem(
+          'CONTRATO_ENCERRADO',
+          { contrato: contrato.id },
+          `Contrato de ${contrato.inquilino?.nome || 'um inquilino'} venceu e foi encerrado automaticamente.`
+        ),
+        link: `/contratos/${contrato.id}`
+      });
+    } catch (erroNotificacao) {
+      console.error(`[JOB] Erro ao notificar encerramento automático do contrato ${contrato.id}:`, erroNotificacao.message);
+    }
+
+    if (contrato.inquilino?.telefone) {
+      try {
+        await WhatsappService.enviarMensagem({
+          numero: contrato.inquilino.telefone,
+          mensagem: "Seu contrato chegou ao fim e foi encerrado automaticamente."
+        });
+      } catch (erroWhatsapp) {
+        console.error(`[JOB] Erro ao enviar WhatsApp de encerramento automático (contrato ${contrato.id}):`, erroWhatsapp.message);
+      }
+    }
 
     console.log(
       `[JOB] Contrato ${contrato.id} encerrado automaticamente.`
