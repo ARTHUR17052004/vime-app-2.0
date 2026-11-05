@@ -19,6 +19,8 @@ module.exports = async () => {
     }
   });
 
+  let receitasEncerradas = 0;
+
   for (const contrato of contratos) {
 
     await prisma.contrato.update({
@@ -29,6 +31,25 @@ module.exports = async () => {
         status: "ENCERRADO"
       }
     });
+
+    // Financeiro não sabia que um contrato tinha acabado -- a
+    // recorrência (ver gerarRecorrenciaReceitasJob.js) continuava
+    // gerando cobrança do mês seguinte pra sempre, mesmo com o
+    // inquilino já fora. Encerrar o contrato agora também desativa a
+    // recorrência das receitas dele (por contratoId, ou por
+    // inquilinoId pra receita avulsa sem contrato vinculado).
+    const { count } = await prisma.receita.updateMany({
+      where: {
+        recorrente: true,
+        OR: [
+          { contratoId: contrato.id },
+          { inquilinoId: contrato.inquilinoId, contratoId: null },
+        ],
+      },
+      data: { recorrente: false },
+    });
+
+    receitasEncerradas += count;
 
     // Sem ignorarInquilinoId, kitnetAindaOcupada encontrava o PRÓPRIO
     // inquilino desse contrato (ainda com ativo:true nesse instante) e
@@ -73,6 +94,10 @@ module.exports = async () => {
 
   if (contratos.length > 0) {
     emitirAtualizacao("contrato");
+  }
+
+  if (receitasEncerradas > 0) {
+    emitirAtualizacao("receita");
   }
 
 };

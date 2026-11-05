@@ -40,6 +40,21 @@ const ROTULOS = {
   indiceReajuste: "Índice de Reajuste",
 };
 
+// Mesmo padrão de rótulo+estrelinha usado em ContratoStep.jsx (cadastro
+// de inquilino) -- aqui o form inteiro estava sem label nenhum, então
+// não tinha como saber o que era obrigatório ou não.
+function Campo({ label, obrigatorio, children }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
+        {label}
+        {obrigatorio && <span className="ml-1 text-red-400">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+}
+
 export default function ContratoForm({
   onSave,
   onCancel,
@@ -367,13 +382,21 @@ export default function ContratoForm({
 
     e.preventDefault();
 
-    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+    // No Arquivo de Contratos (modoManual) a Data Final é obrigatória
+    // sempre, não só quando o admin marcar em Campos Obrigatórios --
+    // sem ela o job de fim de contrato (que encerra a cobrança, libera
+    // a kitnet, etc.) nunca sabe quando agir nesse contrato.
+    const exigidos = new Set([
+      ...obrigatorios,
+      ...SEMPRE_OBRIGATORIOS,
+      ...(modoManual ? ["dataFim"] : []),
+    ]);
 
     // No Arquivo de Contratos (modoManual) esses campos nem aparecem na
     // tela (ver abaixo) -- não faz sentido exigi-los. dataInicio é
     // preenchida sozinha logo abaixo, antes de enviar.
     const campos = modoManual
-      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataInicio", "dataFim"].includes(c))
+      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataInicio"].includes(c))
       : CAMPOS;
 
     const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
@@ -481,6 +504,7 @@ export default function ContratoForm({
 
       <div className="grid md:grid-cols-2 gap-5">
 
+        <Campo label="Locador" obrigatorio>
         <select
           name="locadorId"
           value={formData.locadorId}
@@ -519,7 +543,9 @@ export default function ContratoForm({
           ))}
 
         </select>
+        </Campo>
 
+        <Campo label="Residência" obrigatorio>
         <select
           name="unidadeId"
           value={formData.unidadeId}
@@ -558,7 +584,10 @@ export default function ContratoForm({
           ))}
 
         </select>
-                <select
+        </Campo>
+
+        <Campo label="Kitnet" obrigatorio>
+        <select
           name="kitnetId"
           value={formData.kitnetId}
           onChange={alterarCampo}
@@ -602,7 +631,9 @@ export default function ContratoForm({
           ))}
 
         </select>
+        </Campo>
 
+        <Campo label="Inquilino" obrigatorio>
         <SeletorBusca
           opcoes={inquilinos.map((i) => ({ value: i.id, label: i.nome }))}
           value={formData.inquilinoId}
@@ -611,22 +642,17 @@ export default function ContratoForm({
           className={input}
           required
         />
+        </Campo>
 
       </div>
 
       <div className="grid md:grid-cols-2 gap-5">
 
-        {/* No Arquivo (modoManual) essas datas já estão no papel do
+        {/* No Arquivo (modoManual) essa data já está no papel do
             contrato -- dataInicio é preenchida sozinha (pelo início de
             contrato do inquilino, ou hoje) na hora de salvar. */}
         {!modoManual && (
-        <>
-        <div>
-
-          <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
-            Data de Criação do Contrato
-          </label>
-
+        <Campo label="Data de Criação do Contrato" obrigatorio>
           <input
             className={input}
             type="date"
@@ -635,28 +661,25 @@ export default function ContratoForm({
             onChange={alterarCampo}
             required
           />
+        </Campo>
+        )}
 
-        </div>
-
-        <div>
-
-          <label className="mb-1.5 block text-sm text-[var(--text-subtle)]">
-            Data Final do Contrato
-          </label>
-
+        {/* Data Final É obrigatória no Arquivo (modoManual), mesmo que
+            o admin não tenha marcado em Campos Obrigatórios -- sem ela
+            o job de fim de contrato nunca sabe quando encerrar a
+            cobrança/liberar a kitnet desses contratos importados. */}
+        <Campo label="Data Final do Contrato" obrigatorio={modoManual || obrigatorios.has("dataFim")}>
           <input
             className={input}
             type="date"
             name="dataFim"
             value={formData.dataFim}
             onChange={alterarCampo}
-            required={obrigatorios.has("dataFim")}
+            required={modoManual || obrigatorios.has("dataFim")}
           />
+        </Campo>
 
-        </div>
-        </>
-        )}
-
+        <Campo label="Valor do Aluguel" obrigatorio>
         <input
           className={input}
           type="number"
@@ -666,7 +689,9 @@ export default function ContratoForm({
           onChange={alterarCampo}
           required
         />
+        </Campo>
 
+        <Campo label="Dia do Vencimento" obrigatorio>
         <input
           className={input}
           type="number"
@@ -678,7 +703,9 @@ export default function ContratoForm({
           onChange={alterarCampo}
           required
         />
+        </Campo>
 
+       <Campo label="Status">
        <select
   name="status"
   value={formData.status}
@@ -727,6 +754,7 @@ export default function ContratoForm({
   </option>
 
 </select>
+</Campo>
 
 </div>
 
@@ -735,6 +763,7 @@ export default function ContratoForm({
 {!modoManual && (
 <div className="grid md:grid-cols-3 gap-5">
 
+  <Campo label="Tipo de Garantia" obrigatorio={obrigatorios.has("tipoGarantia")}>
   <select
     name="tipoGarantia"
     value={formData.tipoGarantia}
@@ -784,7 +813,9 @@ export default function ContratoForm({
     </option>
 
   </select>
+  </Campo>
 
+  <Campo label="Valor da Caução" obrigatorio={obrigatorios.has("valorCaucao")}>
   <input
     className={input}
     type="number"
@@ -794,7 +825,9 @@ export default function ContratoForm({
     onChange={alterarCampo}
     required={obrigatorios.has("valorCaucao")}
   />
+  </Campo>
 
+  <Campo label="Índice de Reajuste" obrigatorio={obrigatorios.has("indiceReajuste")}>
   <input
     className={input}
     name="indiceReajuste"
@@ -803,6 +836,7 @@ export default function ContratoForm({
     onChange={alterarCampo}
     required={obrigatorios.has("indiceReajuste")}
   />
+  </Campo>
 
 </div>
 )}

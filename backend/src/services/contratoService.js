@@ -690,6 +690,20 @@ const encerrar = async (id, autor, opcoes = {}) => {
     }
   });
 
+  // Mesma trava do job automático (verificarContratosJob) -- sem isso,
+  // uma receita já PAGA e marcada recorrente continuava gerando o mês
+  // seguinte sozinha mesmo com o contrato encerrado na mão.
+  await prisma.receita.updateMany({
+    where: {
+      recorrente: true,
+      OR: [
+        { contratoId: contrato.id },
+        { inquilinoId: contrato.inquilinoId, contratoId: null },
+      ],
+    },
+    data: { recorrente: false },
+  });
+
   await logService.registrar({
     usuarioId: autor?.id || null,
     usuarioNome: autor?.nome || "Sistema",
