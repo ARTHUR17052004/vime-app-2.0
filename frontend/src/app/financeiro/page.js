@@ -20,7 +20,6 @@ import ReceitaForm from "../components/financeiro/ReceitaForm";
 import DespesaForm from "../components/financeiro/DespesaForm";
 
 import FinanceiroRelatorios from "../components/financeiro/FinanceiroRelatorios";
-import FinanceiroDashboard from "../components/financeiro/FinanceiroDashboard";
 import FinanceiroInadimplencia from "../components/financeiro/FinanceiroInadimplencia";
 import FinanceiroFluxoCaixa from "../components/financeiro/FinanceiroFluxoCaixa";
 import FinanceiroProximosVencimentos from "../components/financeiro/FinanceiroProximosVencimentos";
@@ -751,11 +750,6 @@ function FinanceiroPageConteudo() {
 
     {abaSelecionada === "visao-geral" && (
       <div className="space-y-8">
-
-        <FinanceiroDashboard
-          receitas={receitasFiltradas}
-          despesas={despesasFiltradas}
-        />
 
         <FinanceiroReceitas
           receitas={receitasFiltradas}
