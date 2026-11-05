@@ -178,7 +178,7 @@ export default function FinanceiroInadimplencia({
               >
 
                 <h3 className="text-lg font-semibold text-[var(--text)]">
-                  {item.unidade || item.descricao}
+                  {item.contrato?.unidade?.nome || item.inquilino?.kitnet?.unidade?.nome || item.descricao}
                 </h3>
 
                 <p className="text-[var(--text-subtle)] mt-1">

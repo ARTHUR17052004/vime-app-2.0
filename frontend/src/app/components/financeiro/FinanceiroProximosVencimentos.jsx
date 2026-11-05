@@ -93,7 +93,7 @@ export default function FinanceiroProximosVencimentos({
                 <div>
 
                   <h3 className="text-lg font-semibold text-[var(--text)]">
-                    {item.unidade || item.descricao}
+                    {item.contrato?.unidade?.nome || item.inquilino?.kitnet?.unidade?.nome || item.descricao}
                   </h3>
 
                   <p className="text-sm text-[var(--text-subtle)]">

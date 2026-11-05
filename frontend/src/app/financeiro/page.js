@@ -432,18 +432,25 @@ function FinanceiroPageConteudo() {
 
   const receitasFiltradas = receitas.filter((item) => {
 
+    // A maioria das receitas é lançada só com Inquilino, sem Contrato
+    // nenhum vinculado (ver kitnetOcupacao/contratoService) -- olhar só
+    // item.contrato escondia (quase) tudo ao filtrar por residência.
+    const unidadeIdDaReceita = item.contrato?.unidadeId || item.inquilino?.kitnet?.unidadeId || null;
+    const nomeUnidadeDaReceita = item.contrato?.unidade?.nome || item.inquilino?.kitnet?.unidade?.nome || "";
+    const nomeKitnetDaReceita = item.contrato?.kitnet?.nome || item.inquilino?.kitnet?.nome || "";
+
     const texto = `
       ${item.descricao || ""}
-      ${item.inquilino || ""}
-      ${item.unidade || ""}
-      ${item.kitnet || ""}
+      ${item.inquilino?.nome || item.pagadorNome || ""}
+      ${nomeUnidadeDaReceita}
+      ${nomeKitnetDaReceita}
     `.toLowerCase();
 
     if (!texto.includes(search.toLowerCase())) return false;
 
     if (
       residenciaSelecionada &&
-      item.contrato?.unidadeId !== residenciaSelecionada
+      unidadeIdDaReceita !== residenciaSelecionada
     )
       return false;
 
