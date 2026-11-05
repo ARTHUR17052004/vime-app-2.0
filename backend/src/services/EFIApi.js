@@ -167,11 +167,17 @@ class EFIApi {
 
       const dadosErro = error.response?.data;
 
+      // error_description às vezes vem como objeto (ex.: erro de
+      // validação de campo: { property, message }), não como string --
+      // usar ele direto como mensagem de erro faz o Error() virar
+      // "[object Object]" lá na frente (alert() no front-end).
+      const descricaoErro = dadosErro?.error_description;
+
       const mensagem =
         dadosErro?.nome && dadosErro?.mensagem
           ? `${dadosErro.nome}: ${dadosErro.mensagem}`
           : dadosErro?.mensagem ||
-            dadosErro?.error_description ||
+            (typeof descricaoErro === "string" ? descricaoErro : descricaoErro?.message) ||
             error.message;
 
       console.error("Erro EFI:", dadosErro || error.message);
@@ -193,6 +199,15 @@ class EFIApi {
   // em homologação e ajustar aqui o que vier diferente.
   async criarBoleto(dados, override = null) {
 
+    // E-mail é opcional pra EFI, mas se for mandado precisa bater com
+    // o formato de e-mail de verdade -- um cadastro com e-mail vazio,
+    // com espaço ou mal formatado (ex.: "sem email", "-") faz a API
+    // rejeitar o boleto inteiro. Melhor simplesmente não mandar esse
+    // campo do que travar a cobrança por isso.
+    const emailValido = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(
+      String(dados.pagador.email || "").trim()
+    );
+
     const resultado = await this.request("POST", "/v1/charge/one-step", {
       items: [
         {
@@ -206,7 +221,7 @@ class EFIApi {
           customer: {
             name: dados.pagador.nome,
             cpf: dados.pagador.cpf, // só dígitos
-            email: dados.pagador.email || undefined,
+            email: emailValido ? dados.pagador.email.trim() : undefined,
             phone_number: dados.pagador.telefone || undefined,
           },
           expire_at: dados.dataVencimento, // formato AAAA-MM-DD
