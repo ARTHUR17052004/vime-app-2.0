@@ -452,6 +452,21 @@ function FinanceiroPageConteudo() {
     "valor-maior": (a, b) => (b.valor || 0) - (a.valor || 0),
     "valor-menor": (a, b) => (a.valor || 0) - (b.valor || 0),
     "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+    // Kitnet.numero é string ("01", "02"...), por isso a comparação
+    // numérica (localeCompare com numeric:true) -- senão "11" vem antes
+    // de "3" (ordem de texto). Agrupa por Residência primeiro, pra não
+    // misturar kitnet 3 da VIME I com kitnet 3 da VIME II quando o
+    // filtro de Residência está em "Todas".
+    "kitnet": (a, b) => {
+      const unidadeA = a.contrato?.unidade?.nome || a.inquilino?.kitnet?.unidade?.nome || "";
+      const unidadeB = b.contrato?.unidade?.nome || b.inquilino?.kitnet?.unidade?.nome || "";
+      const porResidencia = unidadeA.localeCompare(unidadeB, "pt-BR");
+      if (porResidencia !== 0) return porResidencia;
+
+      const numeroA = a.contrato?.kitnet?.numero ?? a.inquilino?.kitnet?.numero ?? "";
+      const numeroB = b.contrato?.kitnet?.numero ?? b.inquilino?.kitnet?.numero ?? "";
+      return String(numeroA).localeCompare(String(numeroB), undefined, { numeric: true, sensitivity: "base" });
+    },
   };
 
   const ordenarFinanceiro = COMPARADORES_FINANCEIRO[ordenacao] || COMPARADORES_FINANCEIRO["vencimento-proximo"];
@@ -775,6 +790,7 @@ function FinanceiroPageConteudo() {
               <option value="vencimento-distante" className="bg-[#1b2430]">Vencimento (mais distante)</option>
               <option value="valor-maior" className="bg-[#1b2430]">Valor (maior)</option>
               <option value="valor-menor" className="bg-[#1b2430]">Valor (menor)</option>
+              <option value="kitnet" className="bg-[#1b2430]">Kitnet</option>
               <option value="status" className="bg-[#1b2430]">Status</option>
             </select>
           </div>
