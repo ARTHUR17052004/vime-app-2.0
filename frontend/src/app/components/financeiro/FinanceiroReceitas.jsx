@@ -19,6 +19,7 @@ import ReceitaMapaModal from "./ReceitaMapaModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { statusExibidoReceita } from "@/utils/statusReceita";
 
 function MenuButton({ label, danger, success, warning, onClick }) {
   return (
@@ -56,7 +57,10 @@ export default function FinanceiroReceitas({
   onEnviarCobranca,
   onFixar,
   onToggleRecorrente,
+  onArquivar,
   onNovo,
+  titulo = "Receitas",
+  subtitulo = "Controle das receitas cadastradas.",
 }) {
   const podeEditar = usePermissao("financeiro.editar");
 
@@ -157,6 +161,16 @@ export default function FinanceiroReceitas({
           }}
         />
 
+        {(item.status === "PAGO" || item.status === "PAGA") && (
+          <MenuButton
+            label={item.arquivadaNoHistorico ? "Remover do Histórico" : "Enviar para Histórico"}
+            onClick={() => {
+              onArquivar?.(item.id, !item.arquivadaNoHistorico);
+              setMenuAberto(null);
+            }}
+          />
+        )}
+
         <MenuButton
           label={item.fixado ? "Desafixar" : "Fixar"}
           onClick={() => {
@@ -189,32 +203,7 @@ export default function FinanceiroReceitas({
     );
   }
 
-  // "PENDENTE" sozinho não diz se já foi mandada pro banco ou não --
-  // olha gatewayReferencia (só fica preenchido depois do "Enviar
-  // Cobrança") pra separar "Pendente" (ainda não enviada) de "Em
-  // Aberto" (enviada, aguardando o inquilino pagar). ATRASADA/PAGA/
-  // CANCELADA continuam cada uma com seu próprio selo, sem mudar.
-  const statusExibido = (item) => {
-
-    if (item.status === "PAGO" || item.status === "PAGA") {
-      return { texto: "Pago", variant: "emerald" };
-    }
-
-    if (item.status === "ATRASADA") {
-      return { texto: "Atrasada", variant: "red" };
-    }
-
-    if (item.status === "CANCELADA") {
-      return { texto: "Cancelada", variant: "gray" };
-    }
-
-    if (item.gatewayReferencia) {
-      return { texto: "Em Aberto", variant: "blue" };
-    }
-
-    return { texto: "Pendente", variant: "yellow" };
-
-  };
+  const statusExibido = statusExibidoReceita;
 
   return (
   <>
@@ -251,11 +240,11 @@ export default function FinanceiroReceitas({
             <div>
 
               <h2 className="text-2xl font-bold text-[var(--text)]">
-                Receitas
+                {titulo}
               </h2>
 
               <p className="text-[var(--text-subtle)]">
-                Controle das receitas cadastradas.
+                {subtitulo}
               </p>
 
             </div>

@@ -22,6 +22,23 @@ function proximoMesMesmoDia(data) {
   return new Date(ano, mes + 1, dia);
 }
 
+// A descrição de template "Aluguel - 11/2026" ficava copiada igual pra
+// cobrança do mês seguinte (ex.: vencendo em dezembro, mas ainda
+// escrito "11/2026") -- só troca o "- M/AAAA" do final, se tiver; o
+// resto do texto (ex.: "Aluguel") fica igual, pra não estragar uma
+// descrição digitada diferente que não siga esse padrão.
+function descricaoProximoMes(descricaoAnterior, proximoVencimento) {
+
+  const mesAno = `${proximoVencimento.getMonth() + 1}/${proximoVencimento.getFullYear()}`;
+
+  if (/ - \d{1,2}\/\d{4}$/.test(descricaoAnterior || "")) {
+    return descricaoAnterior.replace(/ - \d{1,2}\/\d{4}$/, ` - ${mesAno}`);
+  }
+
+  return descricaoAnterior;
+
+}
+
 module.exports = async () => {
 
   console.log("[JOB] Gerando recorrência de receitas...");
@@ -82,7 +99,7 @@ module.exports = async () => {
         pagadorEmail: receita.pagadorEmail,
         pagadorTelefone: receita.pagadorTelefone,
         categoria: receita.categoria,
-        descricao: receita.descricao,
+        descricao: descricaoProximoMes(receita.descricao, proximoVencimento),
         valor: receita.valor,
         valorLiquido,
         vencimento: proximoVencimento,

@@ -14,6 +14,10 @@ export default function FinanceiroTabs({
       nome: "Receitas",
     },
     {
+      id: "historico",
+      nome: "Histórico",
+    },
+    {
       id: "despesas",
       nome: "Despesas",
     },

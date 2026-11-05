@@ -146,9 +146,9 @@ export default function FinanceiroFluxoCaixa({
                   <td className="py-5">
 
                     <Badge
-                      color={
+                      variant={
                         item.tipo === "Receita"
-                          ? "green"
+                          ? "emerald"
                           : "red"
                       }
                     >
@@ -180,11 +180,13 @@ export default function FinanceiroFluxoCaixa({
                   <td>
 
                     <Badge
-                      color={
-                        item.status === "PAGO"
-                          ? "green"
+                      variant={
+                        item.status === "PAGO" || item.status === "PAGA"
+                          ? "emerald"
                           : item.status === "ATRASADA"
                           ? "red"
+                          : item.status === "CANCELADA"
+                          ? "gray"
                           : "yellow"
                       }
                     >

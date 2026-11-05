@@ -39,6 +39,7 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
+import { statusExibidoReceita } from "../../utils/statusReceita";
 
 export default function FinanceiroPage() {
   return (
@@ -334,6 +335,22 @@ function FinanceiroPageConteudo() {
 
   };
 
+  const arquivarReceita = async (id, arquivadaNoHistorico) => {
+
+    try {
+
+      await ReceitaService.atualizar(id, { arquivadaNoHistorico });
+
+      await carregar();
+
+    } catch (err) {
+
+      alert(err.message || "Erro ao mover receita pro histórico.");
+
+    }
+
+  };
+
   const toggleRecorrenteReceita = async (id, recorrente) => {
 
     try {
@@ -429,7 +446,14 @@ function FinanceiroPageConteudo() {
 
   const ordenarFinanceiro = COMPARADORES_FINANCEIRO[ordenacao] || COMPARADORES_FINANCEIRO["vencimento-proximo"];
 
+  // Enviada pro histórico some da lista normal -- senão cobrança
+  // recorrente já paga fica acumulando mês após mês misturada com as
+  // em aberto (ver aba "Histórico").
+  const receitasHistorico = receitas.filter((item) => item.arquivadaNoHistorico);
+
   const receitasFiltradas = receitas.filter((item) => {
+
+    if (item.arquivadaNoHistorico) return false;
 
     // A maioria das receitas é lançada só com Inquilino, sem Contrato
     // nenhum vinculado (ver kitnetOcupacao/contratoService) -- olhar só
@@ -453,7 +477,11 @@ function FinanceiroPageConteudo() {
     )
       return false;
 
-    if (statusFiltro && item.status !== statusFiltro) return false;
+    // Mesmo critério usado pro selo na lista (statusExibidoReceita) --
+    // senão filtrar por "Pendente" também trazia quem já estava "Em
+    // Aberto" (PENDENTE por baixo, só mostrado diferente por já ter
+    // sido enviada ao banco).
+    if (statusFiltro && statusExibidoReceita(item).codigo !== statusFiltro) return false;
 
     if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
 
@@ -694,6 +722,7 @@ function FinanceiroPageConteudo() {
             >
               <option value="" className="bg-[#1b2430]">Todos</option>
               <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
+              <option value="EM_ABERTO" className="bg-[#1b2430]">Em Aberto</option>
               <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
               <option value="PAGA" className="bg-[#1b2430]">Paga</option>
               <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
@@ -774,6 +803,7 @@ function FinanceiroPageConteudo() {
           onEnviarCobranca={enviarCobranca}
           onFixar={fixarReceita}
           onToggleRecorrente={toggleRecorrenteReceita}
+          onArquivar={arquivarReceita}
           onNovo={() => {
             setTipoModal("receita");
             setModalOpen(true);
@@ -820,6 +850,27 @@ function FinanceiroPageConteudo() {
         onEnviarCobranca={enviarCobranca}
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
+        onArquivar={arquivarReceita}
+        onNovo={() => {
+          setTipoModal("receita");
+          setModalOpen(true);
+        }}
+      />
+    )}
+
+    {abaSelecionada === "historico" && (
+      <FinanceiroReceitas
+        receitas={receitasHistorico}
+        contas={contas}
+        titulo="Histórico de Pagamentos"
+        subtitulo="Receitas já pagas, enviadas pra cá pra não acumular na lista de Receitas."
+        onDelete={excluirReceita}
+        onUpdate={atualizarReceita}
+        onMarcarPago={marcarReceitaComoPaga}
+        onEnviarCobranca={enviarCobranca}
+        onFixar={fixarReceita}
+        onToggleRecorrente={toggleRecorrenteReceita}
+        onArquivar={arquivarReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);
