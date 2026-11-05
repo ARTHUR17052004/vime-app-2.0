@@ -7,6 +7,7 @@ import {
   Plus,
   Pin,
   Repeat,
+  FileText,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -16,6 +17,7 @@ import ActionMenu from "../ui/ActionMenu";
 import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
 import ReceitaMapaModal from "./ReceitaMapaModal";
+import ReceitaBoletoModal from "./ReceitaBoletoModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -74,6 +76,9 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const [mapaOpen, setMapaOpen] =
+    useState(false);
+
+  const [boletoOpen, setBoletoOpen] =
     useState(false);
 
   const [menuAberto, setMenuAberto] = useState(null);
@@ -325,27 +330,54 @@ export default function FinanceiroReceitas({
                     </p>
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      menuAberto === item.id
-                        ? setMenuAberto(null)
-                        : abrirMenu(e, item.id);
-                    }}
-                    className="
-                      w-9
-                      h-9
-                      shrink-0
-                      rounded-lg
-                      flex
-                      items-center
-                      justify-center
-                      hover:bg-[var(--surface-3)]
-                      transition
-                    "
-                  >
-                    <MoreVertical size={18} />
-                  </button>
+                  <div className="flex items-center gap-1 shrink-0">
+
+                    {(item.linkBoleto || item.linhaDigitavel) && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setReceitaSelecionada(item);
+                          setBoletoOpen(true);
+                        }}
+                        title="Ver boleto"
+                        className="
+                          w-9
+                          h-9
+                          rounded-lg
+                          flex
+                          items-center
+                          justify-center
+                          text-emerald-400
+                          hover:bg-[var(--surface-3)]
+                          transition
+                        "
+                      >
+                        <FileText size={18} />
+                      </button>
+                    )}
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        menuAberto === item.id
+                          ? setMenuAberto(null)
+                          : abrirMenu(e, item.id);
+                      }}
+                      className="
+                        w-9
+                        h-9
+                        rounded-lg
+                        flex
+                        items-center
+                        justify-center
+                        hover:bg-[var(--surface-3)]
+                        transition
+                      "
+                    >
+                      <MoreVertical size={18} />
+                    </button>
+
+                  </div>
 
                   {renderMenu(item)}
 
@@ -540,26 +572,54 @@ export default function FinanceiroReceitas({
 
                   <td>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        menuAberto === item.id
-                          ? setMenuAberto(null)
-                          : abrirMenu(e, item.id);
-                      }}
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        flex
-                        items-center
-                        justify-center
-                        hover:bg-[var(--surface-3)]
-                        transition
-                      "
-                    >
-                      <MoreVertical size={18} />
-                    </button>
+                    <div className="flex items-center gap-1">
+
+                      {(item.linkBoleto || item.linhaDigitavel) && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setReceitaSelecionada(item);
+                            setBoletoOpen(true);
+                          }}
+                          title="Ver boleto"
+                          className="
+                            w-9
+                            h-9
+                            rounded-lg
+                            flex
+                            items-center
+                            justify-center
+                            text-emerald-400
+                            hover:bg-[var(--surface-3)]
+                            transition
+                          "
+                        >
+                          <FileText size={18} />
+                        </button>
+                      )}
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          menuAberto === item.id
+                            ? setMenuAberto(null)
+                            : abrirMenu(e, item.id);
+                        }}
+                        className="
+                          w-9
+                          h-9
+                          rounded-lg
+                          flex
+                          items-center
+                          justify-center
+                          hover:bg-[var(--surface-3)]
+                          transition
+                        "
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+
+                    </div>
 
                     {renderMenu(item)}
 
@@ -609,6 +669,12 @@ export default function FinanceiroReceitas({
       onClose={() => setMapaOpen(false)}
       receita={receitaSelecionada}
       contaNome={contas?.find((c) => c.id === receitaSelecionada?.contaPagamentoId)?.nome}
+    />
+
+    <ReceitaBoletoModal
+      isOpen={boletoOpen}
+      onClose={() => setBoletoOpen(false)}
+      receita={receitaSelecionada}
     />
 
   </>
