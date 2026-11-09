@@ -229,6 +229,85 @@ class WhatsappService {
   }
 
   /* ==========================================
+     RELATÓRIO DE MENSAGENS ENVIADAS
+  ========================================== */
+
+  // Só mensagem que A GENTE mandou (tipo "enviada") tem status de
+  // entrega rastreado pela Meta -- mensagem recebida do contato não
+  // passa por "entregue"/"lida" da nossa parte, então fica de fora.
+  async relatorio(usuario, filtros = {}) {
+
+    const { status, dataDe, dataAte, busca } = filtros;
+
+    const filtroContato = {
+      // Usuário restrito a um locador só vê mensagem pra contato ligado
+      // a inquilino da área dele -- mesma regra de conversas().
+      ...(usuario?.locadorId && { inquilino: filtroInquilino(usuario) }),
+      ...(busca && {
+        OR: [
+          { nome: { contains: busca, mode: "insensitive" } },
+          { telefone: { contains: busca } },
+        ],
+      }),
+    };
+
+    const whereBase = {
+      tipo: "enviada",
+      ...((dataDe || dataAte) && {
+        createdAt: {
+          ...(dataDe && { gte: new Date(dataDe) }),
+          ...(dataAte && { lte: new Date(`${dataAte}T23:59:59.999`) }),
+        },
+      }),
+      conversa: { contato: filtroContato },
+    };
+
+    // Resumo conta por TODOS os status do período/busca filtrado, sem
+    // aplicar o filtro de status -- senão filtrar por "Falhou" sempre
+    // mostraria "100% falhou" no resumo, inútil pra comparar.
+    const [mensagens, statusBase] = await Promise.all([
+      prisma.whatsappMensagem.findMany({
+        where: { ...whereBase, ...(status && { status }) },
+        include: { conversa: { include: { contato: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 500,
+      }),
+      prisma.whatsappMensagem.findMany({
+        where: whereBase,
+        select: { status: true },
+      }),
+    ]);
+
+    const resumo = { total: statusBase.length, enviada: 0, entregue: 0, lida: 0, falhou: 0 };
+
+    for (const item of statusBase) {
+      // Mensagem antiga de antes do webhook de status existir fica sem
+      // "status" nenhum no banco -- conta como "enviada" (só saiu,
+      // sem confirmação de entrega registrada).
+      const chave = item.status || "enviada";
+      if (resumo[chave] !== undefined) resumo[chave] += 1;
+    }
+
+    return {
+      resumo,
+      mensagens: mensagens.map((m) => ({
+        id: m.id,
+        texto: m.texto,
+        status: m.status || "enviada",
+        erroDetalhe: m.erroDetalhe,
+        enviadaPorIA: m.enviadaPorIA,
+        createdAt: m.createdAt,
+        conversaId: m.conversaId,
+        contato: {
+          nome: m.conversa.contato.nome,
+          telefone: m.conversa.contato.telefone,
+        },
+      })),
+    };
+
+  }
+
+  /* ==========================================
      SINCRONIZAR
   ========================================== */
 

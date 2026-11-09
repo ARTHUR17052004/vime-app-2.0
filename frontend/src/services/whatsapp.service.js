@@ -14,6 +14,15 @@ export const WhatsappService = {
     return await api("/whatsapp/conversas");
   },
 
+  async relatorio(filtros = {}) {
+    const params = new URLSearchParams();
+    Object.entries(filtros).forEach(([chave, valor]) => {
+      if (valor) params.set(chave, valor);
+    });
+    const query = params.toString();
+    return await api(`/whatsapp/relatorio${query ? `?${query}` : ""}`);
+  },
+
   async salvarConfiguracao(dados) {
     return await api("/whatsapp/configuracao", {
       method: "PUT",

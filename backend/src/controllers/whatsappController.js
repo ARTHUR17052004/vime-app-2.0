@@ -78,6 +78,37 @@ const conversas = async (req, res) => {
 };
 
 /* ==========================================
+   RELATÓRIO DE MENSAGENS ENVIADAS
+========================================== */
+
+const relatorio = async (req, res) => {
+
+  try {
+
+    const dados = await whatsappService.relatorio(req.usuario, {
+      status: req.query.status || undefined,
+      dataDe: req.query.dataDe || undefined,
+      dataAte: req.query.dataAte || undefined,
+      busca: req.query.busca || undefined,
+    });
+
+    return res.json({
+      success: true,
+      data: dados
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+
+  }
+
+};
+
+/* ==========================================
    SINCRONIZAR
 ========================================== */
 
@@ -354,6 +385,8 @@ module.exports = {
   status,
 
   conversas,
+
+  relatorio,
 
   sincronizar,
 

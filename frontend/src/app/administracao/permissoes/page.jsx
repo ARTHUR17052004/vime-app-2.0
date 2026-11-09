@@ -150,7 +150,7 @@ const CATALOGO = [
   {
     modulo: "WhatsApp",
     chave: "whatsapp",
-    acoes: ["visualizar", "enviar", "conectar", "configurar", "assistenteConfigurar"],
+    acoes: ["visualizar", "enviar", "conectar", "configurar", "assistenteConfigurar", "relatorio"],
   },
   {
     modulo: "Notificações",
@@ -174,6 +174,7 @@ const ROTULOS_ACAO = {
   conectar: "Conectar / QR Code",
   configurar: "Configurar",
   assistenteConfigurar: "Configurar assistente de IA",
+  relatorio: "Relatório de mensagens enviadas",
   gerenciar: "Gerenciar",
   indicadores: "Indicadores (Residências, Kitnets, Inquilinos, Vazias, Solicitações)",
   financeiro: "Financeiro (receitas mensais, recebido/pendente/atrasado)",

@@ -41,6 +41,7 @@ router.get("/status", permissaoMiddleware('whatsapp.visualizar'), whatsappContro
 router.get("/configuracao", permissaoMiddleware('whatsapp.visualizar'), whatsappController.configuracao);
 router.put("/configuracao", apenasIrrestrito, permissaoConfiguracaoWhatsapp, whatsappController.salvarConfiguracao);
 router.get("/conversas", permissaoMiddleware('whatsapp.visualizar'), whatsappController.conversas);
+router.get("/relatorio", permissaoMiddleware('whatsapp.relatorio'), whatsappController.relatorio);
 router.post("/conectar", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.conectar);
 router.post("/qrcode", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.gerarQrCode);
 router.post("/sincronizar", apenasIrrestrito, permissaoMiddleware('whatsapp.conectar'), whatsappController.sincronizar);
