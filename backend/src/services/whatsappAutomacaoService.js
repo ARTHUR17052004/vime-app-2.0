@@ -135,6 +135,17 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
 
   try {
 
+    // Chave-mestra em Configuração: desligada, nenhum dos 4 avisos
+    // automáticos de cobrança dispara (nova cobrança, lembrete,
+    // vencida, pagamento confirmado) -- chat manual e assistente de IA
+    // continuam funcionando normalmente, só esses 4 ficam quietos.
+    const configuracao = await prisma.configuracaoWhatsapp.findFirst();
+
+    if (configuracao && configuracao.avisosCobrancaAtivos === false) {
+      console.warn(`[WhatsApp] ${nomeModelo}: avisos automáticos de cobrança desativados, não enviado.`);
+      return { success: false, mensagem: "Avisos automáticos de cobrança estão desativados nas configurações do WhatsApp." };
+    }
+
     if (!inquilino?.telefone) {
       console.warn(`[WhatsApp] ${nomeModelo}: inquilino sem telefone cadastrado, não enviado.`);
       return { success: false, mensagem: "Inquilino sem telefone cadastrado." };

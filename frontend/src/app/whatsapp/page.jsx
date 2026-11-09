@@ -16,6 +16,7 @@ import WhatsappHeader from "../components/whatsapp/WhatsappHeader";
 import WhatsappStatusCard from "../components/whatsapp/WhatsappStatusCard";
 import WhatsappConfigCard from "../components/whatsapp/WhatsappConfigCard";
 import WhatsappAssistenteCard from "../components/whatsapp/WhatsappAssistenteCard";
+import WhatsappAvisosCobrancaCard from "../components/whatsapp/WhatsappAvisosCobrancaCard";
 import WhatsappActions from "../components/whatsapp/WhatsappActions";
 import WhatsappConversations from "../components/whatsapp/WhatsappConversations";
 import WhatsappChat from "../components/whatsapp/WhatsappChat";
@@ -274,10 +275,27 @@ function WhatsappPageConteudo() {
 
             <PageSection spacing="xl">
 
-              <WhatsappAssistenteCard
-                dados={configuracao}
-                onAtualizar={carregar}
-              />
+              <div className="grid grid-cols-12 gap-6">
+
+                <div className="col-span-12 xl:col-span-6">
+
+                  <WhatsappAssistenteCard
+                    dados={configuracao}
+                    onAtualizar={carregar}
+                  />
+
+                </div>
+
+                <div className="col-span-12 xl:col-span-6">
+
+                  <WhatsappAvisosCobrancaCard
+                    dados={configuracao}
+                    onAtualizar={carregar}
+                  />
+
+                </div>
+
+              </div>
 
             </PageSection>
 

@@ -844,6 +844,13 @@ model ConfiguracaoWhatsapp {
 
   iaApiKey String?
 
+  // Liga/desliga os 4 avisos automáticos de cobrança pro inquilino
+  // (nova cobrança, lembrete de vencimento, cobrança vencida, pagamento
+  // confirmado -- ver whatsappAutomacaoService.js). Desativado, nenhum
+  // desses dispara mais sozinho, mas a conversa manual (chat normal) e
+  // o assistente de IA continuam funcionando normalmente.
+  avisosCobrancaAtivos Boolean @default(true)
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt

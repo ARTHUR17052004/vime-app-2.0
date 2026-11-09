@@ -372,6 +372,7 @@ class WhatsappService {
         phoneNumberId: limpar(dados.phoneNumberId),
         apiUrl: limpar(dados.apiUrl),
         ...(dados.iaAtivo !== undefined ? { iaAtivo: dados.iaAtivo === true } : {}),
+        ...(dados.avisosCobrancaAtivos !== undefined ? { avisosCobrancaAtivos: dados.avisosCobrancaAtivos === true } : {}),
         // Só grava a chave da IA se o campo veio preenchido -- assim o
         // formulário pode deixá-la sempre em branco na tela (por
         // segurança) sem apagar a chave já salva a cada "Salvar".
