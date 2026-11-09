@@ -373,6 +373,7 @@ class WhatsappService {
         apiUrl: limpar(dados.apiUrl),
         ...(dados.iaAtivo !== undefined ? { iaAtivo: dados.iaAtivo === true } : {}),
         ...(dados.avisosCobrancaAtivos !== undefined ? { avisosCobrancaAtivos: dados.avisosCobrancaAtivos === true } : {}),
+        ...(dados.modoSomenteEnvio !== undefined ? { modoSomenteEnvio: dados.modoSomenteEnvio === true } : {}),
         // Só grava a chave da IA se o campo veio preenchido -- assim o
         // formulário pode deixá-la sempre em branco na tela (por
         // segurança) sem apagar a chave já salva a cada "Salvar".
@@ -704,6 +705,13 @@ class WhatsappService {
       if (mensagens.length === 0)
         return { success: true };
 
+      // "Modo somente envio": inquilino não interage de volta -- a
+      // mensagem dele ainda chega aqui (não tem como travar o botão de
+      // responder no aparelho dele, isso é do WhatsApp/Meta), mas o
+      // sistema ignora por completo abaixo quando o contato bate com um
+      // inquilino cadastrado.
+      const { modoSomenteEnvio } = await this.obterConfiguracao();
+
       for (const msg of mensagens) {
 
         // msg.from às vezes vem sem o 9º dígito do celular (mesmo
@@ -748,6 +756,12 @@ class WhatsappService {
                 inquilinoId: inquilinoEncontrado?.id || null,
               },
             });
+        }
+
+        // Contato que não é inquilino (candidato, número errado, etc.)
+        // continua conversando normal -- o bloqueio é só pro inquilino.
+        if (modoSomenteEnvio && contato.inquilinoId) {
+          continue;
         }
 
         let conversa =

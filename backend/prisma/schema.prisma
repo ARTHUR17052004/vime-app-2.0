@@ -851,6 +851,16 @@ model ConfiguracaoWhatsapp {
   // o assistente de IA continuam funcionando normalmente.
   avisosCobrancaAtivos Boolean @default(true)
 
+  // "Somente admin manda mensagem" (igual grupo de anúncio do WhatsApp,
+  // mas não dá pra travar isso no aparelho do inquilino -- é a Meta/o
+  // telefone dele quem controla o botão de responder, não a gente).
+  // Ativado, qualquer mensagem recebida de um contato ligado a um
+  // inquilino é ignorada por completo no webhook (não salva, não
+  // notifica, não deixa o assistente de IA responder) -- pro inquilino
+  // o sistema vira só um canal de recebimento. Contato que não bate com
+  // nenhum inquilino cadastrado continua normal.
+  modoSomenteEnvio Boolean @default(false)
+
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
