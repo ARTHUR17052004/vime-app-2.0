@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -24,8 +25,25 @@ import { WhatsappService } from "../../services/whatsapp.service";
 import { usePermissao } from "../../hooks/usePermissao";
 
 export default function WhatsappPage() {
+  return (
+    <Suspense fallback={null}>
+      <WhatsappPageConteudo />
+    </Suspense>
+  );
+}
+
+// useSearchParams() (lido aqui pro ?conversaId=... que vem das
+// notificações) só funciona dentro de um Suspense -- sem isso o build
+// de produção do Next recusa gerar a página.
+function WhatsappPageConteudo() {
 
   const podeVisualizar = usePermissao("whatsapp.visualizar");
+
+  // Clicar numa notificação de WhatsApp (nova mensagem, falha de envio)
+  // leva pra cá com ?conversaId=... -- sem isso a tela sempre abria na
+  // primeira conversa da lista, não na que gerou a notificação.
+  const searchParams = useSearchParams();
+  const conversaIdDaUrl = searchParams.get("conversaId");
 
   const [loading, setLoading] = useState(true);
 
@@ -75,7 +93,14 @@ export default function WhatsappPage() {
 
             if (!atual) {
 
-            return conversas.data[0];
+            // Primeiro carregamento: se veio de uma notificação
+            // (?conversaId=...), abre ela direto -- senão, a primeira
+            // da lista, igual sempre foi.
+            const daNotificacao = conversaIdDaUrl
+              ? conversas.data.find((c) => c.id === conversaIdDaUrl)
+              : null;
+
+            return daNotificacao || conversas.data[0];
 
             }
 

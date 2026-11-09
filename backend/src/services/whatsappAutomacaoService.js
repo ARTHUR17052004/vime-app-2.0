@@ -214,7 +214,9 @@ async function enviarTemplateParaInquilino({ inquilino, nomeModelo, parametros, 
         origem: "WHATSAPP",
         titulo: `Falha ao enviar WhatsApp para ${inquilino?.nome || "inquilino"}`,
         mensagem: `${resumoParaHistorico}\n\nMotivo: ${error.message}`,
-        link: "/whatsapp",
+        // Cai direto na conversa do inquilino, não só na tela de
+        // WhatsApp genérica (ver whatsapp/page.jsx, que lê ?conversaId).
+        link: conversa ? `/whatsapp?conversaId=${conversa.id}` : "/whatsapp",
         locadorId: inquilino?.id ? await locadorDoInquilino(inquilino.id) : null,
       });
 

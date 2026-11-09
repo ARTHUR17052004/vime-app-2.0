@@ -578,7 +578,10 @@ class WhatsappService {
           origem: "WHATSAPP",
           titulo: `WhatsApp não entregue para ${contato?.nome || contato?.telefone || "inquilino"}`,
           mensagem: `${mensagem.texto}\n\nMotivo: ${erroDetalhe}`,
-          link: "/whatsapp",
+          // Leva direto pra conversa em vez de só abrir a tela de
+          // WhatsApp na primeira da lista -- clicar na notificação
+          // precisa cair na conversa certa, não só "ver".
+          link: `/whatsapp?conversaId=${mensagem.conversaId}`,
           locadorId: contato?.inquilinoId ? await locadorDoInquilino(contato.inquilinoId) : null,
         });
 
@@ -714,7 +717,9 @@ class WhatsappService {
           origem: "WHATSAPP",
           titulo: `Nova mensagem de ${contato.nome || numero}`,
           mensagem: texto,
-          link: "/whatsapp",
+          // Mesma lógica: cai direto na conversa de quem mandou,
+          // não só na tela de WhatsApp genérica.
+          link: `/whatsapp?conversaId=${conversa.id}`,
           locadorId: contato.inquilinoId ? await locadorDoInquilino(contato.inquilinoId) : null,
         });
 
