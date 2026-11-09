@@ -11,6 +11,7 @@ import {
 
 import PageGrid from "../ui/PageGrid";
 import DashboardStatsCard from "../dashboard/DashboardStatsCard";
+import { formatarMoeda } from "../../../utils/dinheiro";
 
 export default function FinanceiroResumo({
   receitaPrevista,
@@ -25,42 +26,42 @@ export default function FinanceiroResumo({
 
       <DashboardStatsCard
         title="Recebido no Mês"
-        value={`R$ ${recebidoNoMes}`}
+        value={`R$ ${formatarMoeda(recebidoNoMes)}`}
         subtitle="Zera todo dia 1 -- só pagamento reconhecido este mês"
         icon={CalendarCheck}
       />
 
       <DashboardStatsCard
         title="Receita Prevista"
-        value={`R$ ${receitaPrevista}`}
+        value={`R$ ${formatarMoeda(receitaPrevista)}`}
         subtitle="Receitas cadastradas"
         icon={Wallet}
       />
 
       <DashboardStatsCard
         title="Despesas"
-        value={`R$ ${totalDespesas}`}
+        value={`R$ ${formatarMoeda(totalDespesas)}`}
         subtitle="Total de despesas"
         icon={TrendingDown}
       />
 
       <DashboardStatsCard
         title="Vencidos"
-        value={`R$ ${vencidos}`}
+        value={`R$ ${formatarMoeda(vencidos)}`}
         subtitle="Receitas e despesas vencidas"
         icon={TriangleAlert}
       />
 
       <DashboardStatsCard
         title="Lucro Líquido"
-        value={`R$ ${lucroLiquido}`}
+        value={`R$ ${formatarMoeda(lucroLiquido)}`}
         subtitle="Só o já pago/recebido, líquido"
         icon={Landmark}
       />
 
       <DashboardStatsCard
         title="Taxas de Boleto"
-        value={`R$ ${taxasBoleto}`}
+        value={`R$ ${formatarMoeda(taxasBoleto)}`}
         subtitle="Valor de taxa acumulado"
         icon={Receipt}
       />

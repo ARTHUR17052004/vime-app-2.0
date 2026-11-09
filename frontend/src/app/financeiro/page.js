@@ -40,6 +40,7 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
 import { statusExibidoReceita } from "../../utils/statusReceita";
+import { arredondarCentavos } from "../../utils/dinheiro";
 
 export default function FinanceiroPage() {
   return (
@@ -551,33 +552,36 @@ function FinanceiroPageConteudo() {
   // status, residência, período) -- antes somavam tudo que já foi
   // cadastrado, sem nenhum filtro, e dava a impressão de número
   // errado quando a tabela estava filtrada por um período menor.
-  const receitaPrevista =
+  const receitaPrevista = arredondarCentavos(
     receitasFiltradas.reduce(
       (total, item) =>
         total + Number(item.valor || 0),
       0
-    );
+    )
+  );
 
-  const totalDespesas =
+  const totalDespesas = arredondarCentavos(
     despesasFiltradas.reduce(
       (total, item) =>
         total + Number(item.valor || 0),
       0
-    );
+    )
+  );
 
   // Diferente de "Receita Prevista" (que soma tudo, pago ou não) --
   // isso aqui é o que REALMENTE entrou/saiu da conta: só receita
   // já PAGA (e no valor líquido, depois da taxa de boleto -- não é
   // lucro o que o banco descontou) menos só despesa já PAGA. Pendente,
   // atrasada e taxa de boleto não contam, de propósito.
-  const lucroLiquido =
+  const lucroLiquido = arredondarCentavos(
     receitasFiltradas
       .filter((item) => item.status === "PAGO" || item.status === "PAGA")
       .reduce((total, item) => total + Number(item.valorLiquido ?? item.valor ?? 0), 0)
     -
     despesasFiltradas
       .filter((item) => item.status === "PAGO" || item.status === "PAGA")
-      .reduce((total, item) => total + Number(item.valor || 0), 0);
+      .reduce((total, item) => total + Number(item.valor || 0), 0)
+  );
 
   const estaVencido = (item) =>
     item.vencimento &&
@@ -585,10 +589,11 @@ function FinanceiroPageConteudo() {
     item.status !== "PAGO" &&
     item.status !== "PAGA";
 
-  const vencidos =
+  const vencidos = arredondarCentavos(
     [...receitasFiltradas, ...despesasFiltradas]
       .filter(estaVencido)
-      .reduce((total, item) => total + Number(item.valor || 0), 0);
+      .reduce((total, item) => total + Number(item.valor || 0), 0)
+  );
 
   // Independente dos filtros da tela (busca, período, status) --
   // sempre o mês corrente de verdade, por dataPagamento (não
@@ -601,13 +606,15 @@ function FinanceiroPageConteudo() {
     const inicioMes = new Date(agora.getFullYear(), agora.getMonth(), 1);
     const inicioProximoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 1);
 
-    return receitas
-      .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.dataPagamento)
-      .filter((item) => {
-        const dataPagamento = new Date(item.dataPagamento);
-        return dataPagamento >= inicioMes && dataPagamento < inicioProximoMes;
-      })
-      .reduce((total, item) => total + Number(item.valorLiquido ?? item.valor ?? 0), 0);
+    return arredondarCentavos(
+      receitas
+        .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.dataPagamento)
+        .filter((item) => {
+          const dataPagamento = new Date(item.dataPagamento);
+          return dataPagamento >= inicioMes && dataPagamento < inicioProximoMes;
+        })
+        .reduce((total, item) => total + Number(item.valorLiquido ?? item.valor ?? 0), 0)
+    );
 
   })();
 
@@ -615,11 +622,11 @@ function FinanceiroPageConteudo() {
   // nunca "aconteceu" de verdade (pode nem chegar a ser paga, cair
   // vencida, etc). Sem valorLiquido preenchido, não entra na conta
   // (nunca assume uma taxa que não foi calculada).
-  const taxasBoleto = Math.round(
+  const taxasBoleto = arredondarCentavos(
     receitasFiltradas
       .filter((item) => (item.status === "PAGO" || item.status === "PAGA") && item.valorLiquido != null)
-      .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0) * 100
-  ) / 100;
+      .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0)
+  );
 
  if (!podeVisualizar) {
     return <SemPermissao />;
