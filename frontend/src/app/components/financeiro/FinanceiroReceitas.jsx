@@ -65,6 +65,7 @@ export default function FinanceiroReceitas({
   subtitulo = "Controle das receitas cadastradas.",
 }) {
   const podeEditar = usePermissao("financeiro.editar");
+  const podeMarcarPago = usePermissao("financeiro.marcarPago");
 
   const [receitaSelecionada, setReceitaSelecionada] =
     useState(null);
@@ -157,14 +158,16 @@ export default function FinanceiroReceitas({
             />
           ))}
 
-        <MenuButton
-          label="Marcar Pago"
-          success
-          onClick={() => {
-            onMarcarPago?.(item.id);
-            setMenuAberto(null);
-          }}
-        />
+        {podeMarcarPago && (
+          <MenuButton
+            label="Marcar Pago"
+            success
+            onClick={() => {
+              onMarcarPago?.(item.id);
+              setMenuAberto(null);
+            }}
+          />
+        )}
 
         {(item.status === "PAGO" || item.status === "PAGA") && (
           <MenuButton

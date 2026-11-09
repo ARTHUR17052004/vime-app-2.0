@@ -6,6 +6,7 @@ const receitaController = require('../controllers/receitaController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
+const { exigirPermissaoParaMarcarPago } = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
 
@@ -15,9 +16,9 @@ router.get('/taxa-boleto', permissaoMiddleware('financeiro.visualizar'), receita
 
 router.get('/:id', permissaoMiddleware('financeiro.visualizar'), receitaController.buscarPorId);
 
-router.post('/', permissaoMiddleware('financeiro.editar'), receitaController.criar);
+router.post('/', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, receitaController.criar);
 
-router.put('/:id', permissaoMiddleware('financeiro.editar'), receitaController.atualizar);
+router.put('/:id', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, receitaController.atualizar);
 
 router.delete('/:id', permissaoMiddleware('financeiro.editar'), receitaController.remover);
 

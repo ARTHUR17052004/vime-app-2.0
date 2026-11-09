@@ -95,7 +95,7 @@ const CATALOGO = [
   {
     modulo: "Financeiro",
     chave: "financeiro",
-    acoes: ["visualizar", "editar", "exportar"],
+    acoes: ["visualizar", "editar", "exportar", "marcarPago"],
   },
   {
     modulo: "Solicitações",
@@ -165,6 +165,7 @@ const ROTULOS_ACAO = {
   editar: "Editar",
   excluir: "Excluir",
   exportar: "Exportar",
+  marcarPago: "Marcar receita/despesa como paga",
   classificar: "Classificar solicitações",
   testarConexao: "Testar conexão",
   enviar: "Enviar",
