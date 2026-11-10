@@ -17,6 +17,7 @@ const lembrarVistoriasPendentes = require("./lembrarVistoriasPendentesJob");
 const fecharChamadosResolvidos = require("./fecharChamadosResolvidosJob");
 const snapshotOcupacao = require("./snapshotOcupacaoJob");
 const verificarBoletosBB = require("./verificarBoletosBBJob");
+const verificarAsaas = require("./verificarAsaasJob");
 
 const iniciarJobs = () => {
 
@@ -34,6 +35,12 @@ const iniciarJobs = () => {
   // nunca foi confirmado ao vivo, então isso é o que garante de verdade
   // que o sistema reconhece o pagamento sem depender dele disparar certo.
   cron.schedule("*/15 * * * *", verificarBoletosBB);
+
+  // Mesmo motivo do job do BB acima: a Asaas também tem webhook, mas ele
+  // às vezes some sozinho (a Asaas pausa um webhook depois de falhas
+  // repetidas de entrega, sem avisar ninguém) -- isso já fez o sistema
+  // cobrar gente que já tinha pago (ver verificarAsaasJob.js).
+  cron.schedule("*/15 * * * *", verificarAsaas);
 
   cron.schedule("0 8 * * *", async () => {
 

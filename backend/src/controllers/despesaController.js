@@ -2,12 +2,25 @@ const despesaService = require('../services/despesaService');
 
 const listar = async (req, res) => {
 
-  const despesas = await despesaService.listar(req.usuario);
+  try {
 
-  return res.json({
-    success: true,
-    data: despesas
-  });
+    const despesas = await despesaService.listar(req.usuario);
+
+    return res.json({
+      success: true,
+      data: despesas
+    });
+
+  } catch (error) {
+
+    console.error("Erro ao listar despesas:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao carregar despesas. Tente recarregar a página."
+    });
+
+  }
 
 };
 

@@ -68,6 +68,12 @@ function FinanceiroPageConteudo() {
   const [carregado, setCarregado] =
     useState(false);
 
+  // Sem isso, uma falha ao buscar (ex.: soluço de conexão com o banco)
+  // deixava a tela inteira zerada sem nenhum aviso -- parecia que o
+  // locador não tinha receita nenhuma cadastrada (ver bug de 10/11/2026).
+  const [erroCarregamento, setErroCarregamento] =
+    useState(false);
+
   const [abaSelecionada, setAbaSelecionada] =
     useState("visao-geral");
 
@@ -184,9 +190,13 @@ function FinanceiroPageConteudo() {
         Array.isArray(despesasResp) ? despesasResp : despesasResp.data || []
       );
 
+      setErroCarregamento(false);
+
     } catch (err) {
 
       console.error("Erro ao carregar dados financeiros:", err);
+
+      setErroCarregamento(true);
 
     } finally {
 
@@ -681,6 +691,14 @@ function FinanceiroPageConteudo() {
         }
       />
     </FadeIn>
+
+    {erroCarregamento && (
+      <FadeIn>
+        <div className="mt-4 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-4 text-sm text-red-300">
+          Não foi possível carregar os dados financeiros agora (os números abaixo podem estar incompletos ou zerados). Tente recarregar a página em alguns instantes.
+        </div>
+      </FadeIn>
+    )}
 
     <FadeIn delay={0.10}>
       <FinanceiroStats

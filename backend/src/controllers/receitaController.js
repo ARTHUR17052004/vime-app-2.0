@@ -14,12 +14,31 @@ const foraDoEscopo = async (req) => {
 };
 
 const listar = async (req, res) => {
-  const receitas = await receitaService.listar(req.usuario);
 
-  return res.json({
-    success: true,
-    data: receitas
-  });
+  try {
+
+    const receitas = await receitaService.listar(req.usuario);
+
+    return res.json({
+      success: true,
+      data: receitas
+    });
+
+  } catch (error) {
+
+    // Sem isso, uma falha aqui (ex.: soluço de conexão com o banco)
+    // nunca virava resposta nenhuma -- o front só via a requisição
+    // falhar e mostrava a tela de Financeiro com tudo zerado, sem
+    // nenhum aviso de erro (foi o que aconteceu em 10/11/2026).
+    console.error("Erro ao listar receitas:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao carregar receitas. Tente recarregar a página."
+    });
+
+  }
+
 };
 
 const buscarPorId = async (req, res) => {
