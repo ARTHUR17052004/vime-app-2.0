@@ -141,6 +141,12 @@ const sanitizar = (dados) => {
 const listar = (usuario) => {
   return prisma.contrato.findMany({
     where: filtroContrato(usuario),
+    // arquivoDados é o PDF/foto do contrato em base64 -- pode ter vários MB
+    // por contrato. Incluir isso na listagem inteira (em vez de só na tela
+    // de um contrato, ou no download em /:id/arquivo) fazia essa rota
+    // devolver 200+ MB de resposta e travar as telas de Contratos/Arquivo
+    // de Contratos carregando por muito tempo.
+    omit: { arquivoDados: true },
     include: {
       locador: true,
       unidade: true,
