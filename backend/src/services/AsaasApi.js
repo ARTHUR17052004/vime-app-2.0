@@ -134,12 +134,19 @@ class AsaasApi {
 
             console.error("Erro Asaas (resposta):", json);
 
-            const mensagem =
+            const base =
               json.errors?.[0]?.description ||
               json.message ||
               `Erro ao comunicar com a Asaas (HTTP ${res.statusCode}).`;
 
-            reject(new Error(mensagem));
+            // Temporário: anexa o array "errors" bruto (código + campo,
+            // quando a Asaas manda) na própria mensagem que chega no
+            // front -- sem isso, um "Propriedade desconhecida" genérico
+            // não diz QUAL propriedade, e não dá pra investigar sem
+            // acesso aos logs do servidor.
+            const detalhe = json.errors ? ` | ${JSON.stringify(json.errors)}` : '';
+
+            reject(new Error(`${base}${detalhe}`));
 
           });
 
