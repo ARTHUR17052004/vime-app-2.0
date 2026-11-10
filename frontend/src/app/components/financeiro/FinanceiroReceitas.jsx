@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MoreVertical,
   Wallet,
@@ -22,6 +22,44 @@ import ReceitaBoletoModal from "./ReceitaBoletoModal";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
 import { statusExibidoReceita } from "@/utils/statusReceita";
+
+// Relógio de 72h -- o contrato prevê corte de água/energia depois de
+// 72h de atraso (ver verificarAtrasoCorteJob.js, que cria uma Vistoria
+// interna sozinho quando esse prazo vence). Conta direto a partir do
+// vencimento, sem precisar guardar "quando entrou em atraso" em lugar
+// nenhum -- é sempre vencimento + 72h.
+function RelogioCorte({ vencimento }) {
+
+  const [agora, setAgora] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setAgora(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!vencimento) return null;
+
+  const prazo = new Date(vencimento).getTime() + 72 * 60 * 60 * 1000;
+  const restanteMs = prazo - agora;
+
+  if (restanteMs <= 0) {
+    return (
+      <Badge variant="red" size="sm">
+        Risco de corte
+      </Badge>
+    );
+  }
+
+  const horas = Math.floor(restanteMs / (60 * 60 * 1000));
+  const minutos = Math.floor((restanteMs % (60 * 60 * 1000)) / (60 * 1000));
+
+  return (
+    <Badge variant="yellow" size="sm">
+      Corte em {horas}h{String(minutos).padStart(2, "0")}
+    </Badge>
+  );
+
+}
 
 function MenuButton({ label, danger, success, warning, onClick }) {
   return (
@@ -419,6 +457,10 @@ export default function FinanceiroReceitas({
                       {statusExibido(item).texto}
                     </Badge>
 
+                    {item.status === "ATRASADA" && (
+                      <RelogioCorte vencimento={item.vencimento} />
+                    )}
+
                     {item.gatewayProvider && (
                       <Badge variant="gray" size="sm">
                         {item.gatewayProvider}
@@ -563,6 +605,10 @@ export default function FinanceiroReceitas({
                       <Badge variant={statusExibido(item).variant}>
                         {statusExibido(item).texto}
                       </Badge>
+
+                      {item.status === "ATRASADA" && (
+                        <RelogioCorte vencimento={item.vencimento} />
+                      )}
 
                       {item.gatewayProvider && (
                         <Badge variant="gray" size="sm">

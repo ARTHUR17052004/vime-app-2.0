@@ -471,6 +471,11 @@ model Receita {
   // uma vez por Receita, mesmo se o job rodar de novo.
   avisoVencidoEnviadoEm       DateTime?
   confirmacaoPagtoEnviadaEm   DateTime?
+
+  // Mesmo dedupe, mas pra Vistoria interna de "risco de corte" criada
+  // depois de 72h de atraso (ver verificarAtrasoCorteJob.js) -- não é
+  // aviso pro inquilino, é tarefa interna pra equipe avaliar o corte.
+  vistoriaCorteAtrasoCriadaEm DateTime?
   // true = some da lista normal de Receitas e passa a aparecer só na
   // aba Histórico -- pra não acumular, mês após mês, cobrança recorrente
   // já paga misturada com as em aberto. Só muda com a ação manual
