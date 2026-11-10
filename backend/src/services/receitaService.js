@@ -154,11 +154,17 @@ const sanitizar = (dados) => {
 
 };
 
+// contrato.arquivoDados é o PDF/foto do contrato em base64 (pode ter
+// vários MB) -- sem excluir isso aqui, toda receita vinculada a um
+// contrato arrastava o arquivo inteiro dele junto, só pra listar uma
+// cobrança (mesmo bug do GET /contratos, ver contratoService.listar).
+const SEM_ARQUIVO_DO_CONTRATO = { omit: { arquivoDados: true } };
+
 const listar = (usuario) => {
   return prisma.receita.findMany({
     where: filtroReceita(usuario),
     include: {
-      contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
+      contrato: { ...SEM_ARQUIVO_DO_CONTRATO, include: { inquilino: true, kitnet: true, unidade: true } },
       inquilino: { include: { kitnet: { include: { unidade: true } } } }
     },
     orderBy: {
@@ -171,7 +177,7 @@ const buscarPorId = (id, usuario) => {
   return prisma.receita.findFirst({
     where: { id, ...filtroReceita(usuario) },
     include: {
-      contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
+      contrato: { ...SEM_ARQUIVO_DO_CONTRATO, include: { inquilino: true, kitnet: true, unidade: true } },
       inquilino: { include: { kitnet: { include: { unidade: true } } } }
     }
   });
