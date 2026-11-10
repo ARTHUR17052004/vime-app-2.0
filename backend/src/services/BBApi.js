@@ -20,6 +20,14 @@ const API_URLS = {
 const ESCOPO_COBRANCAS =
   "cobrancas.boletos-requisicao cobrancas.boletos-info";
 
+// dados.dataVencimento já chega formatado "dd.mm.yyyy" (ver
+// gatewayPagamentoService.formatarDataBB) -- reformata pra Date, soma
+// os dias e devolve no mesmo formato "dd.mm.yyyy" que o BB espera.
+const formatarDataBB = (data) => {
+  const d = new Date(data);
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+};
+
 class BBApi {
 
   constructor() {
@@ -221,7 +229,7 @@ class BBApi {
       );
     }
 
-    return this.request("POST", "/cobrancas/v2/boletos", {
+    const payload = {
       numeroConvenio: Number(numeroConvenio),
       numeroCarteira: Number(numeroCarteira),
       numeroVariacaoCarteira: Number(numeroVariacaoCarteira),
@@ -246,7 +254,37 @@ class BBApi {
         bairro: dados.pagador.bairro,
         uf: dados.pagador.uf,
       },
-    }, {}, override);
+    };
+
+    // Multa/juros por atraso (opcionais -- só manda se a receita tiver
+    // percentual configurado, ver Locador.multa/juros em receitaService.
+    // js). Campos "multa"/"jurosMora" do Cobranças v2 -- NÃO confirmado
+    // ao vivo contra o BB ainda (ao contrário do resto deste payload, que
+    // já roda em produção). Dia de início = dia seguinte ao vencimento,
+    // igual padrão de mercado. Testar o primeiro boleto gerado com esses
+    // campos (consultarBoleto ou o próprio PDF do banco) antes de confiar
+    // cegamente no valor cobrado.
+    if (dados.multaValor) {
+      const diaMulta = new Date(dados.dataVencimento.split('.').reverse().join('-'));
+      diaMulta.setDate(diaMulta.getDate() + 1);
+      payload.multa = {
+        tipo: 2, // percentual
+        data: formatarDataBB(diaMulta),
+        valor: Number(dados.multaValor),
+      };
+    }
+
+    if (dados.jurosValor) {
+      const diaJuros = new Date(dados.dataVencimento.split('.').reverse().join('-'));
+      diaJuros.setDate(diaJuros.getDate() + 1);
+      payload.jurosMora = {
+        tipo: 2, // taxa mensal
+        data: formatarDataBB(diaJuros),
+        valor: Number(dados.jurosValor),
+      };
+    }
+
+    return this.request("POST", "/cobrancas/v2/boletos", payload, {}, override);
 
   }
 

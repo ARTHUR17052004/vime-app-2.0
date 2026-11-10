@@ -1,7 +1,7 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
 const contaPagamentoService = require("../services/contaPagamentoService");
-const { kitnetDaReceita } = require("../services/receitaService");
+const { kitnetDaReceita, multaJurosPadrao } = require("../services/receitaService");
 
 /*
   Recorrência de Receita direto (sem Contrato -- esse já tem seu
@@ -90,6 +90,17 @@ module.exports = async () => {
 
     const valorLiquido = Math.max(0, Math.round((receita.valor - taxa) * 100) / 100);
 
+    // Carrega a multa/juros já usada na receita anterior (pode ter sido
+    // ajustada manualmente pra esse inquilino/contrato) -- só recai no
+    // padrão do locador se a anterior nunca teve nenhum valor definido.
+    let multaValor = receita.multaValor;
+    let jurosValor = receita.jurosValor;
+    if (multaValor == null && jurosValor == null) {
+      const padrao = await multaJurosPadrao(receita.locadorId);
+      multaValor = padrao.multaValor;
+      jurosValor = padrao.jurosValor;
+    }
+
     await prisma.receita.create({
       data: {
         inquilinoId: receita.inquilinoId,
@@ -105,6 +116,8 @@ module.exports = async () => {
         vencimento: proximoVencimento,
         status: "PENDENTE",
         recorrente: true,
+        multaValor,
+        jurosValor,
       },
     });
 

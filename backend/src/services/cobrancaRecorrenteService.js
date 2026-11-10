@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
+const { multaJurosPadrao } = require("./receitaService");
 
 /*
   Núcleo da geração de cobrança de aluguel a partir de um Contrato --
@@ -61,6 +62,8 @@ const gerarCobrancaParaContrato = async (contrato) => {
   const dia = Math.min(contrato.diaVencimento || 1, ultimoDiaDoMes);
   const vencimento = new Date(ano, mes, dia);
 
+  const { multaValor, jurosValor } = await multaJurosPadrao(contrato.locadorId);
+
   const receita = await prisma.receita.create({
     data: {
       contratoId: contrato.id,
@@ -69,6 +72,8 @@ const gerarCobrancaParaContrato = async (contrato) => {
       valor: contrato.valorAluguel,
       vencimento,
       status: "PENDENTE",
+      multaValor,
+      jurosValor,
     },
   });
 

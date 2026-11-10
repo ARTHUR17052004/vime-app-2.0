@@ -29,6 +29,30 @@ const locadorDaReceita = async (dados) => {
   return null;
 };
 
+// Multa/juros por atraso configurados no cadastro do Locador (campo
+// "Multa"/"Juros" dele, em %) -- usados como padrão de toda cobrança
+// nova desse locador, a menos que a receita já tenha um valor próprio
+// definido (ex.: negociação pontual via Asaas Transações -> Editar).
+// Sem isso, NENHUMA cobrança saía com multa/juros por atraso, mesmo
+// quando o locador tinha esses percentuais configurados -- bug
+// relatado em 10/11/2026 ("as cobranças estão vindo sem juros e multa
+// por atraso").
+const multaJurosPadrao = async (locadorId) => {
+
+  if (!locadorId) return { multaValor: null, jurosValor: null };
+
+  const locador = await prisma.locador.findUnique({
+    where: { id: locadorId },
+    select: { multa: true, juros: true },
+  });
+
+  return {
+    multaValor: locador?.multa || null,
+    jurosValor: locador?.juros || null,
+  };
+
+};
+
 // Trava duplicata de Aluguel: mesmo inquilino (ou mesmo pagador avulso,
 // pelo CPF) com cobrança vencendo no MESMO mês não pode ganhar uma
 // segunda -- os motores automáticos (cobrancaRecorrenteService,
@@ -204,6 +228,12 @@ const criar = async (dados, autor) => {
     }
   }
 
+  if (dados.multaValor === undefined || dados.jurosValor === undefined) {
+    const padrao = await multaJurosPadrao(dados.locadorId);
+    if (dados.multaValor === undefined) dados.multaValor = padrao.multaValor;
+    if (dados.jurosValor === undefined) dados.jurosValor = padrao.jurosValor;
+  }
+
   const receita = await prisma.receita.create({
     data: dados
   });
@@ -340,5 +370,6 @@ module.exports = {
   atualizar,
   remover,
   previsaoTaxaBoleto,
-  kitnetDaReceita
+  kitnetDaReceita,
+  multaJurosPadrao
 };

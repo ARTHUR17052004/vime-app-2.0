@@ -5,6 +5,7 @@ const ClicksignApi = require("./ClicksignApi");
 const ClicksignApiV3 = require("./ClicksignApiV3");
 const notificacaoService = require("./notificacaoService");
 const { emitirAtualizacao } = require("../socket");
+const { multaJurosPadrao } = require("./receitaService");
 
 // Confere se o webhook realmente veio da Clicksign, usando o segredo
 // gerado pra esse endpoint (header "Content-Hmac: sha256=<hash>").
@@ -259,6 +260,8 @@ const processarWebhook = async (evento) => {
 
       if (!jaExiste) {
 
+        const { multaValor, jurosValor } = await multaJurosPadrao(documento.locadorId);
+
         const receitaCriada = await prisma.receita.create({
           data: {
             contratoId: documento.id,
@@ -267,7 +270,9 @@ const processarWebhook = async (evento) => {
             descricao: `Aluguel - ${documento.kitnet?.numero || documento.kitnet?.nome || ""}`,
             valor: documento.valorAluguel,
             vencimento: documento.dataInicio,
-            status: "PENDENTE"
+            status: "PENDENTE",
+            multaValor,
+            jurosValor,
           }
         });
 

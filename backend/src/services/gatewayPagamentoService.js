@@ -110,6 +110,8 @@ const enviarPeloBB = async (receita, conta) => {
       valor: Number(receita.valor),
       numeroTituloBeneficiario: receita.id.replace(/-/g, '').slice(0, 15).toUpperCase(),
       numeroControle,
+      multaValor: receita.multaValor,
+      jurosValor: receita.jurosValor,
       pagador: {
         tipoInscricao: 1, // Pessoa física -- inquilino ou pagador avulso, sempre CPF no VIME
         numeroInscricao: Number(cpfDigitos),
@@ -206,6 +208,8 @@ const enviarPelaEFI = async (receita, conta) => {
       dataVencimento: receita.vencimento
         ? new Date(receita.vencimento).toISOString().slice(0, 10)
         : new Date().toISOString().slice(0, 10),
+      multaValor: receita.multaValor,
+      jurosValor: receita.jurosValor,
       pagador: {
         nome: pagador.nome,
         cpf: cpfDigitos,

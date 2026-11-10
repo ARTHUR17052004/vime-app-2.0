@@ -224,6 +224,30 @@ class EFIApi {
       throw new Error(`Telefone do inquilino ${nome ? `"${nome}" ` : ""}está ausente. Corrija o cadastro antes de enviar a cobrança.`);
     }
 
+    const bankingBillet = {
+      customer: {
+        name: nome,
+        cpf: cpfDigitos,
+        email: emailBruto,
+        phone_number: telefoneDigitos,
+      },
+      expire_at: dados.dataVencimento, // formato AAAA-MM-DD
+    };
+
+    // Multa/juros por atraso (opcionais -- ver Locador.multa/juros em
+    // receitaService.js). NÃO confirmado ao vivo (igual o resto do
+    // "palpite" deste arquivo) -- testar o primeiro boleto real com
+    // esses campos antes de confiar no valor cobrado. Mesma convenção
+    // de "centavos de percentual" que a EFI já usa pro valor em si
+    // (2% -> 200).
+    if (dados.multaValor) {
+      bankingBillet.fine = { value: Math.round(Number(dados.multaValor) * 100) };
+    }
+
+    if (dados.jurosValor) {
+      bankingBillet.interest = { value: Math.round(Number(dados.jurosValor) * 100) };
+    }
+
     const resultado = await this.request("POST", "/v1/charge/one-step", {
       items: [
         {
@@ -233,15 +257,7 @@ class EFIApi {
         },
       ],
       payment: {
-        banking_billet: {
-          customer: {
-            name: nome,
-            cpf: cpfDigitos,
-            email: emailBruto,
-            phone_number: telefoneDigitos,
-          },
-          expire_at: dados.dataVencimento, // formato AAAA-MM-DD
-        },
+        banking_billet: bankingBillet,
       },
     }, override);
 
