@@ -525,9 +525,13 @@ const enviarCobranca = async (receitaId, contaResolvida = null) => {
     }
 
     if (receita.jurosValor) {
+      // Ao contrário de discount/fine, o objeto "interest" da Asaas NÃO
+      // tem campo "type" (juros de mora é sempre % ao mês, sem opção de
+      // valor fixo) -- mandar "type" aqui derrubava a cobrança inteira
+      // com "Propriedade desconhecida (não está no schema)" assim que
+      // jurosValor passou a vir preenchido de verdade (10/11/2026).
       payload.interest = {
         value: receita.jurosValor,
-        type: 'PERCENTAGE',
       };
     }
 
