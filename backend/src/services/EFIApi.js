@@ -282,6 +282,26 @@ class EFIApi {
 
   }
 
+  // Consulta o status de uma cobrança já criada -- NÃO confirmado ao
+  // vivo ainda (igual o resto do "palpite" deste arquivo, exceto
+  // criarBoleto). Formato esperado pela documentação pública da EFI:
+  // GET /v1/charge/{id}, resposta em data.status, valores possíveis
+  // "new"|"waiting"|"identified"|"paid"|"unpaid"|"refunded"|
+  // "contested"|"canceled"|"settled"|"link". Testar contra uma
+  // cobrança real paga antes de confiar cegamente.
+  async consultarCobranca(chargeId, override = null) {
+
+    const resultado = await this.request("GET", `/v1/charge/${chargeId}`, null, override);
+
+    const dados = resultado?.data || resultado;
+
+    return {
+      status: dados?.status || null,
+      pago: dados?.status === "paid" || dados?.status === "settled",
+    };
+
+  }
+
   // ==========================
   // PIX -- extrato de recebidos
   // ==========================

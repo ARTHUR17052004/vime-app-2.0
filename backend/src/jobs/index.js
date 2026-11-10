@@ -18,6 +18,7 @@ const fecharChamadosResolvidos = require("./fecharChamadosResolvidosJob");
 const snapshotOcupacao = require("./snapshotOcupacaoJob");
 const verificarBoletosBB = require("./verificarBoletosBBJob");
 const verificarAsaas = require("./verificarAsaasJob");
+const verificarEfi = require("./verificarEfiJob");
 const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
 
 const iniciarJobs = () => {
@@ -46,6 +47,10 @@ const iniciarJobs = () => {
   // repetidas de entrega, sem avisar ninguém) -- isso já fez o sistema
   // cobrar gente que já tinha pago (ver verificarAsaasJob.js).
   cron.schedule("*/15 * * * *", verificarAsaas);
+
+  // A EFI nem webhook tem configurado ainda -- sem isso, uma cobrança
+  // paga na EFI nunca seria reconhecida sozinha (ver verificarEfiJob.js).
+  cron.schedule("*/15 * * * *", verificarEfi);
 
   cron.schedule("0 8 * * *", async () => {
 
