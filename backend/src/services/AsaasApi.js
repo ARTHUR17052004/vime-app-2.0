@@ -133,20 +133,13 @@ class AsaasApi {
             }
 
             console.error("Erro Asaas (resposta):", json);
-            console.error("Erro Asaas (payload enviado):", payload);
 
-            const base =
+            const mensagem =
               json.errors?.[0]?.description ||
               json.message ||
               `Erro ao comunicar com a Asaas (HTTP ${res.statusCode}).`;
 
-            // Temporário: anexa a resposta crua inteira (não só
-            // errors[0].description) + o payload que ENVIAMOS -- o
-            // "errors" não trouxe nada útil da primeira vez, então agora
-            // manda tudo (raw body da Asaas e o que mandamos pra ela)
-            // direto na mensagem que chega no front, pra não depender de
-            // acesso aos logs do servidor pra investigar.
-            reject(new Error(`${base} || RESPOSTA_ASAAS=${data} || ENVIAMOS=${payload}`));
+            reject(new Error(mensagem));
 
           });
 

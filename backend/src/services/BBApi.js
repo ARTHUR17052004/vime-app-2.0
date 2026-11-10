@@ -256,15 +256,16 @@ class BBApi {
       },
     };
 
-    // Multa/juros por atraso (opcionais -- só manda se a receita tiver
-    // percentual configurado, ver Locador.multa/juros em receitaService.
-    // js). Campos "multa"/"jurosMora" do Cobranças v2 -- NÃO confirmado
-    // ao vivo contra o BB ainda (ao contrário do resto deste payload, que
-    // já roda em produção). Dia de início = dia seguinte ao vencimento,
-    // igual padrão de mercado. Testar o primeiro boleto gerado com esses
-    // campos (consultarBoleto ou o próprio PDF do banco) antes de confiar
-    // cegamente no valor cobrado.
-    if (dados.multaValor) {
+    // Multa/juros por atraso -- DESLIGADO de propósito (10/11/2026).
+    // Tentei mandar "multa"/"jurosMora" nesse formato e o BB rejeitou
+    // TODO boleto dessa conta com "Propriedade desconhecida (não está
+    // no schema)" -- ou seja, os nomes de campo que usei (chute, nunca
+    // confirmado ao vivo) estão errados e travavam até boleto SEM multa
+    // nenhuma configurada. Confirmar o formato certo com o suporte/
+    // manual técnico do BB antes de reativar isso -- até lá, o boleto
+    // do BB sai sem multa/juros automáticos (igual sempre foi antes de
+    // hoje), só a Asaas aplica.
+    if (false && dados.multaValor) {
       const diaMulta = new Date(dados.dataVencimento.split('.').reverse().join('-'));
       diaMulta.setDate(diaMulta.getDate() + 1);
       payload.multa = {
@@ -274,7 +275,7 @@ class BBApi {
       };
     }
 
-    if (dados.jurosValor) {
+    if (false && dados.jurosValor) {
       const diaJuros = new Date(dados.dataVencimento.split('.').reverse().join('-'));
       diaJuros.setDate(diaJuros.getDate() + 1);
       payload.jurosMora = {

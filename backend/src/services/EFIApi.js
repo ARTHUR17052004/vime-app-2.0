@@ -234,17 +234,17 @@ class EFIApi {
       expire_at: dados.dataVencimento, // formato AAAA-MM-DD
     };
 
-    // Multa/juros por atraso (opcionais -- ver Locador.multa/juros em
-    // receitaService.js). NÃO confirmado ao vivo (igual o resto do
-    // "palpite" deste arquivo) -- testar o primeiro boleto real com
-    // esses campos antes de confiar no valor cobrado. Mesma convenção
-    // de "centavos de percentual" que a EFI já usa pro valor em si
-    // (2% -> 200).
-    if (dados.multaValor) {
+    // Multa/juros por atraso -- DESLIGADO de propósito (10/11/2026). O
+    // mesmo tipo de campo "chutado" (nunca confirmado ao vivo) pro BB
+    // travou TODO boleto da conta com "Propriedade desconhecida" assim
+    // que passou a ser enviado de verdade -- bem provável que esse aqui
+    // tenha o mesmo problema. Confirmar o formato certo (documentação
+    // oficial ou teste real em homologação) antes de reativar.
+    if (false && dados.multaValor) {
       bankingBillet.fine = { value: Math.round(Number(dados.multaValor) * 100) };
     }
 
-    if (dados.jurosValor) {
+    if (false && dados.jurosValor) {
       bankingBillet.interest = { value: Math.round(Number(dados.jurosValor) * 100) };
     }
 
