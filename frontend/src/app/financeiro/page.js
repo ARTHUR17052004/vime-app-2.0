@@ -317,6 +317,11 @@ function FinanceiroPageConteudo() {
 
       alert(err.message || "Erro ao atualizar receita.");
 
+      // Repassa pra quem chamou (ex.: o modal de edição com a trava de
+      // senha pra mudar o valor) saber que falhou e não fechar sozinho
+      // como se tivesse dado certo.
+      throw err;
+
     }
 
   };

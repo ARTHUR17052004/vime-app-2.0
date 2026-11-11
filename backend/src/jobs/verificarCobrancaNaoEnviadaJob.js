@@ -63,9 +63,7 @@ module.exports = async () => {
 
       await notificacaoService.criar({
         origem: 'SISTEMA',
-        titulo: vencida
-          ? 'Cobrança vencida nunca enviada ao banco'
-          : 'Cobrança perto de vencer, ainda não enviada ao banco',
+        titulo: 'COBRANÇA NÃO ENVIADA',
         mensagem: await notificacaoService.renderizarMensagem(
           'COBRANCA_NAO_ENVIADA',
           {

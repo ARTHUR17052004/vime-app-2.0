@@ -95,7 +95,11 @@ const CATALOGO = [
   {
     modulo: "Financeiro",
     chave: "financeiro",
-    acoes: ["visualizar", "editar", "exportar", "marcarPago"],
+    // "editarValor" é à parte de "editar" de propósito -- mudar o valor
+    // de um boleto já enviado é sensível (ver middlewares/
+    // permissaoMiddleware.js: exige também a senha de quem está
+    // editando, e dispara notificação "MUDANÇA DE VALOR DE BOLETO").
+    acoes: ["visualizar", "editar", "editarValor", "exportar", "marcarPago"],
   },
   {
     modulo: "Solicitações",
@@ -166,6 +170,7 @@ const ROTULOS_ACAO = {
   excluir: "Excluir",
   exportar: "Exportar",
   marcarPago: "Marcar receita/despesa como paga",
+  editarValor: "Editar valor do boleto (exige senha + motivo)",
   classificar: "Classificar solicitações",
   testarConexao: "Testar conexão",
   enviar: "Enviar",

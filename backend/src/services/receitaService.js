@@ -7,8 +7,11 @@ const logService = require('./logService');
 const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const contaPagamentoService = require('./contaPagamentoService');
-const { doContrato, doInquilino } = require('../utils/locadorDeRegistro');
+const notificacaoService = require('./notificacaoService');
+const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
+
+const MOTIVO_EDICAO_VALOR_ROTULO = { TAXA: 'Taxa', MULTA: 'Multa', OUTROS: 'Outros' };
 
 const CAMPOS_RECEITA = {
   descricao: 'descrição',
@@ -270,6 +273,14 @@ const criar = async (dados, autor) => {
 
 const atualizar = async (id, dados, autor) => {
 
+  // Não são campos do model -- o middleware (exigirConfirmacaoEdicaoValor)
+  // já validou os dois antes de chegar aqui (permissão + motivo + senha).
+  // Só sobra usar o motivo pra montar a notificação abaixo; nunca vão
+  // pro prisma.receita.update.
+  const motivoEdicaoValor = dados.motivoEdicaoValor;
+  delete dados.motivoEdicaoValor;
+  delete dados.senhaConfirmacao;
+
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
@@ -288,6 +299,26 @@ const atualizar = async (id, dados, autor) => {
     where: { id },
     data: dados
   });
+
+  // Alerta pra equipe inteira (não só log de auditoria, que ninguém
+  // olha no dia a dia) -- mudar o valor de um boleto já lançado é
+  // sensível o bastante pra todo mundo saber na hora que aconteceu.
+  if (
+    dados.valor !== undefined &&
+    Math.abs(Number(anterior.valor) - Number(receita.valor)) >= 0.005
+  ) {
+
+    const motivoRotulo = MOTIVO_EDICAO_VALOR_ROTULO[String(motivoEdicaoValor || '').toUpperCase()] || 'Outros';
+
+    notificacaoService.criar({
+      origem: 'SISTEMA',
+      titulo: 'MUDANÇA DE VALOR DE BOLETO',
+      mensagem: `${autor?.nome || 'Alguém'} mudou o valor de "${receita.descricao}" de R$ ${Number(anterior.valor).toFixed(2)} para R$ ${Number(receita.valor).toFixed(2)} (motivo: ${motivoRotulo}).`,
+      link: '/financeiro',
+      locadorId: await locadorIdDaReceita(receita.id),
+    }).catch((erro) => console.error('[notificacao] Falha ao avisar mudança de valor de boleto:', erro.message));
+
+  }
 
   await auditoriaService.registrar({
     usuarioId: autor?.id || null,

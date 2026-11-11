@@ -19,7 +19,7 @@ export async function mostrarPopupNotificacao(notificacao) {
 
     // Mesmo critério de urgência do som (ver somNotificacao.js) -- fica
     // fixa na tela até alguém tocar, em vez de sumir sozinha.
-    const urgente = notificacao.titulo === "Vistoria urgente: kitnet vazia";
+    const urgente = (notificacao.titulo || "").toUpperCase() === "VISTORIA URGENTE: KITNET VAZIA";
 
     const opcoes = {
       body: notificacao.mensagem || "",

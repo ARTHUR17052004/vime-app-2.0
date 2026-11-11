@@ -87,9 +87,16 @@ const TIPOS = [
     mensagemPadrao: "{{descricao}} ({{inquilino}}) -- R$ {{valor}} venceu e ainda não foi pago.",
   },
   {
+    chave: "MUDANCA_VALOR_BOLETO", grupo: "Financeiro", rotulo: "Mudança de valor de boleto",
+    descricao: "Alguém mudou o valor de uma cobrança já lançada (exige senha + motivo pra fazer isso).",
+    titulos: ["MUDANÇA DE VALOR DE BOLETO"],
+    variaveis: ["usuario", "descricao", "valorAntigo", "valorNovo", "motivo"],
+    mensagemPadrao: "{{usuario}} mudou o valor de \"{{descricao}}\" de R$ {{valorAntigo}} para R$ {{valorNovo}} (motivo: {{motivo}}).",
+  },
+  {
     chave: "COBRANCA_NAO_ENVIADA", grupo: "Financeiro", rotulo: "Cobrança não enviada ao banco",
     descricao: "Cobrança perto de vencer (ou já vencida) que nunca foi enviada a banco nenhum -- avisa a equipe todo dia enquanto continuar sem ser enviada.",
-    titulos: ["Cobrança perto de vencer, ainda não enviada ao banco", "Cobrança vencida nunca enviada ao banco"],
+    titulos: ["COBRANÇA NÃO ENVIADA"],
     variaveis: ["inquilino", "kitnet", "valor", "vencimento"],
     mensagemPadrao: "{{inquilino}} (kitnet {{kitnet}}) -- R$ {{valor}} vence/venceu em {{vencimento}} e ainda não foi enviada a nenhum banco.",
   },
@@ -130,16 +137,26 @@ const TIPOS = [
   { chave: "WHATSAPP_MENSAGEM", grupo: "WhatsApp", rotulo: "Nova mensagem no WhatsApp", descricao: "Mensagem recebida de um contato.", prefixos: ["Nova mensagem de "] },
 ];
 
+// Comparação sempre em maiúsculas -- notificacaoService.criar() agora
+// salva todo título em caixa alta (pedido explícito, pra dar pra
+// bater o olho e decidir na hora se vale abrir), mas esse catálogo
+// continua com a grafia "normal" de cada título (mais fácil de ler
+// aqui no código); sem isso, nada bateria mais com POR_TITULO/prefixos
+// depois da mudança.
+const emMaiusculas = (texto) => (texto || "").toUpperCase();
+
 const POR_TITULO = new Map();
-TIPOS.forEach((t) => (t.titulos || []).forEach((titulo) => POR_TITULO.set(titulo, t.chave)));
+TIPOS.forEach((t) => (t.titulos || []).forEach((titulo) => POR_TITULO.set(emMaiusculas(titulo), t.chave)));
 
 // Notificação que não bate com nenhum tipo do catálogo (ex.: as de
 // teste) fica sempre ligada -- "OUTROS" não aparece pra configurar.
 const tipoDe = ({ titulo }) => {
 
-  if (POR_TITULO.has(titulo)) return POR_TITULO.get(titulo);
+  const tituloMaiusculo = emMaiusculas(titulo);
 
-  const porPrefixo = TIPOS.find((t) => (t.prefixos || []).some((p) => (titulo || "").startsWith(p)));
+  if (POR_TITULO.has(tituloMaiusculo)) return POR_TITULO.get(tituloMaiusculo);
+
+  const porPrefixo = TIPOS.find((t) => (t.prefixos || []).some((p) => tituloMaiusculo.startsWith(emMaiusculas(p))));
 
   return porPrefixo ? porPrefixo.chave : "OUTROS";
 

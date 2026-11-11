@@ -51,6 +51,16 @@ export default function ReceitaForm({
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
 
+  // Mudar o VALOR de uma receita já lançada é sensível -- pedido
+  // explícito de travar isso com motivo + a própria senha de quem está
+  // editando (ver exigirConfirmacaoEdicaoValor no backend). Só aparece
+  // quando o valor realmente muda numa EDIÇÃO (nunca na criação).
+  const [confirmandoValor, setConfirmandoValor] = useState(false);
+  const [motivoEdicaoValor, setMotivoEdicaoValor] = useState("TAXA");
+  const [senhaConfirmacao, setSenhaConfirmacao] = useState("");
+  const [erroConfirmacaoValor, setErroConfirmacaoValor] = useState("");
+  const [payloadPendente, setPayloadPendente] = useState(null);
+
   useEffect(() => {
 
     async function carregarInquilinos() {
@@ -178,6 +188,48 @@ export default function ReceitaForm({
     ? Math.round((numeroValor - valorLiquidoCalculado) * 100) / 100
     : null;
 
+  // Compara com tolerância de centavo -- "800" vs "800,00" vs 800.0 não
+  // pode contar como "mudou" só por causa do formato do texto.
+  const valorRealmenteMudou = (valorOriginal, valorFormulario) => {
+    const original = Number(valorOriginal);
+    const novo = Number(String(valorFormulario).replace(",", "."));
+    if (Number.isNaN(original) || Number.isNaN(novo)) return false;
+    return Math.abs(original - novo) >= 0.005;
+  };
+
+  const montarPayload = () => ({
+    id: formData.id,
+    categoria: formData.categoria,
+    descricao: formData.descricao,
+    valor: formData.valor,
+    status: formData.status,
+    vencimento: formData.vencimento,
+    dataPagamento: formData.dataPagamento,
+    inquilinoId: formData.inquilinoId || null,
+    contratoId: formData.contratoId || undefined,
+    // valorLiquido não vai no payload -- é sempre calculado pelo
+    // backend a partir da conta de pagamento, nunca editável aqui.
+    // Recorrência também não -- vira uma ação na própria linha da
+    // receita, depois de criada (igual Enviar ao Banco).
+  });
+
+  const executarSave = async (payload) => {
+
+    setErro("");
+    setSalvando(true);
+
+    try {
+
+      await onSave(payload);
+
+    } finally {
+
+      setSalvando(false);
+
+    }
+
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -196,31 +248,56 @@ export default function ReceitaForm({
     }
 
     setErro("");
-    setSalvando(true);
+
+    const payload = montarPayload();
+
+    // Só pede motivo + senha numa EDIÇÃO onde o valor realmente mudou --
+    // criar uma receita nova, ou editar qualquer outra coisa sem mexer
+    // no valor, segue direto sem essa trava.
+    if (receitaEditando && valorRealmenteMudou(receitaEditando.valor, formData.valor)) {
+      setPayloadPendente(payload);
+      setMotivoEdicaoValor("TAXA");
+      setSenhaConfirmacao("");
+      setErroConfirmacaoValor("");
+      setConfirmandoValor(true);
+      return;
+    }
+
+    await executarSave(payload);
+
+  };
+
+  const confirmarEdicaoValor = async (e) => {
+
+    e.preventDefault();
+
+    if (!senhaConfirmacao) {
+      setErroConfirmacaoValor("Digite sua senha pra confirmar.");
+      return;
+    }
+
+    setErroConfirmacaoValor("");
 
     try {
 
-      await onSave({
-        id: formData.id,
-        categoria: formData.categoria,
-        descricao: formData.descricao,
-        valor: formData.valor,
-        status: formData.status,
-        vencimento: formData.vencimento,
-        dataPagamento: formData.dataPagamento,
-        inquilinoId: formData.inquilinoId || null,
-        contratoId: formData.contratoId || undefined,
-        // valorLiquido não vai no payload -- é sempre calculado pelo
-        // backend a partir da conta de pagamento, nunca editável aqui.
-        // Recorrência também não -- vira uma ação na própria linha da
-        // receita, depois de criada (igual Enviar ao Banco).
+      await executarSave({
+        ...payloadPendente,
+        motivoEdicaoValor,
+        senhaConfirmacao,
       });
 
-    } finally {
+      setConfirmandoValor(false);
+      setPayloadPendente(null);
+      setSenhaConfirmacao("");
 
-      setSalvando(false);
+    } catch (err) {
+
+      // Mantém o modal aberto -- senha errada ou motivo inválido é pra
+      // corrigir e tentar de novo, sem perder os dados do formulário.
+      setErroConfirmacaoValor(err.message || "Não foi possível confirmar a edição do valor.");
 
     }
+
   };
 
   const inputStyle =
@@ -230,6 +307,7 @@ export default function ReceitaForm({
     "border border-[var(--border-token)] bg-[var(--surface-3)] text-[var(--text-muted)] rounded-xl p-3 w-full cursor-not-allowed";
 
   return (
+    <>
     <form
       onSubmit={handleSubmit}
       noValidate
@@ -428,5 +506,89 @@ export default function ReceitaForm({
       </div>
 
     </form>
+
+    {confirmandoValor && (
+
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+
+        <form
+          onSubmit={confirmarEdicaoValor}
+          className="w-full max-w-md rounded-2xl border border-yellow-500/30 bg-[var(--surface)] p-7 space-y-5"
+        >
+
+          <h3 className="text-xl font-bold text-yellow-400">
+            Confirmar edição do valor
+          </h3>
+
+          <p className="text-sm text-[var(--text-muted)]">
+            Você está mudando o valor de R$ {Number(receitaEditando?.valor).toFixed(2)} para
+            {" "}R$ {Number(String(formData.valor).replace(",", ".")).toFixed(2)}. Digite o motivo
+            e sua senha pra confirmar -- isso vai gerar um aviso pra equipe.
+          </p>
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Motivo da edição
+            </label>
+            <select
+              value={motivoEdicaoValor}
+              onChange={(e) => setMotivoEdicaoValor(e.target.value)}
+              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
+            >
+              <option value="TAXA">Taxa</option>
+              <option value="MULTA">Multa</option>
+              <option value="OUTROS">Outros</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+              Sua senha
+            </label>
+            <input
+              type="password"
+              autoFocus
+              value={senhaConfirmacao}
+              onChange={(e) => setSenhaConfirmacao(e.target.value)}
+              className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
+            />
+          </div>
+
+          {erroConfirmacaoValor && (
+            <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
+              {erroConfirmacaoValor}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-3">
+
+            <button
+              type="button"
+              onClick={() => {
+                setConfirmandoValor(false);
+                setPayloadPendente(null);
+                setSenhaConfirmacao("");
+              }}
+              className="px-5 py-2.5 rounded-xl border border-[var(--border-token)] text-[var(--text-muted)]"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              disabled={salvando}
+              className="px-5 py-2.5 rounded-xl bg-yellow-600 text-white font-semibold disabled:opacity-60"
+            >
+              {salvando ? "Confirmando..." : "Confirmar"}
+            </button>
+
+          </div>
+
+        </form>
+
+      </div>
+
+    )}
+    </>
   );
 }

@@ -39,7 +39,7 @@ self.addEventListener("push", (event) => {
         // backend) vibra mais forte e insistente, e fica fixa na tela
         // até alguém tocar -- o resto some sozinha depois de um tempo,
         // essa não, de propósito.
-        const urgente = dados.title === "Vistoria urgente: kitnet vazia";
+        const urgente = (dados.title || "").toUpperCase() === "VISTORIA URGENTE: KITNET VAZIA";
 
         return self.registration.showNotification(dados.title || "VIME 2.0", {
           body: dados.body || "",

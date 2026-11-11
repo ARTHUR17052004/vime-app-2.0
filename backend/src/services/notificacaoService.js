@@ -70,11 +70,17 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   // pra ela, independente do perfil dela.
   const perfisAlvo = !usuarioId ? config.perfis : [];
 
+  // Título sempre em caixa alta -- pedido explícito, pra dar pra bater
+  // o olho na lista de notificações e decidir na hora se vale abrir
+  // (tipoDe/POR_TITULO acima já compara em maiúsculas, então isso não
+  // quebra o catálogo nem o toggle de Administração > Notificações).
+  const tituloExibido = (titulo || "").toUpperCase();
+
   const notificacao = await prisma.notificacao.create({
     data: {
       usuarioId: usuarioId || null,
       origem,
-      titulo,
+      titulo: tituloExibido,
       mensagem,
       link: link || null,
       locadorId: locadorId || null,

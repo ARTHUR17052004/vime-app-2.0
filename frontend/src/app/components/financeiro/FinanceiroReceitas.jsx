@@ -719,8 +719,11 @@ export default function FinanceiroReceitas({
         setEditarOpen(false);
       }}
       receita={receitaSelecionada}
-      onSave={(dadosAtualizados) => {
-        onUpdate?.(
+      onSave={async (dadosAtualizados) => {
+        // Precisa esperar (e deixar o erro subir) -- senão o modal
+        // fechava sozinho mesmo quando a edição falhava (ex.: senha
+        // errada na trava de mudança de valor do boleto).
+        await onUpdate?.(
           receitaSelecionada.id,
           dadosAtualizados
         );
