@@ -509,6 +509,7 @@ export default function ReceitaForm({
 
         <form
           onSubmit={confirmarEdicaoValor}
+          autoComplete="off"
           className="w-full max-w-md rounded-2xl border border-yellow-500/30 bg-[var(--surface)] p-7 space-y-5"
         >
 
@@ -517,8 +518,13 @@ export default function ReceitaForm({
           </h3>
 
           <p className="text-sm text-[var(--text-muted)]">
-            Você está editando "{receitaEditando?.descricao}". Digite o motivo e sua senha pra
-            confirmar -- isso vai gerar um aviso pra equipe.
+            Você está editando "{receitaEditando?.descricao}"
+            {(receitaEditando?.inquilino?.nome || receitaEditando?.contrato?.inquilino?.nome || receitaEditando?.pagadorNome) && (
+              <> de <strong className="text-[var(--text)]">
+                {receitaEditando.inquilino?.nome || receitaEditando.contrato?.inquilino?.nome || receitaEditando.pagadorNome}
+              </strong></>
+            )}
+            . Digite o motivo e sua senha pra confirmar -- isso vai gerar um aviso pra equipe.
           </p>
 
           <div>
@@ -527,6 +533,8 @@ export default function ReceitaForm({
             </label>
             <input
               type="text"
+              name="motivoEdicaoReceita"
+              autoComplete="off"
               autoFocus
               value={motivoEdicaoValor}
               onChange={(e) => setMotivoEdicaoValor(e.target.value)}
@@ -541,6 +549,8 @@ export default function ReceitaForm({
             </label>
             <input
               type="password"
+              name="senhaConfirmacaoEdicaoReceita"
+              autoComplete="new-password"
               value={senhaConfirmacao}
               onChange={(e) => setSenhaConfirmacao(e.target.value)}
               className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"

@@ -15,6 +15,9 @@ export default function ReceitaExcluirModal({ isOpen, onClose, receita, onConfir
 
   if (!isOpen || !receita) return null;
 
+  const nomeInquilino =
+    receita.inquilino?.nome || receita.contrato?.inquilino?.nome || receita.pagadorNome || null;
+
   const fechar = () => {
     setMotivoExclusao("");
     setSenhaConfirmacao("");
@@ -63,6 +66,7 @@ export default function ReceitaExcluirModal({ isOpen, onClose, receita, onConfir
 
       <form
         onSubmit={confirmar}
+        autoComplete="off"
         className="w-full max-w-md rounded-2xl border border-red-500/30 bg-[var(--surface)] p-7 space-y-5"
       >
 
@@ -71,7 +75,9 @@ export default function ReceitaExcluirModal({ isOpen, onClose, receita, onConfir
         </h3>
 
         <p className="text-sm text-[var(--text-muted)]">
-          Você está excluindo "{receita.descricao}" (R$ {Number(receita.valor).toFixed(2)}) de vez --
+          Você está excluindo "{receita.descricao}"
+          {nomeInquilino ? <> de <strong className="text-[var(--text)]">{nomeInquilino}</strong></> : ""}
+          {" "}(R$ {Number(receita.valor).toFixed(2)}) de vez --
           isso não pode ser desfeito. Digite o motivo e sua senha pra confirmar -- vai gerar um aviso pra equipe.
         </p>
 
@@ -81,6 +87,8 @@ export default function ReceitaExcluirModal({ isOpen, onClose, receita, onConfir
           </label>
           <input
             type="text"
+            name="motivoExclusaoReceita"
+            autoComplete="off"
             autoFocus
             value={motivoExclusao}
             onChange={(e) => setMotivoExclusao(e.target.value)}
@@ -95,6 +103,8 @@ export default function ReceitaExcluirModal({ isOpen, onClose, receita, onConfir
           </label>
           <input
             type="password"
+            name="senhaConfirmacaoExclusaoReceita"
+            autoComplete="new-password"
             value={senhaConfirmacao}
             onChange={(e) => setSenhaConfirmacao(e.target.value)}
             className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
