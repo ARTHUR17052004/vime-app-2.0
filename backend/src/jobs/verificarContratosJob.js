@@ -9,14 +9,21 @@ module.exports = async () => {
 
   console.log("[JOB] Verificando contratos...");
 
-  const hoje = new Date();
+  // Mesmo bug (e mesma correção) do verificarVencimentosJob.js: comparar
+  // com `new Date()` (hora atual) encerrava o contrato a partir da meia-
+  // noite do próprio último dia de vigência -- liberando a kitnet,
+  // desativando o inquilino e avisando por WhatsApp que "o contrato
+  // chegou ao fim" faltando o dia inteiro pra acabar de verdade. Só
+  // encerra a partir do dia SEGUINTE a dataFim agora.
+  const inicioDeHoje = new Date();
+  inicioDeHoje.setHours(0, 0, 0, 0);
 
   const contratos = await prisma.contrato.findMany({
     where: {
       status: "ATIVO",
       dataFim: {
         not: null,
-        lte: hoje
+        lt: inicioDeHoje
       }
     },
     include: {
