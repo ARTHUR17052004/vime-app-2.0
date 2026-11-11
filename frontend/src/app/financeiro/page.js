@@ -41,6 +41,15 @@ import { socket } from "../../services/socket";
 import { statusExibidoReceita } from "../../utils/statusReceita";
 import { arredondarCentavos } from "../../utils/dinheiro";
 
+// Colar um nome (de uma tabela, PDF etc.) às vezes traz espaço não-
+// quebrável ( ) ou espaço duplo junto -- visualmente igual a um
+// espaço normal, mas não bate com o texto buscado (que só tem espaço
+// normal), e a busca dava "nenhuma receita cadastrada" mesmo com a
+// pessoa certa na lista. Troca tudo por espaço normal e tira
+// sobra/pontas antes de comparar.
+const normalizarBusca = (texto) =>
+  (texto || "").replace(/\s+/g, " ").trim().toLowerCase();
+
 export default function FinanceiroPage() {
   return (
     <Suspense fallback={null}>
@@ -504,14 +513,14 @@ function FinanceiroPageConteudo() {
     const nomeUnidadeDaReceita = item.contrato?.unidade?.nome || item.inquilino?.kitnet?.unidade?.nome || "";
     const nomeKitnetDaReceita = item.contrato?.kitnet?.nome || item.inquilino?.kitnet?.nome || "";
 
-    const texto = `
+    const texto = normalizarBusca(`
       ${item.descricao || ""}
       ${item.inquilino?.nome || item.contrato?.inquilino?.nome || item.pagadorNome || ""}
       ${nomeUnidadeDaReceita}
       ${nomeKitnetDaReceita}
-    `.toLowerCase();
+    `);
 
-    if (!texto.includes(search.toLowerCase())) return false;
+    if (!texto.includes(normalizarBusca(search))) return false;
 
     if (
       residenciaSelecionada &&
@@ -559,13 +568,13 @@ function FinanceiroPageConteudo() {
 
   const despesasFiltradas = despesas.filter((item) => {
 
-    const texto = `
+    const texto = normalizarBusca(`
       ${item.descricao || ""}
       ${item.categoria || ""}
       ${item.fornecedor || ""}
-    `.toLowerCase();
+    `);
 
-    if (!texto.includes(search.toLowerCase())) return false;
+    if (!texto.includes(normalizarBusca(search))) return false;
 
     if (
       residenciaSelecionada &&
