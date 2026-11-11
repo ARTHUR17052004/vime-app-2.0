@@ -506,7 +506,7 @@ function FinanceiroPageConteudo() {
 
     const texto = `
       ${item.descricao || ""}
-      ${item.inquilino?.nome || item.pagadorNome || ""}
+      ${item.inquilino?.nome || item.contrato?.inquilino?.nome || item.pagadorNome || ""}
       ${nomeUnidadeDaReceita}
       ${nomeKitnetDaReceita}
     `.toLowerCase();
