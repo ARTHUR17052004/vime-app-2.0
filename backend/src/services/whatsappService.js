@@ -180,6 +180,11 @@ class WhatsappService {
             createdAt: "asc",
           },
         },
+        // Só a marca DESTE usuário (não lidas é por pessoa agora, não
+        // mais um contador global -- ver WhatsappConversaLeitura).
+        leituras: usuario?.id
+          ? { where: { usuarioId: usuario.id } }
+          : false,
       },
       orderBy: {
         updatedAt: "desc",
@@ -191,12 +196,22 @@ class WhatsappService {
       const ultima =
         conversa.mensagens[conversa.mensagens.length - 1];
 
+      const lidaEm = conversa.leituras?.[0]?.lidaEm || null;
+
+      // "Não lidas" pra ESTE usuário = mensagens recebidas (do contato,
+      // não as que a gente mandou) depois da última vez que ele leu
+      // essa conversa. Sem marca nenhuma ainda (usuário nunca abriu),
+      // conta tudo que já chegou -- mesmo critério de uma conversa nova.
+      const naoLidas = conversa.mensagens.filter(
+        (m) => m.tipo === "recebida" && (!lidaEm || m.createdAt > lidaEm)
+      ).length;
+
       return {
         id: conversa.id,
         nome: conversa.contato.nome,
         numero: conversa.contato.telefone,
         online: conversa.contato.online,
-        naoLidas: conversa.naoLidas,
+        naoLidas,
         ultimaMensagem: ultima?.texto || "",
         horario: ultima
           ? ultima.createdAt.toLocaleTimeString("pt-BR", {
@@ -494,6 +509,29 @@ class WhatsappService {
      vínculo e voltaria a aparecer só com o número cru.
   ========================================== */
 
+  /* ==========================================
+     MARCAR CONVERSA COMO LIDA (por usuário)
+
+     Só grava "até onde ESTE usuário leu" -- não mexe em nada de outro
+     usuário, nem no contador global antigo (naoLidas).
+  ========================================== */
+
+  async marcarConversaLida(conversaId, usuarioId) {
+
+    if (!usuarioId) {
+      return { success: false, mensagem: "Usuário não identificado." };
+    }
+
+    await prisma.whatsappConversaLeitura.upsert({
+      where: { conversaId_usuarioId: { conversaId, usuarioId } },
+      update: { lidaEm: new Date() },
+      create: { conversaId, usuarioId, lidaEm: new Date() },
+    });
+
+    return { success: true };
+
+  }
+
   async excluirConversa(id) {
 
     await prisma.whatsappMensagem.deleteMany({ where: { conversaId: id } });
@@ -640,7 +678,8 @@ class WhatsappService {
         continue;
       }
 
-      const erroDetalhe = novoStatus === "falhou" ? (item.errors?.[0]?.title || "Falha não especificada.") : null;
+      const erro = novoStatus === "falhou" ? item.errors?.[0] : null;
+      const erroDetalhe = erro?.title || (novoStatus === "falhou" ? "Falha não especificada." : null);
 
       await prisma.whatsappMensagem.update({
         where: { id: mensagem.id },
@@ -654,15 +693,36 @@ class WhatsappService {
       if (novoStatus === "falhou") {
 
         const contato = mensagem.conversa?.contato;
+        const inquilino = contato?.inquilino;
+
+        // Código 131026 da Meta = "Message undeliverable": o número
+        // simplesmente não tem WhatsApp ativo (fixo, trocado, digitado
+        // errado...). Diferente de token/modelo vencido -- aqui quem
+        // resolve é a equipe confirmando o telefone certo com o
+        // inquilino, não a equipe técnica. Manda direto pro cadastro
+        // dele, não só pra conversa, pra já cair editando o telefone.
+        const telefoneProvavelmenteErrado = erro?.code === 131026;
+
+        // Título já mostra o motivo (não só na mensagem) -- assim dá pra
+        // saber se é problema de token/modelo/etc sem precisar abrir a
+        // notificação. Corta se for muito longo (alguns erros da Meta
+        // vêm como frase inteira), o motivo completo continua na mensagem.
+        const motivoResumido =
+          erroDetalhe && erroDetalhe.length > 60 ? `${erroDetalhe.slice(0, 57)}...` : erroDetalhe;
 
         await notificacaoService.criar({
           origem: "WHATSAPP",
-          titulo: `WhatsApp não entregue para ${contato?.nome || contato?.telefone || "inquilino"}`,
-          mensagem: `${mensagem.texto}\n\nMotivo: ${erroDetalhe}`,
-          // Leva direto pra conversa em vez de só abrir a tela de
-          // WhatsApp na primeira da lista -- clicar na notificação
-          // precisa cair na conversa certa, não só "ver".
-          link: `/whatsapp?conversaId=${mensagem.conversaId}`,
+          titulo: telefoneProvavelmenteErrado
+            ? `Telefone pode estar errado: ${contato?.nome || contato?.telefone || "inquilino"}`
+            : `WhatsApp não entregue (${motivoResumido}): ${contato?.nome || contato?.telefone || "inquilino"}`,
+          mensagem: telefoneProvavelmenteErrado
+            ? `A mensagem "${mensagem.texto}" não foi entregue -- a Meta informa que esse número não tem WhatsApp ativo. Confira/corrija o telefone no cadastro do inquilino.`
+            : `${mensagem.texto}\n\nMotivo: ${erroDetalhe}`,
+          // Leva direto pro cadastro quando é problema de telefone, ou
+          // pra conversa certa nos outros casos (não só "ver" genérico).
+          link: telefoneProvavelmenteErrado && inquilino?.id
+            ? `/inquilinos/${inquilino.id}`
+            : `/whatsapp?conversaId=${mensagem.conversaId}`,
           locadorId: contato?.inquilinoId ? await locadorDoInquilino(contato.inquilinoId) : null,
         });
 

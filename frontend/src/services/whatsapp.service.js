@@ -14,6 +14,10 @@ export const WhatsappService = {
     return await api("/whatsapp/conversas");
   },
 
+  async marcarConversaLida(id) {
+    return await api(`/whatsapp/conversas/${id}/lida`, { method: "PUT" });
+  },
+
   async relatorio(filtros = {}) {
     const params = new URLSearchParams();
     Object.entries(filtros).forEach(([chave, valor]) => {

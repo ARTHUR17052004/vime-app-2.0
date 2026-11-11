@@ -156,6 +156,7 @@ model Usuario {
   pushSubscriptions PushSubscription[]
   credenciaisBiometria CredencialBiometria[]
   sabadoConversas SabadoConversa[]
+  whatsappLeituras WhatsappConversaLeitura[]
 }
 
 // Uma inscrição de push por navegador/aparelho -- o mesmo usuário pode
@@ -903,6 +904,9 @@ model WhatsappConversa {
 
   ultimaData DateTime?
 
+  // Contador GLOBAL antigo -- mantido só por compatibilidade, não é
+  // mais usado pra mostrar o badge "não lidas" (isso agora é por
+  // usuário, ver WhatsappConversaLeitura/whatsappService.conversas).
   naoLidas Int @default(0)
 
   createdAt DateTime @default(now())
@@ -912,6 +916,30 @@ model WhatsappConversa {
   contato WhatsappContato @relation(fields: [contatoId], references: [id])
 
   mensagens WhatsappMensagem[]
+
+  leituras WhatsappConversaLeitura[]
+}
+
+// Até quando (lidaEm) CADA usuário já leu uma conversa -- "não lidas"
+// pra cada um vira "quantas mensagens recebidas depois de lidaEm"
+// (ver whatsappService.conversas). Sem isso, o contador era um só pra
+// todo mundo: o usuário A abrir a conversa zerava o número também pro
+// usuário B, que nunca tinha visto aquelas mensagens -- cada um precisa
+// da própria marca de "até onde eu li".
+model WhatsappConversaLeitura {
+  id String @id @default(uuid())
+
+  conversaId String
+  conversa   WhatsappConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  lidaEm DateTime @default(now())
+
+  updatedAt DateTime @updatedAt
+
+  @@unique([conversaId, usuarioId])
 }
 
 model WhatsappMensagem {

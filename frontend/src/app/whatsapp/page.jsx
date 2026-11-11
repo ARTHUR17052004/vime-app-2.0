@@ -92,6 +92,8 @@ function WhatsappPageConteudo() {
 
         setConversaSelecionada((atual) => {
 
+            let selecionada;
+
             if (!atual) {
 
             // Primeiro carregamento: se veio de uma notificação
@@ -101,9 +103,9 @@ function WhatsappPageConteudo() {
               ? conversas.data.find((c) => c.id === conversaIdDaUrl)
               : null;
 
-            return daNotificacao || conversas.data[0];
+            selecionada = daNotificacao || conversas.data[0];
 
-            }
+            } else {
 
             const encontrada = conversas.data.find(
 
@@ -111,7 +113,29 @@ function WhatsappPageConteudo() {
 
             );
 
-            return encontrada || conversas.data[0];
+            selecionada = encontrada || conversas.data[0];
+
+            }
+
+            // A conversa que acabou de abrir sozinha (primeiro
+            // carregamento ou veio de notificação) também conta como
+            // "lida" por este usuário -- senão o badge fica preso até
+            // ele clicar em outra e voltar.
+            if (selecionada?.naoLidas) {
+
+              WhatsappService
+                .marcarConversaLida(selecionada.id)
+                .catch((err) => console.error("Erro ao marcar conversa como lida:", err));
+
+              selecionada = { ...selecionada, naoLidas: 0 };
+
+              setConversas((lista) =>
+                lista.map((c) => (c.id === selecionada.id ? { ...c, naoLidas: 0 } : c))
+              );
+
+            }
+
+            return selecionada;
 
         });
 
@@ -143,6 +167,25 @@ function WhatsappPageConteudo() {
 
   }, []);
 
+  // Abrir a conversa marca como lida só pra ESTE usuário (ver
+  // whatsappService.marcarConversaLida) -- zera o badge na hora aqui
+  // (otimista) sem esperar o próximo fetch/socket.
+  function selecionarConversa(conversa) {
+
+    setConversaSelecionada(conversa);
+
+    if (!conversa || !conversa.naoLidas) return;
+
+    setConversas((atual) =>
+      atual.map((c) => (c.id === conversa.id ? { ...c, naoLidas: 0 } : c))
+    );
+
+    WhatsappService
+      .marcarConversaLida(conversa.id)
+      .catch((err) => console.error("Erro ao marcar conversa como lida:", err));
+
+  }
+
   async function excluirConversa(id) {
 
     try {
@@ -163,21 +206,31 @@ function WhatsappPageConteudo() {
 
    useEffect(() => {
 
-  socket.on("whatsapp:update", (dados) => {
+  // O payload que o socket manda é o mesmo pra todo mundo conectado
+  // (io.emit, sem personalizar por usuário) -- "não lidas" agora é por
+  // usuário (ver whatsappService.conversas), então usar esse payload
+  // direto mostraria a contagem errada. Só serve de aviso "mudou algo":
+  // busca de novo pela rota autenticada, que calcula certo pra quem tá
+  // logado.
+  socket.on("whatsapp:update", () => {
 
-    setConversas(dados);
+    WhatsappService.conversas().then((resposta) => {
 
-    if (conversaSelecionada) {
+      const dados = resposta.data || [];
 
-      const atualizada = dados.find(
-        (c) => c.id === conversaSelecionada.id
-      );
+      setConversas(dados);
 
-      if (atualizada) {
-        setConversaSelecionada(atualizada);
-      }
+      setConversaSelecionada((atual) => {
 
-    }
+        if (!atual) return atual;
+
+        const atualizada = dados.find((c) => c.id === atual.id);
+
+        return atualizada || atual;
+
+      });
+
+    }).catch((err) => console.error("Erro ao atualizar conversas:", err));
 
   });
 
@@ -187,7 +240,7 @@ function WhatsappPageConteudo() {
 
   };
 
-}, [conversaSelecionada]);
+}, []);
 
 
   if (!podeVisualizar) {
@@ -325,7 +378,7 @@ function WhatsappPageConteudo() {
                   <WhatsappConversations
                     conversas={conversas}
                     conversaSelecionada={conversaSelecionada}
-                    onSelecionar={setConversaSelecionada}
+                    onSelecionar={selecionarConversa}
                     onExcluir={excluirConversa}
                   />
 

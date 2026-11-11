@@ -315,6 +315,26 @@ const webhook = async (req, res) => {
 };
 
 /* ==========================================
+   MARCAR CONVERSA COMO LIDA (por usuário)
+========================================== */
+
+const marcarConversaLida = async (req, res) => {
+
+  try {
+
+    const dados = await whatsappService.marcarConversaLida(req.params.id, req.usuario?.id);
+
+    return res.json({ success: true, data: dados });
+
+  } catch (error) {
+
+    return res.status(500).json({ success: false, message: error.message });
+
+  }
+
+};
+
+/* ==========================================
    EXCLUIR CONVERSA
 ========================================== */
 
@@ -399,6 +419,8 @@ module.exports = {
   receber,
 
   webhook,
+
+  marcarConversaLida,
 
   excluirConversa,
 
