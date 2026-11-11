@@ -37,8 +37,23 @@ const gerarCobrancaParaContrato = async (contrato) => {
     return { criada: false, motivo: "aindaNaoIniciou" };
   }
 
+  // Olha tanto receita ligada ao Contrato quanto receita ligada direto
+  // ao Inquilino (ver gerarRecorrenciaReceitasJob.js, o outro motor de
+  // recorrência -- os dois geram "Aluguel" pro mesmo inquilino sem se
+  // conhecerem). Sem o OR com inquilinoId, este motor não enxergava a
+  // cobrança que o outro já tinha criado/cobrado pro mês e duplicava
+  // "Aluguel" por cima -- foi o que aconteceu em 11/2026: todo contrato
+  // ativo ganhou uma segunda cobrança do mesmo mês, em cima da que já
+  // existia (e em vários casos já tinha sido paga ou até enviada ao
+  // banco duas vezes).
   const receitasDoContrato = await prisma.receita.findMany({
-    where: { contratoId: contrato.id, categoria: "Aluguel" },
+    where: {
+      categoria: "Aluguel",
+      OR: [
+        { contratoId: contrato.id },
+        ...(contrato.inquilinoId ? [{ inquilinoId: contrato.inquilinoId }] : []),
+      ],
+    },
   });
 
   const jaTemEsteMes = receitasDoContrato.some(
