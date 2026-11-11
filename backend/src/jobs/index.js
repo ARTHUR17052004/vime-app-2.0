@@ -56,6 +56,16 @@ const iniciarJobs = () => {
 
     console.log("========== JOBS ==========");
 
+    // Gera a cobrança do mês ANTES de checar atraso -- rodar depois
+    // deixava uma cobrança recém-criada com vencimento já no passado
+    // (ex.: a anterior só foi paga/fechada depois do dia de vencimento
+    // configurado) presa em "Pendente" até o lote de amanhã, mesmo já
+    // devendo estar "Atrasada" (e disparar o risco de corte) desde o
+    // dia em que nasceu -- bug relatado em 11/11/2026.
+    await gerarCobrancasRecorrentes();
+
+    await gerarRecorrenciaReceitas();
+
     await verificarVencimentos();
 
     // depois de virar PENDENTE -> ATRASADA acima, avisa o inquilino
@@ -69,12 +79,9 @@ const iniciarJobs = () => {
 
     await verificarNotificacoes();
 
-    // gera a cobrança do mês antes de disparar lembretes, para que uma
-    // cobrança recém-criada com vencimento hoje já entre no lembrete
-    await gerarCobrancasRecorrentes();
-
-    await gerarRecorrenciaReceitas();
-
+    // continua depois de gerarCobrancasRecorrentes/gerarRecorrenciaReceitas
+    // (acima), pra uma cobrança recém-criada com vencimento hoje já
+    // entrar no lembrete
     await lembreteVencimento();
 
     await verificarKitnetsVazias();
