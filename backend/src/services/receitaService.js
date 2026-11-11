@@ -341,6 +341,32 @@ const atualizar = async (id, dados, autor) => {
 
   dados = await aplicarValorLiquidoPadrao(dados, anterior);
 
+  // Mudou o vencimento sem dizer o status explicitamente (ex.: só
+  // corrigindo uma data errada)? Recalcula sozinho se ainda deveria
+  // estar Atrasada ou não, com o mesmo critério do job diário
+  // (verificarVencimentosJob -- "atrasada" só a partir do dia
+  // SEGUINTE ao vencimento). Sem isso, adiar o vencimento pra uma
+  // data futura deixava a receita presa em "Atrasada" até o próximo
+  // lote das 8h (nunca volta sozinho pra trás) -- bug relatado em
+  // 11/11/2026. Nunca mexe se já estiver PAGA/CANCELADA.
+  if (
+    dados.vencimento !== undefined &&
+    dados.status === undefined &&
+    (anterior?.status === "PENDENTE" || anterior?.status === "ATRASADA")
+  ) {
+
+    // sanitizar() (acima) já converteu dados.vencimento pra Date|null.
+    if (dados.vencimento) {
+
+      const inicioDeHoje = new Date();
+      inicioDeHoje.setHours(0, 0, 0, 0);
+
+      dados.status = dados.vencimento < inicioDeHoje ? "ATRASADA" : "PENDENTE";
+
+    }
+
+  }
+
   // Atualização parcial (ex.: só marcar como paga) não pode reprovar
   // por "faltar" um campo que já está preenchido desde a criação.
   await campoObrigatorioService.validar(modulo, { ...anterior, ...dados });
