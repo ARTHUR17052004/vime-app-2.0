@@ -59,6 +59,11 @@ const buscar = async (req, res, next) => {
             filtroContrato(req.usuario),
           ],
         },
+        // arquivoDados é o PDF/foto do contrato em base64 -- a busca só
+        // precisa saber que o contrato existe, não arrastar o arquivo
+        // inteiro em cada resultado (mesmo bug do GET /contratos, ver
+        // contratoService.listar).
+        omit: { arquivoDados: true },
         include: { inquilino: true, locador: true },
         take: 5,
       }),

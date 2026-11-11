@@ -14,6 +14,25 @@ const vistoriaService = require('../services/vistoriaService');
   o relógio mostrado na tela de Receitas usa a mesma conta).
   vistoriaCorteAtrasoCriadaEm evita criar duas vezes pra mesma Receita.
 */
+// Responsável vai pro zelador de verdade (perfil "ZELADOR" cadastrado)
+// -- o campo da Vistoria é só texto, mas a tela de Editar escolhe entre
+// esses nomes, então grava literal assim quando existir. Mais de um
+// zelador ativo: avisa todos (nomes juntos); nenhum: deixa descritivo,
+// sem inventar um nome que não existe.
+const resolverResponsavelZelador = async () => {
+
+  const zeladores = await prisma.usuario.findMany({
+    where: { ativo: true, perfil: { nome: 'ZELADOR' } },
+    select: { nome: true },
+    orderBy: { nome: 'asc' },
+  });
+
+  if (zeladores.length === 0) return 'Zelador';
+
+  return zeladores.map((z) => z.nome).join(', ');
+
+};
+
 module.exports = async () => {
 
   const limite = new Date();
@@ -35,6 +54,8 @@ module.exports = async () => {
 
   console.log(`[JOB] Criando vistoria de risco de corte pra ${receitas.length} cobrança(s) atrasada(s) há 72h+...`);
 
+  const responsavel = await resolverResponsavelZelador();
+
   let criadas = 0;
 
   for (const receita of receitas) {
@@ -52,13 +73,14 @@ module.exports = async () => {
     try {
 
       await vistoriaService.criar({
-        titulo: `Risco de corte -- atraso de pagamento (${inquilino?.nome || 'inquilino'})`,
-        descricao: `A cobrança de R$ ${Number(receita.valor).toFixed(2)} venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')} e está atrasada há mais de 72h. Conforme o contrato, água/energia podem ser suspensas até a quitação do débito -- avaliar e agir.`,
+        titulo: 'REALIZAR CORTE DE ÁGUA E ENERGIA',
+        descricao: `Kitnet com falta de pagamento após 72 horas. ${inquilino?.nome || 'Inquilino'} -- R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}. Conforme o contrato, água/energia podem ser suspensas até a quitação do débito.`,
         unidadeId: unidade.id,
         kitnetId: kitnet.id,
         categoria: 'Cobrança',
+        criticidade: 'Crítica',
         periodicidade: 'Única',
-        responsavel: 'Administração',
+        responsavel,
         status: 'PENDENTE',
         data: new Date(),
       });

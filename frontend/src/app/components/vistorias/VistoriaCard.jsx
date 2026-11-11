@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   ChevronDown,
@@ -18,6 +18,52 @@ import MidiaLightbox from "../ui/MidiaLightbox";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
 import AtrasoVistoria from "./AtrasoVistoria";
+
+// Vistoria automática de corte de água/energia por falta de pagamento
+// (ver backend/src/jobs/verificarAtrasoCorteJob.js) -- é a única coisa
+// que cria vistoria com essa categoria, então basta isso pra marcar o
+// card com o visual de alerta (título vermelho, card piscando, relógio
+// contando o atraso) sem precisar de um campo novo no banco.
+const ehVistoriaDeCorte = (vistoria) => vistoria.categoria === "Cobrança";
+
+// Conta subindo desde que a vistoria foi criada (exatamente quando as
+// 72h de atraso se completaram) -- reforça que quanto mais passa, pior
+// fica, diferente do relógio de contagem REGRESSIVA do Financeiro.
+function RelogioAtrasoCorte({ desde }) {
+
+  const [agora, setAgora] = useState(() => Date.now());
+
+  useEffect(() => {
+    const id = setInterval(() => setAgora(Date.now()), 60000);
+    return () => clearInterval(id);
+  }, []);
+
+  if (!desde) return null;
+
+  const decorridoMs = Math.max(0, agora - new Date(desde).getTime());
+  const horas = Math.floor(decorridoMs / (60 * 60 * 1000));
+  const minutos = Math.floor((decorridoMs % (60 * 60 * 1000)) / (60 * 1000));
+
+  return (
+    <span
+      className="
+        px-4
+        py-1.5
+        rounded-full
+        text-xs
+        font-bold
+        bg-red-500/20
+        text-red-300
+        border
+        border-red-500/40
+        tabular-nums
+      "
+    >
+      ⏱ Atrasado há {horas}h{String(minutos).padStart(2, "0")}
+    </span>
+  );
+
+}
 
 export default function VistoriaCard({
   vistorias,
@@ -97,11 +143,15 @@ export default function VistoriaCard({
 
     <div className="space-y-6">
 
-      {vistorias.map((vistoria) => (
+      {vistorias.map((vistoria) => {
+
+        const corte = ehVistoriaDeCorte(vistoria);
+
+        return (
 
         <div
           key={vistoria.id}
-          className="
+          className={`
             rounded-[22px]
             border
             border-[var(--border-token)]
@@ -112,7 +162,8 @@ export default function VistoriaCard({
             duration-300
             hover:border-emerald-500/30
             hover:shadow-[0_0_40px_rgba(16,185,129,.08)]
-          "
+            ${corte ? "corte-alerta-piscando" : ""}
+          `}
         >
 
           <div
@@ -144,14 +195,16 @@ export default function VistoriaCard({
 
                 <AtrasoVistoria vistoria={vistoria} />
 
+                {corte && <RelogioAtrasoCorte desde={vistoria.data} />}
+
                 <h2
-                  className="
+                  className={`
                     text-2xl
                     font-bold
-                    text-[var(--text)]
-                  "
+                    ${corte ? "text-red-400" : "text-[var(--text)]"}
+                  `}
                 >
-                  {vistoria.nomeVistoria}
+                  {corte ? "⚠️ " : ""}{vistoria.nomeVistoria}
                 </h2>
 
                 {vistoria.fixado && (
@@ -184,6 +237,19 @@ export default function VistoriaCard({
                 )}
 
               </div>
+
+              {vistoria.descricao && (
+                <p
+                  className={`
+                    mt-2
+                    text-sm
+                    font-semibold
+                    ${corte ? "text-red-300" : "text-[var(--text-muted)]"}
+                  `}
+                >
+                  {vistoria.descricao}
+                </p>
+              )}
 
               <div className="mt-5 grid md:grid-cols-2 gap-4">
 
@@ -600,7 +666,9 @@ export default function VistoriaCard({
 
         </div>
 
-      ))}
+        );
+
+      })}
 
     </div>
 
