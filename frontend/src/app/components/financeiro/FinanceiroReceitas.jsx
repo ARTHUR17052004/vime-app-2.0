@@ -28,7 +28,7 @@ import { statusExibidoReceita } from "@/utils/statusReceita";
 // interna sozinho quando esse prazo vence). Conta direto a partir do
 // vencimento, sem precisar guardar "quando entrou em atraso" em lugar
 // nenhum -- é sempre vencimento + 72h.
-function RelogioCorte({ vencimento }) {
+function RelogioCorte({ vencimento, enviada }) {
 
   const [agora, setAgora] = useState(() => Date.now());
 
@@ -37,7 +37,11 @@ function RelogioCorte({ vencimento }) {
     return () => clearInterval(id);
   }, []);
 
-  if (!vencimento) return null;
+  // Sem boleto enviado ao banco, não existe "risco de corte" de
+  // verdade -- o inquilino nem recebeu a cobrança pra pagar. Fica só
+  // com os badges de Atrasada + Não enviada ao banco (ver mais abaixo
+  // no card/linha), sem o relógio nem o alerta de corte.
+  if (!vencimento || !enviada) return null;
 
   const prazo = new Date(vencimento).getTime() + 72 * 60 * 60 * 1000;
   const restanteMs = prazo - agora;
@@ -458,7 +462,7 @@ export default function FinanceiroReceitas({
                     </Badge>
 
                     {item.status === "ATRASADA" && (
-                      <RelogioCorte vencimento={item.vencimento} />
+                      <RelogioCorte vencimento={item.vencimento} enviada={!!item.gatewayReferencia} />
                     )}
 
                     {item.gatewayProvider ? (
@@ -613,7 +617,7 @@ export default function FinanceiroReceitas({
                       </Badge>
 
                       {item.status === "ATRASADA" && (
-                        <RelogioCorte vencimento={item.vencimento} />
+                        <RelogioCorte vencimento={item.vencimento} enviada={!!item.gatewayReferencia} />
                       )}
 
                       {item.gatewayProvider ? (
