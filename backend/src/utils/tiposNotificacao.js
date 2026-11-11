@@ -87,11 +87,13 @@ const TIPOS = [
     mensagemPadrao: "{{descricao}} ({{inquilino}}) -- R$ {{valor}} venceu e ainda não foi pago.",
   },
   {
-    chave: "MUDANCA_VALOR_BOLETO", grupo: "Financeiro", rotulo: "Mudança de valor de boleto",
-    descricao: "Alguém mudou o valor de uma cobrança já lançada (exige senha + motivo pra fazer isso).",
-    titulos: ["MUDANÇA DE VALOR DE BOLETO"],
-    variaveis: ["usuario", "descricao", "valorAntigo", "valorNovo", "motivo"],
-    mensagemPadrao: "{{usuario}} mudou o valor de \"{{descricao}}\" de R$ {{valorAntigo}} para R$ {{valorNovo}} (motivo: {{motivo}}).",
+    // Era só "mudança de valor" -- pedido depois virou qualquer edição
+    // de uma cobrança já lançada (exige senha + motivo pra fazer isso).
+    chave: "EDICAO_COBRANCA", grupo: "Financeiro", rotulo: "Edição de cobrança",
+    descricao: "Alguém editou uma cobrança já lançada -- descrição, categoria, valor ou vencimento (exige senha + motivo pra fazer isso).",
+    titulos: ["EDIÇÃO DE COBRANÇA"],
+    variaveis: ["usuario", "descricao", "motivo", "alteracoes"],
+    mensagemPadrao: "{{usuario}} editou \"{{descricao}}\" (motivo: {{motivo}}): {{alteracoes}}.",
   },
   {
     chave: "EXCLUSAO_BOLETO", grupo: "Financeiro", rotulo: "Exclusão de boleto",

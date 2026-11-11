@@ -11,8 +11,6 @@ const notificacaoService = require('./notificacaoService');
 const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
 
-const MOTIVO_EDICAO_VALOR_ROTULO = { TAXA: 'Taxa', MULTA: 'Multa', OUTROS: 'Outros' };
-
 const CAMPOS_RECEITA = {
   descricao: 'descrição',
   categoria: 'categoria',
@@ -348,10 +346,15 @@ const atualizar = async (id, dados, autor) => {
   // SEGUINTE ao vencimento). Sem isso, adiar o vencimento pra uma
   // data futura deixava a receita presa em "Atrasada" até o próximo
   // lote das 8h (nunca volta sozinho pra trás) -- bug relatado em
-  // 11/11/2026. Nunca mexe se já estiver PAGA/CANCELADA.
+  // 11/11/2026. "dados.status === anterior?.status" cobre o
+  // formulário de Editar, que sempre manda o status atual de volta
+  // junto (reenviar o mesmo valor não conta como "escolher" um status
+  // novo) -- só não mexe se o pedido realmente estiver MUDANDO o
+  // status pra outra coisa de propósito. Nunca mexe se já estiver
+  // PAGA/CANCELADA.
   if (
     dados.vencimento !== undefined &&
-    dados.status === undefined &&
+    (dados.status === undefined || dados.status === anterior?.status) &&
     (anterior?.status === "PENDENTE" || anterior?.status === "ATRASADA")
   ) {
 
@@ -376,23 +379,23 @@ const atualizar = async (id, dados, autor) => {
     data: dados
   });
 
-  // Alerta pra equipe inteira (não só log de auditoria, que ninguém
-  // olha no dia a dia) -- mudar o valor de um boleto já lançado é
-  // sensível o bastante pra todo mundo saber na hora que aconteceu.
-  if (
-    dados.valor !== undefined &&
-    Math.abs(Number(anterior.valor) - Number(receita.valor)) >= 0.005
-  ) {
+  const alteracoes = diffCampos(anterior, receita, CAMPOS_RECEITA);
 
-    const motivoRotulo = MOTIVO_EDICAO_VALOR_ROTULO[String(motivoEdicaoValor || '').toUpperCase()] || 'Outros';
+  // Alerta pra equipe inteira (não só log de auditoria, que ninguém
+  // olha no dia a dia) -- editar uma cobrança já lançada é sensível o
+  // bastante pra todo mundo saber na hora que aconteceu. Só dispara
+  // quando passou pela trava de motivo+senha (exigirConfirmacaoEdicaoValor
+  // -- middleware só deixa passar `motivoEdicaoValor` quando veio do
+  // formulário de Editar de verdade) e realmente mudou alguma coisa.
+  if (motivoEdicaoValor !== undefined && alteracoes) {
 
     notificacaoService.criar({
       origem: 'SISTEMA',
-      titulo: 'MUDANÇA DE VALOR DE BOLETO',
-      mensagem: `${autor?.nome || 'Alguém'} mudou o valor de "${receita.descricao}" de R$ ${Number(anterior.valor).toFixed(2)} para R$ ${Number(receita.valor).toFixed(2)} (motivo: ${motivoRotulo}).`,
+      titulo: 'EDIÇÃO DE COBRANÇA',
+      mensagem: `${autor?.nome || 'Alguém'} editou "${receita.descricao}" (motivo: ${motivoEdicaoValor}): ${alteracoes}.`,
       link: '/financeiro',
       locadorId: await locadorIdDaReceita(receita.id),
-    }).catch((erro) => console.error('[notificacao] Falha ao avisar mudança de valor de boleto:', erro.message));
+    }).catch((erro) => console.error('[notificacao] Falha ao avisar edição de cobrança:', erro.message));
 
   }
 
@@ -405,8 +408,6 @@ const atualizar = async (id, dados, autor) => {
     valorAnterior: anterior,
     valorNovo: receita
   });
-
-  const alteracoes = diffCampos(anterior, receita, CAMPOS_RECEITA);
 
   await logService.registrar({
     usuarioId: autor?.id || null,

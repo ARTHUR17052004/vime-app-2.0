@@ -51,12 +51,12 @@ export default function ReceitaForm({
   const [erro, setErro] = useState("");
   const [salvando, setSalvando] = useState(false);
 
-  // Mudar o VALOR de uma receita já lançada é sensível -- pedido
-  // explícito de travar isso com motivo + a própria senha de quem está
-  // editando (ver exigirConfirmacaoEdicaoValor no backend). Só aparece
-  // quando o valor realmente muda numa EDIÇÃO (nunca na criação).
+  // Editar uma receita já lançada é sensível -- pedido explícito de
+  // travar isso com motivo + a própria senha de quem está editando
+  // (ver exigirConfirmacaoEdicaoValor no backend). Aparece em QUALQUER
+  // edição (nunca na criação).
   const [confirmandoValor, setConfirmandoValor] = useState(false);
-  const [motivoEdicaoValor, setMotivoEdicaoValor] = useState("TAXA");
+  const [motivoEdicaoValor, setMotivoEdicaoValor] = useState("");
   const [senhaConfirmacao, setSenhaConfirmacao] = useState("");
   const [erroConfirmacaoValor, setErroConfirmacaoValor] = useState("");
   const [payloadPendente, setPayloadPendente] = useState(null);
@@ -188,15 +188,6 @@ export default function ReceitaForm({
     ? Math.round((numeroValor - valorLiquidoCalculado) * 100) / 100
     : null;
 
-  // Compara com tolerância de centavo -- "800" vs "800,00" vs 800.0 não
-  // pode contar como "mudou" só por causa do formato do texto.
-  const valorRealmenteMudou = (valorOriginal, valorFormulario) => {
-    const original = Number(valorOriginal);
-    const novo = Number(String(valorFormulario).replace(",", "."));
-    if (Number.isNaN(original) || Number.isNaN(novo)) return false;
-    return Math.abs(original - novo) >= 0.005;
-  };
-
   const montarPayload = () => ({
     id: formData.id,
     categoria: formData.categoria,
@@ -251,12 +242,12 @@ export default function ReceitaForm({
 
     const payload = montarPayload();
 
-    // Só pede motivo + senha numa EDIÇÃO onde o valor realmente mudou --
-    // criar uma receita nova, ou editar qualquer outra coisa sem mexer
-    // no valor, segue direto sem essa trava.
-    if (receitaEditando && valorRealmenteMudou(receitaEditando.valor, formData.valor)) {
+    // Pede motivo + senha em QUALQUER edição (pedido explícito, não só
+    // quando o valor muda) -- criar uma receita nova continua sem essa
+    // trava.
+    if (receitaEditando) {
       setPayloadPendente(payload);
-      setMotivoEdicaoValor("TAXA");
+      setMotivoEdicaoValor("");
       setSenhaConfirmacao("");
       setErroConfirmacaoValor("");
       setConfirmandoValor(true);
@@ -270,6 +261,11 @@ export default function ReceitaForm({
   const confirmarEdicaoValor = async (e) => {
 
     e.preventDefault();
+
+    if (!motivoEdicaoValor.trim()) {
+      setErroConfirmacaoValor("Digite o motivo da edição.");
+      return;
+    }
 
     if (!senhaConfirmacao) {
       setErroConfirmacaoValor("Digite sua senha pra confirmar.");
@@ -517,28 +513,26 @@ export default function ReceitaForm({
         >
 
           <h3 className="text-xl font-bold text-yellow-400">
-            Confirmar edição do valor
+            Confirmar edição
           </h3>
 
           <p className="text-sm text-[var(--text-muted)]">
-            Você está mudando o valor de R$ {Number(receitaEditando?.valor).toFixed(2)} para
-            {" "}R$ {Number(String(formData.valor).replace(",", ".")).toFixed(2)}. Digite o motivo
-            e sua senha pra confirmar -- isso vai gerar um aviso pra equipe.
+            Você está editando "{receitaEditando?.descricao}". Digite o motivo e sua senha pra
+            confirmar -- isso vai gerar um aviso pra equipe.
           </p>
 
           <div>
             <label className="block text-xs text-[var(--text-faint)] mb-1.5">
               Motivo da edição
             </label>
-            <select
+            <input
+              type="text"
+              autoFocus
               value={motivoEdicaoValor}
               onChange={(e) => setMotivoEdicaoValor(e.target.value)}
+              placeholder="Ex.: corrigindo data errada, taxa, multa..."
               className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
-            >
-              <option value="TAXA">Taxa</option>
-              <option value="MULTA">Multa</option>
-              <option value="OUTROS">Outros</option>
-            </select>
+            />
           </div>
 
           <div>
@@ -547,7 +541,6 @@ export default function ReceitaForm({
             </label>
             <input
               type="password"
-              autoFocus
               value={senhaConfirmacao}
               onChange={(e) => setSenhaConfirmacao(e.target.value)}
               className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"

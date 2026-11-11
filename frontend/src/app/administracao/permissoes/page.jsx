@@ -96,10 +96,10 @@ const CATALOGO = [
     modulo: "Financeiro",
     chave: "financeiro",
     // "editarValor" e "excluir" são à parte de "editar" de propósito --
-    // mudar o valor de um boleto já enviado ou excluir uma cobrança de
+    // editar uma cobrança já lançada (qualquer campo) ou excluir ela de
     // vez são sensíveis (ver middlewares/permissaoMiddleware.js: as
-    // duas exigem também a senha de quem está fazendo, e disparam
-    // notificação pra equipe inteira).
+    // duas exigem também motivo + a senha de quem está fazendo, e
+    // disparam notificação pra equipe inteira).
     acoes: ["visualizar", "editar", "editarValor", "excluir", "exportar", "marcarPago"],
   },
   {
@@ -171,7 +171,7 @@ const ROTULOS_ACAO = {
   excluir: "Excluir",
   exportar: "Exportar",
   marcarPago: "Marcar receita/despesa como paga",
-  editarValor: "Editar valor do boleto (exige senha + motivo)",
+  editarValor: "Editar cobrança (exige senha + motivo)",
   classificar: "Classificar solicitações",
   testarConexao: "Testar conexão",
   enviar: "Enviar",
