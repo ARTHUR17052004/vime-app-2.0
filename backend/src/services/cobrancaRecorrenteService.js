@@ -1,6 +1,6 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
-const { multaJurosPadrao } = require("./receitaService");
+const { multaJurosPadrao, existeAluguelDuplicado } = require("./receitaService");
 
 /*
   Núcleo da geração de cobrança de aluguel a partir de um Contrato --
@@ -37,35 +37,37 @@ const gerarCobrancaParaContrato = async (contrato) => {
     return { criada: false, motivo: "aindaNaoIniciou" };
   }
 
-  // Olha tanto receita ligada ao Contrato quanto receita ligada direto
-  // ao Inquilino (ver gerarRecorrenciaReceitasJob.js, o outro motor de
-  // recorrência -- os dois geram "Aluguel" pro mesmo inquilino sem se
-  // conhecerem). Sem o OR com inquilinoId, este motor não enxergava a
-  // cobrança que o outro já tinha criado/cobrado pro mês e duplicava
-  // "Aluguel" por cima -- foi o que aconteceu em 11/2026: todo contrato
-  // ativo ganhou uma segunda cobrança do mesmo mês, em cima da que já
-  // existia (e em vários casos já tinha sido paga ou até enviada ao
-  // banco duas vezes).
+  // existeAluguelDuplicado (receitaService.js) é a ÚNICA checagem de
+  // verdade pra "já existe Aluguel esse mês" -- cruza Contrato e
+  // Inquilino do mesmo jeito que a criação manual e o outro motor
+  // (gerarRecorrenciaReceitasJob.js) usam, pra nunca mais divergir
+  // feito antes (foi exatamente essa divergência que causou 29
+  // "Aluguel" duplicados em 11/2026).
+  const jaTemEsteMes = await existeAluguelDuplicado({
+    categoria: "Aluguel",
+    vencimento: inicioMes,
+    contratoId: contrato.id,
+  });
+
+  if (jaTemEsteMes) {
+    return { criada: false, motivo: "jaExiste" };
+  }
+
+  // Regra à parte (não é sobre "já existe esse mês", é sobre "ainda
+  // não quitou um mês anterior") -- continua olhando todas as receitas
+  // do contrato/inquilino, não só o mês atual. Cancelada nunca conta
+  // como pendente (não é cobrança "em aberto" nenhuma -- sem isso, uma
+  // duplicata cancelada travava pra sempre a geração do mês seguinte).
   const receitasDoContrato = await prisma.receita.findMany({
     where: {
       categoria: "Aluguel",
+      status: { not: "CANCELADA" },
       OR: [
         { contratoId: contrato.id },
         ...(contrato.inquilinoId ? [{ inquilinoId: contrato.inquilinoId }] : []),
       ],
     },
   });
-
-  const jaTemEsteMes = receitasDoContrato.some(
-    (r) =>
-      r.vencimento &&
-      r.vencimento >= inicioMes &&
-      r.vencimento < inicioProximoMes
-  );
-
-  if (jaTemEsteMes) {
-    return { criada: false, motivo: "jaExiste" };
-  }
 
   const temPendente = receitasDoContrato.some((r) => r.status !== "PAGA");
 

@@ -78,6 +78,11 @@ module.exports = async () => {
 
     const where = {
       categoria: receita.categoria,
+      // Cancelada não conta como "já existe" -- sem isso, uma
+      // duplicata cancelada (ex.: as 29 do apagão de 11/2026) travava
+      // pra sempre a geração do mês seguinte, mesmo a cobrança de
+      // verdade já tendo sido paga.
+      status: { not: "CANCELADA" },
       vencimento: { gte: inicioMesAlvo, lt: inicioMesSeguinte },
       OR: receita.inquilinoId
         ? [

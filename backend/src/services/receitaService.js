@@ -58,28 +58,78 @@ const multaJurosPadrao = async (locadorId) => {
 
 // Trava duplicata de Aluguel: mesmo inquilino (ou mesmo pagador avulso,
 // pelo CPF) com cobrança vencendo no MESMO mês não pode ganhar uma
-// segunda -- os motores automáticos (cobrancaRecorrenteService,
-// gerarRecorrenciaReceitasJob) já se protegiam disso, mas a criação
-// manual (Nova Receita/Nova Cobrança) não tinha trava nenhuma, então
-// um duplo-clique no "Salvar" empilhava cobrança igual em cima da
-// outra. Só olha a categoria "Aluguel" -- Multa/Taxa/Outros podem ter
-// mais de um lançamento legítimo no mesmo mês.
-const existeAluguelDuplicado = async (dados) => {
+// segunda -- ÚNICA função de verdade pra essa checagem, usada aqui na
+// criação manual (Nova Receita/Nova Cobrança) E pelos dois motores
+// automáticos (cobrancaRecorrenteService, gerarRecorrenciaReceitasJob).
+// Antes cada um tinha sua própria checagem solta, cada uma enxergando
+// só o SEU jeito de vínculo (Contrato ou Inquilino direto) -- foi
+// exatamente isso que causou 29 "Aluguel" duplicados em 11/2026,
+// porque o motor de Contrato não via a cobrança já criada por
+// Inquilino (e vice-versa). Agora resolve sempre o inquilino de
+// verdade (direto ou via contrato.inquilinoId) e cruza os dois lados.
+// Cancelada nunca conta -- não é cobrança "em aberto" nenhuma (sem
+// isso, uma duplicata cancelada travava pra sempre a geração do mês
+// seguinte, mesmo a cobrança de verdade já estando paga). Só olha a
+// categoria "Aluguel" -- Multa/Taxa/Outros podem ter mais de um
+// lançamento legítimo no mesmo mês. `ignorarId`: pra reusar isto numa
+// edição, sem a própria receita contar contra si mesma.
+const existeAluguelDuplicado = async (dados, { ignorarId } = {}) => {
 
   if (dados.categoria !== 'Aluguel' || !dados.vencimento) return false;
-  if (!dados.inquilinoId && !dados.pagadorCpf) return false;
 
   const vencimento = new Date(dados.vencimento);
   const inicioMes = new Date(vencimento.getFullYear(), vencimento.getMonth(), 1);
   const inicioProximoMes = new Date(vencimento.getFullYear(), vencimento.getMonth() + 1, 1);
 
+  // Cobrança avulsa (sem inquilino nem contrato) -- só cruza por CPF
+  // do pagador, como já era.
+  if (!dados.inquilinoId && !dados.contratoId) {
+
+    if (!dados.pagadorCpf) return false;
+
+    const existente = await prisma.receita.findFirst({
+      where: {
+        categoria: 'Aluguel',
+        status: { not: 'CANCELADA' },
+        vencimento: { gte: inicioMes, lt: inicioProximoMes },
+        pagadorCpf: dados.pagadorCpf,
+        ...(ignorarId ? { id: { not: ignorarId } } : {}),
+      },
+    });
+
+    return Boolean(existente);
+
+  }
+
+  let inquilinoReal = dados.inquilinoId || null;
+
+  if (!inquilinoReal && dados.contratoId) {
+    const contrato = await prisma.contrato.findUnique({
+      where: { id: dados.contratoId },
+      select: { inquilinoId: true },
+    });
+    inquilinoReal = contrato?.inquilinoId || null;
+  }
+
+  if (!inquilinoReal) return false;
+
+  const contratosDoInquilino = await prisma.contrato.findMany({
+    where: { inquilinoId: inquilinoReal },
+    select: { id: true },
+  });
+
   const existente = await prisma.receita.findFirst({
     where: {
       categoria: 'Aluguel',
+      status: { not: 'CANCELADA' },
       vencimento: { gte: inicioMes, lt: inicioProximoMes },
-      ...(dados.inquilinoId
-        ? { inquilinoId: dados.inquilinoId }
-        : { pagadorCpf: dados.pagadorCpf }),
+      ...(ignorarId ? { id: { not: ignorarId } } : {}),
+      OR: [
+        { inquilinoId: inquilinoReal },
+        ...(contratosDoInquilino.length > 0
+          ? [{ contratoId: { in: contratosDoInquilino.map((c) => c.id) } }]
+          : []),
+      ],
     },
   });
 
@@ -420,5 +470,6 @@ module.exports = {
   remover,
   previsaoTaxaBoleto,
   kitnetDaReceita,
-  multaJurosPadrao
+  multaJurosPadrao,
+  existeAluguelDuplicado
 };
