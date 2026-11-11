@@ -519,11 +519,23 @@ function FinanceiroPageConteudo() {
     )
       return false;
 
-    // Mesmo critério usado pro selo na lista (statusExibidoReceita) --
-    // senão filtrar por "Pendente" também trazia quem já estava "Em
-    // Aberto" (PENDENTE por baixo, só mostrado diferente por já ter
-    // sido enviada ao banco).
-    if (statusFiltro && statusExibidoReceita(item).codigo !== statusFiltro) return false;
+    // "Não enviada ao banco" corta por fora do status normal (Pendente,
+    // Atrasada...) -- é sobre ter sido mandada pro banco ou não, não
+    // sobre vencimento. Mesmo critério do selo amarelo na lista.
+    if (statusFiltro === "NAO_ENVIADA") {
+      const naoEnviada =
+        !item.gatewayReferencia &&
+        item.status !== "PAGA" &&
+        item.status !== "PAGO" &&
+        item.status !== "CANCELADA";
+      if (!naoEnviada) return false;
+    } else if (
+      // Mesmo critério usado pro selo na lista (statusExibidoReceita) --
+      // senão filtrar por "Pendente" também trazia quem já estava "Em
+      // Aberto" (PENDENTE por baixo, só mostrado diferente por já ter
+      // sido enviada ao banco).
+      statusFiltro && statusExibidoReceita(item).codigo !== statusFiltro
+    ) return false;
 
     if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
 
@@ -816,6 +828,7 @@ function FinanceiroPageConteudo() {
               <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
               <option value="EM_ABERTO" className="bg-[#1b2430]">Em Aberto</option>
               <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
+              <option value="NAO_ENVIADA" className="bg-[#1b2430]">Não enviada ao banco</option>
               <option value="PAGA" className="bg-[#1b2430]">Paga</option>
               <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
             </select>
