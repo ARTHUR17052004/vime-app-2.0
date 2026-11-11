@@ -6,7 +6,7 @@ const receitaController = require('../controllers/receitaController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
-const { exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor } = require('../middlewares/permissaoMiddleware');
+const { exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, exigirConfirmacaoExclusao } = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
 
@@ -20,6 +20,6 @@ router.post('/', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMa
 
 router.put('/:id', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, receitaController.atualizar);
 
-router.delete('/:id', permissaoMiddleware('financeiro.editar'), receitaController.remover);
+router.delete('/:id', permissaoMiddleware('financeiro.editar'), exigirConfirmacaoExclusao, receitaController.remover);
 
 module.exports = router;

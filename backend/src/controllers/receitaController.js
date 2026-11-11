@@ -115,7 +115,7 @@ const remover = async (req, res) => {
     });
   }
 
-  await receitaService.remover(req.params.id, req.usuario);
+  await receitaService.remover(req.params.id, req.usuario, req.body?.motivoExclusao);
 
   return res.json({
     success: true,

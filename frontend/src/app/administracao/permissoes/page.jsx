@@ -95,11 +95,12 @@ const CATALOGO = [
   {
     modulo: "Financeiro",
     chave: "financeiro",
-    // "editarValor" é à parte de "editar" de propósito -- mudar o valor
-    // de um boleto já enviado é sensível (ver middlewares/
-    // permissaoMiddleware.js: exige também a senha de quem está
-    // editando, e dispara notificação "MUDANÇA DE VALOR DE BOLETO").
-    acoes: ["visualizar", "editar", "editarValor", "exportar", "marcarPago"],
+    // "editarValor" e "excluir" são à parte de "editar" de propósito --
+    // mudar o valor de um boleto já enviado ou excluir uma cobrança de
+    // vez são sensíveis (ver middlewares/permissaoMiddleware.js: as
+    // duas exigem também a senha de quem está fazendo, e disparam
+    // notificação pra equipe inteira).
+    acoes: ["visualizar", "editar", "editarValor", "excluir", "exportar", "marcarPago"],
   },
   {
     modulo: "Solicitações",

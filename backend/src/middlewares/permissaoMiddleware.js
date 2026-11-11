@@ -185,7 +185,70 @@ const exigirConfirmacaoEdicaoValor = async (req, res, next) => {
 
 };
 
+// Excluir uma cobrança de vez é tão (ou mais) sensível quanto mudar o
+// valor dela -- principalmente depois do apagão de 11/2026 (29
+// cobranças duplicadas de aluguel), onde excluir ao invés de cancelar
+// teria apagado o rastro da duplicata sem deixar auditoria nenhuma.
+// Mesma trava de permissão + motivo + senha (re-autenticação) de
+// exigirConfirmacaoEdicaoValor, agora pra exclusão.
+const exigirConfirmacaoExclusao = async (req, res, next) => {
+
+  try {
+
+    const permitido = await temPermissao(req.usuario, "financeiro.excluir");
+
+    if (!permitido) {
+      return res.status(403).json({
+        success: false,
+        message: "Você não tem permissão para excluir cobranças.",
+      });
+    }
+
+    if (!String(req.body?.motivoExclusao || "").trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Digite o motivo da exclusão.",
+      });
+    }
+
+    if (!req.body?.senhaConfirmacao) {
+      return res.status(400).json({
+        success: false,
+        message: "Digite sua senha para confirmar a exclusão.",
+      });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.id },
+    });
+
+    const senhaValida =
+      usuario && (await bcrypt.compare(req.body.senhaConfirmacao, usuario.senha));
+
+    if (!senhaValida) {
+      return res.status(403).json({
+        success: false,
+        message: "Senha incorreta.",
+      });
+    }
+
+    return next();
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao verificar a exclusão.",
+    });
+
+  }
+
+};
+
 module.exports = permissaoMiddleware;
 module.exports.temPermissao = temPermissao;
 module.exports.exigirPermissaoParaMarcarPago = exigirPermissaoParaMarcarPago;
 module.exports.exigirConfirmacaoEdicaoValor = exigirConfirmacaoEdicaoValor;
+module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;

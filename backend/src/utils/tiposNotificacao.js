@@ -94,6 +94,13 @@ const TIPOS = [
     mensagemPadrao: "{{usuario}} mudou o valor de \"{{descricao}}\" de R$ {{valorAntigo}} para R$ {{valorNovo}} (motivo: {{motivo}}).",
   },
   {
+    chave: "EXCLUSAO_BOLETO", grupo: "Financeiro", rotulo: "Exclusão de boleto",
+    descricao: "Alguém excluiu uma cobrança de vez (exige senha + motivo pra fazer isso).",
+    titulos: ["EXCLUSÃO DE BOLETO"],
+    variaveis: ["usuario", "descricao", "valor", "motivo"],
+    mensagemPadrao: "{{usuario}} excluiu \"{{descricao}}\" (R$ {{valor}}) -- motivo: {{motivo}}.",
+  },
+  {
     chave: "COBRANCA_NAO_ENVIADA", grupo: "Financeiro", rotulo: "Cobrança não enviada ao banco",
     descricao: "Cobrança perto de vencer (ou já vencida) que nunca foi enviada a banco nenhum -- avisa a equipe todo dia enquanto continuar sem ser enviada.",
     titulos: ["COBRANÇA NÃO ENVIADA"],

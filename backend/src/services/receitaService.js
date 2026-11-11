@@ -346,7 +346,7 @@ const atualizar = async (id, dados, autor) => {
 
 };
 
-const remover = async (id, autor) => {
+const remover = async (id, autor, motivoExclusao) => {
 
   const receita = await prisma.receita.findUnique({
     where: { id }
@@ -371,8 +371,20 @@ const remover = async (id, autor) => {
     usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     acao: "EXCLUIR",
-    descricao: `Receita "${receita.descricao || receita.id}" excluída por ${autor?.nome || "Sistema"}.`
+    descricao: `Receita "${receita.descricao || receita.id}" excluída por ${autor?.nome || "Sistema"}${motivoExclusao ? ` (motivo: ${motivoExclusao})` : ""}.`
   });
+
+  // Mesmo alerta pra equipe inteira que a mudança de valor já dispara
+  // (ver atualizar() acima) -- excluir um boleto de vez é ainda mais
+  // definitivo, ninguém pode descobrir isso só olhando o log de
+  // auditoria, que não é o que o time olha no dia a dia.
+  notificacaoService.criar({
+    origem: 'SISTEMA',
+    titulo: 'EXCLUSÃO DE BOLETO',
+    mensagem: `${autor?.nome || 'Alguém'} excluiu "${receita.descricao}" (R$ ${Number(receita.valor).toFixed(2)})${motivoExclusao ? ` -- motivo: ${motivoExclusao}` : ""}.`,
+    link: '/financeiro',
+    locadorId: await locadorIdDaReceita(receita.id),
+  }).catch((erro) => console.error('[notificacao] Falha ao avisar exclusão de boleto:', erro.message));
 
   const removida = await prisma.receita.delete({
     where: { id }

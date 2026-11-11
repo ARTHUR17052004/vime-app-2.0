@@ -20,6 +20,7 @@ import ReceitaVisualizarModal from "./ReceitaVisualizarModal";
 import ReceitaEditarModal from "./ReceitaEditarModal";
 import ReceitaMapaModal from "./ReceitaMapaModal";
 import ReceitaBoletoModal from "./ReceitaBoletoModal";
+import ReceitaExcluirModal from "./ReceitaExcluirModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -168,6 +169,9 @@ export default function FinanceiroReceitas({
   const [boletoOpen, setBoletoOpen] =
     useState(false);
 
+  const [excluirOpen, setExcluirOpen] =
+    useState(false);
+
   const [menuAberto, setMenuAberto] = useState(null);
 
   const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
@@ -288,7 +292,8 @@ export default function FinanceiroReceitas({
             label="Excluir"
             danger
             onClick={() => {
-              onDelete?.(item.id);
+              setReceitaSelecionada(item);
+              setExcluirOpen(true);
               setMenuAberto(null);
             }}
           />
@@ -799,6 +804,13 @@ export default function FinanceiroReceitas({
       isOpen={boletoOpen}
       onClose={() => setBoletoOpen(false)}
       receita={receitaSelecionada}
+    />
+
+    <ReceitaExcluirModal
+      isOpen={excluirOpen}
+      onClose={() => setExcluirOpen(false)}
+      receita={receitaSelecionada}
+      onConfirmar={onDelete}
     />
 
   </>

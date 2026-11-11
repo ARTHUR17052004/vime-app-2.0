@@ -63,10 +63,30 @@ module.exports = async () => {
     const inicioMesAlvo = new Date(proximoVencimento.getFullYear(), proximoVencimento.getMonth(), 1);
     const inicioMesSeguinte = new Date(proximoVencimento.getFullYear(), proximoVencimento.getMonth() + 1, 1);
 
+    // Também olha receita ligada por Contrato desse mesmo Inquilino
+    // (ver cobrancaRecorrenteService.js, o outro motor de recorrência --
+    // os dois geram "Aluguel" pro mesmo inquilino sem se conhecerem).
+    // Sem isso, esse motor duplicava por cima da cobrança que o motor
+    // de Contrato já tinha criado pro mês -- foi o que aconteceu em
+    // 11/2026, em quase todo contrato ativo.
+    const contratosDoInquilino = receita.inquilinoId
+      ? await prisma.contrato.findMany({
+          where: { inquilinoId: receita.inquilinoId },
+          select: { id: true },
+        })
+      : [];
+
     const where = {
       categoria: receita.categoria,
       vencimento: { gte: inicioMesAlvo, lt: inicioMesSeguinte },
-      inquilinoId: receita.inquilinoId || null,
+      OR: receita.inquilinoId
+        ? [
+            { inquilinoId: receita.inquilinoId },
+            ...(contratosDoInquilino.length > 0
+              ? [{ contratoId: { in: contratosDoInquilino.map((c) => c.id) } }]
+              : []),
+          ]
+        : [{ inquilinoId: null }],
     };
 
     const existentes = await prisma.receita.findMany({ where });

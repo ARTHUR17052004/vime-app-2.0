@@ -8,7 +8,7 @@ export default function FinanceiroProximosVencimentos({
   receitas,
 }) {
   const vencimentos = receitas.filter(
-    (item) => item.status !== "PAGO"
+    (item) => item.status !== "PAGO" && item.status !== "PAGA" && item.status !== "CANCELADA"
   );
 
   return (

@@ -263,20 +263,22 @@ function FinanceiroPageConteudo() {
 
   };
 
-  const excluirReceita = async (id) => {
-
-    if (!window.confirm("Excluir receita?"))
-      return;
+  // Confirmação de verdade (motivo + senha) já acontece no
+  // ReceitaExcluirModal antes de chamar isto aqui -- sem o
+  // window.confirm de antes, que virou redundante. Precisa deixar o
+  // erro subir (não só alert) pra ele ficar mostrado dentro do modal
+  // em vez de fechar como se tivesse dado certo.
+  const excluirReceita = async (id, dados) => {
 
     try {
 
-      await ReceitaService.excluir(id);
+      await ReceitaService.excluir(id, dados);
 
       await carregar();
 
     } catch (err) {
 
-      alert(err.message || "Erro ao excluir receita.");
+      throw err;
 
     }
 
@@ -535,8 +537,13 @@ function FinanceiroPageConteudo() {
 
   // Só pra exibição na lista de Receitas (Visão Geral e aba Receitas) --
   // os cards de totais e os outros painéis usam receitasFiltradas
-  // direto, arquivada ou não.
-  const receitasListaVisivel = receitasFiltradas.filter((item) => !item.arquivadaNoHistorico);
+  // direto, arquivada ou não. Cancelada também some da lista por
+  // padrão (não polui a tela com cobrança que não vale mais, ex.:
+  // duplicata cancelada depois do apagão de 11/2026) -- só aparece se
+  // o usuário escolher "Cancelada" no filtro de Status de propósito.
+  const receitasListaVisivel = receitasFiltradas.filter(
+    (item) => !item.arquivadaNoHistorico && (statusFiltro === "CANCELADA" || item.status !== "CANCELADA")
+  );
 
   const despesasFiltradas = despesas.filter((item) => {
 
@@ -566,12 +573,17 @@ function FinanceiroPageConteudo() {
   // status, residência, período) -- antes somavam tudo que já foi
   // cadastrado, sem nenhum filtro, e dava a impressão de número
   // errado quando a tabela estava filtrada por um período menor.
+  // CANCELADA nunca entra -- não é "receita prevista" nenhuma, é uma
+  // cobrança que não vale mais (ex.: duplicata cancelada depois do
+  // apagão de 11/2026).
   const receitaPrevista = arredondarCentavos(
-    receitasFiltradas.reduce(
-      (total, item) =>
-        total + Number(item.valor || 0),
-      0
-    )
+    receitasFiltradas
+      .filter((item) => item.status !== "CANCELADA")
+      .reduce(
+        (total, item) =>
+          total + Number(item.valor || 0),
+        0
+      )
   );
 
   const totalDespesas = arredondarCentavos(
@@ -601,7 +613,8 @@ function FinanceiroPageConteudo() {
     item.vencimento &&
     item.vencimento.slice(0, 10) < new Date().toISOString().split("T")[0] &&
     item.status !== "PAGO" &&
-    item.status !== "PAGA";
+    item.status !== "PAGA" &&
+    item.status !== "CANCELADA";
 
   const vencidos = arredondarCentavos(
     [...receitasFiltradas, ...despesasFiltradas]

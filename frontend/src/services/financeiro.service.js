@@ -50,9 +50,10 @@ export const ReceitaService = {
     });
   },
 
-  excluir(id) {
+  excluir(id, dados) {
     return api(`/receitas/${id}`, {
       method: "DELETE",
+      body: dados ? JSON.stringify(dados) : undefined,
     });
   },
 
