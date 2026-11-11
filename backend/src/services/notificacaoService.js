@@ -2,7 +2,7 @@ const prisma = require("../config/prisma");
 const { getIO } = require("../socket");
 const pushService = require("./pushService");
 const notificacaoConfigService = require("./notificacaoConfigService");
-const { tipoDe } = require("../utils/tiposNotificacao");
+const { tipoDe, TIPOS } = require("../utils/tiposNotificacao");
 const { doLink } = require("../utils/locadorDeRegistro");
 const { notificarSistemaWhatsapp } = require("./whatsappAutomacaoService");
 
@@ -57,9 +57,11 @@ const renderizarMensagem = async (tipoChave, variaveis, textoPadrao) => {
 // descobrir; null = sem locador (só quem vê tudo recebe).
 const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) => {
 
+  const tipoChave = tipoDe({ origem, titulo });
+
   // O admin escolhe o que notificar (Administração > Notificações).
   // Desligado = nem cria. Tipo sem configuração continua ligado.
-  const config = await notificacaoConfigService.obter(tipoDe({ origem, titulo }));
+  const config = await notificacaoConfigService.obter(tipoChave);
 
   if (!config.ativo) return null;
 
@@ -68,7 +70,37 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   // Restrição de perfil só vale pra aviso geral (sem usuarioId) -- um
   // aviso endereçado a uma pessoa específica já é por definição só
   // pra ela, independente do perfil dela.
-  const perfisAlvo = !usuarioId ? config.perfis : [];
+  let perfisAlvo = !usuarioId ? config.perfis : [];
+
+  // Alguns tipos exigem também a permissão "dona" do módulo (ver
+  // tiposNotificacao.js, campo permissaoNecessaria) -- sem isso, um
+  // perfil sem "whatsapp.visualizar" continuava recebendo aviso de
+  // mensagem nova do WhatsApp mesmo sem poder abrir a conversa. Quando
+  // existe, combina de verdade com "quem recebe" (em branco = todos os
+  // perfis COM a permissão; perfis escolhidos = só quem estiver nos
+  // dois ao mesmo tempo).
+  const tipoInfo = TIPOS.find((t) => t.chave === tipoChave);
+
+  if (!usuarioId && tipoInfo?.permissaoNecessaria) {
+
+    const todosPerfis = await prisma.perfil.findMany({
+      select: { nome: true, permissoes: true },
+    });
+
+    const perfisComPermissao = todosPerfis
+      .filter(
+        (p) =>
+          p.nome === "ADMINISTRADOR" ||
+          (p.permissoes || []).includes(tipoInfo.permissaoNecessaria)
+      )
+      .map((p) => p.nome);
+
+    perfisAlvo =
+      perfisAlvo.length > 0
+        ? perfisAlvo.filter((p) => perfisComPermissao.includes(p))
+        : perfisComPermissao;
+
+  }
 
   // Título sempre em caixa alta -- pedido explícito, pra dar pra bater
   // o olho na lista de notificações e decidir na hora se vale abrir

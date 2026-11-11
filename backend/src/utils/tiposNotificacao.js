@@ -134,7 +134,16 @@ const TIPOS = [
   // Sem variaveis/mensagemPadrao de propósito -- a "mensagem" aqui É o
   // texto literal recebido no WhatsApp, não dá pra padronizar com
   // placeholder.
-  { chave: "WHATSAPP_MENSAGEM", grupo: "WhatsApp", rotulo: "Nova mensagem no WhatsApp", descricao: "Mensagem recebida de um contato.", prefixos: ["Nova mensagem de "] },
+  //
+  // permissaoNecessaria: quem não tem "whatsapp.visualizar" (Permissões
+  // > WhatsApp) não recebe esse aviso em NENHUM canal (sino, push,
+  // WhatsApp pra equipe), mesmo que o perfil dele esteja marcado em
+  // "Quem recebe" aqui -- as duas travas (permissão de ver o módulo e
+  // "quem recebe" desse tipo) agora se combinam de verdade (ver
+  // notificacaoService.criar). Sem isso, desligar "visualizar" pro
+  // perfil não impedia a notificação de mensagem nova continuar
+  // chegando -- bug relatado em 11/11/2026.
+  { chave: "WHATSAPP_MENSAGEM", grupo: "WhatsApp", rotulo: "Nova mensagem no WhatsApp", descricao: "Mensagem recebida de um contato.", prefixos: ["Nova mensagem de "], permissaoNecessaria: "whatsapp.visualizar" },
 ];
 
 // Comparação sempre em maiúsculas -- notificacaoService.criar() agora
