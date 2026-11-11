@@ -461,10 +461,16 @@ export default function FinanceiroReceitas({
                       <RelogioCorte vencimento={item.vencimento} />
                     )}
 
-                    {item.gatewayProvider && (
+                    {item.gatewayProvider ? (
                       <Badge variant="gray" size="sm">
                         {item.gatewayProvider}
                       </Badge>
+                    ) : (
+                      item.status !== "PAGA" && item.status !== "PAGO" && (
+                        <Badge variant="yellow" size="sm">
+                          Não enviada ao banco
+                        </Badge>
+                      )
                     )}
 
                   </div>
@@ -610,10 +616,16 @@ export default function FinanceiroReceitas({
                         <RelogioCorte vencimento={item.vencimento} />
                       )}
 
-                      {item.gatewayProvider && (
+                      {item.gatewayProvider ? (
                         <Badge variant="gray" size="sm">
                           {item.gatewayProvider}
                         </Badge>
+                      ) : (
+                        item.status !== "PAGA" && item.status !== "PAGO" && (
+                          <Badge variant="yellow" size="sm">
+                            Não enviada ao banco
+                          </Badge>
+                        )
                       )}
 
                     </div>

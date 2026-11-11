@@ -177,12 +177,18 @@ export default function AsaasTabela({
                     {item.cliente}
                   </div>
 
-                  <div className="text-sm text-[var(--text-subtle)]">
+                  <div
+                    className={
+                      item.gatewayProvider === "BB" || item.enviadaAsaas
+                        ? "text-sm text-[var(--text-subtle)]"
+                        : "text-sm font-semibold text-yellow-400"
+                    }
+                  >
                     {item.gatewayProvider === "BB"
                       ? `BB • ${item.gatewayReferencia || "sincronizado"}`
                       : item.enviadaAsaas
                       ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
-                      : "Ainda não enviada a nenhum banco"}
+                      : "⚠ Ainda não enviada a nenhum banco"}
                   </div>
 
                 </td>

@@ -20,6 +20,7 @@ const verificarBoletosBB = require("./verificarBoletosBBJob");
 const verificarAsaas = require("./verificarAsaasJob");
 const verificarEfi = require("./verificarEfiJob");
 const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
+const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
 
 const iniciarJobs = () => {
 
@@ -83,6 +84,11 @@ const iniciarJobs = () => {
     // (acima), pra uma cobrança recém-criada com vencimento hoje já
     // entrar no lembrete
     await lembreteVencimento();
+
+    // Mesmo motivo/mesma janela do lembrete acima, mas pra equipe (não
+    // pro inquilino): cobrança perto de vencer (ou já vencida) que
+    // nunca foi enviada a banco nenhum -- ver verificarCobrancaNaoEnviadaJob.js.
+    await verificarCobrancaNaoEnviada();
 
     await verificarKitnetsVazias();
 

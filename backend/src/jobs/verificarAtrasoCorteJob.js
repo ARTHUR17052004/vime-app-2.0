@@ -43,6 +43,12 @@ module.exports = async () => {
       status: 'ATRASADA',
       vencimento: { lte: limite },
       vistoriaCorteAtrasoCriadaEm: null,
+      // Só dispara risco de corte pra cobrança que virou um boleto de
+      // verdade -- sem isso, uma cobrança que nunca foi enviada ao
+      // banco (ninguém clicou "Enviar ao Banco" ainda) entrava no
+      // mesmo risco de corte de quem realmente recebeu e não pagou,
+      // mesmo sem nenhum boleto pra cobrar o inquilino de fato.
+      gatewayReferencia: { not: null },
     },
     include: {
       contrato: { include: { inquilino: true, kitnet: true, unidade: true } },

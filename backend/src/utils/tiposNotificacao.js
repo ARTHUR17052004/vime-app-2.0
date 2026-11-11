@@ -86,6 +86,13 @@ const TIPOS = [
     variaveis: ["descricao", "inquilino", "valor"],
     mensagemPadrao: "{{descricao}} ({{inquilino}}) -- R$ {{valor}} venceu e ainda não foi pago.",
   },
+  {
+    chave: "COBRANCA_NAO_ENVIADA", grupo: "Financeiro", rotulo: "Cobrança não enviada ao banco",
+    descricao: "Cobrança perto de vencer (ou já vencida) que nunca foi enviada a banco nenhum -- avisa a equipe todo dia enquanto continuar sem ser enviada.",
+    titulos: ["Cobrança perto de vencer, ainda não enviada ao banco", "Cobrança vencida nunca enviada ao banco"],
+    variaveis: ["inquilino", "kitnet", "valor", "vencimento"],
+    mensagemPadrao: "{{inquilino}} (kitnet {{kitnet}}) -- R$ {{valor}} vence/venceu em {{vencimento}} e ainda não foi enviada a nenhum banco.",
+  },
 
   {
     chave: "SOLICITACAO_NOVA", grupo: "Solicitações", rotulo: "Nova solicitação",
