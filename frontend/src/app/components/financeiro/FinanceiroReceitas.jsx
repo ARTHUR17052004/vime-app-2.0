@@ -8,6 +8,8 @@ import {
   Pin,
   Repeat,
   FileText,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -65,6 +67,46 @@ function RelogioCorte({ vencimento, enviada }) {
 
 }
 
+// Cabeçalho clicável pra organizar a lista -- substitui o antigo
+// select "Organizar por" (tirava espaço da tela à toa quando dá pra
+// clicar direto na coluna, como o resto do sistema já faz). `ordens`
+// é [valorAscendente, valorDescendente] dentro de COMPARADORES_FINANCEIRO
+// (financeiro/page.js); coluna sem as duas direções (ex.: Kitnet,
+// Status) passa só um valor e alterna só liga/desliga.
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`text-left pr-4 cursor-pointer select-none hover:text-[var(--text)] transition ${
+        ativo ? "text-[var(--text)]" : ""
+      }`}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
+
 function MenuButton({ label, danger, success, warning, onClick }) {
   return (
     <button
@@ -95,6 +137,8 @@ function MenuButton({ label, danger, success, warning, onClick }) {
 export default function FinanceiroReceitas({
   receitas,
   contas,
+  ordenacao,
+  onOrdenar,
   onDelete,
   onUpdate,
   onMarcarPago,
@@ -525,21 +569,33 @@ export default function FinanceiroReceitas({
                   Residencial
                 </th>
 
-                <th className="text-left pr-4">
-                  Kitnet
-                </th>
+                <CabecalhoOrdenavel
+                  label="Kitnet"
+                  ordens={["kitnet"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
-                <th className="text-left pr-4">
-                  Vencimento
-                </th>
+                <CabecalhoOrdenavel
+                  label="Vencimento"
+                  ordens={["vencimento-proximo", "vencimento-distante"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
-                <th className="text-left pr-4">
-                  Valor
-                </th>
+                <CabecalhoOrdenavel
+                  label="Valor"
+                  ordens={["valor-menor", "valor-maior"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
-                <th className="text-left pr-4">
-                  Status
-                </th>
+                <CabecalhoOrdenavel
+                  label="Status"
+                  ordens={["status"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
                 <th></th>
               </tr>

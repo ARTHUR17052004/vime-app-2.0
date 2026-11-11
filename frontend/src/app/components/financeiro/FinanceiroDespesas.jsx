@@ -6,6 +6,8 @@ import {
   TrendingDown,
   Plus,
   Pin,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -15,6 +17,42 @@ import ActionMenu from "../ui/ActionMenu";
 import DespesaVisualizarModal from "./DespesaVisualizarModal";
 import DespesaEditarModal from "./DespesaEditarModal";
 import { usePermissao } from "../../../hooks/usePermissao";
+
+// Mesmo cabeçalho clicável de FinanceiroReceitas.jsx -- ver o
+// comentário lá pra entender `ordens`.
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`text-left cursor-pointer select-none hover:text-[var(--text)] transition ${
+        ativo ? "text-[var(--text)]" : ""
+      }`}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
 
 function MenuButton({ label, danger, warning, onClick }) {
   return (
@@ -43,6 +81,8 @@ function MenuButton({ label, danger, warning, onClick }) {
 
 export default function FinanceiroDespesas({
   despesas,
+  ordenacao,
+  onOrdenar,
   onDelete,
   onUpdate,
   onFixar,
@@ -197,13 +237,19 @@ export default function FinanceiroDespesas({
                   Categoria
                 </th>
 
-                <th className="text-left">
-                  Valor
-                </th>
+                <CabecalhoOrdenavel
+                  label="Valor"
+                  ordens={["valor-menor", "valor-maior"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
-                <th className="text-left">
-                  Status
-                </th>
+                <CabecalhoOrdenavel
+                  label="Status"
+                  ordens={["status"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
 
                 <th></th>
 

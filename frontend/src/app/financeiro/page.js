@@ -27,7 +27,6 @@ import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 
 import FinanceiroStats from "../components/financeiro/FinanceiroStats";
-import FinanceiroFilters from "../components/financeiro/FinanceiroFilters";
 import FinanceiroTabs from "../components/financeiro/FinanceiroTabs";
 import FinanceiroReceitas from "../components/financeiro/FinanceiroReceitas";
 import FinanceiroDespesas from "../components/financeiro/FinanceiroDespesas";
@@ -643,6 +642,16 @@ function FinanceiroPageConteudo() {
       .reduce((total, item) => total + (Number(item.valor) - Number(item.valorLiquido)), 0)
   );
 
+  const limparFiltros = () => {
+    setSearch("");
+    setResidenciaSelecionada("");
+    setDataDe("");
+    setDataAte("");
+    setStatusFiltro("");
+    setContaFiltro("");
+    setOrdenacao("vencimento-proximo");
+  };
+
  if (!podeVisualizar) {
     return <SemPermissao />;
   }
@@ -717,31 +726,41 @@ function FinanceiroPageConteudo() {
     </FadeIn>
 
     <FadeIn delay={0.20}>
-      <div
-        className="
-          mt-8
-          rounded-2xl
-          border
-          border-[var(--border-token)]
-          bg-[var(--surface)]
-          backdrop-blur-xl
-          p-6
-          space-y-5
-        "
-      >
+      <div className="mt-8 bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] p-6">
 
-        <FinanceiroFilters
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+        <div className="mb-6">
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <h2 className="text-xl font-bold text-[var(--text)]">
+            Filtros
+          </h2>
+
+          <p className="text-[var(--text-subtle)] mt-1">
+            Localize rapidamente qualquer receita ou despesa.
+          </p>
+
+        </div>
+
+        <div className="mb-5">
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Pesquisar
+          </label>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Descrição, inquilino, kitnet..."
+            className="w-full rounded-xl p-3 bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-green-600"
+          />
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
 
           <div>
             <label className="block text-xs text-[var(--text-faint)] mb-1.5">
               Residência
             </label>
             <ResidenciaFiltro
+              compact
               value={residenciaSelecionada}
               onChange={setResidenciaSelecionada}
             />
@@ -807,38 +826,26 @@ function FinanceiroPageConteudo() {
             </select>
           </div>
 
-          <div>
-            <label className="block text-xs text-[var(--text-faint)] mb-1.5">
-              Organizar por
-            </label>
-            <select
-              value={ordenacao}
-              onChange={(e) => setOrdenacao(e.target.value)}
-              className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
+          <div className="flex items-end">
+            <button
+              type="button"
+              onClick={limparFiltros}
+              className="
+                w-full
+                h-11
+                border
+                border-[var(--border-token)]
+                text-[var(--text-1)]
+                hover:bg-[var(--surface-2)]
+                rounded-xl
+                text-sm
+              "
             >
-              <option value="vencimento-proximo" className="bg-[#1b2430]">Vencimento (mais próximo)</option>
-              <option value="vencimento-distante" className="bg-[#1b2430]">Vencimento (mais distante)</option>
-              <option value="valor-maior" className="bg-[#1b2430]">Valor (maior)</option>
-              <option value="valor-menor" className="bg-[#1b2430]">Valor (menor)</option>
-              <option value="kitnet" className="bg-[#1b2430]">Kitnet</option>
-              <option value="status" className="bg-[#1b2430]">Status</option>
-            </select>
+              Limpar filtros
+            </button>
           </div>
 
         </div>
-
-        {(dataDe || dataAte) && (
-          <button
-            type="button"
-            onClick={() => {
-              setDataDe("");
-              setDataAte("");
-            }}
-            className="text-xs text-[var(--text-faint)] hover:text-[var(--text)] underline"
-          >
-            Limpar período
-          </button>
-        )}
 
       </div>
     </FadeIn>
@@ -858,6 +865,8 @@ function FinanceiroPageConteudo() {
         <FinanceiroReceitas
           receitas={receitasListaVisivel}
           contas={contas}
+          ordenacao={ordenacao}
+          onOrdenar={setOrdenacao}
           onDelete={excluirReceita}
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
@@ -873,6 +882,8 @@ function FinanceiroPageConteudo() {
 
         <FinanceiroDespesas
           despesas={despesasFiltradas}
+          ordenacao={ordenacao}
+          onOrdenar={setOrdenacao}
           onDelete={excluirDespesa}
           onUpdate={atualizarDespesa}
           onFixar={fixarDespesa}
@@ -905,6 +916,8 @@ function FinanceiroPageConteudo() {
       <FinanceiroReceitas
         receitas={receitasListaVisivel}
         contas={contas}
+        ordenacao={ordenacao}
+        onOrdenar={setOrdenacao}
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
@@ -923,6 +936,8 @@ function FinanceiroPageConteudo() {
       <FinanceiroReceitas
         receitas={receitasHistorico}
         contas={contas}
+        ordenacao={ordenacao}
+        onOrdenar={setOrdenacao}
         titulo="Histórico de Pagamentos"
         subtitulo="Receitas já pagas, enviadas pra cá pra não acumular na lista de Receitas."
         onDelete={excluirReceita}
@@ -942,6 +957,8 @@ function FinanceiroPageConteudo() {
     {abaSelecionada === "despesas" && (
       <FinanceiroDespesas
         despesas={despesasFiltradas}
+        ordenacao={ordenacao}
+        onOrdenar={setOrdenacao}
         onDelete={excluirDespesa}
         onUpdate={atualizarDespesa}
         onFixar={fixarDespesa}
