@@ -239,6 +239,14 @@ model Contrato {
   indiceReajuste String?
   status         String    @default("PENDENTE")
   observacoes    String?
+  // Preenchido só quando o contrato foi quebrado ANTES do dataFim
+  // (excluir inquilino, excluir contrato, excluir kitnet ou encerrar
+  // manualmente, tudo antes do fim de verdade) -- null quando o
+  // encerramento foi no fim natural do contrato. motivoEncerramento é
+  // um dos 3 fixos (ABANDONO/INADIMPLENCIA/QUEBRA_DO_INQUILINO), ver
+  // permissaoMiddleware.exigirConfirmacaoTerminoAntecipado.
+  motivoEncerramento     String?
+  observacaoEncerramento String?
   clicksignDocumentKey String?
   clicksignEnvelopeId  String?
   clicksignSigningUrl  String?

@@ -446,7 +446,7 @@ function KitnetsPageConteudo() {
           isOpen={!!terminoAntecipado}
           onClose={() => setTerminoAntecipado(null)}
           titulo="Quebra de contrato -- excluir kitnet"
-          contexto="Essa kitnet tem um contrato ativo que ainda não chegou no fim (dataFim)."
+          contexto="Essa kitnet tem um contrato ativo que ainda não chegou no fim. A kitnet não será excluída -- o contrato vai ser encerrado e ela fica liberada (disponível) em vez de apagada."
           acao={async (extra) => {
             await KitnetService.excluir(terminoAntecipado.id, extra);
             await carregarKitnets();

@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Trash2, Download, Paperclip } from "lucide-react";
+import { Pencil, Trash2, Download, Paperclip, Ban } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
@@ -11,6 +11,7 @@ export default function ContratoArquivoTable({
   onEdit,
   onDelete,
   onBaixarArquivo,
+  onEncerrar,
 }) {
 
   const podeEditar = usePermissao("arquivoContratos.editar");
@@ -116,6 +117,17 @@ export default function ContratoArquivoTable({
                       aria-label="Baixar arquivo"
                     >
                       <Download size={16} />
+                    </button>
+                  )}
+
+                  {podeEditar && contrato.status === "ATIVO" && (
+                    <button
+                      onClick={() => onEncerrar?.(contrato.id)}
+                      className="text-[var(--text-subtle)] hover:text-orange-400 transition"
+                      aria-label="Encerrar Contrato"
+                      title="Encerrar Contrato"
+                    >
+                      <Ban size={16} />
                     </button>
                   )}
 

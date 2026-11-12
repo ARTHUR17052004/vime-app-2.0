@@ -643,13 +643,20 @@ const encerrar = async (id, autor, opcoes = {}) => {
 
   const gerarVistoriaEntrega = opcoes.gerarVistoriaEntrega !== false;
 
+  // Presente = quebra de contrato (excluir inquilino/contrato/kitnet
+  // ou encerrar manualmente, ANTES do dataFim de verdade -- ver
+  // permissaoMiddleware.exigirConfirmacaoTerminoAntecipado, que já
+  // validou motivo+observação+senha antes de chegar aqui). Ausente =
+  // encerramento normal, no fim natural do contrato.
+  const { motivoEncerramento, observacaoEncerramento } = opcoes;
+
   // Sem o include, contrato.inquilino ficava undefined e a mensagem de
   // encerramento (mais abaixo) tentava mandar pro telefone vazio --
   // nunca chegava a ninguém, só criava um contato "55" fantasma no
   // WhatsApp a cada contrato encerrado.
   const contrato = await prisma.contrato.findUnique({
     where: { id },
-    include: { inquilino: true }
+    include: { inquilino: true, kitnet: { include: { unidade: true } } }
   });
 
   if (!contrato) {
@@ -660,7 +667,12 @@ const encerrar = async (id, autor, opcoes = {}) => {
     where: { id },
     data: {
       status: 'ENCERRADO',
-      dataFim: contrato.dataFim || new Date()
+      // Quebra de contrato: a data real do fim é AGORA, não a que
+      // estava planejada (nunca deixa um contrato "encerrado" com
+      // dataFim ainda no futuro, que seria contraditório). Fim normal:
+      // mantém o dataFim que já tinha (comportamento de sempre).
+      dataFim: motivoEncerramento ? new Date() : (contrato.dataFim || new Date()),
+      ...(motivoEncerramento && { motivoEncerramento, observacaoEncerramento }),
     }
   });
 
@@ -735,14 +747,22 @@ const encerrar = async (id, autor, opcoes = {}) => {
     descricao: `Contrato ${contrato.id} encerrado por ${autor?.nome || "Sistema"}.`
   });
 
+  const MOTIVO_ROTULO = {
+    ABANDONO: "Abandono",
+    INADIMPLENCIA: "Inadimplência",
+    QUEBRA_DO_INQUILINO: "Quebra do inquilino",
+  };
+
   await notificacaoService.criar({
     origem: "SISTEMA",
-    titulo: "Contrato encerrado",
-    mensagem: await notificacaoService.renderizarMensagem(
-      'CONTRATO_ENCERRADO',
-      { contrato: contrato.id },
-      `Contrato ${contrato.id} foi encerrado.`
-    ),
+    titulo: motivoEncerramento ? "QUEBRA DE CONTRATO" : "Contrato encerrado",
+    mensagem: motivoEncerramento
+      ? `${autor?.nome || "Alguém"} registrou quebra de contrato -- ${contrato.inquilino?.nome || "inquilino"} (${contrato.kitnet?.unidade?.nome || "?"}, kitnet ${contrato.kitnet?.nome || contrato.kitnet?.numero || "?"}), motivo: ${MOTIVO_ROTULO[motivoEncerramento] || motivoEncerramento}. Observação: ${observacaoEncerramento || "-"}`
+      : await notificacaoService.renderizarMensagem(
+          'CONTRATO_ENCERRADO',
+          { contrato: contrato.id },
+          `Contrato ${contrato.id} foi encerrado.`
+        ),
     link: `/contratos/${contrato.id}`
   });
 

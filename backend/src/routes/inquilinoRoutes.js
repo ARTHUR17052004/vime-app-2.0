@@ -12,21 +12,13 @@ router.use(authMiddleware);
 
 // Excluir o Inquilino esvazia a kitnet dele (ver inquilinoService.remover) --
 // se o contrato ATIVO dele ainda não chegou no dataFim, é quebra de
-// contrato (ver permissaoMiddleware.exigirConfirmacaoTerminoAntecipado).
-const obterDataFimDoInquilino = async (req) => {
-  const contrato = await prisma.contrato.findFirst({
+// contrato e vira um encerrar de verdade em vez da exclusão (ver
+// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado).
+const obterContratoDoInquilino = async (req) => {
+  return prisma.contrato.findFirst({
     where: { inquilinoId: req.params.id, status: 'ATIVO' },
-    select: { dataFim: true },
+    select: { id: true, dataFim: true },
   });
-  return contrato?.dataFim || null;
-};
-
-const obterContextoDoInquilino = async (req) => {
-  const inquilino = await prisma.inquilino.findUnique({
-    where: { id: req.params.id },
-    select: { nome: true },
-  });
-  return inquilino?.nome ? `inquilino ${inquilino.nome} excluído` : null;
 };
 
 router.get('/', permissaoMiddleware('inquilinos.visualizar'), inquilinoController.listar);
@@ -40,7 +32,7 @@ router.put('/:id', permissaoMiddleware('inquilinos.editar'), inquilinoController
 router.delete(
   '/:id',
   permissaoMiddleware('inquilinos.excluir'),
-  exigirConfirmacaoTerminoAntecipado(obterDataFimDoInquilino, obterContextoDoInquilino),
+  exigirConfirmacaoTerminoAntecipado(obterContratoDoInquilino),
   inquilinoController.remover
 );
 

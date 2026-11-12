@@ -222,6 +222,28 @@ export default function DetalhesContratoPage() {
 
           </div>
 
+          {contrato.status === "ENCERRADO" && contrato.motivoEncerramento && (
+            <div className="md:col-span-2">
+              <p className="text-[var(--text-subtle)]">
+                Encerrado por quebra de contrato
+              </p>
+
+              <h2 className="font-bold text-xl text-red-400">
+                {{
+                  ABANDONO: "Abandono",
+                  INADIMPLENCIA: "Inadimplência",
+                  QUEBRA_DO_INQUILINO: "Quebra do inquilino",
+                }[contrato.motivoEncerramento] || contrato.motivoEncerramento}
+              </h2>
+
+              {contrato.observacaoEncerramento && (
+                <p className="mt-1 text-[var(--text-muted)]">
+                  {contrato.observacaoEncerramento}
+                </p>
+              )}
+            </div>
+          )}
+
         </div>
 
       </div>

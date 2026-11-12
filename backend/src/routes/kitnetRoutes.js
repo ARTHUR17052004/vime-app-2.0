@@ -10,26 +10,16 @@ const prisma = require('../config/prisma');
 
 router.use(authMiddleware);
 
-// Excluir a kitnet esvazia ela de vez -- se tiver um contrato ATIVO
-// nela e o dataFim ainda não chegou, é quebra de contrato (ver
-// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado).
-const obterDataFimDaKitnet = async (req) => {
-  const contrato = await prisma.contrato.findFirst({
+// Excluir a kitnet -- se tiver um contrato ATIVO nela e o dataFim
+// ainda não chegou, é quebra de contrato e vira um encerrar de verdade
+// (libera a kitnet, não apaga ela) em vez da exclusão (ver
+// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado). Sem
+// contrato ativo (já livre), exclui a kitnet normalmente.
+const obterContratoDaKitnet = async (req) => {
+  return prisma.contrato.findFirst({
     where: { kitnetId: req.params.id, status: 'ATIVO' },
-    select: { dataFim: true },
+    select: { id: true, dataFim: true },
   });
-  return contrato?.dataFim || null;
-};
-
-const obterContextoDaKitnet = async (req) => {
-  const contrato = await prisma.contrato.findFirst({
-    where: { kitnetId: req.params.id, status: 'ATIVO' },
-    include: { inquilino: true, kitnet: true },
-  });
-  if (!contrato) return null;
-  const nome = contrato.inquilino?.nome || "inquilino";
-  const kitnet = contrato.kitnet?.nome || contrato.kitnet?.numero || "?";
-  return `kitnet ${kitnet} excluída (${nome})`;
 };
 
 router.get('/', permissaoMiddleware('kitnets.visualizar'), kitnetController.listar);
@@ -41,7 +31,7 @@ router.put('/:id', permissaoMiddleware('kitnets.editar'), kitnetController.atual
 router.delete(
   '/:id',
   permissaoMiddleware('kitnets.excluir'),
-  exigirConfirmacaoTerminoAntecipado(obterDataFimDaKitnet, obterContextoDaKitnet),
+  exigirConfirmacaoTerminoAntecipado(obterContratoDaKitnet),
   kitnetController.remover
 );
 

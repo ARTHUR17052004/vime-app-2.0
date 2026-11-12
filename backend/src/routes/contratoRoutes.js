@@ -12,25 +12,14 @@ const prisma = require('../config/prisma');
 router.use(authMiddleware);
 
 // Excluir ou encerrar manualmente ANTES do dataFim é quebra de contrato
-// (ver permissaoMiddleware.exigirConfirmacaoTerminoAntecipado) -- o
-// próprio contrato já tem a data, sem precisar ir atrás de mais nada.
-const obterDataFimDoContrato = async (req) => {
-  const contrato = await prisma.contrato.findUnique({
+// e vira um encerrar de verdade em vez da exclusão (ver
+// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado) -- o próprio
+// contrato já tem a data, sem precisar ir atrás de mais nada.
+const obterContratoDoContrato = async (req) => {
+  return prisma.contrato.findUnique({
     where: { id: req.params.id },
-    select: { dataFim: true },
+    select: { id: true, dataFim: true },
   });
-  return contrato?.dataFim || null;
-};
-
-const obterContextoDoContrato = async (req) => {
-  const contrato = await prisma.contrato.findUnique({
-    where: { id: req.params.id },
-    include: { inquilino: true, kitnet: true },
-  });
-  if (!contrato) return null;
-  const nome = contrato.inquilino?.nome || "inquilino";
-  const kitnet = contrato.kitnet?.nome || contrato.kitnet?.numero || "?";
-  return `contrato de ${nome} (kitnet ${kitnet})`;
 };
 
 // Contrato (assinado pela Clicksign) e Arquivo de Contratos (cadastrado na
@@ -95,14 +84,14 @@ router.put('/:id', podeContrato('editar'), contratoController.atualizar);
 router.delete(
   '/:id',
   podeContrato('excluir'),
-  exigirConfirmacaoTerminoAntecipado(obterDataFimDoContrato, obterContextoDoContrato),
+  exigirConfirmacaoTerminoAntecipado(obterContratoDoContrato),
   contratoController.remover
 );
 
 router.patch(
   '/:id/encerrar',
   podeContrato('editar'),
-  exigirConfirmacaoTerminoAntecipado(obterDataFimDoContrato, obterContextoDoContrato),
+  exigirConfirmacaoTerminoAntecipado(obterContratoDoContrato),
   contratoController.encerrar
 );
 

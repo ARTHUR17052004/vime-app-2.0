@@ -23,6 +23,7 @@ import ContratoModal from "../../components/contratos/ContratoModal";
 import ContratoForm from "../../components/contratos/ContratoForm";
 import ContratoArquivoTable from "../../components/contratos/ContratoArquivoTable";
 import ConfirmVistoriaEntregaModal from "../../components/common/ConfirmVistoriaEntregaModal";
+import TerminoAntecipadoModal from "../../components/common/TerminoAntecipadoModal";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -46,6 +47,12 @@ export default function ContratosArquivoPage() {
 
   const [vistoriaPendente, setVistoriaPendente] = useState(null);
   const [arquivoPendente, setArquivoPendente] = useState(null);
+
+  // Excluir ou encerrar ANTES do fim do contrato (dataFim) é quebra de
+  // contrato -- o backend recusa com requerConfirmacaoTerminoAntecipado:true
+  // e essa tela abre o modal de motivo+observação+senha (ver
+  // TerminoAntecipadoModal.jsx).
+  const [terminoAntecipado, setTerminoAntecipado] = useState(null);
 
   async function carregarContratos() {
 
@@ -187,9 +194,41 @@ export default function ContratosArquivoPage() {
 
     } catch (error) {
 
+      if (error.data?.requerConfirmacaoTerminoAntecipado) {
+        setTerminoAntecipado({ id: pendente.id, tipo: "excluir", gerarVistoriaEntrega });
+        return;
+      }
+
       console.error("Erro ao excluir contrato:", error);
 
       alert(error.message || "Erro ao excluir contrato.");
+
+    }
+
+  }
+
+  async function encerrarContrato(id) {
+
+    const confirmar = window.confirm("Encerrar este contrato agora?");
+
+    if (!confirmar) return;
+
+    try {
+
+      await ContratoService.encerrar(id);
+
+      await carregarContratos();
+
+    } catch (error) {
+
+      if (error.data?.requerConfirmacaoTerminoAntecipado) {
+        setTerminoAntecipado({ id, tipo: "encerrar" });
+        return;
+      }
+
+      console.error("Erro ao encerrar contrato:", error);
+
+      alert(error.message || "Erro ao encerrar contrato.");
 
     }
 
@@ -382,6 +421,7 @@ export default function ContratosArquivoPage() {
                 contratos={contratosFiltrados}
                 onEdit={editarContrato}
                 onDelete={excluirContrato}
+                onEncerrar={encerrarContrato}
                 onBaixarArquivo={baixarArquivoDoContrato}
               />
 
@@ -408,6 +448,24 @@ export default function ContratosArquivoPage() {
             isOpen={!!vistoriaPendente}
             nomeKitnet={vistoriaPendente?.kitnetNome}
             onEscolher={confirmarExclusaoContrato}
+          />
+
+          <TerminoAntecipadoModal
+            isOpen={!!terminoAntecipado}
+            onClose={() => setTerminoAntecipado(null)}
+            titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+            contexto="Esse contrato ainda não chegou no fim (dataFim). Ele não será excluído -- vai ser encerrado, com o motivo registrado, pra manter o histórico."
+            acao={async (extra) => {
+              if (terminoAntecipado.tipo === "encerrar") {
+                await ContratoService.encerrar(terminoAntecipado.id, extra);
+              } else {
+                await ContratoService.excluir(terminoAntecipado.id, {
+                  gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                  ...extra,
+                });
+              }
+              await carregarContratos();
+            }}
           />
 
         </PageContainer>

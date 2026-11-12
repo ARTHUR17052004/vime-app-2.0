@@ -570,7 +570,7 @@ export default function InquilinosPage() {
             isOpen={!!terminoAntecipado}
             onClose={() => setTerminoAntecipado(null)}
             titulo="Quebra de contrato -- excluir inquilino"
-            contexto="O contrato desse inquilino ainda não chegou no fim."
+            contexto="O contrato desse inquilino ainda não chegou no fim. O inquilino não será excluído -- o contrato vai ser encerrado, a kitnet liberada, e tudo fica registrado no histórico."
             acao={async (extra) => {
               await InquilinoService.excluir(terminoAntecipado.id, {
                 gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,

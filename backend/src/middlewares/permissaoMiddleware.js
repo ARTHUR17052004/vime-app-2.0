@@ -1,6 +1,5 @@
 const prisma = require("../config/prisma");
 const bcrypt = require("bcryptjs");
-const notificacaoService = require("../services/notificacaoService");
 
 const temPermissao = async (usuario, chave) => {
 
@@ -250,27 +249,37 @@ const exigirConfirmacaoExclusao = async (req, res, next) => {
 // nada de texto livre aqui (a observação é que é livre).
 const MOTIVOS_TERMINO_ANTECIPADO = ["ABANDONO", "INADIMPLENCIA", "QUEBRA_DO_INQUILINO"];
 
-// Esvaziar a kitnet (excluir inquilino), excluir o contrato, ou
-// encerrar ele manualmente -- ANTES do dataFim do contrato (o próprio
-// ciclo de 4 meses que o sistema já respeita pra fechar sozinho, ver
-// contratoService.criar/renovar) -- é sempre quebra de contrato, não
+// Esvaziar a kitnet (excluir inquilino), excluir o contrato, excluir a
+// kitnet, ou encerrar manualmente -- ANTES do dataFim do contrato (o
+// ciclo que o sistema já respeita pra fechar sozinho, ver
+// contratoService.criar/renovar) -- é sempre quebra de contrato, nunca
 // um fim normal. Trava com motivo (fixo) + observação (livre) + senha.
-// Fábrica porque cada rota resolve o dataFim de um jeito diferente
-// (direto do Contrato sendo excluído/encerrado, ou do Contrato ativo
-// do Inquilino/Kitnet sendo excluído) -- `obterDataFim(req)` devolve
-// essa data, ou null/undefined se não tiver contrato nenhum pra
-// avaliar (segue sem travar, não tem o que quebrar). `obterContexto(req)`
-// é só texto descritivo (nome do inquilino, kitnet...) pro aviso que
-// sai pra equipe quando a quebra é confirmada.
-const exigirConfirmacaoTerminoAntecipado = (obterDataFim, obterContexto) => async (req, res, next) => {
+//
+// IMPORTANTE: quando confirmado, isso NUNCA deixa a ação original
+// (excluir) continuar -- em vez disso, ENCERRA o contrato de verdade
+// (contratoService.encerrar, com o motivo/observação gravados) e
+// responde direto, sem chamar next(). Kitnet fica vazia, inquilino
+// fica inativo, contrato fica ENCERRADO com o motivo visível --
+// nada é apagado, pra manter o histórico rastreável (pedido
+// explícito: excluir de vez não é a forma certa de registrar uma
+// quebra de contrato). Só quando o contrato JÁ chegou no fim (ou não
+// tem contrato nenhum pra quebrar) é que next() deixa a ação original
+// (exclusão de verdade, ou o encerrar comum) acontecer.
+//
+// Fábrica porque cada rota resolve o contrato de um jeito diferente
+// (direto, ou via Contrato ATIVO do Inquilino/Kitnet sendo excluído) --
+// `obterContrato(req)` devolve `{ id, dataFim }` do contrato a
+// avaliar/encerrar, ou null se não tiver nenhum.
+const exigirConfirmacaoTerminoAntecipado = (obterContrato) => async (req, res, next) => {
 
   try {
 
-    const dataFim = await obterDataFim(req);
+    const contrato = await obterContrato(req);
 
-    // Sem contrato (ou contrato sem dataFim) pra avaliar, ou o ciclo já
-    // realmente acabou -- fim normal, segue sem travar.
-    if (!dataFim || new Date(dataFim) <= new Date()) {
+    // Sem contrato pra avaliar, ou o ciclo já realmente acabou -- fim
+    // normal, segue sem travar (ação original: exclusão de verdade, ou
+    // o próprio encerrar comum).
+    if (!contrato?.dataFim || new Date(contrato.dataFim) <= new Date()) {
       return next();
     }
 
@@ -315,22 +324,23 @@ const exigirConfirmacaoTerminoAntecipado = (obterDataFim, obterContexto) => asyn
       });
     }
 
-    const MOTIVO_ROTULO = {
-      ABANDONO: "Abandono",
-      INADIMPLENCIA: "Inadimplência",
-      QUEBRA_DO_INQUILINO: "Quebra do inquilino",
-    };
+    // Confirmado -- vira um encerrar de verdade, nunca a exclusão
+    // original. require() aqui dentro (não no topo do arquivo) só pra
+    // não criar um ciclo de require entre os dois módulos.
+    const contratoService = require("../services/contratoService");
 
-    const contexto = (await obterContexto?.(req)) || "";
+    const contratoEncerrado = await contratoService.encerrar(contrato.id, req.usuario, {
+      motivoEncerramento: motivo,
+      observacaoEncerramento: req.body.observacaoTerminoAntecipado,
+      gerarVistoriaEntrega: req.body.gerarVistoriaEntrega,
+    });
 
-    notificacaoService.criar({
-      origem: "SISTEMA",
-      titulo: "QUEBRA DE CONTRATO",
-      mensagem: `${req.usuario?.nome || "Alguém"} registrou quebra de contrato${contexto ? ` -- ${contexto}` : ""} (motivo: ${MOTIVO_ROTULO[motivo]}). Observação: ${req.body.observacaoTerminoAntecipado}`,
-      link: "/contratos",
-    }).catch((erro) => console.error("[notificacao] Falha ao avisar quebra de contrato:", erro.message));
-
-    return next();
+    return res.json({
+      success: true,
+      quebraDeContrato: true,
+      message: "Contrato encerrado por quebra de contrato.",
+      data: contratoEncerrado,
+    });
 
   } catch (error) {
 
