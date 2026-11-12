@@ -20,6 +20,7 @@ import InquilinoForm from "../components/inquilinos/InquilinoForm";
 import ExplicacaoInquilinoModal from "../components/inquilinos/ExplicacaoInquilinoModal";
 import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
 import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
+import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { InquilinoService } from "../../services/inquilinos.service";
@@ -50,6 +51,13 @@ export default function InquilinosPage() {
     useState(null);
 
   const [vistoriaPendente, setVistoriaPendente] =
+    useState(null);
+
+  // Exclusão ANTES do fim do contrato (dataFim) é quebra de contrato --
+  // o backend recusa com requerConfirmacaoTerminoAntecipado:true e essa
+  // tela abre o modal de motivo+observação+senha em vez do alert comum
+  // (ver TerminoAntecipadoModal.jsx).
+  const [terminoAntecipado, setTerminoAntecipado] =
     useState(null);
 
   const [loading, setLoading] =
@@ -227,6 +235,11 @@ export default function InquilinosPage() {
       await carregarInquilinos();
 
     } catch (err) {
+
+      if (err.data?.requerConfirmacaoTerminoAntecipado) {
+        setTerminoAntecipado({ id: pendente.id, gerarVistoriaEntrega });
+        return;
+      }
 
       console.error(err);
 
@@ -551,6 +564,20 @@ export default function InquilinosPage() {
             isOpen={!!vistoriaPendente}
             nomeKitnet={vistoriaPendente?.kitnetNome}
             onEscolher={confirmarExclusaoInquilino}
+          />
+
+          <TerminoAntecipadoModal
+            isOpen={!!terminoAntecipado}
+            onClose={() => setTerminoAntecipado(null)}
+            titulo="Quebra de contrato -- excluir inquilino"
+            contexto="O contrato desse inquilino ainda não chegou no fim."
+            acao={async (extra) => {
+              await InquilinoService.excluir(terminoAntecipado.id, {
+                gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                ...extra,
+              });
+              await carregarInquilinos();
+            }}
           />
 
         </PageContainer>

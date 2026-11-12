@@ -65,6 +65,13 @@ const TIPOS = [
     mensagemPadrao: "Contrato {{contrato}} foi encerrado.",
   },
   {
+    chave: "QUEBRA_DE_CONTRATO", grupo: "Contratos", rotulo: "Quebra de contrato",
+    descricao: "Excluir inquilino, excluir/encerrar contrato ou excluir kitnet ANTES do dataFim do contrato (exige motivo + observação + senha pra fazer isso).",
+    titulos: ["QUEBRA DE CONTRATO"],
+    variaveis: ["usuario", "contexto", "motivo", "observacao"],
+    mensagemPadrao: "{{usuario}} registrou quebra de contrato -- {{contexto}} (motivo: {{motivo}}). Observação: {{observacao}}",
+  },
+  {
     chave: "CONTRATO_ASSINATURA", grupo: "Contratos", rotulo: "Assinatura digital (Clicksign)",
     descricao: "Contrato enviado, assinado ou cancelado na Clicksign -- as 3 situações usam a mesma mensagem personalizada, se você definir uma.",
     titulos: ["Contrato enviado para assinatura", "Contrato assinado", "Contrato cancelado na Clicksign"],

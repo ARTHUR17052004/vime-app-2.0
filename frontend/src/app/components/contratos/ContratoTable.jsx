@@ -12,6 +12,7 @@ import {
   PenLine,
   Send,
   RefreshCw,
+  Ban,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -27,6 +28,7 @@ export default function ContratoTable({
   onBaixarPdf,
   onEnviarClicksign,
   onRenovar,
+  onEncerrar,
 }) {
 
   const podeEditar = usePermissao("contratos.editar");
@@ -434,6 +436,41 @@ export default function ContratoTable({
                     <RefreshCw size={18} />
 
                     Renovar
+
+                  </button>
+
+                )}
+
+                {podeEditar && contrato.status === "ATIVO" && (
+
+                  <button
+                    onClick={() => {
+
+                      setMenuAberto(null);
+
+                      onEncerrar?.(contrato.id);
+
+                    }}
+                    className="
+                      flex
+                      items-center
+                      gap-3
+
+                      w-full
+
+                      px-5
+                      py-3
+
+                      text-orange-400
+
+                      hover:bg-orange-500/10
+                      transition
+                    "
+                  >
+
+                    <Ban size={18} />
+
+                    Encerrar Contrato
 
                   </button>
 

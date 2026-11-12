@@ -81,7 +81,13 @@ export async function api(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data.message || "Erro na API");
+    const erro = new Error(data.message || "Erro na API");
+    // Corpo inteiro da resposta de erro junto (ex.: a trava de quebra de
+    // contrato manda `requerConfirmacaoTerminoAntecipado: true` pra tela
+    // saber que precisa abrir o modal de motivo+senha, sem ter que
+    // adivinhar isso só pelo texto da mensagem).
+    erro.data = data;
+    throw erro;
   }
 
   return data;

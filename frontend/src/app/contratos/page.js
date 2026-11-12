@@ -29,6 +29,7 @@ import ContratoTable from "../components/contratos/ContratoTable";
 import ContratoClicksignOrfaos from "../components/contratos/ContratoClicksignOrfaos";
 import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstrativoModal";
 import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
+import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 
 import { ContratoService } from "@/services/contratos.service";
@@ -82,6 +83,13 @@ function ContratosPageConteudo() {
     useState(null);
 
   const [vistoriaPendente, setVistoriaPendente] =
+    useState(null);
+
+  // Excluir ou encerrar ANTES do fim do contrato (dataFim) é quebra de
+  // contrato -- o backend recusa com requerConfirmacaoTerminoAntecipado:true
+  // e essa tela abre o modal de motivo+observação+senha (ver
+  // TerminoAntecipadoModal.jsx).
+  const [terminoAntecipado, setTerminoAntecipado] =
     useState(null);
 
   const [contratos, setContratos] =
@@ -260,12 +268,49 @@ function ContratosPageConteudo() {
 
     } catch (error) {
 
+      if (error.data?.requerConfirmacaoTerminoAntecipado) {
+        setTerminoAntecipado({ id: pendente.id, tipo: "excluir", gerarVistoriaEntrega });
+        return;
+      }
+
       console.error(
         "Erro ao excluir contrato:",
         error
       );
 
       alert(error.message || "Erro ao excluir contrato.");
+
+    }
+
+  }
+
+  async function encerrarContrato(id) {
+
+    const confirmar = window.confirm(
+      "Encerrar este contrato agora?"
+    );
+
+    if (!confirmar) return;
+
+    try {
+
+      await ContratoService.encerrar(id);
+
+      await carregarContratos();
+
+    } catch (error) {
+
+      if (error.data?.requerConfirmacaoTerminoAntecipado) {
+        setTerminoAntecipado({ id, tipo: "encerrar" });
+        return;
+      }
+
+      console.error(
+        "Erro ao encerrar contrato:",
+        error
+      );
+
+      alert(error.message || "Erro ao encerrar contrato.");
 
     }
 
@@ -531,6 +576,7 @@ function ContratosPageConteudo() {
                   onBaixarPdf={gerarPdfContrato}
                   onEnviarClicksign={setDemonstrativoContratoId}
                   onRenovar={renovarContrato}
+                  onEncerrar={encerrarContrato}
                 />
 
                 <ContratoClicksignOrfaos contratosLocais={contratos} />
@@ -590,6 +636,24 @@ function ContratosPageConteudo() {
           isOpen={!!vistoriaPendente}
           nomeKitnet={vistoriaPendente?.kitnetNome}
           onEscolher={confirmarExclusaoContrato}
+        />
+
+        <TerminoAntecipadoModal
+          isOpen={!!terminoAntecipado}
+          onClose={() => setTerminoAntecipado(null)}
+          titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+          contexto="Esse contrato ainda não chegou no fim (dataFim)."
+          acao={async (extra) => {
+            if (terminoAntecipado.tipo === "encerrar") {
+              await ContratoService.encerrar(terminoAntecipado.id, extra);
+            } else {
+              await ContratoService.excluir(terminoAntecipado.id, {
+                gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                ...extra,
+              });
+            }
+            await carregarContratos();
+          }}
         />
 
       </PageContainer>

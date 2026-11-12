@@ -28,6 +28,7 @@ import KitnetModal from "../components/kitnets/KitnetModal";
 import KitnetForm from "../components/kitnets/KitnetForm";
 import KitnetTable from "../components/kitnets/KitnetTable";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 
 import { usePermissao } from "../../hooks/usePermissao";
 
@@ -56,6 +57,12 @@ function KitnetsPageConteudo() {
   const [erro, setErro] = useState("");
 
   const [kitnetEditando, setKitnetEditando] = useState(null);
+
+  // Excluir ANTES do fim do contrato ativo nessa kitnet (dataFim) é
+  // quebra de contrato -- o backend recusa com
+  // requerConfirmacaoTerminoAntecipado:true e essa tela abre o modal de
+  // motivo+observação+senha (ver TerminoAntecipadoModal.jsx).
+  const [terminoAntecipado, setTerminoAntecipado] = useState(null);
 
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
@@ -168,6 +175,12 @@ function KitnetsPageConteudo() {
     await carregarKitnets();
 
   } catch (err) {
+
+    if (err.data?.requerConfirmacaoTerminoAntecipado) {
+      setTerminoAntecipado({ id });
+      return;
+    }
+
     console.error(err);
 
     alert(
@@ -428,6 +441,17 @@ function KitnetsPageConteudo() {
           />
 
         </KitnetModal>
+
+        <TerminoAntecipadoModal
+          isOpen={!!terminoAntecipado}
+          onClose={() => setTerminoAntecipado(null)}
+          titulo="Quebra de contrato -- excluir kitnet"
+          contexto="Essa kitnet tem um contrato ativo que ainda não chegou no fim (dataFim)."
+          acao={async (extra) => {
+            await KitnetService.excluir(terminoAntecipado.id, extra);
+            await carregarKitnets();
+          }}
+        />
 
       </PageContainer>
 

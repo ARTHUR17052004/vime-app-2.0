@@ -6,9 +6,32 @@ const contratoController = require('../controllers/contratoController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
-const { temPermissao } = permissaoMiddleware;
+const { temPermissao, exigirConfirmacaoTerminoAntecipado } = permissaoMiddleware;
+const prisma = require('../config/prisma');
 
 router.use(authMiddleware);
+
+// Excluir ou encerrar manualmente ANTES do dataFim é quebra de contrato
+// (ver permissaoMiddleware.exigirConfirmacaoTerminoAntecipado) -- o
+// próprio contrato já tem a data, sem precisar ir atrás de mais nada.
+const obterDataFimDoContrato = async (req) => {
+  const contrato = await prisma.contrato.findUnique({
+    where: { id: req.params.id },
+    select: { dataFim: true },
+  });
+  return contrato?.dataFim || null;
+};
+
+const obterContextoDoContrato = async (req) => {
+  const contrato = await prisma.contrato.findUnique({
+    where: { id: req.params.id },
+    include: { inquilino: true, kitnet: true },
+  });
+  if (!contrato) return null;
+  const nome = contrato.inquilino?.nome || "inquilino";
+  const kitnet = contrato.kitnet?.nome || contrato.kitnet?.numero || "?";
+  return `contrato de ${nome} (kitnet ${kitnet})`;
+};
 
 // Contrato (assinado pela Clicksign) e Arquivo de Contratos (cadastrado na
 // mão, já existia em papel) são o mesmo model/tabela por baixo -- pra dar
@@ -69,9 +92,19 @@ router.post('/', podeContrato('criar'), contratoController.criar);
 
 router.put('/:id', podeContrato('editar'), contratoController.atualizar);
 
-router.delete('/:id', podeContrato('excluir'), contratoController.remover);
+router.delete(
+  '/:id',
+  podeContrato('excluir'),
+  exigirConfirmacaoTerminoAntecipado(obterDataFimDoContrato, obterContextoDoContrato),
+  contratoController.remover
+);
 
-router.patch('/:id/encerrar', podeContrato('editar'), contratoController.encerrar);
+router.patch(
+  '/:id/encerrar',
+  podeContrato('editar'),
+  exigirConfirmacaoTerminoAntecipado(obterDataFimDoContrato, obterContextoDoContrato),
+  contratoController.encerrar
+);
 
 router.patch('/:id/renovar', podeContrato('editar'), contratoController.renovar);
 

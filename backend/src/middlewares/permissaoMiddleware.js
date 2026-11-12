@@ -1,5 +1,6 @@
 const prisma = require("../config/prisma");
 const bcrypt = require("bcryptjs");
+const notificacaoService = require("../services/notificacaoService");
 
 const temPermissao = async (usuario, chave) => {
 
@@ -245,8 +246,109 @@ const exigirConfirmacaoExclusao = async (req, res, next) => {
 
 };
 
+// Motivos fixos pra "quebra de contrato" -- os 3 que o usuário pediu,
+// nada de texto livre aqui (a observação é que é livre).
+const MOTIVOS_TERMINO_ANTECIPADO = ["ABANDONO", "INADIMPLENCIA", "QUEBRA_DO_INQUILINO"];
+
+// Esvaziar a kitnet (excluir inquilino), excluir o contrato, ou
+// encerrar ele manualmente -- ANTES do dataFim do contrato (o próprio
+// ciclo de 4 meses que o sistema já respeita pra fechar sozinho, ver
+// contratoService.criar/renovar) -- é sempre quebra de contrato, não
+// um fim normal. Trava com motivo (fixo) + observação (livre) + senha.
+// Fábrica porque cada rota resolve o dataFim de um jeito diferente
+// (direto do Contrato sendo excluído/encerrado, ou do Contrato ativo
+// do Inquilino/Kitnet sendo excluído) -- `obterDataFim(req)` devolve
+// essa data, ou null/undefined se não tiver contrato nenhum pra
+// avaliar (segue sem travar, não tem o que quebrar). `obterContexto(req)`
+// é só texto descritivo (nome do inquilino, kitnet...) pro aviso que
+// sai pra equipe quando a quebra é confirmada.
+const exigirConfirmacaoTerminoAntecipado = (obterDataFim, obterContexto) => async (req, res, next) => {
+
+  try {
+
+    const dataFim = await obterDataFim(req);
+
+    // Sem contrato (ou contrato sem dataFim) pra avaliar, ou o ciclo já
+    // realmente acabou -- fim normal, segue sem travar.
+    if (!dataFim || new Date(dataFim) <= new Date()) {
+      return next();
+    }
+
+    const motivo = String(req.body?.motivoTerminoAntecipado || "").toUpperCase();
+
+    if (!MOTIVOS_TERMINO_ANTECIPADO.includes(motivo)) {
+      return res.status(400).json({
+        success: false,
+        requerConfirmacaoTerminoAntecipado: true,
+        message: "Selecione o motivo (Abandono, Inadimplência ou Quebra do inquilino).",
+      });
+    }
+
+    if (!String(req.body?.observacaoTerminoAntecipado || "").trim()) {
+      return res.status(400).json({
+        success: false,
+        requerConfirmacaoTerminoAntecipado: true,
+        message: "Escreva a observação.",
+      });
+    }
+
+    if (!req.body?.senhaConfirmacao) {
+      return res.status(400).json({
+        success: false,
+        requerConfirmacaoTerminoAntecipado: true,
+        message: "Digite sua senha para confirmar.",
+      });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.id },
+    });
+
+    const senhaValida =
+      usuario && (await bcrypt.compare(req.body.senhaConfirmacao, usuario.senha));
+
+    if (!senhaValida) {
+      return res.status(403).json({
+        success: false,
+        requerConfirmacaoTerminoAntecipado: true,
+        message: "Senha incorreta.",
+      });
+    }
+
+    const MOTIVO_ROTULO = {
+      ABANDONO: "Abandono",
+      INADIMPLENCIA: "Inadimplência",
+      QUEBRA_DO_INQUILINO: "Quebra do inquilino",
+    };
+
+    const contexto = (await obterContexto?.(req)) || "";
+
+    notificacaoService.criar({
+      origem: "SISTEMA",
+      titulo: "QUEBRA DE CONTRATO",
+      mensagem: `${req.usuario?.nome || "Alguém"} registrou quebra de contrato${contexto ? ` -- ${contexto}` : ""} (motivo: ${MOTIVO_ROTULO[motivo]}). Observação: ${req.body.observacaoTerminoAntecipado}`,
+      link: "/contratos",
+    }).catch((erro) => console.error("[notificacao] Falha ao avisar quebra de contrato:", erro.message));
+
+    return next();
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao verificar o encerramento antecipado.",
+    });
+
+  }
+
+};
+
 module.exports = permissaoMiddleware;
 module.exports.temPermissao = temPermissao;
 module.exports.exigirPermissaoParaMarcarPago = exigirPermissaoParaMarcarPago;
 module.exports.exigirConfirmacaoEdicaoValor = exigirConfirmacaoEdicaoValor;
 module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;
+module.exports.exigirConfirmacaoTerminoAntecipado = exigirConfirmacaoTerminoAntecipado;
+module.exports.MOTIVOS_TERMINO_ANTECIPADO = MOTIVOS_TERMINO_ANTECIPADO;

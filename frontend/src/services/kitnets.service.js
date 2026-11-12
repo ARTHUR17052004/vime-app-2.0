@@ -23,9 +23,10 @@ export const KitnetService = {
     });
   },
 
-  excluir(id) {
+  excluir(id, dados) {
     return api(`/kitnets/${id}`, {
       method: "DELETE",
+      body: dados ? JSON.stringify(dados) : undefined,
     });
   },
 };

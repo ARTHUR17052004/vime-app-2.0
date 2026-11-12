@@ -72,6 +72,13 @@ export const ContratoService = {
     });
   },
 
+  encerrar(id, dados = {}) {
+    return api(`/contratos/${id}/encerrar`, {
+      method: "PATCH",
+      body: JSON.stringify(dados),
+    });
+  },
+
   // Arquivo do "Adicionar Contrato" (PDF/foto do contrato real, diferente
   // do PDF modelo gerado pelo VIME). `arquivo` é um File do input.
   enviarArquivo(id, arquivo) {
