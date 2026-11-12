@@ -477,6 +477,14 @@ model Receita {
   // depois de 72h de atraso (ver verificarAtrasoCorteJob.js) -- não é
   // aviso pro inquilino, é tarefa interna pra equipe avaliar o corte.
   vistoriaCorteAtrasoCriadaEm DateTime?
+  // Qual Vistoria de corte essa Receita gerou -- sem isso não tinha
+  // como voltar e CANCELAR a vistoria sozinho quando a cobrança deixa
+  // de estar em risco (pagou, data corrigida pro futuro, cancelada)
+  // -- Financeiro e Vistorias não se falavam depois da vistoria criada,
+  // só antes. onDelete: SetNull porque excluir a receita (trava própria
+  // de senha+motivo) não deve arrastar a vistoria junto.
+  vistoriaCorteId String?  @unique
+  vistoriaCorte   Vistoria? @relation(fields: [vistoriaCorteId], references: [id], onDelete: SetNull)
 
   // Dedupe (um por dia, não um só pra sempre -- ver lembreteEnviadoEm)
   // do aviso INTERNO (sino/WhatsApp da equipe, não do inquilino) de
@@ -714,6 +722,10 @@ model Vistoria {
   unidade Unidade? @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
 
   kitnet Kitnet? @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
+
+  // Lado oposto de Receita.vistoriaCorteId -- a receita que gerou esta
+  // vistoria de risco de corte, se for uma dessas (ver verificarAtrasoCorteJob.js).
+  receitaOrigem Receita?
 
   ocorrencias Ocorrencia[]
 

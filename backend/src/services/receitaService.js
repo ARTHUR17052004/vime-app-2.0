@@ -8,6 +8,7 @@ const auditoriaService = require('./auditoriaService');
 const campoObrigatorioService = require('./campoObrigatorioService');
 const contaPagamentoService = require('./contaPagamentoService');
 const notificacaoService = require('./notificacaoService');
+const corteVistoriaService = require('./corteVistoriaService');
 const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
 
@@ -379,6 +380,14 @@ const atualizar = async (id, dados, autor) => {
     data: dados
   });
 
+  // Reação na hora (não espera o lote de hora em hora) quando a edição
+  // tira a cobrança do risco de corte -- marcar paga, cancelar, ou
+  // corrigir o vencimento pro futuro (ver corteVistoriaService.js).
+  // Nunca deve travar a edição em si.
+  corteVistoriaService
+    .resolverSeNaoCabeMais(receita.id)
+    .catch((erro) => console.error('[corteVistoria] Falha ao resolver vistoria de corte:', erro.message));
+
   const alteracoes = diffCampos(anterior, receita, CAMPOS_RECEITA);
 
   // Alerta pra equipe inteira (não só log de auditoria, que ninguém
@@ -462,6 +471,12 @@ const remover = async (id, autor, motivoExclusao) => {
     link: '/financeiro',
     locadorId: await locadorIdDaReceita(receita.id),
   }).catch((erro) => console.error('[notificacao] Falha ao avisar exclusão de boleto:', erro.message));
+
+  // A receita está deixando de existir -- a vistoria de corte que ela
+  // gerou (se tiver) nunca pode ficar órfã e aberta pra sempre.
+  await corteVistoriaService
+    .cancelarVinculada(receita.id)
+    .catch((erro) => console.error('[corteVistoria] Falha ao cancelar vistoria vinculada:', erro.message));
 
   const removida = await prisma.receita.delete({
     where: { id }

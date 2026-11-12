@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const vistoriaService = require('../services/vistoriaService');
+const corteVistoriaService = require('../services/corteVistoriaService');
 
 /*
   72h (3 dias) depois do vencimento sem pagamento -- cria uma Vistoria
@@ -34,6 +35,27 @@ const resolverResponsavelZelador = async () => {
 };
 
 module.exports = async () => {
+
+  // Caminho de VOLTA primeiro -- pra toda receita que já gerou uma
+  // vistoria de corte, confere se ela ainda cabe (ver corteVistoriaService).
+  // Pega qualquer jeito que a cobrança tenha deixado de estar em risco
+  // (paga, cancelada, data corrigida pro futuro), não só edição manual
+  // -- inclusive confirmação de pagamento via webhook/job, que atualiza
+  // a Receita direto no banco sem passar pelo service.
+  const comVistoriaDeCorte = await prisma.receita.findMany({
+    where: { vistoriaCorteId: { not: null } },
+    select: { id: true },
+  });
+
+  for (const { id } of comVistoriaDeCorte) {
+
+    try {
+      await corteVistoriaService.resolverSeNaoCabeMais(id);
+    } catch (erro) {
+      console.error(`[JOB] Erro ao resolver vistoria de corte da receita ${id}:`, erro.message);
+    }
+
+  }
 
   const limite = new Date();
   limite.setHours(limite.getHours() - 72);
@@ -78,7 +100,7 @@ module.exports = async () => {
 
     try {
 
-      await vistoriaService.criar({
+      const vistoria = await vistoriaService.criar({
         titulo: 'REALIZAR CORTE DE ÁGUA E ENERGIA',
         descricao: `Kitnet com falta de pagamento após 72 horas. ${inquilino?.nome || 'Inquilino'} -- R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}. Conforme o contrato, água/energia podem ser suspensas até a quitação do débito.`,
         unidadeId: unidade.id,
@@ -93,7 +115,7 @@ module.exports = async () => {
 
       await prisma.receita.update({
         where: { id: receita.id },
-        data: { vistoriaCorteAtrasoCriadaEm: new Date() },
+        data: { vistoriaCorteAtrasoCriadaEm: new Date(), vistoriaCorteId: vistoria.id },
       });
 
       criadas++;
