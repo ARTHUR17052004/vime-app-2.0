@@ -76,9 +76,19 @@ async function visaoGeral(usuario, { periodo_inicio, periodo_fim } = {}) {
 
 }
 
-async function listarContratos(usuario, { status, vencendo_em_dias } = {}) {
+async function listarContratos(usuario, { status, vencendo_em_dias, inquilino } = {}) {
 
   const where = { ...filtroContrato(usuario) };
+
+  // Sem isso, a única forma de "achar o contrato do fulano" era o
+  // modelo escanear os 25 primeiros contratos (ordenados por dataFim)
+  // dentro do próprio contexto -- um inquilino fora dessa fatia nunca
+  // era encontrado, mesmo com o contrato existindo de verdade (bug
+  // relatado em 12/11/2026: Aldenisa dos Anjos Tufi, contrato antigo
+  // com dataFim em 2027, bem depois dos 25 mais próximos).
+  if (inquilino) {
+    where.inquilino = { nome: { contains: String(inquilino).trim(), mode: "insensitive" } };
+  }
 
   if (vencendo_em_dias) {
     const hoje = new Date();
@@ -325,12 +335,13 @@ const FERRAMENTAS = [
     type: "function",
     function: {
       name: "listar_contratos",
-      description: "Lista contratos reais (inquilino, imóvel, datas, valor, status). Use pra perguntas sobre QUAIS contratos, não só quantos.",
+      description: "Lista contratos reais (inquilino, imóvel, datas, valor, status). Use pra perguntas sobre QUAIS contratos, não só quantos. Se a pergunta citar um inquilino específico pelo nome (ex.: \"qual o contrato da Maria\", \"quando termina o contrato do João\"), SEMPRE preencha o parâmetro 'inquilino' -- sem isso a busca só traz os 25 contratos mais próximos do vencimento, e pode não achar quem tem um contrato com data mais distante.",
       parameters: {
         type: "object",
         properties: {
           status: { type: ["string", "null"], enum: ["ATIVO", "PENDENTE", "ENCERRADO", null], description: "Filtrar por status (opcional)" },
           vencendo_em_dias: { type: ["number", "null"], description: "Só contratos ativos vencendo em até N dias (opcional, ignora 'status' se usado)" },
+          inquilino: { type: ["string", "null"], description: "Nome (ou parte do nome) do inquilino, quando a pergunta for sobre o contrato de uma pessoa específica (opcional)" },
           ...PARAM_LOCADOR,
         },
       },
