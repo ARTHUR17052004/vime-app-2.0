@@ -1,9 +1,12 @@
 "use client";
 
-import { Pencil, Trash2, Download, Paperclip, Ban } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
+import { Eye, Pencil, Trash2, Download, Paperclip, Ban, MoreVertical } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
+import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
 
 export default function ContratoArquivoTable({
@@ -16,6 +19,31 @@ export default function ContratoArquivoTable({
 
   const podeEditar = usePermissao("arquivoContratos.editar");
   const podeExcluir = usePermissao("arquivoContratos.excluir");
+
+  const [menuAberto, setMenuAberto] = useState(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
+
+  function abrirMenu(e, id) {
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const larguraMenu = 220;
+
+    let left = rect.right - larguraMenu;
+    const top = rect.bottom + 8;
+
+    if (left + larguraMenu > window.innerWidth - 16) {
+      left = window.innerWidth - larguraMenu - 16;
+    }
+
+    if (left < 16) {
+      left = 16;
+    }
+
+    setMenuPosition({ top, left });
+    setMenuAberto(id);
+
+  }
 
   if (!contratos.length) {
 
@@ -107,51 +135,198 @@ export default function ContratoArquivoTable({
                 )}
               </td>
 
-              <td className="px-6 py-5">
-                <div className="flex items-center justify-center gap-4">
+              <td className="px-6 py-5 text-center">
+
+                <button
+                  onClick={(e) => {
+
+                    if (menuAberto === contrato.id) {
+                      setMenuAberto(null);
+                      return;
+                    }
+
+                    abrirMenu(e, contrato.id);
+
+                  }}
+                  className="
+                    flex
+                    items-center
+                    justify-center
+
+                    w-10
+                    h-10
+
+                    mx-auto
+
+                    rounded-xl
+
+                    bg-[var(--surface-2)]
+
+                    hover:bg-[var(--surface-3)]
+
+                    transition-all
+                  "
+                >
+
+                  <MoreVertical
+                    size={18}
+                    className="text-[var(--text-muted)]"
+                  />
+
+                </button>
+
+                <ActionMenu
+                  open={menuAberto === contrato.id}
+                  position={menuPosition}
+                  onClose={() => setMenuAberto(null)}
+                >
+
+                  <Link
+                    href={`/contratos/${contrato.id}`}
+                    onClick={() => setMenuAberto(null)}
+                    className="
+                      flex
+                      items-center
+                      gap-3
+
+                      px-5
+                      py-3
+
+                      text-[var(--text-muted)]
+
+                      hover:bg-[var(--surface-2)]
+                      transition
+                    "
+                  >
+
+                    <Eye size={18} />
+
+                    Visualizar
+
+                  </Link>
 
                   {contrato.arquivoNomeOriginal && (
                     <button
-                      onClick={() => onBaixarArquivo?.(contrato)}
-                      className="text-[var(--text-subtle)] hover:text-emerald-400 transition"
-                      aria-label="Baixar arquivo"
+                      onClick={() => {
+                        setMenuAberto(null);
+                        onBaixarArquivo?.(contrato);
+                      }}
+                      className="
+                        flex
+                        items-center
+                        gap-3
+
+                        w-full
+
+                        px-5
+                        py-3
+
+                        text-emerald-400
+
+                        hover:bg-emerald-500/10
+                        transition
+                      "
                     >
-                      <Download size={16} />
+
+                      <Download size={18} />
+
+                      Baixar Arquivo
+
                     </button>
                   )}
 
                   {podeEditar && contrato.status === "ATIVO" && (
                     <button
-                      onClick={() => onEncerrar?.(contrato.id)}
-                      className="text-[var(--text-subtle)] hover:text-orange-400 transition"
-                      aria-label="Encerrar Contrato"
-                      title="Encerrar Contrato"
+                      onClick={() => {
+                        setMenuAberto(null);
+                        onEncerrar?.(contrato.id);
+                      }}
+                      className="
+                        flex
+                        items-center
+                        gap-3
+
+                        w-full
+
+                        px-5
+                        py-3
+
+                        text-orange-400
+
+                        hover:bg-orange-500/10
+                        transition
+                      "
                     >
-                      <Ban size={16} />
+
+                      <Ban size={18} />
+
+                      Encerrar Contrato
+
                     </button>
                   )}
 
                   {podeEditar && (
                     <button
-                      onClick={() => onEdit?.(contrato)}
-                      className="text-[var(--text-subtle)] hover:text-[var(--text)] transition"
-                      aria-label="Editar"
+                      onClick={() => {
+                        setMenuAberto(null);
+                        onEdit?.(contrato);
+                      }}
+                      className="
+                        flex
+                        items-center
+                        gap-3
+
+                        w-full
+
+                        px-5
+                        py-3
+
+                        text-yellow-400
+
+                        hover:bg-yellow-500/10
+                        transition
+                      "
                     >
-                      <Pencil size={16} />
+
+                      <Pencil size={18} />
+
+                      Editar
+
                     </button>
                   )}
 
                   {podeExcluir && (
                     <button
-                      onClick={() => onDelete?.(contrato.id)}
-                      className="text-[var(--text-subtle)] hover:text-red-400 transition"
-                      aria-label="Excluir"
+                      onClick={() => {
+                        setMenuAberto(null);
+                        onDelete?.(contrato.id);
+                      }}
+                      className="
+                        flex
+                        items-center
+                        gap-3
+
+                        w-full
+
+                        px-5
+                        py-3
+
+                        text-red-400
+
+                        hover:bg-red-500/10
+                        transition
+                      "
                     >
-                      <Trash2 size={16} />
+
+                      <Trash2 size={18} />
+
+                      Excluir
+
                     </button>
                   )}
 
-                </div>
+                </ActionMenu>
+
               </td>
 
             </tr>
