@@ -21,6 +21,8 @@ const verificarAsaas = require("./verificarAsaasJob");
 const verificarEfi = require("./verificarEfiJob");
 const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
 const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
+const dispararReceitasBanco = require("./dispararReceitasBancoJob");
+const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
 
 const iniciarJobs = () => {
 
@@ -53,17 +55,21 @@ const iniciarJobs = () => {
   // paga na EFI nunca seria reconhecida sozinha (ver verificarEfiJob.js).
   cron.schedule("*/15 * * * *", verificarEfi);
 
+  // Emissão mensal de Aluguel: dia 20 só CRIA a receita do mês seguinte
+  // (Pendente, sem enviar ao banco) -- dá a janela de ~10 dias pra
+  // equipe revisar antes do disparo de verdade. Ver
+  // gerarCobrancasRecorrentesJob.js / dispararReceitasBancoJob.js.
+  // Roda 1h antes do lote diário das 8h (nunca ao mesmo tempo) só pra
+  // nunca correr em paralelo com ele -- sem depender de nenhum dos dois
+  // de verdade.
+  cron.schedule("0 7 20 * *", gerarCobrancasRecorrentes);
+
+  // Disparo automático ao banco: dia 01, depois da janela de revisão.
+  cron.schedule("0 7 1 * *", dispararReceitasBanco);
+
   cron.schedule("0 8 * * *", async () => {
 
     console.log("========== JOBS ==========");
-
-    // Gera a cobrança do mês ANTES de checar atraso -- rodar depois
-    // deixava uma cobrança recém-criada com vencimento já no passado
-    // (ex.: a anterior só foi paga/fechada depois do dia de vencimento
-    // configurado) presa em "Pendente" até o lote de amanhã, mesmo já
-    // devendo estar "Atrasada" (e disparar o risco de corte) desde o
-    // dia em que nasceu -- bug relatado em 11/11/2026.
-    await gerarCobrancasRecorrentes();
 
     await gerarRecorrenciaReceitas();
 
@@ -80,15 +86,17 @@ const iniciarJobs = () => {
 
     await verificarNotificacoes();
 
-    // continua depois de gerarCobrancasRecorrentes/gerarRecorrenciaReceitas
-    // (acima), pra uma cobrança recém-criada com vencimento hoje já
-    // entrar no lembrete
     await lembreteVencimento();
 
     // Mesmo motivo/mesma janela do lembrete acima, mas pra equipe (não
     // pro inquilino): cobrança perto de vencer (ou já vencida) que
     // nunca foi enviada a banco nenhum -- ver verificarCobrancaNaoEnviadaJob.js.
     await verificarCobrancaNaoEnviada();
+
+    // Lembrete de 5 dias / 24h antes do disparo automático do dia 01
+    // (ver dispararReceitasBancoJob.js) -- roda todo dia, só age nos
+    // dois marcos certos.
+    await avisoDisparoReceitas();
 
     await verificarKitnetsVazias();
 

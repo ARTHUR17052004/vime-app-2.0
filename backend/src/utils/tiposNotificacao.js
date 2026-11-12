@@ -116,6 +116,27 @@ const TIPOS = [
     variaveis: ["inquilino", "kitnet", "valor", "vencimento"],
     mensagemPadrao: "{{inquilino}} (kitnet {{kitnet}}) -- R$ {{valor}} vence/venceu em {{vencimento}} e ainda não foi enviada a nenhum banco.",
   },
+  {
+    chave: "RECEITAS_EMITIDAS", grupo: "Financeiro", rotulo: "Receitas emitidas (dia 20)",
+    descricao: "Todo dia 20, quando o sistema emite as cobranças de aluguel do mês seguinte (Pendente, ainda não enviadas ao banco).",
+    titulos: ["RECEITAS EMITIDAS"],
+    variaveis: ["quantidade"],
+    mensagemPadrao: "{{quantidade}} receita(s) de aluguel do mês que vem foram emitidas (Pendente, ainda não enviadas ao banco). O disparo automático ao banco acontece no dia 01.",
+  },
+  {
+    chave: "DISPARO_RECEITAS_PROXIMO", grupo: "Financeiro", rotulo: "Disparo de cobranças se aproximando",
+    descricao: "Lembretes de 5 dias e 24 horas antes do disparo automático das cobranças de aluguel aos bancos (dia 01).",
+    titulos: ["DISPARO DE COBRANÇAS EM 5 DIAS", "DISPARO DE COBRANÇAS EM 24 HORAS"],
+    variaveis: ["prazo", "quantidade"],
+    mensagemPadrao: "Faltam {{prazo}} para o disparo automático de {{quantidade}} cobrança(s) de aluguel aos bancos. Revise/edite o que precisar no Financeiro antes do dia 01.",
+  },
+  {
+    chave: "DISPARO_RECEITAS_REALIZADO", grupo: "Financeiro", rotulo: "Disparo automático de cobranças (dia 01)",
+    descricao: "Todo dia 01, resumo de quantas cobranças de aluguel foram enviadas automaticamente aos bancos (e quantas falharam, se alguma).",
+    titulos: ["DISPARO AUTOMATICO DE COBRANCAS"],
+    variaveis: ["enviadas", "falhas"],
+    mensagemPadrao: "{{enviadas}} cobrança(s) de aluguel enviada(s) automaticamente aos bancos hoje.",
+  },
 
   {
     chave: "SOLICITACAO_NOVA", grupo: "Solicitações", rotulo: "Nova solicitação",
