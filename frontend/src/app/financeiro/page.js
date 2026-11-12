@@ -478,6 +478,20 @@ function FinanceiroPageConteudo() {
     "valor-maior": (a, b) => (b.valor || 0) - (a.valor || 0),
     "valor-menor": (a, b) => (a.valor || 0) - (b.valor || 0),
     "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+    // Sem data (nunca enviada) sempre por último, nos dois sentidos --
+    // "mais recente" não pode misturar com "nunca enviada" no topo.
+    "enviada-recente": (a, b) => {
+      if (!a.cobrancaEnviadaEm && !b.cobrancaEnviadaEm) return 0;
+      if (!a.cobrancaEnviadaEm) return 1;
+      if (!b.cobrancaEnviadaEm) return -1;
+      return new Date(b.cobrancaEnviadaEm) - new Date(a.cobrancaEnviadaEm);
+    },
+    "enviada-antiga": (a, b) => {
+      if (!a.cobrancaEnviadaEm && !b.cobrancaEnviadaEm) return 0;
+      if (!a.cobrancaEnviadaEm) return 1;
+      if (!b.cobrancaEnviadaEm) return -1;
+      return new Date(a.cobrancaEnviadaEm) - new Date(b.cobrancaEnviadaEm);
+    },
     // Kitnet.numero é string ("01", "02"...), por isso a comparação
     // numérica (localeCompare com numeric:true) -- senão "11" vem antes
     // de "3" (ordem de texto). Agrupa por Residência primeiro, pra não

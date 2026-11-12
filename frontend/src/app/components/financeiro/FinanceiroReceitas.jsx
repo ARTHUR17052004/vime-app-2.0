@@ -602,6 +602,13 @@ export default function FinanceiroReceitas({
                   onOrdenar={onOrdenar}
                 />
 
+                <CabecalhoOrdenavel
+                  label="Enviada em"
+                  ordens={["enviada-antiga", "enviada-recente"]}
+                  ordenacao={ordenacao}
+                  onOrdenar={onOrdenar}
+                />
+
                 <th></th>
               </tr>
             </thead>
@@ -694,6 +701,12 @@ export default function FinanceiroReceitas({
                       )}
 
                     </div>
+                  </td>
+
+                  <td className="text-[var(--text-subtle)] pr-4 whitespace-nowrap">
+                    {item.cobrancaEnviadaEm
+                      ? new Date(item.cobrancaEnviadaEm).toLocaleDateString("pt-BR")
+                      : "-"}
                   </td>
 
                   <td>
