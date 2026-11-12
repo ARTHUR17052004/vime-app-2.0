@@ -44,6 +44,11 @@ module.exports = async () => {
       status: { in: ["PENDENTE", "ATRASADA"] },
       gatewayReferencia: null,
       vencimento: { lte: fimDoMes },
+      // Mesmo filtro do dispararReceitasBancoJob -- contrato Encerrado
+      // ou Pendente nunca entra no disparo automático, então também não
+      // deve contar nesse aviso (senão o "faltam X cobranças" fica maior
+      // do que o que realmente vai sair no dia 01).
+      contrato: { status: "ATIVO" },
     },
     select: {
       locadorId: true,
