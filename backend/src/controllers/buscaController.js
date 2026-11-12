@@ -1,5 +1,15 @@
 const prisma = require('../config/prisma');
 const { filtroInquilino, filtroContrato, filtroKitnet, filtroUnidade } = require('../utils/escopoLocador');
+const { normalizarBusca } = require('../utils/busca');
+
+// Pega os candidatos (já escopados por locador) e filtra/corta em JS,
+// em vez do "contains" do Prisma -- ILIKE do Postgres é insensível a
+// maiúscula/minúscula, mas não a acento ("andre" nunca achava
+// "André"), e os volumes aqui (dezenas/poucas centenas de linhas por
+// tabela nesse sistema) não justificam reescrever tudo em SQL cru só
+// pra resolver isso.
+const bateComTermo = (registro, campos, termoNormalizado) =>
+  campos.some((campo) => normalizarBusca(registro[campo]).includes(termoNormalizado));
 
 const buscar = async (req, res, next) => {
 
@@ -14,103 +24,70 @@ const buscar = async (req, res, next) => {
       });
     }
 
+    const termoNormalizado = normalizarBusca(termo);
+
     const isAdmin = req.usuario?.perfil === 'ADMINISTRADOR';
 
-    const [locadores, inquilinos, contratos, kitnets, unidades, usuarios] = await Promise.all([
+    const [locadoresTodos, inquilinosTodos, contratosTodos, kitnetsTodos, unidadesTodos, usuariosTodos] = await Promise.all([
 
       isAdmin
-        ? prisma.locador.findMany({
-            where: {
-              OR: [
-                { nome: { contains: termo, mode: 'insensitive' } },
-                { email: { contains: termo, mode: 'insensitive' } },
-                { cpfCnpj: { contains: termo, mode: 'insensitive' } },
-              ],
-            },
-            take: 5,
-          })
+        ? prisma.locador.findMany()
         : Promise.resolve([]),
 
       prisma.inquilino.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { nome: { contains: termo, mode: 'insensitive' } },
-                { email: { contains: termo, mode: 'insensitive' } },
-                { cpf: { contains: termo, mode: 'insensitive' } },
-              ],
-            },
-            filtroInquilino(req.usuario),
-          ],
-        },
-        take: 5,
+        where: filtroInquilino(req.usuario),
       }),
 
       prisma.contrato.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { inquilino: { nome: { contains: termo, mode: 'insensitive' } } },
-                { locador: { nome: { contains: termo, mode: 'insensitive' } } },
-              ],
-            },
-            filtroContrato(req.usuario),
-          ],
-        },
+        where: filtroContrato(req.usuario),
         // arquivoDados é o PDF/foto do contrato em base64 -- a busca só
         // precisa saber que o contrato existe, não arrastar o arquivo
         // inteiro em cada resultado (mesmo bug do GET /contratos, ver
         // contratoService.listar).
         omit: { arquivoDados: true },
         include: { inquilino: true, locador: true },
-        take: 5,
       }),
 
       prisma.kitnet.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { numero: { contains: termo, mode: 'insensitive' } },
-                { nome: { contains: termo, mode: 'insensitive' } },
-              ],
-            },
-            filtroKitnet(req.usuario),
-          ],
-        },
-        take: 5,
+        where: filtroKitnet(req.usuario),
       }),
 
       prisma.unidade.findMany({
-        where: {
-          AND: [
-            {
-              OR: [
-                { nome: { contains: termo, mode: 'insensitive' } },
-                { cidade: { contains: termo, mode: 'insensitive' } },
-              ],
-            },
-            filtroUnidade(req.usuario),
-          ],
-        },
-        take: 5,
+        where: filtroUnidade(req.usuario),
       }),
 
       isAdmin
-        ? prisma.usuario.findMany({
-            where: {
-              OR: [
-                { nome: { contains: termo, mode: 'insensitive' } },
-                { email: { contains: termo, mode: 'insensitive' } },
-              ],
-            },
-            take: 5,
-          })
+        ? prisma.usuario.findMany()
         : Promise.resolve([]),
 
     ]);
+
+    const locadores = locadoresTodos
+      .filter((l) => bateComTermo(l, ['nome', 'email', 'cpfCnpj'], termoNormalizado))
+      .slice(0, 5);
+
+    const inquilinos = inquilinosTodos
+      .filter((i) => bateComTermo(i, ['nome', 'email', 'cpf'], termoNormalizado))
+      .slice(0, 5);
+
+    const contratos = contratosTodos
+      .filter((c) =>
+        normalizarBusca(c.inquilino?.nome).includes(termoNormalizado) ||
+        normalizarBusca(c.locador?.nome).includes(termoNormalizado)
+      )
+      .slice(0, 5);
+
+    const kitnets = kitnetsTodos
+      .filter((k) => bateComTermo(k, ['numero', 'nome'], termoNormalizado))
+      .slice(0, 5);
+
+    const unidades = unidadesTodos
+      .filter((u) => bateComTermo(u, ['nome', 'cidade'], termoNormalizado))
+      .slice(0, 5);
+
+    const usuarios = usuariosTodos
+      .filter((u) => bateComTermo(u, ['nome', 'email'], termoNormalizado))
+      .slice(0, 5);
 
     const resultados = [
 
