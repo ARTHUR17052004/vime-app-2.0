@@ -27,6 +27,7 @@ import TerminoAntecipadoModal from "../../components/common/TerminoAntecipadoMod
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { normalizarBusca } from "../../../utils/busca";
 
 // Contratos que já existiam de verdade (em papel/PDF) e só precisavam
 // ficar organizados aqui, sem passar pela assinatura digital da
@@ -41,6 +42,10 @@ export default function ContratosArquivoPage() {
 
   const [search, setSearch] = useState("");
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
+
+  // Clique no cabeçalho ordena -- mesmo padrão de Contratos/Financeiro,
+  // sem dropdown "Organizar por" separado.
+  const [ordenacao, setOrdenacao] = useState("inicio-recente");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [contratoEditando, setContratoEditando] = useState(null);
@@ -291,15 +296,38 @@ export default function ContratosArquivoPage() {
 
   }
 
+  // Mesmas chaves de Contratos (page.js) -- é o mesmo model por baixo,
+  // literalmente os mesmos critérios fazem sentido aqui.
+  const COMPARADORES_CONTRATO = {
+    "inicio-recente": (a, b) => new Date(b.dataInicio || 0) - new Date(a.dataInicio || 0),
+    "inicio-antigo": (a, b) => new Date(a.dataInicio || 0) - new Date(b.dataInicio || 0),
+    "inquilino-asc": (a, b) => (a.inquilino?.nome || a.inquilinoNome || "").localeCompare(b.inquilino?.nome || b.inquilinoNome || "", "pt-BR"),
+    "inquilino-desc": (a, b) => (b.inquilino?.nome || b.inquilinoNome || "").localeCompare(a.inquilino?.nome || a.inquilinoNome || "", "pt-BR"),
+    "residencia-asc": (a, b) => (a.unidade?.nome || a.unidadeNome || "").localeCompare(b.unidade?.nome || b.unidadeNome || "", "pt-BR"),
+    "residencia-desc": (a, b) => (b.unidade?.nome || b.unidadeNome || "").localeCompare(a.unidade?.nome || a.unidadeNome || "", "pt-BR"),
+    "kitnet": (a, b) => {
+      const unidadeA = a.unidade?.nome || a.unidadeNome || "";
+      const unidadeB = b.unidade?.nome || b.unidadeNome || "";
+      const porResidencia = unidadeA.localeCompare(unidadeB, "pt-BR");
+      if (porResidencia !== 0) return porResidencia;
+      const numeroA = a.kitnet?.numero ?? "";
+      const numeroB = b.kitnet?.numero ?? "";
+      return String(numeroA).localeCompare(String(numeroB), undefined, { numeric: true, sensitivity: "base" });
+    },
+    "aluguel-maior": (a, b) => (b.valorAluguel || 0) - (a.valorAluguel || 0),
+    "aluguel-menor": (a, b) => (a.valorAluguel || 0) - (b.valorAluguel || 0),
+    "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
+  };
+
   const contratosFiltrados = useMemo(() => {
 
-    const termo = search.toLowerCase();
+    const termo = normalizarBusca(search);
 
     return contratos.filter((contrato) => {
 
-      const nomeInquilino = (contrato.inquilino?.nome || contrato.inquilinoNome || "").toLowerCase();
-      const nomeUnidade = (contrato.unidade?.nome || contrato.unidadeNome || "").toLowerCase();
-      const nomeKitnet = (contrato.kitnet?.nome || contrato.kitnetNome || "").toLowerCase();
+      const nomeInquilino = normalizarBusca(contrato.inquilino?.nome || contrato.inquilinoNome || "");
+      const nomeUnidade = normalizarBusca(contrato.unidade?.nome || contrato.unidadeNome || "");
+      const nomeKitnet = normalizarBusca(contrato.kitnet?.nome || contrato.kitnetNome || "");
 
       const busca =
         !termo ||
@@ -315,9 +343,9 @@ export default function ContratosArquivoPage() {
 
       return true;
 
-    });
+    }).sort(COMPARADORES_CONTRATO[ordenacao] || COMPARADORES_CONTRATO["inicio-recente"]);
 
-  }, [contratos, search, residenciaSelecionada]);
+  }, [contratos, search, residenciaSelecionada, ordenacao]);
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -423,6 +451,8 @@ export default function ContratosArquivoPage() {
                 onDelete={excluirContrato}
                 onEncerrar={encerrarContrato}
                 onBaixarArquivo={baixarArquivoDoContrato}
+                ordenacao={ordenacao}
+                onOrdenar={setOrdenacao}
               />
 
             </PageSection>

@@ -47,8 +47,7 @@ import { arredondarCentavos } from "../../utils/dinheiro";
 // normal), e a busca dava "nenhuma receita cadastrada" mesmo com a
 // pessoa certa na lista. Troca tudo por espaço normal e tira
 // sobra/pontas antes de comparar.
-const normalizarBusca = (texto) =>
-  (texto || "").replace(/\s+/g, " ").trim().toLowerCase();
+import { normalizarBusca } from "../../utils/busca";
 
 export default function FinanceiroPage() {
   return (

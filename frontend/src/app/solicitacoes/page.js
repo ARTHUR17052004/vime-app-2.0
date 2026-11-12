@@ -29,6 +29,7 @@ import SolicitacaoForm from "../components/solicitacoes/SolicitacaoForm";
 import SolicitacaoRelatorios from "../components/solicitacoes/SolicitacaoRelatorios";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 
 export default function SolicitacoesPage() {
   return (
@@ -205,18 +206,18 @@ function SolicitacoesPageConteudo() {
 
   } const solicitacoesFiltradas = solicitacoes.filter((item) => {
 
-    const texto = `
+    const texto = normalizarBusca(`
       ${item.numero || ""}
       ${item.titulo || ""}
       ${item.descricao || ""}
       ${item.observacoes || ""}
       ${item.responsavel || ""}
-    `.toLowerCase();
+    `);
 
     if (
       pesquisa &&
       !texto.includes(
-        pesquisa.toLowerCase()
+        normalizarBusca(pesquisa)
       )
     ) {
       return false;

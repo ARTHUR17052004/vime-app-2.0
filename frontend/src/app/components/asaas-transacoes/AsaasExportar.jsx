@@ -1,28 +1,7 @@
 "use client";
 
 import { exportarExcel, exportarPDF } from "@/utils/exportar";
-
-const rotuloStatus = (status) => {
-  switch (status) {
-    case "PAGA":
-      return "Recebido";
-
-    case "PENDENTE":
-      return "Pendente";
-
-    case "ATRASADA":
-      return "Atrasado";
-
-    case "CANCELADA":
-      return "Cancelado";
-
-    case "ESTORNADA":
-      return "Estornado";
-
-    default:
-      return status || "-";
-  }
-};
+import { statusExibidoReceita } from "@/utils/statusReceita";
 
 const formatarValor = (valor) =>
   Number(valor || 0).toLocaleString("pt-BR", {
@@ -35,15 +14,16 @@ const formatarData = (data) =>
     ? new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" })
     : "-";
 
-const COLUNAS = ["Cliente", "Valor", "Vencimento", "Forma", "Status"];
+const COLUNAS = ["Cliente", "Descrição", "Valor", "Vencimento", "Forma", "Status"];
 
 const linhasDe = (transacoes) =>
   transacoes.map((item) => [
-    item.cliente || "-",
+    item.clienteNome || item.cliente || "-",
+    item.descricao || item.cliente || "-",
     formatarValor(item.valor),
     formatarData(item.vencimento),
     item.formaPagamento || "-",
-    rotuloStatus(item.status),
+    statusExibidoReceita(item).texto,
   ]);
 
 export default function AsaasExportar({ transacoes = [] }) {

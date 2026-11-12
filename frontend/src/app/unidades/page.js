@@ -20,6 +20,7 @@ import SemPermissao from "../components/ui/SemPermissao";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 
 export default function UnidadesPage() {
 
@@ -222,25 +223,19 @@ export default function UnidadesPage() {
   const unidadesFiltradas = unidades.filter(
     (unidade) => {
 
-      const termo = search.toLowerCase();
+      const termo = normalizarBusca(search);
 
       return (
 
-        unidade.nome
-          ?.toLowerCase()
-          .includes(termo)
+        normalizarBusca(unidade.nome).includes(termo)
 
         ||
 
-        unidade.cidade
-          ?.toLowerCase()
-          .includes(termo)
+        normalizarBusca(unidade.cidade).includes(termo)
 
         ||
 
-        unidade.logradouro
-          ?.toLowerCase()
-          .includes(termo)
+        normalizarBusca(unidade.logradouro).includes(termo)
 
       );
 

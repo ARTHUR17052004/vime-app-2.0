@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { usePermissao } from "../../../hooks/usePermissao";
+import { normalizarBusca } from "../../../utils/busca";
 
 export default function WhatsappConversations({
 
@@ -30,11 +31,10 @@ export default function WhatsappConversations({
 
     return conversas.filter((conversa) => {
 
-      const nome =
-        conversa.nome?.toLowerCase() || "";
+      const nome = normalizarBusca(conversa.nome);
 
       return nome.includes(
-        pesquisa.toLowerCase()
+        normalizarBusca(pesquisa)
       );
 
     });

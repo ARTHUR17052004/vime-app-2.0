@@ -17,6 +17,7 @@ import Button from "../../components/ui/Button";
 import { LogService } from "@/services/log.service";
 import { usePermissao } from "../../../hooks/usePermissao";
 import { exportarPDF } from "@/utils/exportar";
+import { normalizarBusca } from "@/utils/busca";
 
 export default function LogsPage() {
 
@@ -70,13 +71,13 @@ export default function LogsPage() {
 
     if (!busca.trim()) return logs;
 
-    const texto = busca.toLowerCase();
+    const texto = normalizarBusca(busca);
 
     return logs.filter((log) =>
-      log.usuarioNome?.toLowerCase().includes(texto) ||
-      log.modulo?.toLowerCase().includes(texto) ||
-      log.acao?.toLowerCase().includes(texto) ||
-      log.descricao?.toLowerCase().includes(texto)
+      normalizarBusca(log.usuarioNome).includes(texto) ||
+      normalizarBusca(log.modulo).includes(texto) ||
+      normalizarBusca(log.acao).includes(texto) ||
+      normalizarBusca(log.descricao).includes(texto)
     );
 
   }, [logs, busca]);

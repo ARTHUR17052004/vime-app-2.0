@@ -287,9 +287,22 @@ const mapearTransacao = (receita) => {
 
   const locador = resolverLocadorDaReceita(receita);
 
+  // "cliente" sempre foi a DESCRIÇÃO ("Aluguel - 12/2026"), nunca o
+  // nome de quem deve -- a tela mostrava só isso, sem dizer de quem é
+  // a cobrança, de onde veio (kitnet/residência) nem se é recorrente.
+  // Esses campos novos resolvem isso sem quebrar quem já lê "cliente"
+  // esperando a descrição.
+  const inquilino = receita.inquilino || receita.contrato?.inquilino;
+  const kitnet = inquilino?.kitnet || null;
+
   return {
     id: receita.id,
     cliente: receita.descricao,
+    descricao: receita.descricao,
+    clienteNome: inquilino?.nome || receita.pagadorNome || null,
+    kitnetNome: kitnet?.nome || kitnet?.numero || null,
+    residenciaNome: kitnet?.unidade?.nome || null,
+    recorrente: !!receita.recorrente,
     valor: receita.valor,
     vencimento: receita.vencimento,
     dataPagamento: receita.dataPagamento,

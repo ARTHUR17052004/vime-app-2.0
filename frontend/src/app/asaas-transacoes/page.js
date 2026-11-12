@@ -27,12 +27,24 @@ import { ReceitaService } from "@/services/financeiro.service";
 import { LocadorService } from "@/services/locadores.service";
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
+import { normalizarBusca } from "../../utils/busca";
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
   Pendente: "PENDENTE",
   Atrasado: "ATRASADA",
   Cancelado: "CANCELADA",
+};
+
+const COMPARADORES_ASAAS = {
+  "cliente-asc": (a, b) => (a.clienteNome || a.cliente || "").localeCompare(b.clienteNome || b.cliente || "", "pt-BR"),
+  "cliente-desc": (a, b) => (b.clienteNome || b.cliente || "").localeCompare(a.clienteNome || a.cliente || "", "pt-BR"),
+  "valor-maior": (a, b) => (b.valor || 0) - (a.valor || 0),
+  "valor-menor": (a, b) => (a.valor || 0) - (b.valor || 0),
+  "vencimento-proximo": (a, b) => new Date(a.vencimento || 0) - new Date(b.vencimento || 0),
+  "vencimento-distante": (a, b) => new Date(b.vencimento || 0) - new Date(a.vencimento || 0),
+  "forma": (a, b) => (a.formaPagamento || "").localeCompare(b.formaPagamento || "", "pt-BR"),
+  "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
 };
 
 export default function AsaasTransacoesPage() {
@@ -81,6 +93,12 @@ export default function AsaasTransacoesPage() {
 
   const [locadorFiltro, setLocadorFiltro] =
     useState("");
+
+  // Clique no cabeçalho da tabela ordena -- mesmo padrão do Financeiro
+  // (ver FinanceiroReceitas.jsx/CabecalhoOrdenavel), sem dropdown
+  // separado nenhum.
+  const [ordenacao, setOrdenacao] =
+    useState("vencimento-proximo");
 
   useEffect(() => {
 
@@ -293,11 +311,14 @@ export default function AsaasTransacoesPage() {
 
     return porLocador.filter((item) => {
 
-      const termo = filtros.busca?.toLowerCase().trim();
+      const termo = normalizarBusca(filtros.busca);
 
       if (termo) {
 
-        const alvo = `${item.cliente || ""}`.toLowerCase();
+        // item.cliente é a DESCRIÇÃO ("Aluguel - 12/2026"), não o nome
+        // de quem deve -- sem clienteNome aqui, buscar pelo nome do
+        // inquilino nunca achava nada.
+        const alvo = normalizarBusca(`${item.clienteNome || ""} ${item.cliente || ""}`);
 
         if (!alvo.includes(termo)) return false;
 
@@ -336,9 +357,9 @@ export default function AsaasTransacoesPage() {
 
       return true;
 
-    });
+    }).sort(COMPARADORES_ASAAS[ordenacao] || COMPARADORES_ASAAS["vencimento-proximo"]);
 
-  }, [transacoes, filtros, locadorFiltro]);
+  }, [transacoes, filtros, locadorFiltro, ordenacao]);
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -429,6 +450,8 @@ export default function AsaasTransacoesPage() {
             <AsaasTabela
               transacoes={transacoesFiltradas}
               loading={loading}
+              ordenacao={ordenacao}
+              onOrdenar={setOrdenacao}
               onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
               onEditar={abrirEdicao}

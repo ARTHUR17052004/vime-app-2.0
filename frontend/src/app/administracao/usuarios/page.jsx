@@ -21,6 +21,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 import { UsuarioService } from "@/services/usuarios.service";
 
 import { usePermissao } from "../../../hooks/usePermissao";
+import { normalizarBusca } from "@/utils/busca";
 
 export default function UsuariosPage() {
 
@@ -281,27 +282,15 @@ export default function UsuariosPage() {
 
     }
 
-    const texto = busca.toLowerCase();
+    const texto = normalizarBusca(busca);
 
     return usuarios.filter((usuario) =>
 
-      usuario.nome
+      normalizarBusca(usuario.nome).includes(texto) ||
 
-        ?.toLowerCase()
+      normalizarBusca(usuario.email).includes(texto) ||
 
-        .includes(texto) ||
-
-      usuario.email
-
-        ?.toLowerCase()
-
-        .includes(texto) ||
-
-      usuario.perfil?.nome
-
-        ?.toLowerCase()
-
-        .includes(texto)
+      normalizarBusca(usuario.perfil?.nome).includes(texto)
 
     );
 

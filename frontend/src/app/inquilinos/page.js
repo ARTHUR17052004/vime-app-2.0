@@ -26,6 +26,7 @@ import SemPermissao from "../components/ui/SemPermissao";
 import { InquilinoService } from "../../services/inquilinos.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 
 export default function InquilinosPage() {
 
@@ -308,19 +309,19 @@ export default function InquilinosPage() {
 
   const inquilinosFiltrados = useMemo(() => {
 
-    const termo = search.toLowerCase();
+    const termo = normalizarBusca(search);
 
     const filtrados = inquilinos.filter((inquilino) => {
 
       const correspondeTexto =
 
-        inquilino.nome?.toLowerCase().includes(termo) ||
+        normalizarBusca(inquilino.nome).includes(termo) ||
 
-        inquilino.email?.toLowerCase().includes(termo) ||
+        normalizarBusca(inquilino.email).includes(termo) ||
 
-        inquilino.telefone?.toLowerCase().includes(termo) ||
+        normalizarBusca(inquilino.telefone).includes(termo) ||
 
-        inquilino.cpf?.toLowerCase().includes(termo);
+        normalizarBusca(inquilino.cpf).includes(termo);
 
       if (!correspondeTexto) return false;
 

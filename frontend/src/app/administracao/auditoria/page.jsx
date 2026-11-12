@@ -17,6 +17,7 @@ import SemPermissao from "../../components/ui/SemPermissao";
 
 import { AuditoriaService } from "@/services/auditoria.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { normalizarBusca } from "../../../utils/busca";
 
 const ACAO_VARIANT = {
   CRIAR: "emerald",
@@ -80,12 +81,12 @@ export default function AuditoriaPage() {
 
     if (!busca.trim()) return registros;
 
-    const texto = busca.toLowerCase();
+    const texto = normalizarBusca(busca);
 
     return registros.filter((registro) =>
-      registro.usuarioNome?.toLowerCase().includes(texto) ||
-      registro.modulo?.toLowerCase().includes(texto) ||
-      registro.acao?.toLowerCase().includes(texto)
+      normalizarBusca(registro.usuarioNome).includes(texto) ||
+      normalizarBusca(registro.modulo).includes(texto) ||
+      normalizarBusca(registro.acao).includes(texto)
     );
 
   }, [registros, busca]);

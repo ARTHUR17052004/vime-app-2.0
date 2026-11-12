@@ -16,6 +16,7 @@ import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { PerfilService } from "@/services/perfis.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { normalizarBusca } from "@/utils/busca";
 
 export default function PerfisPage() {
 
@@ -135,7 +136,7 @@ export default function PerfisPage() {
 
     return perfis.filter((p) =>
 
-      p.nome.toLowerCase().includes(busca.toLowerCase())
+      normalizarBusca(p.nome).includes(normalizarBusca(busca))
 
     );
 

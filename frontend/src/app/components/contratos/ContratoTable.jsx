@@ -13,6 +13,8 @@ import {
   Send,
   RefreshCw,
   Ban,
+  ChevronUp,
+  ChevronDown,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -20,6 +22,41 @@ import { formatarProximoVencimento } from "../../../utils/vencimento";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
+
+// Mesmo cabeçalho clicável de FinanceiroReceitas.jsx.
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`px-6 py-5 text-left uppercase text-xs tracking-[0.22em] cursor-pointer select-none hover:text-[var(--text)] transition ${
+        ativo ? "text-[var(--text)]" : "text-[var(--text-subtle)]"
+      }`}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
 
 export default function ContratoTable({
   contratos = [],
@@ -29,6 +66,8 @@ export default function ContratoTable({
   onEnviarClicksign,
   onRenovar,
   onEncerrar,
+  ordenacao,
+  onOrdenar,
 }) {
 
   const podeEditar = usePermissao("contratos.editar");
@@ -121,29 +160,47 @@ export default function ContratoTable({
 
         <tr>
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Inquilino
-          </th>
+          <CabecalhoOrdenavel
+            label="Inquilino"
+            ordens={["inquilino-asc", "inquilino-desc"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Residência
-          </th>
+          <CabecalhoOrdenavel
+            label="Residência"
+            ordens={["residencia-asc", "residencia-desc"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Kitnet
-          </th>
+          <CabecalhoOrdenavel
+            label="Kitnet"
+            ordens={["kitnet"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Aluguel
-          </th>
+          <CabecalhoOrdenavel
+            label="Aluguel"
+            ordens={["aluguel-menor", "aluguel-maior"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Vencimento
-          </th>
+          <CabecalhoOrdenavel
+            label="Vencimento"
+            ordens={["vencimento-dia"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
-          <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
-            Status
-          </th>
+          <CabecalhoOrdenavel
+            label="Status"
+            ordens={["status"]}
+            ordenacao={ordenacao}
+            onOrdenar={onOrdenar}
+          />
 
           <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">
             Ações

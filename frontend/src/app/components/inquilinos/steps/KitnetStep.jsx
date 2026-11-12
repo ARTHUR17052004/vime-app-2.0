@@ -3,6 +3,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import { normalizarBusca } from "@/utils/busca";
+
 export default function KitnetStep({
   formData,
   handleChange,
@@ -45,12 +47,12 @@ export default function KitnetStep({
 
   const kitnetsFiltradas = useMemo(() => {
 
-    const termo = busca.trim().toLowerCase();
+    const termo = normalizarBusca(busca);
 
     if (!termo) return kitnetsDisponiveis;
 
     return kitnetsDisponiveis.filter((kitnet) =>
-      rotulo(kitnet).toLowerCase().includes(termo)
+      normalizarBusca(rotulo(kitnet)).includes(termo)
     );
 
   }, [kitnetsDisponiveis, busca]);

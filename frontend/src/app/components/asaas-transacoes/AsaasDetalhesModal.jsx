@@ -1,6 +1,8 @@
 "use client";
 
 import Modal from "../ui/Modal";
+import Badge from "../ui/Badge";
+import { statusExibidoReceita } from "@/utils/statusReceita";
 
 const formatarValor = (valor) => {
   const numero = Number(valor || 0);
@@ -17,28 +19,6 @@ const formatarData = (data) => {
   return new Date(data).toLocaleDateString("pt-BR", {
     timeZone: "UTC",
   });
-};
-
-const rotuloStatus = (status) => {
-  switch (status) {
-    case "PAGA":
-      return "Recebido";
-
-    case "PENDENTE":
-      return "Pendente";
-
-    case "ATRASADA":
-      return "Atrasado";
-
-    case "CANCELADA":
-      return "Cancelado";
-
-    case "ESTORNADA":
-      return "Estornado";
-
-    default:
-      return status || "-";
-  }
 };
 
 export default function AsaasDetalhesModal({
@@ -78,7 +58,20 @@ export default function AsaasDetalhesModal({
               </label>
 
               <p className="mt-2 font-semibold text-[var(--text)]">
-                {transacao.cliente || "-"}
+                {transacao.clienteNome || transacao.cliente || "-"}
+              </p>
+            </div>
+
+            <div>
+              <label className="text-sm font-semibold text-[var(--text-subtle)]">
+                Descrição
+              </label>
+
+              <p className="mt-2 font-semibold text-[var(--text)]">
+                {transacao.descricao || transacao.cliente || "-"}
+                {transacao.residenciaNome && ` · ${transacao.residenciaNome}`}
+                {transacao.kitnetNome && ` · Kitnet ${transacao.kitnetNome}`}
+                {transacao.recorrente && " · Recorrente"}
               </p>
             </div>
 
@@ -108,9 +101,9 @@ export default function AsaasDetalhesModal({
               </label>
 
               <div className="mt-2">
-                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-semibold">
-                  {rotuloStatus(transacao.status)}
-                </span>
+                <Badge variant={statusExibidoReceita(transacao).variant}>
+                  {statusExibidoReceita(transacao).texto}
+                </Badge>
               </div>
             </div>
 

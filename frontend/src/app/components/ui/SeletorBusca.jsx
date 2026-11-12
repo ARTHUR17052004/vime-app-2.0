@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { normalizarBusca } from "@/utils/busca";
+
 // Select com busca por texto -- pra listas longas (ex.: inquilinos)
 // onde rolar uma lista fixa pra achar um nome é lento. `opcoes` é
 // [{ value, label }]; funciona como um <select> normal por fora
@@ -37,7 +39,7 @@ export default function SeletorBusca({
   }, []);
 
   const filtradas = busca
-    ? opcoes.filter((o) => o.label.toLowerCase().includes(busca.toLowerCase()))
+    ? opcoes.filter((o) => normalizarBusca(o.label).includes(normalizarBusca(busca)))
     : opcoes;
 
   return (

@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronUp, ChevronDown } from "lucide-react";
+
 export default function Table({
   children,
 
@@ -23,6 +25,15 @@ export default function Table({
 
   rowClassName = "",
   cellClassName = "",
+
+  // Clique no cabeçalho ordena -- só no MODO 2 (columns+data), e só pra
+  // coluna que declarar `sortKey` (liga/desliga, uma direção só) ou
+  // `sortKeys: [asc, desc]` (alterna nos dois sentidos) -- mesmo padrão
+  // de CabecalhoOrdenavel usado nas tabelas feitas à mão (Financeiro,
+  // Contratos...). Sem isso numa coluna, o `<th>` continua estático,
+  // igual sempre foi.
+  ordenacao,
+  onOrdenar,
 }) {
 
   if (loading) {
@@ -164,37 +175,103 @@ export default function Table({
 
             <tr>
 
-              {columns.map((column) => (
+              {columns.map((column) => {
 
-                <th
-                  key={column.key}
-                  className={`
-                    text-left
+                const ordens = column.sortKeys || (column.sortKey ? [column.sortKey] : null);
 
-                    uppercase
+                if (!ordens) {
 
-                    tracking-[0.22em]
+                  return (
 
-                    font-semibold
+                    <th
+                      key={column.key}
+                      className={`
+                        text-left
 
-                    text-[var(--text-subtle)]
+                        uppercase
 
-                    border-b
-                    border-[var(--border-token)]
+                        tracking-[0.22em]
 
-                    ${
-                      compact
-                        ? "px-4 py-3 text-[11px]"
-                        : "px-6 py-5 text-[12px]"
-                    }
-                  `}
-                >
+                        font-semibold
 
-                  {column.title}
+                        text-[var(--text-subtle)]
 
-                </th>
+                        border-b
+                        border-[var(--border-token)]
 
-              ))}
+                        ${
+                          compact
+                            ? "px-4 py-3 text-[11px]"
+                            : "px-6 py-5 text-[12px]"
+                        }
+                      `}
+                    >
+
+                      {column.title}
+
+                    </th>
+
+                  );
+
+                }
+
+                const [asc, desc] = ordens;
+                const ativo = ordenacao === asc || ordenacao === desc;
+
+                const alternar = () => {
+                  if (!desc) {
+                    onOrdenar?.(asc);
+                    return;
+                  }
+                  onOrdenar?.(ordenacao === asc ? desc : asc);
+                };
+
+                return (
+
+                  <th
+                    key={column.key}
+                    onClick={alternar}
+                    className={`
+                      text-left
+
+                      uppercase
+
+                      tracking-[0.22em]
+
+                      font-semibold
+
+                      cursor-pointer
+                      select-none
+                      transition
+
+                      border-b
+                      border-[var(--border-token)]
+
+                      ${ativo ? "text-[var(--text)]" : "text-[var(--text-subtle)] hover:text-[var(--text)]"}
+
+                      ${
+                        compact
+                          ? "px-4 py-3 text-[11px]"
+                          : "px-6 py-5 text-[12px]"
+                      }
+                    `}
+                  >
+
+                    <span className="inline-flex items-center gap-1">
+                      {column.title}
+                      {ativo &&
+                        (desc && ordenacao === desc ? (
+                          <ChevronDown size={13} />
+                        ) : (
+                          <ChevronUp size={13} />
+                        ))}
+                    </span>
+
+                  </th>
+
+                );
+
+              })}
 
             </tr>
 

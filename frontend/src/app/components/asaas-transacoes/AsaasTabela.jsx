@@ -1,5 +1,47 @@
 "use client";
 
+import { ChevronUp, ChevronDown, Repeat } from "lucide-react";
+
+import Badge from "../ui/Badge";
+import { statusExibidoReceita } from "@/utils/statusReceita";
+
+// Mesmo cabeçalho clicável de FinanceiroReceitas.jsx -- `ordens` é
+// [valorAscendente, valorDescendente] (toggle nos dois sentidos) ou só
+// [valorUnico] (liga/desliga, sem direção -- ex.: Forma, Status).
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar, className = "" }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`text-left p-4 cursor-pointer select-none hover:text-[var(--text)] transition ${
+        ativo ? "text-[var(--text)]" : "text-[var(--text-muted)]"
+      } ${className}`}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
+
 const formatarValor = (valor) => {
   const numero = Number(valor || 0);
 
@@ -17,43 +59,11 @@ const formatarData = (data) => {
   });
 };
 
-const rotuloStatus = (status) => {
-  switch (status) {
-    case "PAGA":
-      return "Recebido";
-
-    case "PENDENTE":
-      return "Pendente";
-
-    case "ATRASADA":
-      return "Atrasado";
-
-    case "CANCELADA":
-      return "Cancelado";
-
-    case "ESTORNADA":
-      return "Estornado";
-
-    default:
-      return status || "-";
-  }
-};
-
-const badge = (status) => {
-  switch (status) {
-    case "PAGA":
-      return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-
-    case "PENDENTE":
-      return "bg-yellow-500/10 text-yellow-300 border border-yellow-500/20";
-
-    case "ATRASADA":
-      return "bg-red-500/10 text-red-400 border border-red-500/20";
-
-    default:
-      return "bg-[var(--surface-2)] text-[var(--text-muted)] border border-[var(--border-token)]";
-  }
-};
+// Mesmo padrão de status do Financeiro (statusExibidoReceita) --
+// "Pendente" só quando NUNCA foi enviada a banco nenhum; já enviada e
+// ainda não paga vira "Em Aberto". Antes essa tela tinha sua própria
+// régua solta (Pendente pra tudo que não era paga/atrasada/cancelada),
+// divergindo do que o resto do sistema já mostra pro mesmo status.
 
 export default function AsaasTabela({
   transacoes = [],
@@ -70,6 +80,8 @@ export default function AsaasTabela({
   enviandoLote = false,
   podeEditar = true,
   podeEnviar = true,
+  ordenacao,
+  onOrdenar,
 }) {
 
   // enviadaAsaas só cobre o caminho Asaas -- uma receita mandada pelo
@@ -108,25 +120,40 @@ export default function AsaasTabela({
                 />
               </th>
 
-              <th className="text-left p-4 text-[var(--text-muted)]">
-                Cliente
-              </th>
+              <CabecalhoOrdenavel
+                label="Cliente"
+                ordens={["cliente-asc", "cliente-desc"]}
+                ordenacao={ordenacao}
+                onOrdenar={onOrdenar}
+              />
 
-              <th className="text-left p-4 text-[var(--text-muted)]">
-                Valor
-              </th>
+              <CabecalhoOrdenavel
+                label="Valor"
+                ordens={["valor-menor", "valor-maior"]}
+                ordenacao={ordenacao}
+                onOrdenar={onOrdenar}
+              />
 
-              <th className="text-left p-4 text-[var(--text-muted)]">
-                Vencimento
-              </th>
+              <CabecalhoOrdenavel
+                label="Vencimento"
+                ordens={["vencimento-proximo", "vencimento-distante"]}
+                ordenacao={ordenacao}
+                onOrdenar={onOrdenar}
+              />
 
-              <th className="text-left p-4 text-[var(--text-muted)]">
-                Forma
-              </th>
+              <CabecalhoOrdenavel
+                label="Forma"
+                ordens={["forma"]}
+                ordenacao={ordenacao}
+                onOrdenar={onOrdenar}
+              />
 
-              <th className="text-left p-4 text-[var(--text-muted)]">
-                Status
-              </th>
+              <CabecalhoOrdenavel
+                label="Status"
+                ordens={["status"]}
+                ordenacao={ordenacao}
+                onOrdenar={onOrdenar}
+              />
 
               <th className="text-right p-4 text-[var(--text-muted)]">
                 Ações
@@ -173,8 +200,17 @@ export default function AsaasTabela({
 
                 <td className="p-4">
 
-                  <div className="font-semibold text-[var(--text)]">
-                    {item.cliente}
+                  <div className="flex items-center gap-1.5 font-semibold text-[var(--text)]">
+                    {item.clienteNome || item.cliente}
+                    {item.recorrente && (
+                      <Repeat size={13} className="text-sky-400 shrink-0" title="Cobrança recorrente" />
+                    )}
+                  </div>
+
+                  <div className="text-sm text-[var(--text-subtle)] truncate">
+                    {item.descricao || item.cliente}
+                    {item.residenciaNome && ` · ${item.residenciaNome}`}
+                    {item.kitnetNome && ` · Kitnet ${item.kitnetNome}`}
                   </div>
 
                   <div
@@ -207,13 +243,9 @@ export default function AsaasTabela({
 
                 <td className="p-4">
 
-                  <span
-                    className={`px-3 py-1 rounded-full text-sm font-semibold ${badge(
-                      item.status
-                    )}`}
-                  >
-                    {rotuloStatus(item.status)}
-                  </span>
+                  <Badge variant={statusExibidoReceita(item).variant}>
+                    {statusExibidoReceita(item).texto}
+                  </Badge>
 
                 </td>
 

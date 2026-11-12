@@ -22,6 +22,7 @@ import ChamadoCard from "../components/suporte/ChamadoCard";
 import ChamadoForm from "../components/suporte/ChamadoForm";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 
 const ABAS = [
   { chave: "todos", rotulo: "Todos" },
@@ -180,17 +181,17 @@ export default function SuportePage() {
 
   const chamadosFiltrados = chamados.filter((item) => {
 
-    const texto = `
+    const texto = normalizarBusca(`
       ${item.numero || ""}
       ${item.titulo || ""}
       ${item.descricao || ""}
       ${item.criadoPorNome || ""}
-    `.toLowerCase();
+    `);
 
     if (
       pesquisa &&
       !texto.includes(
-        pesquisa.toLowerCase()
+        normalizarBusca(pesquisa)
       )
     ) {
       return false;

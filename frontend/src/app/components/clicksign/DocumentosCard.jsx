@@ -14,6 +14,7 @@ import {
 
 import { ClicksignService } from "@/services/clicksign.service";
 import { obterLinkClicksign } from "@/utils/clicksignLink";
+import { normalizarBusca } from "@/utils/busca";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -183,7 +184,7 @@ export default function DocumentosCard() {
   const documentosFiltrados = documentos
     .filter((doc) => {
       const nome = doc.filename || doc.key || "";
-      return nome.toLowerCase().includes(busca.toLowerCase());
+      return normalizarBusca(nome).includes(normalizarBusca(busca));
     })
     .sort((a, b) => {
       const dataA = new Date(a.uploaded_at || a.created_at || 0).getTime();

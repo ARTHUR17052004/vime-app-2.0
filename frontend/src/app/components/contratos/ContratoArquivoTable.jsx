@@ -2,12 +2,47 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, Pencil, Trash2, Download, Paperclip, Ban, MoreVertical } from "lucide-react";
+import { Eye, Pencil, Trash2, Download, Paperclip, Ban, MoreVertical, ChevronUp, ChevronDown } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
+
+// Mesmo cabeçalho clicável de FinanceiroReceitas.jsx/ContratoTable.jsx.
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`px-6 py-5 text-left uppercase text-xs tracking-[0.22em] cursor-pointer select-none hover:text-[var(--text)] transition ${
+        ativo ? "text-[var(--text)]" : "text-[var(--text-subtle)]"
+      }`}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
 
 export default function ContratoArquivoTable({
   contratos = [],
@@ -15,6 +50,8 @@ export default function ContratoArquivoTable({
   onDelete,
   onBaixarArquivo,
   onEncerrar,
+  ordenacao,
+  onOrdenar,
 }) {
 
   const podeEditar = usePermissao("arquivoContratos.editar");
@@ -68,12 +105,12 @@ export default function ContratoArquivoTable({
 
         <thead className="border-b border-[var(--border-token)]">
           <tr>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Inquilino</th>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Residência</th>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Kitnet</th>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Período</th>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Aluguel</th>
-            <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Status</th>
+            <CabecalhoOrdenavel label="Inquilino" ordens={["inquilino-asc", "inquilino-desc"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
+            <CabecalhoOrdenavel label="Residência" ordens={["residencia-asc", "residencia-desc"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
+            <CabecalhoOrdenavel label="Kitnet" ordens={["kitnet"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
+            <CabecalhoOrdenavel label="Período" ordens={["inicio-recente", "inicio-antigo"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
+            <CabecalhoOrdenavel label="Aluguel" ordens={["aluguel-menor", "aluguel-maior"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
+            <CabecalhoOrdenavel label="Status" ordens={["status"]} ordenacao={ordenacao} onOrdenar={onOrdenar} />
             <th className="px-6 py-5 text-left uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Arquivo</th>
             <th className="px-6 py-5 text-center uppercase text-xs tracking-[0.22em] text-[var(--text-subtle)]">Ações</th>
           </tr>

@@ -21,6 +21,7 @@ import SemPermissao from "../components/ui/SemPermissao";
 import { LocadorService } from "@/services/locadores.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 
 export default function LocadoresPage() {
 
@@ -161,25 +162,19 @@ export default function LocadoresPage() {
 
   const locadoresFiltrados = locadores.filter((locador) => {
 
-    const termo = search.toLowerCase();
+    const termo = normalizarBusca(search);
 
     const correspondeTexto = (
 
-      locador.nome
-        ?.toLowerCase()
-        .includes(termo)
+      normalizarBusca(locador.nome).includes(termo)
 
       ||
 
-      locador.email
-        ?.toLowerCase()
-        .includes(termo)
+      normalizarBusca(locador.email).includes(termo)
 
       ||
 
-      locador.documento
-        ?.toLowerCase()
-        .includes(termo)
+      normalizarBusca(locador.documento).includes(termo)
 
     );
 

@@ -30,6 +30,7 @@ import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { normalizarBusca } from "../../utils/busca";
 import { avancarUmaVez } from "../../utils/periodicidade";
 
 export default function VistoriasPage() {
@@ -432,17 +433,17 @@ const fixarVistoria = async (id, fixado) => {
 
      const vistoriasFiltradas = vistorias.filter((vistoria) => {
 
-  const texto = `
+  const texto = normalizarBusca(`
     ${vistoria.titulo || ""}
     ${vistoria.categoria || ""}
     ${vistoria.unidadeNome || ""}
     ${vistoria.kitnetNome || ""}
     ${vistoria.responsavel || ""}
-  `.toLowerCase();
+  `);
 
   if (
     search &&
-    !texto.includes(search.toLowerCase())
+    !texto.includes(normalizarBusca(search))
   ) {
     return false;
   }

@@ -38,6 +38,21 @@ export default function VistoriaRealizadasTable({
   const [detalhe, setDetalhe] = useState(null);
   const [editando, setEditando] = useState(null);
 
+  // Clique no cabeçalho ordena -- mesmo padrão do Financeiro/Contratos
+  // (ver Table.jsx, que agora aceita sortKey/sortKeys por coluna).
+  const [ordenacao, setOrdenacao] = useState("data-recente");
+
+  const COMPARADORES = {
+    "data-recente": (a, b) => new Date(b.dataHora || 0) - new Date(a.dataHora || 0),
+    "data-antiga": (a, b) => new Date(a.dataHora || 0) - new Date(b.dataHora || 0),
+    "vistoria-asc": (a, b) => (a.vistoria || "").localeCompare(b.vistoria || "", "pt-BR"),
+    "vistoria-desc": (a, b) => (b.vistoria || "").localeCompare(a.vistoria || "", "pt-BR"),
+    "residencia-asc": (a, b) => (a.residencia || "").localeCompare(b.residencia || "", "pt-BR"),
+    "residencia-desc": (a, b) => (b.residencia || "").localeCompare(a.residencia || "", "pt-BR"),
+    "ciclo": (a, b) => String(a.ciclo ?? "").localeCompare(String(b.ciclo ?? ""), undefined, { numeric: true }),
+    "responsavel-asc": (a, b) => (a.responsavel || "").localeCompare(b.responsavel || "", "pt-BR"),
+  };
+
   const linhas = useMemo(() => {
 
     // `m.fotos` não vem mais na lista (ver vistoriaService.listarMissoesRealizadas
@@ -73,9 +88,9 @@ export default function VistoriaRealizadasTable({
 
     return [...deMissoes, ...deRegulares]
       .filter((item) => !filtroVistoriaId || item.vistoriaId === filtroVistoriaId)
-      .sort((a, b) => new Date(b.dataHora) - new Date(a.dataHora));
+      .sort(COMPARADORES[ordenacao] || COMPARADORES["data-recente"]);
 
-  }, [missoesRealizadas, vistorias, filtroVistoriaId]);
+  }, [missoesRealizadas, vistorias, filtroVistoriaId, ordenacao]);
 
   const excluirMissao = async (item) => {
 
@@ -115,11 +130,11 @@ export default function VistoriaRealizadasTable({
   };
 
   const colunas = [
-    { key: "vistoria", title: "Vistoria" },
-    { key: "residencia", title: "Residência" },
-    { key: "ciclo", title: "Ciclo" },
-    { key: "dataHora", title: "Data/Hora Realizada", render: (item) => formatDateTime(item.dataHora) },
-    { key: "responsavel", title: "Responsável" },
+    { key: "vistoria", title: "Vistoria", sortKeys: ["vistoria-asc", "vistoria-desc"] },
+    { key: "residencia", title: "Residência", sortKeys: ["residencia-asc", "residencia-desc"] },
+    { key: "ciclo", title: "Ciclo", sortKey: "ciclo" },
+    { key: "dataHora", title: "Data/Hora Realizada", sortKeys: ["data-antiga", "data-recente"], render: (item) => formatDateTime(item.dataHora) },
+    { key: "responsavel", title: "Responsável", sortKey: "responsavel-asc" },
     {
       key: "fotos",
       title: "Fotos",
@@ -168,6 +183,8 @@ export default function VistoriaRealizadasTable({
         data={linhas}
         loading={carregandoMissoes}
         emptyMessage="Nenhuma vistoria realizada ainda."
+        ordenacao={ordenacao}
+        onOrdenar={setOrdenacao}
       />
 
       {/* `key` troca a cada registro aberto -- remonta do zero, pra
