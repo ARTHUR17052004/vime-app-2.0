@@ -190,7 +190,6 @@ export default function DashboardMobile({
           border
           border-emerald-500/20
           p-5
-          min-h-[150px]
         "
         style={{
           backgroundImage:
@@ -200,44 +199,53 @@ export default function DashboardMobile({
         }}
       >
 
-        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
-          {dataAtual}
-        </p>
+        {/* flex (não absolute) -- com nome comprido ou fonte maior
+            (acessibilidade do sistema), o clima nunca fica em cima do
+            texto, só empurra ele; antes o clima ficava centralizado por
+            cima do bloco de texto, podia encavalar em tela estreita. */}
+        <div className="flex items-start justify-between gap-3">
 
-        <h1 className="mt-2 text-[26px] leading-tight font-extrabold text-white">
-          {saudacaoAtual}, {nomeProprio(primeiroNome)}! <span aria-hidden="true">👋</span>
-        </h1>
+          <div className="min-w-0">
 
-        <p className="mt-2 max-w-[68%] text-[13px] leading-snug text-emerald-50/80">
-          Aqui está o resumo da sua gestão hoje.
-        </p>
-
-        {clima && (
-          <div
-            className="
-              absolute
-              right-4
-              top-1/2
-              -translate-y-1/2
-
-              rounded-2xl
-              border
-              border-white/15
-              bg-black/25
-              backdrop-blur-md
-
-              px-3.5
-              py-2.5
-
-              text-center
-            "
-          >
-            <p className="text-xl font-bold text-white leading-none">
-              {clima.temperatura}°C
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200/80">
+              {dataAtual}
             </p>
-            <p className="mt-1 text-[10px] text-white/70">{clima.local}</p>
+
+            <h1 className="mt-2 text-[26px] leading-tight font-extrabold text-white break-words">
+              {saudacaoAtual}, {nomeProprio(primeiroNome)}! <span aria-hidden="true">👋</span>
+            </h1>
+
+            <p className="mt-2 text-[13px] leading-snug text-emerald-50/80">
+              Aqui está o resumo da sua gestão hoje.
+            </p>
+
           </div>
-        )}
+
+          {clima && (
+            <div
+              className="
+                shrink-0
+
+                rounded-2xl
+                border
+                border-white/15
+                bg-black/25
+                backdrop-blur-md
+
+                px-3.5
+                py-2.5
+
+                text-center
+              "
+            >
+              <p className="text-xl font-bold text-white leading-none">
+                {clima.temperatura}°C
+              </p>
+              <p className="mt-1 text-[10px] text-white/70">{clima.local}</p>
+            </div>
+          )}
+
+        </div>
 
       </section>
 
