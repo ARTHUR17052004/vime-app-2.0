@@ -81,6 +81,7 @@ function MenuButton({ label, danger, warning, onClick }) {
 
 export default function FinanceiroDespesas({
   despesas,
+  contas,
   ordenacao,
   onOrdenar,
   onDelete,
@@ -251,6 +252,10 @@ export default function FinanceiroDespesas({
                   onOrdenar={onOrdenar}
                 />
 
+                <th className="text-left">
+                  Conta
+                </th>
+
                 <th></th>
 
               </tr>
@@ -305,6 +310,10 @@ export default function FinanceiroDespesas({
                       {item.status}
                     </Badge>
 
+                  </td>
+
+                  <td className="text-[var(--text-subtle)]">
+                    {contas?.find((c) => c.id === item.contaPagamentoId)?.nome || "-"}
                   </td>
 
                   <td>
@@ -398,6 +407,7 @@ export default function FinanceiroDespesas({
         setVisualizarOpen(false)
       }
       despesa={despesaSelecionada}
+      contaNome={contas?.find((c) => c.id === despesaSelecionada?.contaPagamentoId)?.nome}
     />
 
     <DespesaEditarModal

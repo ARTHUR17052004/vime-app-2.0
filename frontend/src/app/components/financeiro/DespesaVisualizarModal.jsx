@@ -4,6 +4,7 @@ export default function DespesaVisualizarModal({
   isOpen,
   onClose,
   despesa,
+  contaNome,
 }) {
   if (!isOpen || !despesa) return null;
 
@@ -45,6 +46,11 @@ export default function DespesaVisualizarModal({
           <div>
             <strong className="text-[var(--text-subtle)]">Status:</strong>
             <div>{despesa.status}</div>
+          </div>
+
+          <div>
+            <strong className="text-[var(--text-subtle)]">Conta:</strong>
+            <div>{contaNome || "-"}</div>
           </div>
 
           <div>

@@ -153,6 +153,7 @@ const MODULOS = [
       { campo: "descricao", label: "Descrição", travado: true },
       { campo: "valor", label: "Valor", travado: true },
       { campo: "unidadeId", label: "Residência" },
+      { campo: "contaPagamentoId", label: "Conta" },
       { campo: "status", label: "Status" },
       { campo: "vencimento", label: "Vencimento" },
       { campo: "dataPagamento", label: "Data de Pagamento" },

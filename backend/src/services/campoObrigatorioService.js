@@ -67,6 +67,7 @@ const rotulosPadrao = {
   juros: 'Juros',
   locadorId: 'Locador',
   unidadeId: 'Residência',
+  contaPagamentoId: 'Conta',
   kitnetId: 'Kitnet',
   inquilinoId: 'Inquilino',
   dataFim: 'Data Final do Contrato',

@@ -595,6 +595,8 @@ function FinanceiroPageConteudo() {
     )
       return false;
 
+    if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
+
     if (!dentroDoIntervalo(item.vencimento)) return false;
 
     return true;
@@ -930,6 +932,7 @@ function FinanceiroPageConteudo() {
 
         <FinanceiroDespesas
           despesas={despesasFiltradas}
+          contas={contas}
           ordenacao={ordenacao}
           onOrdenar={setOrdenacao}
           onDelete={excluirDespesa}
@@ -1005,6 +1008,7 @@ function FinanceiroPageConteudo() {
     {abaSelecionada === "despesas" && (
       <FinanceiroDespesas
         despesas={despesasFiltradas}
+        contas={contas}
         ordenacao={ordenacao}
         onOrdenar={setOrdenacao}
         onDelete={excluirDespesa}

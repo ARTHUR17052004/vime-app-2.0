@@ -8,15 +8,15 @@ datasource db {
 }
 
 model Unidade {
-  id                  String     @id @default(uuid())
+  id                  String              @id @default(uuid())
   nome                String
   cidade              String
   uf                  String
   locador             String?
   kitnets             Int
-  status              String     @default("ATIVA")
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
+  status              String              @default("ATIVA")
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
   aluguel             Float?
   bairro              String?
   cep                 String?
@@ -29,7 +29,7 @@ model Unidade {
   dataInicioCobranca  DateTime?
   contratos           Contrato[]
   kitnetsRelacionadas Kitnet[]
-  locadorRel          Locador?   @relation(fields: [locadorId], references: [id])
+  locadorRel          Locador?            @relation(fields: [locadorId], references: [id])
   despesas            Despesa[]
   vistorias           Vistoria[]
   vistoriaMissoes     VistoriaMissao[]
@@ -37,24 +37,24 @@ model Unidade {
 }
 
 model Kitnet {
-  id         String      @id @default(uuid())
-  numero     String
-  metragem   Float
-  aluguel    Float
-  ocupada    Boolean     @default(false)
-  status     String      @default("DISPONIVEL")
-  unidadeId  String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  nome       String?
-  observacoes String?
+  id                  String          @id @default(uuid())
+  numero              String
+  metragem            Float
+  aluguel             Float
+  ocupada             Boolean         @default(false)
+  status              String          @default("DISPONIVEL")
+  unidadeId           String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  nome                String?
+  observacoes         String?
   // true depois que o aluguel dessa kitnet é editado individualmente --
   // a partir daí, mudar o valor da Residência não sobrescreve mais ela.
-  aluguelManual Boolean  @default(false)
+  aluguelManual       Boolean         @default(false)
   // Desde quando o status é DISPONIVEL, ininterruptamente -- mantido
   // sozinho pela extensão do Prisma Client (ver config/prisma.js), não
   // por cada service que muda o status. Null enquanto não é DISPONIVEL.
-  vazioDesde DateTime?
+  vazioDesde          DateTime?
   // Último alerta "kitnet vazia" enviado por verificarKitnetsVaziasJob.js
   // (72h+ sem locar) -- evita reenviar mais de uma vez por dia.
   ultimoAlertaVaziaEm DateTime?
@@ -62,26 +62,26 @@ model Kitnet {
   // pode ter várias contas (ex.: SH com BB-H, BB-S e Efí, cada uma
   // recebendo de kitnets diferentes). Sem nenhuma aqui, usa a conta
   // padrão do locador (Locador.contaPagamentoId), igual sempre foi.
-  contaPagamentoId String?
-  contaPagamento   ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
-  contratos  Contrato[]
-  inquilinos Inquilino[]
-  unidade    Unidade     @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
-  vistorias  Vistoria[]
+  contaPagamentoId    String?
+  contaPagamento      ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
+  contratos           Contrato[]
+  inquilinos          Inquilino[]
+  unidade             Unidade         @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+  vistorias           Vistoria[]
 }
 
 model Inquilino {
-  id                 String     @id @default(uuid())
+  id                 String            @id @default(uuid())
   nome               String
   email              String
   telefone           String
   cpf                String
   dataInicioContrato DateTime
-  ativo              Boolean    @default(true)
+  ativo              Boolean           @default(true)
   kitnetId           String
   asaasCustomerId    String?
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
   contatoEmergencia  String?
   dataFimContrato    DateTime?
   dataNascimento     DateTime?
@@ -94,7 +94,7 @@ model Inquilino {
   contratos          Contrato[]
   receitas           Receita[]
   whatsappContatos   WhatsappContato[]
-  kitnet             Kitnet     @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
+  kitnet             Kitnet            @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
 }
 
 // Digital / rosto do celular (WebAuthn): só guarda a chave PÚBLICA -- a
@@ -153,10 +153,10 @@ model Usuario {
 
   notificacoes Notificacao[]
 
-  pushSubscriptions PushSubscription[]
+  pushSubscriptions    PushSubscription[]
   credenciaisBiometria CredencialBiometria[]
-  sabadoConversas SabadoConversa[]
-  whatsappLeituras WhatsappConversaLeitura[]
+  sabadoConversas      SabadoConversa[]
+  whatsappLeituras     WhatsappConversaLeitura[]
 }
 
 // Uma inscrição de push por navegador/aparelho -- o mesmo usuário pode
@@ -177,35 +177,35 @@ model PushSubscription {
 }
 
 model Notificacao {
-  id          String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  usuarioId   String?
+  usuarioId String?
 
-  origem      String   // ex: "WHATSAPP", "ASAAS", "CLICKSIGN", "SISTEMA"
+  origem String // ex: "WHATSAPP", "ASAAS", "CLICKSIGN", "SISTEMA"
 
-  titulo      String
+  titulo String
 
-  mensagem    String
+  mensagem String
 
-  link        String?
+  link String?
 
   // De qual locador é o assunto do aviso (descoberto pelo link/registro).
   // Usuário restrito a um locador só recebe os dele; sem locador conhecido,
   // só quem vê o sistema inteiro recebe.
-  locadorId   String?
+  locadorId String?
 
   // Perfis que podiam ver esse aviso no momento em que ele nasceu --
   // "fotografado" de NotificacaoConfig.perfis na hora de criar (se o
   // admin mudar a regra depois, avisos antigos não mudam de dono).
   // Vazio = todos (igual sempre foi).
-  perfisAlvo  String[] @default([])
+  perfisAlvo String[] @default([])
 
-  lida        Boolean  @default(false)
-  lidaEm      DateTime?
+  lida   Boolean   @default(false)
+  lidaEm DateTime?
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
-  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
 }
 
 model Perfil {
@@ -225,20 +225,20 @@ model Perfil {
 }
 
 model Contrato {
-  id             String    @id @default(uuid())
-  locadorId      String
-  unidadeId      String
-  kitnetId       String
-  inquilinoId    String
-  dataInicio     DateTime
-  dataFim        DateTime?
-  valorAluguel   Float
-  diaVencimento  Int
-  tipoGarantia   String?
-  valorCaucao    Float?
-  indiceReajuste String?
-  status         String    @default("PENDENTE")
-  observacoes    String?
+  id                     String    @id @default(uuid())
+  locadorId              String
+  unidadeId              String
+  kitnetId               String
+  inquilinoId            String
+  dataInicio             DateTime
+  dataFim                DateTime?
+  valorAluguel           Float
+  diaVencimento          Int
+  tipoGarantia           String?
+  valorCaucao            Float?
+  indiceReajuste         String?
+  status                 String    @default("PENDENTE")
+  observacoes            String?
   // Preenchido só quando o contrato foi quebrado ANTES do dataFim
   // (excluir inquilino, excluir contrato, excluir kitnet ou encerrar
   // manualmente, tudo antes do fim de verdade) -- null quando o
@@ -247,26 +247,26 @@ model Contrato {
   // permissaoMiddleware.exigirConfirmacaoTerminoAntecipado.
   motivoEncerramento     String?
   observacaoEncerramento String?
-  clicksignDocumentKey String?
-  clicksignEnvelopeId  String?
-  clicksignSigningUrl  String?
-  clicksignEnviadoEm   DateTime?
+  clicksignDocumentKey   String?
+  clicksignEnvelopeId    String?
+  clicksignSigningUrl    String?
+  clicksignEnviadoEm     DateTime?
   // "DIGITAL" (padrão, assinado pela Clicksign) ou "MANUAL" (contrato que já
   // existia em papel/PDF e só foi cadastrado aqui pra ficar organizado --
   // ver "Arquivo de Contratos"). arquivoDados é o PDF/foto anexado, como
   // data URL base64 (mesmo padrão de Usuario.foto/Inquilino.foto -- sem
   // precisar de disco/volume próprio na VPS).
-  origem              String  @default("DIGITAL")
-  arquivoDados         String?
-  arquivoTipo          String?
-  arquivoNomeOriginal String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  inquilino      Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
-  kitnet         Kitnet    @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
-  locador        Locador   @relation(fields: [locadorId], references: [id], onDelete: Cascade)
-  unidade        Unidade   @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
-  receitas       Receita[]
+  origem                 String    @default("DIGITAL")
+  arquivoDados           String?
+  arquivoTipo            String?
+  arquivoNomeOriginal    String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+  inquilino              Inquilino @relation(fields: [inquilinoId], references: [id], onDelete: Cascade)
+  kitnet                 Kitnet    @relation(fields: [kitnetId], references: [id], onDelete: Cascade)
+  locador                Locador   @relation(fields: [locadorId], references: [id], onDelete: Cascade)
+  unidade                Unidade   @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+  receitas               Receita[]
 }
 
 // Signatários que entram automaticamente em TODO contrato novo enviado
@@ -333,6 +333,8 @@ model ContaPagamento {
   kitnets Kitnet[]
 
   receitas Receita[]
+
+  despesas Despesa[]
 }
 
 model Locador {
@@ -411,75 +413,75 @@ model Locador {
 }
 
 model Receita {
-  id              String    @id @default(uuid())
-  contratoId      String?
-  inquilinoId     String?
+  id                        String          @id @default(uuid())
+  contratoId                String?
+  inquilinoId               String?
   // De qual locador é o dinheiro. Preenchido na criação (pelo contrato/inquilino
   // ou pelo usuário restrito que lançou) -- é o que faz a receita avulsa, sem
   // contrato nem inquilino, aparecer pro locador certo.
-  locadorId       String?
+  locadorId                 String?
   // Pagador avulso: dados digitados na hora, pra mandar boleto sem
   // precisar cadastrar um Inquilino completo (kitnet, contrato...) só
   // pra uma cobrança única. Só usado quando não tem inquilino/contrato
   // vinculado -- ver gatewayPagamentoService.resolverPagador.
-  pagadorNome     String?
-  pagadorCpf      String?
-  pagadorEmail    String?
-  pagadorTelefone String?
-  categoria       String
-  descricao       String
-  valor           Float
+  pagadorNome               String?
+  pagadorCpf                String?
+  pagadorEmail              String?
+  pagadorTelefone           String?
+  categoria                 String
+  descricao                 String
+  valor                     Float
   // Valor líquido de verdade, depois de descontar a taxa do boleto --
   // "valor" continua sendo o valor COBRADO do pagador (bruto), nunca
   // mudou de significado. Calculado sozinho (não editável no front)
   // pela ContaPagamento.taxaBoletoValor da conta que processa
   // essa receita (locador -> Locador.contaPagamentoId, senão a conta
   // padrão do sistema -- mesma resolução de gatewayPagamentoService).
-  valorLiquido    Float?
+  valorLiquido              Float?
   // true = quando esta ficar PAGA, o job de recorrência gera
   // automaticamente a cobrança do mês seguinte (mesmo inquilino,
   // mesmo valor) -- ver gerarRecorrenciaReceitasJob.js.
-  recorrente      Boolean   @default(false)
-  vencimento      DateTime?
-  dataPagamento   DateTime?
+  recorrente                Boolean         @default(false)
+  vencimento                DateTime?
+  dataPagamento             DateTime?
   // Quando o dinheiro É CREDITADO na conta do locador -- só o BB
   // devolve isso separado de dataPagamento (compensação de boleto não
   // é sempre no mesmo dia do pagamento). Pix/Asaas creditam na hora,
   // então ficam iguais a dataPagamento nesses casos.
-  dataCredito     DateTime?
-  status          String    @default("PENDENTE")
-  formaPagamento  String?
-  descontoValor   Float?
-  descontoDias    Int?
-  multaValor      Float?
-  jurosValor      Float?
-  asaasPaymentId  String?   @unique
-  asaasCustomerId String?
-  enviadaAsaas    Boolean   @default(false)
+  dataCredito               DateTime?
+  status                    String          @default("PENDENTE")
+  formaPagamento            String?
+  descontoValor             Float?
+  descontoDias              Int?
+  multaValor                Float?
+  jurosValor                Float?
+  asaasPaymentId            String?         @unique
+  asaasCustomerId           String?
+  enviadaAsaas              Boolean         @default(false)
   // Genéricos, preenchidos independente do banco (Asaas continua
   // preenchendo os dois campos acima também, por compatibilidade com
   // telas que já leem enviadaAsaas/asaasPaymentId direto).
-  contaPagamentoId  String?
-  contaPagamento    ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
-  gatewayProvider   String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
-  gatewayReferencia String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
-  linkBoleto        String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
-  linhaDigitavel    String? // código pra digitar/colar no app do banco em vez de abrir o link
+  contaPagamentoId          String?
+  contaPagamento            ContaPagamento? @relation(fields: [contaPagamentoId], references: [id])
+  gatewayProvider           String? // "ASAAS" | "BB" -- pro front não precisar de join só pra mostrar o selo
+  gatewayReferencia         String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
+  linkBoleto                String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
+  linhaDigitavel            String? // código pra digitar/colar no app do banco em vez de abrir o link
   // Pix "copia e cola" do próprio boleto (BB: qrCode.emv da resposta de
   // registro; EFI: pix.qrcode) -- quando a conta tem Pix habilitado,
   // dá pra pagar sem nem abrir o link/PDF do boleto.
-  pixCopiaECola     String?
-  lembreteEnviadoEm DateTime?
+  pixCopiaECola             String?
+  lembreteEnviadoEm         DateTime?
   // Quando a cobrança foi de fato mandada pro banco/provedor (botão
   // "Enviar Cobrança") -- diferente de createdAt (quando a Receita foi
   // cadastrada no sistema, pode ser bem antes do envio de verdade).
   // Usado no "Mapa da Cobrança" (Financeiro > 3 pontinhos) pra montar
   // a linha do tempo: enviada -> identificada -> creditada.
-  cobrancaEnviadaEm DateTime?
+  cobrancaEnviadaEm         DateTime?
   // Dedupe dos avisos automáticos por WhatsApp -- cada um dispara só
   // uma vez por Receita, mesmo se o job rodar de novo.
-  avisoVencidoEnviadoEm       DateTime?
-  confirmacaoPagtoEnviadaEm   DateTime?
+  avisoVencidoEnviadoEm     DateTime?
+  confirmacaoPagtoEnviadaEm DateTime?
 
   // Mesmo dedupe, mas pra Vistoria interna de "risco de corte" criada
   // depois de 72h de atraso (ver verificarAtrasoCorteJob.js) -- não é
@@ -491,39 +493,45 @@ model Receita {
   // -- Financeiro e Vistorias não se falavam depois da vistoria criada,
   // só antes. onDelete: SetNull porque excluir a receita (trava própria
   // de senha+motivo) não deve arrastar a vistoria junto.
-  vistoriaCorteId String?  @unique
-  vistoriaCorte   Vistoria? @relation(fields: [vistoriaCorteId], references: [id], onDelete: SetNull)
+  vistoriaCorteId             String?   @unique
+  vistoriaCorte               Vistoria? @relation(fields: [vistoriaCorteId], references: [id], onDelete: SetNull)
 
   // Dedupe (um por dia, não um só pra sempre -- ver lembreteEnviadoEm)
   // do aviso INTERNO (sino/WhatsApp da equipe, não do inquilino) de
   // "cobrança perto de vencer (ou já vencida) e ainda não foi enviada
   // pro banco" -- ver verificarCobrancaNaoEnviadaJob.js.
-  alertaNaoEnviadaEm DateTime?
+  alertaNaoEnviadaEm   DateTime?
   // true = some da lista normal de Receitas e passa a aparecer só na
   // aba Histórico -- pra não acumular, mês após mês, cobrança recorrente
   // já paga misturada com as em aberto. Só muda com a ação manual
   // "Enviar para Histórico" (ou "Remover do Histórico" pra desfazer).
-  arquivadaNoHistorico Boolean @default(false)
-  fixado          Boolean   @default(false)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  contrato        Contrato? @relation(fields: [contratoId], references: [id])
-  inquilino       Inquilino? @relation(fields: [inquilinoId], references: [id])
+  arquivadaNoHistorico Boolean    @default(false)
+  fixado               Boolean    @default(false)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  contrato             Contrato?  @relation(fields: [contratoId], references: [id])
+  inquilino            Inquilino? @relation(fields: [inquilinoId], references: [id])
 }
 
 model Despesa {
-  id            String    @id @default(uuid())
-  categoria     String
-  descricao     String
-  valor         Float
-  vencimento    DateTime?
-  dataPagamento DateTime?
-  status        String    @default("PENDENTE")
-  fixado        Boolean   @default(false)
-  unidadeId     String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  unidade       Unidade?  @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+  id               String          @id @default(uuid())
+  categoria        String
+  descricao        String
+  valor            Float
+  vencimento       DateTime?
+  dataPagamento    DateTime?
+  status           String          @default("PENDENTE")
+  fixado           Boolean         @default(false)
+  unidadeId        String?
+  // De qual conta (ContaPagamento) saiu essa despesa -- escolhida na
+  // hora de cadastrar, igual a Receita, mas aqui sempre manual: não
+  // tem gateway/boleto que resolva sozinho, porque despesa nunca é
+  // cobrada de ninguém.
+  contaPagamentoId String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  unidade          Unidade?        @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+  contaPagamento   ContaPagamento? @relation(fields: [contaPagamentoId], references: [id], onDelete: SetNull)
 }
 
 model Solicitacao {
@@ -1003,24 +1011,25 @@ model WhatsappMensagem {
 
   conversa WhatsappConversa @relation(fields: [conversaId], references: [id])
 }
+
 model Configuracao {
-  id               Int      @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 
-  empresa          String
-  cnpj             String?
-  telefone         String?
-  email            String?
+  empresa  String
+  cnpj     String?
+  telefone String?
+  email    String?
 
-  endereco         String?
-  cidade           String?
-  uf               String?
-  cep              String?
+  endereco String?
+  cidade   String?
+  uf       String?
+  cep      String?
 
-  logo             String?
-  tema             String? @default("claro")
+  logo String?
+  tema String? @default("claro")
 
-  corPrimaria      String? @default("#F4C430")
-  corSecundaria    String? @default("#1F2937")
+  corPrimaria   String? @default("#F4C430")
+  corSecundaria String? @default("#1F2937")
 
   nomeSistema        String?
   nomeEmpresa        String?
@@ -1028,30 +1037,30 @@ model Configuracao {
   textoRodape        String?
   mensagemBoasVindas String?
 
-  smtpHost         String?
-  smtpPorta        Int?
-  smtpUsuario      String?
-  smtpSenha        String?
+  smtpHost    String?
+  smtpPorta   Int?
+  smtpUsuario String?
+  smtpSenha   String?
 
-  asaasToken            String?
-  asaasAmbiente         String?  @default("sandbox")
-  asaasWalletId         String?
-  asaasWebhookToken     String?
+  asaasToken             String?
+  asaasAmbiente          String? @default("sandbox")
+  asaasWalletId          String?
+  asaasWebhookToken      String?
   asaasTaxaAdministracao Float?  @default(0)
 
-  clicksignToken        String?
-  clicksignAmbiente     String?  @default("sandbox")
-  clicksignTemplateKey  String?
+  clicksignToken         String?
+  clicksignAmbiente      String? @default("sandbox")
+  clicksignTemplateKey   String?
   clicksignWebhookSecret String?
 
-  whatsappToken    String?
-  whatsappNumero   String?
+  whatsappToken  String?
+  whatsappNumero String?
 
-  manutencaoAtiva     Boolean @default(false)
-  manutencaoMensagem  String?
+  manutencaoAtiva    Boolean @default(false)
+  manutencaoMensagem String?
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model ModeloDocumento {
@@ -1082,6 +1091,7 @@ model CampoObrigatorio {
 
   @@unique([modulo, campo])
 }
+
 // O que o administrador escolheu notificar (Administração > Notificações).
 // Sem linha pro tipo = ligado (comportamento de sempre).
 //   ativo = false -> a notificação nem é criada (nem sino, nem celular)
@@ -1147,7 +1157,7 @@ model SabadoMensagem {
   conversaId String
   conversa   SabadoConversa @relation(fields: [conversaId], references: [id], onDelete: Cascade)
 
-  role    String // "user" ou "assistant"
+  role     String // "user" ou "assistant"
   conteudo String
 
   createdAt DateTime @default(now())
@@ -1177,4 +1187,3 @@ model SnapshotOcupacao {
 
   @@unique([data, locadorId])
 }
-

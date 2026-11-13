@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { UnidadeService } from "@/services/unidades.service";
+import { ContaPagamentoService } from "@/services/contaPagamento.service";
 import { CamposObrigatoriosService } from "@/services/camposObrigatorios.service";
 import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoObrigatorios";
 
@@ -10,13 +11,14 @@ import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoOb
 // tem como ficarem em branco independente do que for configurado.
 const SEMPRE_OBRIGATORIOS = new Set(["categoria", "descricao", "valor"]);
 
-const CAMPOS = ["categoria", "descricao", "valor", "unidadeId", "status", "vencimento", "dataPagamento"];
+const CAMPOS = ["categoria", "descricao", "valor", "unidadeId", "contaPagamentoId", "status", "vencimento", "dataPagamento"];
 
 const ROTULOS = {
   categoria: "Categoria",
   descricao: "Descrição",
   valor: "Valor",
   unidadeId: "Residência",
+  contaPagamentoId: "Conta",
   status: "Status",
   vencimento: "Vencimento",
   dataPagamento: "Data de Pagamento",
@@ -27,6 +29,7 @@ export default function DespesaForm({
   despesaEditando,
 }) {
   const [residencias, setResidencias] = useState([]);
+  const [contas, setContas] = useState([]);
 
   const [obrigatorios, setObrigatorios] = useState(new Set());
   const [erro, setErro] = useState("");
@@ -47,6 +50,8 @@ export default function DespesaForm({
       dataPagamento: "",
 
       unidadeId: "",
+
+      contaPagamentoId: "",
     });
 
   useEffect(() => {
@@ -58,6 +63,15 @@ export default function DespesaForm({
         );
       } catch (err) {
         console.error("Erro ao carregar residências:", err);
+      }
+    }
+
+    async function carregarContas() {
+      try {
+        const resposta = await ContaPagamentoService.listar();
+        setContas(Array.isArray(resposta) ? resposta : resposta.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar contas:", err);
       }
     }
 
@@ -81,6 +95,7 @@ export default function DespesaForm({
     }
 
     carregarResidencias();
+    carregarContas();
     carregarObrigatorios();
   }, []);
 
@@ -89,6 +104,7 @@ export default function DespesaForm({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setFormData({
         unidadeId: "",
+        contaPagamentoId: "",
         ...despesaEditando,
       });
     }
@@ -220,6 +236,26 @@ export default function DespesaForm({
             {residencias.map((residencia) => (
               <option key={residencia.id} value={residencia.id}>
                 {residencia.nome}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+            Conta{obrigatorios.has("contaPagamentoId") && <span className="text-red-400"> *</span>}
+          </label>
+          <select
+            name="contaPagamentoId"
+            value={formData.contaPagamentoId || ""}
+            onChange={handleChange}
+            required={obrigatorios.has("contaPagamentoId")}
+            className={inputStyle}
+          >
+            <option value="">Selecione (opcional)</option>
+            {contas.map((conta) => (
+              <option key={conta.id} value={conta.id}>
+                {conta.nome}
               </option>
             ))}
           </select>
