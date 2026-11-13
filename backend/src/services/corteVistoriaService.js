@@ -61,6 +61,44 @@ const resolverSeNaoCabeMais = async (receitaId) => {
 
 };
 
+// Caminho INVERSO do resolverSeNaoCabeMais (que parte da Receita) --
+// varre direto as Vistorias de corte ainda abertas e cancela qualquer
+// uma que não tenha mais uma Receita de verdade te back-la (ex.: a
+// Receita que gerou ela foi excluída/cancelada por fora do fluxo
+// normal, sem passar por cancelarVinculada). Sem isso, uma vistoria
+// dessas fica Pendente pra sempre, pedindo corte de água/energia de
+// um débito que não existe mais -- bug relatado em 13/11/2026 (sobra
+// de quando existiam duas Receitas de Aluguel pro mesmo mês/inquilino).
+const TITULO_REALIZAR_CORTE = 'REALIZAR CORTE DE ÁGUA E ENERGIA';
+
+const resolverOrfas = async () => {
+
+  const abertas = await prisma.vistoria.findMany({
+    where: { titulo: TITULO_REALIZAR_CORTE, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
+    select: { id: true, observacoes: true },
+  });
+
+  let canceladas = 0;
+
+  for (const vistoria of abertas) {
+
+    const receita = await prisma.receita.findFirst({ where: { vistoriaCorteId: vistoria.id } });
+
+    if (receita && aindaEmRisco(receita)) continue;
+
+    await vistoriaService.atualizar(vistoria.id, {
+      status: 'CANCELADA',
+      observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- não existe mais nenhuma cobrança em aberto ligada a essa vistoria de corte.`,
+    });
+
+    canceladas++;
+
+  }
+
+  return canceladas;
+
+};
+
 // Pra quando a Receita está sendo EXCLUÍDA de vez -- aí não interessa
 // mais se ela "ainda cabe" ou não (os critérios de aindaEmRisco nem
 // fazem sentido pra uma cobrança que está deixando de existir): a
@@ -85,4 +123,4 @@ const cancelarVinculada = async (receitaId) => {
 
 };
 
-module.exports = { aindaEmRisco, resolverSeNaoCabeMais, cancelarVinculada };
+module.exports = { aindaEmRisco, resolverSeNaoCabeMais, resolverOrfas, cancelarVinculada, TITULO_REALIZAR_CORTE };

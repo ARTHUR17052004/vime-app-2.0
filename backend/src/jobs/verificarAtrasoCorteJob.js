@@ -57,6 +57,18 @@ module.exports = async () => {
 
   }
 
+  // Caminho inverso -- varre direto as vistorias de corte (não as
+  // receitas), pra pegar quem ficou órfã por fora desse fluxo (ver
+  // corteVistoriaService.resolverOrfas).
+  try {
+    const orfasCanceladas = await corteVistoriaService.resolverOrfas();
+    if (orfasCanceladas > 0) {
+      console.log(`[JOB] ${orfasCanceladas} vistoria(s) de corte órfã(s) cancelada(s).`);
+    }
+  } catch (erro) {
+    console.error('[JOB] Erro ao resolver vistorias de corte órfãs:', erro.message);
+  }
+
   const limite = new Date();
   limite.setHours(limite.getHours() - 72);
 
@@ -98,10 +110,23 @@ module.exports = async () => {
       continue;
     }
 
+    // Já existe um "realizar corte" aberto pra essa mesma kitnet --
+    // não cria outro (duas cobranças atrasadas da mesma kitnet viram
+    // um corte só, não dois pedidos redundantes pro zelador). Não linka
+    // essa receita à vistoria da outra -- se a outra for resolvida
+    // primeiro, a vistoria seria cancelada mesmo com essa aqui ainda em
+    // atraso. Só pula por agora; volta a tentar na próxima rodada.
+    const jaTemCorteAberto = await prisma.vistoria.findFirst({
+      where: { kitnetId: kitnet.id, titulo: corteVistoriaService.TITULO_REALIZAR_CORTE, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
+      select: { id: true },
+    });
+
+    if (jaTemCorteAberto) continue;
+
     try {
 
       const vistoria = await vistoriaService.criar({
-        titulo: 'REALIZAR CORTE DE ÁGUA E ENERGIA',
+        titulo: corteVistoriaService.TITULO_REALIZAR_CORTE,
         descricao: `Kitnet com falta de pagamento após 72 horas. ${inquilino?.nome || 'Inquilino'} -- R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}. Conforme o contrato, água/energia podem ser suspensas até a quitação do débito.`,
         unidadeId: unidade.id,
         kitnetId: kitnet.id,
