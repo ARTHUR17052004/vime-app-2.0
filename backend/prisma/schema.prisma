@@ -1016,6 +1016,18 @@ model WhatsappMensagem {
   // ambíguo num self-relation), resolvido na mão em whatsappService.
   respostaDeId String?
 
+  // Mídia RECEBIDA (imagem/áudio/vídeo/documento/figurinha) -- antes se
+  // perdia pra sempre (só sobrava o texto "[Mensagem não suportada]").
+  // midiaDados em base64, mesmo padrão de Contrato.arquivoDados.
+  // midiaTipo é a categoria da Meta ("image"|"audio"|"video"|
+  // "document"|"sticker"), midiaMimeType o mime de verdade (ex.:
+  // "image/jpeg"), midiaNomeOriginal só existe pra documento (nome do
+  // arquivo que a pessoa mandou).
+  midiaDados        String?
+  midiaTipo         String?
+  midiaMimeType     String?
+  midiaNomeOriginal String?
+
   createdAt DateTime @default(now())
 
   conversa WhatsappConversa @relation(fields: [conversaId], references: [id])

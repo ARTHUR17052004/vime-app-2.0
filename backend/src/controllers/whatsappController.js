@@ -355,6 +355,40 @@ const excluirConversa = async (req, res) => {
 };
 
 /* ==========================================
+   MÍDIA DE UMA MENSAGEM RECEBIDA
+========================================== */
+
+const obterMidia = async (req, res) => {
+
+  try {
+
+    const midia = await whatsappService.obterMidiaMensagem(req.params.id);
+
+    if (!midia) {
+      return res.status(404).json({ success: false, message: "Mídia não encontrada." });
+    }
+
+    res.setHeader("Content-Type", midia.mimeType);
+
+    // Documento baixa com o nome de verdade; imagem/áudio/vídeo/
+    // figurinha tocam/abrem direto na tela (inline), sem download.
+    if (midia.nomeOriginal) {
+      res.setHeader("Content-Disposition", `attachment; filename="${midia.nomeOriginal}"`);
+    } else {
+      res.setHeader("Content-Disposition", "inline");
+    }
+
+    return res.send(midia.buffer);
+
+  } catch (error) {
+
+    return res.status(500).json({ success: false, message: error.message });
+
+  }
+
+};
+
+/* ==========================================
    APAGAR MENSAGEM
 ========================================== */
 
@@ -427,5 +461,7 @@ module.exports = {
   excluirMensagem,
 
   editarMensagem,
+
+  obterMidia,
 
 };

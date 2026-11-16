@@ -52,5 +52,6 @@ router.put("/conversas/:id/lida", permissaoMiddleware('whatsapp.visualizar'), wh
 router.delete("/conversas/:id", permissaoMiddleware('whatsapp.enviar'), whatsappController.excluirConversa);
 router.delete("/mensagens/:id", permissaoMiddleware('whatsapp.enviar'), whatsappController.excluirMensagem);
 router.put("/mensagens/:id", permissaoMiddleware('whatsapp.enviar'), whatsappController.editarMensagem);
+router.get("/mensagens/:id/midia", permissaoMiddleware('whatsapp.visualizar'), whatsappController.obterMidia);
 
 module.exports = router;

@@ -234,6 +234,14 @@ class WhatsappService {
           respostaDeTexto: m.respostaDeId
             ? conversa.mensagens.find((outra) => outra.id === m.respostaDeId)?.texto
             : null,
+          // Só o tipo/nome aqui -- nunca midiaDados (o base64 em si),
+          // senão toda vez que a tela de conversas carrega baixaria TODA
+          // mídia de TODA conversa de uma vez. O conteúdo de verdade só
+          // é buscado sob demanda (ver GET /whatsapp/mensagens/:id/midia).
+          temMidia: Boolean(m.midiaDados),
+          midiaTipo: m.midiaTipo,
+          midiaMimeType: m.midiaMimeType,
+          midiaNomeOriginal: m.midiaNomeOriginal,
           hora: m.createdAt.toLocaleTimeString("pt-BR", {
             hour: "2-digit",
             minute: "2-digit",
@@ -559,6 +567,25 @@ class WhatsappService {
      entrega de uma mensagem já recebida no aparelho de quem recebeu.
   ========================================== */
 
+  // Devolve o conteúdo de verdade de uma mídia recebida (imagem/áudio/
+  // vídeo/documento/figurinha) -- base64 decodificado de volta pra
+  // buffer, pra servir como arquivo de verdade (ver whatsappController).
+  async obterMidiaMensagem(id) {
+
+    const mensagem = await prisma.whatsappMensagem.findUnique({ where: { id } });
+
+    if (!mensagem?.midiaDados) {
+      return null;
+    }
+
+    return {
+      buffer: Buffer.from(mensagem.midiaDados, "base64"),
+      mimeType: mensagem.midiaMimeType || "application/octet-stream",
+      nomeOriginal: mensagem.midiaNomeOriginal,
+    };
+
+  }
+
   async excluirMensagem(id) {
 
     const mensagem = await prisma.whatsappMensagem.findUnique({ where: { id } });
@@ -784,9 +811,52 @@ class WhatsappService {
         // chave canônica, senão a mesma pessoa vira dois contatos.
         const numero = normalizarTelefoneChave(msg.from);
 
-        const texto =
-          msg.text?.body ||
-          "[Mensagem não suportada]";
+        // Tipos de mídia que a Meta manda no webhook (msg.type) --
+        // cada um guarda o id do arquivo num campo próprio, nunca o
+        // conteúdo em si. "[Mensagem não suportada]" só sobra mesmo
+        // pra tipo que não é nem texto nem um destes (ex.: localização,
+        // contato, enquete, reação).
+        const ROTULO_MIDIA = {
+          image: "📷 Imagem",
+          video: "🎥 Vídeo",
+          audio: "🎵 Áudio",
+          sticker: "😀 Figurinha",
+          document: "📄 Documento",
+        };
+
+        let texto = msg.text?.body || null;
+
+        let midia = null;
+
+        if (!texto && ROTULO_MIDIA[msg.type] && msg[msg.type]?.id) {
+
+          const nomeOriginal = msg.type === "document" ? msg[msg.type].filename : null;
+
+          texto = nomeOriginal ? `${ROTULO_MIDIA[msg.type]}: ${nomeOriginal}` : ROTULO_MIDIA[msg.type];
+
+          try {
+
+            const { buffer, mimeType } = await metaWhatsappService.obterMidia(msg[msg.type].id);
+
+            midia = {
+              midiaDados: buffer.toString("base64"),
+              midiaTipo: msg.type,
+              midiaMimeType: mimeType,
+              midiaNomeOriginal: nomeOriginal,
+            };
+
+          } catch (erroMidia) {
+
+            // Mídia em si falhou ao baixar (token vencido, id expirado
+            // etc.) -- a mensagem ainda é registrada, só sem o anexo
+            // (mesmo texto-rótulo, sem o `midia` pra abrir/tocar).
+            console.error(`[WhatsApp] Falha ao baixar mídia (${msg.type}, ${msg[msg.type]?.id}):`, erroMidia.message);
+
+          }
+
+        }
+
+        texto = texto || "[Mensagem não suportada]";
 
         let contato =
           await prisma.whatsappContato.findUnique({
@@ -852,6 +922,12 @@ class WhatsappService {
             texto,
             tipo: "recebida",
             status: "recebida",
+            ...(midia && {
+              midiaDados: midia.midiaDados,
+              midiaTipo: midia.midiaTipo,
+              midiaMimeType: midia.midiaMimeType,
+              midiaNomeOriginal: midia.midiaNomeOriginal,
+            }),
           },
         });
 

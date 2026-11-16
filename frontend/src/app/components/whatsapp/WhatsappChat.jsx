@@ -1,9 +1,12 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { API_URL } from "../../../config/api";
+import { Sessao } from "../../../utils/sessao";
 
 import {
   Bot,
@@ -16,7 +19,125 @@ import {
   Pencil,
   Trash2,
   X,
+  FileText,
+  Download,
 } from "lucide-react";
+
+// Baixa a mídia de uma mensagem recebida (ver GET /whatsapp/mensagens/:id/midia)
+// como blob autenticado -- um <img src="...">/<audio src="..."> direto
+// não manda o Bearer token, só cookie, então busca o conteúdo pela API
+// de verdade e usa um object URL local pra tocar/exibir/baixar depois.
+function useMidiaBlob(mensagemId, habilitado) {
+
+  const [url, setUrl] = useState(null);
+  const [erro, setErro] = useState(false);
+  const [carregando, setCarregando] = useState(true);
+
+  useEffect(() => {
+
+    if (!habilitado) return;
+
+    let objectUrl = null;
+    let cancelado = false;
+
+    async function carregar() {
+
+      try {
+
+        setCarregando(true);
+        setErro(false);
+
+        const token = Sessao.token();
+
+        const resposta = await fetch(`${API_URL}/whatsapp/mensagens/${mensagemId}/midia`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          credentials: "include",
+        });
+
+        if (!resposta.ok) throw new Error("Falha ao carregar mídia.");
+
+        const blob = await resposta.blob();
+
+        if (cancelado) return;
+
+        objectUrl = URL.createObjectURL(blob);
+        setUrl(objectUrl);
+
+      } catch {
+
+        if (!cancelado) setErro(true);
+
+      } finally {
+
+        if (!cancelado) setCarregando(false);
+
+      }
+
+    }
+
+    carregar();
+
+    return () => {
+      cancelado = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+
+  }, [mensagemId, habilitado]);
+
+  return { url, erro, carregando };
+
+}
+
+// Mídia recebida (imagem/áudio/vídeo/documento/figurinha) -- antes
+// qualquer uma dessas virava só o texto "[Mensagem não suportada]",
+// sem nenhum jeito de ver o que realmente foi mandado.
+function MidiaMensagem({ msg }) {
+
+  const { url, erro, carregando } = useMidiaBlob(msg.id, msg.temMidia);
+
+  if (erro) {
+    return <p className="text-sm text-[var(--text)]/70 italic">Não foi possível carregar o anexo.</p>;
+  }
+
+  if (carregando || !url) {
+    return <p className="text-sm text-[var(--text)]/70 italic">Carregando anexo...</p>;
+  }
+
+  if (msg.midiaTipo === "image" || msg.midiaTipo === "sticker") {
+    return (
+      <a href={url} target="_blank" rel="noreferrer">
+        <img
+          src={url}
+          alt=""
+          className="max-h-64 w-full rounded-xl object-contain"
+        />
+      </a>
+    );
+  }
+
+  if (msg.midiaTipo === "video") {
+    return <video src={url} controls className="max-h-64 w-full rounded-xl" />;
+  }
+
+  if (msg.midiaTipo === "audio") {
+    return <audio src={url} controls className="w-full" />;
+  }
+
+  // Documento -- link de download de verdade (o blob já está em
+  // memória, baixado com autenticação; o navegador só salva ele).
+  return (
+    <a
+      href={url}
+      download={msg.midiaNomeOriginal || "documento"}
+      className="flex items-center gap-2.5 rounded-xl bg-black/15 px-3.5 py-2.5 text-sm hover:bg-black/25 transition"
+    >
+      <FileText size={18} className="shrink-0" />
+      <span className="truncate flex-1">{msg.midiaNomeOriginal || "Documento"}</span>
+      <Download size={15} className="shrink-0" />
+    </a>
+  );
+
+}
 
 // Divisor "Hoje"/"Ontem"/data por extenso entre mensagens de dias
 // diferentes -- antes o chat só mostrava a hora de cada mensagem, sem
@@ -537,7 +658,7 @@ export default function WhatsappChat({ conversa }) {
                   </div>
                 )}
 
-                {msg.texto}
+                {msg.temMidia ? <MidiaMensagem msg={msg} /> : msg.texto}
 
                 <div
                   className="

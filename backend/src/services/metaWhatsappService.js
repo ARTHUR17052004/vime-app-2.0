@@ -76,6 +76,37 @@ class MetaWhatsappService {
 
   }
 
+  // Baixa o conteúdo de uma mídia RECEBIDA (imagem/áudio/vídeo/
+  // documento/figurinha) -- a Meta nunca manda o arquivo direto no
+  // webhook, só o id. Dois passos: 1) GET /{media-id} devolve uma URL
+  // temporária (expira rápido, por isso baixa na hora, nunca guarda
+  // essa URL) + o mime_type de verdade; 2) GET nessa URL (com o mesmo
+  // Bearer token) devolve os bytes. Sem isso, toda mídia recebida virava
+  // só "[Mensagem não suportada]" e o conteúdo se perdia pra sempre.
+  async obterMidia(mediaId) {
+
+    const { token } = await this.obterCredenciais();
+
+    if (!token) {
+      throw new Error("WhatsApp não configurado: informe o Token na tela de Configuração.");
+    }
+
+    const info = await axios.get(`https://graph.facebook.com/v23.0/${mediaId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    const resposta = await axios.get(info.data.url, {
+      headers: { Authorization: `Bearer ${token}` },
+      responseType: "arraybuffer",
+    });
+
+    return {
+      buffer: Buffer.from(resposta.data),
+      mimeType: info.data.mime_type || "application/octet-stream",
+    };
+
+  }
+
   // `respostaAId` (opcional) é o wamid (mensagemIdMeta) de uma mensagem
   // anterior -- quando informado, a Meta manda como resposta "citada"
   // de verdade (igual responder uma mensagem específica no WhatsApp
