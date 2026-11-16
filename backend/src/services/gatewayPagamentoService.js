@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 
 const asaasService = require('./asaasService');
+const AsaasApi = require('./AsaasApi');
 const contaPagamentoService = require('./contaPagamentoService');
 const BBApi = require('./BBApi');
 const EFIApi = require('./EFIApi');
@@ -455,8 +456,69 @@ const enviarCobranca = async (receitaId) => {
 
 };
 
+// Cancela a cobrança de verdade no banco que a processou -- chamado na
+// hora de excluir uma Receita que já tinha sido enviada (ver
+// receitaService.remover). Nunca trava a exclusão em si: ela sempre
+// acontece aqui dentro do VIME de qualquer forma; isso só avisa se o
+// cancelamento do lado de fora deu certo ou não, pra quem excluiu
+// saber se ainda precisa ir cancelar na mão no painel do banco.
+//
+// BRB não tem função de cancelar implementada ainda (nenhuma receita
+// real usou esse provider até agora) -- se aparecer um caso de
+// verdade, implementar igual os outros três.
+const cancelarNoBanco = async (receita) => {
+
+  if (!receita.gatewayReferencia || !receita.gatewayProvider) {
+    // Nunca foi enviada a banco nenhum -- não tem o que cancelar lá fora.
+    return { tentou: false };
+  }
+
+  const conta = receita.contaPagamentoId
+    ? await prisma.contaPagamento.findUnique({ where: { id: receita.contaPagamentoId } })
+    : null;
+
+  const credenciais = conta?.credenciais || null;
+
+  try {
+
+    if (receita.gatewayProvider === 'BB') {
+      await BBApi.baixarBoletoPorNumeroTitulo(receita.gatewayReferencia, credenciais);
+      return { tentou: true, success: true };
+    }
+
+    if (receita.gatewayProvider === 'EFI') {
+      await EFIApi.cancelarCobranca(receita.gatewayReferencia, credenciais);
+      return { tentou: true, success: true };
+    }
+
+    if (receita.gatewayProvider === 'ASAAS') {
+      await AsaasApi.cancelarCobranca(receita.gatewayReferencia, credenciais);
+      return { tentou: true, success: true };
+    }
+
+    return {
+      tentou: true,
+      success: false,
+      mensagem: `Cancelamento automático não implementado ainda para ${receita.gatewayProvider} -- cancele manualmente no painel do banco.`,
+    };
+
+  } catch (erro) {
+
+    console.error(`[gateway] Falha ao cancelar ${receita.gatewayProvider} (${receita.gatewayReferencia}):`, erro.message);
+
+    return {
+      tentou: true,
+      success: false,
+      mensagem: `Excluído aqui no VIME, mas o banco (${receita.gatewayProvider}) recusou o cancelamento: ${erro.message}. Cancele manualmente no painel do banco.`,
+    };
+
+  }
+
+};
+
 module.exports = {
   enviarCobranca,
+  cancelarNoBanco,
   resolverLocadorId,
   numeroControleParaReceita,
 };

@@ -115,11 +115,17 @@ const remover = async (req, res) => {
     });
   }
 
-  await receitaService.remover(req.params.id, req.usuario, req.body?.motivoExclusao);
+  const removida = await receitaService.remover(req.params.id, req.usuario, req.body?.motivoExclusao);
+
+  const banco = removida.cancelamentoBanco;
 
   return res.json({
     success: true,
-    message: 'Receita removida com sucesso.'
+    message:
+      banco?.tentou && !banco.success
+        ? `Receita removida aqui no VIME, mas o banco não cancelou: ${banco.mensagem}`
+        : 'Receita removida com sucesso.',
+    cancelamentoBanco: banco,
   });
 
 };

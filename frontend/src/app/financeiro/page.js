@@ -280,9 +280,18 @@ function FinanceiroPageConteudo() {
 
     try {
 
-      await ReceitaService.excluir(id, dados);
+      const resposta = await ReceitaService.excluir(id, dados);
 
       await carregar();
+
+      // Excluir aqui tenta cancelar a cobrança de verdade no banco
+      // também (ver gatewayPagamentoService.cancelarNoBanco) -- se não
+      // conseguiu, a exclusão em si já aconteceu (não trava por isso),
+      // mas precisa avisar: o boleto pode continuar válido lá fora.
+      const banco = resposta?.cancelamentoBanco;
+      if (banco?.tentou && !banco.success) {
+        alert(banco.mensagem || "Receita removida aqui, mas não foi possível cancelar no banco. Cancele manualmente.");
+      }
 
     } catch (err) {
 

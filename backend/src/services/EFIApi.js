@@ -302,6 +302,23 @@ class EFIApi {
 
   }
 
+  // Cancela uma cobrança já registrada -- CONFIRMADO ao vivo em
+  // 16/11/2026 contra uma cobrança real (duplicada, R$ 800, conta SH):
+  // PUT /v1/charge/{id}/cancel, sem corpo, e depois confirmado também
+  // via consultarCobranca() que o status realmente virou "canceled".
+  async cancelarCobranca(chargeId, override = null) {
+
+    const resultado = await this.request("PUT", `/v1/charge/${chargeId}/cancel`, null, override);
+
+    const dados = resultado?.data || resultado;
+
+    return {
+      status: dados?.status || null,
+      cancelado: dados?.status === "canceled",
+    };
+
+  }
+
   // ==========================
   // PIX -- extrato de recebidos
   // ==========================

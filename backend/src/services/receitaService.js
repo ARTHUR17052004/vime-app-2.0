@@ -9,6 +9,7 @@ const campoObrigatorioService = require('./campoObrigatorioService');
 const contaPagamentoService = require('./contaPagamentoService');
 const notificacaoService = require('./notificacaoService');
 const corteVistoriaService = require('./corteVistoriaService');
+const gatewayPagamentoService = require('./gatewayPagamentoService');
 const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
 const { diffCampos } = require('../utils/diffCampos');
 
@@ -478,13 +479,21 @@ const remover = async (id, autor, motivoExclusao) => {
     .cancelarVinculada(receita.id)
     .catch((erro) => console.error('[corteVistoria] Falha ao cancelar vistoria vinculada:', erro.message));
 
+  // Se essa cobrança já tinha sido enviada a um banco de verdade,
+  // cancela ela lá também -- antes, excluir aqui dentro nunca mexia no
+  // banco, e o boleto continuava válido e pagável mesmo já "excluído"
+  // no VIME (bug relatado em 16/11/2026: vários boletos reais do BB/EFI
+  // ficaram órfãos assim). Nunca trava a exclusão em si -- ela já
+  // aconteceu de qualquer forma; isso só informa se deu certo lá fora.
+  const cancelamentoBanco = await gatewayPagamentoService.cancelarNoBanco(receita);
+
   const removida = await prisma.receita.delete({
     where: { id }
   });
 
   emitirAtualizacao("receita");
 
-  return removida;
+  return { ...removida, cancelamentoBanco };
 
 };
 

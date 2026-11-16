@@ -317,6 +317,28 @@ class BBApi {
 
   }
 
+  // Mesma "baixa" acima, mas recebendo o "numeroTituloCliente" PRONTO
+  // (os 20 dígitos que a própria API devolveu na criação, já salvos em
+  // Receita.gatewayReferencia) em vez do numeroControle cru -- evita
+  // ter que remontar o número e arriscar divergir do que o BB realmente
+  // aceitou da primeira vez. ATENÇÃO: igual o resto deste arquivo,
+  // endpoint/payload seguem a documentação da API Cobranças v2, mas a
+  // "baixa" em si não foi confirmada contra um boleto real ainda --
+  // testar com um boleto de verdade antes de confiar cegamente.
+  async baixarBoletoPorNumeroTitulo(numeroTituloCliente, override = null) {
+
+    const { numeroConvenio } = this.obterConfig(override);
+
+    return this.request(
+      "POST",
+      `/cobrancas/v2/boletos/${numeroTituloCliente}/baixar`,
+      { numeroConvenio: Number(numeroConvenio) },
+      {},
+      override
+    );
+
+  }
+
 }
 
 module.exports = new BBApi();
