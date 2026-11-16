@@ -23,8 +23,12 @@ const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
 const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
 const dispararReceitasBanco = require("./dispararReceitasBancoJob");
 const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
+const diagnosticoMemoria = require("./diagnosticoMemoriaJob");
 
 const iniciarJobs = () => {
+
+  // TEMPORÁRIO -- diagnóstico do OOM de 16/11/2026, ver diagnosticoMemoriaJob.js.
+  cron.schedule("* * * * *", diagnosticoMemoria);
 
   // Status (Programada -> Pendente -> Atrasada) depende de estar perto
   // ou ter passado do prazo na hora certa -- de hora em hora é fino o
