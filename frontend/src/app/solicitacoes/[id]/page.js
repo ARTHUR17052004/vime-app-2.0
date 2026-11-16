@@ -48,27 +48,40 @@ export default function DetalhesSolicitacaoPage() {
 
         setCarregando(true);
 
-        const [respostaSolicitacao, respostaAuditoria] = await Promise.all([
-          SolicitacaoService.buscar(params.id),
-          AuditoriaService.listar(),
-        ]);
+        // Separado de propósito (ver mesma correção em vistorias/[id]) --
+        // Auditoria exige permissão à parte (Diretoria não tem
+        // "auditoria.visualizar"), então não pode estar no mesmo
+        // Promise.all da Solicitação em si, senão um 403 ali jogava a
+        // Solicitação inteira fora. Também NUNCA "resposta.data ||
+        // resposta" aqui -- esse endpoint devolve a Solicitação crua
+        // (sem embrulho), e Solicitacao tem campo PRÓPRIO chamado "data"
+        // -- isso fazia a tela pegar só essa string de data e descartar o
+        // objeto inteiro, deixando tudo em branco.
+        const solicitacaoCarregada = await SolicitacaoService.buscar(params.id);
 
-        const dadosSolicitacao =
-          respostaSolicitacao.data || respostaSolicitacao;
+        setSolicitacao(solicitacaoCarregada);
 
-        setSolicitacao(dadosSolicitacao);
+        try {
 
-        const listaAuditoria = Array.isArray(respostaAuditoria)
-          ? respostaAuditoria
-          : respostaAuditoria.data || [];
+          const respostaAuditoria = await AuditoriaService.listar();
 
-        setHistorico(
-          listaAuditoria.filter(
-            (item) =>
-              item.modulo === "SOLICITACOES" &&
-              item.registroId === params.id
-          )
-        );
+          const listaAuditoria = Array.isArray(respostaAuditoria)
+            ? respostaAuditoria
+            : respostaAuditoria.data || [];
+
+          setHistorico(
+            listaAuditoria.filter(
+              (item) =>
+                item.modulo === "SOLICITACOES" &&
+                item.registroId === params.id
+            )
+          );
+
+        } catch (erroAuditoria) {
+
+          console.error("Erro ao carregar histórico da solicitação:", erroAuditoria);
+
+        }
 
       } catch (err) {
 

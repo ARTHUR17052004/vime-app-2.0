@@ -72,9 +72,16 @@ export default function DetalhesVistoriaPage() {
         // Com Promise.all, só essa segunda chamada falhando (403) jogava
         // a vistoria inteira fora e mostrava "Vistoria não encontrada",
         // mesmo ela existindo e o usuário tendo acesso normal a ela.
-        const respostaVistoria = await VistoriaService.buscar(params.id);
+        // NUNCA "resposta.data || resposta" aqui -- esse endpoint devolve
+        // a Vistoria crua (controller faz res.json(vistoria), sem
+        // embrulho), e Vistoria tem campo PRÓPRIO chamado "data" (data de
+        // criação, sempre preenchido em vistoria de corte). Isso fazia a
+        // tela pegar só essa string de data e descartar o objeto inteiro
+        // -- toda vistoria com "data" preenchida aparecia com tudo em
+        // branco, e a grade específica de corte nunca disparava.
+        const vistoriaCarregada = await VistoriaService.buscar(params.id);
 
-        setVistoria(respostaVistoria.data || respostaVistoria);
+        setVistoria(vistoriaCarregada);
 
         try {
 
