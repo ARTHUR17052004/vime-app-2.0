@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import { WhatsappService } from "../../../services/whatsapp.service";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -17,6 +17,45 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+
+// Divisor "Hoje"/"Ontem"/data por extenso entre mensagens de dias
+// diferentes -- antes o chat só mostrava a hora de cada mensagem, sem
+// nenhuma data, impossível saber em que dia uma conversa antiga
+// aconteceu só rolando a tela.
+function mesmoDia(a, b) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function rotuloData(data) {
+
+  const hoje = new Date();
+  const ontem = new Date(hoje);
+  ontem.setDate(ontem.getDate() - 1);
+
+  if (mesmoDia(data, hoje)) return "Hoje";
+  if (mesmoDia(data, ontem)) return "Ontem";
+
+  return data.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+}
+
+function DivisorData({ data }) {
+  return (
+    <div className="flex items-center justify-center py-1">
+      <span className="rounded-full bg-[var(--surface-2)] px-3 py-1 text-xs font-medium text-[var(--text-subtle)]">
+        {rotuloData(data)}
+      </span>
+    </div>
+  );
+}
 
 // "controle se o inquilino recebeu ou não" -- status de entrega real,
 // vindo do webhook de status da Meta (ver whatsappService.processarStatus
@@ -199,6 +238,8 @@ export default function WhatsappChat({ conversa }) {
 
       respostaDeTexto: respostaDe?.texto || null,
 
+      createdAt: new Date(),
+
       hora: new Date().toLocaleTimeString("pt-BR", {
 
         hour: "2-digit",
@@ -245,6 +286,7 @@ export default function WhatsappChat({ conversa }) {
                   ...m,
                   id: criada.id,
                   mensagemIdMeta: criada.mensagemIdMeta,
+                  createdAt: criada.createdAt,
                   hora: new Date(criada.createdAt).toLocaleTimeString("pt-BR", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -385,11 +427,22 @@ export default function WhatsappChat({ conversa }) {
         "
       >
 
-        {mensagens.map((msg) => (
+        {mensagens.map((msg, indice) => {
+
+          const anterior = mensagens[indice - 1];
+
+          const dataMsg = msg.createdAt ? new Date(msg.createdAt) : null;
+          const dataAnterior = anterior?.createdAt ? new Date(anterior.createdAt) : null;
+
+          const mostrarDivisor =
+            dataMsg && (!dataAnterior || !mesmoDia(dataMsg, dataAnterior));
+
+          return (
+          <Fragment key={msg.id}>
+
+          {mostrarDivisor && <DivisorData data={dataMsg} />}
 
           <div
-
-            key={msg.id}
 
             className={`
 
@@ -550,7 +603,10 @@ export default function WhatsappChat({ conversa }) {
 
           </div>
 
-        ))}
+          </Fragment>
+          );
+
+        })}
 
         <div ref={fimRef} />
 

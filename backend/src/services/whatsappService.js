@@ -238,6 +238,11 @@ class WhatsappService {
             hour: "2-digit",
             minute: "2-digit",
           }),
+          // Timestamp cru (não só a hora formatada) -- o front usa pra
+          // mostrar um divisor de data entre mensagens de dias
+          // diferentes (até agora não tinha nenhuma data visível no
+          // chat, só a hora).
+          createdAt: m.createdAt,
         })),
       };
     });
