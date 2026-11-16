@@ -2,6 +2,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import MainLayout from "../../components/layout/MainLayout";
@@ -19,6 +20,26 @@ const ACAO_LABEL = {
   ATUALIZAR: "Vistoria atualizada",
   EXCLUIR: "Vistoria excluída",
 };
+
+const STATUS_LABEL = {
+  PROGRAMADA: "Programada",
+  PENDENTE: "Pendente",
+  ATRASADA: "Atrasada",
+  REALIZADA: "Realizada",
+  CANCELADA: "Cancelada",
+};
+
+// Endereço legível a partir da Unidade -- a mesma montagem usada em
+// boletoPdfService.js (enderecoUnidade), só que aqui como texto corrido.
+function enderecoDaUnidade(unidade) {
+  if (!unidade) return "-";
+  const partes = [
+    [unidade.logradouro, unidade.numero].filter(Boolean).join(", "),
+    unidade.bairro,
+    [unidade.cidade, unidade.uf].filter(Boolean).join("/"),
+  ].filter(Boolean);
+  return partes.join(" - ") || "-";
+}
 
 export default function DetalhesVistoriaPage() {
 
@@ -160,72 +181,154 @@ export default function DetalhesVistoriaPage() {
             Dados da Vistoria
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-6">
+          {vistoria.receitaOrigem ? (
 
-            <div>
-              <p className="text-[var(--text-subtle)]">Categoria</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.categoria || "-"}
-              </h3>
+            // Vistoria automática de corte de água/energia (nasce de uma
+            // cobrança atrasada há 72h+, ver verificarAtrasoCorteJob.js)
+            // -- os campos genéricos de vistoria normal (Categoria,
+            // Periodicidade, Próxima Execução...) não dizem nada de útil
+            // aqui; o que importa é a cobrança que gerou o corte.
+            <div className="grid md:grid-cols-3 gap-6">
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Endereço da Kitnet</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {enderecoDaUnidade(vistoria.unidade)}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Número da Kitnet</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.kitnet?.numero || vistoria.kitnet?.nome || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Motivo do Corte</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  Atraso de pagamento (cobrança vencida há mais de 72h)
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Contrato do Inquilino</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.receitaOrigem.contrato?.id ? (
+                    <Link
+                      href={`/contratos/${vistoria.receitaOrigem.contrato.id}`}
+                      className="text-emerald-400 hover:underline"
+                    >
+                      {vistoria.receitaOrigem.contrato?.inquilino?.nome
+                        || vistoria.receitaOrigem.inquilino?.nome
+                        || "Ver contrato"}
+                    </Link>
+                  ) : (
+                    vistoria.receitaOrigem.inquilino?.nome || "Sem contrato vinculado"
+                  )}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Data do Vencimento</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {formatDate(vistoria.receitaOrigem.vencimento)}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Status</p>
+                <h3 className="font-semibold text-emerald-400">
+                  {STATUS_LABEL[vistoria.status] || vistoria.status || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Baixa Registrada Em</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {formatDateTime(vistoria.concluidaEm)}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Responsável</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.responsavel || "-"}
+                </h3>
+              </div>
+
             </div>
 
-            <div>
-              <p className="text-[var(--text-subtle)]">Responsável</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.responsavel || "-"}
-              </h3>
+          ) : (
+
+            <div className="grid md:grid-cols-3 gap-6">
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Categoria</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.categoria || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Responsável</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.responsavel || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Periodicidade</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.periodicidade || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Status</p>
+                <h3 className="font-semibold text-emerald-400">
+                  {STATUS_LABEL[vistoria.status] || vistoria.status || "-"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Última Execução</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.dataUltima ? formatDate(vistoria.dataUltima) : "Ainda não executada"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Próxima Execução</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {formatDate(vistoria.dataProxima)}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Baixa Registrada Em</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {formatDateTime(vistoria.concluidaEm)}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Residência</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.unidade?.nome || "Geral (todas as residências)"}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-[var(--text-subtle)]">Kitnet</p>
+                <h3 className="font-semibold text-[var(--text)]">
+                  {vistoria.kitnet?.nome || vistoria.kitnet?.numero || (vistoria.unidadeId ? "Geral (todas as kitnets)" : "-")}
+                </h3>
+              </div>
+
             </div>
 
-            <div>
-              <p className="text-[var(--text-subtle)]">Periodicidade</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.periodicidade || "-"}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Status</p>
-              <h3 className="font-semibold text-emerald-400">
-                {vistoria.status}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Última Execução</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.dataUltima ? formatDate(vistoria.dataUltima) : "Ainda não executada"}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Próxima Execução</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {formatDate(vistoria.dataProxima)}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Baixa Registrada Em</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {formatDateTime(vistoria.concluidaEm)}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Residência</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.unidade?.nome || "Geral (todas as residências)"}
-              </h3>
-            </div>
-
-            <div>
-              <p className="text-[var(--text-subtle)]">Kitnet</p>
-              <h3 className="font-semibold text-[var(--text)]">
-                {vistoria.kitnet?.nome || vistoria.kitnet?.numero || (vistoria.unidadeId ? "Geral (todas as kitnets)" : "-")}
-              </h3>
-            </div>
-
-          </div>
+          )}
 
         </div>
 

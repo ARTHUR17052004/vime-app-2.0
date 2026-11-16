@@ -114,6 +114,16 @@ const buscarPorId = async (id) => {
         kitnet: true,
         progressos: { include: { unidade: true } },
         missoes: { include: { unidade: true }, orderBy: { createdAt: 'desc' } },
+        // Só existe quando a vistoria nasceu de uma cobrança atrasada
+        // (ver verificarAtrasoCorteJob.js) -- é o que dá o contrato/
+        // vencimento de verdade pra tela de detalhes mostrar em vez de
+        // deixar em branco (Receita.vistoriaCorteId, lado oposto).
+        receitaOrigem: {
+          include: {
+            contrato: { include: { inquilino: true } },
+            inquilino: true,
+          },
+        },
       }
     }),
     residenciasAtivasIds(),
