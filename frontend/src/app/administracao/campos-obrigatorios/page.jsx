@@ -101,9 +101,6 @@ const MODULOS = [
       { campo: "valorAluguel", label: "Valor do Aluguel", travado: true },
       { campo: "diaVencimento", label: "Dia do Vencimento", travado: true },
       { campo: "dataFim", label: "Data Final do Contrato" },
-      { campo: "tipoGarantia", label: "Tipo de Garantia" },
-      { campo: "valorCaucao", label: "Valor da Caução" },
-      { campo: "indiceReajuste", label: "Índice de Reajuste" },
     ],
   },
   {

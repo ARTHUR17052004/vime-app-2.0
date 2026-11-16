@@ -110,36 +110,6 @@ export default function ContratoDetalhesModal({
 
           <div>
             <p className="text-[var(--text-subtle)]">
-              Garantia
-            </p>
-
-            <p className="font-semibold text-[var(--text)]">
-              {contrato.tipoGarantia}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
-              Valor Caução
-            </p>
-
-            <p className="font-semibold text-[var(--text)]">
-              R$ {contrato.valorCaucao}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
-              Índice Reajuste
-            </p>
-
-            <p className="font-semibold text-[var(--text)]">
-              {contrato.indiceReajuste}
-            </p>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
               Status
             </p>
 

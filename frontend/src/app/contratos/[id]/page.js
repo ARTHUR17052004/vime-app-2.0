@@ -165,36 +165,6 @@ export default function DetalhesContratoPage() {
 
           <div>
             <p className="text-[var(--text-subtle)]">
-              Garantia
-            </p>
-
-            <h2 className="font-bold text-2xl text-[var(--text)]">
-              {contrato.tipoGarantia}
-            </h2>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
-              Caução
-            </p>
-
-            <h2 className="font-bold text-2xl text-[var(--text)]">
-              R$ {contrato.valorCaucao}
-            </h2>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
-              Reajuste
-            </p>
-
-            <h2 className="font-bold text-2xl text-[var(--text)]">
-              {contrato.indiceReajuste}
-            </h2>
-          </div>
-
-          <div>
-            <p className="text-[var(--text-subtle)]">
               Dia vencimento
             </p>
 

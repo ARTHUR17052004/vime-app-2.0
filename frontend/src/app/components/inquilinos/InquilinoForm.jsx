@@ -316,10 +316,22 @@ export default function InquilinoForm({
 
   }
 
+  // Só a etapa 3 tem um botão type="submit" de verdade (as outras duas
+  // são type="button") -- sem essa trava, apertar Enter em qualquer
+  // campo da etapa 3 (ex.: digitando a data) já salvava e fechava o
+  // modal na hora, sem dar chance de revisar/editar antes. Enter
+  // continua funcionando normal em qualquer textarea (ex.: Observações).
+  function bloquearEnvioPorEnter(e) {
+    if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
+      e.preventDefault();
+    }
+  }
+
   return (
 
     <form
       onSubmit={handleSubmit}
+      onKeyDown={bloquearEnvioPorEnter}
       noValidate
       className="space-y-8"
     >

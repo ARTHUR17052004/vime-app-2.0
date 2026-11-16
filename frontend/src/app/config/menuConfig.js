@@ -17,6 +17,7 @@ import {
   BadgeDollarSign,
   LifeBuoy,
   Sparkles,
+  LayoutGrid,
 } from "lucide-react";
 
 // `permissao` é a chave conferida contra usuario.permissoes (ver
@@ -38,6 +39,16 @@ const menuConfig = [
         href: "/insights",
         icon: Sparkles,
         badge: "Beta",
+        permissao: "insights.visualizar",
+      },
+      {
+        // Era a aba "Visão geral" dentro de Assistente VIME -- virou
+        // item próprio no menu (pedido do usuário: "melhor que dentro
+        // de assistente"). Mesma permissão, porque é a mesma tela de
+        // sempre, só mudou de endereço.
+        label: "BY (Soluções Rápidas)",
+        href: "/visao-geral",
+        icon: LayoutGrid,
         permissao: "insights.visualizar",
       },
     ],

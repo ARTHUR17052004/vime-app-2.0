@@ -20,7 +20,7 @@ import { calcularFimCicloAtual } from "@/utils/cicloContrato";
 
 const CAMPOS = [
   "locadorId", "unidadeId", "kitnetId", "inquilinoId", "dataInicio", "dataFim",
-  "valorAluguel", "diaVencimento", "tipoGarantia", "valorCaucao", "indiceReajuste",
+  "valorAluguel", "diaVencimento",
 ];
 
 const SEMPRE_OBRIGATORIOS = new Set([
@@ -36,9 +36,6 @@ const ROTULOS = {
   dataFim: "Data Final do Contrato",
   valorAluguel: "Valor do Aluguel",
   diaVencimento: "Dia do Vencimento",
-  tipoGarantia: "Tipo de Garantia",
-  valorCaucao: "Valor da Caução",
-  indiceReajuste: "Índice de Reajuste",
 };
 
 // Mesmo padrão de rótulo+estrelinha usado em ContratoStep.jsx (cadastro
@@ -144,12 +141,6 @@ export default function ContratoForm({
       valorAluguel: "",
 
       diaVencimento: "",
-
-      tipoGarantia: "",
-
-      valorCaucao: "",
-
-      indiceReajuste: "",
 
       status: "ATIVO",
 
@@ -344,9 +335,6 @@ export default function ContratoForm({
 
         ...(inquilino?.kitnet?.aluguel != null && { valorAluguel: String(inquilino.kitnet.aluguel) }),
         ...(diaVencimentoPadrao && { diaVencimento: String(diaVencimentoPadrao) }),
-        ...(inquilino?.tipoGarantia && { tipoGarantia: inquilino.tipoGarantia }),
-        ...(inquilino?.valorCaucao != null && { valorCaucao: String(inquilino.valorCaucao) }),
-        ...(inquilino?.indiceReajuste && { indiceReajuste: inquilino.indiceReajuste }),
 
         // Início vale a pena puxar nos dois modos (quem cadastrou o
         // inquilino já digitou essa data lá na etapa 3) -- dá pra
@@ -412,12 +400,11 @@ export default function ContratoForm({
 
     const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
 
-    // No Arquivo de Contratos (modoManual) esses campos nem aparecem na
-    // tela -- não faz sentido exigi-los. dataFim também sai da lista:
-    // não é mais digitada, é calculada sozinha a partir do Início (ver
-    // calcularFimCicloAtual logo abaixo).
+    // No Arquivo de Contratos (modoManual) dataFim nem aparece na tela
+    // -- não é mais digitada, é calculada sozinha a partir do Início
+    // (ver calcularFimCicloAtual logo abaixo), não faz sentido exigir.
     const campos = modoManual
-      ? CAMPOS.filter((c) => !["tipoGarantia", "valorCaucao", "indiceReajuste", "dataFim"].includes(c))
+      ? CAMPOS.filter((c) => c !== "dataFim")
       : CAMPOS;
 
     const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
@@ -450,22 +437,23 @@ export default function ContratoForm({
 
         ...(modoManual && !contrato ? { origem: "MANUAL" } : {}),
 
-        // O admin pode ter marcado Garantia/Caução/Reajuste como
-        // obrigatórios em Campos Obrigatórios (pro contrato normal,
-        // gerado pela Clicksign) -- isso não pode travar o Arquivo, que
-        // nem mostra esses campos na tela. dataFim idem: sempre
-        // calculada aqui, nunca "faltando".
-        ...(modoManual && { ignorarObrigatorios: ["tipoGarantia", "valorCaucao", "indiceReajuste", "dataFim"] }),
+        // Tipo de Garantia/Valor da Caução/Índice de Reajuste não
+        // existem mais nessa tela (removidos em 16/11/2026 -- pedido
+        // do usuário) -- ignora de vez, mesmo se o admin tiver marcado
+        // algum deles como obrigatório em Campos Obrigatórios. dataFim
+        // idem no Arquivo: sempre calculada aqui, nunca "faltando".
+        ignorarObrigatorios: [
+          "tipoGarantia",
+          "valorCaucao",
+          "indiceReajuste",
+          ...(modoManual ? ["dataFim"] : []),
+        ],
 
         dataInicio: formData.dataInicio,
 
         valorAluguel: Number(formData.valorAluguel),
 
         diaVencimento: Number(formData.diaVencimento),
-
-        valorCaucao: formData.valorCaucao
-          ? Number(formData.valorCaucao)
-          : null,
 
         dataFim: modoManual
           ? (dataFimCalculada ? dataFimCalculada.fimCiclo.toISOString().slice(0, 10) : null)
@@ -807,89 +795,6 @@ export default function ContratoForm({
 </Campo>
 
 </div>
-
-{/* No Arquivo de Contratos (modoManual) o contrato já existe em papel
-    -- esses detalhes já estão nele, não precisa recadastrar. */}
-{!modoManual && (
-<div className="grid md:grid-cols-3 gap-5">
-
-  <Campo label="Tipo de Garantia" obrigatorio={obrigatorios.has("tipoGarantia")}>
-  <select
-    name="tipoGarantia"
-    value={formData.tipoGarantia}
-    onChange={alterarCampo}
-    className={input}
-    required={obrigatorios.has("tipoGarantia")}
-  >
-
-    <option
-      value=""
-      style={{
-        backgroundColor: "#1d2833",
-        color: "#fff",
-      }}
-    >
-      Tipo de Garantia
-    </option>
-
-    <option
-      value="CAUCAO"
-      style={{
-        backgroundColor: "#1d2833",
-        color: "#fff",
-      }}
-    >
-      Caução
-    </option>
-
-    <option
-      value="FIADOR"
-      style={{
-        backgroundColor: "#1d2833",
-        color: "#fff",
-      }}
-    >
-      Fiador
-    </option>
-
-    <option
-      value="SEGURO_FIANCA"
-      style={{
-        backgroundColor: "#1d2833",
-        color: "#fff",
-      }}
-    >
-      Seguro Fiança
-    </option>
-
-  </select>
-  </Campo>
-
-  <Campo label="Valor da Caução" obrigatorio={obrigatorios.has("valorCaucao")}>
-  <input
-    className={input}
-    type="number"
-    name="valorCaucao"
-    placeholder="Valor da Caução"
-    value={formData.valorCaucao}
-    onChange={alterarCampo}
-    required={obrigatorios.has("valorCaucao")}
-  />
-  </Campo>
-
-  <Campo label="Índice de Reajuste" obrigatorio={obrigatorios.has("indiceReajuste")}>
-  <input
-    className={input}
-    name="indiceReajuste"
-    placeholder="Índice de Reajuste"
-    value={formData.indiceReajuste}
-    onChange={alterarCampo}
-    required={obrigatorios.has("indiceReajuste")}
-  />
-  </Campo>
-
-</div>
-)}
 
 <textarea
   name="observacoes"
