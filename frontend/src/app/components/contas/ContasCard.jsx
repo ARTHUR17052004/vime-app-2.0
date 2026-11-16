@@ -74,6 +74,8 @@ const FORM_INICIAL = {
   provider: "ASAAS",
   nome: "",
   taxaBoletoValor: "",
+  multa: "",
+  juros: "",
   padrao: false,
   ativo: true,
   credenciais: {},
@@ -126,6 +128,8 @@ export default function ContasCard() {
       provider: conta.provider,
       nome: conta.nome,
       taxaBoletoValor: conta.taxaBoletoValor ?? "",
+      multa: conta.multa ?? "",
+      juros: conta.juros ?? "",
       padrao: conta.padrao,
       ativo: conta.ativo,
       credenciais: conta.credenciais || {},
@@ -169,6 +173,8 @@ export default function ContasCard() {
         provider: form.provider,
         nome: form.nome,
         taxaBoletoValor: form.taxaBoletoValor,
+        multa: form.multa,
+        juros: form.juros,
         padrao: form.padrao,
         ativo: form.ativo,
         credenciais: form.credenciais,
@@ -571,6 +577,37 @@ export default function ContasCard() {
               Valor fixo em R$ descontado por essa conta na emissão do boleto (não é porcentagem) -- usado pra calcular sozinho o Valor a Receber em Financeiro &gt; Nova Receita.
             </p>
           </div>
+
+          <div className="grid grid-cols-2 gap-4">
+
+            <div>
+              <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                Multa por atraso (%)
+              </label>
+              <input
+                value={form.multa}
+                onChange={(e) => setForm((a) => ({ ...a, multa: e.target.value }))}
+                placeholder="Ex: 10"
+                className={inputStyle}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+                Juros por atraso (% ao mês)
+              </label>
+              <input
+                value={form.juros}
+                onChange={(e) => setForm((a) => ({ ...a, juros: e.target.value }))}
+                placeholder="Ex: 1"
+                className={inputStyle}
+              />
+            </div>
+
+          </div>
+          <p className="text-xs text-[var(--text-faint)] -mt-2">
+            Usado como padrão em toda cobrança nova processada por essa conta (cada banco/conta pode cobrar um percentual diferente) -- uma receita pode ter o próprio valor ajustado depois, sem mexer aqui.
+          </p>
 
           <div className="border-t border-[var(--border-token)] pt-5 space-y-4">
             {CAMPOS_POR_PROVIDER[form.provider].map((c) => (

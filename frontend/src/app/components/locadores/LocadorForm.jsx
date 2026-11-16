@@ -28,7 +28,7 @@ const BANCOS = [
 
 const CAMPOS = [
   "nome", "documento", "email", "telefone", "banco", "agencia", "conta", "pix",
-  "taxaAdministracao", "multa", "juros", "observacoes",
+  "taxaAdministracao", "observacoes",
 ];
 
 const SEMPRE_OBRIGATORIOS = new Set(["nome", "documento"]);
@@ -43,8 +43,6 @@ const ROTULOS = {
   conta: "Conta",
   pix: "Chave PIX",
   taxaAdministracao: "Taxa de Administração",
-  multa: "Multa",
-  juros: "Juros",
   observacoes: "Observações",
 };
 
@@ -110,8 +108,6 @@ export default function LocadorForm({
     pix: "",
 
     taxaAdministracao: "",
-    multa: "",
-    juros: "",
     diaVencimentoPadrao: "",
 
     observacoes: "",
@@ -153,12 +149,6 @@ export default function LocadorForm({
 
       taxaAdministracao:
         locadorEditando.taxaAdministracao || "",
-
-      multa:
-        locadorEditando.multa || "",
-
-      juros:
-        locadorEditando.juros || "",
 
       diaVencimentoPadrao:
         locadorEditando.diaVencimentoPadrao != null
@@ -459,28 +449,6 @@ export default function LocadorForm({
               onChange={handleChange}
               className={inputStyle}
               required={obrigatorios.has("taxaAdministracao")}
-            />
-          </Campo>
-
-          <Campo label="Multa (%)" obrigatorio={obrigatorios.has("multa")}>
-            <input
-              name="multa"
-              placeholder="Multa (%)"
-              value={formData.multa}
-              onChange={handleChange}
-              className={inputStyle}
-              required={obrigatorios.has("multa")}
-            />
-          </Campo>
-
-          <Campo label="Juros (%)" obrigatorio={obrigatorios.has("juros")}>
-            <input
-              name="juros"
-              placeholder="Juros (%)"
-              value={formData.juros}
-              onChange={handleChange}
-              className={inputStyle}
-              required={obrigatorios.has("juros")}
             />
           </Campo>
 

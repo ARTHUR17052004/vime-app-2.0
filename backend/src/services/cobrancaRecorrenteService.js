@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
 const { multaJurosPadrao, existeAluguelDuplicado } = require("./receitaService");
+const contaPagamentoService = require("./contaPagamentoService");
 
 /*
   Núcleo da geração de cobrança de aluguel a partir de um Contrato --
@@ -95,7 +96,13 @@ const gerarCobrancaParaContrato = async (contrato) => {
     return { criada: false, motivo: "aguardandoPagamento" };
   }
 
-  const { multaValor, jurosValor } = await multaJurosPadrao(contrato.locadorId);
+  // Multa/juros vêm da CONTA que vai processar essa cobrança (mesma
+  // resolução de kitnet->conta própria, senão a do locador) -- não do
+  // locador direto, porque é a conta/banco que de fato cobra esse
+  // percentual, e um locador pode ter mais de uma conta com valores
+  // diferentes.
+  const contaDoContrato = await contaPagamentoService.resolverParaKitnet(contrato.kitnetId, contrato.locadorId);
+  const { multaValor, jurosValor } = multaJurosPadrao(contaDoContrato);
 
   const receita = await prisma.receita.create({
     data: {

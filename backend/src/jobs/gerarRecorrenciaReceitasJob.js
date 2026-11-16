@@ -117,11 +117,12 @@ module.exports = async () => {
 
     // Carrega a multa/juros já usada na receita anterior (pode ter sido
     // ajustada manualmente pra esse inquilino/contrato) -- só recai no
-    // padrão do locador se a anterior nunca teve nenhum valor definido.
+    // padrão da CONTA (já resolvida acima, mesma da taxa) se a anterior
+    // nunca teve nenhum valor definido.
     let multaValor = receita.multaValor;
     let jurosValor = receita.jurosValor;
     if (multaValor == null && jurosValor == null) {
-      const padrao = await multaJurosPadrao(receita.locadorId);
+      const padrao = multaJurosPadrao(conta);
       multaValor = padrao.multaValor;
       jurosValor = padrao.jurosValor;
     }

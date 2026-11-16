@@ -342,55 +342,6 @@ export default function LocadorDetailsModal({
 
             </div>
 
-            <div className="flex items-center gap-3">
-
-              <BadgePercent
-                className="text-emerald-400"
-                size={20}
-              />
-
-              <div>
-
-                <p className="text-sm text-[var(--text-subtle)]">
-
-                  Multa
-
-                </p>
-
-                <p className="text-[var(--text)] font-medium">
-
-                  {locador.multa || 0}%
-
-                </p>
-
-              </div>
-
-            </div>
-
-            <div className="flex items-center gap-3">
-
-              <BadgePercent
-                className="text-emerald-400"
-                size={20}
-              />
-
-              <div>
-
-                <p className="text-sm text-[var(--text-subtle)]">
-
-                  Juros
-
-                </p>
-
-                <p className="text-[var(--text)] font-medium">
-
-                  {locador.juros || 0}% a.m.
-
-                </p>
-
-              </div>
-
-            </div>
 
           </div>
 

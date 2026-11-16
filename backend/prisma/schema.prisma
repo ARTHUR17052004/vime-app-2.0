@@ -311,6 +311,15 @@ model ContaPagamento {
   // Receita.valorLiquido sozinho (valor - taxaBoletoValor).
   taxaBoletoValor Float @default(0)
 
+  // Percentual de multa/juros por atraso -- cada conta/banco cobra o
+  // seu (antes vinha do Locador, mas é a conta que processa o boleto
+  // que define isso de verdade, não quem é o dono do imóvel). Usado
+  // pra preencher Receita.multaValor/jurosValor sozinho na criação --
+  // ver receitaService.aplicarValorLiquidoPadrao/cobrancaRecorrenteService.
+  multa Float? @default(0)
+
+  juros Float? @default(0)
+
   padrao Boolean @default(false) // usada quando um locador não tem conta própria
 
   ativo Boolean @default(true)

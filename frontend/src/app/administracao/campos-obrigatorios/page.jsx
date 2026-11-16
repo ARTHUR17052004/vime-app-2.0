@@ -87,8 +87,6 @@ const MODULOS = [
       { campo: "conta", label: "Conta" },
       { campo: "pix", label: "Chave PIX" },
       { campo: "taxaAdministracao", label: "Taxa de Administração" },
-      { campo: "multa", label: "Multa" },
-      { campo: "juros", label: "Juros" },
     ],
   },
   {

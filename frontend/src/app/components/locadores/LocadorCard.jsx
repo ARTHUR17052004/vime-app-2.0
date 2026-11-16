@@ -297,9 +297,7 @@ export default function LocadorCard({
 
               <div className="mt-3 text-sm text-emerald-400">
 
-                Taxa Adm.: {locador.taxaAdministracao || 0}% |
-                {" "}Multa: {locador.multa || 0}% |
-                {" "}Juros: {locador.juros || 0}% a.m.
+                Taxa Adm.: {locador.taxaAdministracao || 0}%
 
               </div>
 

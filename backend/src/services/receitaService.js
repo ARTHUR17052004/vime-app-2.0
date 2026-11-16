@@ -32,29 +32,23 @@ const locadorDaReceita = async (dados) => {
   return null;
 };
 
-// Multa/juros por atraso configurados no cadastro do Locador (campo
-// "Multa"/"Juros" dele, em %) -- usados como padrão de toda cobrança
-// nova desse locador, a menos que a receita já tenha um valor próprio
-// definido (ex.: negociação pontual via Asaas Transações -> Editar).
-// Sem isso, NENHUMA cobrança saía com multa/juros por atraso, mesmo
-// quando o locador tinha esses percentuais configurados -- bug
-// relatado em 10/11/2026 ("as cobranças estão vindo sem juros e multa
-// por atraso").
-const multaJurosPadrao = async (locadorId) => {
-
-  if (!locadorId) return { multaValor: null, jurosValor: null };
-
-  const locador = await prisma.locador.findUnique({
-    where: { id: locadorId },
-    select: { multa: true, juros: true },
-  });
-
-  return {
-    multaValor: locador?.multa || null,
-    jurosValor: locador?.juros || null,
-  };
-
-};
+// Multa/juros por atraso configurados na CONTA que processa a
+// cobrança (campo "Multa"/"Juros" dela, em %) -- usados como padrão de
+// toda cobrança nova processada por essa conta, a menos que a receita
+// já tenha um valor próprio definido (ex.: negociação pontual via
+// Asaas Transações -> Editar).
+//
+// Era no cadastro do Locador antes (bug relatado em 10/11/2026: "as
+// cobranças estão vindo sem juros e multa por atraso" -- sem isso,
+// NENHUMA cobrança saía com multa/juros). Trocado em 16/11/2026 pra
+// vir da conta: é ela que processa o boleto de verdade, e cada
+// conta/banco pode cobrar um percentual diferente -- um locador com
+// mais de uma conta (ex.: BB numa kitnet, Efí noutra) não tem como ter
+// só um multa/juros válido pra todas.
+const multaJurosPadrao = (conta) => ({
+  multaValor: conta?.multa ?? null,
+  jurosValor: conta?.juros ?? null,
+});
 
 // Trava duplicata de Aluguel: mesmo inquilino (ou mesmo pagador avulso,
 // pelo CPF) com cobrança vencendo no MESMO mês não pode ganhar uma
@@ -247,7 +241,7 @@ const buscarPorId = (id, usuario) => {
 // reenvia esses campos.
 async function aplicarValorLiquidoPadrao(dados, registroExistente) {
 
-  if (dados.valor === undefined) return dados;
+  if (dados.valor === undefined) return { dados, conta: null };
 
   const base = { ...registroExistente, ...dados };
   const locadorId = base.locadorId || await locadorDaReceita(base);
@@ -257,7 +251,7 @@ async function aplicarValorLiquidoPadrao(dados, registroExistente) {
 
   dados.valorLiquido = Math.max(0, Math.round((dados.valor - taxa) * 100) / 100);
 
-  return dados;
+  return { dados, conta };
 
 }
 
@@ -266,7 +260,10 @@ const criar = async (dados, autor) => {
   const modulo = extrairModulo(dados);
 
   dados = sanitizar(dados);
-  dados = await aplicarValorLiquidoPadrao(dados);
+
+  const resolvido = await aplicarValorLiquidoPadrao(dados);
+  dados = resolvido.dados;
+  const contaDaReceita = resolvido.conta;
 
   await campoObrigatorioService.validar(modulo, dados);
 
@@ -288,7 +285,7 @@ const criar = async (dados, autor) => {
   }
 
   if (dados.multaValor === undefined || dados.jurosValor === undefined) {
-    const padrao = await multaJurosPadrao(dados.locadorId);
+    const padrao = multaJurosPadrao(contaDaReceita);
     if (dados.multaValor === undefined) dados.multaValor = padrao.multaValor;
     if (dados.jurosValor === undefined) dados.jurosValor = padrao.jurosValor;
   }
@@ -339,7 +336,7 @@ const atualizar = async (id, dados, autor) => {
     where: { id }
   });
 
-  dados = await aplicarValorLiquidoPadrao(dados, anterior);
+  ({ dados } = await aplicarValorLiquidoPadrao(dados, anterior));
 
   // Mudou o vencimento sem dizer o status explicitamente (ex.: só
   // corrigindo uma data errada)? Recalcula sozinho se ainda deveria
