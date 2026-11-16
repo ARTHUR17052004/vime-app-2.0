@@ -256,6 +256,23 @@ const atualizar = async (id, dados, autor) => {
     descricao: `Vistoria "${vistoria.titulo}" atualizada por ${autor?.nome || "Sistema"}${alteracoes ? `: ${alteracoes}` : ""}.`
   });
 
+  // Cancelar (manual, ou automático -- ver corteVistoriaService, que
+  // cancela sozinho quando a cobrança que gerou o corte deixa de estar
+  // em risco) não apagava as notificações já mandadas sobre essa
+  // vistoria ("pendente", "atrasada"...) -- ficavam pra sempre no sino,
+  // apontando pra algo que não vale mais, só confundindo quem via
+  // depois (bug relatado em 16/11/2026). Só limpa na TRANSIÇÃO pra
+  // CANCELADA, não toda vez que uma já cancelada for tocada de novo.
+  if (dados.status === "CANCELADA" && anterior.status !== "CANCELADA") {
+
+    try {
+      await notificacaoService.removerPorLink(`/vistorias/${id}`);
+    } catch (erro) {
+      console.error('[notificacao] Falha ao limpar notificações da vistoria cancelada:', erro.message);
+    }
+
+  }
+
   return vistoria;
 
 };

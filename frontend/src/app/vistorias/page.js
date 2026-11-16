@@ -469,8 +469,14 @@ const fixarVistoria = async (id, fixado) => {
     case "atrasadas":
       return vistoria.status === "ATRASADA";
 
+    // Visão Geral é o "resto" (nenhuma aba específica escolhida) --
+    // Cancelada fica de fora daqui, senão vistoria cancelada (manual ou
+    // automática, ex.: corte de água/energia que deixou de fazer
+    // sentido) nunca mais some da tela, só acumula poluindo (pedido do
+    // usuário em 16/11/2026). Quem quiser auditar cancelada tem a
+    // Auditoria pra isso.
     default:
-      return true;
+      return vistoria.status !== "CANCELADA";
 
   }
 

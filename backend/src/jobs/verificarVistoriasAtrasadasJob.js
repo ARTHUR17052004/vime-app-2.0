@@ -36,10 +36,14 @@ module.exports = async () => {
 
     if (reivindicada.count === 0) continue;
 
-    const dias = Math.max(
-      1,
-      Math.floor((agora.getTime() - new Date(vistoria.dataProxima).getTime()) / MS_DIA)
-    );
+    // dataProxima nula (vistoria "Única", sem recorrência) não deveria
+    // chegar aqui pelo fluxo normal -- atualizarStatusVistoriasJob só
+    // joga pra ATRASADA quem tem dataProxima preenchida. Guarda mesmo
+    // assim: sem isso, 1970 (new Date(null)) vira um número gigante de
+    // "dias atrasada".
+    const dias = vistoria.dataProxima
+      ? Math.max(1, Math.floor((agora.getTime() - new Date(vistoria.dataProxima).getTime()) / MS_DIA))
+      : 1;
 
     const local = vistoria.kitnet?.nome || vistoria.kitnet?.numero
       ? `Kitnet ${vistoria.kitnet.nome || vistoria.kitnet.numero}`

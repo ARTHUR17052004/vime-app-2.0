@@ -41,7 +41,13 @@ module.exports = async () => {
 
     if (reivindicada.count === 0) continue;
 
-    const prazo = new Date(vistoria.dataProxima).toLocaleDateString("pt-BR");
+    // Vistoria "Única" (sem recorrência, ex.: REALIZAR CORTE DE ÁGUA E
+    // ENERGIA) nunca tem dataProxima -- new Date(null) virava 01/01/1970
+    // (exibido como 31/12/1969 no fuso daqui), um "prazo" que não existe
+    // de verdade. Bug relatado em 16/11/2026.
+    const prazo = vistoria.dataProxima
+      ? new Date(vistoria.dataProxima).toLocaleDateString("pt-BR")
+      : "sem prazo definido";
 
     await notificacaoService.criar({
       origem: "SISTEMA",

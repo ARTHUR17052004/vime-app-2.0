@@ -46,24 +46,38 @@ export default function DetalhesVistoriaPage() {
 
         setCarregando(true);
 
-        const [respostaVistoria, respostaAuditoria] = await Promise.all([
-          VistoriaService.buscar(params.id),
-          AuditoriaService.listar(),
-        ]);
+        // Separado de propósito -- Auditoria exige uma permissão à
+        // parte (Diretoria, por exemplo, não tem "auditoria.visualizar").
+        // Com Promise.all, só essa segunda chamada falhando (403) jogava
+        // a vistoria inteira fora e mostrava "Vistoria não encontrada",
+        // mesmo ela existindo e o usuário tendo acesso normal a ela.
+        const respostaVistoria = await VistoriaService.buscar(params.id);
 
         setVistoria(respostaVistoria.data || respostaVistoria);
 
-        const listaAuditoria = Array.isArray(respostaAuditoria)
-          ? respostaAuditoria
-          : respostaAuditoria.data || [];
+        try {
 
-        setHistorico(
-          listaAuditoria.filter(
-            (item) =>
-              item.modulo === "VISTORIAS" &&
-              item.registroId === params.id
-          )
-        );
+          const respostaAuditoria = await AuditoriaService.listar();
+
+          const listaAuditoria = Array.isArray(respostaAuditoria)
+            ? respostaAuditoria
+            : respostaAuditoria.data || [];
+
+          setHistorico(
+            listaAuditoria.filter(
+              (item) =>
+                item.modulo === "VISTORIAS" &&
+                item.registroId === params.id
+            )
+          );
+
+        } catch (erroAuditoria) {
+
+          // Sem permissão pra Auditoria -- a vistoria continua
+          // aparecendo normal, só sem a seção de histórico.
+          console.error("Erro ao carregar histórico da vistoria:", erroAuditoria);
+
+        }
 
       } catch (err) {
 
