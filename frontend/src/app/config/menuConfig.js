@@ -45,8 +45,12 @@ const menuConfig = [
         // Era a aba "Visão geral" dentro de Assistente VIME -- virou
         // item próprio no menu (pedido do usuário: "melhor que dentro
         // de assistente"). Mesma permissão, porque é a mesma tela de
-        // sempre, só mudou de endereço.
-        label: "BY (Soluções Rápidas)",
+        // sempre, só mudou de endereço. Sem parênteses no rótulo --
+        // "BY (Soluções Rápidas)" quebrava feio em 3 linhas na sidebar
+        // estreita (o "BY" sozinho, depois "(Soluções"/"Rápidas)"
+        // partidos pelo parêntese). O título da página continua com o
+        // nome completo.
+        label: "BY Soluções Rápidas",
         href: "/visao-geral",
         icon: LayoutGrid,
         permissao: "insights.visualizar",
