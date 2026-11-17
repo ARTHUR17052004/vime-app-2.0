@@ -29,7 +29,22 @@ pm2 restart vime-backend
 echo "==> Frontend..."
 cd ../frontend
 npm install
-npm run build
+
+# "set -e" sozinho não pega tudo -- em 17/11/2026 o "next build" parou
+# no meio (aviso novo de upgrade de segurança do Next.js 16.4, que
+# trava o build inteiro fora de um terminal interativo de verdade) e
+# ainda assim voltou com exit code 0. O deploy seguiu reto, reiniciou
+# o PM2 com o build velho/incompleto, e o site inteiro caiu com 502.
+# Confere aqui se o build REALMENTE terminou (procura a confirmação
+# que só aparece depois da compilação de verdade) antes de reiniciar
+# qualquer coisa -- sem isso, mantém a versão anterior no ar.
+npm run build 2>&1 | tee /tmp/vime-frontend-build.log
+
+if ! grep -qE "Compiled successfully|Finished writing to disk|Route \(app\)" /tmp/vime-frontend-build.log; then
+  echo "ERRO: build do frontend não terminou direito -- NÃO reiniciando o PM2 (mantendo a versão anterior no ar). Veja /tmp/vime-frontend-build.log"
+  exit 1
+fi
+
 pm2 restart vime-frontend
 
 echo "==> Deploy concluído."
