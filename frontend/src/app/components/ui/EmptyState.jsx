@@ -15,7 +15,78 @@ export default function EmptyState({
   action,
 
   actionLabel,
+
+  // Cartão pensado pra tela grande (py-20, ícone 96px, título text-3xl)
+  // fica desproporcional no celular -- a tela toda vira só esse ícone
+  // gigante, sem o título/descrição aparecerem sem rolar. `compact`
+  // dá uma versão no mesmo espírito, só que do tamanho certo pra
+  // caber inteira na tela (ver KitnetsMobile/ContratosMobile).
+  compact = false,
 }) {
+
+  if (compact) {
+
+    return (
+
+      <FadeIn>
+
+        <div
+          className="
+            rounded-2xl
+            border
+            border-[var(--border-token)]
+            bg-[var(--surface)]
+            backdrop-blur-xl
+            py-10
+            px-6
+            flex
+            flex-col
+            items-center
+            justify-center
+            text-center
+          "
+        >
+
+          <div
+            className="
+              flex
+              items-center
+              justify-center
+              w-14
+              h-14
+              rounded-full
+              bg-emerald-500/10
+              border
+              border-emerald-500/20
+              text-emerald-400
+            "
+          >
+            {icon || <Inbox size={26} />}
+          </div>
+
+          <h2 className="mt-4 text-[15px] font-bold text-[var(--text)]">
+            {title}
+          </h2>
+
+          <p className="mt-1.5 text-[12px] leading-snug text-[var(--text-subtle)]">
+            {description}
+          </p>
+
+          {action && (
+            <div className="mt-5">
+              <Button onClick={action} size="sm">
+                {actionLabel || "Adicionar"}
+              </Button>
+            </div>
+          )}
+
+        </div>
+
+      </FadeIn>
+
+    );
+
+  }
 
   return (
 

@@ -35,9 +35,11 @@ import { formatarProximoVencimento } from "../../../../utils/vencimento";
 // como blocos separados, cada um com seu próprio cartão; no celular isso
 // vira cartões empilhados colidindo (abas e pills de status quase do
 // mesmo tamanho/cor, tabela cortada de lado). Aqui os mesmos dados (já
-// filtrados/ordenados pela página) viram um único cartão de filtros +
-// abas em rolagem horizontal + conteúdo em cartão, no estilo do
-// DashboardMobile/KitnetsMobile.
+// filtrados/ordenados pela página) viram um único cartão "Filtros" com
+// campo rotulado (igual ao Financeiro -- ver financeiro/page.js, que usa
+// essa mesma grade com label em cima de cada campo) + abas que quebram
+// linha (flex-wrap, não rolagem horizontal) + a lista de contratos em
+// cartões (a tabela do desktop cortava de lado no celular).
 
 const cartao = `
   rounded-2xl
@@ -141,75 +143,88 @@ export default function ContratosMobile({
 
       {/* FILTROS */}
 
-      <section className={`${cartao} p-3 space-y-3`}>
+      <section className={`${cartao} p-4 space-y-4`}>
 
-        <h2 className="px-0.5 text-[13px] font-bold text-[var(--text)]">
-          Filtros
-        </h2>
+        <div>
+          <h2 className="text-[15px] font-bold text-[var(--text)]">
+            Filtros
+          </h2>
+          <p className="mt-0.5 text-[12px] text-[var(--text-subtle)]">
+            Encontre rapidamente um contrato por inquilino, residência ou status.
+          </p>
+        </div>
 
-        <SearchInput
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Descrição, inquilino, kitnet..."
-          className="h-11"
-        />
+        <div>
+          <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
+            Pesquisar
+          </label>
+          <SearchInput
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Descrição, inquilino, kitnet..."
+            className="h-11"
+          />
+        </div>
 
-        <ResidenciaFiltro
-          compact
-          value={residenciaSelecionada}
-          onChange={onResidenciaChange}
-        />
+        <div className="grid grid-cols-2 gap-3">
 
-        <div className="flex gap-2 overflow-x-auto pb-0.5 -mx-0.5 px-0.5">
-          {FILTROS_STATUS.map((filtro) => (
-            <button
-              key={filtro}
-              onClick={() => onFiltroChange(filtro)}
-              className={`
-                shrink-0
-                px-3.5 py-2
-                rounded-xl
-                text-[12px] font-semibold
-                whitespace-nowrap
-                transition-all
-                ${
-                  filtroSelecionado === filtro
-                    ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70"
-                    : "bg-[var(--surface-2)] text-[var(--text-muted)]"
-                }
-              `}
+          <div>
+            <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
+              Residência
+            </label>
+            <ResidenciaFiltro
+              compact
+              value={residenciaSelecionada}
+              onChange={onResidenciaChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
+              Status
+            </label>
+            <select
+              value={filtroSelecionado}
+              onChange={(e) => onFiltroChange(e.target.value)}
+              className="w-full h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] px-3 text-[13px]"
             >
-              {filtro}
-            </button>
-          ))}
+              {FILTROS_STATUS.map((filtro) => (
+                <option key={filtro} value={filtro} className="bg-[#1b2430]">
+                  {filtro}
+                </option>
+              ))}
+            </select>
+          </div>
+
         </div>
 
       </section>
 
       {/* ABAS */}
 
-      <section className="flex gap-2 overflow-x-auto pb-0.5 -mx-0.5 px-0.5">
-        {ABAS.map((aba) => (
-          <button
-            key={aba.id}
-            onClick={() => onAbaChange(aba.id)}
-            className={`
-              shrink-0
-              px-4 py-2.5
-              rounded-xl
-              text-[12px] font-semibold
-              whitespace-nowrap
-              transition-all
-              ${
-                abaSelecionada === aba.id
-                  ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70 shadow-[0_0_14px_rgba(16,185,129,.35)]"
-                  : `${cartao} text-[var(--text-muted)]`
-              }
-            `}
-          >
-            {aba.nome}
-          </button>
-        ))}
+      <section className={`${cartao} p-2`}>
+        <div className="flex flex-wrap gap-2">
+          {ABAS.map((aba) => (
+            <button
+              key={aba.id}
+              onClick={() => onAbaChange(aba.id)}
+              className={`
+                px-4 py-2.5
+                rounded-xl
+                text-[12px] font-semibold
+                whitespace-nowrap
+                transition-all
+                ${
+                  abaSelecionada === aba.id
+                    ? "bg-[var(--surface-2)] text-emerald-400 ring-2 ring-emerald-400/70 shadow-[0_0_14px_rgba(16,185,129,.35)]"
+                    : "text-[var(--text-muted)]"
+                }
+              `}
+            >
+              {aba.nome}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* CONTEÚDO */}
@@ -269,7 +284,8 @@ export default function ContratosMobile({
         contratosFiltrados.length === 0 ? (
 
           <EmptyState
-            icon={<FileText size={54} />}
+            compact
+            icon={<FileText size={26} />}
             title="Nenhum contrato encontrado"
             description="Ajuste os filtros ou cadastre o primeiro contrato."
           />
@@ -301,7 +317,8 @@ export default function ContratosMobile({
         contratosVencendo.length === 0 ? (
 
           <EmptyState
-            icon={<CalendarClock size={54} />}
+            compact
+            icon={<CalendarClock size={26} />}
             title="Nenhum contrato ativo"
             description="Não há vencimentos para mostrar no momento."
           />

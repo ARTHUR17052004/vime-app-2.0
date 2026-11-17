@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Send, FileText } from "lucide-react";
+import { Plus, Trash2, Send, FileText, ExternalLink } from "lucide-react";
 
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
@@ -139,6 +139,21 @@ export default function ContratoDemonstrativoModal({
           ) : null}
 
         </div>
+
+        {/* Muito navegador de celular não mostra PDF dentro de iframe
+            (fica em branco) -- esse link garante que dá pra ver o
+            demonstrativo de qualquer jeito, numa aba nova. */}
+        {pdfUrl && !erroPdf && (
+          <a
+            href={pdfUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-medium text-emerald-400 hover:text-emerald-300 transition"
+          >
+            <ExternalLink size={15} />
+            Abrir demonstrativo em nova aba
+          </a>
+        )}
 
         {enviado ? (
 

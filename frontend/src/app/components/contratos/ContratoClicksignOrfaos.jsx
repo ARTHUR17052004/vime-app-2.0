@@ -6,6 +6,7 @@ import { FileWarning, Eye, Download, Loader2, MoreVertical, Trash2 } from "lucid
 
 import { ClicksignService } from "@/services/clicksign.service";
 import { obterLinkClicksign } from "@/utils/clicksignLink";
+import { mostrarBlobNaAba } from "@/utils/abrirArquivoBaixado";
 import Button from "../ui/Button";
 import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -109,22 +110,23 @@ export default function ContratoClicksignOrfaos({ contratosLocais = [] }) {
     const id = doc.key || doc.id;
     if (!id) return;
 
+    // Abre a aba ANTES do fetch (ainda na mesma pilha síncrona do
+    // clique) -- sem isso o navegador bloqueia como pop-up e no
+    // celular o download forçado (<a download>) costuma falhar em
+    // silêncio, sem abrir nem visualizar nada.
+    const aba = window.open("", "_blank");
+
     setBaixando(id);
 
     try {
 
       const blob = await ClicksignService.baixarArquivo(id);
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = doc.filename || "contrato-clicksign.pdf";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      mostrarBlobNaAba(aba, blob, { nomeArquivo: doc.filename || "contrato-clicksign.pdf" });
 
     } catch (err) {
+
+      aba?.close();
 
       alert(err.message || "Erro ao baixar o documento.");
 

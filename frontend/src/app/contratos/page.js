@@ -38,6 +38,7 @@ import { usePermissao } from "../../hooks/usePermissao";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { socket } from "../../services/socket";
 import { normalizarBusca } from "../../utils/busca";
+import { mostrarBlobNaAba } from "../../utils/abrirArquivoBaixado";
 
 export default function ContratosPage() {
   return (
@@ -208,20 +209,21 @@ function ContratosPageConteudo() {
 
   async function gerarPdfContrato(contratoId) {
 
+    // Abre a aba ANTES do fetch (ainda na mesma pilha síncrona do
+    // clique) -- é o que evita o navegador bloquear como pop-up e é o
+    // que faz o PDF realmente abrir/visualizar no celular, em vez de
+    // só tentar (e falhar em silêncio) um download forçado.
+    const aba = window.open("", "_blank");
+
     try {
 
       const blob = await ContratoService.baixarPdf(contratoId);
 
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `contrato-${contratoId}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      mostrarBlobNaAba(aba, blob, { nomeArquivo: `contrato-${contratoId}.pdf` });
 
     } catch (err) {
+
+      aba?.close();
 
       console.error("Erro ao gerar PDF do contrato:", err);
 

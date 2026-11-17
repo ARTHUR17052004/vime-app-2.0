@@ -85,8 +85,13 @@ const baixarPdf = async (req, res) => {
 
   const sufixo = assinado ? '-assinado' : '';
 
+  // "inline" (não "attachment") -- com attachment, o celular só dispara
+  // um download sem feedback visível e sem abrir nada, o que para o
+  // usuário parece "não abre, não visualiza". Com inline, o navegador
+  // mostra o PDF na própria aba (desktop e celular) e quem quiser
+  // ainda baixa pelo botão de salvar do próprio visualizador.
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="contrato-${nomeInquilino}${sufixo}.pdf"`);
+  res.setHeader('Content-Disposition', `inline; filename="contrato-${nomeInquilino}${sufixo}.pdf"`);
 
   return res.send(buffer);
 
@@ -206,8 +211,17 @@ const baixarArquivo = async (req, res) => {
 
   const buffer = Buffer.from(contrato.arquivoDados, 'base64');
 
-  res.setHeader('Content-Type', contrato.arquivoTipo || 'application/octet-stream');
-  res.setHeader('Content-Disposition', `attachment; filename="${contrato.arquivoNomeOriginal || 'contrato'}"`);
+  // PDF e imagem o navegador sabe mostrar sozinho -- "inline" deixa
+  // visualizar na hora (essencial no celular, onde "attachment" só
+  // dispara um download sem feedback visível). Outros tipos (Word,
+  // etc.) o navegador não exibe mesmo, então segue baixando.
+  const tipo = contrato.arquivoTipo || 'application/octet-stream';
+  const disposicao = tipo.startsWith('application/pdf') || tipo.startsWith('image/')
+    ? 'inline'
+    : 'attachment';
+
+  res.setHeader('Content-Type', tipo);
+  res.setHeader('Content-Disposition', `${disposicao}; filename="${contrato.arquivoNomeOriginal || 'contrato'}"`);
 
   return res.send(buffer);
 

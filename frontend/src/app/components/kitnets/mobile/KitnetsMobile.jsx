@@ -191,7 +191,8 @@ export default function KitnetsMobile({
       {kitnets.length === 0 ? (
 
         <EmptyState
-          icon={<House size={54} />}
+          compact
+          icon={<House size={26} />}
           title="Nenhuma kitnet encontrada"
           description="Ajuste os filtros ou cadastre sua primeira kitnet."
         />

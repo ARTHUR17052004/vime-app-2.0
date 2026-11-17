@@ -22,12 +22,15 @@ import ResidenciaFiltro from "../../components/common/ResidenciaFiltro";
 import ContratoModal from "../../components/contratos/ContratoModal";
 import ContratoForm from "../../components/contratos/ContratoForm";
 import ContratoArquivoTable from "../../components/contratos/ContratoArquivoTable";
+import ArquivoContratosMobile from "../../components/contratos/mobile/ArquivoContratosMobile";
 import ConfirmVistoriaEntregaModal from "../../components/common/ConfirmVistoriaEntregaModal";
 import TerminoAntecipadoModal from "../../components/common/TerminoAntecipadoModal";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { normalizarBusca } from "../../../utils/busca";
+import { mostrarBlobNaAba } from "../../../utils/abrirArquivoBaixado";
 
 // Contratos que já existiam de verdade (em papel/PDF) e só precisavam
 // ficar organizados aqui, sem passar pela assinatura digital da
@@ -36,6 +39,7 @@ export default function ContratosArquivoPage() {
 
   const podeVisualizar = usePermissao("arquivoContratos.visualizar");
   const podeCriar = usePermissao("arquivoContratos.criar");
+  const isMobile = useIsMobile();
 
   const [contratos, setContratos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -241,19 +245,21 @@ export default function ContratosArquivoPage() {
 
   async function baixarArquivoDoContrato(contrato) {
 
+    // Abre a aba ANTES do fetch (ainda na mesma pilha síncrona do
+    // clique) -- sem isso o navegador bloqueia como pop-up e no
+    // celular o download forçado (<a download>) costuma falhar em
+    // silêncio, sem abrir nem visualizar nada.
+    const aba = window.open("", "_blank");
+
     try {
 
       const blob = await ContratoService.baixarArquivo(contrato.id);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = contrato.arquivoNomeOriginal || "contrato";
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+
+      mostrarBlobNaAba(aba, blob, { nomeArquivo: contrato.arquivoNomeOriginal || "contrato" });
 
     } catch (err) {
+
+      aba?.close();
 
       alert(err.message || "Erro ao baixar o arquivo.");
 
@@ -366,6 +372,80 @@ export default function ContratosArquivoPage() {
                 Carregando arquivo de contratos...
               </p>
             </div>
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
+  }
+
+  if (isMobile) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <ArquivoContratosMobile
+              contratos={contratosFiltrados}
+              totalContratos={contratosFiltrados.length}
+              podeCriar={podeCriar}
+              onNovoContrato={novoContrato}
+              onEdit={editarContrato}
+              onDelete={excluirContrato}
+              onEncerrar={encerrarContrato}
+              onBaixarArquivo={baixarArquivoDoContrato}
+              search={search}
+              onSearchChange={setSearch}
+              residenciaSelecionada={residenciaSelecionada}
+              onResidenciaChange={setResidenciaSelecionada}
+            />
+
+            <ContratoModal isOpen={modalOpen} onClose={fecharModal}>
+
+              <ContratoForm
+                contrato={contratoEditando}
+                onSave={salvarContrato}
+                modoManual
+                arquivoSelecionado={arquivoPendente}
+                onArquivoSelecionado={setArquivoPendente}
+                onBaixarArquivoAtual={baixarArquivoAtual}
+                onRemoverArquivoAtual={removerArquivoAtual}
+                onCancel={fecharModal}
+              />
+
+            </ContratoModal>
+
+            <ConfirmVistoriaEntregaModal
+              isOpen={!!vistoriaPendente}
+              nomeKitnet={vistoriaPendente?.kitnetNome}
+              onEscolher={confirmarExclusaoContrato}
+            />
+
+            <TerminoAntecipadoModal
+              isOpen={!!terminoAntecipado}
+              onClose={() => setTerminoAntecipado(null)}
+              titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+              contexto="Esse contrato ainda não chegou no fim (dataFim). Ele não será excluído -- vai ser encerrado, com o motivo registrado, pra manter o histórico."
+              acao={async (extra) => {
+                if (terminoAntecipado.tipo === "encerrar") {
+                  await ContratoService.encerrar(terminoAntecipado.id, extra);
+                } else {
+                  await ContratoService.excluir(terminoAntecipado.id, {
+                    gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                    ...extra,
+                  });
+                }
+                await carregarContratos();
+              }}
+            />
 
           </PageContainer>
 

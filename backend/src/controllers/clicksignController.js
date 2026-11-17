@@ -97,8 +97,10 @@ const baixarArquivoDocumento = async (req, res) => {
 
   const buffer = await ClicksignApi.baixarArquivoDocumento(req.params.id);
 
+  // "inline" -- "attachment" no celular só dispara um download sem
+  // feedback visível (ver mesmo ajuste em contratoController.baixarPdf).
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="documento-clicksign.pdf"`);
+  res.setHeader('Content-Disposition', `inline; filename="documento-clicksign.pdf"`);
 
   return res.send(buffer);
 
