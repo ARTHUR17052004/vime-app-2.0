@@ -20,14 +20,6 @@ const API_URLS = {
 const ESCOPO_COBRANCAS =
   "cobrancas.boletos-requisicao cobrancas.boletos-info";
 
-// dados.dataVencimento já chega formatado "dd.mm.yyyy" (ver
-// gatewayPagamentoService.formatarDataBB) -- reformata pra Date, soma
-// os dias e devolve no mesmo formato "dd.mm.yyyy" que o BB espera.
-const formatarDataBB = (data) => {
-  const d = new Date(data);
-  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-};
-
 class BBApi {
 
   constructor() {
@@ -274,13 +266,24 @@ class BBApi {
     // voltar "Propriedade desconhecida" de novo, é sinal de que esse
     // formato também está errado.
     if (dados.multaValor) {
-      const diaMulta = new Date(dados.dataVencimento.split('.').reverse().join('-'));
-      diaMulta.setDate(diaMulta.getDate() + 1);
+
+      // "Data da multa" tem que ser ESTRITAMENTE depois do vencimento
+      // (o BB rejeita com "Data da multa menor ou igual a data do
+      // vencimento" senão) -- vencimento+1 dia. Construído e formatado
+      // em UTC o tempo todo de propósito: misturar `new Date("aaaa-
+      // mm-dd")` (sempre UTC) com getDate()/setDate() (sempre hora
+      // LOCAL do servidor) fazia o "+1 dia" voltar pro MESMO dia do
+      // vencimento em qualquer fuso atrás de UTC (ex.: Brasil, UTC-3)
+      // -- e aí o BB rejeitava.
+      const [diaVenc, mesVenc, anoVenc] = dados.dataVencimento.split('.').map(Number);
+      const diaMulta = new Date(Date.UTC(anoVenc, mesVenc - 1, diaVenc + 1));
+
       payload.multa = {
         tipo: 2, // percentual
-        data: formatarDataBB(diaMulta),
+        data: `${String(diaMulta.getUTCDate()).padStart(2, '0')}.${String(diaMulta.getUTCMonth() + 1).padStart(2, '0')}.${diaMulta.getUTCFullYear()}`,
         porcentagem: Number(dados.multaValor),
       };
+
     }
 
     if (dados.jurosValor) {
