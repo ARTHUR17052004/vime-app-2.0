@@ -70,10 +70,29 @@ function ContratosPageConteudo() {
   // clica -> abre já filtrado)? Lê o status da URL uma vez, na entrada.
   const searchParams = useSearchParams();
 
+  // O link do BY manda o status cru do banco (ATIVO/PENDENTE/ENCERRADO
+  // -- ver insightsService.js navegacao), mas os botões de filtro aqui
+  // usam o rótulo em português ("Ativos"/"Pendentes"/"Encerrados").
+  // Sem traduzir, STATUS_POR_FILTRO[filtroSelecionado] (mais abaixo)
+  // nunca batia com nada e a lista ficava vazia -- parecia que o clique
+  // só abria a ferramenta sem filtrar nada.
+  const STATUS_URL_PARA_FILTRO = {
+    ATIVO: "Ativos",
+    PENDENTE: "Pendentes",
+    ENCERRADO: "Encerrados",
+  };
+
   useEffect(() => {
 
     const status = searchParams.get("status");
-    if (status) setFiltroSelecionado(status);
+
+    if (status) {
+      setFiltroSelecionado(STATUS_URL_PARA_FILTRO[status] || status);
+      // Sem isso, chegava com o filtro certo só que preso na aba
+      // "Visão Geral" (o padrão) -- o usuário via o resumo, não a
+      // lista filtrada que veio buscar.
+      setAbaSelecionada("contratos");
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
