@@ -8,16 +8,19 @@ import ContratoHistoricoFinanceiro from "../../components/contratos/ContratoHist
 import ContratoHistoricoEventos from "../../components/contratos/ContratoHistoricoEventos";
 import ContratoFinanceiroResumo from "../../components/contratos/ContratoFinanceiroResumo";
 import ContratoHistoricoCard from "../../components/contratos/ContratoHistoricoCard";
+import ContratoDetalheMobile from "../../components/contratos/mobile/ContratoDetalheMobile";
 import SemPermissao from "../../components/ui/SemPermissao";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import BotaoVoltar from "../../components/ui/BotaoVoltar";
 
 export default function DetalhesContratoPage() {
   const params = useParams();
 
   const podeVisualizar = usePermissao("contratos.visualizar");
+  const isMobile = useIsMobile();
 
   const [contrato, setContrato] =
     useState(null);
@@ -71,6 +74,18 @@ export default function DetalhesContratoPage() {
         <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] text-[var(--text-1)] rounded-3xl p-10">
           Contrato não encontrado.
         </div>
+      </MainLayout>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <MainLayout>
+        <div className="mb-4">
+          <BotaoVoltar href="/contratos" label="Voltar para Contratos" />
+        </div>
+
+        <ContratoDetalheMobile contrato={contrato} />
       </MainLayout>
     );
   }
