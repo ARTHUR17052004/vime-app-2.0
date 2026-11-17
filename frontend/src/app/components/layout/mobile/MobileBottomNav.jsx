@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   LifeBuoy,
   Wallet,
+  Brain,
   Menu,
 } from "lucide-react";
 
@@ -19,11 +20,13 @@ import { usePermissoes } from "../../../../hooks/usePermissao";
 
 // Só os 3 primeiros com permissão entram na barra (o resto fica no "Mais",
 // que já é filtrado por permissão -- ver MobileMoreMenu.jsx). Ordem é por
-// frequência de uso real, não alfabética.
+// frequência de uso real, não alfabética. BY no lugar de Inquilinos nessa
+// barra -- Inquilinos continua acessível pelo "Mais".
 const CANDIDATOS = [
   { label: "Contratos", href: "/contratos", icon: FileText, permissao: "contratos.visualizar" },
-  { label: "Inquilinos", href: "/inquilinos", icon: Users, permissao: "inquilinos.visualizar" },
+  { label: "BY", href: "/visao-geral", icon: Brain, permissao: "insights.visualizar" },
   { label: "Financeiro", href: "/financeiro", icon: Wallet, permissao: "financeiro.visualizar" },
+  { label: "Inquilinos", href: "/inquilinos", icon: Users, permissao: "inquilinos.visualizar" },
   { label: "Solicitações", href: "/solicitacoes", icon: ClipboardList, permissao: "solicitacoes.visualizar" },
   { label: "Vistorias", href: "/vistorias", icon: ShieldCheck, permissao: "vistorias.visualizar" },
   { label: "Locadores", href: "/locadores", icon: UserSquare2, permissao: "locadores.visualizar" },

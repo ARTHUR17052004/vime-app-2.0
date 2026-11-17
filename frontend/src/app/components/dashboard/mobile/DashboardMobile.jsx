@@ -4,31 +4,34 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  BedDouble,
   Bell,
   Building2,
+  ChevronDown,
   ChevronRight,
   ClipboardList,
   ClipboardPlus,
   DollarSign,
+  DoorOpen,
   FileText,
   House,
   LayoutDashboard,
-  LifeBuoy,
   ShieldCheck,
   TriangleAlert,
   User,
   UserPlus,
   Users,
-  Wallet,
 } from "lucide-react";
 
 import { useNotificacoes } from "../../../../hooks/useNotificacoes";
 import { useClima } from "../../../../hooks/useClima";
 import { usePermissoes } from "../../../../hooks/usePermissao";
 
-// Home do celular -- mesma organização do modelo aprovado: saudação,
-// ações rápidas, indicadores, ocupação, notificações e acesso rápido.
-// O desktop continua usando o dashboard de sempre (ver app/page.js).
+// Home do celular -- saudação, ações rápidas, indicadores, ocupação
+// (com detalhe por residência) e notificações. "Acesso rápido" foi
+// removido de propósito (17/11/2026) -- abrir qualquer ferramenta já
+// é feito pelo botão "Mais" da barra inferior, não precisa duplicar
+// aqui. O desktop continua usando o dashboard de sempre (ver app/page.js).
 
 const cartao = `
   rounded-2xl
@@ -138,9 +141,14 @@ export default function DashboardMobile({
     setDataAtual(dataExtensa());
   }, []);
 
+  // Só uma residência aberta por vez (igual um acordeão) -- clicar na
+  // mesma de novo fecha.
+  const [residenciaAberta, setResidenciaAberta] = useState(null);
+
   const percentual = percentualOcupacao(dados?.ocupacao);
   const ocupadas = dados?.ocupacao?.ocupadas ?? 0;
   const vazias = dados?.ocupacao?.vazias ?? 0;
+  const porResidencia = dados?.ocupacao?.porResidencia ?? [];
   const recebido = percentualRecebido(dados?.financeiro);
 
   // Cada atalho só aparece se o usuário tiver a permissão da página de
@@ -160,18 +168,6 @@ export default function DashboardMobile({
     podeIndicadores && { titulo: "Inquilinos", valor: dados?.inquilinos ?? 0, sub: "Ativos", icone: Users, cor: "text-sky-400 bg-sky-500/15" },
     podeIndicadores && { titulo: "Locadores", valor: dados?.locadores ?? 0, sub: "Cadastrados", icone: User, cor: "text-violet-300 bg-violet-500/15" },
     podeFinanceiro && { titulo: "Recebido", valor: recebido === null ? "—" : `${recebido}%`, sub: "Do lançado", icone: DollarSign, cor: "text-emerald-400 bg-emerald-500/15" },
-  ].filter(Boolean);
-
-  const atalhos = [
-    pode("locadores.visualizar") && { titulo: "Locadores", icone: User, href: "/locadores" },
-    pode("unidades.visualizar") && { titulo: "Unidades", icone: Building2, href: "/unidades" },
-    pode("kitnets.visualizar") && { titulo: "Kitnets", icone: House, href: "/kitnets" },
-    pode("inquilinos.visualizar") && { titulo: "Inquilinos", icone: Users, href: "/inquilinos" },
-    pode("contratos.visualizar") && { titulo: "Contratos", icone: FileText, href: "/contratos" },
-    pode("solicitacoes.visualizar") && { titulo: "Solicitações", icone: ClipboardList, href: "/solicitacoes" },
-    pode("vistorias.visualizar") && { titulo: "Vistorias", icone: ShieldCheck, href: "/vistorias" },
-    pode("financeiro.visualizar") && { titulo: "Financeiro", icone: Wallet, href: "/financeiro" },
-    pode("suporte.visualizar") && { titulo: "Suporte", icone: LifeBuoy, href: "/suporte" },
   ].filter(Boolean);
 
   const alertas = (dados?.alertas || []).slice(0, 3);
@@ -347,6 +343,96 @@ export default function DashboardMobile({
 
         </div>
 
+        {porResidencia.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-[var(--border-token)] -mx-1">
+            {porResidencia.map((residencia) => {
+
+              const aberta = residenciaAberta === residencia.id;
+
+              return (
+                <div key={residencia.id}>
+
+                  <button
+                    type="button"
+                    onClick={() => setResidenciaAberta(aberta ? null : residencia.id)}
+                    className="w-full flex items-center gap-3 px-1 py-2.5 text-left"
+                  >
+                    <span className="w-8 h-8 shrink-0 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                      <Building2 size={16} />
+                    </span>
+
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[13px] font-bold text-[var(--text)]">
+                        {residencia.nome}
+                      </span>
+                      <span className="block text-[11px] text-[var(--text-faint)]">
+                        {residencia.totalKitnets} kitnets
+                      </span>
+                    </span>
+
+                    <ChevronDown
+                      size={18}
+                      className={`shrink-0 text-[var(--text-subtle)] transition-transform ${aberta ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {aberta && (
+                    <div className="px-1 pb-3">
+
+                      <div className="grid grid-cols-3 gap-2">
+
+                        <StatResidencia
+                          icone={BedDouble}
+                          cor="text-emerald-400 bg-emerald-500/10"
+                          valor={residencia.ocupadas}
+                          rotulo="Ocupadas"
+                        />
+
+                        <StatResidencia
+                          icone={DoorOpen}
+                          cor="text-amber-400 bg-amber-500/10"
+                          valor={residencia.vagas}
+                          rotulo="Vagas"
+                        />
+
+                        <StatResidencia
+                          icone={TriangleAlert}
+                          cor="text-red-400 bg-red-500/10"
+                          valor={residencia.emAtraso}
+                          rotulo="Em atraso"
+                        />
+
+                      </div>
+
+                      <div className="mt-3 flex items-center gap-3">
+
+                        <div className="flex-1 h-2 rounded-full bg-[var(--surface-3)] overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400"
+                            style={{ width: `${Math.min(100, Math.max(0, residencia.percentual))}%` }}
+                          />
+                        </div>
+
+                        <span className="shrink-0 text-[11px] font-semibold text-[var(--text-muted)]">
+                          {residencia.percentual}%
+                        </span>
+
+                      </div>
+
+                      <p className="mt-1.5 text-[10px] text-[var(--text-faint)]">
+                        Ocupação da residência
+                      </p>
+
+                    </div>
+                  )}
+
+                </div>
+              );
+
+            })}
+          </div>
+        )}
+
       </section>
       )}
 
@@ -452,44 +538,22 @@ export default function DashboardMobile({
         </section>
       )}
 
-      {/* ACESSO RÁPIDO */}
+    </div>
+  );
+}
 
-      {atalhos.length > 0 && (
-      <section>
-
-        <div className="flex items-center gap-2 mb-2.5 px-1">
-          <LayoutDashboard size={16} className="text-emerald-400" />
-          <h2 className="text-[15px] font-bold text-[var(--text)]">Acesso rápido</h2>
-        </div>
-
-        <div className="-mx-4 px-4 flex gap-2 overflow-x-auto pb-1 snap-x [scrollbar-width:none]">
-          {atalhos.map(({ titulo, icone: Icone, href }) => (
-            <Link
-              key={titulo}
-              href={href}
-              className={`
-                ${cartao}
-                snap-start
-                shrink-0
-                w-[88px]
-                py-3.5
-                flex
-                flex-col
-                items-center
-                gap-2
-                active:scale-95
-                transition
-              `}
-            >
-              <Icone size={24} className="text-[var(--text)]" />
-              <span className="text-[11px] font-medium text-[var(--text)]">{titulo}</span>
-            </Link>
-          ))}
-        </div>
-
-      </section>
-      )}
-
+function StatResidencia({ icone: Icone, cor, valor, rotulo }) {
+  return (
+    <div className="rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] py-2.5 text-center">
+      <div className={`mx-auto w-7 h-7 rounded-full flex items-center justify-center ${cor}`}>
+        <Icone size={14} />
+      </div>
+      <p className="mt-1.5 text-[16px] leading-none font-extrabold text-[var(--text)] tabular-nums">
+        {valor}
+      </p>
+      <p className="mt-1 text-[10px] text-[var(--text-faint)]">
+        {rotulo}
+      </p>
     </div>
   );
 }

@@ -176,6 +176,77 @@ const alertas = async (usuario) => {
   return lista;
 };
 
+// Pro card "Ocupação das residências" do mobile poder abrir cada
+// residência e mostrar Ocupadas/Vagas/Em atraso dela -- "em atraso" é
+// kitnet OCUPADA cujo contrato/inquilino atual tem uma Receita de
+// Aluguel com status ATRASADA (mesmo campo que Financeiro e os jobs
+// de cobrança já usam, mantido sozinho por verificarVencimentosJob).
+// Não é um status da própria Kitnet -- por isso não dá pra só filtrar
+// por "status", precisa cruzar com Receita.
+const ocupacaoPorResidencia = async (usuario) => {
+
+  const [unidades, receitasAtrasadas] = await Promise.all([
+
+    // Unidade.kitnets é um Int solto (contador manual) -- a relação de
+    // verdade com o model Kitnet se chama kitnetsRelacionadas.
+    prisma.unidade.findMany({
+      where: filtroUnidade(usuario),
+      select: {
+        id: true,
+        nome: true,
+        kitnetsRelacionadas: {
+          where: filtroKitnet(usuario),
+          select: { id: true, status: true },
+        },
+      },
+      orderBy: { nome: 'asc' },
+    }),
+
+    prisma.receita.findMany({
+      where: { ...filtroReceita(usuario), status: 'ATRASADA', categoria: 'Aluguel' },
+      select: {
+        contrato: { select: { kitnetId: true } },
+        inquilino: { select: { kitnetId: true } },
+      },
+    }),
+
+  ]);
+
+  const kitnetsEmAtraso = new Set();
+
+  for (const receita of receitasAtrasadas) {
+    if (receita.contrato?.kitnetId) kitnetsEmAtraso.add(receita.contrato.kitnetId);
+    if (receita.inquilino?.kitnetId) kitnetsEmAtraso.add(receita.inquilino.kitnetId);
+  }
+
+  return unidades.map((unidade) => {
+
+    let ocupadas = 0;
+    let vagas = 0;
+    let emAtraso = 0;
+
+    for (const kitnet of unidade.kitnetsRelacionadas) {
+      if (kitnetsEmAtraso.has(kitnet.id)) emAtraso++;
+      else if (kitnet.status === 'OCUPADA') ocupadas++;
+      else if (kitnet.status === 'DISPONIVEL') vagas++;
+    }
+
+    const total = unidade.kitnetsRelacionadas.length;
+
+    return {
+      id: unidade.id,
+      nome: unidade.nome,
+      totalKitnets: total,
+      ocupadas,
+      vagas,
+      emAtraso,
+      percentual: total > 0 ? Math.round((ocupadas / total) * 100) : 0,
+    };
+
+  });
+
+};
+
 const ocupacao = async (usuario) => {
 
   const total = await prisma.kitnet.count({
@@ -192,12 +263,15 @@ const ocupacao = async (usuario) => {
     where: { ...filtroKitnet(usuario), status: 'DISPONIVEL' }
   });
 
+  const porResidencia = await ocupacaoPorResidencia(usuario);
+
   return {
     ocupadas,
     vazias,
     percentual: total > 0
       ? Math.round((ocupadas / total) * 100)
-      : 0
+      : 0,
+    porResidencia,
   };
 };
 
