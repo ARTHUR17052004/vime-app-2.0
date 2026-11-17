@@ -35,6 +35,7 @@ import PageHeader from "../components/ui/PageHeader";
 import Button from "../components/ui/Button";
 import SemPermissao from "../components/ui/SemPermissao";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import SearchInput from "../components/common/SearchInput";
 
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
@@ -802,12 +803,10 @@ function FinanceiroPageConteudo() {
           <label className="block text-xs text-[var(--text-faint)] mb-1.5">
             Pesquisar
           </label>
-          <input
-            type="text"
+          <SearchInput
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Descrição, inquilino, kitnet..."
-            className="w-full rounded-xl p-3 bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text)] focus:outline-none focus:ring-2 focus:ring-green-600"
           />
         </div>
 

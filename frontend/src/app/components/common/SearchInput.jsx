@@ -1,7 +1,11 @@
 "use client";
 
-import { Search, X } from "lucide-react";
-
+// Caixa de pesquisa única do sistema -- sem ícone, sem botão de limpar
+// (nada "dentro da caixa"), igual ao campo "Pesquisar" que já existia
+// em Financeiro (financeiro/page.js). Era a referência que o usuário
+// pediu pra aplicar em todo o resto do sistema -- antes essa versão
+// tinha lupa + botão de limpar dentro de um wrapper mais alto/arredondado,
+// visualmente "uma caixa dentro da caixa" comparado ao Financeiro.
 export default function SearchInput({
   value,
   onChange,
@@ -9,124 +13,52 @@ export default function SearchInput({
   className = "",
   autoFocus = false,
   disabled = false,
-  onClear,
 }) {
-  const limpar = () => {
-    if (onClear) {
-      onClear();
-      return;
-    }
-
-    if (onChange) {
-      onChange({
-        target: {
-          value: "",
-        },
-      });
-    }
-  };
-
   return (
-    <div
+    <input
+      type="text"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      autoFocus={autoFocus}
+      disabled={disabled}
+      autoComplete="off"
+      autoCorrect="off"
+      autoCapitalize="off"
+      spellCheck={false}
+      name="busca-vime"
+      data-lpignore="true"
+      data-1p-ignore
       className={`
-        group
-
         w-full
-        h-14
 
-        rounded-2xl
+        rounded-xl
 
-        bg-[var(--surface)]
-        backdrop-blur-xl
+        p-3
+
+        bg-[var(--surface-2)]
 
         border
         border-[var(--border-token)]
 
-        px-5
+        text-[var(--text)]
 
-        flex
-        items-center
-        gap-3
+        placeholder:text-[var(--text-faint)]
 
         transition-all
         duration-300
 
         hover:border-[var(--border-strong)]
 
-        focus-within:border-emerald-500/50
-        focus-within:ring-2
-        focus-within:ring-emerald-500/20
+        focus:outline-none
+        focus:ring-2
+        focus:ring-green-600
 
-        ${disabled ? "opacity-60" : ""}
+        disabled:opacity-60
+        disabled:cursor-not-allowed
 
         ${className}
       `}
-    >
-      <Search
-        size={18}
-        className="
-          text-[var(--text-subtle)]
-          transition-colors
-          duration-300
-
-          group-focus-within:text-emerald-400
-        "
-      />
-
-      <input
-        type="text"
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        autoFocus={autoFocus}
-        disabled={disabled}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck={false}
-        name="busca-vime"
-        data-lpignore="true"
-        data-1p-ignore
-        className="
-          flex-1
-
-          bg-transparent
-
-          outline-none
-
-          text-[var(--text)]
-
-          placeholder:text-[var(--text-faint)]
-
-          disabled:cursor-not-allowed
-        "
-      />
-
-      {value && !disabled && (
-        <button
-          type="button"
-          onClick={limpar}
-          className="
-            flex
-            items-center
-            justify-center
-
-            w-8
-            h-8
-
-            rounded-full
-
-            text-[var(--text-faint)]
-
-            transition-all
-
-            hover:bg-[var(--surface-3)]
-            hover:text-[var(--text)]
-          "
-        >
-          <X size={16} />
-        </button>
-      )}
-    </div>
+    />
   );
 }
