@@ -27,10 +27,12 @@ import DashboardStatsCard from "../components/dashboard/DashboardStatsCard";
 import KitnetModal from "../components/kitnets/KitnetModal";
 import KitnetForm from "../components/kitnets/KitnetForm";
 import KitnetTable from "../components/kitnets/KitnetTable";
+import KitnetsMobile from "../components/kitnets/mobile/KitnetsMobile";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { useIsMobile } from "../../hooks/useIsMobile";
 
 export default function KitnetsPage() {
   return (
@@ -47,6 +49,7 @@ function KitnetsPageConteudo() {
 
   const podeVisualizar = usePermissao("kitnets.visualizar");
   const podeCriar = usePermissao("kitnets.criar");
+  const isMobile = useIsMobile();
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -270,6 +273,96 @@ function KitnetsPageConteudo() {
     );
 
   }
+
+  if (isMobile) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            {erro && (
+
+              <div
+                className="
+                  mb-4
+                  rounded-2xl
+                  border
+                  border-red-500/20
+                  bg-red-500/10
+                  px-4
+                  py-3
+                  text-sm
+                  text-red-300
+                "
+              >
+                {erro}
+              </div>
+
+            )}
+
+            <KitnetsMobile
+              kitnets={kitnetsFiltradas}
+              totalKitnets={totalKitnets}
+              disponiveis={disponiveis}
+              ocupadas={ocupadas}
+              manutencao={manutencao}
+              podeCriar={podeCriar}
+              onNovaKitnet={novaKitnet}
+              onEdit={editarKitnet}
+              onDelete={excluirKitnet}
+              residenciaSelecionada={residenciaSelecionada}
+              onResidenciaChange={setResidenciaSelecionada}
+              statusFiltro={statusFiltro}
+              onStatusChange={setStatusFiltro}
+              ordenacao={ordenacao}
+              onOrdenacaoChange={setOrdenacao}
+            />
+
+            <KitnetModal
+              isOpen={modalOpen}
+              kitnet={kitnetEditando}
+              onClose={() => {
+                setKitnetEditando(null);
+                setModalOpen(false);
+              }}
+            >
+
+              <KitnetForm
+                kitnet={kitnetEditando}
+                onSave={salvarKitnet}
+                onCancel={() => {
+                  setKitnetEditando(null);
+                  setModalOpen(false);
+                }}
+              />
+
+            </KitnetModal>
+
+            <TerminoAntecipadoModal
+              isOpen={!!terminoAntecipado}
+              onClose={() => setTerminoAntecipado(null)}
+              titulo="Quebra de contrato -- excluir kitnet"
+              contexto="Essa kitnet tem um contrato ativo que ainda não chegou no fim. A kitnet não será excluída -- o contrato vai ser encerrado e ela fica liberada (disponível) em vez de apagada."
+              acao={async (extra) => {
+                await KitnetService.excluir(terminoAntecipado.id, extra);
+                await carregarKitnets();
+              }}
+            />
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
+  }
+
   return (
 
   <MainLayout>
