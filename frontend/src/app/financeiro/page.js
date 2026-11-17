@@ -145,6 +145,8 @@ function FinanceiroPageConteudo() {
   const [contas, setContas] = useState([]);
   const [contaFiltro, setContaFiltro] = useState("");
 
+  const [enviandoLote, setEnviandoLote] = useState(false);
+
   useEffect(() => {
 
     async function carregarContas() {
@@ -464,6 +466,58 @@ function FinanceiroPageConteudo() {
       alert(err.message || "Erro ao enviar cobrança ao banco.");
 
     }
+
+  };
+
+  // Envio em lote -- veio de Transações (ver asaas-transacoes/page.js),
+  // de propósito trazido pra cá: quem edita/lança a receita é o
+  // Financeiro, então disparar as pendentes em massa também fica aqui.
+  // Transações virou só um painel de acompanhamento, sem ações.
+  const enviarCobrancasSelecionadas = async (ids) => {
+
+    setEnviandoLote(true);
+
+    let sucesso = 0;
+    let falha = 0;
+    // Conta quantas foram pra cada banco, pra confirmar no resumo final.
+    const porBanco = {};
+
+    for (const id of ids) {
+
+      try {
+
+        const resposta = await AsaasService.enviarCobranca(id);
+
+        if (resposta.success === false) {
+          falha++;
+          continue;
+        }
+
+        sucesso++;
+
+        const banco = resposta.data?.gatewayProvider === "BB" ? "Banco do Brasil" : "Asaas";
+        porBanco[banco] = (porBanco[banco] || 0) + 1;
+
+      } catch (error) {
+        console.error(`Erro ao enviar cobrança ${id}:`, error);
+        falha++;
+      }
+
+    }
+
+    setEnviandoLote(false);
+
+    await carregar();
+
+    const resumoBancos = Object.entries(porBanco)
+      .map(([banco, qtd]) => `${qtd} pro ${banco}`)
+      .join(", ");
+
+    alert(
+      falha > 0
+        ? `${sucesso} cobrança(s) enviada(s)${resumoBancos ? ` (${resumoBancos})` : ""}. ${falha} falharam (confira o status delas na lista).`
+        : `${sucesso} cobrança(s) enviada(s) com sucesso${resumoBancos ? ` -- ${resumoBancos}` : ""}.`
+    );
 
   };
 
@@ -929,6 +983,8 @@ function FinanceiroPageConteudo() {
           onUpdate={atualizarReceita}
           onMarcarPago={marcarReceitaComoPaga}
           onEnviarCobranca={enviarCobranca}
+          onEnviarSelecionadas={enviarCobrancasSelecionadas}
+          enviandoLote={enviandoLote}
           onFixar={fixarReceita}
           onToggleRecorrente={toggleRecorrenteReceita}
           onArquivar={arquivarReceita}
@@ -981,6 +1037,8 @@ function FinanceiroPageConteudo() {
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
         onEnviarCobranca={enviarCobranca}
+        onEnviarSelecionadas={enviarCobrancasSelecionadas}
+        enviandoLote={enviandoLote}
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
@@ -1003,6 +1061,8 @@ function FinanceiroPageConteudo() {
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
         onEnviarCobranca={enviarCobranca}
+        onEnviarSelecionadas={enviarCobrancasSelecionadas}
+        enviandoLote={enviandoLote}
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}

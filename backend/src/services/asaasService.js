@@ -306,6 +306,15 @@ const mapearTransacao = (receita) => {
     valor: receita.valor,
     vencimento: receita.vencimento,
     dataPagamento: receita.dataPagamento,
+    // Usados pelo "demonstrativo" do painel de Transações (ver
+    // utils/statusReceita.js demonstrativoReceita) -- createdAt é quando
+    // a receita foi lançada, cobrancaEnviadaEm é quando foi de fato
+    // mandada pro banco (pode ser bem depois do createdAt), dataCredito
+    // é quando o dinheiro caiu de verdade (BB não credita no mesmo dia
+    // do pagamento).
+    createdAt: receita.createdAt,
+    cobrancaEnviadaEm: receita.cobrancaEnviadaEm,
+    dataCredito: receita.dataCredito,
     formaPagamento: receita.formaPagamento || (receita.enviadaAsaas ? 'BOLETO' : '-'),
     status: receita.status,
     enviadaAsaas: receita.enviadaAsaas,

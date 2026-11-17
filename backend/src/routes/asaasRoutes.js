@@ -26,7 +26,11 @@ router.get('/transacoes', permissaoMiddleware('asaasTransacoes.visualizar'), asa
 
 router.get('/transacoes/:id', permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.buscarTransacao);
 
-router.post('/transacoes/:id/enviar', permissaoMiddleware('asaasTransacoes.enviar'), asaasController.enviarCobranca);
+// O Financeiro passou a disparar isso também (envio avulso/em lote das
+// receitas pendentes -- ver financeiro/page.js), então libera por
+// financeiro.editar OU asaasTransacoes.enviar (quem só tem um dos dois
+// continua conseguindo).
+router.post('/transacoes/:id/enviar', permissaoMiddleware.permissaoOuMiddleware('financeiro.editar', 'asaasTransacoes.enviar'), asaasController.enviarCobranca);
 
 router.get('/resumo', permissaoMiddleware('asaasTransacoes.visualizar'), asaasController.resumo);
 

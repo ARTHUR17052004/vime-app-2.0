@@ -52,7 +52,21 @@ export default function AsaasResumoCards({ transacoes = [] }) {
 
         <div
           key={card.titulo}
-          className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden"
+          className="
+            bg-[var(--surface)]
+            backdrop-blur-[24px]
+            rounded-2xl
+            border
+            border-[var(--border-token)]
+            overflow-hidden
+
+            transition-all
+            duration-300
+
+            hover:border-emerald-400/20
+            hover:shadow-[0_14px_32px_rgba(0,0,0,.28)]
+            hover:-translate-y-[2px]
+          "
         >
 
           <div

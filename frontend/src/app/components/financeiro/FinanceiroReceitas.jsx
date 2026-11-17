@@ -135,6 +135,19 @@ function MenuButton({ label, danger, success, warning, onClick }) {
   );
 }
 
+// Paga/cancelada sem ter sido enviada a banco nenhum é lançamento
+// manual (dinheiro na mão, por exemplo) -- não é pendência, não entra
+// na seleção em lote. Mesmo critério do selo "Não enviada ao banco"
+// logo abaixo e do filtro "Não enviada" em financeiro/page.js.
+function precisaEnviar(item) {
+  return (
+    !item.gatewayReferencia &&
+    item.status !== "PAGA" &&
+    item.status !== "PAGO" &&
+    item.status !== "CANCELADA"
+  );
+}
+
 export default function FinanceiroReceitas({
   receitas,
   contas,
@@ -144,6 +157,8 @@ export default function FinanceiroReceitas({
   onUpdate,
   onMarcarPago,
   onEnviarCobranca,
+  onEnviarSelecionadas,
+  enviandoLote = false,
   onFixar,
   onToggleRecorrente,
   onArquivar,
@@ -156,6 +171,36 @@ export default function FinanceiroReceitas({
 
   const [receitaSelecionada, setReceitaSelecionada] =
     useState(null);
+
+  // Seleção em lote pra "Enviar Cobrança" -- veio de Transações, pra
+  // quem edita (aqui) também poder disparar as pendentes de uma vez,
+  // sem precisar ir em outra tela.
+  const [selecionadas, setSelecionadas] = useState(new Set());
+
+  function alternarSelecionada(id) {
+    setSelecionadas((atual) => {
+      const novo = new Set(atual);
+      if (novo.has(id)) novo.delete(id);
+      else novo.add(id);
+      return novo;
+    });
+  }
+
+  function alternarTodasSelecionadas(ids) {
+    setSelecionadas((atual) => {
+      const todasJaSelecionadas = ids.every((id) => atual.has(id));
+      return todasJaSelecionadas ? new Set() : new Set(ids);
+    });
+  }
+
+  async function enviarSelecionadasClick() {
+    const ids = Array.from(selecionadas);
+    await onEnviarSelecionadas?.(ids);
+    setSelecionadas(new Set());
+  }
+
+  const enviaveis = receitas.filter(precisaEnviar);
+  const todasSelecionadas = enviaveis.length > 0 && enviaveis.every((t) => selecionadas.has(t.id));
 
   const [visualizarOpen, setVisualizarOpen] =
     useState(false);
@@ -382,6 +427,65 @@ export default function FinanceiroReceitas({
 
       </div>
 
+      {podeEditar && onEnviarSelecionadas && enviaveis.length > 0 && (
+
+        <div
+          className="
+            mx-6
+            mt-4
+
+            flex
+            flex-wrap
+            items-center
+            justify-between
+            gap-3
+
+            rounded-xl
+
+            border
+            border-[var(--border-token)]
+
+            bg-[var(--surface-2)]
+
+            px-4
+            py-3
+          "
+        >
+
+          <label className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
+            <input
+              type="checkbox"
+              checked={todasSelecionadas}
+              onChange={() => alternarTodasSelecionadas(enviaveis.map((t) => t.id))}
+            />
+            Selecionar todas enviáveis ({enviaveis.length})
+          </label>
+
+          {selecionadas.size > 0 && (
+            <button
+              onClick={enviarSelecionadasClick}
+              disabled={enviandoLote}
+              className="
+                rounded-lg
+                bg-sky-600
+                hover:bg-sky-700
+                disabled:opacity-50
+                disabled:cursor-not-allowed
+                px-4
+                py-2
+                text-sm
+                font-semibold
+                text-[var(--text)]
+              "
+            >
+              {enviandoLote ? "Enviando..." : `Enviar ${selecionadas.size} selecionada(s)`}
+            </button>
+          )}
+
+        </div>
+
+      )}
+
       {receitas.length === 0 ? (
         <div className="px-6 pb-6 text-[var(--text-subtle)]">
           Nenhuma receita cadastrada.
@@ -405,6 +509,17 @@ export default function FinanceiroReceitas({
 
                 <div className="flex items-start justify-between gap-3">
 
+                  <div className="flex items-start gap-2.5 min-w-0">
+
+                    {podeEditar && onEnviarSelecionadas && precisaEnviar(item) && (
+                      <input
+                        type="checkbox"
+                        checked={selecionadas.has(item.id)}
+                        onChange={() => alternarSelecionada(item.id)}
+                        className="mt-1 shrink-0"
+                      />
+                    )}
+
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
                       {item.fixado && (
@@ -422,6 +537,8 @@ export default function FinanceiroReceitas({
                       {item.categoria}
                       {inquilino?.nome ? ` · ${inquilino.nome}` : ""}
                     </p>
+                  </div>
+
                   </div>
 
                   <div className="flex items-center gap-1 shrink-0">
@@ -558,6 +675,17 @@ export default function FinanceiroReceitas({
               "
             >
               <tr>
+                {podeEditar && onEnviarSelecionadas && (
+                  <th className="w-10 py-4 pr-2">
+                    <input
+                      type="checkbox"
+                      checked={todasSelecionadas}
+                      onChange={() => alternarTodasSelecionadas(enviaveis.map((t) => t.id))}
+                      disabled={enviaveis.length === 0}
+                    />
+                  </th>
+                )}
+
                 <th className="text-left py-4 pr-4">
                   Descrição
                 </th>
@@ -627,6 +755,18 @@ export default function FinanceiroReceitas({
                   key={item.id}
                   className="border-b border-[var(--border-token)] hover:bg-[var(--surface-2)] transition"
                 >
+
+                  {podeEditar && onEnviarSelecionadas && (
+                    <td className="pr-2">
+                      {precisaEnviar(item) && (
+                        <input
+                          type="checkbox"
+                          checked={selecionadas.has(item.id)}
+                          onChange={() => alternarSelecionada(item.id)}
+                        />
+                      )}
+                    </td>
+                  )}
 
                   <td className="py-5 pr-4">
                     <div className="flex items-center gap-2">

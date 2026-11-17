@@ -1,9 +1,14 @@
 "use client";
 
-import { ChevronUp, ChevronDown, Repeat } from "lucide-react";
+import { ChevronUp, ChevronDown, Repeat, Clock, Send, TriangleAlert, CheckCircle2, Ban } from "lucide-react";
 
 import Badge from "../ui/Badge";
-import { statusExibidoReceita } from "@/utils/statusReceita";
+import { statusExibidoReceita, demonstrativoReceita } from "@/utils/statusReceita";
+
+// Transações é só um painel de acompanhamento -- quem lança, edita e
+// envia ao banco (inclusive em lote) é o Financeiro agora. Aqui só dá
+// pra olhar ("Visualizar"/"Detalhes"); nada de checkbox, Editar ou
+// Enviar ao Banco.
 
 // Mesmo cabeçalho clicável de FinanceiroReceitas.jsx -- `ordens` é
 // [valorAscendente, valorDescendente] (toggle nos dois sentidos) ou só
@@ -59,47 +64,54 @@ const formatarData = (data) => {
   });
 };
 
-// Mesmo padrão de status do Financeiro (statusExibidoReceita) --
-// "Pendente" só quando NUNCA foi enviada a banco nenhum; já enviada e
-// ainda não paga vira "Em Aberto". Antes essa tela tinha sua própria
-// régua solta (Pendente pra tudo que não era paga/atrasada/cancelada),
-// divergindo do que o resto do sistema já mostra pro mesmo status.
+const ICONE_POR_TIPO = {
+  aguardando: Clock,
+  enviada: Send,
+  atrasada: TriangleAlert,
+  paga: CheckCircle2,
+  cancelada: Ban,
+};
+
+const COR_POR_TIPO = {
+  aguardando: "text-yellow-400",
+  enviada: "text-sky-400",
+  atrasada: "text-red-400",
+  paga: "text-emerald-400",
+  cancelada: "text-[var(--text-faint)]",
+};
+
+// Demonstrativo da cobrança -- cada estado (aguardando envio, enviada
+// e aguardando pagamento, vencida, paga, cancelada) mostra as datas e
+// a origem relevantes pra ele, em vez de uma linha única igual pra
+// tudo (ver utils/statusReceita.js demonstrativoReceita).
+function Demonstrativo({ item }) {
+
+  const { tipo, titulo, linhas } = demonstrativoReceita(item);
+  const Icone = ICONE_POR_TIPO[tipo];
+  const cor = COR_POR_TIPO[tipo];
+
+  return (
+    <div className="mt-1 flex items-start gap-1.5">
+      <Icone size={13} className={`mt-0.5 shrink-0 ${cor}`} />
+      <div className="min-w-0">
+        <p className={`text-sm font-semibold ${cor}`}>{titulo}</p>
+        {linhas.map((linha) => (
+          <p key={linha} className="text-xs text-[var(--text-faint)]">{linha}</p>
+        ))}
+      </div>
+    </div>
+  );
+
+}
 
 export default function AsaasTabela({
   transacoes = [],
   loading = false,
   onVisualizar,
   onDetalhes,
-  onEditar,
-  onEnviar,
-  enviandoId,
-  selecionados = new Set(),
-  onAlternarSelecionado,
-  onAlternarTodos,
-  onEnviarSelecionados,
-  enviandoLote = false,
-  podeEditar = true,
-  podeEnviar = true,
   ordenacao,
   onOrdenar,
 }) {
-
-  // enviadaAsaas só cobre o caminho Asaas -- uma receita mandada pelo
-  // BB fica com gatewayReferencia preenchida em vez disso.
-  const foiEnviada = (t) => t.enviadaAsaas || !!t.gatewayReferencia;
-
-  // Paga ou cancelada SEM ter passado pelo banco não é um problema --
-  // é lançamento manual (dinheiro na mão, por exemplo), não precisa e
-  // não deve ser "enviada" agora. Sem isso, toda receita nessa situação
-  // aparecia com o aviso amarelo e o botão "Enviar ao Banco" como se
-  // estivesse pendente de verdade, confundindo o usuário (mesmo
-  // critério do filtro "Não enviada" em financeiro/page.js).
-  const jaResolvida = (t) => t.status === "PAGA" || t.status === "PAGO" || t.status === "CANCELADA";
-  const precisaEnviar = (t) => !foiEnviada(t) && !jaResolvida(t);
-
-  const enviaveis = transacoes.filter(precisaEnviar);
-  const todosSelecionados =
-    enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
   return (
     <div className="bg-[var(--surface)] backdrop-blur-[24px] rounded-2xl border border-[var(--border-token)] overflow-hidden">
@@ -119,15 +131,6 @@ export default function AsaasTabela({
           <thead className="bg-[var(--surface-2)]">
 
             <tr>
-
-              <th className="p-4 w-10">
-                <input
-                  type="checkbox"
-                  checked={todosSelecionados}
-                  onChange={() => onAlternarTodos?.(enviaveis.map((t) => t.id))}
-                  disabled={enviaveis.length === 0}
-                />
-              </th>
 
               <CabecalhoOrdenavel
                 label="Cliente"
@@ -176,7 +179,7 @@ export default function AsaasTabela({
 
             {loading && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-[var(--text-subtle)]">
+                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
                   Carregando cobranças...
                 </td>
               </tr>
@@ -184,7 +187,7 @@ export default function AsaasTabela({
 
             {!loading && transacoes.length === 0 && (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-[var(--text-subtle)]">
+                <td colSpan={6} className="p-8 text-center text-[var(--text-subtle)]">
                   Nenhuma cobrança encontrada.
                 </td>
               </tr>
@@ -196,16 +199,6 @@ export default function AsaasTabela({
                 key={item.id}
                 className="border-t border-[var(--border-token)] hover:bg-[var(--surface-2)]"
               >
-
-                <td className="p-4">
-                  {precisaEnviar(item) && (
-                    <input
-                      type="checkbox"
-                      checked={selecionados.has(item.id)}
-                      onChange={() => onAlternarSelecionado?.(item.id)}
-                    />
-                  )}
-                </td>
 
                 <td className="p-4">
 
@@ -222,21 +215,7 @@ export default function AsaasTabela({
                     {item.kitnetNome && ` · Kitnet ${item.kitnetNome}`}
                   </div>
 
-                  <div
-                    className={
-                      precisaEnviar(item)
-                        ? "text-sm font-semibold text-yellow-400"
-                        : "text-sm text-[var(--text-subtle)]"
-                    }
-                  >
-                    {item.gatewayProvider === "BB"
-                      ? `BB • ${item.gatewayReferencia || "sincronizado"}`
-                      : item.enviadaAsaas
-                      ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
-                      : jaResolvida(item)
-                      ? (item.status === "CANCELADA" ? "Cancelada sem passar pelo banco" : "Paga sem passar pelo banco (lançamento manual)")
-                      : "⚠ Ainda não enviada a nenhum banco"}
-                  </div>
+                  <Demonstrativo item={item} />
 
                 </td>
 
@@ -293,44 +272,6 @@ export default function AsaasTabela({
                       Detalhes
                     </button>
 
-                    {precisaEnviar(item) && podeEditar && (
-                      <button
-                        onClick={() => onEditar?.(item)}
-                        className="
-                          px-4
-                          py-2
-                          rounded-lg
-                          border
-                          border-yellow-500/30
-                          text-yellow-400
-                          hover:bg-yellow-500/10
-                        "
-                      >
-                        Editar
-                      </button>
-                    )}
-
-                    {precisaEnviar(item) && podeEnviar && (
-                      <button
-                        onClick={() => onEnviar?.(item)}
-                        disabled={enviandoId === item.id}
-                        className="
-                          px-4
-                          py-2
-                          rounded-lg
-                          bg-sky-600
-                          hover:bg-sky-700
-                          disabled:opacity-50
-                          disabled:cursor-not-allowed
-                          text-[var(--text)]
-                        "
-                      >
-                        {enviandoId === item.id
-                          ? "Enviando..."
-                          : "Enviar ao Banco"}
-                      </button>
-                    )}
-
                   </div>
 
                 </td>
@@ -345,34 +286,11 @@ export default function AsaasTabela({
 
       </div>
 
-      <div className="px-6 py-4 border-t border-[var(--border-token)] flex justify-between items-center flex-wrap gap-3">
+      <div className="px-6 py-4 border-t border-[var(--border-token)]">
 
         <span className="text-[var(--text-subtle)] text-sm">
           Exibindo {transacoes.length} cobrança(s)
-          {selecionados.size > 0 && ` • ${selecionados.size} selecionada(s)`}
         </span>
-
-        {selecionados.size > 0 && podeEnviar && (
-          <button
-            onClick={() => onEnviarSelecionados?.()}
-            disabled={enviandoLote}
-            className="
-              px-5
-              py-2.5
-              rounded-lg
-              bg-sky-600
-              hover:bg-sky-700
-              disabled:opacity-50
-              disabled:cursor-not-allowed
-              text-[var(--text)]
-              font-semibold
-            "
-          >
-            {enviandoLote
-              ? "Enviando..."
-              : `Enviar ${selecionados.size} selecionada(s)`}
-          </button>
-        )}
 
       </div>
 

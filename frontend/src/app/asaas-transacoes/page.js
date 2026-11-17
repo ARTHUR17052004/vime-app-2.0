@@ -18,13 +18,11 @@ import AsaasFiltros from "../components/asaas-transacoes/AsaasFiltros";
 import AsaasTabela from "../components/asaas-transacoes/AsaasTabela";
 import AsaasExportar from "../components/asaas-transacoes/AsaasExportar";
 import AsaasDetalhesModal from "../components/asaas-transacoes/AsaasDetalhesModal";
-import AsaasEditarModal from "../components/asaas-transacoes/AsaasEditarModal";
 import AsaasNovaCobrancaModal from "../components/asaas-transacoes/AsaasNovaCobrancaModal";
 import AsaasTransacoesMobile from "../components/asaas-transacoes/mobile/AsaasTransacoesMobile";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { AsaasService } from "@/services/asaas.service";
-import { ReceitaService } from "@/services/financeiro.service";
 import { LocadorService } from "@/services/locadores.service";
 import { usePermissao } from "../../hooks/usePermissao";
 import { useIsMobile } from "../../hooks/useIsMobile";
@@ -51,12 +49,16 @@ const COMPARADORES_ASAAS = {
   "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
 };
 
+// Transações é só um painel de acompanhamento (um "gerente inteligente"
+// de tudo que acontece com cada cobrança) -- lançar, editar e enviar ao
+// banco (inclusive em lote) é tudo feito no Financeiro agora (ver
+// financeiro/page.js, FinanceiroReceitas.jsx). Essa tela só lê o que já
+// está lá e organiza por estado (aguardando envio, enviada, vencida,
+// paga, cancelada -- ver utils/statusReceita.js demonstrativoReceita).
 export default function AsaasTransacoesPage() {
 
   const podeVisualizar = usePermissao("asaasTransacoes.visualizar");
   const podeCriar = usePermissao("asaasTransacoes.criar");
-  const podeEditar = usePermissao("asaasTransacoes.editar");
-  const podeEnviar = usePermissao("asaasTransacoes.enviar");
   const podeExportar = usePermissao("asaasTransacoes.exportar");
   const isMobile = useIsMobile();
 
@@ -74,9 +76,6 @@ export default function AsaasTransacoesPage() {
   const [filtros, setFiltros] =
     useState(null);
 
-  const [enviandoId, setEnviandoId] =
-    useState(null);
-
   const [transacaoSelecionada, setTransacaoSelecionada] =
     useState(null);
 
@@ -84,18 +83,6 @@ export default function AsaasTransacoesPage() {
     useState(false);
 
   const [novaCobrancaOpen, setNovaCobrancaOpen] =
-    useState(false);
-
-  const [editarOpen, setEditarOpen] =
-    useState(false);
-
-  const [salvandoEdicao, setSalvandoEdicao] =
-    useState(false);
-
-  const [selecionados, setSelecionados] =
-    useState(new Set());
-
-  const [enviandoLote, setEnviandoLote] =
     useState(false);
 
   const [locadores, setLocadores] =
@@ -152,8 +139,9 @@ export default function AsaasTransacoesPage() {
     carregarTransacoes();
 
     // Cobrança pode virar "Paga"/"Atrasada" sozinha (webhook do banco,
-    // job de vencimento) sem ninguém mexer nesta tela -- sem isso, só
-    // aparecia atualizado depois de dar F5.
+    // job de vencimento, ou enviada em lote lá no Financeiro) sem
+    // ninguém mexer nesta tela -- sem isso, só aparecia atualizado
+    // depois de dar F5.
     function aoAtualizar(evento) {
       if (evento?.tipo === "receita") {
         carregarTransacoes();
@@ -168,146 +156,10 @@ export default function AsaasTransacoesPage() {
 
   }, []);
 
-  async function enviarCobranca(transacao) {
-
-    try {
-
-      setEnviandoId(transacao.id);
-
-      const resposta = await AsaasService.enviarCobranca(transacao.id);
-
-      // Confirma explicitamente qual banco recebeu -- a mensagem já
-      // vem do backend nomeando o banco certo (ver
-      // gatewayPagamentoService.js), então não tem chance de mostrar
-      // um banco errado por engano aqui na tela.
-      alert(resposta.message || "Cobrança enviada com sucesso.");
-
-      await carregarTransacoes();
-
-    } catch (error) {
-
-      console.error("Erro ao enviar cobrança:", error);
-
-      alert(error.message || "Erro ao enviar cobrança.");
-
-    } finally {
-
-      setEnviandoId(null);
-
-    }
-
-  }
-
-  function alternarSelecionado(id) {
-
-    setSelecionados((atual) => {
-      const novo = new Set(atual);
-      if (novo.has(id)) {
-        novo.delete(id);
-      } else {
-        novo.add(id);
-      }
-      return novo;
-    });
-
-  }
-
-  function alternarTodos(ids) {
-
-    setSelecionados((atual) => {
-      const todosJaSelecionados = ids.every((id) => atual.has(id));
-      return todosJaSelecionados ? new Set() : new Set(ids);
-    });
-
-  }
-
-  async function enviarSelecionados() {
-
-    setEnviandoLote(true);
-
-    let sucesso = 0;
-    let falha = 0;
-    // Conta quantas foram pra cada banco, pra confirmar no resumo
-    // final -- mesma lógica de segurança do envio individual.
-    const porBanco = {};
-
-    for (const id of selecionados) {
-
-      try {
-
-        const resposta = await AsaasService.enviarCobranca(id);
-
-        if (resposta.success === false) {
-          falha++;
-          continue;
-        }
-
-        sucesso++;
-
-        const banco = resposta.data?.gatewayProvider === "BB" ? "Banco do Brasil" : "Asaas";
-        porBanco[banco] = (porBanco[banco] || 0) + 1;
-
-      } catch (error) {
-        console.error(`Erro ao enviar cobrança ${id}:`, error);
-        falha++;
-      }
-
-    }
-
-    setSelecionados(new Set());
-    setEnviandoLote(false);
-
-    await carregarTransacoes();
-
-    const resumoBancos = Object.entries(porBanco)
-      .map(([banco, qtd]) => `${qtd} pro ${banco}`)
-      .join(", ");
-
-    alert(
-      falha > 0
-        ? `${sucesso} cobrança(s) enviada(s)${resumoBancos ? ` (${resumoBancos})` : ""}. ${falha} falharam (confira o status delas na lista).`
-        : `${sucesso} cobrança(s) enviada(s) com sucesso${resumoBancos ? ` -- ${resumoBancos}` : ""}.`
-    );
-
-  }
-
   function abrirDetalhes(transacao) {
 
     setTransacaoSelecionada(transacao);
     setDetalhesOpen(true);
-
-  }
-
-  function abrirEdicao(transacao) {
-
-    setTransacaoSelecionada(transacao);
-    setEditarOpen(true);
-
-  }
-
-  async function salvarEdicao(id, dados) {
-
-    try {
-
-      setSalvandoEdicao(true);
-
-      await ReceitaService.atualizar(id, dados);
-
-      setEditarOpen(false);
-
-      await carregarTransacoes();
-
-    } catch (error) {
-
-      console.error("Erro ao editar cobrança:", error);
-
-      alert(error.message || "Erro ao salvar a cobrança.");
-
-    } finally {
-
-      setSalvandoEdicao(false);
-
-    }
 
   }
 
@@ -367,10 +219,10 @@ export default function AsaasTransacoesPage() {
 
       if (filtros.enviado && filtros.enviado !== "Todos") {
 
-        // Mesmo critério da tabela/seleção em lote (ver AsaasTabela.jsx
-        // foiEnviada) -- enviadaAsaas só cobre o caminho Asaas, uma
-        // receita mandada pelo BB fica com gatewayReferencia preenchida
-        // em vez disso.
+        // Mesmo critério usado no demonstrativo (ver
+        // utils/statusReceita.js) -- enviadaAsaas só cobre o caminho
+        // Asaas, uma receita mandada pelo BB fica com gatewayReferencia
+        // preenchida em vez disso.
         const enviada = item.enviadaAsaas || !!item.gatewayReferencia;
 
         if (filtros.enviado === "Enviadas" && !enviada) return false;
@@ -403,20 +255,10 @@ export default function AsaasTransacoesPage() {
               totalTransacoes={transacoesFiltradas.length}
               loading={loading}
               podeCriar={podeCriar}
-              podeEditar={podeEditar}
-              podeEnviar={podeEnviar}
               podeExportar={podeExportar}
               onNovaCobranca={() => setNovaCobrancaOpen(true)}
               onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
-              onEditar={abrirEdicao}
-              onEnviar={enviarCobranca}
-              enviandoId={enviandoId}
-              selecionados={selecionados}
-              onAlternarSelecionado={alternarSelecionado}
-              onAlternarTodos={alternarTodos}
-              onEnviarSelecionados={enviarSelecionados}
-              enviandoLote={enviandoLote}
               locadores={locadores}
               locadorFiltro={locadorFiltro}
               onLocadorChange={setLocadorFiltro}
@@ -433,14 +275,6 @@ export default function AsaasTransacoesPage() {
               open={detalhesOpen}
               onClose={() => setDetalhesOpen(false)}
               transacao={transacaoSelecionada}
-            />
-
-            <AsaasEditarModal
-              open={editarOpen}
-              onClose={() => setEditarOpen(false)}
-              transacaoOriginal={transacaoSelecionada}
-              onSave={salvarEdicao}
-              salvando={salvandoEdicao}
             />
 
             <AsaasNovaCobrancaModal
@@ -474,7 +308,7 @@ export default function AsaasTransacoesPage() {
 
           <PageHeader
             title="Transações"
-            subtitle="Gerencie cobranças, recebimentos e sincronizações de qualquer banco."
+            subtitle="Acompanhe o que está acontecendo com cada cobrança -- lançar e enviar ao banco é no Financeiro."
             count={transacoesFiltradas.length}
             countLabel="cobrança(s)"
             actions={
@@ -551,16 +385,6 @@ export default function AsaasTransacoesPage() {
               onOrdenar={setOrdenacao}
               onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
-              onEditar={abrirEdicao}
-              onEnviar={enviarCobranca}
-              enviandoId={enviandoId}
-              selecionados={selecionados}
-              onAlternarSelecionado={alternarSelecionado}
-              onAlternarTodos={alternarTodos}
-              onEnviarSelecionados={enviarSelecionados}
-              enviandoLote={enviandoLote}
-              podeEditar={podeEditar}
-              podeEnviar={podeEnviar}
             />
 
           </PageSection>
@@ -585,14 +409,6 @@ export default function AsaasTransacoesPage() {
           open={detalhesOpen}
           onClose={() => setDetalhesOpen(false)}
           transacao={transacaoSelecionada}
-        />
-
-        <AsaasEditarModal
-          open={editarOpen}
-          onClose={() => setEditarOpen(false)}
-          transacaoOriginal={transacaoSelecionada}
-          onSave={salvarEdicao}
-          salvando={salvandoEdicao}
         />
 
         <AsaasNovaCobrancaModal

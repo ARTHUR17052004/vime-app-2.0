@@ -3,13 +3,16 @@
 import { useState } from "react";
 
 import {
+  Ban,
+  CheckCircle2,
+  Clock,
   Eye,
   FileText,
   Info,
   MoreVertical,
-  Pencil,
   Repeat,
   Send,
+  TriangleAlert,
 } from "lucide-react";
 
 import ActionMenu from "../../ui/ActionMenu";
@@ -18,15 +21,11 @@ import EmptyState from "../../ui/EmptyState";
 import SearchInput from "../../common/SearchInput";
 import AsaasExportar from "../AsaasExportar";
 
-import { statusExibidoReceita } from "@/utils/statusReceita";
+import { statusExibidoReceita, demonstrativoReceita } from "@/utils/statusReceita";
 
-// Versão mobile de Transações -- o desktop usa AsaasResumoCards +
-// AsaasFiltros + AsaasTabela (uma <table> de verdade, com checkbox de
-// cada linha e botões de ação lado a lado) como blocos separados; no
-// celular a tabela cortava de lado. Aqui os mesmos dados viram cartão
-// de indicadores + um cartão "Filtros" com campo rotulado (igual ao
-// Financeiro) + a lista em cartões, com os mesmos botões/seleção em
-// lote de sempre.
+// Versão mobile de Transações -- painel de acompanhamento, só pra
+// olhar (Visualizar/Detalhes). Lançar, editar e enviar ao banco
+// (inclusive em lote) é tudo feito no Financeiro agora.
 
 const cartao = `
   rounded-2xl
@@ -47,13 +46,24 @@ const FILTROS_STATUS = ["Todos", "Recebido", "Pendente", "Atrasado", "Cancelado"
 const FILTROS_FORMA = ["Todas", "PIX", "Boleto", "Cartão"];
 const FILTROS_ENVIADO = ["Todos", "Enviadas", "Não enviadas"];
 
+const ICONE_POR_TIPO = {
+  aguardando: Clock,
+  enviada: Send,
+  atrasada: TriangleAlert,
+  paga: CheckCircle2,
+  cancelada: Ban,
+};
+
+const COR_POR_TIPO = {
+  aguardando: "text-yellow-400",
+  enviada: "text-sky-400",
+  atrasada: "text-red-400",
+  paga: "text-emerald-400",
+  cancelada: "text-[var(--text-faint)]",
+};
+
 function formatarValor(valor) {
   return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function formatarData(data) {
-  if (!data) return "-";
-  return new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
 }
 
 function somarPorStatus(transacoes, status) {
@@ -67,20 +77,10 @@ export default function AsaasTransacoesMobile({
   totalTransacoes,
   loading,
   podeCriar,
-  podeEditar,
-  podeEnviar,
   podeExportar,
   onNovaCobranca,
   onVisualizar,
   onDetalhes,
-  onEditar,
-  onEnviar,
-  enviandoId,
-  selecionados,
-  onAlternarSelecionado,
-  onAlternarTodos,
-  onEnviarSelecionados,
-  enviandoLote,
   locadores,
   locadorFiltro,
   onLocadorChange,
@@ -89,17 +89,6 @@ export default function AsaasTransacoesMobile({
   onAplicarFiltros,
   onLimparFiltros,
 }) {
-
-  // Paga/cancelada sem ter passado pelo banco (lançamento manual) não
-  // é pendência -- mesmo critério de AsaasTabela.jsx/financeiro/page.js
-  // (filtro "Não enviada"), senão aparecia aviso e botão "Enviar ao
-  // Banco" pra cobrança que já está resolvida.
-  const foiEnviada = (t) => t.enviadaAsaas || !!t.gatewayReferencia;
-  const jaResolvida = (t) => t.status === "PAGA" || t.status === "PAGO" || t.status === "CANCELADA";
-  const precisaEnviar = (t) => !foiEnviada(t) && !jaResolvida(t);
-
-  const enviaveis = transacoes.filter(precisaEnviar);
-  const todosSelecionados = enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
   return (
     <div className="space-y-4">
@@ -113,7 +102,7 @@ export default function AsaasTransacoesMobile({
             Transações
           </h1>
           <p className="mt-0.5 text-[12px] leading-snug text-[var(--text-subtle)]">
-            Gerencie cobranças, recebimentos e sincronizações de qualquer banco.
+            Acompanhe o que está acontecendo com cada cobrança -- lançar e enviar ao banco é no Financeiro.
           </p>
           <p className="mt-1 text-[11px] font-semibold text-emerald-400">
             {totalTransacoes} cobrança(s)
@@ -283,33 +272,6 @@ export default function AsaasTransacoesMobile({
 
       </section>
 
-      {/* SELEÇÃO EM LOTE */}
-
-      {enviaveis.length > 0 && podeEnviar && (
-        <section className={`${cartao} p-3 flex items-center justify-between gap-3`}>
-
-          <label className="flex items-center gap-2 text-[12px] text-[var(--text-muted)]">
-            <input
-              type="checkbox"
-              checked={todosSelecionados}
-              onChange={() => onAlternarTodos(enviaveis.map((t) => t.id))}
-            />
-            Selecionar todas enviáveis
-          </label>
-
-          {selecionados.size > 0 && (
-            <button
-              onClick={onEnviarSelecionados}
-              disabled={enviandoLote}
-              className="shrink-0 rounded-xl bg-sky-600 disabled:opacity-50 px-3 py-2 text-[12px] font-semibold text-white"
-            >
-              {enviandoLote ? "Enviando..." : `Enviar ${selecionados.size}`}
-            </button>
-          )}
-
-        </section>
-      )}
-
       {/* LISTA */}
 
       {loading ? (
@@ -334,16 +296,8 @@ export default function AsaasTransacoesMobile({
             <TransacaoCard
               key={item.id}
               item={item}
-              precisaEnviar={precisaEnviar(item)}
-              selecionada={selecionados.has(item.id)}
-              onToggleSelecionar={() => onAlternarSelecionado(item.id)}
               onVisualizar={() => onVisualizar(item)}
               onDetalhes={() => onDetalhes(item)}
-              onEditar={() => onEditar(item)}
-              onEnviar={() => onEnviar(item)}
-              enviando={enviandoId === item.id}
-              podeEditar={podeEditar}
-              podeEnviar={podeEnviar}
             />
           ))}
         </section>
@@ -356,19 +310,7 @@ export default function AsaasTransacoesMobile({
   );
 }
 
-function TransacaoCard({
-  item,
-  precisaEnviar,
-  selecionada,
-  onToggleSelecionar,
-  onVisualizar,
-  onDetalhes,
-  onEditar,
-  onEnviar,
-  enviando,
-  podeEditar,
-  podeEnviar,
-}) {
+function TransacaoCard({ item, onVisualizar, onDetalhes }) {
 
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -392,35 +334,25 @@ function TransacaoCard({
   }
 
   const status = statusExibidoReceita(item);
+  const { tipo, titulo, linhas } = demonstrativoReceita(item);
+  const Icone = ICONE_POR_TIPO[tipo];
+  const cor = COR_POR_TIPO[tipo];
 
   return (
     <div className={`${cartao} p-3.5`}>
 
       <div className="flex items-start justify-between gap-2">
 
-        <div className="min-w-0 flex items-start gap-2.5">
-
-          {precisaEnviar && (
-            <input
-              type="checkbox"
-              checked={selecionada}
-              onChange={onToggleSelecionar}
-              className="mt-1 shrink-0"
-            />
-          )}
-
-          <div className="min-w-0">
-            <p className="flex items-center gap-1.5 text-[14px] font-bold text-[var(--text)] truncate">
-              {item.clienteNome || item.cliente}
-              {item.recorrente && <Repeat size={12} className="shrink-0 text-sky-400" />}
-            </p>
-            <p className="mt-0.5 text-[11px] text-[var(--text-subtle)] truncate">
-              {item.descricao || item.cliente}
-              {item.residenciaNome && ` · ${item.residenciaNome}`}
-              {item.kitnetNome && ` · Kitnet ${item.kitnetNome}`}
-            </p>
-          </div>
-
+        <div className="min-w-0">
+          <p className="flex items-center gap-1.5 text-[14px] font-bold text-[var(--text)] truncate">
+            {item.clienteNome || item.cliente}
+            {item.recorrente && <Repeat size={12} className="shrink-0 text-sky-400" />}
+          </p>
+          <p className="mt-0.5 text-[11px] text-[var(--text-subtle)] truncate">
+            {item.descricao || item.cliente}
+            {item.residenciaNome && ` · ${item.residenciaNome}`}
+            {item.kitnetNome && ` · Kitnet ${item.kitnetNome}`}
+          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -443,51 +375,26 @@ function TransacaoCard({
 
       </div>
 
-      <p className={`mt-2 text-[11px] ${precisaEnviar ? "font-semibold text-yellow-400" : "text-[var(--text-subtle)]"}`}>
-        {item.gatewayProvider === "BB"
-          ? `BB · ${item.gatewayReferencia || "sincronizado"}`
-          : item.enviadaAsaas
-          ? `Asaas · ${item.asaasPaymentId || "sincronizado"}`
-          : precisaEnviar
-          ? "⚠ Ainda não enviada a nenhum banco"
-          : item.status === "CANCELADA"
-          ? "Cancelada sem passar pelo banco"
-          : "Paga sem passar pelo banco (lançamento manual)"}
-      </p>
-
-      <div className="mt-3 flex items-center justify-between">
-
-        <div className="flex items-center gap-4 text-[12px] text-[var(--text-muted)]">
-          <span className="text-[14px] font-bold text-[var(--text)]">{formatarValor(item.valor)}</span>
-          <span>{formatarData(item.vencimento)}</span>
-          <span>{item.formaPagamento || "-"}</span>
+      <div className="mt-2 flex items-start gap-1.5">
+        <Icone size={13} className={`mt-0.5 shrink-0 ${cor}`} />
+        <div className="min-w-0">
+          <p className={`text-[12px] font-semibold ${cor}`}>{titulo}</p>
+          {linhas.map((linha) => (
+            <p key={linha} className="text-[11px] text-[var(--text-faint)]">{linha}</p>
+          ))}
         </div>
-
       </div>
 
-      {precisaEnviar && podeEnviar && (
-        <button
-          onClick={onEnviar}
-          disabled={enviando}
-          className="mt-3 w-full h-10 rounded-xl bg-sky-600 disabled:opacity-50 text-[13px] font-semibold text-white"
-        >
-          {enviando ? "Enviando..." : "Enviar ao Banco"}
-        </button>
-      )}
+      <div className="mt-3 flex items-center gap-4 text-[12px] text-[var(--text-muted)]">
+        <span className="text-[14px] font-bold text-[var(--text)]">{formatarValor(item.valor)}</span>
+        <span>{item.formaPagamento || "-"}</span>
+      </div>
 
       <ActionMenu open={open} position={position} onClose={() => setOpen(false)}>
 
         <MenuItem icon={<Eye size={17} />} label="Visualizar" onClick={onVisualizar} onCloseMenu={() => setOpen(false)} />
 
         <MenuItem icon={<Info size={17} />} label="Detalhes" cor="text-emerald-400 hover:bg-emerald-500/10" onClick={onDetalhes} onCloseMenu={() => setOpen(false)} />
-
-        {precisaEnviar && podeEditar && (
-          <MenuItem icon={<Pencil size={17} />} label="Editar" cor="text-yellow-400 hover:bg-yellow-500/10" onClick={onEditar} onCloseMenu={() => setOpen(false)} />
-        )}
-
-        {precisaEnviar && podeEnviar && (
-          <MenuItem icon={<Send size={17} />} label="Enviar ao Banco" cor="text-sky-400 hover:bg-sky-500/10" onClick={onEnviar} onCloseMenu={() => setOpen(false)} />
-        )}
 
       </ActionMenu>
 

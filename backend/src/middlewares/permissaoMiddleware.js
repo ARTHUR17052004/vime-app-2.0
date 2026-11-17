@@ -355,8 +355,53 @@ const exigirConfirmacaoTerminoAntecipado = (obterContrato) => async (req, res, n
 
 };
 
+// Libera se o usuário tiver QUALQUER uma das chaves (não todas) --
+// usado em "/asaas/transacoes/:id/enviar", que hoje é chamada tanto
+// pelo Financeiro (envio avulso/em lote de receitas -- financeiro.editar)
+// quanto por Transações (criar e já enviar uma cobrança avulsa --
+// asaasTransacoes.enviar/criar).
+const permissaoOuMiddleware = (...chaves) => {
+
+  return async (req, res, next) => {
+
+    if (!req.usuario) {
+      return res.status(401).json({
+        success: false,
+        message: "Usuário não autenticado.",
+      });
+    }
+
+    try {
+
+      for (const chave of chaves) {
+        if (await temPermissao(req.usuario, chave)) {
+          return next();
+        }
+      }
+
+      return res.status(403).json({
+        success: false,
+        message: "Você não tem permissão para realizar esta ação.",
+      });
+
+    } catch (error) {
+
+      console.error(error);
+
+      return res.status(500).json({
+        success: false,
+        message: "Erro ao verificar permissão.",
+      });
+
+    }
+
+  };
+
+};
+
 module.exports = permissaoMiddleware;
 module.exports.temPermissao = temPermissao;
+module.exports.permissaoOuMiddleware = permissaoOuMiddleware;
 module.exports.exigirPermissaoParaMarcarPago = exigirPermissaoParaMarcarPago;
 module.exports.exigirConfirmacaoEdicaoValor = exigirConfirmacaoEdicaoValor;
 module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;
