@@ -59,6 +59,24 @@ const buscarPorId = async (req, res) => {
 
 };
 
+const historico = async (req, res) => {
+
+  const registros = await receitaService.historico(req.params.id, req.usuario);
+
+  if (!registros) {
+    return res.status(404).json({
+      success: false,
+      message: 'Receita não encontrada.'
+    });
+  }
+
+  return res.json({
+    success: true,
+    data: registros
+  });
+
+};
+
 const taxaBoleto = async (req, res) => {
 
   const dados = await receitaService.previsaoTaxaBoleto({
@@ -133,6 +151,7 @@ const remover = async (req, res) => {
 module.exports = {
   listar,
   buscarPorId,
+  historico,
   taxaBoleto,
   criar,
   atualizar,

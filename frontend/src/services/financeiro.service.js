@@ -24,6 +24,10 @@ export const ReceitaService = {
     return api("/receitas");
   },
 
+  historico(id) {
+    return api(`/receitas/${id}/historico`);
+  },
+
   taxaBoleto({ inquilinoId, contratoId } = {}) {
 
     const params = new URLSearchParams();

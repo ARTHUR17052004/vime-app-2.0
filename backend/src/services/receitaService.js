@@ -230,6 +230,28 @@ const buscarPorId = (id, usuario) => {
   });
 };
 
+// Histórico de auditoria desta receita, pro "Mapa da Cobrança" saber
+// contar a história toda: quando foi criada, por quem, se já nasceu
+// paga (lançamento manual) ou foi marcada como paga depois (e por
+// quem -- sistema via webhook/job, ou um usuário manualmente).
+// Escopo do usuário aplicado igual buscarPorId -- restrito a um
+// locador não pode ver histórico de receita de fora da sua área.
+const historico = async (id, usuario) => {
+
+  const receita = await prisma.receita.findFirst({
+    where: { id, ...filtroReceita(usuario) },
+    select: { id: true },
+  });
+
+  if (!receita) return null;
+
+  return prisma.auditoria.findMany({
+    where: { modulo: 'RECEITAS', registroId: id },
+    orderBy: { createdAt: 'asc' },
+  });
+
+};
+
 // Valor líquido NUNCA vem do front (campo só de exibição lá) -- sempre
 // recalculado aqui pela taxa da conta que processa essa receita (do
 // locador do contrato/inquilino, ou a conta padrão do sistema -- mesma
@@ -513,6 +535,7 @@ const previsaoTaxaBoleto = async ({ inquilinoId, contratoId }) => {
 module.exports = {
   listar,
   buscarPorId,
+  historico,
   criar,
   atualizar,
   remover,

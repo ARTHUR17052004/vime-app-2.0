@@ -16,6 +16,8 @@ router.get('/taxa-boleto', permissaoMiddleware('financeiro.visualizar'), receita
 
 router.get('/:id', permissaoMiddleware('financeiro.visualizar'), receitaController.buscarPorId);
 
+router.get('/:id/historico', permissaoMiddleware('financeiro.visualizar'), receitaController.historico);
+
 router.post('/', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, receitaController.criar);
 
 router.put('/:id', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, receitaController.atualizar);

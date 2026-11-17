@@ -1,6 +1,9 @@
 "use client";
 
-import { Send, CheckCircle2, Landmark, Clock } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FilePlus2, Send, CheckCircle2, Landmark, Clock } from "lucide-react";
+
+import { ReceitaService } from "@/services/financeiro.service";
 
 // D+1 útil (pula sábado/domingo) -- é só uma ESTIMATIVA quando o banco
 // ainda não confirmou a data de crédito de verdade (dataCredito). Boleto
@@ -58,6 +61,48 @@ function Linha({ icon: Icon, titulo, valor, detalhe, tone = "neutral" }) {
 
 export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }) {
 
+  const [historico, setHistorico] = useState([]);
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+
+  useEffect(() => {
+
+    if (!isOpen || !receita?.id) return;
+
+    let cancelado = false;
+
+    async function carregarHistorico() {
+
+      setCarregandoHistorico(true);
+
+      try {
+
+        const resposta = await ReceitaService.historico(receita.id);
+
+        if (!cancelado) {
+          setHistorico(Array.isArray(resposta?.data) ? resposta.data : []);
+        }
+
+      } catch (erro) {
+
+        console.error("Erro ao carregar histórico da cobrança:", erro);
+        if (!cancelado) setHistorico([]);
+
+      } finally {
+
+        if (!cancelado) setCarregandoHistorico(false);
+
+      }
+
+    }
+
+    carregarHistorico();
+
+    return () => {
+      cancelado = true;
+    };
+
+  }, [isOpen, receita?.id]);
+
   if (!isOpen || !receita) return null;
 
   const paga = receita.status === "PAGA" || receita.status === "PAGO";
@@ -67,6 +112,36 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
     : receita.dataPagamento
       ? { data: estimarCredito(receita.dataPagamento), estimativa: true }
       : null;
+
+  // Quem criou a cobrança e se ela já nasceu marcada como paga
+  // (lançamento manual direto, sem passar pelo fluxo de boleto).
+  const logCriacao = historico.find((h) => h.acao === "CRIAR");
+  const criadoPor = logCriacao?.usuarioNome || null;
+  const nasceuPaga = logCriacao?.valorNovo?.status === "PAGA";
+
+  // Última edição que colocou a cobrança como PAGA manualmente (tela
+  // de editar/marcar pago) -- webhook/job de banco nunca passa por
+  // auditoria, só grava confirmacaoPagtoEnviadaEm direto no banco, então
+  // a ausência de um registro desses aqui já diz que foi automático.
+  const logMarcacaoManual = [...historico]
+    .reverse()
+    .find((h) => h.acao === "ATUALIZAR" && h.valorNovo?.status === "PAGA" && h.valorAnterior?.status !== "PAGA");
+
+  const infoPagamentoManual = nasceuPaga
+    ? { usuarioNome: criadoPor, createdAt: logCriacao?.createdAt, quando: "na criação da cobrança" }
+    : logMarcacaoManual
+      ? { usuarioNome: logMarcacaoManual.usuarioNome, createdAt: logMarcacaoManual.createdAt, quando: "numa edição" }
+      : null;
+
+  const enviadaAoBanco = Boolean(receita.cobrancaEnviadaEm || receita.gatewayReferencia);
+
+  const motivoNaoEnviada = enviadaAoBanco
+    ? null
+    : nasceuPaga
+      ? "Não foi enviada porque essa cobrança foi lançada diretamente como paga, sem passar pelo fluxo de boleto."
+      : receita.status === "CANCELADA"
+        ? "Cancelada antes de chegar a ser enviada ao banco."
+        : null;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--surface-inset)] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -90,9 +165,23 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
           <div className="space-y-6">
 
             <Linha
+              icon={FilePlus2}
+              titulo="Cobrança criada"
+              tone="done"
+              valor={formatarDataHora(receita.createdAt) || "Data não registrada"}
+              detalhe={
+                carregandoHistorico
+                  ? "Carregando quem criou..."
+                  : criadoPor
+                    ? `Criada por ${criadoPor}`
+                    : "Criada automaticamente pelo sistema (ex.: recorrência do contrato)"
+              }
+            />
+
+            <Linha
               icon={Send}
               titulo="Cobrança enviada"
-              tone={(receita.cobrancaEnviadaEm || receita.gatewayReferencia) ? "done" : "pending"}
+              tone={enviadaAoBanco ? "done" : "pending"}
               valor={
                 receita.cobrancaEnviadaEm
                   ? formatarDataHora(receita.cobrancaEnviadaEm)
@@ -107,22 +196,28 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
               detalhe={
                 receita.gatewayProvider
                   ? `Via ${contaNome ? `${contaNome} (${receita.gatewayProvider})` : receita.gatewayProvider}`
-                  : null
+                  : motivoNaoEnviada
               }
             />
 
             <Linha
               icon={CheckCircle2}
-              titulo="Pagamento identificado pelo sistema"
+              titulo={infoPagamentoManual ? "Pagamento registrado manualmente" : "Pagamento identificado pelo sistema"}
               tone={paga ? "done" : "pending"}
               valor={
                 paga
-                  ? formatarDataHora(receita.confirmacaoPagtoEnviadaEm || receita.dataPagamento)
+                  ? infoPagamentoManual
+                    ? formatarDataHora(infoPagamentoManual.createdAt) || formatarDataHora(receita.dataPagamento)
+                    : formatarDataHora(receita.confirmacaoPagtoEnviadaEm || receita.dataPagamento)
                   : "Ainda não identificado"
               }
               detalhe={
-                paga && receita.dataPagamento
-                  ? `Pago em ${formatarDataHora(receita.dataPagamento)}`
+                paga
+                  ? infoPagamentoManual
+                    ? `Por ${infoPagamentoManual.usuarioNome || "Sistema"} ${infoPagamentoManual.quando}${receita.dataPagamento ? ` -- data de pagamento informada: ${formatarDataHora(receita.dataPagamento)}` : ""}`
+                    : receita.dataPagamento
+                      ? `Pago em ${formatarDataHora(receita.dataPagamento)}`
+                      : null
                   : null
               }
             />
