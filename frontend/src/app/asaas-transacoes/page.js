@@ -31,7 +31,7 @@ import { useIsMobile } from "../../hooks/useIsMobile";
 import { socket } from "../../services/socket";
 import { normalizarBusca } from "../../utils/busca";
 
-const FILTROS_INICIAIS = { busca: "", status: "Todos", forma: "Todas", periodo: "" };
+const FILTROS_INICIAIS = { busca: "", status: "Todos", forma: "Todas", periodo: "", enviado: "Todos" };
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
@@ -362,6 +362,19 @@ export default function AsaasTransacoesPage() {
           .slice(0, 10);
 
         if (vencimento > filtros.periodo) return false;
+
+      }
+
+      if (filtros.enviado && filtros.enviado !== "Todos") {
+
+        // Mesmo critério da tabela/seleção em lote (ver AsaasTabela.jsx
+        // foiEnviada) -- enviadaAsaas só cobre o caminho Asaas, uma
+        // receita mandada pelo BB fica com gatewayReferencia preenchida
+        // em vez disso.
+        const enviada = item.enviadaAsaas || !!item.gatewayReferencia;
+
+        if (filtros.enviado === "Enviadas" && !enviada) return false;
+        if (filtros.enviado === "Não enviadas" && enviada) return false;
 
       }
 

@@ -45,6 +45,7 @@ const RESUMO = [
 
 const FILTROS_STATUS = ["Todos", "Recebido", "Pendente", "Atrasado", "Cancelado"];
 const FILTROS_FORMA = ["Todas", "PIX", "Boleto", "Cartão"];
+const FILTROS_ENVIADO = ["Todos", "Enviadas", "Não enviadas"];
 
 function formatarValor(valor) {
   return Number(valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -227,16 +228,35 @@ export default function AsaasTransacoesMobile({
 
         </div>
 
-        <div>
-          <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
-            Vencimento até
-          </label>
-          <input
-            type="date"
-            value={filtros.periodo}
-            onChange={(e) => onFiltroChange("periodo", e.target.value)}
-            className="w-full h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] px-3 text-[13px]"
-          />
+        <div className="grid grid-cols-2 gap-3">
+
+          <div>
+            <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
+              Vencimento até
+            </label>
+            <input
+              type="date"
+              value={filtros.periodo}
+              onChange={(e) => onFiltroChange("periodo", e.target.value)}
+              className="w-full h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] px-3 text-[13px]"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] text-[var(--text-faint)] mb-1.5">
+              Enviado ao banco
+            </label>
+            <select
+              value={filtros.enviado}
+              onChange={(e) => onFiltroChange("enviado", e.target.value)}
+              className="w-full h-11 rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] px-3 text-[13px]"
+            >
+              {FILTROS_ENVIADO.map((f) => (
+                <option key={f} value={f} className="bg-[#1b2430]">{f}</option>
+              ))}
+            </select>
+          </div>
+
         </div>
 
         <div className="flex gap-3">

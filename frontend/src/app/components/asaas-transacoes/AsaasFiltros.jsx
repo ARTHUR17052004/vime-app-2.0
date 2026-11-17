@@ -7,6 +7,7 @@ const FILTROS_INICIAIS = {
   status: "Todos",
   forma: "Todas",
   periodo: "",
+  enviado: "Todos",
 };
 
 export default function AsaasFiltros({ onFiltrar, onLimpar }) {
@@ -49,7 +50,7 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
 
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-6 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-7 gap-5">
 
         <div className="xl:col-span-2">
 
@@ -123,6 +124,26 @@ export default function AsaasFiltros({ onFiltrar, onLimpar }) {
             onChange={handleChange("periodo")}
             className="w-full rounded-xl p-3"
           />
+
+        </div>
+
+        <div>
+
+          <label className="block text-sm font-semibold text-[var(--text-1)] mb-2">
+            Enviado ao banco
+          </label>
+
+          <select
+            value={filtros.enviado}
+            onChange={handleChange("enviado")}
+            className="w-full border border-[var(--border-token)] rounded-xl p-3 bg-[var(--surface-2)] text-[var(--text)]"
+          >
+
+            <option className="bg-[#1b2430]">Todos</option>
+            <option className="bg-[#1b2430]">Enviadas</option>
+            <option className="bg-[#1b2430]">Não enviadas</option>
+
+          </select>
 
         </div>
 
