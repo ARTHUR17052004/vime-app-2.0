@@ -107,7 +107,6 @@ function Demonstrativo({ item }) {
 export default function AsaasTabela({
   transacoes = [],
   loading = false,
-  onVisualizar,
   onDetalhes,
   ordenacao,
   onOrdenar,
@@ -242,21 +241,6 @@ export default function AsaasTabela({
                 <td className="p-4">
 
                   <div className="flex justify-end gap-2 flex-wrap">
-
-                    <button
-                      onClick={() => onVisualizar?.(item)}
-                      className="
-                        px-4
-                        py-2
-                        rounded-lg
-                        border
-                        border-[var(--border-token)]
-                        text-[var(--text-1)]
-                        hover:bg-[var(--surface-2)]
-                      "
-                    >
-                      Visualizar
-                    </button>
 
                     <button
                       onClick={() => onDetalhes?.(item)}

@@ -257,7 +257,6 @@ export default function AsaasTransacoesPage() {
               podeCriar={podeCriar}
               podeExportar={podeExportar}
               onNovaCobranca={() => setNovaCobrancaOpen(true)}
-              onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
               locadores={locadores}
               locadorFiltro={locadorFiltro}
@@ -383,7 +382,6 @@ export default function AsaasTransacoesPage() {
               loading={loading}
               ordenacao={ordenacao}
               onOrdenar={setOrdenacao}
-              onVisualizar={abrirDetalhes}
               onDetalhes={abrirDetalhes}
             />
 

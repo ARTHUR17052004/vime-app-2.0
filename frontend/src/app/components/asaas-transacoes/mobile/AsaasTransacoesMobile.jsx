@@ -6,7 +6,6 @@ import {
   Ban,
   CheckCircle2,
   Clock,
-  Eye,
   FileText,
   Info,
   MoreVertical,
@@ -79,7 +78,6 @@ export default function AsaasTransacoesMobile({
   podeCriar,
   podeExportar,
   onNovaCobranca,
-  onVisualizar,
   onDetalhes,
   locadores,
   locadorFiltro,
@@ -296,7 +294,6 @@ export default function AsaasTransacoesMobile({
             <TransacaoCard
               key={item.id}
               item={item}
-              onVisualizar={() => onVisualizar(item)}
               onDetalhes={() => onDetalhes(item)}
             />
           ))}
@@ -310,7 +307,7 @@ export default function AsaasTransacoesMobile({
   );
 }
 
-function TransacaoCard({ item, onVisualizar, onDetalhes }) {
+function TransacaoCard({ item, onDetalhes }) {
 
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState({ top: 0, left: 0 });
@@ -391,8 +388,6 @@ function TransacaoCard({ item, onVisualizar, onDetalhes }) {
       </div>
 
       <ActionMenu open={open} position={position} onClose={() => setOpen(false)}>
-
-        <MenuItem icon={<Eye size={17} />} label="Visualizar" onClick={onVisualizar} onCloseMenu={() => setOpen(false)} />
 
         <MenuItem icon={<Info size={17} />} label="Detalhes" cor="text-emerald-400 hover:bg-emerald-500/10" onClick={onDetalhes} onCloseMenu={() => setOpen(false)} />
 
