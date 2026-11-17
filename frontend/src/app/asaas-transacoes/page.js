@@ -20,14 +20,18 @@ import AsaasExportar from "../components/asaas-transacoes/AsaasExportar";
 import AsaasDetalhesModal from "../components/asaas-transacoes/AsaasDetalhesModal";
 import AsaasEditarModal from "../components/asaas-transacoes/AsaasEditarModal";
 import AsaasNovaCobrancaModal from "../components/asaas-transacoes/AsaasNovaCobrancaModal";
+import AsaasTransacoesMobile from "../components/asaas-transacoes/mobile/AsaasTransacoesMobile";
 import SemPermissao from "../components/ui/SemPermissao";
 
 import { AsaasService } from "@/services/asaas.service";
 import { ReceitaService } from "@/services/financeiro.service";
 import { LocadorService } from "@/services/locadores.service";
 import { usePermissao } from "../../hooks/usePermissao";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { socket } from "../../services/socket";
 import { normalizarBusca } from "../../utils/busca";
+
+const FILTROS_INICIAIS = { busca: "", status: "Todos", forma: "Todas", periodo: "" };
 
 const STATUS_ROTULO_PARA_VALOR = {
   Recebido: "PAGA",
@@ -54,6 +58,12 @@ export default function AsaasTransacoesPage() {
   const podeEditar = usePermissao("asaasTransacoes.editar");
   const podeEnviar = usePermissao("asaasTransacoes.enviar");
   const podeExportar = usePermissao("asaasTransacoes.exportar");
+  const isMobile = useIsMobile();
+
+  // Rascunho dos filtros -- no mobile os campos são controlados direto
+  // (sem o estado interno que AsaasFiltros.jsx mantém sozinho), então a
+  // página precisa guardar o valor de cada campo antes de aplicar.
+  const [filtrosDraft, setFiltrosDraft] = useState(FILTROS_INICIAIS);
 
   const [transacoes, setTransacoes] =
     useState([]);
@@ -363,6 +373,80 @@ export default function AsaasTransacoesPage() {
 
   if (!podeVisualizar) {
     return <SemPermissao />;
+  }
+
+  if (isMobile) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <AsaasTransacoesMobile
+              transacoes={transacoesFiltradas}
+              totalTransacoes={transacoesFiltradas.length}
+              loading={loading}
+              podeCriar={podeCriar}
+              podeEditar={podeEditar}
+              podeEnviar={podeEnviar}
+              podeExportar={podeExportar}
+              onNovaCobranca={() => setNovaCobrancaOpen(true)}
+              onVisualizar={abrirDetalhes}
+              onDetalhes={abrirDetalhes}
+              onEditar={abrirEdicao}
+              onEnviar={enviarCobranca}
+              enviandoId={enviandoId}
+              selecionados={selecionados}
+              onAlternarSelecionado={alternarSelecionado}
+              onAlternarTodos={alternarTodos}
+              onEnviarSelecionados={enviarSelecionados}
+              enviandoLote={enviandoLote}
+              locadores={locadores}
+              locadorFiltro={locadorFiltro}
+              onLocadorChange={setLocadorFiltro}
+              filtros={filtrosDraft}
+              onFiltroChange={(campo, valor) => setFiltrosDraft((atual) => ({ ...atual, [campo]: valor }))}
+              onAplicarFiltros={() => setFiltros(filtrosDraft)}
+              onLimparFiltros={() => {
+                setFiltrosDraft(FILTROS_INICIAIS);
+                setFiltros(null);
+              }}
+            />
+
+            <AsaasDetalhesModal
+              open={detalhesOpen}
+              onClose={() => setDetalhesOpen(false)}
+              transacao={transacaoSelecionada}
+            />
+
+            <AsaasEditarModal
+              open={editarOpen}
+              onClose={() => setEditarOpen(false)}
+              transacaoOriginal={transacaoSelecionada}
+              onSave={salvarEdicao}
+              salvando={salvandoEdicao}
+            />
+
+            <AsaasNovaCobrancaModal
+              open={novaCobrancaOpen}
+              onClose={() => setNovaCobrancaOpen(false)}
+              onCriada={() => {
+                setNovaCobrancaOpen(false);
+                carregarTransacoes();
+              }}
+            />
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
   }
 
   return (
