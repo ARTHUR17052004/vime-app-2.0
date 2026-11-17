@@ -88,7 +88,16 @@ export default function AsaasTabela({
   // BB fica com gatewayReferencia preenchida em vez disso.
   const foiEnviada = (t) => t.enviadaAsaas || !!t.gatewayReferencia;
 
-  const enviaveis = transacoes.filter((t) => !foiEnviada(t));
+  // Paga ou cancelada SEM ter passado pelo banco não é um problema --
+  // é lançamento manual (dinheiro na mão, por exemplo), não precisa e
+  // não deve ser "enviada" agora. Sem isso, toda receita nessa situação
+  // aparecia com o aviso amarelo e o botão "Enviar ao Banco" como se
+  // estivesse pendente de verdade, confundindo o usuário (mesmo
+  // critério do filtro "Não enviada" em financeiro/page.js).
+  const jaResolvida = (t) => t.status === "PAGA" || t.status === "PAGO" || t.status === "CANCELADA";
+  const precisaEnviar = (t) => !foiEnviada(t) && !jaResolvida(t);
+
+  const enviaveis = transacoes.filter(precisaEnviar);
   const todosSelecionados =
     enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
@@ -189,7 +198,7 @@ export default function AsaasTabela({
               >
 
                 <td className="p-4">
-                  {!foiEnviada(item) && (
+                  {precisaEnviar(item) && (
                     <input
                       type="checkbox"
                       checked={selecionados.has(item.id)}
@@ -215,15 +224,17 @@ export default function AsaasTabela({
 
                   <div
                     className={
-                      item.gatewayProvider === "BB" || item.enviadaAsaas
-                        ? "text-sm text-[var(--text-subtle)]"
-                        : "text-sm font-semibold text-yellow-400"
+                      precisaEnviar(item)
+                        ? "text-sm font-semibold text-yellow-400"
+                        : "text-sm text-[var(--text-subtle)]"
                     }
                   >
                     {item.gatewayProvider === "BB"
                       ? `BB • ${item.gatewayReferencia || "sincronizado"}`
                       : item.enviadaAsaas
                       ? `Asaas • ${item.asaasPaymentId || "sincronizado"}`
+                      : jaResolvida(item)
+                      ? (item.status === "CANCELADA" ? "Cancelada sem passar pelo banco" : "Paga sem passar pelo banco (lançamento manual)")
                       : "⚠ Ainda não enviada a nenhum banco"}
                   </div>
 
@@ -282,7 +293,7 @@ export default function AsaasTabela({
                       Detalhes
                     </button>
 
-                    {!foiEnviada(item) && podeEditar && (
+                    {precisaEnviar(item) && podeEditar && (
                       <button
                         onClick={() => onEditar?.(item)}
                         className="
@@ -299,7 +310,7 @@ export default function AsaasTabela({
                       </button>
                     )}
 
-                    {!foiEnviada(item) && podeEnviar && (
+                    {precisaEnviar(item) && podeEnviar && (
                       <button
                         onClick={() => onEnviar?.(item)}
                         disabled={enviandoId === item.id}

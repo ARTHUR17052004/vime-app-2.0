@@ -90,8 +90,15 @@ export default function AsaasTransacoesMobile({
   onLimparFiltros,
 }) {
 
+  // Paga/cancelada sem ter passado pelo banco (lançamento manual) não
+  // é pendência -- mesmo critério de AsaasTabela.jsx/financeiro/page.js
+  // (filtro "Não enviada"), senão aparecia aviso e botão "Enviar ao
+  // Banco" pra cobrança que já está resolvida.
   const foiEnviada = (t) => t.enviadaAsaas || !!t.gatewayReferencia;
-  const enviaveis = transacoes.filter((t) => !foiEnviada(t));
+  const jaResolvida = (t) => t.status === "PAGA" || t.status === "PAGO" || t.status === "CANCELADA";
+  const precisaEnviar = (t) => !foiEnviada(t) && !jaResolvida(t);
+
+  const enviaveis = transacoes.filter(precisaEnviar);
   const todosSelecionados = enviaveis.length > 0 && enviaveis.every((t) => selecionados.has(t.id));
 
   return (
@@ -327,7 +334,7 @@ export default function AsaasTransacoesMobile({
             <TransacaoCard
               key={item.id}
               item={item}
-              foiEnviada={foiEnviada(item)}
+              precisaEnviar={precisaEnviar(item)}
               selecionada={selecionados.has(item.id)}
               onToggleSelecionar={() => onAlternarSelecionado(item.id)}
               onVisualizar={() => onVisualizar(item)}
@@ -351,7 +358,7 @@ export default function AsaasTransacoesMobile({
 
 function TransacaoCard({
   item,
-  foiEnviada,
+  precisaEnviar,
   selecionada,
   onToggleSelecionar,
   onVisualizar,
@@ -393,7 +400,7 @@ function TransacaoCard({
 
         <div className="min-w-0 flex items-start gap-2.5">
 
-          {!foiEnviada && (
+          {precisaEnviar && (
             <input
               type="checkbox"
               checked={selecionada}
@@ -436,12 +443,16 @@ function TransacaoCard({
 
       </div>
 
-      <p className={`mt-2 text-[11px] ${item.gatewayProvider === "BB" || item.enviadaAsaas ? "text-[var(--text-subtle)]" : "font-semibold text-yellow-400"}`}>
+      <p className={`mt-2 text-[11px] ${precisaEnviar ? "font-semibold text-yellow-400" : "text-[var(--text-subtle)]"}`}>
         {item.gatewayProvider === "BB"
           ? `BB · ${item.gatewayReferencia || "sincronizado"}`
           : item.enviadaAsaas
           ? `Asaas · ${item.asaasPaymentId || "sincronizado"}`
-          : "⚠ Ainda não enviada a nenhum banco"}
+          : precisaEnviar
+          ? "⚠ Ainda não enviada a nenhum banco"
+          : item.status === "CANCELADA"
+          ? "Cancelada sem passar pelo banco"
+          : "Paga sem passar pelo banco (lançamento manual)"}
       </p>
 
       <div className="mt-3 flex items-center justify-between">
@@ -454,7 +465,7 @@ function TransacaoCard({
 
       </div>
 
-      {!foiEnviada && podeEnviar && (
+      {precisaEnviar && podeEnviar && (
         <button
           onClick={onEnviar}
           disabled={enviando}
@@ -470,11 +481,11 @@ function TransacaoCard({
 
         <MenuItem icon={<Info size={17} />} label="Detalhes" cor="text-emerald-400 hover:bg-emerald-500/10" onClick={onDetalhes} onCloseMenu={() => setOpen(false)} />
 
-        {!foiEnviada && podeEditar && (
+        {precisaEnviar && podeEditar && (
           <MenuItem icon={<Pencil size={17} />} label="Editar" cor="text-yellow-400 hover:bg-yellow-500/10" onClick={onEditar} onCloseMenu={() => setOpen(false)} />
         )}
 
-        {!foiEnviada && podeEnviar && (
+        {precisaEnviar && podeEnviar && (
           <MenuItem icon={<Send size={17} />} label="Enviar ao Banco" cor="text-sky-400 hover:bg-sky-500/10" onClick={onEnviar} onCloseMenu={() => setOpen(false)} />
         )}
 
