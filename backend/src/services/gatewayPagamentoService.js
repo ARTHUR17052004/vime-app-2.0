@@ -16,6 +16,15 @@ const formatarDataBB = (data) => {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 };
 
+// Mesma função de receitaService.js, copiada aqui (não importada de lá)
+// de propósito -- receitaService já importa ESTE arquivo
+// (gatewayPagamentoService), então importar de volta criaria
+// dependência circular entre os dois módulos.
+const multaJurosPadrao = (conta) => ({
+  multaValor: conta?.multa ?? null,
+  jurosValor: conta?.juros ?? null,
+});
+
 // O próprio locadorId já salvo na receita (ex.: pagador avulso, onde
 // não tem contrato nem inquilino pra inferir nada) sempre vem
 // primeiro -- antes disso não era checado aqui, então uma cobrança
@@ -387,6 +396,37 @@ const enviarCobranca = async (receitaId) => {
   const locadorId = resolverLocadorId(receita);
   const kitnetId = resolverKitnetId(receita);
   const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, locadorId);
+
+  // Multa/juros são gravados na Receita lá na criação (dia 20, pelo
+  // job de recorrência), mas ela fica Pendente justamente pra dar uma
+  // janela de revisão/correção antes do envio virar irreversível --
+  // se a Conta mudou de multa/juros nesse meio tempo, é o valor de
+  // AGORA que tem que ir pro banco, não o retrato velho do dia 20.
+  // Recalcula aqui, no único lugar por onde todo envio passa (BB, EFI,
+  // BRB e Asaas -- Asaas relê a Receita do banco de novo lá dentro,
+  // então já pega esse valor atualizado sozinho). Só quando uma conta
+  // foi mesmo resolvida (sem isso, "sem conta nenhuma" apagaria a
+  // multa/juros já gravados em vez de deixar como estava) E a receita
+  // ainda não tem boleto registrado em nenhum lugar -- depois de
+  // enviada de verdade não tem mais "janela de correção" nenhuma, só
+  // reescreveria o retrato sem mudar nada no banco de fato.
+  if (conta && !receita.gatewayReferencia) {
+
+    const multaJurosAtual = multaJurosPadrao(conta);
+
+    if (multaJurosAtual.multaValor !== receita.multaValor || multaJurosAtual.jurosValor !== receita.jurosValor) {
+
+      await prisma.receita.update({
+        where: { id: receita.id },
+        data: multaJurosAtual,
+      });
+
+      receita.multaValor = multaJurosAtual.multaValor;
+      receita.jurosValor = multaJurosAtual.jurosValor;
+
+    }
+
+  }
 
   // Rede de segurança: receita sem locadorId nenhum (nem direto, nem
   // via contrato/inquilino) que acabou de ser resolvida pra uma conta
