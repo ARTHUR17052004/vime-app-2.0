@@ -256,32 +256,37 @@ class BBApi {
       },
     };
 
-    // Multa/juros por atraso -- DESLIGADO de propósito (10/11/2026).
-    // Tentei mandar "multa"/"jurosMora" nesse formato e o BB rejeitou
-    // TODO boleto dessa conta com "Propriedade desconhecida (não está
-    // no schema)" -- ou seja, os nomes de campo que usei (chute, nunca
-    // confirmado ao vivo) estão errados e travavam até boleto SEM multa
-    // nenhuma configurada. Confirmar o formato certo com o suporte/
-    // manual técnico do BB antes de reativar isso -- até lá, o boleto
-    // do BB sai sem multa/juros automáticos (igual sempre foi antes de
-    // hoje), só a Asaas aplica.
-    if (false && dados.multaValor) {
+    // Multa/juros por atraso -- religado em 17/11/2026 com o formato
+    // corrigido. O chute anterior (campo "valor" pra tipo percentual, e
+    // "data" dentro de jurosMora) é o que travava TODO boleto dessa
+    // conta com "Propriedade desconhecida (não está no schema)".
+    // Conferido contra o manual técnico/layout JSON da API de Cobranças
+    // do BB (campo a campo, via wiki de ERP que documenta esse layout +
+    // threads da comunidade ACBr que bateram no mesmo erro em 2022):
+    // - multa: tipo (0 dispensar / 1 valor fixo / 2 percentual), "data"
+    //   só quando tipo 1 ou 2, e o valor em si vai em "valor" (tipo 1)
+    //   OU "porcentagem" (tipo 2) -- nunca os dois.
+    // - jurosMora: tipo (0 dispensar / 1 valor por dia / 2 taxa
+    //   mensal), SEM campo "data" nenhum (diferente de multa) -- só
+    //   "valor" (tipo 1) ou "porcentagem" (tipo 2).
+    // NÃO é confirmação oficial do BB (não achei o Swagger oficial) --
+    // confirmar no primeiro boleto de verdade enviado depois disso: se
+    // voltar "Propriedade desconhecida" de novo, é sinal de que esse
+    // formato também está errado.
+    if (dados.multaValor) {
       const diaMulta = new Date(dados.dataVencimento.split('.').reverse().join('-'));
       diaMulta.setDate(diaMulta.getDate() + 1);
       payload.multa = {
         tipo: 2, // percentual
         data: formatarDataBB(diaMulta),
-        valor: Number(dados.multaValor),
+        porcentagem: Number(dados.multaValor),
       };
     }
 
-    if (false && dados.jurosValor) {
-      const diaJuros = new Date(dados.dataVencimento.split('.').reverse().join('-'));
-      diaJuros.setDate(diaJuros.getDate() + 1);
+    if (dados.jurosValor) {
       payload.jurosMora = {
         tipo: 2, // taxa mensal
-        data: formatarDataBB(diaJuros),
-        valor: Number(dados.jurosValor),
+        porcentagem: Number(dados.jurosValor),
       };
     }
 

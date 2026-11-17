@@ -234,18 +234,31 @@ class EFIApi {
       expire_at: dados.dataVencimento, // formato AAAA-MM-DD
     };
 
-    // Multa/juros por atraso -- DESLIGADO de propósito (10/11/2026). O
-    // mesmo tipo de campo "chutado" (nunca confirmado ao vivo) pro BB
-    // travou TODO boleto da conta com "Propriedade desconhecida" assim
-    // que passou a ser enviado de verdade -- bem provável que esse aqui
-    // tenha o mesmo problema. Confirmar o formato certo (documentação
-    // oficial ou teste real em homologação) antes de reativar.
-    if (false && dados.multaValor) {
-      bankingBillet.fine = { value: Math.round(Number(dados.multaValor) * 100) };
+    // Multa/juros por atraso -- religado em 17/11/2026 com o formato
+    // corrigido, conferido contra a documentação oficial da EFI
+    // (dev.efipay.com.br/docs/api-cobrancas/boleto): "fine"/"interest"
+    // NÃO ficam soltos direto em banking_billet (formato antigo daqui,
+    // nunca confirmado ao vivo) -- vivem dentro de
+    // banking_billet.configurations, e são número inteiro simples, não
+    // objeto {value}:
+    // - fine: percentual x100 (multa de 2% = manda 200). Máximo 1000
+    //   (10%) pela doc.
+    // - interest: percentual AO DIA x1000 (0,033%/dia = manda 33).
+    //   jurosValor aqui é taxa MENSAL (mesma convenção do BB/Asaas),
+    //   então convertido pra diário (÷30) antes de converter pra esse
+    //   formato. Máximo 330 (0,33%/dia) pela doc.
+    const configurations = {};
+
+    if (dados.multaValor) {
+      configurations.fine = Math.round(Number(dados.multaValor) * 100);
     }
 
-    if (false && dados.jurosValor) {
-      bankingBillet.interest = { value: Math.round(Number(dados.jurosValor) * 100) };
+    if (dados.jurosValor) {
+      configurations.interest = Math.round((Number(dados.jurosValor) / 30) * 1000);
+    }
+
+    if (Object.keys(configurations).length) {
+      bankingBillet.configurations = configurations;
     }
 
     const resultado = await this.request("POST", "/v1/charge/one-step", {
