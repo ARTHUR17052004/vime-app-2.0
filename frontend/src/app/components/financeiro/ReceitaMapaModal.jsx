@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FilePlus2, Send, CheckCircle2, Landmark, Clock } from "lucide-react";
+import { FilePlus2, Send, CheckCircle2, Landmark, ScrollText } from "lucide-react";
 
 import { ReceitaService } from "@/services/financeiro.service";
 
@@ -59,10 +59,41 @@ function Linha({ icon: Icon, titulo, valor, detalhe, tone = "neutral" }) {
 
 }
 
+// Registro de processo -- um item da linha do tempo completa, estilo
+// ata de escrivão: hora exata + o que aconteceu + quem/detalhe.
+function RegistroDeProcesso({ evento, ultimo }) {
+
+  return (
+    <div className="flex gap-4">
+
+      <div className="flex flex-col items-center shrink-0">
+        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/80 mt-1.5" />
+        {!ultimo && <div className="w-px flex-1 bg-[var(--border-token)] mt-1" />}
+      </div>
+
+      <div className="flex-1 min-w-0 pb-5">
+        <p className="text-xs text-[var(--text-faint)]">
+          {formatarDataHora(evento.data)}
+        </p>
+        <p className="text-sm font-semibold text-[var(--text)] mt-0.5">
+          {evento.titulo}
+        </p>
+        {evento.descricao && (
+          <p className="text-xs text-[var(--text-subtle)] mt-0.5">
+            {evento.descricao}
+          </p>
+        )}
+      </div>
+
+    </div>
+  );
+
+}
+
 export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }) {
 
-  const [historico, setHistorico] = useState([]);
-  const [carregandoHistorico, setCarregandoHistorico] = useState(false);
+  const [mapa, setMapa] = useState(null);
+  const [carregando, setCarregando] = useState(false);
 
   useEffect(() => {
 
@@ -70,32 +101,32 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
 
     let cancelado = false;
 
-    async function carregarHistorico() {
+    async function carregarMapa() {
 
-      setCarregandoHistorico(true);
+      setCarregando(true);
 
       try {
 
         const resposta = await ReceitaService.historico(receita.id);
 
         if (!cancelado) {
-          setHistorico(Array.isArray(resposta?.data) ? resposta.data : []);
+          setMapa(resposta?.data || null);
         }
 
       } catch (erro) {
 
-        console.error("Erro ao carregar histórico da cobrança:", erro);
-        if (!cancelado) setHistorico([]);
+        console.error("Erro ao carregar o mapa da cobrança:", erro);
+        if (!cancelado) setMapa(null);
 
       } finally {
 
-        if (!cancelado) setCarregandoHistorico(false);
+        if (!cancelado) setCarregando(false);
 
       }
 
     }
 
-    carregarHistorico();
+    carregarMapa();
 
     return () => {
       cancelado = true;
@@ -113,40 +144,21 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
       ? { data: estimarCredito(receita.dataPagamento), estimativa: true }
       : null;
 
-  // Quem criou a cobrança e se ela já nasceu marcada como paga
-  // (lançamento manual direto, sem passar pelo fluxo de boleto).
-  const logCriacao = historico.find((h) => h.acao === "CRIAR");
-  const criadoPor = logCriacao?.usuarioNome || null;
-  const nasceuPaga = logCriacao?.valorNovo?.status === "PAGA";
-
-  // Última edição que colocou a cobrança como PAGA manualmente (tela
-  // de editar/marcar pago) -- webhook/job de banco nunca passa por
-  // auditoria, só grava confirmacaoPagtoEnviadaEm direto no banco, então
-  // a ausência de um registro desses aqui já diz que foi automático.
-  const logMarcacaoManual = [...historico]
-    .reverse()
-    .find((h) => h.acao === "ATUALIZAR" && h.valorNovo?.status === "PAGA" && h.valorAnterior?.status !== "PAGA");
-
-  const infoPagamentoManual = nasceuPaga
-    ? { usuarioNome: criadoPor, createdAt: logCriacao?.createdAt, quando: "na criação da cobrança" }
-    : logMarcacaoManual
-      ? { usuarioNome: logMarcacaoManual.usuarioNome, createdAt: logMarcacaoManual.createdAt, quando: "numa edição" }
-      : null;
-
-  const enviadaAoBanco = Boolean(receita.cobrancaEnviadaEm || receita.gatewayReferencia);
-
-  const motivoNaoEnviada = enviadaAoBanco
-    ? null
-    : nasceuPaga
-      ? "Não foi enviada porque essa cobrança foi lançada diretamente como paga, sem passar pelo fluxo de boleto."
-      : receita.status === "CANCELADA"
-        ? "Cancelada antes de chegar a ser enviada ao banco."
-        : null;
+  // Tudo abaixo vem pronto do backend (receitaService.historico) --
+  // ele que faz o papel de escrivão, juntando Auditoria com os
+  // timestamps soltos que webhook/job de banco gravam sem passar por
+  // auditoria nenhuma. O front só mostra o que chegou.
+  const criadoPor = mapa?.criadoPor || null;
+  const nasceuPaga = mapa?.nasceuPaga || false;
+  const enviadaAoBanco = mapa?.enviadaAoBanco ?? Boolean(receita.cobrancaEnviadaEm || receita.gatewayReferencia);
+  const motivoNaoEnviada = mapa?.motivoNaoEnviada || null;
+  const infoPagamentoManual = mapa?.infoPagamentoManual || null;
+  const eventos = mapa?.eventos || [];
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-[var(--surface-inset)] p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
       <div className="min-h-full flex items-center justify-center">
-        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl shadow-[0_18px_45px_rgba(0,0,0,.35)] w-full max-w-lg p-8 relative">
+        <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl shadow-[0_18px_45px_rgba(0,0,0,.35)] w-full max-w-xl p-8 relative max-h-[90vh] overflow-y-auto">
 
           <button
             onClick={onClose}
@@ -170,7 +182,7 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
               tone="done"
               valor={formatarDataHora(receita.createdAt) || "Data não registrada"}
               detalhe={
-                carregandoHistorico
+                carregando
                   ? "Carregando quem criou..."
                   : criadoPor
                     ? `Criada por ${criadoPor}`
@@ -207,14 +219,14 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
               valor={
                 paga
                   ? infoPagamentoManual
-                    ? formatarDataHora(infoPagamentoManual.createdAt) || formatarDataHora(receita.dataPagamento)
+                    ? formatarDataHora(infoPagamentoManual.data) || formatarDataHora(receita.dataPagamento)
                     : formatarDataHora(receita.confirmacaoPagtoEnviadaEm || receita.dataPagamento)
                   : "Ainda não identificado"
               }
               detalhe={
                 paga
                   ? infoPagamentoManual
-                    ? `Por ${infoPagamentoManual.usuarioNome || "Sistema"} ${infoPagamentoManual.quando}${receita.dataPagamento ? ` -- data de pagamento informada: ${formatarDataHora(receita.dataPagamento)}` : ""}`
+                    ? `Por ${infoPagamentoManual.usuarioNome || "Sistema"}${nasceuPaga ? " -- na criação da cobrança" : " -- numa edição"}${receita.dataPagamento ? ` -- data de pagamento informada: ${formatarDataHora(receita.dataPagamento)}` : ""}`
                     : receita.dataPagamento
                       ? `Pago em ${formatarDataHora(receita.dataPagamento)}`
                       : null
@@ -242,12 +254,40 @@ export default function ReceitaMapaModal({ isOpen, onClose, receita, contaNome }
 
           </div>
 
-          {!paga && receita.cobrancaEnviadaEm && (
-            <div className="mt-8 flex items-center gap-2 text-xs text-[var(--text-faint)]">
-              <Clock size={14} />
-              O sistema confere pagamentos automaticamente (a cada 15min pro BB, ou na hora por webhook pros outros bancos).
+          <div className="mt-10 pt-8 border-t border-[var(--border-token)]">
+
+            <div className="flex items-center gap-2 mb-5">
+              <ScrollText size={18} className="text-[var(--text-subtle)]" />
+              <h3 className="text-base font-bold text-[var(--text)]">
+                Linha do tempo completa
+              </h3>
             </div>
-          )}
+
+            {carregando ? (
+
+              <p className="text-sm text-[var(--text-faint)]">Carregando...</p>
+
+            ) : eventos.length ? (
+
+              <div>
+                {eventos.map((evento, indice) => (
+                  <RegistroDeProcesso
+                    key={`${evento.titulo}-${evento.data}-${indice}`}
+                    evento={evento}
+                    ultimo={indice === eventos.length - 1}
+                  />
+                ))}
+              </div>
+
+            ) : (
+
+              <p className="text-sm text-[var(--text-faint)]">
+                Nenhum processo registrado ainda pra essa cobrança.
+              </p>
+
+            )}
+
+          </div>
 
         </div>
       </div>

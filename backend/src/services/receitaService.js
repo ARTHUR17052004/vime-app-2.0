@@ -11,7 +11,7 @@ const notificacaoService = require('./notificacaoService');
 const corteVistoriaService = require('./corteVistoriaService');
 const gatewayPagamentoService = require('./gatewayPagamentoService');
 const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
-const { diffCampos } = require('../utils/diffCampos');
+const { diffCampos, formatarValor } = require('../utils/diffCampos');
 
 const CAMPOS_RECEITA = {
   descricao: 'descrição',
@@ -230,25 +230,157 @@ const buscarPorId = (id, usuario) => {
   });
 };
 
-// Histórico de auditoria desta receita, pro "Mapa da Cobrança" saber
-// contar a história toda: quando foi criada, por quem, se já nasceu
-// paga (lançamento manual) ou foi marcada como paga depois (e por
-// quem -- sistema via webhook/job, ou um usuário manualmente).
+// Cada campo-timestamp da Receita que marca um evento do sistema sem
+// passar pela Auditoria (webhook de banco e jobs escrevem direto no
+// banco, nunca registram auditoria -- ver bbService/efiService/
+// asaasService) -- cada um vira uma linha própria no histórico, com
+// a hora de verdade de quando aconteceu.
+const EVENTOS_DE_CAMPO = [
+  {
+    campo: 'confirmacaoPagtoEnviadaEm',
+    titulo: 'Pagamento confirmado automaticamente pelo banco',
+  },
+  {
+    campo: 'dataCredito',
+    titulo: 'Dinheiro creditado na conta',
+  },
+  {
+    campo: 'lembreteEnviadoEm',
+    titulo: 'Lembrete de vencimento enviado ao inquilino (WhatsApp)',
+  },
+  {
+    campo: 'avisoVencidoEnviadoEm',
+    titulo: 'Aviso de cobrança vencida enviado ao inquilino (WhatsApp)',
+  },
+  {
+    campo: 'alertaNaoEnviadaEm',
+    titulo: 'Alerta interno disparado',
+    descricao: 'Equipe avisada que essa cobrança passou do prazo esperado sem ter sido enviada ao banco.',
+  },
+  {
+    campo: 'vistoriaCorteAtrasoCriadaEm',
+    titulo: 'Vistoria de corte de água/energia criada',
+    descricao: 'Cobrança ficou 72h+ vencida sem pagamento.',
+  },
+];
+
+// O "Mapa da Cobrança" age como escrivão: registra TODO processo que
+// já aconteceu com essa cobrança, não só os marcos principais. Junta
+// a Auditoria (criação/edições feitas por alguém, com diff de campo)
+// com os eventos automáticos que só existem como timestamp solto na
+// própria Receita (webhook de banco e jobs nunca passam por
+// Auditoria), tudo numa linha do tempo só, em ordem cronológica.
 // Escopo do usuário aplicado igual buscarPorId -- restrito a um
-// locador não pode ver histórico de receita de fora da sua área.
+// locador não pode ver o mapa de uma receita de fora da sua área.
 const historico = async (id, usuario) => {
 
   const receita = await prisma.receita.findFirst({
     where: { id, ...filtroReceita(usuario) },
-    select: { id: true },
   });
 
   if (!receita) return null;
 
-  return prisma.auditoria.findMany({
+  const auditorias = await prisma.auditoria.findMany({
     where: { modulo: 'RECEITAS', registroId: id },
     orderBy: { createdAt: 'asc' },
   });
+
+  const logCriacao = auditorias.find((a) => a.acao === 'CRIAR');
+  const nasceuPaga = logCriacao?.valorNovo?.status === 'PAGA';
+
+  const eventos = [];
+
+  for (const log of auditorias) {
+
+    if (log.acao === 'CRIAR') {
+
+      eventos.push({
+        data: log.createdAt,
+        titulo: 'Cobrança criada',
+        descricao: nasceuPaga
+          ? `Por ${log.usuarioNome || 'Sistema'} -- já nasceu como PAGA, lançamento manual sem passar pelo fluxo de boleto`
+            + (log.valorNovo?.dataPagamento ? ` (data de pagamento informada: ${formatarValor(log.valorNovo.dataPagamento, 'data')}).` : '.')
+          : `Por ${log.usuarioNome || 'Sistema'}.`,
+      });
+
+    } else if (log.acao === 'ATUALIZAR') {
+
+      const alteracoes = diffCampos(log.valorAnterior, log.valorNovo, CAMPOS_RECEITA);
+
+      if (alteracoes) {
+        eventos.push({
+          data: log.createdAt,
+          titulo: `Editada por ${log.usuarioNome || 'Sistema'}`,
+          descricao: alteracoes,
+        });
+      }
+
+    } else if (log.acao === 'EXCLUIR') {
+
+      eventos.push({
+        data: log.createdAt,
+        titulo: `Excluída por ${log.usuarioNome || 'Sistema'}`,
+        descricao: null,
+      });
+
+    }
+
+  }
+
+  if (receita.cobrancaEnviadaEm) {
+    eventos.push({
+      data: receita.cobrancaEnviadaEm,
+      titulo: 'Cobrança enviada ao banco',
+      descricao: receita.gatewayProvider
+        ? `Via ${receita.gatewayProvider}${receita.gatewayReferencia ? ` -- referência ${receita.gatewayReferencia}` : ''}.`
+        : null,
+    });
+  }
+
+  for (const { campo, titulo, descricao } of EVENTOS_DE_CAMPO) {
+    if (receita[campo]) {
+      eventos.push({ data: receita[campo], titulo, descricao: descricao || null });
+    }
+  }
+
+  eventos.sort((a, b) => new Date(a.data) - new Date(b.data));
+
+  const logMarcacaoManual = [...auditorias].reverse().find(
+    (a) => a.acao === 'ATUALIZAR' && a.valorNovo?.status === 'PAGA' && a.valorAnterior?.status !== 'PAGA'
+  );
+
+  const pago = receita.status === 'PAGA' || receita.status === 'PAGO';
+
+  // Webhook/job de banco nunca passa por auditoria quando confirma
+  // pagamento sozinho -- só grava confirmacaoPagtoEnviadaEm direto no
+  // banco. Então: tem confirmacaoPagtoEnviadaEm = foi automático; não
+  // tem, mas está PAGA = foi um humano que marcou (na criação ou numa
+  // edição depois).
+  const infoPagamentoManual = pago && !receita.confirmacaoPagtoEnviadaEm
+    ? (nasceuPaga
+      ? { usuarioNome: logCriacao?.usuarioNome || 'Sistema', data: logCriacao?.createdAt }
+      : logMarcacaoManual
+        ? { usuarioNome: logMarcacaoManual.usuarioNome || 'Sistema', data: logMarcacaoManual.createdAt }
+        : null)
+    : null;
+
+  const enviadaAoBanco = Boolean(receita.cobrancaEnviadaEm || receita.gatewayReferencia);
+
+  return {
+    criadoEm: receita.createdAt,
+    criadoPor: logCriacao?.usuarioNome || null,
+    nasceuPaga,
+    enviadaAoBanco,
+    motivoNaoEnviada: enviadaAoBanco
+      ? null
+      : nasceuPaga
+        ? 'Não foi enviada porque essa cobrança foi lançada diretamente como paga, sem passar pelo fluxo de boleto.'
+        : receita.status === 'CANCELADA'
+          ? 'Cancelada antes de chegar a ser enviada ao banco.'
+          : null,
+    infoPagamentoManual,
+    eventos,
+  };
 
 };
 
