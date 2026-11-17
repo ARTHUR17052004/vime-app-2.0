@@ -31,9 +31,11 @@ import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstr
 import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
 import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import ContratosMobile from "../components/contratos/mobile/ContratosMobile";
 
 import { ContratoService } from "@/services/contratos.service";
 import { usePermissao } from "../../hooks/usePermissao";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { socket } from "../../services/socket";
 import { normalizarBusca } from "../../utils/busca";
 
@@ -52,6 +54,7 @@ function ContratosPageConteudo() {
 
   const podeVisualizar = usePermissao("contratos.visualizar");
   const podeCriar = usePermissao("contratos.criar");
+  const isMobile = useIsMobile();
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -457,6 +460,98 @@ function ContratosPageConteudo() {
 
   if (!podeVisualizar) {
     return <SemPermissao />;
+  }
+
+  if (isMobile) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            <ContratosMobile
+              contratos={contratos}
+              contratosFiltrados={contratosFiltrados}
+              totalContratos={totalContratos}
+              podeCriar={podeCriar}
+              onNovoContrato={novoContrato}
+              onEdit={editarContrato}
+              onDelete={excluirContrato}
+              onBaixarPdf={gerarPdfContrato}
+              onEnviarClicksign={setDemonstrativoContratoId}
+              onRenovar={renovarContrato}
+              onEncerrar={encerrarContrato}
+              search={search}
+              onSearchChange={setSearch}
+              residenciaSelecionada={residenciaSelecionada}
+              onResidenciaChange={setResidenciaSelecionada}
+              filtroSelecionado={filtroSelecionado}
+              onFiltroChange={setFiltroSelecionado}
+              abaSelecionada={abaSelecionada}
+              onAbaChange={setAbaSelecionada}
+            />
+
+            <ContratoModal
+              isOpen={modalOpen}
+              onClose={() => {
+                setModalOpen(false);
+                setContratoEditando(null);
+              }}
+            >
+
+              <ContratoForm
+                contrato={contratoEditando}
+                onSave={salvarContrato}
+                onCancel={() => {
+                  setModalOpen(false);
+                  setContratoEditando(null);
+                }}
+              />
+
+            </ContratoModal>
+
+            <ContratoDemonstrativoModal
+              open={!!demonstrativoContratoId}
+              contratoId={demonstrativoContratoId}
+              onClose={() => setDemonstrativoContratoId(null)}
+              onEnviado={carregarContratos}
+            />
+
+            <ConfirmVistoriaEntregaModal
+              isOpen={!!vistoriaPendente}
+              nomeKitnet={vistoriaPendente?.kitnetNome}
+              onEscolher={confirmarExclusaoContrato}
+            />
+
+            <TerminoAntecipadoModal
+              isOpen={!!terminoAntecipado}
+              onClose={() => setTerminoAntecipado(null)}
+              titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+              contexto="Esse contrato ainda não chegou no fim (dataFim). Ele não será excluído -- vai ser encerrado, com o motivo registrado, pra manter o histórico."
+              acao={async (extra) => {
+                if (terminoAntecipado.tipo === "encerrar") {
+                  await ContratoService.encerrar(terminoAntecipado.id, extra);
+                } else {
+                  await ContratoService.excluir(terminoAntecipado.id, {
+                    gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                    ...extra,
+                  });
+                }
+                await carregarContratos();
+              }}
+            />
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
   }
 
   return (
