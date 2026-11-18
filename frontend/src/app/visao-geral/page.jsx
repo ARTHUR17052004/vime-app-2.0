@@ -203,9 +203,20 @@ function DivisoriaGrupo({ titulo, descricao }) {
 // linha serve pros módulos ainda não integrados (sem seta, nada pra
 // abrir) e pro Financeiro (com seta, abre os indicadores). Pedido
 // explícito: tudo começa resumido, o usuário escolhe o que quer abrir.
+// Cada módulo é seu próprio cartão (borda + fundo fechando em volta),
+// não mais uma linha dentro de um cartão único com as outras -- era
+// só uma linha fina (border-t) separando onde um módulo/tabela acaba
+// e o próximo começa, ficava tudo "colado" e difícil de saber até
+// onde ia o conteúdo aberto de cada um. Agora o contorno do próprio
+// cartão marca esse limite.
 function LinhaModulo({ titulo, resumo, icone: Icone, expansivel = false, aberto = false, onToggle, children }) {
   return (
-    <div className="border-t border-[var(--border-token)]">
+    <div
+      className={`
+        rounded-2xl border bg-[var(--surface)] overflow-hidden transition-colors
+        ${aberto ? "border-emerald-500/30" : "border-[var(--border-token)]"}
+      `}
+    >
 
       <button
         onClick={expansivel ? onToggle : undefined}
@@ -497,7 +508,7 @@ export default function VisaoGeralPage() {
                 Módulos
               </h2>
 
-              <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] overflow-hidden">
+              <div className="space-y-3">
 
                 <LinhaModulo
                   titulo="Financeiro"
