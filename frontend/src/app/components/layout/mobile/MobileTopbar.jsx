@@ -51,7 +51,6 @@ export default function MobileTopbar() {
 
         backdrop-blur-2xl
 
-        px-4
         py-2.5
 
         flex
@@ -59,6 +58,17 @@ export default function MobileTopbar() {
         justify-between
         gap-2
       "
+      style={{
+        // Mesma ideia do "pb-[env(safe-area-inset-bottom)]" que a barra
+        // inferior já usa -- só que pro topo, que não tinha nada (o
+        // viewport-fit=cover que liga o env() foi ligado agora, ver
+        // layout.js). Sem isso, num iPhone instalado como app (ver
+        // statusBarStyle: "black-translucent" no layout.js), o relógio/
+        // bateria do sistema ficava por cima do logo.
+        paddingTop: "env(safe-area-inset-top, 0px)",
+        paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
+        paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
+      }}
     >
 
       <Link href="/" className="flex items-center gap-2.5 min-w-0">

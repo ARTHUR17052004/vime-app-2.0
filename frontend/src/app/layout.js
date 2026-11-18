@@ -47,8 +47,18 @@ export const metadata = {
   },
 };
 
+// Sem "width"/"initialScale" aqui, o <meta name="viewport"> gerado só
+// tinha o theme-color -- cada navegador/aparelho decidia sozinho como
+// escalar a página (é parte do porquê de "zoom e espaço" ficarem
+// diferentes dependendo do celular). "viewportFit: cover" é o que
+// liga os env(safe-area-inset-*) usados pelo app (ex.: a barra inferior
+// mobile já tentava usar isso) -- sem essa declaração, o navegador
+// SEMPRE devolve 0 pra eles, então aquele respiro ficava inerte.
 export const viewport = {
   themeColor: "#10B981",
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }) {

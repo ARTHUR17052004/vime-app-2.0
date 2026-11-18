@@ -36,7 +36,12 @@ export default function MobileShell({ children }) {
         "
       />
 
-      <div className="flex flex-col h-screen">
+      {/* h-dvh (não h-screen/100vh) -- 100vh é fixo no tamanho MÁXIMO da
+          tela e ignora a barra de endereço do navegador mobile aparecendo/
+          sumindo; cada aparelho/navegador mostra essa barra de um jeito,
+          então 100vh sobrava ou faltava espaço dependendo de qual. dvh
+          acompanha a altura visível de verdade, ao vivo. */}
+      <div className="flex flex-col h-dvh">
         <MobileTopbar />
 
         <main
@@ -46,10 +51,13 @@ export default function MobileShell({ children }) {
 
             overflow-y-auto
 
-            px-4
             pt-4
             pb-24
           "
+          style={{
+            paddingLeft: "max(1rem, env(safe-area-inset-left, 0px))",
+            paddingRight: "max(1rem, env(safe-area-inset-right, 0px))",
+          }}
         >
           {children}
         </main>

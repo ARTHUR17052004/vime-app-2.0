@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, User, Plus, Search, History, TrendingUp, Clock, AlertTriangle, Wallet, Trash2, Mic, Square } from "lucide-react";
+import { Send, Sparkles, User, Plus, Search, History, TrendingUp, Clock, AlertTriangle, Wallet, Trash2, Mic, Square, X } from "lucide-react";
 
 import { SabadoService } from "@/services/sabado.service";
 import { useAuth } from "../../../context/AuthContext";
+import { useIsMobile } from "../../../hooks/useIsMobile";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 // "Hoje 08:21" / "Ontem" / "25/10" -- igual qualquer chat de IA
@@ -93,6 +94,7 @@ function CartoesFinanceiro({ cards }) {
 
 export default function AssistenteChat() {
   const { usuario } = useAuth();
+  const isMobile = useIsMobile();
 
   const [mensagens, setMensagens] = useState([]);
   const [conversaAtualId, setConversaAtualId] = useState(null);
@@ -137,6 +139,21 @@ export default function AssistenteChat() {
       if (gravadorRef.current?.state === "recording") gravadorRef.current.stop();
     };
   }, []);
+
+  // No mobile o histórico vira um overlay de tela cheia (ver JSX mais
+  // abaixo) -- trava o scroll da página por trás, mesmo padrão do
+  // MobileMoreMenu.jsx. No desktop "historicoAberto" só abre/fecha um
+  // painel lateral inline, não precisa disso.
+  useEffect(() => {
+    if (isMobile && historicoAberto) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobile, historicoAberto]);
 
   const carregarConversas = async (termo) => {
     try {
@@ -345,6 +362,323 @@ export default function AssistenteChat() {
   };
 
   const primeiroNome = usuario?.nome?.trim().split(" ")[0] || "";
+
+  // Versão mobile: a mesma lógica acima (conversas, envio, gravação),
+  // só o layout muda -- o desktop tinha header com 2 botões de texto
+  // ("Histórico"/"Novo chat") + um painel lateral de 72 (w-72) que no
+  // celular virava "Histórico" colidindo com o resto do header e o
+  // card de chat competindo por espaço com ele. Aqui os botões viram
+  // ícone (sem rótulo, mais compactos) e o histórico é um overlay de
+  // tela cheia (mesmo padrão do MobileMoreMenu.jsx), não uma coluna
+  // espremida do lado.
+  if (isMobile) {
+    return (
+      <>
+        <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-3 flex flex-col h-[72dvh]">
+
+          <div className="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-[var(--border-token)]">
+
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                <Sparkles size={18} />
+              </div>
+              <p className="text-[13px] font-bold text-[var(--text)] flex items-center gap-1.5 truncate">
+                Assistente VIME
+                <span className="text-[9px] font-bold uppercase tracking-wide bg-emerald-500/15 text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/30 shrink-0">
+                  Beta
+                </span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+
+              <button
+                onClick={() => setHistoricoAberto(true)}
+                aria-label="Histórico de conversas"
+                className="w-9 h-9 rounded-lg border border-[var(--border-token)] flex items-center justify-center text-[var(--text-muted)] active:scale-95 transition"
+              >
+                <History size={16} />
+              </button>
+
+              <button
+                onClick={novoChat}
+                aria-label="Novo chat"
+                className="w-9 h-9 rounded-lg border border-emerald-400/30 text-emerald-400 flex items-center justify-center active:scale-95 transition"
+              >
+                <Plus size={16} />
+              </button>
+
+            </div>
+
+          </div>
+
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-3">
+
+            {mensagens.length === 0 && !carregandoConversa && (
+              <div className="h-full flex flex-col items-center justify-center text-center gap-2.5 px-3">
+                <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
+                  <Sparkles size={22} />
+                </div>
+                <p className="text-[13px] font-semibold text-[var(--text)]">
+                  {primeiroNome ? `Olá, ${primeiroNome}!` : "Olá!"}
+                </p>
+                <p className="text-[12px] text-[var(--text-faint)] max-w-[240px]">
+                  Pergunte o que quiser do sistema, estou aqui para facilitar sua vida 😉
+                </p>
+              </div>
+            )}
+
+            {carregandoConversa && (
+              <p className="text-[12px] text-[var(--text-faint)] text-center mt-6">Carregando conversa...</p>
+            )}
+
+            {!carregandoConversa && mensagens.map((m, i) => (
+              <div key={i} className={`flex gap-2 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
+
+                <div
+                  className={`
+                    w-7 h-7 shrink-0 rounded-lg flex items-center justify-center
+                    ${m.role === "user" ? "bg-sky-500/15 text-sky-400" : "bg-emerald-500/15 text-emerald-400"}
+                  `}
+                >
+                  {m.role === "user" ? <User size={14} /> : <Sparkles size={14} />}
+                </div>
+
+                <div
+                  className={`
+                    max-w-[82%] rounded-2xl px-3.5 py-2.5 text-[13px] whitespace-pre-line leading-relaxed
+                    ${
+                      m.role === "user"
+                        ? "bg-sky-500/10 border border-sky-500/20 text-[var(--text)]"
+                        : "bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text)]"
+                    }
+                  `}
+                >
+                  {m.content}
+                  <CartoesFinanceiro cards={m.cards} />
+                </div>
+
+              </div>
+            ))}
+
+            {enviando && (
+              <div className="flex gap-2">
+                <div className="w-7 h-7 shrink-0 rounded-lg flex items-center justify-center bg-emerald-500/15 text-emerald-400">
+                  <Sparkles size={14} />
+                </div>
+                <div className="rounded-2xl px-3.5 py-2.5 text-[13px] bg-[var(--surface-2)] border border-[var(--border-token)] text-[var(--text-faint)]">
+                  Consultando os dados...
+                </div>
+              </div>
+            )}
+
+            {erro && <p className="text-[11px] text-red-400">{erro}</p>}
+
+            <div ref={fimRef} />
+
+          </div>
+
+          <div className="mt-3 flex items-end gap-1.5 border-t border-[var(--border-token)] pt-3">
+
+            <textarea
+              value={pergunta}
+              onChange={(e) => setPergunta(e.target.value)}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              placeholder={gravando ? "Gravando..." : transcrevendo ? "Transcrevendo..." : "Digite sua pergunta..."}
+              disabled={enviando || gravando || transcrevendo}
+              className="
+                flex-1
+                resize-none
+                rounded-xl
+                border
+                border-[var(--border-token)]
+                bg-[var(--surface-2)]
+                px-3
+                py-2.5
+                text-[13px]
+                text-[var(--text)]
+                outline-none
+                focus:border-emerald-500
+                disabled:opacity-60
+              "
+            />
+
+            {microfoneDisponivel && (
+              <button
+                onClick={gravando ? pararGravacao : iniciarGravacao}
+                disabled={enviando || transcrevendo}
+                aria-label={gravando ? "Parar gravação" : "Perguntar por voz"}
+                className={`
+                  flex items-center justify-center
+                  w-10 h-10 shrink-0 rounded-xl
+                  border transition-colors
+                  disabled:opacity-40 disabled:cursor-not-allowed
+                  ${gravando
+                    ? "bg-red-500/15 border-red-500/40 text-red-400 animate-pulse"
+                    : "bg-[var(--surface-2)] border-[var(--border-token)] text-[var(--text-muted)]"
+                  }
+                `}
+              >
+                {transcrevendo ? (
+                  <span className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
+                ) : gravando ? (
+                  <Square size={15} />
+                ) : (
+                  <Mic size={17} />
+                )}
+              </button>
+            )}
+
+            <button
+              onClick={enviarPergunta}
+              disabled={enviando || gravando || transcrevendo || !pergunta.trim()}
+              aria-label="Enviar pergunta"
+              className="
+                flex items-center justify-center
+                w-10 h-10 shrink-0 rounded-xl
+                bg-emerald-500 text-black
+                disabled:opacity-40 disabled:cursor-not-allowed
+                transition-colors
+              "
+            >
+              <Send size={16} />
+            </button>
+
+          </div>
+
+          <p className="mt-1.5 text-[10px] text-[var(--text-faint)] text-center">
+            A IA pode errar. Confira informações importantes.
+          </p>
+
+        </div>
+
+        {historicoAberto && (
+          <div className="fixed inset-0 z-50 flex flex-col">
+
+            <div
+              onClick={() => setHistoricoAberto(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+
+            <div
+              className="
+                relative
+                mt-auto
+
+                max-h-[80dvh]
+
+                rounded-t-3xl
+
+                border-t
+                border-[var(--border-token)]
+
+                bg-[var(--surface)]
+
+                flex
+                flex-col
+
+                overflow-hidden
+
+                shadow-[0_-20px_60px_rgba(0,0,0,.35)]
+              "
+            >
+
+              <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--border-token)]">
+                <h4 className="text-[15px] font-bold text-[var(--text)]">Histórico</h4>
+                <button
+                  onClick={() => setHistoricoAberto(false)}
+                  className="w-9 h-9 rounded-full bg-[var(--surface-2)] flex items-center justify-center"
+                >
+                  <X size={16} className="text-[var(--text)]" />
+                </button>
+              </div>
+
+              <div className="px-4 pt-3">
+                <div className="relative mb-3">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-faint)]" />
+                  <input
+                    value={busca}
+                    onChange={(e) => setBusca(e.target.value)}
+                    placeholder="Buscar conversas..."
+                    className="
+                      w-full
+                      rounded-lg
+                      border
+                      border-[var(--border-token)]
+                      bg-[var(--surface-2)]
+                      pl-9
+                      pr-3
+                      py-2.5
+                      text-[13px]
+                      text-[var(--text)]
+                      outline-none
+                      focus:border-emerald-500
+                    "
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-6 space-y-1">
+
+                {conversas.length === 0 && (
+                  <p className="text-[13px] text-[var(--text-faint)] px-1">Nenhuma conversa ainda.</p>
+                )}
+
+                {conversas.map((c) => (
+                  <div
+                    key={c.id}
+                    className={`
+                      group relative flex items-center gap-1 rounded-xl transition-colors
+                      ${
+                        c.id === conversaAtualId
+                          ? "bg-emerald-500/10 border border-emerald-500/30"
+                          : "border border-transparent"
+                      }
+                    `}
+                  >
+                    <button
+                      onClick={() => abrirConversa(c.id)}
+                      className="flex-1 min-w-0 text-left px-3 py-3"
+                    >
+                      <p className="text-[13px] font-medium text-[var(--text)] truncate">{c.titulo}</p>
+                      <p className="text-[11px] text-[var(--text-faint)] mt-0.5">
+                        {formatarQuando(c.updatedAt)}
+                        {c.usuarioId !== usuario?.id && c.usuario?.nome && (
+                          <> · {c.usuario.nome.split(" ")[0]}</>
+                        )}
+                      </p>
+                    </button>
+
+                    {c.usuarioId === usuario?.id && (
+                      <button
+                        onClick={() => excluirConversa(c.id)}
+                        disabled={excluindoId === c.id}
+                        title={confirmandoId === c.id ? "Clique de novo pra confirmar" : "Excluir conversa"}
+                        className={`
+                          shrink-0 mr-2 p-2 rounded-lg transition-colors
+                          ${confirmandoId === c.id
+                            ? "bg-red-500/20 text-red-400"
+                            : "text-[var(--text-faint)] hover:bg-red-500/10 hover:text-red-400"
+                          }
+                          disabled:opacity-50
+                        `}
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface)] p-5 sm:p-6">

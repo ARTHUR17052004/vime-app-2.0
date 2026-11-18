@@ -32,6 +32,24 @@ function disponivel() {
   return Boolean(CONFIGS[PROVEDOR]?.apiKey);
 }
 
+// O corpo técnico do erro (ex.: JSON de rate limit do Groq, com nome de
+// modelo/organização/tokens) ia direto pro usuário -- o controller só
+// repassa error.message sem filtrar (ver sabadoController.js). Loga o
+// detalhe técnico aqui (servidor) e devolve uma mensagem só com o que
+// o usuário realmente precisa saber.
+function erroAmigavel(status, acao) {
+  if (status === 429) {
+    return `O assistente recebeu muitas perguntas agora e atingiu o limite do provedor de IA. Tente de novo em alguns segundos.`;
+  }
+  if (status === 401 || status === 403) {
+    return `Não foi possível autenticar com o provedor de IA configurado -- avise o administrador.`;
+  }
+  if (status >= 500) {
+    return `O provedor de IA está indisponível no momento. Tente de novo em instantes.`;
+  }
+  return `Não foi possível ${acao} agora. Tente de novo em instantes.`;
+}
+
 // Devolve a mensagem bruta do modelo (não só o texto) -- quem chama
 // pode passar `ferramentas` (formato "tools" da OpenAI) e precisa
 // inspecionar `tool_calls` antes de decidir se já é a resposta final
@@ -70,7 +88,8 @@ async function gerarRespostaBruta(mensagens, { temperatura = 0.3, ferramentas } 
 
   if (!resposta.ok) {
     const corpoErro = await resposta.text().catch(() => "");
-    throw new Error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}): ${corpoErro.slice(0, 500)}`);
+    console.error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}): ${corpoErro.slice(0, 500)}`);
+    throw new Error(erroAmigavel(resposta.status, "gerar a resposta"));
   }
 
   const dados = await resposta.json();
@@ -131,7 +150,8 @@ async function transcrever(buffer, { nomeArquivo = "audio.webm", mimeType = "aud
 
   if (!resposta.ok) {
     const corpoErro = await resposta.text().catch(() => "");
-    throw new Error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}) ao transcrever áudio: ${corpoErro.slice(0, 500)}`);
+    console.error(`Erro do provedor de IA (${PROVEDOR}, ${resposta.status}) ao transcrever áudio: ${corpoErro.slice(0, 500)}`);
+    throw new Error(erroAmigavel(resposta.status, "transcrever o áudio"));
   }
 
   const dados = await resposta.json();
