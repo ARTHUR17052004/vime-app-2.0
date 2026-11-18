@@ -125,6 +125,13 @@ module.exports = async () => {
 
     try {
 
+      // Relógio de 72h pra realizar o corte -- sem responder até lá, o
+      // job de status (atualizarStatusVistoriasJob) já vira ATRASADA
+      // sozinho, mesmo padrão de verificarEscalonamentoCorteJob.js pro
+      // segundo estágio (pedido do usuário em 18/11/2026).
+      const dataProxima = new Date();
+      dataProxima.setHours(dataProxima.getHours() + 72);
+
       const vistoria = await vistoriaService.criar({
         titulo: corteVistoriaService.TITULO_REALIZAR_CORTE,
         descricao: `Kitnet com falta de pagamento após 72 horas. ${inquilino?.nome || 'Inquilino'} -- R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}. Conforme o contrato, água/energia podem ser suspensas até a quitação do débito.`,
@@ -136,6 +143,7 @@ module.exports = async () => {
         responsavel,
         status: 'PENDENTE',
         data: new Date(),
+        dataProxima,
       });
 
       await prisma.receita.update({

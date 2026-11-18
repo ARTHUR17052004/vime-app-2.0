@@ -249,6 +249,79 @@ const exigirConfirmacaoExclusao = async (req, res, next) => {
 // nada de texto livre aqui (a observação é que é livre).
 const MOTIVOS_TERMINO_ANTECIPADO = ["ABANDONO", "INADIMPLENCIA", "QUEBRA_DO_INQUILINO"];
 
+// Classificar uma Receita como inadimplência de verdade (botão
+// "Inadimplência" nos 3 pontinhos do Financeiro) -- mesmo motivo fixo +
+// observação + senha de exigirConfirmacaoTerminoAntecipado, só que aqui
+// é só um registro da RECEITA (não mexe em contrato/kitnet -- isso já
+// aconteceu antes, na vistoria de esvaziar kitnet). Reaproveita os
+// mesmos 3 motivos pra manter um vocabulário só no sistema inteiro.
+const exigirConfirmacaoInadimplencia = async (req, res, next) => {
+
+  try {
+
+    const permitido = await temPermissao(req.usuario, "financeiro.editar");
+
+    if (!permitido) {
+      return res.status(403).json({
+        success: false,
+        message: "Você não tem permissão para classificar inadimplência.",
+      });
+    }
+
+    const motivo = String(req.body?.motivoInadimplencia || "").toUpperCase();
+
+    if (!MOTIVOS_TERMINO_ANTECIPADO.includes(motivo)) {
+      return res.status(400).json({
+        success: false,
+        message: "Selecione o motivo (Abandono, Inadimplência ou Quebra de Contrato).",
+      });
+    }
+
+    if (!String(req.body?.observacaoInadimplencia || "").trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Escreva a observação.",
+      });
+    }
+
+    if (!req.body?.senhaConfirmacao) {
+      return res.status(400).json({
+        success: false,
+        message: "Digite sua senha para confirmar.",
+      });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.id },
+    });
+
+    const senhaValida =
+      usuario && (await bcrypt.compare(req.body.senhaConfirmacao, usuario.senha));
+
+    if (!senhaValida) {
+      return res.status(403).json({
+        success: false,
+        message: "Senha incorreta.",
+      });
+    }
+
+    req.body.motivoInadimplencia = motivo;
+
+    return next();
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao verificar a classificação de inadimplência.",
+    });
+
+  }
+
+};
+
 // Esvaziar a kitnet (excluir inquilino), excluir o contrato, excluir a
 // kitnet, ou encerrar manualmente -- ANTES do dataFim do contrato (o
 // ciclo que o sistema já respeita pra fechar sozinho, ver
@@ -406,4 +479,5 @@ module.exports.exigirPermissaoParaMarcarPago = exigirPermissaoParaMarcarPago;
 module.exports.exigirConfirmacaoEdicaoValor = exigirConfirmacaoEdicaoValor;
 module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;
 module.exports.exigirConfirmacaoTerminoAntecipado = exigirConfirmacaoTerminoAntecipado;
+module.exports.exigirConfirmacaoInadimplencia = exigirConfirmacaoInadimplencia;
 module.exports.MOTIVOS_TERMINO_ANTECIPADO = MOTIVOS_TERMINO_ANTECIPADO;

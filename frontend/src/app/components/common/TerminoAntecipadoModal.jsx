@@ -12,7 +12,15 @@ import { useState } from "react";
 // observacaoTerminoAntecipado, senhaConfirmacao } e deve lançar o erro
 // de volta se a senha estiver errada (o modal mantém o passo 2 aberto
 // pra tentar de novo, sem perder motivo/observação já digitados).
-export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contexto, acao }) {
+// Rótulo do 3º motivo muda conforme quem chama -- "Quebra do inquilino"
+// faz sentido pra encerrar um contrato de verdade (Contratos/Kitnets/
+// Inquilinos), mas em Financeiro (classificar inadimplência de uma
+// Receita, depois que a kitnet já foi esvaziada) o usuário pediu
+// literalmente "Quebra de Contrato". Mesmo valor (QUEBRA_DO_INQUILINO)
+// nos dois -- só o texto exibido muda.
+const ROTULO_PADRAO_QUEBRA = "Quebra do inquilino";
+
+export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contexto, acao, rotuloQuebra = ROTULO_PADRAO_QUEBRA }) {
 
   const [passo, setPasso] = useState(1);
   const [motivo, setMotivo] = useState("");
@@ -118,7 +126,7 @@ export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contex
               <option value="" className="bg-[#1b2430]">Selecione...</option>
               <option value="ABANDONO" className="bg-[#1b2430]">Abandono</option>
               <option value="INADIMPLENCIA" className="bg-[#1b2430]">Inadimplência</option>
-              <option value="QUEBRA_DO_INQUILINO" className="bg-[#1b2430]">Quebra do inquilino</option>
+              <option value="QUEBRA_DO_INQUILINO" className="bg-[#1b2430]">{rotuloQuebra}</option>
             </select>
           </div>
 

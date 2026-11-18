@@ -512,7 +512,43 @@ model Receita {
   // só antes. onDelete: SetNull porque excluir a receita (trava própria
   // de senha+motivo) não deve arrastar a vistoria junto.
   vistoriaCorteId             String?   @unique
-  vistoriaCorte               Vistoria? @relation(fields: [vistoriaCorteId], references: [id], onDelete: SetNull)
+  vistoriaCorte               Vistoria? @relation("VistoriaCorte", fields: [vistoriaCorteId], references: [id], onDelete: SetNull)
+
+  // Quando a vistoria de corte foi marcada Realizada -- começa a contar
+  // as 72h pra escalar pra "esvaziar kitnet" se a cobrança continuar
+  // sem resolver (ver verificarAtrasoCorteJob.js). De propósito um
+  // campo à parte, não um novo valor de `status` -- status continua
+  // ATRASADA por baixo, pra não sumir da cobrança automática (Asaas/BB/
+  // Efí), do lembrete de WhatsApp, do Dashboard/Insights e dos
+  // relatórios de inadimplência; o selo "Corte de Água e Energia"/
+  // "Esvaziar Kitnet" no Financeiro é só visual, calculado a partir
+  // destes campos (ver statusReceita.js).
+  corteRealizadoEm            DateTime?
+
+  // Mesma ideia de vistoriaCorteAtrasoCriadaEm/vistoriaCorteId, pra
+  // escalada seguinte.
+  vistoriaEsvaziarCriadaEm    DateTime?
+  vistoriaEsvaziarId          String?   @unique
+  vistoriaEsvaziar            Vistoria? @relation("VistoriaEsvaziar", fields: [vistoriaEsvaziarId], references: [id], onDelete: SetNull)
+
+  // Quando a vistoria de "esvaziar kitnet" foi marcada Realizada --
+  // nesse momento o contrato já foi encerrado e a kitnet já foi
+  // liberada sozinha (ver vistoriaService.atualizar, reaproveitando
+  // contratoService.encerrar, o mesmo mecanismo da Quebra de Contrato).
+  // Começa a contar as 72h de "aguardando classificação de
+  // inadimplência" (botão Inadimplência no Financeiro).
+  kitnetEsvaziadaEm            DateTime?
+
+  // Classificação final de uma receita que virou inadimplência de
+  // verdade (botão "Inadimplência" nos 3 pontinhos do Financeiro) --
+  // mesmas 3 opções/senha de TerminoAntecipadoModal.jsx, só que aqui é
+  // só um registro da RECEITA (não mexe em contrato/kitnet, isso já
+  // aconteceu antes). Uma vez classificada, sai da lista normal do
+  // Financeiro e só aparece em /inadimplentes.
+  classificacaoInadimplencia     String?
+  observacaoInadimplencia        String?
+  classificadaInadimplenciaEm    DateTime?
+  classificadaInadimplenciaPor   String?
 
   // Dedupe (um por dia, não um só pra sempre -- ver lembreteEnviadoEm)
   // do aviso INTERNO (sino/WhatsApp da equipe, não do inquilino) de
@@ -771,7 +807,11 @@ model Vistoria {
 
   // Lado oposto de Receita.vistoriaCorteId -- a receita que gerou esta
   // vistoria de risco de corte, se for uma dessas (ver verificarAtrasoCorteJob.js).
-  receitaOrigem Receita?
+  receitaOrigem Receita? @relation("VistoriaCorte")
+
+  // Lado oposto de Receita.vistoriaEsvaziarId -- idem, pra escalada de
+  // "esvaziar kitnet".
+  receitaOrigemEsvaziar Receita? @relation("VistoriaEsvaziar")
 
   ocorrencias Ocorrencia[]
 

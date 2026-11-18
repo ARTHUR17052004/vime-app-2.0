@@ -491,10 +491,11 @@ const fixarVistoria = async (id, fixado) => {
     // Cancelada fica de fora daqui, senão vistoria cancelada (manual ou
     // automática, ex.: corte de água/energia que deixou de fazer
     // sentido) nunca mais some da tela, só acumula poluindo (pedido do
-    // usuário em 16/11/2026). Quem quiser auditar cancelada tem a
-    // Auditoria pra isso.
+    // usuário em 16/11/2026). Realizada também sai daqui pelo mesmo
+    // motivo -- quem quiser ver o que já foi feito tem a própria aba
+    // Realizadas (pedido do usuário em 18/11/2026).
     default:
-      return vistoria.status !== "CANCELADA";
+      return !["CANCELADA", "REALIZADA"].includes(vistoria.status);
 
   }
 

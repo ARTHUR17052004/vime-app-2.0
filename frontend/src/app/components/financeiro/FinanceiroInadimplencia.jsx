@@ -5,14 +5,20 @@ import {
 } from "lucide-react";
 
 import Table from "../ui/Table";
+import { statusExibidoReceita } from "@/utils/statusReceita";
 
 export default function FinanceiroInadimplencia({
   receitas,
 }) {
 
+  // Já classificada (botão Inadimplência) saiu do Financeiro normal e
+  // mora em /financeiro > aba Inadimplentes -- esse painel é só o
+  // controle do atraso ainda ATIVO, mesma ideia de receitasListaVisivel
+  // em financeiro/page.js.
   const inadimplentes = receitas.filter(
     (item) =>
-      item.status === "ATRASADA"
+      item.status === "ATRASADA" &&
+      !item.classificacaoInadimplencia
   );
 
   const totalEmAberto = inadimplentes.reduce(
@@ -190,7 +196,7 @@ export default function FinanceiroInadimplencia({
                 </p>
 
                 <p className="text-red-400 mt-2">
-                  Status: {item.status}
+                  Status: {statusExibidoReceita(item).texto}
                 </p>
 
               </div>

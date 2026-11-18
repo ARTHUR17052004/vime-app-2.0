@@ -648,6 +648,74 @@ const remover = async (id, autor, motivoExclusao) => {
 
 };
 
+// Classificação final de uma receita que virou inadimplência de
+// verdade -- botão "Inadimplência" nos 3 pontinhos do Financeiro (ver
+// permissaoMiddleware.exigirConfirmacaoInadimplencia, que já validou
+// motivo+observação+senha antes de chegar aqui). Não mexe em status
+// (continua ATRASADA por baixo, de propósito -- ver schema.prisma),
+// só registra a classificação; FinanceiroReceitas.jsx filtra pra sumir
+// da lista normal assim que isso é preenchido, e /inadimplentes passa
+// a listar.
+const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoInadimplencia }, autor) => {
+
+  const receita = await prisma.receita.findUnique({ where: { id } });
+
+  if (!receita) {
+    throw new Error("Receita não encontrada.");
+  }
+
+  if (receita.classificacaoInadimplencia) {
+    throw new Error("Essa receita já foi classificada.");
+  }
+
+  const atualizada = await prisma.receita.update({
+    where: { id },
+    data: {
+      classificacaoInadimplencia: motivoInadimplencia,
+      observacaoInadimplencia,
+      classificadaInadimplenciaEm: new Date(),
+      classificadaInadimplenciaPor: autor?.nome || "Sistema",
+    },
+  });
+
+  const MOTIVO_ROTULO = {
+    ABANDONO: "Abandono",
+    INADIMPLENCIA: "Inadimplência",
+    QUEBRA_DO_INQUILINO: "Quebra de Contrato",
+  };
+
+  await auditoriaService.registrar({
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
+    modulo: "RECEITAS",
+    registroId: receita.id,
+    acao: "ATUALIZAR",
+    valorAnterior: receita,
+    valorNovo: atualizada,
+  });
+
+  await logService.registrar({
+    usuarioId: autor?.id || null,
+    usuarioNome: autor?.nome || "Sistema",
+    modulo: "RECEITAS",
+    acao: "ATUALIZAR",
+    descricao: `Receita "${receita.descricao || receita.id}" classificada como ${MOTIVO_ROTULO[motivoInadimplencia] || motivoInadimplencia} por ${autor?.nome || "Sistema"}.`,
+  });
+
+  notificacaoService.criar({
+    origem: 'SISTEMA',
+    titulo: 'INADIMPLÊNCIA REGISTRADA',
+    mensagem: `${autor?.nome || 'Alguém'} classificou "${receita.descricao}" (R$ ${Number(receita.valor).toFixed(2)}) como ${MOTIVO_ROTULO[motivoInadimplencia] || motivoInadimplencia}.`,
+    link: '/financeiro/inadimplentes',
+    locadorId: await locadorIdDaReceita(receita.id),
+  }).catch((erro) => console.error('[notificacao] Falha ao avisar classificação de inadimplência:', erro.message));
+
+  emitirAtualizacao("receita");
+
+  return atualizada;
+
+};
+
 // Pro front mostrar a conta/taxa que vai valer ANTES de salvar --
 // mesma resolução usada de verdade na criação (locadorDaReceita +
 // contaPagamentoService), só que sem gravar nada.
@@ -671,6 +739,7 @@ module.exports = {
   criar,
   atualizar,
   remover,
+  classificarInadimplencia,
   previsaoTaxaBoleto,
   kitnetDaReceita,
   multaJurosPadrao,

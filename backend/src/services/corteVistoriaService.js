@@ -10,7 +10,23 @@ const vistoriaService = require('./vistoriaService');
   achando que ainda tinha risco de corte -- bug relatado em 12/11/2026
   (Guilherme Rodrigues Oliveira: vencimento corrigido e cobrança
   enviada, mas a vistoria de corte continuava Pendente).
+
+  Escalada em 2 estágios, mesma ponte pros dois (pedido do usuário em
+  18/11/2026): atraso 72h+ -> vistoria "REALIZAR CORTE DE ÁGUA E
+  ENERGIA" -> realizada mas a cobrança continua sem resolver por mais
+  72h -> vistoria "ESVAZIAR KITNET" (que, ao ser realizada, encerra o
+  contrato e libera a kitnet sozinha -- ver vistoriaService.atualizar).
+  Cada estágio é descrito aqui (ver ESTAGIOS) pra não duplicar a mesma
+  lógica de cancelar/resolver duas vezes.
 */
+
+const TITULO_REALIZAR_CORTE = 'REALIZAR CORTE DE ÁGUA E ENERGIA';
+const TITULO_ESVAZIAR_KITNET = 'ESVAZIAR KITNET';
+
+const ESTAGIOS = [
+  { campoVistoriaId: 'vistoriaCorteId', campoCriadaEm: 'vistoriaCorteAtrasoCriadaEm', titulo: TITULO_REALIZAR_CORTE },
+  { campoVistoriaId: 'vistoriaEsvaziarId', campoCriadaEm: 'vistoriaEsvaziarCriadaEm', titulo: TITULO_ESVAZIAR_KITNET },
+];
 
 // Mesmo critério de 72h usado na criação (verificarAtrasoCorteJob.js) --
 // "ainda em risco" = atrasada, enviada ao banco, vencida há 72h+.
@@ -32,66 +48,77 @@ const aindaEmRisco = (receita) => {
 // webhook de pagamento...) E pela varredura do job (pega quem mudou por
 // outro caminho, ex.: confirmação direta do banco). Idempotente -- não
 // faz nada se não tiver vistoria vinculada, ou se ela já estiver
-// Cancelada/Realizada.
+// Cancelada/Realizada. Roda os 2 estágios (corte e esvaziar) sempre que
+// chamado -- qualquer um dos dois pode estar aberto.
 const resolverSeNaoCabeMais = async (receitaId) => {
 
   const receita = await prisma.receita.findUnique({ where: { id: receitaId } });
 
-  if (!receita?.vistoriaCorteId) return;
+  if (!receita) return;
 
   if (aindaEmRisco(receita)) return;
 
-  const vistoria = await prisma.vistoria.findUnique({ where: { id: receita.vistoriaCorteId } });
+  for (const estagio of ESTAGIOS) {
 
-  if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+    const vistoriaId = receita[estagio.campoVistoriaId];
 
-    await vistoriaService.atualizar(vistoria.id, {
-      status: 'CANCELADA',
-      observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- a cobrança que gerou esse risco de corte não está mais em atraso/aberta.`,
+    if (!vistoriaId) continue;
+
+    const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+    if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+
+      await vistoriaService.atualizar(vistoria.id, {
+        status: 'CANCELADA',
+        observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- a cobrança que gerou esse risco não está mais em atraso/aberta.`,
+      });
+
+    }
+
+    // Libera o vínculo (e o dedupe) -- se essa mesma receita voltar a
+    // ficar em risco de novo no futuro, pode gerar outra vistoria.
+    await prisma.receita.update({
+      where: { id: receita.id },
+      data: { [estagio.campoVistoriaId]: null, [estagio.campoCriadaEm]: null },
     });
 
   }
 
-  // Libera o vínculo (e o dedupe) -- se essa mesma receita voltar a
-  // ficar 72h+ atrasada de novo no futuro, pode gerar outra vistoria.
-  await prisma.receita.update({
-    where: { id: receita.id },
-    data: { vistoriaCorteId: null, vistoriaCorteAtrasoCriadaEm: null },
-  });
-
 };
 
 // Caminho INVERSO do resolverSeNaoCabeMais (que parte da Receita) --
-// varre direto as Vistorias de corte ainda abertas e cancela qualquer
-// uma que não tenha mais uma Receita de verdade te back-la (ex.: a
-// Receita que gerou ela foi excluída/cancelada por fora do fluxo
-// normal, sem passar por cancelarVinculada). Sem isso, uma vistoria
-// dessas fica Pendente pra sempre, pedindo corte de água/energia de
-// um débito que não existe mais -- bug relatado em 13/11/2026 (sobra
-// de quando existiam duas Receitas de Aluguel pro mesmo mês/inquilino).
-const TITULO_REALIZAR_CORTE = 'REALIZAR CORTE DE ÁGUA E ENERGIA';
-
+// varre direto as Vistorias de corte/esvaziar ainda abertas e cancela
+// qualquer uma que não tenha mais uma Receita de verdade te back-la
+// (ex.: a Receita que gerou ela foi excluída/cancelada por fora do
+// fluxo normal, sem passar por cancelarVinculada). Sem isso, uma
+// vistoria dessas fica Pendente pra sempre, pedindo uma ação sobre um
+// débito que não existe mais -- bug relatado em 13/11/2026 (sobra de
+// quando existiam duas Receitas de Aluguel pro mesmo mês/inquilino).
 const resolverOrfas = async () => {
-
-  const abertas = await prisma.vistoria.findMany({
-    where: { titulo: TITULO_REALIZAR_CORTE, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
-    select: { id: true, observacoes: true },
-  });
 
   let canceladas = 0;
 
-  for (const vistoria of abertas) {
+  for (const estagio of ESTAGIOS) {
 
-    const receita = await prisma.receita.findFirst({ where: { vistoriaCorteId: vistoria.id } });
-
-    if (receita && aindaEmRisco(receita)) continue;
-
-    await vistoriaService.atualizar(vistoria.id, {
-      status: 'CANCELADA',
-      observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- não existe mais nenhuma cobrança em aberto ligada a essa vistoria de corte.`,
+    const abertas = await prisma.vistoria.findMany({
+      where: { titulo: estagio.titulo, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
+      select: { id: true, observacoes: true },
     });
 
-    canceladas++;
+    for (const vistoria of abertas) {
+
+      const receita = await prisma.receita.findFirst({ where: { [estagio.campoVistoriaId]: vistoria.id } });
+
+      if (receita && aindaEmRisco(receita)) continue;
+
+      await vistoriaService.atualizar(vistoria.id, {
+        status: 'CANCELADA',
+        observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- não existe mais nenhuma cobrança em aberto ligada a essa vistoria.`,
+      });
+
+      canceladas++;
+
+    }
 
   }
 
@@ -102,25 +129,40 @@ const resolverOrfas = async () => {
 // Pra quando a Receita está sendo EXCLUÍDA de vez -- aí não interessa
 // mais se ela "ainda cabe" ou não (os critérios de aindaEmRisco nem
 // fazem sentido pra uma cobrança que está deixando de existir): a
-// vistoria é cancelada sempre que tiver uma vinculada. Chamar ANTES de
-// apagar a receita (ver receitaService.remover).
+// vistoria é cancelada sempre que tiver uma vinculada (dos 2 estágios).
+// Chamar ANTES de apagar a receita (ver receitaService.remover).
 const cancelarVinculada = async (receitaId) => {
 
   const receita = await prisma.receita.findUnique({ where: { id: receitaId } });
 
-  if (!receita?.vistoriaCorteId) return;
+  if (!receita) return;
 
-  const vistoria = await prisma.vistoria.findUnique({ where: { id: receita.vistoriaCorteId } });
+  for (const estagio of ESTAGIOS) {
 
-  if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+    const vistoriaId = receita[estagio.campoVistoriaId];
 
-    await vistoriaService.atualizar(vistoria.id, {
-      status: 'CANCELADA',
-      observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- a cobrança que gerou esse risco de corte foi excluída.`,
-    });
+    if (!vistoriaId) continue;
+
+    const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+    if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+
+      await vistoriaService.atualizar(vistoria.id, {
+        status: 'CANCELADA',
+        observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- a cobrança que gerou esse risco foi excluída.`,
+      });
+
+    }
 
   }
 
 };
 
-module.exports = { aindaEmRisco, resolverSeNaoCabeMais, resolverOrfas, cancelarVinculada, TITULO_REALIZAR_CORTE };
+module.exports = {
+  aindaEmRisco,
+  resolverSeNaoCabeMais,
+  resolverOrfas,
+  cancelarVinculada,
+  TITULO_REALIZAR_CORTE,
+  TITULO_ESVAZIAR_KITNET,
+};

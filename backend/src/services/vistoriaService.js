@@ -311,6 +311,76 @@ const atualizar = async (id, dados, autor) => {
 
   }
 
+  // Vistoria automática de corte de água/energia (categoria "Cobrança",
+  // ver corteVistoriaService.js) sendo marcada Realizada -- cada título
+  // avança um estágio da escalada combinada com o usuário em
+  // 18/11/2026: "REALIZAR CORTE..." começa o relógio de 72h de
+  // "aguardando esvaziar" na Receita; "ESVAZIAR KITNET" encerra o
+  // contrato e libera a kitnet sozinha (mesmo mecanismo da Quebra de
+  // Contrato -- ver contratoService.encerrar), e começa o relógio de
+  // "aguardando classificação de inadimplência". `dados.concluidaEm`
+  // só vem preenchido no fluxo de verdade (VistoriaConcluirModal, que
+  // já exige foto/vídeo + motivo pra categoria "Cobrança") -- uma
+  // edição manual qualquer (ex.: trocar o status direto no formulário
+  // de editar) não passa por aqui, de propósito: encerrar contrato e
+  // liberar kitnet sozinho é grave demais pra disparar sem a
+  // comprovação de verdade.
+  if (
+    dados.status === "REALIZADA" &&
+    anterior.status !== "REALIZADA" &&
+    anterior.categoria === "Cobrança" &&
+    dados.concluidaEm
+  ) {
+
+    // require() aqui dentro (não no topo do arquivo) só pra não criar
+    // um ciclo de require: corteVistoriaService já importa este
+    // arquivo (vistoriaService).
+    const corteVistoriaService = require('./corteVistoriaService');
+
+    try {
+
+      if (anterior.titulo === corteVistoriaService.TITULO_REALIZAR_CORTE) {
+
+        await prisma.receita.updateMany({
+          where: { vistoriaCorteId: id, corteRealizadoEm: null },
+          data: { corteRealizadoEm: new Date() },
+        });
+
+      } else if (anterior.titulo === corteVistoriaService.TITULO_ESVAZIAR_KITNET) {
+
+        if (anterior.kitnetId) {
+
+          const contratoAtivo = await prisma.contrato.findFirst({
+            where: { kitnetId: anterior.kitnetId, status: 'ATIVO' },
+            select: { id: true },
+          });
+
+          if (contratoAtivo) {
+
+            const contratoService = require('./contratoService');
+
+            await contratoService.encerrar(contratoAtivo.id, autor, {
+              motivoEncerramento: 'INADIMPLENCIA',
+              observacaoEncerramento: `Encerrado automaticamente -- kitnet esvaziada após a vistoria "${anterior.titulo}" (corte de água/energia sem quitação em 72h).`,
+            });
+
+          }
+
+        }
+
+        await prisma.receita.updateMany({
+          where: { vistoriaEsvaziarId: id, kitnetEsvaziadaEm: null },
+          data: { kitnetEsvaziadaEm: new Date() },
+        });
+
+      }
+
+    } catch (erro) {
+      console.error('[corteVistoria] Falha ao avançar a escalada de corte de água/energia:', erro.message);
+    }
+
+  }
+
   return vistoria;
 
 };

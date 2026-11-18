@@ -21,17 +21,25 @@ import ReceitaEditarModal from "./ReceitaEditarModal";
 import ReceitaMapaModal from "./ReceitaMapaModal";
 import ReceitaBoletoModal from "./ReceitaBoletoModal";
 import ReceitaExcluirModal from "./ReceitaExcluirModal";
+import TerminoAntecipadoModal from "../common/TerminoAntecipadoModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
 import { statusExibidoReceita } from "@/utils/statusReceita";
 
-// Relógio de 72h -- o contrato prevê corte de água/energia depois de
-// 72h de atraso (ver verificarAtrasoCorteJob.js, que cria uma Vistoria
-// interna sozinho quando esse prazo vence). Conta direto a partir do
-// vencimento, sem precisar guardar "quando entrou em atraso" em lugar
-// nenhum -- é sempre vencimento + 72h.
-function RelogioCorte({ vencimento, enviada }) {
+// Relógio da escalada de corte de água/energia (ver corteVistoriaService.js
+// no backend) -- 3 janelas de 72h em sequência, cada uma só existe
+// enquanto a anterior não foi resolvida:
+//   1) vencimento+72h -- ainda não tem vistoria de corte (ehVistoriaDeCorte
+//      no backend cria ela quando esse prazo vence).
+//   2) corteRealizadoEm+72h -- corte já realizado, contando pra escalar
+//      pra "esvaziar kitnet" se a cobrança continuar sem resolver.
+//   3) kitnetEsvaziadaEm+72h -- kitnet já esvaziada (contrato encerrado
+//      sozinho), contando até alguém classificar a inadimplência
+//      (botão "Inadimplência" nos 3 pontinhos).
+// Já classificada (classificacaoInadimplencia) não tem mais relógio --
+// aí é estado final, cuidado em /financeiro/inadimplentes.
+function RelogioCorte({ receita }) {
 
   const [agora, setAgora] = useState(() => Date.now());
 
@@ -40,13 +48,48 @@ function RelogioCorte({ vencimento, enviada }) {
     return () => clearInterval(id);
   }, []);
 
+  if (receita.classificacaoInadimplencia) return null;
+
+  const restante = (desde, rotulo) => {
+
+    const prazo = new Date(desde).getTime() + 72 * 60 * 60 * 1000;
+    const restanteMs = prazo - agora;
+
+    if (restanteMs <= 0) {
+      return (
+        <Badge variant="purple" size="sm">
+          {rotulo} atrasado
+        </Badge>
+      );
+    }
+
+    const horas = Math.floor(restanteMs / (60 * 60 * 1000));
+    const minutos = Math.floor((restanteMs % (60 * 60 * 1000)) / (60 * 1000));
+
+    return (
+      <Badge variant="purple" size="sm">
+        {rotulo} em {horas}h{String(minutos).padStart(2, "0")}
+      </Badge>
+    );
+
+  };
+
+  if (receita.kitnetEsvaziadaEm) {
+    return restante(receita.kitnetEsvaziadaEm, "Classificar inadimplência");
+  }
+
+  if (receita.corteRealizadoEm) {
+    return restante(receita.corteRealizadoEm, "Esvaziar kitnet");
+  }
+
   // Sem boleto enviado ao banco, não existe "risco de corte" de
   // verdade -- o inquilino nem recebeu a cobrança pra pagar. Fica só
   // com os badges de Atrasada + Não enviada ao banco (ver mais abaixo
   // no card/linha), sem o relógio nem o alerta de corte.
-  if (!vencimento || !enviada) return null;
+  const enviada = !!receita.gatewayReferencia && receita.status !== "PAGA" && receita.status !== "PAGO" && receita.status !== "CANCELADA";
+  if (!receita.vencimento || !enviada) return null;
 
-  const prazo = new Date(vencimento).getTime() + 72 * 60 * 60 * 1000;
+  const prazo = new Date(receita.vencimento).getTime() + 72 * 60 * 60 * 1000;
   const restanteMs = prazo - agora;
 
   if (restanteMs <= 0) {
@@ -108,7 +151,7 @@ function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
   );
 }
 
-function MenuButton({ label, danger, success, warning, onClick }) {
+function MenuButton({ label, danger, success, warning, purple, onClick }) {
   return (
     <button
       type="button"
@@ -126,6 +169,8 @@ function MenuButton({ label, danger, success, warning, onClick }) {
             ? "text-green-400 hover:bg-green-500/10"
             : warning
             ? "text-yellow-400 hover:bg-yellow-500/10"
+            : purple
+            ? "text-purple-400 hover:bg-purple-500/10"
             : "text-[var(--text-muted)] hover:bg-[var(--surface-2)]"
         }
       `}
@@ -162,6 +207,7 @@ export default function FinanceiroReceitas({
   onFixar,
   onToggleRecorrente,
   onArquivar,
+  onClassificarInadimplencia,
   onNovo,
   titulo = "Receitas",
   subtitulo = "Controle das receitas cadastradas.",
@@ -215,6 +261,9 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const [excluirOpen, setExcluirOpen] =
+    useState(false);
+
+  const [inadimplenciaOpen, setInadimplenciaOpen] =
     useState(false);
 
   const [menuAberto, setMenuAberto] = useState(null);
@@ -327,6 +376,18 @@ export default function FinanceiroReceitas({
             label={item.recorrente ? "Desativar Recorrência" : "Ativar Recorrência"}
             onClick={() => {
               onToggleRecorrente?.(item.id, !item.recorrente);
+              setMenuAberto(null);
+            }}
+          />
+        )}
+
+        {podeEditar && item.status === "ATRASADA" && !item.classificacaoInadimplencia && (
+          <MenuButton
+            label="Inadimplência"
+            purple
+            onClick={() => {
+              setReceitaSelecionada(item);
+              setInadimplenciaOpen(true);
               setMenuAberto(null);
             }}
           />
@@ -634,7 +695,7 @@ export default function FinanceiroReceitas({
                     </Badge>
 
                     {item.status === "ATRASADA" && (
-                      <RelogioCorte vencimento={item.vencimento} enviada={!!item.gatewayReferencia} />
+                      <RelogioCorte receita={item} />
                     )}
 
                     {item.gatewayProvider ? (
@@ -831,7 +892,7 @@ export default function FinanceiroReceitas({
                       </Badge>
 
                       {item.status === "ATRASADA" && (
-                        <RelogioCorte vencimento={item.vencimento} enviada={!!item.gatewayReferencia} />
+                        <RelogioCorte receita={item} />
                       )}
 
                       {item.gatewayProvider ? (
@@ -970,6 +1031,15 @@ export default function FinanceiroReceitas({
       onClose={() => setExcluirOpen(false)}
       receita={receitaSelecionada}
       onConfirmar={onDelete}
+    />
+
+    <TerminoAntecipadoModal
+      isOpen={inadimplenciaOpen}
+      onClose={() => setInadimplenciaOpen(false)}
+      titulo="Classificar inadimplência"
+      contexto={`"${receitaSelecionada?.descricao || "Essa cobrança"}" vai sair da lista de Receitas e passar pra Inadimplentes.`}
+      rotuloQuebra="Quebra de Contrato"
+      acao={(dados) => onClassificarInadimplencia?.(receitaSelecionada.id, dados)}
     />
 
   </>

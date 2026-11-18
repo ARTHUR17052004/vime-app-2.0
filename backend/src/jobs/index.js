@@ -20,6 +20,7 @@ const verificarBoletosBB = require("./verificarBoletosBBJob");
 const verificarAsaas = require("./verificarAsaasJob");
 const verificarEfi = require("./verificarEfiJob");
 const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
+const verificarEscalonamentoCorte = require("./verificarEscalonamentoCorteJob");
 const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
 const dispararReceitasBanco = require("./dispararReceitasBancoJob");
 const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
@@ -42,6 +43,9 @@ const iniciarJobs = () => {
   // Mesma lógica das duas de cima (janela fina de 72h, não pode
   // esperar o lote diário das 8h) -- ver verificarAtrasoCorteJob.js.
   cron.schedule("0 * * * *", verificarAtrasoCorte);
+
+  // Segundo estágio da mesma escalada -- ver verificarEscalonamentoCorteJob.js.
+  cron.schedule("0 * * * *", verificarEscalonamentoCorte);
 
   // Não espera o lote diário das 8h -- quem pergunta "foi pago?" quer
   // saber na hora, não no dia seguinte. O webhook do BB existe mas

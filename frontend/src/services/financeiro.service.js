@@ -61,6 +61,13 @@ export const ReceitaService = {
     });
   },
 
+  classificarInadimplencia(id, dados) {
+    return api(`/receitas/${id}/classificar-inadimplencia`, {
+      method: "POST",
+      body: JSON.stringify(dados),
+    });
+  },
+
 };
 
 export const DespesaService = {

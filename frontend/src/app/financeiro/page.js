@@ -304,6 +304,31 @@ function FinanceiroPageConteudo() {
 
   };
 
+  // { motivoTerminoAntecipado, observacaoTerminoAntecipado, senhaConfirmacao }
+  // -- reaproveita o mesmo TerminoAntecipadoModal.jsx usado em Contratos/
+  // Kitnets/Inquilinos pra "quebra de contrato" (mesmos 3 motivos, mesma
+  // senha); aqui só classifica a Receita, não mexe em contrato/kitnet
+  // (isso já aconteceu antes, na vistoria de esvaziar kitnet).
+  const classificarInadimplenciaReceita = async (id, dados) => {
+
+    try {
+
+      await ReceitaService.classificarInadimplencia(id, {
+        motivoInadimplencia: dados.motivoTerminoAntecipado,
+        observacaoInadimplencia: dados.observacaoTerminoAntecipado,
+        senhaConfirmacao: dados.senhaConfirmacao,
+      });
+
+      await carregar();
+
+    } catch (err) {
+
+      throw err;
+
+    }
+
+  };
+
   const excluirDespesa = async (id) => {
 
     if (!window.confirm("Excluir despesa?"))
@@ -581,6 +606,10 @@ function FinanceiroPageConteudo() {
   // lista, nunca deixa de contabilizar nada.
   const receitasHistorico = receitas.filter((item) => item.arquivadaNoHistorico);
 
+  // Classificada (botão Inadimplência) sai do Financeiro normal e só
+  // aparece aqui -- aba Inadimplentes, mesma ideia do Histórico acima.
+  const receitasInadimplentes = receitas.filter((item) => item.classificacaoInadimplencia);
+
   const receitasFiltradas = receitas.filter((item) => {
 
     // A maioria das receitas é lançada só com Inquilino, sem Contrato
@@ -640,7 +669,13 @@ function FinanceiroPageConteudo() {
   // duplicata cancelada depois do apagão de 11/2026) -- só aparece se
   // o usuário escolher "Cancelada" no filtro de Status de propósito.
   const receitasListaVisivel = receitasFiltradas.filter(
-    (item) => !item.arquivadaNoHistorico && (statusFiltro === "CANCELADA" || item.status !== "CANCELADA")
+    (item) =>
+      !item.arquivadaNoHistorico &&
+      (statusFiltro === "CANCELADA" || item.status !== "CANCELADA") &&
+      // Classificada (botão Inadimplência) sai da lista normal e só
+      // aparece em /financeiro/inadimplentes -- mesma ideia da Cancelada
+      // acima, pedido do usuário em 18/11/2026.
+      !item.classificacaoInadimplencia
   );
 
   const despesasFiltradas = despesas.filter((item) => {
@@ -914,6 +949,8 @@ function FinanceiroPageConteudo() {
               <option value="PENDENTE" className="bg-[#1b2430]">Pendente</option>
               <option value="EM_ABERTO" className="bg-[#1b2430]">Em Aberto</option>
               <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
+              <option value="CORTE_AGUA_ENERGIA" className="bg-[#1b2430]">Corte de Água e Energia</option>
+              <option value="ESVAZIAR_KITNET" className="bg-[#1b2430]">Esvaziar Kitnet</option>
               <option value="NAO_ENVIADA" className="bg-[#1b2430]">Não enviada ao banco</option>
               <option value="PAGA" className="bg-[#1b2430]">Paga</option>
               <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
@@ -988,6 +1025,7 @@ function FinanceiroPageConteudo() {
           onFixar={fixarReceita}
           onToggleRecorrente={toggleRecorrenteReceita}
           onArquivar={arquivarReceita}
+          onClassificarInadimplencia={classificarInadimplenciaReceita}
           onNovo={() => {
             setTipoModal("receita");
             setModalOpen(true);
@@ -1042,6 +1080,7 @@ function FinanceiroPageConteudo() {
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
+        onClassificarInadimplencia={classificarInadimplenciaReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);
@@ -1066,6 +1105,32 @@ function FinanceiroPageConteudo() {
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
+        onClassificarInadimplencia={classificarInadimplenciaReceita}
+        onNovo={() => {
+          setTipoModal("receita");
+          setModalOpen(true);
+        }}
+      />
+    )}
+
+    {abaSelecionada === "inadimplentes" && (
+      <FinanceiroReceitas
+        receitas={receitasInadimplentes}
+        contas={contas}
+        ordenacao={ordenacao}
+        onOrdenar={setOrdenacao}
+        titulo="Inadimplentes"
+        subtitulo="Receitas classificadas como Abandono, Inadimplência ou Quebra de Contrato -- já saíram da lista normal de Receitas."
+        onDelete={excluirReceita}
+        onUpdate={atualizarReceita}
+        onMarcarPago={marcarReceitaComoPaga}
+        onEnviarCobranca={enviarCobranca}
+        onEnviarSelecionadas={enviarCobrancasSelecionadas}
+        enviandoLote={enviandoLote}
+        onFixar={fixarReceita}
+        onToggleRecorrente={toggleRecorrenteReceita}
+        onArquivar={arquivarReceita}
+        onClassificarInadimplencia={classificarInadimplenciaReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);

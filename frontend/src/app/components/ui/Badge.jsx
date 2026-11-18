@@ -38,6 +38,12 @@ export default function Badge({
       text-[var(--text-muted)]
       border border-[var(--border-token)]
     `,
+
+    purple: `
+      bg-purple-500/10
+      text-purple-400
+      border border-purple-500/20
+    `,
   };
 
   const sizes = {

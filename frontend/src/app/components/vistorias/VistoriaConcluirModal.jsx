@@ -37,6 +37,14 @@ export default function VistoriaConcluirModal({
   // as outras.
   const isGeral = !vistoria?.unidadeId;
 
+  // Vistoria automática de corte de água/energia (ou da escalada
+  // seguinte, "esvaziar kitnet") -- mesma categoria "Cobrança" usada em
+  // VistoriaCard.jsx pro visual de alerta. Pra essas, foto/vídeo e o
+  // motivo não são mais opcionais: é o registro de que a equipe
+  // realmente esteve lá antes de reportar pro Financeiro que o corte
+  // foi feito (pedido do usuário em 18/11/2026).
+  const exigeComprovacao = vistoria?.categoria === "Cobrança";
+
   const [missoes, setMissoes] = useState(null);
   const [carregandoMissoes, setCarregandoMissoes] = useState(false);
   const [selecionadas, setSelecionadas] = useState(new Set());
@@ -111,6 +119,16 @@ export default function VistoriaConcluirModal({
     dataAlterada ? `${data}T12:00:00` : new Date().toISOString();
 
   const handleConfirmar = async () => {
+
+    if (exigeComprovacao && midias.length === 0) {
+      setErro("Anexe ao menos uma foto ou vídeo comprovando a execução.");
+      return;
+    }
+
+    if (exigeComprovacao && !observacoes.trim()) {
+      setErro("Descreva o motivo/o que foi feito antes de confirmar.");
+      return;
+    }
 
     if (isGeral) {
 
@@ -292,8 +310,18 @@ export default function VistoriaConcluirModal({
         <div>
           <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] mb-2">
             <ImageIcon size={16} />
-            Fotos e vídeos da execução (opcional)
+            Fotos e vídeos da execução {exigeComprovacao ? (
+              <span className="text-red-400">(obrigatório)</span>
+            ) : (
+              "(opcional)"
+            )}
           </label>
+
+          {exigeComprovacao && (
+            <p className="text-xs text-[var(--text-faint)] mb-3">
+              Vistoria de corte -- anexe a prova de que a equipe esteve no local antes de confirmar.
+            </p>
+          )}
 
           <SeletorMidia
             accept="image/*,video/*"
@@ -331,14 +359,18 @@ export default function VistoriaConcluirModal({
         <div>
           <label className="flex items-center gap-2 text-sm font-semibold text-[var(--text-muted)] mb-2">
             <NotebookPen size={16} />
-            Observações (opcional)
+            {exigeComprovacao ? (
+              <>Motivo/observações <span className="text-red-400">(obrigatório)</span></>
+            ) : (
+              "Observações (opcional)"
+            )}
           </label>
 
           <textarea
             value={observacoes}
             onChange={(e) => setObservacoes(e.target.value)}
             rows={3}
-            placeholder="Algo a registrar sobre essa vistoria..."
+            placeholder={exigeComprovacao ? "O que foi feito, com quem falou, situação encontrada..." : "Algo a registrar sobre essa vistoria..."}
             className="
               w-full
               rounded-xl

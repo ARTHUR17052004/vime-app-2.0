@@ -5,7 +5,39 @@
 // pelo filtro de Status -- senão filtrar por "Pendente" também trazia
 // quem já estava "Em Aberto" (mesmo status PENDENTE por baixo, só
 // mostrado diferente).
+// Rótulo de cada motivo de classificação final de inadimplência (botão
+// "Inadimplência" nos 3 pontinhos) -- mesmos 3 valores de
+// TerminoAntecipadoModal.jsx/MOTIVOS_TERMINO_ANTECIPADO, só reaproveitado
+// aqui pro selo da Receita.
+export const ROTULO_INADIMPLENCIA = {
+  ABANDONO: "Abandono",
+  INADIMPLENCIA: "Inadimplência",
+  QUEBRA_DO_INQUILINO: "Quebra de Contrato",
+};
+
+// Escalada do corte de água/energia (ver corteVistoriaService.js no
+// backend) -- vem ANTES de ATRASADA/PAGA de propósito: o `status` da
+// Receita continua ATRASADA por baixo o tempo todo (pra não sumir da
+// cobrança automática/Dashboard/Insights/relatórios), então sem checar
+// esses campos primeiro o selo mostraria só "Atrasada" pro tempo
+// inteiro do processo, escondendo em que estágio a cobrança está.
 export function statusExibidoReceita(item) {
+
+  if (item.classificacaoInadimplencia) {
+    return {
+      codigo: "INADIMPLENTE",
+      texto: ROTULO_INADIMPLENCIA[item.classificacaoInadimplencia] || item.classificacaoInadimplencia,
+      variant: "purple",
+    };
+  }
+
+  if (item.kitnetEsvaziadaEm) {
+    return { codigo: "ESVAZIAR_KITNET", texto: "Esvaziar Kitnet", variant: "purple" };
+  }
+
+  if (item.corteRealizadoEm) {
+    return { codigo: "CORTE_AGUA_ENERGIA", texto: "Corte de Água e Energia", variant: "purple" };
+  }
 
   if (item.status === "PAGO" || item.status === "PAGA") {
     return { codigo: "PAGA", texto: "Pago", variant: "emerald" };

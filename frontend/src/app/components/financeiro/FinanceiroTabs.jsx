@@ -18,6 +18,10 @@ export default function FinanceiroTabs({
       nome: "Histórico",
     },
     {
+      id: "inadimplentes",
+      nome: "Inadimplentes",
+    },
+    {
       id: "despesas",
       nome: "Despesas",
     },

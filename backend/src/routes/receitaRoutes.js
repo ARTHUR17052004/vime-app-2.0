@@ -6,7 +6,7 @@ const receitaController = require('../controllers/receitaController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
-const { exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, exigirConfirmacaoExclusao } = require('../middlewares/permissaoMiddleware');
+const { exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, exigirConfirmacaoExclusao, exigirConfirmacaoInadimplencia } = require('../middlewares/permissaoMiddleware');
 
 router.use(authMiddleware);
 
@@ -23,5 +23,12 @@ router.post('/', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMa
 router.put('/:id', permissaoMiddleware('financeiro.editar'), exigirPermissaoParaMarcarPago, exigirConfirmacaoEdicaoValor, receitaController.atualizar);
 
 router.delete('/:id', permissaoMiddleware('financeiro.editar'), exigirConfirmacaoExclusao, receitaController.remover);
+
+router.post(
+  '/:id/classificar-inadimplencia',
+  permissaoMiddleware('financeiro.editar'),
+  exigirConfirmacaoInadimplencia,
+  receitaController.classificarInadimplencia
+);
 
 module.exports = router;

@@ -148,6 +148,43 @@ const remover = async (req, res) => {
 
 };
 
+const classificarInadimplencia = async (req, res) => {
+
+  if (await foraDoEscopo(req)) {
+    return res.status(404).json({
+      success: false,
+      message: 'Receita não encontrada.'
+    });
+  }
+
+  try {
+
+    const atualizada = await receitaService.classificarInadimplencia(
+      req.params.id,
+      {
+        motivoInadimplencia: req.body.motivoInadimplencia,
+        observacaoInadimplencia: req.body.observacaoInadimplencia,
+      },
+      req.usuario
+    );
+
+    return res.json({
+      success: true,
+      message: 'Receita classificada com sucesso.',
+      data: atualizada,
+    });
+
+  } catch (error) {
+
+    return res.status(400).json({
+      success: false,
+      message: error.message || 'Erro ao classificar a receita.',
+    });
+
+  }
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -155,5 +192,6 @@ module.exports = {
   taxaBoleto,
   criar,
   atualizar,
-  remover
+  remover,
+  classificarInadimplencia
 };
