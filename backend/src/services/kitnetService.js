@@ -8,7 +8,20 @@ const listar = (usuario) => {
   return prisma.kitnet.findMany({
     where: filtroKitnet(usuario),
     include: {
-      unidade: true
+      unidade: true,
+      // Pro "Detalhes da Kitnet" mostrar inquilino/CPF/contrato quando
+      // ocupada (ver kitnets/[id]/page.js) -- inquilino pela relação
+      // direta (sempre existe quando ocupada, mesmo sem Contrato digital
+      // ainda gerado) e o contrato "ATIVO" mais recente só pra data.
+      inquilinos: {
+        where: { ativo: true },
+        orderBy: { createdAt: 'desc' },
+      },
+      contratos: {
+        where: { status: 'ATIVO' },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
     },
     orderBy: {
       createdAt: 'desc'

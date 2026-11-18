@@ -96,6 +96,9 @@ export default function KitnetDetalhesPage() {
     );
   }
 
+  const inquilino = kitnet.inquilinos?.[0];
+  const contratoAtivo = kitnet.contratos?.[0];
+
   return (
     <MainLayout>
 
@@ -151,32 +154,79 @@ export default function KitnetDetalhesPage() {
             "
           >
 
-            <InfoRow
-              icon={<Building2 size={20} />}
-              label="Residência"
-              value={kitnet.unidade?.nome || kitnet.unidadeNome || "-"}
+            <InfoRowPar
+              campos={[
+                {
+                  icon: <Building2 size={18} />,
+                  label: "Residência",
+                  value: kitnet.unidade?.nome || kitnet.unidadeNome || "-",
+                },
+                {
+                  icon: <DoorOpen size={18} />,
+                  label: "Número",
+                  value: kitnet.numero,
+                },
+              ]}
             />
 
-            <InfoRow
-              icon={<DoorOpen size={20} />}
-              label="Número"
-              value={kitnet.numero}
+            <InfoRowPar
+              campos={[
+                {
+                  icon: <Ruler size={18} />,
+                  label: "Metragem",
+                  value: `${kitnet.metragem} m²`,
+                },
+                {
+                  icon: <Wallet size={18} />,
+                  label: "Valor do Aluguel",
+                  value: `R$ ${Number(
+                    kitnet.aluguel || 0
+                  ).toLocaleString("pt-BR")}`,
+                  valueClassName: "text-emerald-400",
+                },
+              ]}
             />
 
-            <InfoRow
-              icon={<Ruler size={20} />}
-              label="Metragem"
-              value={`${kitnet.metragem} m²`}
-            />
+            {/* Quem mora na kitnet agora + até quando vai o contrato --
+                só faz sentido mostrar com a kitnet ocupada. Vazia, fica
+                exatamente como antes (sem esse bloco). Inquilino vem da
+                relação direta (sempre existe quando ocupada, mesmo sem
+                um Contrato digital ainda gerado); a data vem do
+                Contrato "Ativo" mais recente dessa kitnet, se houver. */}
+            {kitnet.status === "OCUPADA" && inquilino && (
+              <div
+                className="
+                  flex
+                  items-start
+                  justify-between
+                  gap-4
 
-            <InfoRow
-              icon={<Wallet size={20} />}
-              label="Valor do Aluguel"
-              value={`R$ ${Number(
-                kitnet.aluguel || 0
-              ).toLocaleString("pt-BR")}`}
-              valueClassName="text-emerald-400"
-            />
+                  px-8
+                  py-6
+
+                  border-b
+                  border-[var(--border-token)]
+                "
+              >
+                <div className="min-w-0">
+                  <p className="text-lg font-semibold text-[var(--text)] truncate">
+                    {inquilino.nome}
+                  </p>
+                  <p className="mt-1 text-sm text-[var(--text-subtle)]">
+                    CPF: {inquilino.cpf || "-"}
+                  </p>
+                </div>
+
+                <div className="shrink-0 text-right">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-faint)]">
+                    Contrato
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-[var(--text)]">
+                    {formatarDataContrato(contratoAtivo?.dataFim)}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <InfoRow
               icon={<CheckCircle2 size={20} />}
@@ -202,6 +252,71 @@ export default function KitnetDetalhesPage() {
       </Page>
 
     </MainLayout>
+  );
+}
+
+// Data do Contrato vem do banco como timestamp (meia-noite UTC) --
+// mesmo padrão já usado em AsaasTabela.jsx/formatarData -- sem o
+// timeZone: "UTC" o dia exibido "volta" um dia num fuso atrás de UTC
+// (Brasil).
+function formatarDataContrato(data) {
+  if (!data) return "Sem data de término";
+  return new Date(data).toLocaleDateString("pt-BR", { timeZone: "UTC" });
+}
+
+// Duas informações lado a lado na mesma linha (ex.: Residência +
+// Número) em vez de uma embaixo da outra -- mesmo visual do InfoRow,
+// só dividido ao meio.
+function InfoRowPar({ campos }) {
+  return (
+    <div
+      className="
+        grid
+        grid-cols-2
+
+        border-b
+        border-[var(--border-token)]
+      "
+    >
+      {campos.map((campo, indice) => (
+        <div
+          key={campo.label}
+          className={`
+            flex
+            items-start
+            gap-3
+
+            px-5
+            py-6
+
+            ${indice === 0 ? "border-r border-[var(--border-token)]" : ""}
+          `}
+        >
+          <div className="text-emerald-400 mt-1 shrink-0">
+            {campo.icon}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-sm text-[var(--text-subtle)]">
+              {campo.label}
+            </p>
+            <p
+              className={`
+                mt-2
+                text-lg
+                font-semibold
+                text-[var(--text)]
+                truncate
+
+                ${campo.valueClassName || ""}
+              `}
+            >
+              {campo.value}
+            </p>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
