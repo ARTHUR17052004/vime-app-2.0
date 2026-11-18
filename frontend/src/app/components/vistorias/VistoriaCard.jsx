@@ -24,7 +24,17 @@ import AtrasoVistoria from "./AtrasoVistoria";
 // que cria vistoria com essa categoria, então basta isso pra marcar o
 // card com o visual de alerta (título vermelho, card piscando, relógio
 // contando o atraso) sem precisar de um campo novo no banco.
-const ehVistoriaDeCorte = (vistoria) => vistoria.categoria === "Cobrança";
+//
+// Mas o alerta só faz sentido enquanto o corte ainda não foi feito --
+// uma vez Realizada (ou Cancelada), o card continuava vermelho/piscando
+// pra sempre, com o relógio de atraso contando sem parar mesmo depois
+// de resolvido (reportado em 18/11/2026). Por isso considera "corte"
+// só quando a vistoria ainda está aberta.
+const STATUS_ENCERRADOS_CORTE = ["REALIZADA", "CANCELADA"];
+
+const ehVistoriaDeCorte = (vistoria) =>
+  vistoria.categoria === "Cobrança" &&
+  !STATUS_ENCERRADOS_CORTE.includes(vistoria.status);
 
 // Conta subindo desde que a vistoria foi criada (exatamente quando as
 // 72h de atraso se completaram) -- reforça que quanto mais passa, pior

@@ -28,10 +28,26 @@ import VistoriaCardList from "../components/vistorias/VistoriaCardList";
 import VistoriaRealizadasTable from "../components/vistorias/VistoriaRealizadasTable";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import SemPermissao from "../components/ui/SemPermissao";
+import VistoriasMobile from "../components/vistorias/mobile/VistoriasMobile";
 
 import { usePermissao } from "../../hooks/usePermissao";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { normalizarBusca } from "../../utils/busca";
 import { avancarUmaVez } from "../../utils/periodicidade";
+
+// Mesmo dia local (não UTC) -- cópia do critério de VistoriaResumo.jsx
+// (onde "Realizadas hoje" já é calculado) pra alimentar os mesmos
+// números no cartão do mobile.
+function ehHoje(data) {
+  if (!data) return false;
+  const d = new Date(data);
+  const hoje = new Date();
+  return (
+    d.getFullYear() === hoje.getFullYear() &&
+    d.getMonth() === hoje.getMonth() &&
+    d.getDate() === hoje.getDate()
+  );
+}
 
 export default function VistoriasPage() {
   return (
@@ -48,6 +64,8 @@ function VistoriasPageConteudo() {
 
   const podeVisualizar = usePermissao("vistorias.visualizar");
   const podeCriar = usePermissao("vistorias.criar");
+
+  const isMobile = useIsMobile();
 
   const [modalOpen, setModalOpen] =
     useState(false);
@@ -502,6 +520,108 @@ const fixarVistoria = async (id, fixado) => {
         </div>
       </MainLayout>
     );
+  }
+
+  if (isMobile) {
+
+    const programadas = vistorias.filter((v) => v.status === "PROGRAMADA").length;
+
+    const regularesRealizadasHoje = vistorias.filter(
+      (v) => v.status === "REALIZADA" && ehHoje(v.concluidaEm)
+    ).length;
+
+    const missoesRealizadasHoje = missoesRealizadas.filter((m) => ehHoje(m.dataRealizacao)).length;
+
+    const atrasadas = vistorias.filter((v) => v.status === "ATRASADA").length;
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            {abaSelecionada === "realizadas" ? (
+
+              <VistoriaRealizadasTable
+                vistorias={vistorias}
+                missoesRealizadas={missoesRealizadas}
+                carregandoMissoes={carregandoMissoes}
+                filtroVistoriaId={filtroMissaoVistoriaId}
+                onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
+                onRecarregarVistorias={carregar}
+                onRecarregarMissoes={carregarMissoes}
+              />
+
+            ) : (
+
+              <VistoriasMobile
+                vistorias={vistoriasFiltradas}
+                totalVistorias={vistorias.length}
+                programadas={programadas}
+                realizadasHoje={regularesRealizadasHoje + missoesRealizadasHoje}
+                atrasadas={atrasadas}
+                podeCriar={podeCriar}
+                onNovaVistoria={novaVistoria}
+                onEdit={editarVistoria}
+                onDelete={excluirVistoria}
+                onConcluir={abrirConcluirVistoria}
+                onCancelar={cancelarVistoria}
+                onFixar={fixarVistoria}
+                onVerMissoes={verMissoesDaVistoria}
+                residenciaSelecionada={residenciaSelecionada}
+                onResidenciaChange={setResidenciaSelecionada}
+                abaSelecionada={abaSelecionada}
+                onAbaChange={trocarAba}
+                ordenacao={ordenacao}
+                onOrdenacaoChange={setOrdenacao}
+              />
+
+            )}
+
+            <VistoriaModal
+              isOpen={modalOpen}
+              onClose={() => {
+                setModalOpen(false);
+                setVistoriaEditando(null);
+              }}
+            >
+
+              <VistoriaForm
+                onSave={salvarVistoria}
+                vistoriaEditando={vistoriaEditando}
+                onCancelar={() => {
+                  setModalOpen(false);
+                  setVistoriaEditando(null);
+                }}
+              />
+
+            </VistoriaModal>
+
+            <VistoriaConcluirModal
+              isOpen={concluirModalOpen}
+              onClose={() => {
+                setConcluirModalOpen(false);
+                setVistoriaParaConcluir(null);
+              }}
+              vistoria={vistoriaParaConcluir}
+              onConfirm={confirmarConcluirVistoria}
+              onMissoesConcluidas={async () => {
+                await carregar();
+                setConcluirModalOpen(false);
+                setVistoriaParaConcluir(null);
+              }}
+            />
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
   }
 
    return (
