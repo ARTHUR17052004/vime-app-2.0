@@ -2,16 +2,65 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 import Table from "../ui/Table";
 import Badge from "../ui/Badge";
 import ActionMenu from "../ui/ActionMenu";
 import { usePermissao } from "../../../hooks/usePermissao";
 
+// Mesmo cabeçalho clicável de FinanceiroReceitas.jsx/ContratoTable.jsx.
+function CabecalhoOrdenavel({ label, ordens, ordenacao, onOrdenar }) {
+
+  const [asc, desc] = ordens;
+
+  const ativo = ordenacao === asc || ordenacao === desc;
+
+  const alternar = () => {
+    if (!desc) {
+      onOrdenar?.(asc);
+      return;
+    }
+    onOrdenar?.(ordenacao === asc ? desc : asc);
+  };
+
+  return (
+    <th
+      onClick={alternar}
+      className={`
+        px-6
+        py-5
+        text-left
+        uppercase
+        text-xs
+        tracking-[0.22em]
+        font-semibold
+        cursor-pointer
+        select-none
+        hover:text-[var(--text)]
+        transition
+        ${ativo ? "text-[var(--text)]" : "text-[var(--text-subtle)]"}
+      `}
+    >
+      <span className="inline-flex items-center gap-1">
+        {label}
+        {ativo &&
+          (desc && ordenacao === desc ? (
+            <ChevronDown size={13} />
+          ) : (
+            <ChevronUp size={13} />
+          ))}
+      </span>
+    </th>
+  );
+}
+
 export default function InquilinoTable({
   inquilinos,
   onDelete,
   onEdit,
+  ordenacao,
+  onOrdenar,
 }) {
 
   const router = useRouter();
@@ -75,100 +124,40 @@ export default function InquilinoTable({
       <table className="w-full text-[var(--text-1)]">
         <thead className="border-b border-[var(--border-token)] text-[var(--text-subtle)] uppercase text-xs tracking-[0.25em]">
           <tr>
-            <th
-              className="
-                px-6
-                py-5
+            <CabecalhoOrdenavel
+              label="Inquilino"
+              ordens={["nome-asc", "nome-desc"]}
+              ordenacao={ordenacao}
+              onOrdenar={onOrdenar}
+            />
 
-                text-xs
+            <CabecalhoOrdenavel
+              label="Kitnet"
+              ordens={["kitnet-asc", "kitnet-desc"]}
+              ordenacao={ordenacao}
+              onOrdenar={onOrdenar}
+            />
 
-                uppercase
+            <CabecalhoOrdenavel
+              label="Contato"
+              ordens={["contato-asc", "contato-desc"]}
+              ordenacao={ordenacao}
+              onOrdenar={onOrdenar}
+            />
 
-                tracking-[0.22em]
+            <CabecalhoOrdenavel
+              label="Contrato"
+              ordens={["contrato-recente", "contrato-antigo"]}
+              ordenacao={ordenacao}
+              onOrdenar={onOrdenar}
+            />
 
-                text-[var(--text-subtle)]
-
-                font-semibold
-              "
-            >
-              Inquilino
-            </th>
-
-           <th
-              className="
-                px-6
-                py-5
-
-                text-xs
-
-                uppercase
-
-                tracking-[0.22em]
-
-                text-[var(--text-subtle)]
-
-                font-semibold
-              "
-            >
-              Kitnet
-            </th>
-
-            <th
-              className="
-                px-6
-                py-5
-
-                text-xs
-
-                uppercase
-
-                tracking-[0.22em]
-
-                text-[var(--text-subtle)]
-
-                font-semibold
-              "
-            >
-              Contato
-            </th>
-
-            <th
-              className="
-                px-6
-                py-5
-
-                text-xs
-
-                uppercase
-
-                tracking-[0.22em]
-
-                text-[var(--text-subtle)]
-
-                font-semibold
-              "
-            >
-              Contrato
-            </th>
-
-            <th
-              className="
-                px-6
-                py-5
-
-                text-xs
-
-                uppercase
-
-                tracking-[0.22em]
-
-                text-[var(--text-subtle)]
-
-                font-semibold
-              "
-            >
-              Status
-            </th>
+            <CabecalhoOrdenavel
+              label="Status"
+              ordens={["status-asc", "status-desc"]}
+              ordenacao={ordenacao}
+              onOrdenar={onOrdenar}
+            />
 
             <th
               className="

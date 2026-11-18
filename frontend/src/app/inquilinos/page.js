@@ -22,16 +22,19 @@ import ContratoDemonstrativoModal from "../components/contratos/ContratoDemonstr
 import ConfirmVistoriaEntregaModal from "../components/common/ConfirmVistoriaEntregaModal";
 import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 import SemPermissao from "../components/ui/SemPermissao";
+import InquilinosMobile from "../components/inquilinos/mobile/InquilinosMobile";
 
 import { InquilinoService } from "../../services/inquilinos.service";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
 import { usePermissao } from "../../hooks/usePermissao";
+import { useIsMobile } from "../../hooks/useIsMobile";
 import { normalizarBusca } from "../../utils/busca";
 
 export default function InquilinosPage() {
 
   const podeVisualizar = usePermissao("inquilinos.visualizar");
   const podeCriar = usePermissao("inquilinos.criar");
+  const isMobile = useIsMobile();
 
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -71,6 +74,9 @@ export default function InquilinosPage() {
     useState("");
 
   const [residenciaSelecionada, setResidenciaSelecionada] =
+    useState("");
+
+  const [statusFiltro, setStatusFiltro] =
     useState("");
 
   const [ordenacao, setOrdenacao] =
@@ -302,9 +308,13 @@ export default function InquilinosPage() {
     "nome-asc": (a, b) => (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
     "nome-desc": (a, b) => (b.nome || "").localeCompare(a.nome || "", "pt-BR"),
     "kitnet-asc": (a, b) => nomeKitnetOrdenavel(a).localeCompare(nomeKitnetOrdenavel(b), "pt-BR"),
+    "kitnet-desc": (a, b) => nomeKitnetOrdenavel(b).localeCompare(nomeKitnetOrdenavel(a), "pt-BR"),
+    "contato-asc": (a, b) => (a.email || "").localeCompare(b.email || "", "pt-BR"),
+    "contato-desc": (a, b) => (b.email || "").localeCompare(a.email || "", "pt-BR"),
     "contrato-recente": (a, b) => new Date(b.dataFimContrato || 0) - new Date(a.dataFimContrato || 0),
     "contrato-antigo": (a, b) => new Date(a.dataFimContrato || 0) - new Date(b.dataFimContrato || 0),
-    "status": (a, b) => (b.ativo === true) - (a.ativo === true) || (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    "status-asc": (a, b) => (b.ativo === true) - (a.ativo === true) || (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
+    "status-desc": (a, b) => (a.ativo === true) - (b.ativo === true) || (a.nome || "").localeCompare(b.nome || "", "pt-BR"),
   };
 
   const inquilinosFiltrados = useMemo(() => {
@@ -331,6 +341,9 @@ export default function InquilinosPage() {
       )
         return false;
 
+      if (statusFiltro === "ATIVO" && !inquilino.ativo) return false;
+      if (statusFiltro === "INATIVO" && inquilino.ativo) return false;
+
       return true;
 
     });
@@ -339,7 +352,10 @@ export default function InquilinosPage() {
 
     return [...filtrados].sort(comparador);
 
-  }, [inquilinos, search, residenciaSelecionada, ordenacao]);
+  }, [inquilinos, search, residenciaSelecionada, statusFiltro, ordenacao]);
+
+  const totalAtivos = inquilinos.filter((i) => i.ativo).length;
+  const totalInativos = inquilinos.length - totalAtivos;
 
   /* ==========================================
      PERMISSAO
@@ -372,6 +388,131 @@ export default function InquilinosPage() {
               </p>
 
             </div>
+
+          </PageContainer>
+
+        </Page>
+
+      </MainLayout>
+
+    );
+
+  }
+
+  if (isMobile) {
+
+    return (
+
+      <MainLayout>
+
+        <Page>
+
+          <PageContainer>
+
+            {erro && (
+
+              <div
+                className="
+                  mb-4
+                  rounded-2xl
+                  border
+                  border-red-500/20
+                  bg-red-500/10
+                  px-4
+                  py-3
+                  text-sm
+                  text-red-300
+                "
+              >
+                {erro}
+              </div>
+
+            )}
+
+            <InquilinosMobile
+              inquilinos={inquilinosFiltrados}
+              totalInquilinos={inquilinos.length}
+              ativos={totalAtivos}
+              inativos={totalInativos}
+              podeCriar={podeCriar}
+              onNovoInquilino={abrirExplicacao}
+              onEdit={editarInquilino}
+              onDelete={excluirInquilino}
+              residenciaSelecionada={residenciaSelecionada}
+              onResidenciaChange={setResidenciaSelecionada}
+              statusFiltro={statusFiltro}
+              onStatusChange={setStatusFiltro}
+              ordenacao={ordenacao}
+              onOrdenacaoChange={setOrdenacao}
+            />
+
+            <ExplicacaoInquilinoModal
+              isOpen={explicacaoOpen}
+              onClose={() => setExplicacaoOpen(false)}
+              onEscolherNovo={novoInquilino}
+              onEscolherAdicionar={adicionarInquilino}
+            />
+
+            <InquilinoModal
+              isOpen={modalOpen}
+              onClose={() => {
+                setModalOpen(false);
+                setInquilinoEditando(null);
+              }}
+            >
+
+              {!inquilinoEditando && (
+
+                <p
+                  className={`
+                    mb-4 rounded-xl border px-4 py-3 text-sm
+                    ${
+                      gerarContratoAutomatico
+                        ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
+                        : "border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text-subtle)]"
+                    }
+                  `}
+                >
+                  {gerarContratoAutomatico
+                    ? "O contrato será gerado automaticamente ao salvar. Você vai poder conferir o demonstrativo antes de enviar para assinatura."
+                    : "Este cadastro não vai gerar contrato automático."}
+                </p>
+
+              )}
+
+              <InquilinoForm
+                onSave={salvarInquilino}
+                inquilino={inquilinoEditando}
+                salvando={salvandoInquilino}
+              />
+
+            </InquilinoModal>
+
+            <ContratoDemonstrativoModal
+              open={!!demonstrativoContratoId}
+              contratoId={demonstrativoContratoId}
+              onClose={() => setDemonstrativoContratoId(null)}
+            />
+
+            <ConfirmVistoriaEntregaModal
+              isOpen={!!vistoriaPendente}
+              nomeKitnet={vistoriaPendente?.kitnetNome}
+              onEscolher={confirmarExclusaoInquilino}
+            />
+
+            <TerminoAntecipadoModal
+              isOpen={!!terminoAntecipado}
+              onClose={() => setTerminoAntecipado(null)}
+              titulo="Quebra de contrato -- excluir inquilino"
+              contexto="O contrato desse inquilino ainda não chegou no fim. O inquilino não será excluído -- o contrato vai ser encerrado, a kitnet liberada, e tudo fica registrado no histórico."
+              acao={async (extra) => {
+                await InquilinoService.excluir(terminoAntecipado.id, {
+                  gerarVistoriaEntrega: terminoAntecipado.gerarVistoriaEntrega,
+                  ...extra,
+                });
+                await carregarInquilinos();
+              }}
+            />
 
           </PageContainer>
 
@@ -462,6 +603,21 @@ export default function InquilinosPage() {
 
                 <div className="flex items-center gap-2">
                   <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
+                    Status
+                  </label>
+                  <select
+                    value={statusFiltro}
+                    onChange={(e) => setStatusFiltro(e.target.value)}
+                    className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="" className="bg-[#1b2430]">Todos</option>
+                    <option value="ATIVO" className="bg-[#1b2430]">Ativo</option>
+                    <option value="INATIVO" className="bg-[#1b2430]">Inativo</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
                     Organizar por
                   </label>
                   <select
@@ -474,7 +630,7 @@ export default function InquilinosPage() {
                     <option value="kitnet-asc" className="bg-[#1b2430]">Kitnet</option>
                     <option value="contrato-recente" className="bg-[#1b2430]">Contrato (mais recente)</option>
                     <option value="contrato-antigo" className="bg-[#1b2430]">Contrato (mais antigo)</option>
-                    <option value="status" className="bg-[#1b2430]">Status (ativos primeiro)</option>
+                    <option value="status-asc" className="bg-[#1b2430]">Status (ativos primeiro)</option>
                   </select>
                 </div>
 
@@ -504,6 +660,8 @@ export default function InquilinosPage() {
                 inquilinos={inquilinosFiltrados}
                 onDelete={excluirInquilino}
                 onEdit={editarInquilino}
+                ordenacao={ordenacao}
+                onOrdenar={setOrdenacao}
               />
 
             </PageSection>
