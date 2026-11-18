@@ -594,13 +594,19 @@ export default function FinanceiroReceitas({
 
                 </div>
 
-                <div className="mt-3 flex items-center justify-between text-sm text-[var(--text-subtle)]">
+                <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm text-[var(--text-subtle)]">
                   <span className="truncate">
                     {unidade?.nome || "-"}
                     {kitnet?.nome || kitnet?.numero ? ` · ${kitnet?.nome || kitnet?.numero}` : ""}
                   </span>
 
-                  <span className="shrink-0">
+                  {unidade?.cidade && (
+                    <span className="shrink-0 rounded-full bg-[var(--surface-3)] px-2.5 py-0.5 text-xs text-[var(--text-subtle)]">
+                      {unidade.cidade}{unidade.uf ? ` - ${unidade.uf}` : ""}
+                    </span>
+                  )}
+
+                  <span className="ml-auto shrink-0">
                     {item.vencimento
                       ? new Date(item.vencimento).toLocaleDateString("pt-BR")
                       : "-"}
