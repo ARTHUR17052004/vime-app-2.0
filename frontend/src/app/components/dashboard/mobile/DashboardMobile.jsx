@@ -18,7 +18,6 @@ import {
   LayoutDashboard,
   ShieldCheck,
   TriangleAlert,
-  User,
   UserPlus,
   Users,
 } from "lucide-react";
@@ -163,11 +162,20 @@ export default function DashboardMobile({
     pode("vistorias.criar") && { titulo: "Nova Vistoria", icone: ShieldCheck, href: "/vistorias" },
   ].filter(Boolean);
 
+  // Locadores sempre vai ser 1 ou 2 -- número fixo, sem utilidade num
+  // card de indicador. No lugar, mostra o que muda todo dia: quantas
+  // receitas estão "Atrasada" agora (mesma definição que o BY e o
+  // Financeiro já usam -- ver insightsService.js cobrancas_vencidas).
+  const vencidas = dados?.financeiro?.atrasadoQtd ?? 0;
+
+  // Mesmo link que o BY manda nos cards equivalentes (ver
+  // insightsService.js) -- clicar aqui tem que levar pro mesmo lugar
+  // filtrado que clicar no card do BY leva.
   const indicadores = [
-    podeIndicadores && { titulo: "Residências", valor: dados?.unidades ?? 0, sub: "Cadastradas", icone: Building2, cor: "text-emerald-400 bg-emerald-500/15" },
-    podeIndicadores && { titulo: "Inquilinos", valor: dados?.inquilinos ?? 0, sub: "Ativos", icone: Users, cor: "text-sky-400 bg-sky-500/15" },
-    podeIndicadores && { titulo: "Locadores", valor: dados?.locadores ?? 0, sub: "Cadastrados", icone: User, cor: "text-violet-300 bg-violet-500/15" },
-    podeFinanceiro && { titulo: "Recebido", valor: recebido === null ? "—" : `${recebido}%`, sub: "Do lançado", icone: DollarSign, cor: "text-emerald-400 bg-emerald-500/15" },
+    podeIndicadores && { titulo: "Grupo Residencial", valor: dados?.unidades ?? 0, sub: "Cadastradas", icone: Building2, cor: "text-emerald-400 bg-emerald-500/15", href: "/unidades" },
+    podeIndicadores && { titulo: "Inquilinos", valor: dados?.inquilinos ?? 0, sub: "Ativos", icone: Users, cor: "text-sky-400 bg-sky-500/15", href: "/inquilinos" },
+    podeFinanceiro && { titulo: "Vencimentos", valor: vencidas, sub: "Em atraso", icone: TriangleAlert, cor: "text-red-400 bg-red-500/15", href: "/financeiro?aba=receitas&status=ATRASADA" },
+    podeFinanceiro && { titulo: "Recebido", valor: recebido === null ? "—" : `${recebido}%`, sub: "Do lançado", icone: DollarSign, cor: "text-emerald-400 bg-emerald-500/15", href: "/financeiro?aba=receitas&status=PAGA" },
   ].filter(Boolean);
 
   const alertas = (dados?.alertas || []).slice(0, 3);
@@ -281,8 +289,12 @@ export default function DashboardMobile({
 
       {indicadores.length > 0 && (
       <section className="grid grid-cols-4 gap-2">
-        {indicadores.map(({ titulo, valor, sub, icone: Icone, cor }) => (
-          <div key={titulo} className={`${cartao} p-2.5`}>
+        {indicadores.map(({ titulo, valor, sub, icone: Icone, cor, href }) => (
+          <Link
+            key={titulo}
+            href={href}
+            className={`${cartao} block p-2.5 active:scale-95 transition`}
+          >
             <div className={`w-8 h-8 rounded-full flex items-center justify-center ${cor}`}>
               <Icone size={15} />
             </div>
@@ -291,7 +303,7 @@ export default function DashboardMobile({
               {valor}
             </p>
             <p className="mt-1 text-[10px] text-[var(--text-faint)] truncate">{sub}</p>
-          </div>
+          </Link>
         ))}
       </section>
       )}
@@ -436,6 +448,44 @@ export default function DashboardMobile({
       </section>
       )}
 
+      {/* AVISOS (só aparece se houver) */}
+
+      {podeAlertas && alertas.length > 0 && (
+        <section className={`${cartao} p-4`}>
+
+          <div className="flex items-center gap-2">
+            <TriangleAlert size={16} className="text-amber-400" />
+            <h2 className="text-[15px] font-bold text-[var(--text)]">
+              Avisos importantes
+            </h2>
+          </div>
+
+          <ul className="mt-3 divide-y divide-[var(--border-token)]">
+            {alertas.map((a) => (
+              <li key={a.id}>
+                <Link
+                  href={a.link || "/"}
+                  className="flex items-center gap-3 py-3"
+                >
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-[13px] text-[var(--text)] leading-snug">
+                      {a.titulo}
+                    </span>
+                    {a.descricao && (
+                      <span className="block mt-0.5 text-[11px] text-[var(--text-faint)] line-clamp-1">
+                        {a.descricao}
+                      </span>
+                    )}
+                  </span>
+                  <ChevronRight size={16} className="shrink-0 text-[var(--text-faint)]" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+        </section>
+      )}
+
       {/* NOTIFICAÇÕES RECENTES */}
 
       <section className={`${cartao} p-4`}>
@@ -499,44 +549,6 @@ export default function DashboardMobile({
         )}
 
       </section>
-
-      {/* AVISOS (só aparece se houver) */}
-
-      {podeAlertas && alertas.length > 0 && (
-        <section className={`${cartao} p-4`}>
-
-          <div className="flex items-center gap-2">
-            <TriangleAlert size={16} className="text-amber-400" />
-            <h2 className="text-[15px] font-bold text-[var(--text)]">
-              Avisos importantes
-            </h2>
-          </div>
-
-          <ul className="mt-3 divide-y divide-[var(--border-token)]">
-            {alertas.map((a) => (
-              <li key={a.id}>
-                <Link
-                  href={a.link || "/"}
-                  className="flex items-center gap-3 py-3"
-                >
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-[13px] text-[var(--text)] leading-snug">
-                      {a.titulo}
-                    </span>
-                    {a.descricao && (
-                      <span className="block mt-0.5 text-[11px] text-[var(--text-faint)] line-clamp-1">
-                        {a.descricao}
-                      </span>
-                    )}
-                  </span>
-                  <ChevronRight size={16} className="shrink-0 text-[var(--text-faint)]" />
-                </Link>
-              </li>
-            ))}
-          </ul>
-
-        </section>
-      )}
 
     </div>
   );

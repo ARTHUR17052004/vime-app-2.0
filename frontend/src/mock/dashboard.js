@@ -19,6 +19,7 @@ export const dashboardMock = {
     recebido: 18540,
     pendente: 4280,
     atrasado: 1350,
+    atrasadoQtd: 2,
     cancelado: 650,
   },
 

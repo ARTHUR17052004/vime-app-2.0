@@ -294,6 +294,7 @@ const financeiro = async (usuario) => {
   let recebido = 0;
   let pendente = 0;
   let atrasado = 0;
+  let atrasadoQtd = 0;
   let cancelado = 0;
 
   receitas.forEach(r => {
@@ -308,8 +309,10 @@ const financeiro = async (usuario) => {
     if (r.status === 'PENDENTE')
       pendente += r.valor;
 
-    if (r.status === 'ATRASADA')
+    if (r.status === 'ATRASADA') {
       atrasado += r.valor;
+      atrasadoQtd += 1;
+    }
 
     if (r.status === 'CANCELADA')
       cancelado += r.valor;
@@ -320,6 +323,9 @@ const financeiro = async (usuario) => {
     recebido,
     pendente,
     atrasado,
+    // Quantidade (não valor) de receitas "Atrasada" -- card "Vencimentos"
+    // do Dashboard mobile usa isso, não o valor em R$.
+    atrasadoQtd,
     cancelado
   };
 };
