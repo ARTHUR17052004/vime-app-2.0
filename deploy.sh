@@ -24,6 +24,13 @@ source .env
 set +a
 npx prisma generate
 
+# Até 18/11/2026 esse deploy nunca aplicava migration nenhuma no banco
+# (só gerava o client) -- toda migration nova (índices inclusive) ficava
+# parada no repositório até alguém rodar isso manualmente na mão.
+# "migrate deploy" só aplica o que falta, na ordem, sem resetar nada --
+# seguro de rodar toda vez, mesmo sem migration pendente.
+npx prisma migrate deploy
+
 pm2 restart vime-backend
 
 echo "==> Frontend..."

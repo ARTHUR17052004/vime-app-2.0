@@ -56,7 +56,7 @@ const ABAS = [
   { id: "relatorios", nome: "Relatórios" },
 ];
 
-const FILTROS_STATUS = ["Todos", "Ativos", "Pendentes", "Encerrados"];
+const FILTROS_STATUS = ["Todos", "Ativos", "Pendentes", "Vencendo", "Encerrados"];
 
 const STATUS_INFO = {
   ATIVO: { label: "Ativo", cor: "bg-emerald-500/15 text-emerald-400" },

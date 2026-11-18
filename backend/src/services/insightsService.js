@@ -523,7 +523,12 @@ const resumoContratos = async (usuario) => {
         quantidade: vencendo,
         escopo: "atual",
         criterio: `Contratos "Ativo" cujo fim de vigência cai nos próximos ${DIAS_CONTRATO_VENCENDO} dias -- mesmo prazo que já dispara o aviso de vencimento próximo em Contratos.`,
-        navegacao: { href: "/contratos", query: { status: "ATIVO" } },
+        // "VENCENDO" não é um status real do contrato (isso é feito de
+        // ATIVO + dataFim perto) -- é só um valor combinado com o front
+        // (ver STATUS_URL_PARA_FILTRO em contratos/page.js) pra cair no
+        // filtro certo em vez de reaproveitar "ATIVO" e abrir a lista
+        // inteira de ativos sem isolar quem tá vencendo.
+        navegacao: { href: "/contratos", query: { status: "VENCENDO" } },
       },
 
       {

@@ -34,6 +34,8 @@ model Unidade {
   vistorias           Vistoria[]
   vistoriaMissoes     VistoriaMissao[]
   vistoriaProgressos  VistoriaProgresso[]
+
+  @@index([locadorId])
 }
 
 model Kitnet {
@@ -68,6 +70,9 @@ model Kitnet {
   inquilinos          Inquilino[]
   unidade             Unidade         @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
   vistorias           Vistoria[]
+
+  @@index([status])
+  @@index([unidadeId])
 }
 
 model Inquilino {
@@ -267,6 +272,10 @@ model Contrato {
   locador                Locador   @relation(fields: [locadorId], references: [id], onDelete: Cascade)
   unidade                Unidade   @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
   receitas               Receita[]
+
+  @@index([status])
+  @@index([dataFim])
+  @@index([locadorId])
 }
 
 // Signatários que entram automaticamente em TODO contrato novo enviado
@@ -520,6 +529,13 @@ model Receita {
   updatedAt            DateTime   @updatedAt
   contrato             Contrato?  @relation(fields: [contratoId], references: [id])
   inquilino            Inquilino? @relation(fields: [inquilinoId], references: [id])
+
+  @@index([status])
+  @@index([vencimento])
+  @@index([dataPagamento])
+  @@index([locadorId])
+  @@index([contratoId])
+  @@index([inquilinoId])
 }
 
 model Despesa {
@@ -585,6 +601,11 @@ model Solicitacao {
   createdAt DateTime @default(now())
 
   updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([prazo])
+  @@index([locadorId])
+  @@index([criadoPorId])
 }
 
 model SolicitacaoMensagem {
@@ -757,6 +778,11 @@ model Vistoria {
   missoes VistoriaMissao[]
 
   progressos VistoriaProgresso[]
+
+  @@index([status])
+  @@index([concluidaEm])
+  @@index([unidadeId])
+  @@index([kitnetId])
 }
 
 // Uma "missão" = a vistoria de UMA residência específica, dentro de uma
@@ -784,6 +810,7 @@ model VistoriaMissao {
   createdAt DateTime @default(now())
 
   @@unique([vistoriaId, unidadeId, ciclo])
+  @@index([dataRealizacao])
 }
 
 // Relógio PRÓPRIO de cada residência dentro de uma vistoria "Geral" --
@@ -826,6 +853,8 @@ model Ocorrencia {
   updatedAt DateTime @updatedAt
 
   vistoria Vistoria @relation(fields: [vistoriaId], references: [id], onDelete: Cascade)
+
+  @@index([vistoriaId])
 }
 
 model LogSistema {

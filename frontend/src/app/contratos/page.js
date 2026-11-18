@@ -80,6 +80,7 @@ function ContratosPageConteudo() {
     ATIVO: "Ativos",
     PENDENTE: "Pendentes",
     ENCERRADO: "Encerrados",
+    VENCENDO: "Vencendo",
   };
 
   useEffect(() => {
@@ -452,6 +453,17 @@ function ContratosPageConteudo() {
         Pendentes: "PENDENTE",
         Encerrados: "ENCERRADO",
       };
+
+      // "Vencendo" não é um status gravado -- é ATIVO com dataFim
+      // dentro dos próximos 10 dias (mesma regra do BY, ver
+      // insightsService.js DIAS_CONTRATO_VENCENDO).
+      if (filtroSelecionado === "Vencendo") {
+        if (contrato.status !== "ATIVO" || !contrato.dataFim) return false;
+        const hoje = new Date();
+        const limite = new Date(hoje.getTime() + 10 * 24 * 60 * 60 * 1000);
+        const fim = new Date(contrato.dataFim);
+        return fim >= hoje && fim <= limite;
+      }
 
       return (
         contrato.status ===
