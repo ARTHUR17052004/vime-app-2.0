@@ -17,10 +17,15 @@ const listar = (usuario) => {
         where: { ativo: true },
         orderBy: { createdAt: 'desc' },
       },
+      // select (não o contrato inteiro) -- Contrato guarda o PDF/foto
+      // anexado em base64 em arquivoDados, e isso sozinho já deixava a
+      // resposta de /kitnets gigante o bastante pra derrubar a conexão
+      // (erro "Server has closed the connection" em toda a lista).
       contratos: {
         where: { status: 'ATIVO' },
         orderBy: { createdAt: 'desc' },
         take: 1,
+        select: { id: true, dataFim: true },
       },
     },
     orderBy: {
