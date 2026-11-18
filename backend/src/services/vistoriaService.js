@@ -78,16 +78,44 @@ const progressoMissoes = (vistoria, idsResidenciasAtivas) => {
 
 };
 
+// De propósito SEM "fotos"/"fotosConclusao"/"checklist" aqui (mídia em
+// base64, às vezes dezenas de MB por vistoria) -- esses campos sozinhos
+// já deixavam a resposta de /vistorias gigante o bastante pra derrubar
+// a conexão ("Server has closed the connection" na lista inteira,
+// reportado em 18/11/2026). Mesmo bug já corrigido em Kitnets, e mesmo
+// motivo documentado em listarMissoesRealizadas logo abaixo. Quem abre
+// o card pra ver as fotos da conclusão busca pelo detalhe (buscarPorId
+// / GET /vistorias/:id), uma vistoria de cada vez -- ver VistoriaCard.jsx.
 const listar = async (usuario) => {
 
   const [vistorias, idsResidenciasAtivas] = await Promise.all([
     prisma.vistoria.findMany({
       where: filtroVistoria(usuario),
-      include: {
-        ocorrencias: true,
-        unidade: true,
-        kitnet: true,
-        progressos: true,
+      select: {
+        id: true,
+        titulo: true,
+        descricao: true,
+        unidadeId: true,
+        kitnetId: true,
+        categoria: true,
+        criticidade: true,
+        periodicidade: true,
+        responsavel: true,
+        status: true,
+        data: true,
+        dataUltima: true,
+        dataProxima: true,
+        dataProximaBase: true,
+        concluidaEm: true,
+        fixado: true,
+        observacoes: true,
+        observacoesConclusao: true,
+        createdAt: true,
+        updatedAt: true,
+        cicloAtual: true,
+        unidade: { select: { id: true, nome: true } },
+        kitnet: { select: { id: true, nome: true, numero: true } },
+        progressos: { select: { unidadeId: true, dataUltima: true, dataProxima: true } },
       },
       orderBy: {
         createdAt: 'desc'
@@ -678,6 +706,25 @@ const listarMissoesRealizadas = async () => {
 
 };
 
+// Mesma ideia de listarMissoesRealizadas logo acima, só que pras
+// vistorias REGULARES (não "Geral") já concluídas -- a aba Realizadas
+// mostra um badge "X fotos" por linha, e precisava da lista cheia
+// (vistoriaService.listar) trazendo fotosConclusao pra isso, que foi
+// exatamente o que derrubou a conexão de /vistorias (ver comentário em
+// listar() acima). Só a contagem, nunca o conteúdo -- o conteúdo de
+// verdade é buscado sob demanda (buscarPorId) quando abre um registro.
+const contarFotosConclusao = async () => {
+
+  const linhas = await prisma.$queryRaw`
+    SELECT id, COALESCE(jsonb_array_length("fotosConclusao"), 0)::int AS "fotosCount"
+    FROM "Vistoria"
+    WHERE "unidadeId" IS NOT NULL AND "concluidaEm" IS NOT NULL
+  `;
+
+  return linhas;
+
+};
+
 // Uma missão só, com o conteúdo de "fotos" completo -- usado quando
 // abre o detalhe/edição de UM registro (ver listarMissoesRealizadas
 // acima pro motivo de não vir tudo junto na lista).
@@ -774,6 +821,7 @@ module.exports = {
   concluirMissoes,
   cancelarRealizacao,
   listarMissoesRealizadas,
+  contarFotosConclusao,
   buscarMissao,
   atualizarMissao,
   removerMissao,

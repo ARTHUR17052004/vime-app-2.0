@@ -80,6 +80,11 @@ const listarMissoesRealizadas = async (req, res) => {
   res.json(dados);
 };
 
+const contarFotosConclusao = async (req, res) => {
+  const dados = await vistoriaService.contarFotosConclusao();
+  res.json(dados);
+};
+
 const buscarMissao = async (req, res) => {
 
   const missao = await vistoriaService.buscarMissao(req.params.missaoId);
@@ -112,6 +117,7 @@ module.exports = {
   concluirMissoes,
   cancelarRealizacao,
   listarMissoesRealizadas,
+  contarFotosConclusao,
   buscarMissao,
   atualizarMissao,
   removerMissao,

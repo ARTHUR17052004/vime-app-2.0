@@ -20,6 +20,10 @@ router.get('/', permissaoMiddleware('vistorias.visualizar'), vistoriaController.
 // -- precisa vir antes de "/:id" pra não ser lido como um id.
 router.get('/arquivo-missoes', permissaoMiddleware('vistorias.visualizar'), vistoriaController.listarMissoesRealizadas);
 
+// Contagem de fotos das vistorias regulares já concluídas (badge da aba
+// Realizadas) -- também precisa vir antes de "/:id" pelo mesmo motivo.
+router.get('/arquivo-contagem-fotos', permissaoMiddleware('vistorias.visualizar'), vistoriaController.contarFotosConclusao);
+
 router.get('/:id', permissaoMiddleware('vistorias.visualizar'), vistoriaController.buscarPorId);
 
 router.get('/:id/missoes', permissaoMiddleware('vistorias.visualizar'), vistoriaController.listarMissoes);

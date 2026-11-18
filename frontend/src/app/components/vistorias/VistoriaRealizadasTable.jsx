@@ -38,6 +38,28 @@ export default function VistoriaRealizadasTable({
   const [detalhe, setDetalhe] = useState(null);
   const [editando, setEditando] = useState(null);
 
+  // Contagem de fotos das regulares (badge da coluna "Fotos") -- não vem
+  // mais dentro de `vistorias` (ver vistoriaService.listar/contarFotosConclusao
+  // no backend), busca à parte, uma vez só.
+  const [contagemFotosRegulares, setContagemFotosRegulares] = useState({});
+
+  useEffect(() => {
+
+    let cancelado = false;
+
+    VistoriaService.contarFotosConclusao()
+      .then((linhas) => {
+        if (cancelado) return;
+        const mapa = {};
+        for (const linha of linhas || []) mapa[linha.id] = linha.fotosCount;
+        setContagemFotosRegulares(mapa);
+      })
+      .catch(() => {});
+
+    return () => { cancelado = true; };
+
+  }, []);
+
   // Clique no cabeçalho ordena -- mesmo padrão do Financeiro/Contratos
   // (ver Table.jsx, que agora aceita sortKey/sortKeys por coluna).
   const [ordenacao, setOrdenacao] = useState("data-recente");
@@ -81,8 +103,7 @@ export default function VistoriaRealizadasTable({
         ciclo: "-",
         dataHora: v.concluidaEm,
         responsavel: v.responsavel || "-",
-        fotos: v.fotosConclusao || [],
-        fotosCount: (v.fotosConclusao || []).length,
+        fotosCount: contagemFotosRegulares[v.id] || 0,
         observacoes: v.observacoesConclusao || "",
       }));
 
@@ -90,7 +111,7 @@ export default function VistoriaRealizadasTable({
       .filter((item) => !filtroVistoriaId || item.vistoriaId === filtroVistoriaId)
       .sort(COMPARADORES[ordenacao] || COMPARADORES["data-recente"]);
 
-  }, [missoesRealizadas, vistorias, filtroVistoriaId, ordenacao]);
+  }, [missoesRealizadas, vistorias, filtroVistoriaId, ordenacao, contagemFotosRegulares]);
 
   const excluirMissao = async (item) => {
 
@@ -215,21 +236,26 @@ function DetalheModal({ item, onClose }) {
   // lá em cima) -- então o estado inicial já pode nascer certo pro
   // item em questão, sem precisar de um efeito só pra resetar.
   const [lightboxIndice, setLightboxIndice] = useState(null);
-  const [fotos, setFotos] = useState(() => (item && item.tipo !== "missao") ? (item.fotos || []) : []);
-  const [carregandoFotos, setCarregandoFotos] = useState(() => !!item && item.tipo === "missao");
+  const [fotos, setFotos] = useState([]);
+  const [carregandoFotos, setCarregandoFotos] = useState(() => !!item && item.fotosCount > 0);
 
   useEffect(() => {
 
-    // "regular" já nasceu com fotos (lista separada, bem menor) -- só
-    // "missao" precisa buscar, porque a lista de Realizadas não traz
-    // o conteúdo pesado (ver comentário no backend).
-    if (!item || item.tipo !== "missao") return;
+    // Nem "missao" nem "regular" trazem o conteúdo de fotos na lista
+    // (só a contagem, ver comentário no backend) -- busca sob demanda,
+    // uma de cada vez, só quando o registro é aberto. Sem fotos
+    // nenhuma, nem vale a chamada.
+    if (!item || !item.fotosCount) return;
 
     let cancelado = false;
 
-    VistoriaService.buscarMissao(item.vistoriaId, item.missaoId)
-      .then((missao) => {
-        if (!cancelado) setFotos(missao?.fotos || []);
+    const busca = item.tipo === "missao"
+      ? VistoriaService.buscarMissao(item.vistoriaId, item.missaoId).then((m) => m?.fotos)
+      : VistoriaService.buscar(item.vistoriaId).then((v) => v?.fotosConclusao);
+
+    busca
+      .then((lista) => {
+        if (!cancelado) setFotos(lista || []);
       })
       .catch(() => {
         if (!cancelado) setFotos([]);

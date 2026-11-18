@@ -45,6 +45,10 @@ export const VistoriaService = {
     return api("/vistorias/arquivo-missoes");
   },
 
+  contarFotosConclusao() {
+    return api("/vistorias/arquivo-contagem-fotos");
+  },
+
   buscarMissao(vistoriaId, missaoId) {
     return api(`/vistorias/${vistoriaId}/missoes/${missaoId}`);
   },

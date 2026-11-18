@@ -17,6 +17,7 @@ import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
+import { VistoriaService } from "@/services/vistoria.service";
 import AtrasoVistoria from "./AtrasoVistoria";
 
 // Vistoria automática de corte de água/energia por falta de pagamento
@@ -93,6 +94,45 @@ export default function VistoriaCard({
 
   const [lightbox, setLightbox] =
     useState({ vistoriaId: null, indice: null });
+
+  // Fotos/vídeos da baixa não vêm mais na listagem (ver vistoriaService.
+  // listar -- mídia em base64 estava derrubando a conexão de /vistorias
+  // inteira). Busca o detalhe completo só quando o card é expandido,
+  // uma vistoria de cada vez, e guarda em memória pra não rebuscar se
+  // fechar/abrir de novo.
+  const [fotosPorVistoria, setFotosPorVistoria] =
+    useState({});
+
+  const [carregandoFotos, setCarregandoFotos] =
+    useState(null);
+
+  useEffect(() => {
+
+    if (!aberto || fotosPorVistoria[aberto] !== undefined) return;
+
+    let cancelado = false;
+
+    (async () => {
+
+      try {
+        setCarregandoFotos(aberto);
+        const detalhe = await VistoriaService.buscar(aberto);
+        if (!cancelado) {
+          setFotosPorVistoria((prev) => ({ ...prev, [aberto]: detalhe?.fotosConclusao || [] }));
+        }
+      } catch {
+        if (!cancelado) {
+          setFotosPorVistoria((prev) => ({ ...prev, [aberto]: [] }));
+        }
+      } finally {
+        if (!cancelado) setCarregandoFotos(null);
+      }
+
+    })();
+
+    return () => { cancelado = true; };
+
+  }, [aberto, fotosPorVistoria]);
 
   if (!vistorias.length) {
 
@@ -611,7 +651,11 @@ export default function VistoriaCard({
 
               </div>
 
-              {vistoria.fotosConclusao?.length > 0 && (
+              {carregandoFotos === vistoria.id && (
+                <p className="mt-8 text-sm text-[var(--text-faint)]">Carregando fotos e vídeos...</p>
+              )}
+
+              {(fotosPorVistoria[vistoria.id]?.length > 0) && (
 
                 <div className="mt-8">
 
@@ -621,7 +665,7 @@ export default function VistoriaCard({
 
                   <div className="grid md:grid-cols-3 gap-4">
 
-                    {vistoria.fotosConclusao.map((midia, index) => (
+                    {fotosPorVistoria[vistoria.id].map((midia, index) => (
                       <button
                         key={index}
                         type="button"
@@ -647,7 +691,7 @@ export default function VistoriaCard({
                   </div>
 
                   <MidiaLightbox
-                    itens={vistoria.fotosConclusao}
+                    itens={fotosPorVistoria[vistoria.id]}
                     indice={lightbox.vistoriaId === vistoria.id ? lightbox.indice : null}
                     onClose={() => setLightbox({ vistoriaId: null, indice: null })}
                     onMudarIndice={(i) => setLightbox({ vistoriaId: vistoria.id, indice: i })}
