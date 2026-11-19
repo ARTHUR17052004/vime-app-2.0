@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import {
+  ArrowLeft,
   Building2,
   CalendarClock,
   CheckCircle2,
@@ -91,6 +92,21 @@ export default function VistoriasMobile({
 }) {
   return (
     <div className="space-y-4">
+
+      {/* Voltar -- só dentro de Realizadas, que é uma "sub-tela" dentro
+          de Vistorias (lista bem diferente das outras abas). Chama a
+          mesma troca de aba de sempre (onAbaChange), então também conta
+          como navegação de verdade pro botão "voltar" do navegador. */}
+
+      {abaSelecionada === "realizadas" && (
+        <button
+          onClick={() => onAbaChange?.("visao-geral")}
+          className="flex items-center gap-1.5 text-[13px] font-semibold text-emerald-400"
+        >
+          <ArrowLeft size={16} />
+          Voltar
+        </button>
+      )}
 
       {/* CABEÇALHO */}
 

@@ -5,7 +5,7 @@
 import Page from "../components/ui/Page";
 import PageContainer from "../components/ui/PageContainer";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import MainLayout from "../components/layout/MainLayout";
 
@@ -83,14 +83,21 @@ function VistoriasPageConteudo() {
     useState("");
 
   const searchParams = useSearchParams();
+  const router = useRouter();
 
+  // A aba agora mora na URL (?aba=...), não só no estado -- sem isso,
+  // trocar de aba no mobile (Visão Geral -> Realizadas) não criava
+  // nenhum histórico de navegação, e apertar "voltar" pulava a tela de
+  // Vistorias inteira direto pra tela anterior (ex.: Início), em vez de
+  // voltar pra aba de antes (bug relatado em 19/11/2026). Reage a
+  // QUALQUER mudança em searchParams (não só na primeira carga) --
+  // inclusive quando o próprio botão "voltar" do navegador muda a URL.
   useEffect(() => {
 
     const aba = searchParams.get("aba");
-    if (aba) setAbaSelecionada(aba);
+    setAbaSelecionada(aba || "visao-geral");
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [searchParams]);
   
   const [vistorias, setVistorias] =
     useState([]);
@@ -140,16 +147,19 @@ function VistoriasPageConteudo() {
     useState(null);
 
   const verMissoesDaVistoria = (vistoriaId) => {
-    setAbaSelecionada("realizadas");
     setFiltroMissaoVistoriaId(vistoriaId);
+    router.push("/vistorias?aba=realizadas", { scroll: false });
   };
 
   // Trocar de aba por qualquer outro caminho (tabs, cards de resumo)
   // limpa o filtro de uma missão específica -- só fica ativo vindo do
-  // "X/Y VIMEs concluídas" de um card.
+  // "X/Y VIMEs concluídas" de um card. router.push (não replace) de
+  // propósito -- cada troca de aba vira um passo de navegação de
+  // verdade, pro botão "voltar" do navegador desfazer uma aba de cada
+  // vez em vez de sair da tela inteira.
   const trocarAba = (aba) => {
-    setAbaSelecionada(aba);
     setFiltroMissaoVistoriaId(null);
+    router.push(aba === "visao-geral" ? "/vistorias" : `/vistorias?aba=${aba}`, { scroll: false });
   };
 
   const carregar = useCallback(async () => {
