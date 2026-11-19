@@ -90,6 +90,14 @@ const prisma = comRetryDeConexao.$extends({
           } else if (args.data.status !== 'DISPONIVEL' && atual?.status === 'DISPONIVEL') {
             args.data.vazioDesde = null;
             args.data.ultimoAlertaVaziaEm = null;
+
+            // Kitnet estava vazia e voltou a ficar ocupada/manutenção --
+            // cancela a vistoria de entrega automática se ainda não foi
+            // Realizada, senão fica presa aberta pra sempre. Require
+            // tardio (dentro da função) pra evitar ciclo: kitnetOcupacao
+            // usa este próprio arquivo (module.exports de prisma).
+            const { cancelarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
+            cancelarVistoriaDeEntrega(args.where.id);
           }
 
         }

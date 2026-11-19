@@ -153,4 +153,52 @@ const gerarVistoriaDeEntrega = async (kitnetId) => {
 
 };
 
-module.exports = { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega };
+// Espelho de gerarVistoriaDeEntrega: quando a kitnet deixa de estar
+// vazia (ganhou morador de novo, ou foi pra manutenção) antes da
+// vistoria de entrega automática ter sido Realizada, ela ficava presa
+// Pendente/Atrasada pra sempre -- a kitnet já tem morador e a vistoria
+// não faz mais sentido (bug relatado em 19/11/2026: kitnet 22 da
+// VIME I ocupada e com a receita paga, mas ainda com "Vistoria de
+// entrega" em aberto de quando ficou vazia antes). Chamado pela
+// extensão do Prisma Client (config/prisma.js) sempre que o status sai
+// de DISPONIVEL, não importa por qual service mudou (mesmo chokepoint
+// que já mantém vazioDesde em dia).
+const cancelarVistoriaDeEntrega = async (kitnetId) => {
+
+  try {
+
+    const abertas = await prisma.vistoria.findMany({
+      where: {
+        kitnetId,
+        categoria: "Entrega de kitnet vazia",
+        status: { notIn: ["REALIZADA", "CANCELADA"] },
+      },
+      select: { id: true, observacoes: true },
+    });
+
+    for (const vistoria of abertas) {
+
+      await prisma.vistoria.update({
+        where: { id: vistoria.id },
+        data: {
+          status: "CANCELADA",
+          observacoes: `${vistoria.observacoes ? vistoria.observacoes + "\n\n" : ""}Cancelada automaticamente -- a kitnet voltou a ficar ocupada (ou foi pra manutenção) antes dessa vistoria ser realizada.`,
+        },
+      });
+
+    }
+
+  } catch (erro) {
+
+    console.error("[vistoria-automatica] Falha ao cancelar vistoria de entrega:", erro.message);
+
+  }
+
+};
+
+module.exports = {
+  kitnetAindaOcupada,
+  inquilinoTemOutroContratoAtivo,
+  gerarVistoriaDeEntrega,
+  cancelarVistoriaDeEntrega,
+};
