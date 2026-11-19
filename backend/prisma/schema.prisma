@@ -5,6 +5,15 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  // "prisma migrate deploy" trava com erro P1002 ("Timed out trying to
+  // acquire a postgres advisory lock") quando roda pela URL com
+  // pgbouncer=true -- o PgBouncer em modo transaction não garante a
+  // mesma conexão de verdade entre os comandos do lock, então o Neon
+  // nunca libera o advisory lock que o Migrate usa (bug relatado em
+  // 19/11/2026, no meio do deploy). directUrl é só pra isso (migrations
+  // -- Prisma Client continua usando a `url` com pool normalmente);
+  // mesmo host da DATABASE_URL, sem o "-pooler" e sem pgbouncer=true.
+  directUrl = env("DIRECT_URL")
 }
 
 model Unidade {
