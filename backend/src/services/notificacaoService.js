@@ -108,6 +108,33 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   // quebra o catálogo nem o toggle de Administração > Notificações).
   const tituloExibido = (titulo || "").toUpperCase();
 
+  // Trava GERAL contra duplicata -- antes cada chamador tinha que
+  // lembrar da própria trava (ex.: Receita.avisoVencidoEnviadoEm), e um
+  // deles esqueceu: o webhook PAYMENT_OVERDUE da Asaas não tinha
+  // nenhuma, e como a Asaas reenvia esse evento pra mesma cobrança
+  // (webhook retry/aviso periódico deles), virou 390+ notificações
+  // idênticas pra mesma cobrança em 9 dias (bug relatado em
+  // 19/11/2026). Essa trava mora aqui, central, pra proteger QUALQUER
+  // chamador (Asaas, BB, Efí, WhatsApp, jobs...) -- inclusive os
+  // futuros que esquecerem da própria. Mesmo título (já em caixa alta)
+  // + mensagem + link + destinatário de novo dentro de 24h = ignora
+  // (nunca trava quem chamou -- só não duplica o aviso).
+  const JANELA_DEDUPE_MS = 24 * 60 * 60 * 1000;
+
+  const duplicata = await prisma.notificacao.findFirst({
+    where: {
+      titulo: tituloExibido,
+      mensagem,
+      link: link || null,
+      locadorId: locadorId || null,
+      usuarioId: usuarioId || null,
+      createdAt: { gte: new Date(Date.now() - JANELA_DEDUPE_MS) },
+    },
+    select: { id: true },
+  });
+
+  if (duplicata) return null;
+
   const notificacao = await prisma.notificacao.create({
     data: {
       usuarioId: usuarioId || null,

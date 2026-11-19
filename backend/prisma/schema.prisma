@@ -211,6 +211,11 @@ model Notificacao {
   createdAt DateTime @default(now())
 
   usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  // Trava de duplicata em notificacaoService.criar() filtra por
+  // título+createdAt antes de comparar o resto -- sem índice, isso
+  // varria a tabela inteira a cada notificação criada no sistema.
+  @@index([titulo, createdAt])
 }
 
 model Perfil {
