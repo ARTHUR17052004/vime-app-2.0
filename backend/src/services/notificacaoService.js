@@ -230,6 +230,14 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
    LISTAR NÃO LIDAS (pro sininho)
 ========================================== */
 
+// De propósito COM limite (mesmo padrão de listarHistorico logo abaixo,
+// que já tinha) -- sem isso, um backlog grande (ex.: bug de duplicata
+// de 19/11/2026, que sozinho deixou 1735 não lidas na hora) deixava
+// essa consulta lenta/pesada o bastante pra falhar, e o hook do
+// sininho (useNotificacoes.js) só loga o erro e silenciosamente mostra
+// "0 notificações" -- mais enganoso que mostrar as mais recentes e
+// pronto (não lida muito tempo? tem o alerta diário repetindo pra não
+// deixar esquecer, ver atualizarStatusVistoriasJob/lembrarVistoriasPendentesJob).
 const listarNaoLidas = async (usuarioId, locadorId, perfil) => {
 
   return prisma.notificacao.findMany({
@@ -240,6 +248,7 @@ const listarNaoLidas = async (usuarioId, locadorId, perfil) => {
     orderBy: {
       createdAt: "desc",
     },
+    take: 200,
   });
 
 };
