@@ -543,43 +543,33 @@ const fixarVistoria = async (id, fixado) => {
 
           <PageContainer>
 
-            {abaSelecionada === "realizadas" ? (
-
-              <VistoriaRealizadasTable
-                vistorias={vistorias}
-                missoesRealizadas={missoesRealizadas}
-                carregandoMissoes={carregandoMissoes}
-                filtroVistoriaId={filtroMissaoVistoriaId}
-                onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
-                onRecarregarVistorias={carregar}
-                onRecarregarMissoes={carregarMissoes}
-              />
-
-            ) : (
-
-              <VistoriasMobile
-                vistorias={vistoriasFiltradas}
-                totalVistorias={vistorias.length}
-                programadas={programadas}
-                realizadasHoje={regularesRealizadasHoje + missoesRealizadasHoje}
-                atrasadas={atrasadas}
-                podeCriar={podeCriar}
-                onNovaVistoria={novaVistoria}
-                onEdit={editarVistoria}
-                onDelete={excluirVistoria}
-                onConcluir={abrirConcluirVistoria}
-                onCancelar={cancelarVistoria}
-                onFixar={fixarVistoria}
-                onVerMissoes={verMissoesDaVistoria}
-                residenciaSelecionada={residenciaSelecionada}
-                onResidenciaChange={setResidenciaSelecionada}
-                abaSelecionada={abaSelecionada}
-                onAbaChange={trocarAba}
-                ordenacao={ordenacao}
-                onOrdenacaoChange={setOrdenacao}
-              />
-
-            )}
+            <VistoriasMobile
+              vistorias={vistoriasFiltradas}
+              totalVistorias={vistorias.length}
+              programadas={programadas}
+              realizadasHoje={regularesRealizadasHoje + missoesRealizadasHoje}
+              atrasadas={atrasadas}
+              podeCriar={podeCriar}
+              onNovaVistoria={novaVistoria}
+              onEdit={editarVistoria}
+              onDelete={excluirVistoria}
+              onConcluir={abrirConcluirVistoria}
+              onCancelar={cancelarVistoria}
+              onFixar={fixarVistoria}
+              onVerMissoes={verMissoesDaVistoria}
+              residenciaSelecionada={residenciaSelecionada}
+              onResidenciaChange={setResidenciaSelecionada}
+              abaSelecionada={abaSelecionada}
+              onAbaChange={trocarAba}
+              ordenacao={ordenacao}
+              onOrdenacaoChange={setOrdenacao}
+              missoesRealizadas={missoesRealizadas}
+              carregandoMissoes={carregandoMissoes}
+              filtroVistoriaId={filtroMissaoVistoriaId}
+              onLimparFiltro={() => setFiltroMissaoVistoriaId(null)}
+              onRecarregarVistorias={carregar}
+              onRecarregarMissoes={carregarMissoes}
+            />
 
             <VistoriaModal
               isOpen={modalOpen}

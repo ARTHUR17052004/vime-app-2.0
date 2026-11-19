@@ -21,6 +21,7 @@ import {
 import ResidenciaFiltro from "../../common/ResidenciaFiltro";
 import ActionMenu from "../../ui/ActionMenu";
 import EmptyState from "../../ui/EmptyState";
+import VistoriaRealizadasTable from "../VistoriaRealizadasTable";
 import { usePermissao } from "../../../../hooks/usePermissao";
 import { formatDate } from "@/utils/formatDate";
 
@@ -29,9 +30,13 @@ import { formatDate } from "@/utils/formatDate";
 // virava a mesma estrutura espremida em 400px. Mesmo padrão visual de
 // KitnetsMobile/InquilinosMobile: cabeçalho, indicadores, filtro, cartões.
 //
-// Só cobre as abas "ao vivo" (Visão Geral/Agendadas/Pendentes/Atrasadas),
-// que usam VistoriaCardList no desktop -- "Realizadas" continua na
-// tabela/histórico (VistoriaRealizadasTable), que já rola de lado.
+// Cabeçalho/indicadores/filtro ficam sempre visíveis, mesmo na aba
+// Realizadas -- antes a página trocava o componente inteiro (vistorias/
+// page.js) e sumia com o seletor de aba, sem nenhum jeito de voltar pra
+// Visão Geral a não ser saindo da tela (bug relatado em 19/11/2026).
+// Só a LISTA de baixo muda: card próprio pras abas "ao vivo", ou
+// VistoriaRealizadasTable (que já tem sua própria versão mobile) pra
+// Realizadas.
 
 const cartao = `
   rounded-2xl
@@ -77,6 +82,12 @@ export default function VistoriasMobile({
   onAbaChange,
   ordenacao,
   onOrdenacaoChange,
+  missoesRealizadas,
+  carregandoMissoes,
+  filtroVistoriaId,
+  onLimparFiltro,
+  onRecarregarVistorias,
+  onRecarregarMissoes,
 }) {
   return (
     <div className="space-y-4">
@@ -217,7 +228,19 @@ export default function VistoriasMobile({
 
       {/* LISTA */}
 
-      {vistorias.length === 0 ? (
+      {abaSelecionada === "realizadas" ? (
+
+        <VistoriaRealizadasTable
+          vistorias={vistorias}
+          missoesRealizadas={missoesRealizadas}
+          carregandoMissoes={carregandoMissoes}
+          filtroVistoriaId={filtroVistoriaId}
+          onLimparFiltro={onLimparFiltro}
+          onRecarregarVistorias={onRecarregarVistorias}
+          onRecarregarMissoes={onRecarregarMissoes}
+        />
+
+      ) : vistorias.length === 0 ? (
 
         <EmptyState
           compact
