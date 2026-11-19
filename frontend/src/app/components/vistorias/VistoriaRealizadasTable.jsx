@@ -1,17 +1,33 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Image as ImageIcon, NotebookPen } from "lucide-react";
+import {
+  Building2,
+  CalendarClock,
+  Image as ImageIcon,
+  NotebookPen,
+  User,
+} from "lucide-react";
 
 import Table from "../ui/Table";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
 import SeletorMidia from "../ui/SeletorMidia";
+import EmptyState from "../ui/EmptyState";
 import VistoriaMissaoActionsMenu from "./VistoriaMissaoActionsMenu";
 import { VistoriaService } from "@/services/vistoria.service";
 import { formatDateTime } from "@/utils/formatDate";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
+import { useIsMobile } from "../../../hooks/useIsMobile";
+
+const cartao = `
+  rounded-2xl
+  border
+  border-[var(--border-token)]
+  bg-[var(--surface)]
+  backdrop-blur-xl
+`;
 
 // Identifica um item só da lista -- usado como `key` dos modais abaixo,
 // pra remontar (e já nascer com o estado certo) ao trocar de registro.
@@ -34,6 +50,8 @@ export default function VistoriaRealizadasTable({
   onRecarregarVistorias,
   onRecarregarMissoes,
 }) {
+
+  const isMobile = useIsMobile();
 
   const [detalhe, setDetalhe] = useState(null);
   const [editando, setEditando] = useState(null);
@@ -184,6 +202,149 @@ export default function VistoriaRealizadasTable({
       ),
     },
   ];
+
+  if (isMobile) {
+
+    return (
+
+      <div className="space-y-4">
+
+        {filtroVistoriaId && (
+          <p className="text-[12px] text-[var(--text-subtle)]">
+            Mostrando só <strong className="text-[var(--text)]">{linhas[0]?.vistoria || "uma vistoria"}</strong>.
+            {" "}
+            <button onClick={onLimparFiltro} className="text-emerald-400 hover:underline">
+              Ver todas
+            </button>
+          </p>
+        )}
+
+        <section className={`${cartao} p-3`}>
+
+          <select
+            value={ordenacao}
+            onChange={(e) => setOrdenacao(e.target.value)}
+            className="
+              w-full
+              rounded-xl
+              border border-[var(--border-token)]
+              bg-[var(--surface-2)]
+              text-[var(--text)]
+              px-3 py-2.5
+              text-[12px]
+            "
+          >
+            <option value="data-recente" className="bg-[#1b2430]">Data (mais recente)</option>
+            <option value="data-antiga" className="bg-[#1b2430]">Data (mais antiga)</option>
+            <option value="vistoria-asc" className="bg-[#1b2430]">Vistoria (A-Z)</option>
+            <option value="vistoria-desc" className="bg-[#1b2430]">Vistoria (Z-A)</option>
+            <option value="residencia-asc" className="bg-[#1b2430]">Residência (A-Z)</option>
+            <option value="residencia-desc" className="bg-[#1b2430]">Residência (Z-A)</option>
+            <option value="responsavel-asc" className="bg-[#1b2430]">Responsável</option>
+          </select>
+
+        </section>
+
+        {carregandoMissoes ? (
+
+          <div className={`${cartao} p-10 text-center text-[13px] text-[var(--text-subtle)]`}>
+            Carregando...
+          </div>
+
+        ) : linhas.length === 0 ? (
+
+          <EmptyState
+            compact
+            icon={<CalendarClock size={26} />}
+            title="Nenhuma vistoria realizada ainda"
+            description="Assim que uma vistoria for concluída, ela aparece aqui."
+          />
+
+        ) : (
+
+          <section className="space-y-2.5">
+
+            {linhas.map((item) => (
+
+              <div
+                key={chaveItem(item)}
+                onClick={() => setDetalhe(item)}
+                className={`${cartao} p-3.5 active:scale-[0.99] transition cursor-pointer`}
+              >
+
+                <div className="flex items-start justify-between gap-2">
+
+                  <div className="min-w-0">
+                    <p className="text-[15px] font-bold text-[var(--text)] truncate">
+                      {item.vistoria}
+                    </p>
+                    <p className="mt-0.5 flex items-center gap-1 text-[12px] text-[var(--text-subtle)] truncate">
+                      <Building2 size={12} className="shrink-0" />
+                      {item.residencia}
+                      {item.ciclo !== "-" && ` · Ciclo ${item.ciclo}`}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+
+                    {item.fotosCount > 0 && (
+                      <span className="flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold bg-[var(--surface-3)] text-[var(--text-subtle)]">
+                        <ImageIcon size={11} />
+                        {item.fotosCount}
+                      </span>
+                    )}
+
+                    <VistoriaMissaoActionsMenu
+                      item={item}
+                      onVer={setDetalhe}
+                      onEditar={setEditando}
+                      onExcluir={excluirMissao}
+                      onCancelarRealizacao={cancelarRealizacao}
+                    />
+
+                  </div>
+
+                </div>
+
+                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] text-[var(--text-muted)]">
+
+                  <span className="flex items-center gap-1.5">
+                    <User size={13} className="text-[var(--text-faint)]" />
+                    {item.responsavel}
+                  </span>
+
+                  <span className="flex items-center gap-1.5">
+                    <CalendarClock size={13} className="text-[var(--text-faint)]" />
+                    {formatDateTime(item.dataHora)}
+                  </span>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </section>
+
+        )}
+
+        <DetalheModal key={chaveItem(detalhe)} item={detalhe} onClose={() => setDetalhe(null)} />
+
+        <EditarModal
+          key={chaveItem(editando)}
+          item={editando}
+          onClose={() => setEditando(null)}
+          onSalvo={async () => {
+            setEditando(null);
+            await onRecarregarMissoes?.();
+          }}
+        />
+
+      </div>
+
+    );
+
+  }
 
   return (
 
