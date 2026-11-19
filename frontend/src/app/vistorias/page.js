@@ -573,6 +573,8 @@ const fixarVistoria = async (id, fixado) => {
               onAbaChange={trocarAba}
               ordenacao={ordenacao}
               onOrdenacaoChange={setOrdenacao}
+              search={search}
+              onSearchChange={setSearch}
               missoesRealizadas={missoesRealizadas}
               carregandoMissoes={carregandoMissoes}
               filtroVistoriaId={filtroMissaoVistoriaId}
@@ -680,31 +682,33 @@ const fixarVistoria = async (id, fixado) => {
 
           <PageSection spacing="lg">
 
-            <div className="flex flex-wrap gap-4 items-center">
+            {/* Mesmo visual "pílula" compacta do mobile (compact no
+                ResidenciaFiltro + select do mesmo tamanho/arredondado,
+                sem rótulo "Organizar por" ao lado) -- sistema e mobile
+                têm que ter a mesma cara, só a adaptação de layout muda
+                (pedido do usuário em 19/11/2026). */}
+
+            <div className="flex flex-wrap gap-3 items-center">
 
               <div className="flex-1 min-w-[220px]">
                 <ResidenciaFiltro
+                  compact
                   value={residenciaSelecionada}
                   onChange={setResidenciaSelecionada}
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-                  Organizar por
-                </label>
-                <select
-                  value={ordenacao}
-                  onChange={(e) => setOrdenacao(e.target.value)}
-                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="data-proxima" className="bg-[#1b2430]">Data (mais próxima)</option>
-                  <option value="data-distante" className="bg-[#1b2430]">Data (mais distante)</option>
-                  <option value="titulo-asc" className="bg-[#1b2430]">Título (A-Z)</option>
-                  <option value="responsavel-asc" className="bg-[#1b2430]">Responsável</option>
-                  <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
-                </select>
-              </div>
+              <select
+                value={ordenacao}
+                onChange={(e) => setOrdenacao(e.target.value)}
+                className="rounded-xl border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] px-4 py-3 text-sm"
+              >
+                <option value="data-proxima" className="bg-[#1b2430]">Data (mais próxima)</option>
+                <option value="data-distante" className="bg-[#1b2430]">Data (mais distante)</option>
+                <option value="titulo-asc" className="bg-[#1b2430]">Título (A-Z)</option>
+                <option value="responsavel-asc" className="bg-[#1b2430]">Responsável</option>
+                <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+              </select>
 
             </div>
 

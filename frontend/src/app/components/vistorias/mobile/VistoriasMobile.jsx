@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import ResidenciaFiltro from "../../common/ResidenciaFiltro";
+import SearchInput from "../../common/SearchInput";
 import ActionMenu from "../../ui/ActionMenu";
 import EmptyState from "../../ui/EmptyState";
 import VistoriaRealizadasTable from "../VistoriaRealizadasTable";
@@ -83,6 +84,8 @@ export default function VistoriasMobile({
   onAbaChange,
   ordenacao,
   onOrdenacaoChange,
+  search,
+  onSearchChange,
   missoesRealizadas,
   carregandoMissoes,
   filtroVistoriaId,
@@ -145,6 +148,15 @@ export default function VistoriasMobile({
         )}
 
       </section>
+
+      {/* BUSCA -- mesmo SearchInput do desktop (PageHeader), só que
+          fora dele aqui (mobile não usa PageHeader). */}
+
+      <SearchInput
+        placeholder="Pesquisar vistoria..."
+        value={search}
+        onChange={(e) => onSearchChange?.(e.target.value)}
+      />
 
       {/* INDICADORES */}
 
