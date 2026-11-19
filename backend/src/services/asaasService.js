@@ -695,26 +695,37 @@ const sincronizar = async (evento) => {
 
     case "PAYMENT_OVERDUE":
 
-      await prisma.receita.update({
-        where: {
-          id: receita.id
-        },
-        data: {
-          status: "ATRASADA"
-        }
-      });
+      // A Asaas reenvia esse evento várias vezes pro mesmo pagamento
+      // (retry de webhook, ou um novo aviso periódico deles) -- sem essa
+      // trava (mesmo padrão do PAYMENT_CONFIRMED/RECEIVED acima), cada
+      // reenvio criava outra notificação igualzinha, lotando o sino em
+      // minutos com a mesma cobrança (bug relatado em 19/11/2026: 5
+      // notificações iguais em 37 minutos). Só processa na TRANSIÇÃO de
+      // verdade pra ATRASADA.
+      if (receita.status !== "ATRASADA") {
 
-      await notificacaoService.criar({
-        origem: "ASAAS",
-        titulo: "Cobrança atrasada",
-        mensagem: await notificacaoService.renderizarMensagem(
-          'COBRANCA_ATRASADA',
-          { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
-          `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`
-        ),
-        link: "/asaas-transacoes",
-        locadorId: await locadorDaReceita(receita.id),
-      });
+        await prisma.receita.update({
+          where: {
+            id: receita.id
+          },
+          data: {
+            status: "ATRASADA"
+          }
+        });
+
+        await notificacaoService.criar({
+          origem: "ASAAS",
+          titulo: "Cobrança atrasada",
+          mensagem: await notificacaoService.renderizarMensagem(
+            'COBRANCA_ATRASADA',
+            { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
+            `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} venceu e ainda não foi pago.`
+          ),
+          link: "/asaas-transacoes",
+          locadorId: await locadorDaReceita(receita.id),
+        });
+
+      }
 
       break;
 
