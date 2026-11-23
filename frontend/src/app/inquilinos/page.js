@@ -592,47 +592,76 @@ export default function InquilinosPage() {
                 placeholder="Pesquisar inquilino..."
               />
 
-              <div className="mt-4 flex flex-wrap gap-4 items-center">
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.15}>
+
+            <PageSection>
+
+              {/* Mesma caixa/estilo do cartão de filtros do mobile
+                  (InquilinosMobile.jsx) -- só o layout muda (linha
+                  aqui, empilhado lá), a aparência das caixas é igual.
+                  Pedido do usuário em 23/11/2026. */}
+              <div
+                className="
+                  rounded-2xl
+                  border
+                  border-[var(--border-token)]
+                  bg-[var(--surface)]
+                  backdrop-blur-xl
+                  p-4
+                  flex
+                  flex-wrap
+                  gap-3
+                "
+              >
 
                 <div className="flex-1 min-w-[220px]">
                   <ResidenciaFiltro
+                    compact
                     value={residenciaSelecionada}
                     onChange={setResidenciaSelecionada}
                   />
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-                    Status
-                  </label>
-                  <select
-                    value={statusFiltro}
-                    onChange={(e) => setStatusFiltro(e.target.value)}
-                    className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="" className="bg-[#1b2430]">Todos</option>
-                    <option value="ATIVO" className="bg-[#1b2430]">Ativo</option>
-                    <option value="INATIVO" className="bg-[#1b2430]">Inativo</option>
-                  </select>
-                </div>
+                <select
+                  value={statusFiltro}
+                  onChange={(e) => setStatusFiltro(e.target.value)}
+                  className="
+                    rounded-xl
+                    border border-[var(--border-token)]
+                    bg-[var(--surface-2)]
+                    text-[var(--text)]
+                    px-3 py-2.5
+                    text-sm
+                  "
+                >
+                  <option value="" className="bg-[#1b2430]">Todos os status</option>
+                  <option value="ATIVO" className="bg-[#1b2430]">Ativo</option>
+                  <option value="INATIVO" className="bg-[#1b2430]">Inativo</option>
+                </select>
 
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-                    Organizar por
-                  </label>
-                  <select
-                    value={ordenacao}
-                    onChange={(e) => setOrdenacao(e.target.value)}
-                    className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-                  >
-                    <option value="nome-asc" className="bg-[#1b2430]">Nome (A-Z)</option>
-                    <option value="nome-desc" className="bg-[#1b2430]">Nome (Z-A)</option>
-                    <option value="kitnet-asc" className="bg-[#1b2430]">Kitnet</option>
-                    <option value="contrato-recente" className="bg-[#1b2430]">Contrato (mais recente)</option>
-                    <option value="contrato-antigo" className="bg-[#1b2430]">Contrato (mais antigo)</option>
-                    <option value="status-asc" className="bg-[#1b2430]">Status (ativos primeiro)</option>
-                  </select>
-                </div>
+                <select
+                  value={ordenacao}
+                  onChange={(e) => setOrdenacao(e.target.value)}
+                  className="
+                    rounded-xl
+                    border border-[var(--border-token)]
+                    bg-[var(--surface-2)]
+                    text-[var(--text)]
+                    px-3 py-2.5
+                    text-sm
+                  "
+                >
+                  <option value="nome-asc" className="bg-[#1b2430]">Nome (A-Z)</option>
+                  <option value="nome-desc" className="bg-[#1b2430]">Nome (Z-A)</option>
+                  <option value="kitnet-asc" className="bg-[#1b2430]">Kitnet</option>
+                  <option value="contrato-recente" className="bg-[#1b2430]">Contrato (mais recente)</option>
+                  <option value="contrato-antigo" className="bg-[#1b2430]">Contrato (mais antigo)</option>
+                  <option value="status-asc" className="bg-[#1b2430]">Status (ativos primeiro)</option>
+                </select>
 
               </div>
 
