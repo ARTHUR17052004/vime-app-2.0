@@ -478,6 +478,17 @@ const atualizar = async (id, dados, autor) => {
     where: { id }
   });
 
+  // Editar esse campo direto aqui (tela normal de edição) pulava TODA a
+  // cascata que só `encerrar()` faz (liberar a kitnet, desativar o
+  // inquilino, cancelar receita recorrente/futura, gerar vistoria de
+  // entrega, notificar, cancelar envelope da Clicksign) -- a kitnet
+  // ficava "Ocupada" fantasma pra sempre. Bug relatado em 23/11/2026:
+  // kitnet 22 da VIME I. Força sempre passar pelo botão dedicado
+  // "Encerrar contrato" (que já exige senha + motivo).
+  if (dados.status === 'ENCERRADO' && anterior?.status !== 'ENCERRADO') {
+    throw new Error('Pra encerrar um contrato, use o botão "Encerrar contrato" (exige senha e motivo) -- não dá pra encerrar editando esse campo aqui.');
+  }
+
   // Atualização parcial não pode reprovar por "faltar" um campo que já
   // está preenchido desde a criação -- valida o resultado final
   // (anterior + alterações), não só o pedaço enviado nesta chamada.
@@ -712,12 +723,19 @@ const encerrar = async (id, autor, opcoes = {}) => {
     valorNovo: contratoEncerrado
   });
 
+  // PENDENTE ou já ATRASADA, tanto faz -- o que importa é o vencimento
+  // ser DEPOIS do fim real do contrato (contratoEncerrado.dataFim): é
+  // cobrança de um período que o inquilino nem mora mais lá. Sem o
+  // ATRASADA aqui, essa receita ficava cobrando (e escalando pra corte
+  // de água/energia -- verificarAtrasoCorteJob) um ex-inquilino, porque
+  // ela já tinha vencido ANTES de alguém notar que precisava encerrar
+  // (bug relatado em 23/11/2026, contratos 8e32aaeb.../2dab1282...).
   await prisma.receita.updateMany({
     where: {
       contratoId: contrato.id,
-      status: "PENDENTE",
+      status: { in: ["PENDENTE", "ATRASADA"] },
       vencimento: {
-        gt: new Date()
+        gt: contratoEncerrado.dataFim
       }
     },
     data: {

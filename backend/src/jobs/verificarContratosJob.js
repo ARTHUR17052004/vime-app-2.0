@@ -63,6 +63,24 @@ module.exports = async () => {
 
     receitasEncerradas += count;
 
+    // Mesma lógica de contratoService.encerrar() -- uma receita que já
+    // tinha sido gerada (recorrência roda meses à frente) pro período
+    // DEPOIS do fim do contrato continuava cobrando (e escalando pra
+    // corte de água/energia) um inquilino que já foi embora sozinho,
+    // sem ninguém encerrar na mão. Cancela PENDENTE e ATRASADA, não só
+    // PENDENTE -- esse job automático nunca cancelava nenhuma das duas
+    // (bug relatado em 23/11/2026, contratos 8e32aaeb.../2dab1282...).
+    const { count: receitasVencidasCanceladas } = await prisma.receita.updateMany({
+      where: {
+        contratoId: contrato.id,
+        status: { in: ["PENDENTE", "ATRASADA"] },
+        vencimento: { gt: contrato.dataFim },
+      },
+      data: { status: "CANCELADA" },
+    });
+
+    receitasEncerradas += receitasVencidasCanceladas;
+
     // Sem ignorarInquilinoId, kitnetAindaOcupada encontrava o PRÓPRIO
     // inquilino desse contrato (ainda com ativo:true nesse instante) e
     // achava que "sobrou" morador -- a kitnet nunca era liberada

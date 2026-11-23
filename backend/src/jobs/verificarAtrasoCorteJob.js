@@ -83,6 +83,16 @@ module.exports = async () => {
       // mesmo risco de corte de quem realmente recebeu e não pagou,
       // mesmo sem nenhum boleto pra cobrar o inquilino de fato.
       gatewayReferencia: { not: null },
+      // Trava extra (defesa em profundidade, não é a correção
+      // principal -- ver contratoService.encerrar/verificarContratosJob,
+      // que já cancelam essa receita quando o contrato termina): nunca
+      // cortar água/energia de quem já não é mais inquilino. Bug
+      // relatado em 23/11/2026 -- receita ATRASADA sobrevivendo ao
+      // encerramento do contrato quase disparou corte pra ex-inquilino.
+      OR: [
+        { contratoId: null },
+        { contrato: { status: { not: "ENCERRADO" } } },
+      ],
     },
     include: {
       contrato: { include: { inquilino: true, kitnet: true, unidade: true } },

@@ -771,15 +771,13 @@ export default function ContratoForm({
     Pendente
   </option>
 
-  <option
-    value="ENCERRADO"
-    style={{
-      backgroundColor: "#1d2833",
-      color: "#fff",
-    }}
-  >
-    Encerrado
-  </option>
+  {/* "Encerrado" tirado de propósito -- editar esse campo direto aqui
+      pulava toda a cascata (liberar kitnet, desativar inquilino,
+      cancelar receita recorrente, notificar, cancelar envelope da
+      Clicksign). Pra encerrar, usar o botão dedicado "Encerrar
+      contrato" (já pede senha + motivo). Bug relatado em 23/11/2026:
+      kitnet 22 da VIME I ficou "Ocupada" fantasma porque o contrato
+      foi encerrado editando esse campo, não pelo botão. */}
 
   <option
     value="ASSINADO"
