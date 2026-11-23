@@ -402,6 +402,30 @@ export default function AdministracaoPage() {
 
                 <AdministracaoCard
 
+                  title="Feriados"
+
+                  subtitle="Nacional/estadual usado pelos relógios de vencimento, atraso e corte"
+
+                >
+
+                  <Button
+
+                    className="w-full"
+
+                    onClick={() =>
+                      router.push("/administracao/feriados")
+                    }
+
+                  >
+
+                    Abrir Feriados
+
+                  </Button>
+
+                </AdministracaoCard>
+
+                <AdministracaoCard
+
                   title="Relatórios"
 
                   subtitle="Escolha quais relatórios o sistema emite"

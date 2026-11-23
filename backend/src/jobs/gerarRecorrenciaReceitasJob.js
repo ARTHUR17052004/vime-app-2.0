@@ -2,6 +2,7 @@ const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
 const contaPagamentoService = require("../services/contaPagamentoService");
 const { kitnetDaReceita, multaJurosPadrao } = require("../services/receitaService");
+const diaUtil = require("../utils/diaUtil");
 
 /*
   Recorrência de Receita direto (sem Contrato -- esse já tem seu
@@ -58,7 +59,20 @@ module.exports = async () => {
       continue;
     }
 
-    const proximoVencimento = proximoMesMesmoDia(new Date(receita.vencimento));
+    // Dia-base vem do vencimento ANTERIOR (que pode já ter sido
+    // empurrado por sábado/domingo/feriado) -- sem contrato por trás
+    // pra guardar um "dia pretendido" fixo (ver cobrancaRecorrenteService,
+    // que usa contrato.diaVencimento), pode deslizar alguns dias com o
+    // tempo nesse caminho sem contrato. Aceitável aqui: é o motor menos
+    // usado (recorrência de receita avulsa, sem Contrato por trás).
+    const feriadosSetRecorrencia = await diaUtil.obterFeriadosSet([
+      receita.vencimento.getFullYear(),
+      receita.vencimento.getFullYear() + 1,
+    ]);
+    const proximoVencimento = diaUtil.proximoDiaUtil(
+      proximoMesMesmoDia(new Date(receita.vencimento)),
+      feriadosSetRecorrencia
+    );
 
     const inicioMesAlvo = new Date(proximoVencimento.getFullYear(), proximoVencimento.getMonth(), 1);
     const inicioMesSeguinte = new Date(proximoVencimento.getFullYear(), proximoVencimento.getMonth() + 1, 1);

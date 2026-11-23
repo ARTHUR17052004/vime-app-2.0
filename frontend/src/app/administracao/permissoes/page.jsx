@@ -162,6 +162,14 @@ const CATALOGO = [
     chave: "notificacoes",
     acoes: ["visualizar", "gerenciar"],
   },
+  {
+    // Feriados nacionais/estaduais pros relógios de 72h (vencimento,
+    // atraso, corte de água/energia, esvaziar kitnet) -- não é por
+    // locador, vale pro sistema inteiro (pedido do usuário em 23/11/2026).
+    modulo: "Feriados",
+    chave: "feriados",
+    acoes: ["visualizar", "editar"],
+  },
 ];
 
 const ROTULOS_ACAO = {

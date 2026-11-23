@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const vistoriaService = require('../services/vistoriaService');
 const corteVistoriaService = require('../services/corteVistoriaService');
+const diaUtil = require('../utils/diaUtil');
 
 /*
   72h (3 dias) depois do vencimento sem pagamento -- cria uma Vistoria
@@ -69,10 +70,18 @@ module.exports = async () => {
     console.error('[JOB] Erro ao resolver vistorias de corte órfãs:', erro.message);
   }
 
-  const limite = new Date();
+  const agora = new Date();
+
+  // Filtro do banco é só uma PRÉ-seleção solta (72h corridas = 3 dias
+  // corridos) -- 3 dias ÚTEIS nunca é menor que isso, então nenhuma
+  // candidata de verdade fica de fora aqui. A conta exata (pulando
+  // sábado/domingo/feriado) é feita depois, em JS, com diaUtil
+  // (pedido do usuário em 23/11/2026 -- o zelador não trabalha nesses
+  // dias, então o relógio de verdade não pode contar essas horas).
+  const limite = new Date(agora);
   limite.setHours(limite.getHours() - 72);
 
-  const receitas = await prisma.receita.findMany({
+  const candidatas = await prisma.receita.findMany({
     where: {
       status: 'ATRASADA',
       // Só Aluguel -- cortar água/energia (e escalar até esvaziar a
@@ -105,9 +114,20 @@ module.exports = async () => {
     },
   });
 
+  if (candidatas.length === 0) return;
+
+  const feriadosSet = await diaUtil.obterFeriadosSet([agora.getFullYear(), agora.getFullYear() + 1]);
+
+  // 3 dias ÚTEIS de verdade, contados a partir do vencimento -- só
+  // agora, com o calendário de feriados carregado, dá pra saber quem
+  // já fechou o prazo de verdade.
+  const receitas = candidatas.filter(
+    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.vencimento), 3, feriadosSet) <= agora
+  );
+
   if (receitas.length === 0) return;
 
-  console.log(`[JOB] Criando vistoria de risco de corte pra ${receitas.length} cobrança(s) atrasada(s) há 72h+...`);
+  console.log(`[JOB] Criando vistoria de risco de corte pra ${receitas.length} cobrança(s) atrasada(s) há 3 dias úteis+...`);
 
   const responsavel = await resolverResponsavelZelador();
 
@@ -140,12 +160,12 @@ module.exports = async () => {
 
     try {
 
-      // Relógio de 72h pra realizar o corte -- sem responder até lá, o
-      // job de status (atualizarStatusVistoriasJob) já vira ATRASADA
-      // sozinho, mesmo padrão de verificarEscalonamentoCorteJob.js pro
-      // segundo estágio (pedido do usuário em 18/11/2026).
-      const dataProxima = new Date();
-      dataProxima.setHours(dataProxima.getHours() + 72);
+      // Prazo de 3 dias ÚTEIS pra realizar o corte -- sem responder até
+      // lá, o job de status (atualizarStatusVistoriasJob) já vira
+      // ATRASADA sozinho, mesmo padrão de
+      // verificarEscalonamentoCorteJob.js pro segundo estágio (pedido
+      // do usuário em 18/11/2026, dias úteis em 23/11/2026).
+      const dataProxima = diaUtil.adicionarDiasUteis(new Date(), 3, feriadosSet);
 
       const vistoria = await vistoriaService.criar({
         titulo: corteVistoriaService.TITULO_REALIZAR_CORTE,

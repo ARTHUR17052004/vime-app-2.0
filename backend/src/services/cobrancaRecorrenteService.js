@@ -2,6 +2,7 @@ const prisma = require("../config/prisma");
 const { emitirAtualizacao } = require("../socket");
 const { multaJurosPadrao, existeAluguelDuplicado } = require("./receitaService");
 const contaPagamentoService = require("./contaPagamentoService");
+const diaUtil = require("../utils/diaUtil");
 
 /*
   Núcleo da geração de cobrança de aluguel a partir de um Contrato --
@@ -52,7 +53,13 @@ const gerarCobrancaParaContrato = async (contrato) => {
 
   const ultimoDiaDoMes = new Date(ano, mes + 1, 0).getDate();
   const dia = Math.min(contrato.diaVencimento || 1, ultimoDiaDoMes);
-  const vencimento = new Date(ano, mes, dia);
+
+  // Se o dia do vencimento cair em sábado/domingo/feriado, empurra pro
+  // próximo dia útil (ex.: dia 20 cai no sábado -> vence segunda) -- o
+  // zelador não trabalha nesses dias, e o boleto registrado no banco
+  // precisa refletir o prazo de verdade (pedido do usuário em 23/11/2026).
+  const feriadosSet = await diaUtil.obterFeriadosSet([ano, ano + 1]);
+  const vencimento = diaUtil.proximoDiaUtil(new Date(ano, mes, dia), feriadosSet);
 
   if (contrato.dataFim && new Date(contrato.dataFim) < vencimento) {
     return { criada: false, motivo: "contratoEncerraAntes" };

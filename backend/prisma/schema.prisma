@@ -1291,3 +1291,25 @@ model SnapshotOcupacao {
 
   @@unique([data, locadorId])
 }
+
+// Feriados ADICIONAIS aos nacionais (esses são calculados sozinhos, ver
+// utils/diaUtil.js -- fixos de lei + móveis calculados pela Páscoa, não
+// precisam de linha aqui). Pensado pro feriado estadual (ex.: Dia do
+// Servidor Público de Goiás, 28/10, que o governo pode deslocar por
+// decreto todo ano -- Lei 20.756/2020) e qualquer outro dia pontual que
+// o admin queira tratar como não-útil (ex.: um ponto facultativo).
+// Nunca municipal -- combinado com o usuário em 23/11/2026, o relógio
+// de 72h só respeita nacional + estadual. Usado pelos relógios de
+// vencimento/atraso/corte de água/esvaziar kitnet (o zelador não
+// trabalha nesses dias).
+model Feriado {
+  id String @id @default(uuid())
+
+  data DateTime // só a data (meia-noite), sem hora
+  nome String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([data])
+}

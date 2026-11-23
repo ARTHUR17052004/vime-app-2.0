@@ -1,5 +1,6 @@
 const prisma = require('../config/prisma');
 const vistoriaService = require('./vistoriaService');
+const diaUtil = require('../utils/diaUtil');
 
 /*
   Ponte entre Financeiro e Vistorias pro "risco de corte" -- antes só
@@ -28,17 +29,20 @@ const ESTAGIOS = [
   { campoVistoriaId: 'vistoriaEsvaziarId', campoCriadaEm: 'vistoriaEsvaziarCriadaEm', titulo: TITULO_ESVAZIAR_KITNET },
 ];
 
-// Mesmo critério de 72h usado na criação (verificarAtrasoCorteJob.js) --
-// "ainda em risco" = atrasada, enviada ao banco, vencida há 72h+.
-const aindaEmRisco = (receita) => {
+// Mesmo critério usado na criação (verificarAtrasoCorteJob.js) --
+// "ainda em risco" = atrasada, enviada ao banco, vencida há 3 dias
+// ÚTEIS+ (não 72h corridas -- o zelador não trabalha sábado/domingo/
+// feriado, pedido do usuário em 23/11/2026).
+const aindaEmRisco = async (receita) => {
 
   if (!receita) return false;
   if (receita.status === 'PAGO' || receita.status === 'PAGA' || receita.status === 'CANCELADA') return false;
   if (!receita.gatewayReferencia) return false;
   if (!receita.vencimento) return false;
 
-  const limite = new Date(receita.vencimento);
-  limite.setHours(limite.getHours() + 72);
+  const vencimento = new Date(receita.vencimento);
+  const feriadosSet = await diaUtil.obterFeriadosSet([vencimento.getFullYear(), vencimento.getFullYear() + 1]);
+  const limite = diaUtil.adicionarDiasUteis(vencimento, 3, feriadosSet);
 
   return limite <= new Date();
 
@@ -56,7 +60,7 @@ const resolverSeNaoCabeMais = async (receitaId) => {
 
   if (!receita) return;
 
-  if (aindaEmRisco(receita)) return;
+  if (await aindaEmRisco(receita)) return;
 
   for (const estagio of ESTAGIOS) {
 
@@ -109,7 +113,7 @@ const resolverOrfas = async () => {
 
       const receita = await prisma.receita.findFirst({ where: { [estagio.campoVistoriaId]: vistoria.id } });
 
-      if (receita && aindaEmRisco(receita)) continue;
+      if (receita && await aindaEmRisco(receita)) continue;
 
       await vistoriaService.atualizar(vistoria.id, {
         status: 'CANCELADA',

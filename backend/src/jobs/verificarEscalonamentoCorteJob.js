@@ -1,6 +1,7 @@
 const prisma = require('../config/prisma');
 const vistoriaService = require('../services/vistoriaService');
 const corteVistoriaService = require('../services/corteVistoriaService');
+const diaUtil = require('../utils/diaUtil');
 
 /*
   Segundo estágio da escalada de corte de água/energia (pedido do
@@ -32,10 +33,14 @@ const resolverResponsavelZelador = async () => {
 
 module.exports = async () => {
 
-  const limite = new Date();
+  const agora = new Date();
+
+  // Pré-filtro solto (72h corridas) -- igual verificarAtrasoCorteJob.js,
+  // a conta exata de 3 dias ÚTEIS é feita depois com diaUtil.
+  const limite = new Date(agora);
   limite.setHours(limite.getHours() - 72);
 
-  const receitas = await prisma.receita.findMany({
+  const candidatas = await prisma.receita.findMany({
     where: {
       corteRealizadoEm: { not: null, lte: limite },
       vistoriaEsvaziarId: null,
@@ -52,9 +57,17 @@ module.exports = async () => {
     },
   });
 
+  if (candidatas.length === 0) return;
+
+  const feriadosSet = await diaUtil.obterFeriadosSet([agora.getFullYear(), agora.getFullYear() + 1]);
+
+  const receitas = candidatas.filter(
+    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.corteRealizadoEm), 3, feriadosSet) <= agora
+  );
+
   if (receitas.length === 0) return;
 
-  console.log(`[JOB] Criando vistoria de "esvaziar kitnet" pra ${receitas.length} cobrança(s) com corte realizado há 72h+ sem quitação...`);
+  console.log(`[JOB] Criando vistoria de "esvaziar kitnet" pra ${receitas.length} cobrança(s) com corte realizado há 3 dias úteis+ sem quitação...`);
 
   const responsavel = await resolverResponsavelZelador();
 
@@ -79,11 +92,10 @@ module.exports = async () => {
 
     try {
 
-      // Mesma janela de 72h do primeiro estágio -- sem responder até lá,
-      // o job de status (atualizarStatusVistoriasJob) já vira ATRASADA
-      // sozinho.
-      const dataProxima = new Date();
-      dataProxima.setHours(dataProxima.getHours() + 72);
+      // Mesmo prazo de 3 dias ÚTEIS do primeiro estágio -- sem
+      // responder até lá, o job de status (atualizarStatusVistoriasJob)
+      // já vira ATRASADA sozinho.
+      const dataProxima = diaUtil.adicionarDiasUteis(new Date(), 3, feriadosSet);
 
       const vistoria = await vistoriaService.criar({
         titulo: corteVistoriaService.TITULO_ESVAZIAR_KITNET,
