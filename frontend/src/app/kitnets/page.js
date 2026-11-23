@@ -29,10 +29,12 @@ import KitnetForm from "../components/kitnets/KitnetForm";
 import KitnetTable from "../components/kitnets/KitnetTable";
 import KitnetsMobile from "../components/kitnets/mobile/KitnetsMobile";
 import ResidenciaFiltro from "../components/common/ResidenciaFiltro";
+import SearchInput from "../components/common/SearchInput";
 import TerminoAntecipadoModal from "../components/common/TerminoAntecipadoModal";
 
 import { usePermissao } from "../../hooks/usePermissao";
 import { useIsMobile } from "../../hooks/useIsMobile";
+import { normalizarBusca } from "../../utils/busca";
 
 export default function KitnetsPage() {
   return (
@@ -66,6 +68,8 @@ function KitnetsPageConteudo() {
   // requerConfirmacaoTerminoAntecipado:true e essa tela abre o modal de
   // motivo+observação+senha (ver TerminoAntecipadoModal.jsx).
   const [terminoAntecipado, setTerminoAntecipado] = useState(null);
+
+  const [search, setSearch] = useState("");
 
   const [residenciaSelecionada, setResidenciaSelecionada] = useState("");
 
@@ -234,7 +238,18 @@ function KitnetsPageConteudo() {
     "status": (a, b) => (a.status || "").localeCompare(b.status || "", "pt-BR"),
   };
 
+  const termoBusca = normalizarBusca(search);
+
   const kitnetsFiltradas = kitnets
+    .filter((k) => {
+      if (!termoBusca) return true;
+      const texto = normalizarBusca(`
+        ${k.numero || ""}
+        ${k.nome || ""}
+        ${k.unidade?.nome || k.unidadeNome || ""}
+      `);
+      return texto.includes(termoBusca);
+    })
     .filter((k) => !residenciaSelecionada || k.unidadeId === residenciaSelecionada)
     .filter((k) => !statusFiltro || k.status === statusFiltro)
     .slice()
@@ -448,52 +463,87 @@ function KitnetsPageConteudo() {
 
         </FadeIn>
 
+        <FadeIn delay={0.12}>
+
+          <PageSection>
+
+            <SearchInput
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Pesquisar kitnet..."
+            />
+
+          </PageSection>
+
+        </FadeIn>
+
         <FadeIn delay={0.15}>
 
           <PageSection>
 
-            <div className="flex flex-wrap gap-4 items-center">
+            {/* Mesma caixa/estilo do cartão de filtros do mobile
+                (KitnetsMobile.jsx) -- só o layout muda (linha aqui,
+                empilhado lá), a aparência das caixas é igual. Pedido
+                do usuário em 23/11/2026. */}
+            <div
+              className="
+                rounded-2xl
+                border
+                border-[var(--border-token)]
+                bg-[var(--surface)]
+                backdrop-blur-xl
+                p-4
+                flex
+                flex-wrap
+                gap-3
+              "
+            >
 
               <div className="flex-1 min-w-[220px]">
                 <ResidenciaFiltro
+                  compact
                   value={residenciaSelecionada}
                   onChange={setResidenciaSelecionada}
                 />
               </div>
 
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-                  Status
-                </label>
-                <select
-                  value={statusFiltro}
-                  onChange={(e) => setStatusFiltro(e.target.value)}
-                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="" className="bg-[#1b2430]">Todos</option>
-                  <option value="DISPONIVEL" className="bg-[#1b2430]">Disponível</option>
-                  <option value="OCUPADA" className="bg-[#1b2430]">Ocupada</option>
-                  <option value="MANUTENCAO" className="bg-[#1b2430]">Manutenção</option>
-                </select>
-              </div>
+              <select
+                value={statusFiltro}
+                onChange={(e) => setStatusFiltro(e.target.value)}
+                className="
+                  rounded-xl
+                  border border-[var(--border-token)]
+                  bg-[var(--surface-2)]
+                  text-[var(--text)]
+                  px-3 py-2.5
+                  text-sm
+                "
+              >
+                <option value="" className="bg-[#1b2430]">Todos os status</option>
+                <option value="DISPONIVEL" className="bg-[#1b2430]">Disponível</option>
+                <option value="OCUPADA" className="bg-[#1b2430]">Ocupada</option>
+                <option value="MANUTENCAO" className="bg-[#1b2430]">Manutenção</option>
+              </select>
 
-              <div className="flex items-center gap-2">
-                <label className="text-sm text-[var(--text-subtle)] whitespace-nowrap">
-                  Organizar por
-                </label>
-                <select
-                  value={ordenacao}
-                  onChange={(e) => setOrdenacao(e.target.value)}
-                  className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-lg px-3 py-2 text-sm"
-                >
-                  <option value="numero-asc" className="bg-[#1b2430]">Número (A-Z)</option>
-                  <option value="numero-desc" className="bg-[#1b2430]">Número (Z-A)</option>
-                  <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
-                  <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
-                  <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
-                  <option value="status" className="bg-[#1b2430]">Status</option>
-                </select>
-              </div>
+              <select
+                value={ordenacao}
+                onChange={(e) => setOrdenacao(e.target.value)}
+                className="
+                  rounded-xl
+                  border border-[var(--border-token)]
+                  bg-[var(--surface-2)]
+                  text-[var(--text)]
+                  px-3 py-2.5
+                  text-sm
+                "
+              >
+                <option value="numero-asc" className="bg-[#1b2430]">Número (A-Z)</option>
+                <option value="numero-desc" className="bg-[#1b2430]">Número (Z-A)</option>
+                <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+                <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
+                <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
+                <option value="status" className="bg-[#1b2430]">Status</option>
+              </select>
 
             </div>
 
