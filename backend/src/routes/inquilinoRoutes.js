@@ -11,12 +11,17 @@ const prisma = require('../config/prisma');
 router.use(authMiddleware);
 
 // Excluir o Inquilino esvazia a kitnet dele (ver inquilinoService.remover) --
-// se o contrato ATIVO dele ainda não chegou no dataFim, é quebra de
-// contrato e vira um encerrar de verdade em vez da exclusão (ver
-// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado).
+// se o contrato ATIVO ou PENDENTE (ainda aguardando assinatura) dele
+// ainda não chegou no dataFim, é quebra de contrato e vira um encerrar
+// de verdade em vez da exclusão (ver
+// permissaoMiddleware.exigirConfirmacaoTerminoAntecipado). Só ATIVO
+// aqui deixava excluir sem senha/motivo nenhum um inquilino com
+// contrato PENDENTE ainda não assinado -- o contrato sumia junto
+// (onDelete: Cascade) sem cancelar o envelope da Clicksign nem avisar
+// ninguém (bug relatado em 23/11/2026).
 const obterContratoDoInquilino = async (req) => {
   return prisma.contrato.findFirst({
-    where: { inquilinoId: req.params.id, status: 'ATIVO' },
+    where: { inquilinoId: req.params.id, status: { in: ['ATIVO', 'PENDENTE'] } },
     select: { id: true, dataFim: true },
   });
 };

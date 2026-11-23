@@ -678,6 +678,17 @@ const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoIna
     },
   });
 
+  // Sem isso, a vistoria de "realizar corte"/"esvaziar kitnet" ainda
+  // aberta continuava pedindo ação do zelador sobre um caso que já foi
+  // encerrado administrativamente -- resolverSeNaoCabeMais não serve
+  // aqui porque o status por baixo continua ATRASADA de propósito (ver
+  // schema.prisma), então aindaEmRisco() nunca deixaria cancelar.
+  try {
+    await corteVistoriaService.cancelarVinculadaPorInadimplencia(id);
+  } catch (erro) {
+    console.error('[vistoria-corte] Falha ao cancelar vistoria vinculada na classificação de inadimplência:', erro.message);
+  }
+
   const MOTIVO_ROTULO = {
     ABANDONO: "Abandono",
     INADIMPLENCIA: "Inadimplência",

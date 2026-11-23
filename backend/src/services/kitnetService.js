@@ -43,6 +43,25 @@ const buscarPorId = (id) => {
   });
 };
 
+// Dois números iguais na mesma residência é a raiz do problema que
+// gerou duas "kitnet 15" (e nenhuma 14) na ARA -- sem essa checagem o
+// formulário deixava salvar um número repetido sem avisar nada.
+const validarNumeroUnico = async (unidadeId, numero, { ignorarId } = {}) => {
+
+  const duplicada = await prisma.kitnet.findFirst({
+    where: {
+      unidadeId,
+      numero: String(numero),
+      ...(ignorarId ? { id: { not: ignorarId } } : {}),
+    },
+  });
+
+  if (duplicada) {
+    throw new Error(`Já existe uma kitnet número ${numero} nessa residência.`);
+  }
+
+};
+
 const criar = async (dados, usuario) => {
 
   await campoObrigatorioService.validar('kitnet', dados);
@@ -57,6 +76,10 @@ const criar = async (dados, usuario) => {
 
   if (usuario?.locadorId && unidade.locadorId !== usuario.locadorId) {
     throw new Error('Residência não encontrada.');
+  }
+
+  if (dados.numero !== undefined && dados.numero !== null && dados.numero !== '') {
+    await validarNumeroUnico(dados.unidadeId, dados.numero);
   }
 
   // unidade.kitnets é o limite cadastrado pra essa residência -- sem
@@ -107,6 +130,15 @@ const atualizar = async (id, dados) => {
   // o resultado final (atual + alterações), não só o pedaço enviado.
   await campoObrigatorioService.validar('kitnet', { ...atual, ...dados });
 
+  if (
+    dados.numero !== undefined &&
+    dados.numero !== null &&
+    dados.numero !== '' &&
+    String(dados.numero) !== String(atual?.numero)
+  ) {
+    await validarNumeroUnico(atual.unidadeId, dados.numero, { ignorarId: id });
+  }
+
   // Só marca como "editada manualmente" se o aluguel realmente mudou --
   // assim um salvar sem mexer nesse campo não trava a sincronização
   // automática vinda da Residência.
@@ -143,12 +175,44 @@ const atualizar = async (id, dados) => {
   return resultado;
 };
 
-// Excluir o kitnet derruba (cascade no banco) todas as vistorias dele
-// junto -- sem isso, notificação velha ("Vistoria pendente"/"urgente")
-// fica apontando pra um link que não existe mais, pra sempre (ver
-// vistoriaController.buscarPorId pra auto-cura das que já ficaram
-// órfãs antes dessa correção).
+// Excluir a kitnet derruba (cascade no banco) o(s) contrato(s) e o(s)
+// inquilino(s) dela junto, sem passar por contratoService.remover()
+// nem inquilinoService.remover() -- que têm suas próprias travas
+// (cancelar envelope Clicksign, bloquear se tiver receita vinculada).
+// A trava de senha da rota (exigirConfirmacaoTerminoAntecipado) só
+// pega contrato com dataFim ainda no futuro; um contrato sem dataFim,
+// ou já vencido mas ainda não encerrado pelo job, passava direto sem
+// pedir nada e apagava um inquilino de verdade morando lá (bug
+// relatado em 23/11/2026). Bloqueia aqui, incondicional -- pra excluir
+// a kitnet tem que encerrar/excluir o contrato e o inquilino primeiro,
+// pelos fluxos certos.
 const remover = async (id) => {
+
+  const contratoAberto = await prisma.contrato.findFirst({
+    where: { kitnetId: id, status: { in: ['ATIVO', 'PENDENTE'] } },
+    select: { id: true },
+  });
+
+  if (contratoAberto) {
+    const erro = new Error(
+      'PROIBIDO: essa kitnet tem um contrato ativo ou pendente -- encerre (ou exclua) o contrato antes de excluir a kitnet.'
+    );
+    erro.status = 400;
+    throw erro;
+  }
+
+  const inquilinoComReceita = await prisma.inquilino.findFirst({
+    where: { kitnetId: id, receitas: { some: {} } },
+    select: { id: true, nome: true },
+  });
+
+  if (inquilinoComReceita) {
+    const erro = new Error(
+      `PROIBIDO: essa kitnet tem um inquilino (${inquilinoComReceita.nome}) com cobrança vinculada -- resolva ou exclua o inquilino antes de excluir a kitnet.`
+    );
+    erro.status = 400;
+    throw erro;
+  }
 
   const vistorias = await prisma.vistoria.findMany({
     where: { kitnetId: id },

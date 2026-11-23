@@ -158,11 +158,49 @@ const cancelarVinculada = async (receitaId) => {
 
 };
 
+// Pra quando a Receita é classificada como Inadimplência (botão
+// "Inadimplência" do Financeiro) -- igual cancelarVinculada, mas por
+// outro motivo: aindaEmRisco() continua achando que tem risco (o
+// "selo adicional" não muda o status por baixo, ver schema.prisma), só
+// que agora não importa mais -- a receita já saiu do fluxo normal de
+// cobrança, foi formalmente classificada e está indo pra
+// /financeiro/inadimplentes. Deixar o zelador com uma tarefa de
+// "realizar corte"/"esvaziar kitnet" pendente sobre um caso que já foi
+// encerrado administrativamente não faz sentido (bug relatado em
+// 23/11/2026). Chamado por receitaService.classificarInadimplencia.
+const cancelarVinculadaPorInadimplencia = async (receitaId) => {
+
+  const receita = await prisma.receita.findUnique({ where: { id: receitaId } });
+
+  if (!receita) return;
+
+  for (const estagio of ESTAGIOS) {
+
+    const vistoriaId = receita[estagio.campoVistoriaId];
+
+    if (!vistoriaId) continue;
+
+    const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
+
+    if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+
+      await vistoriaService.atualizar(vistoria.id, {
+        status: 'CANCELADA',
+        observacoes: `${vistoria.observacoes ? vistoria.observacoes + '\n\n' : ''}Cancelada automaticamente -- a cobrança que gerou esse risco foi classificada como inadimplência (caso encerrado administrativamente).`,
+      });
+
+    }
+
+  }
+
+};
+
 module.exports = {
   aindaEmRisco,
   resolverSeNaoCabeMais,
   resolverOrfas,
   cancelarVinculada,
+  cancelarVinculadaPorInadimplencia,
   TITULO_REALIZAR_CORTE,
   TITULO_ESVAZIAR_KITNET,
 };
