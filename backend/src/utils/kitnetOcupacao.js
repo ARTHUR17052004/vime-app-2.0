@@ -182,7 +182,7 @@ const cancelarVistoriaDeEntrega = async (kitnetId) => {
         where: { id: vistoria.id },
         data: {
           status: "CANCELADA",
-          observacoes: `${vistoria.observacoes ? vistoria.observacoes + "\n\n" : ""}Cancelada automaticamente -- a kitnet voltou a ficar ocupada (ou foi pra manutenção) antes dessa vistoria ser realizada.`,
+          observacoes: `${vistoria.observacoes ? vistoria.observacoes + "\n\n" : ""}CANCELADA POR VAGÂNCIA ENCERRADA -- a kitnet voltou a ficar ocupada (ou foi pra manutenção) antes dessa vistoria de entrega ser realizada.`,
         },
       });
 
