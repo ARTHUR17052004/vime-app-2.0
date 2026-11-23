@@ -226,9 +226,20 @@ const ocupacaoPorResidencia = async (usuario) => {
     let emAtraso = 0;
 
     for (const kitnet of unidade.kitnetsRelacionadas) {
-      if (kitnetsEmAtraso.has(kitnet.id)) emAtraso++;
-      else if (kitnet.status === 'OCUPADA') ocupadas++;
-      else if (kitnet.status === 'DISPONIVEL') vagas++;
+      // "Em atraso" só vale pra quem ainda MORA lá -- uma dívida de
+      // ex-inquilino (contrato já ENCERRADO, mas a cobrança de antes
+      // dele sair continua ATRASADA pra cobrança) não pode fazer a
+      // kitnet, já DISPONIVEL de novo, sumir da contagem de Vagas.
+      // Bug relatado em 23/11/2026: total de Vazias (contagem direta
+      // por status) batia 8, mas a soma de "Vagas" por residência
+      // dava só 3 -- 5 kitnets vazias tinham dívida de ex-inquilino
+      // ainda em aberto e caíam aqui antes de chegar no DISPONIVEL.
+      if (kitnet.status === 'OCUPADA') {
+        if (kitnetsEmAtraso.has(kitnet.id)) emAtraso++;
+        else ocupadas++;
+      } else if (kitnet.status === 'DISPONIVEL') {
+        vagas++;
+      }
     }
 
     const total = unidade.kitnetsRelacionadas.length;
