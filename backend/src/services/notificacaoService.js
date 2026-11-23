@@ -121,31 +121,54 @@ const criar = async ({ usuarioId, origem, titulo, mensagem, link, locadorId }) =
   // (nunca trava quem chamou -- só não duplica o aviso).
   const JANELA_DEDUPE_MS = 24 * 60 * 60 * 1000;
 
-  const duplicata = await prisma.notificacao.findFirst({
-    where: {
-      titulo: tituloExibido,
-      mensagem,
-      link: link || null,
-      locadorId: locadorId || null,
-      usuarioId: usuarioId || null,
-      createdAt: { gte: new Date(Date.now() - JANELA_DEDUPE_MS) },
-    },
-    select: { id: true },
+  // A checagem acima (achar duplicata) e o create logo abaixo não eram
+  // atômicos -- duas chamadas de criar() pra exatamente o mesmo aviso
+  // quase ao mesmo tempo (ex.: o job de 15 em 15 min conferindo a Asaas
+  // E um webhook real chegando quase junto pro mesmo PAYMENT_OVERDUE)
+  // passavam as duas pelo "ainda não existe" antes de qualquer uma
+  // inserir, e furavam a trava -- foi isso que manteve a "Cobrança
+  // atrasada" do YAMIR duplicando de 15 em 15 min mesmo DEPOIS da trava
+  // de dedupe já estar no ar (confirmado em produção em 23/11/2026).
+  // pg_advisory_xact_lock serializa quem tenta criar o MESMO aviso ao
+  // mesmo tempo (a segunda chamada espera a primeira commitar antes de
+  // fazer a própria checagem) e solta sozinho no fim da transação --
+  // seguro com conexão via PgBouncer (diferente da versão "session"
+  // desse lock, que vazaria entre conexões do pool).
+  const chaveDedupe = `${tituloExibido}|${mensagem}|${link || ""}|${locadorId || ""}|${usuarioId || ""}`;
+
+  const notificacao = await prisma.$transaction(async (tx) => {
+
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${chaveDedupe})::bigint)`;
+
+    const duplicata = await tx.notificacao.findFirst({
+      where: {
+        titulo: tituloExibido,
+        mensagem,
+        link: link || null,
+        locadorId: locadorId || null,
+        usuarioId: usuarioId || null,
+        createdAt: { gte: new Date(Date.now() - JANELA_DEDUPE_MS) },
+      },
+      select: { id: true },
+    });
+
+    if (duplicata) return null;
+
+    return tx.notificacao.create({
+      data: {
+        usuarioId: usuarioId || null,
+        origem,
+        titulo: tituloExibido,
+        mensagem,
+        link: link || null,
+        locadorId: locadorId || null,
+        perfisAlvo,
+      },
+    });
+
   });
 
-  if (duplicata) return null;
-
-  const notificacao = await prisma.notificacao.create({
-    data: {
-      usuarioId: usuarioId || null,
-      origem,
-      titulo: tituloExibido,
-      mensagem,
-      link: link || null,
-      locadorId: locadorId || null,
-      perfisAlvo,
-    },
-  });
+  if (!notificacao) return null;
 
   const io = getIO();
 
