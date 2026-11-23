@@ -584,6 +584,18 @@ export default function InquilinosPage() {
 
             <PageSection>
 
+              <InquilinoStats
+                total={inquilinos.length}
+              />
+
+            </PageSection>
+
+          </FadeIn>
+
+          <FadeIn delay={0.20}>
+
+            <PageSection>
+
               {/* Mesmo cartão único "Filtros" do Financeiro/Contratos
                   (título + subtítulo + Pesquisar rotulado + campos em
                   grid rotulados). Pedido do usuário em 23/11/2026. */}
@@ -672,18 +684,6 @@ export default function InquilinosPage() {
                 </div>
 
               </div>
-
-            </PageSection>
-
-          </FadeIn>
-
-          <FadeIn delay={0.20}>
-
-            <PageSection>
-
-              <InquilinoStats
-                total={inquilinos.length}
-              />
 
             </PageSection>
 
