@@ -689,6 +689,19 @@ const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoIna
     console.error('[vistoria-corte] Falha ao cancelar vistoria vinculada na classificação de inadimplência:', erro.message);
   }
 
+  // Classificar como inadimplência não tira o boleto de circulação lá
+  // fora -- sem isso, a cobrança continuava válida e pagável no banco
+  // mesmo já encerrada aqui dentro (mesmo motivo de receitaService.remover
+  // cancelar no banco antes de excluir -- bug relatado em 16/11/2026,
+  // pedido do usuário em 23/11/2026 pra também valer aqui). Só tenta se
+  // tinha sido enviada de verdade (cancelarNoBanco já confere isso);
+  // nunca trava a classificação em si, que já aconteceu de qualquer jeito.
+  const cancelamentoBanco = await gatewayPagamentoService.cancelarNoBanco(receita);
+
+  if (cancelamentoBanco.tentou && !cancelamentoBanco.success) {
+    console.error(`[gateway] Receita ${receita.id} classificada como inadimplência, mas o cancelamento no banco falhou:`, cancelamentoBanco.mensagem);
+  }
+
   const MOTIVO_ROTULO = {
     ABANDONO: "Abandono",
     INADIMPLENCIA: "Inadimplência",
@@ -716,7 +729,7 @@ const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoIna
     usuarioNome: autor?.nome || "Sistema",
     modulo: "RECEITAS",
     acao: "ATUALIZAR",
-    descricao: `Receita "${receita.descricao || receita.id}" classificada como ${MOTIVO_ROTULO[motivoInadimplencia] || motivoInadimplencia} por ${autor?.nome || "Sistema"}.`,
+    descricao: `Receita "${receita.descricao || receita.id}" classificada como ${MOTIVO_ROTULO[motivoInadimplencia] || motivoInadimplencia} por ${autor?.nome || "Sistema"}.${cancelamentoBanco.tentou ? (cancelamentoBanco.success ? ' Cobrança cancelada no banco.' : ` Cancelamento no banco falhou: ${cancelamentoBanco.mensagem}`) : ''}`,
   });
 
   notificacaoService.criar({
@@ -729,7 +742,7 @@ const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoIna
 
   emitirAtualizacao("receita");
 
-  return atualizada;
+  return { ...atualizada, cancelamentoBanco };
 
 };
 
