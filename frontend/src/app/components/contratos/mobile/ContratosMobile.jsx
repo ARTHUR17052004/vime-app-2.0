@@ -88,6 +88,8 @@ export default function ContratosMobile({
 }) {
   const router = useRouter();
 
+  const podeEditar = usePermissao("contratos.editar");
+
   const ativos = contratosFiltrados.filter((c) => c.status === "ATIVO").length;
   const pendentes = contratosFiltrados.filter((c) => c.status === "PENDENTE").length;
   const encerrados = contratosFiltrados.filter((c) => c.status === "ENCERRADO").length;
@@ -96,9 +98,22 @@ export default function ContratosMobile({
     0
   );
 
+  // Aba "Vencimentos" é sobre o FIM do contrato (dataFim) -- pra
+  // decidir renovar ou não -- não o dia de vencimento mensal do
+  // aluguel (diaVencimento), que já aparece na aba Contratos. Mesmo
+  // critério do desktop (ver ContratoProximosVencimentos.jsx).
+  const hojeSemHora = new Date();
+  hojeSemHora.setHours(0, 0, 0, 0);
+
   const contratosVencendo = contratos
-    .filter((c) => c.status === "ATIVO")
-    .sort((a, b) => Number(a.diaVencimento) - Number(b.diaVencimento));
+    .filter((c) => c.status === "ATIVO" && c.dataFim)
+    .map((c) => {
+      const fim = new Date(c.dataFim);
+      fim.setHours(0, 0, 0, 0);
+      const diasRestantes = Math.round((fim - hojeSemHora) / (1000 * 60 * 60 * 24));
+      return { ...c, _fim: fim, _diasRestantes: diasRestantes };
+    })
+    .sort((a, b) => a._fim - b._fim);
 
   return (
     <div className="space-y-4">
@@ -326,31 +341,100 @@ export default function ContratosMobile({
         ) : (
 
           <section className="space-y-2.5">
-            {contratosVencendo.map((contrato) => (
-              <div
-                key={contrato.id}
-                onClick={() => router.push(`/contratos/${contrato.id}`)}
-                className={`${cartao} p-3.5 flex items-center justify-between gap-3 active:scale-[0.99] transition cursor-pointer`}
-              >
-                <div className="min-w-0">
-                  <p className="text-[14px] font-bold text-[var(--text)] truncate">
-                    {contrato.inquilino?.nome || contrato.inquilinoNome || "-"}
-                  </p>
-                  <p className="mt-0.5 text-[12px] text-[var(--text-subtle)] truncate">
-                    {contrato.unidade?.nome || contrato.unidadeNome || "-"}
-                  </p>
-                </div>
+            {contratosVencendo.map((contrato) => {
 
-                <div className="shrink-0 text-right">
-                  <p className="text-[14px] font-bold text-emerald-400 tabular-nums">
-                    R$ {Number(contrato.valorAluguel || 0).toLocaleString("pt-BR")}
-                  </p>
-                  <p className="mt-0.5 text-[11px] text-[var(--text-subtle)]">
-                    Dia {contrato.diaVencimento}
-                  </p>
+              const urgente = contrato._diasRestantes <= 10;
+              const atencao = !urgente && contrato._diasRestantes <= 30;
+              const corUrgencia = urgente
+                ? "bg-red-500/15 text-red-400"
+                : atencao
+                ? "bg-yellow-500/15 text-yellow-400"
+                : "bg-emerald-500/15 text-emerald-400";
+              const textoUrgencia = contrato._diasRestantes < 0
+                ? "Venceu"
+                : `${contrato._diasRestantes}d restante${contrato._diasRestantes === 1 ? "" : "s"}`;
+
+              return (
+                <div
+                  key={contrato.id}
+                  onClick={() => router.push(`/contratos/${contrato.id}`)}
+                  className={`${cartao} p-3.5 active:scale-[0.99] transition cursor-pointer`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-bold text-[var(--text)] truncate">
+                        {contrato.inquilino?.nome || contrato.inquilinoNome || "-"}
+                      </p>
+                      <p className="mt-0.5 text-[12px] text-[var(--text-subtle)] truncate">
+                        {contrato.unidade?.nome || contrato.unidadeNome || "-"}
+                      </p>
+                    </div>
+
+                    <div className="shrink-0 text-right">
+                      <p className="text-[14px] font-bold text-emerald-400 tabular-nums">
+                        R$ {Number(contrato.valorAluguel || 0).toLocaleString("pt-BR")}
+                      </p>
+                      <p className="mt-0.5 text-[11px] text-[var(--text-subtle)]">
+                        Fim: {contrato._fim.toLocaleDateString("pt-BR")}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between gap-2">
+
+                    <span className={`px-2.5 py-1 rounded-full text-[11px] font-semibold whitespace-nowrap ${corUrgencia}`}>
+                      {textoUrgencia}
+                    </span>
+
+                    {podeEditar && (
+                      <div className="flex items-center gap-2">
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onRenovar?.(contrato.id);
+                          }}
+                          className="
+                            flex items-center justify-center
+                            w-9 h-9
+                            rounded-xl
+                            bg-emerald-500/10
+                            border border-emerald-500/20
+                            text-emerald-400
+                            active:scale-95
+                            transition
+                          "
+                        >
+                          <RefreshCw size={16} />
+                        </button>
+
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEncerrar?.(contrato.id);
+                          }}
+                          className="
+                            flex items-center justify-center
+                            w-9 h-9
+                            rounded-xl
+                            bg-red-500/10
+                            border border-red-500/20
+                            text-red-400
+                            active:scale-95
+                            transition
+                          "
+                        >
+                          <Ban size={16} />
+                        </button>
+
+                      </div>
+                    )}
+
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+
+            })}
           </section>
 
         )

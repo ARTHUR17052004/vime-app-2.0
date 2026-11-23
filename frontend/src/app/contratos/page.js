@@ -712,6 +712,8 @@ function ContratosPageConteudo() {
 
               <ContratoProximosVencimentos
                 contratos={contratos}
+                onRenovar={renovarContrato}
+                onEncerrar={encerrarContrato}
               />
 
             ) : (
