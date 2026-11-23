@@ -504,17 +504,59 @@ export default function ContratosArquivoPage() {
 
             <PageSection>
 
-              <SearchInput
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Pesquisar por inquilino, residência ou kitnet..."
-              />
+              {/* Mesmo cartão único "Filtros" do Financeiro/Contratos/
+                  Inquilinos/Kitnets (título + subtítulo + Pesquisar
+                  rotulado + campos em grid rotulados). Pedido do
+                  usuário em 23/11/2026. */}
+              <div
+                className="
+                  bg-[var(--surface)]
+                  backdrop-blur-[24px]
+                  rounded-2xl
+                  border
+                  border-[var(--border-token)]
+                  p-6
+                "
+              >
 
-              <div className="mt-4 max-w-sm">
-                <ResidenciaFiltro
-                  value={residenciaSelecionada}
-                  onChange={setResidenciaSelecionada}
-                />
+                <div className="mb-6">
+
+                  <h2 className="text-xl font-bold text-[var(--text)]">
+                    Filtros
+                  </h2>
+
+                  <p className="text-[var(--text-subtle)] mt-1">
+                    Localize rapidamente qualquer contrato do arquivo.
+                  </p>
+
+                </div>
+
+                <div className="mb-5">
+                  <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                    Pesquisar
+                  </label>
+                  <SearchInput
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Pesquisar por inquilino, residência ou kitnet..."
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+
+                  <div>
+                    <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                      Residência
+                    </label>
+                    <ResidenciaFiltro
+                      compact
+                      value={residenciaSelecionada}
+                      onChange={setResidenciaSelecionada}
+                    />
+                  </div>
+
+                </div>
+
               </div>
 
             </PageSection>
