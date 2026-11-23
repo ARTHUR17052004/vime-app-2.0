@@ -393,6 +393,41 @@ const enviarCobranca = async (receitaId) => {
     };
   }
 
+  // Reivindica atomicamente ANTES de mandar pra qualquer banco -- a
+  // checagem de "já foi enviada" (gatewayReferencia/asaasPaymentId) em
+  // cada enviarPeloXXX/asaasService.enviarCobranca só olha um objeto já
+  // lido em memória, sem travar nada no banco. Duas chamadas quase
+  // juntas pra essa MESMA receita (duplo clique, ou um retry do
+  // frontend enquanto a primeira ainda espera a resposta -- lenta -- do
+  // banco) liam as duas "ainda não enviada" e cada uma gerava um boleto
+  // de VERDADE no banco pra mesma cobrança. Aconteceu de verdade: uma
+  // receita do YAMIR LAZARO acumulou ~35 boletos Asaas pro mesmo mês
+  // (bug relatado em 23/11/2026). Mesmo padrão já usado em
+  // lembreteVencimentoJob/cobrancaVencidaWhatsappJob -- devolve a
+  // reivindicação se o envio falhar, pra não perder a tentativa.
+  // cobrancaEnviadaEm TEM que entrar na WHERE também, não só
+  // gatewayReferencia/asaasPaymentId -- são esses dois que só ficam
+  // preenchidos DEPOIS que o banco responder (são o resultado, não a
+  // reivindicação). Sem cobrancaEnviadaEm aqui, a trava não travava
+  // nada: testado com 5 chamadas simultâneas, as 5 "reivindicavam" com
+  // sucesso antes de eu perceber e corrigir.
+  const reivindicada = await prisma.receita.updateMany({
+    where: { id: receitaId, gatewayReferencia: null, asaasPaymentId: null, cobrancaEnviadaEm: null },
+    data: { cobrancaEnviadaEm: new Date() },
+  });
+
+  if (reivindicada.count === 0) {
+    return {
+      success: false,
+      mensagem: 'Esta receita já foi enviada ao banco.',
+    };
+  }
+
+  const devolverReivindicacao = () => prisma.receita.update({
+    where: { id: receitaId },
+    data: { cobrancaEnviadaEm: receita.cobrancaEnviadaEm || null },
+  }).catch((erro) => console.error('[gateway] Falha ao devolver reivindicação de envio:', erro.message));
+
   const locadorId = resolverLocadorId(receita);
   const kitnetId = resolverKitnetId(receita);
   const conta = await contaPagamentoService.resolverParaKitnet(kitnetId, locadorId);
@@ -452,15 +487,21 @@ const enviarCobranca = async (receitaId) => {
   }
 
   if (conta?.provider === 'BB') {
-    return enviarPeloBB(receita, conta);
+    const resultadoBB = await enviarPeloBB(receita, conta);
+    if (!resultadoBB.success) await devolverReivindicacao();
+    return resultadoBB;
   }
 
   if (conta?.provider === 'EFI') {
-    return enviarPelaEFI(receita, conta);
+    const resultadoEFI = await enviarPelaEFI(receita, conta);
+    if (!resultadoEFI.success) await devolverReivindicacao();
+    return resultadoEFI;
   }
 
   if (conta?.provider === 'BRB') {
-    return enviarPeloBRB(receita, conta);
+    const resultadoBRB = await enviarPeloBRB(receita, conta);
+    if (!resultadoBRB.success) await devolverReivindicacao();
+    return resultadoBRB;
   }
 
   // Sem conta BB/EFI/BRB vinculada -- segue o fluxo Asaas de sempre.
@@ -468,6 +509,8 @@ const enviarCobranca = async (receitaId) => {
   // locador) pra não resolver de novo lá dentro com uma lógica
   // separada que podia divergir desta.
   const resultado = await asaasService.enviarCobranca(receitaId, conta);
+
+  if (!resultado.success) await devolverReivindicacao();
 
   if (resultado.success) {
 
