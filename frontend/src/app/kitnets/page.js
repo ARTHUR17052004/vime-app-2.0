@@ -467,83 +467,92 @@ function KitnetsPageConteudo() {
 
           <PageSection>
 
-            <SearchInput
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Pesquisar kitnet..."
-            />
-
-          </PageSection>
-
-        </FadeIn>
-
-        <FadeIn delay={0.15}>
-
-          <PageSection>
-
-            {/* Mesma caixa/estilo do cartão de filtros do mobile
-                (KitnetsMobile.jsx) -- só o layout muda (linha aqui,
-                empilhado lá), a aparência das caixas é igual. Pedido
-                do usuário em 23/11/2026. */}
+            {/* Mesmo cartão único "Filtros" do Financeiro/Contratos/
+                Inquilinos (título + subtítulo + Pesquisar rotulado +
+                campos em grid rotulados). Pedido do usuário em
+                23/11/2026. */}
             <div
               className="
+                bg-[var(--surface)]
+                backdrop-blur-[24px]
                 rounded-2xl
                 border
                 border-[var(--border-token)]
-                bg-[var(--surface)]
-                backdrop-blur-xl
-                p-4
-                flex
-                flex-wrap
-                gap-3
+                p-6
               "
             >
 
-              <div className="flex-1 min-w-[220px]">
-                <ResidenciaFiltro
-                  compact
-                  value={residenciaSelecionada}
-                  onChange={setResidenciaSelecionada}
+              <div className="mb-6">
+
+                <h2 className="text-xl font-bold text-[var(--text)]">
+                  Filtros
+                </h2>
+
+                <p className="text-[var(--text-subtle)] mt-1">
+                  Localize rapidamente qualquer kitnet.
+                </p>
+
+              </div>
+
+              <div className="mb-5">
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Pesquisar
+                </label>
+                <SearchInput
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Pesquisar kitnet..."
                 />
               </div>
 
-              <select
-                value={statusFiltro}
-                onChange={(e) => setStatusFiltro(e.target.value)}
-                className="
-                  rounded-xl
-                  border border-[var(--border-token)]
-                  bg-[var(--surface-2)]
-                  text-[var(--text)]
-                  px-3 py-2.5
-                  text-sm
-                "
-              >
-                <option value="" className="bg-[#1b2430]">Todos os status</option>
-                <option value="DISPONIVEL" className="bg-[#1b2430]">Disponível</option>
-                <option value="OCUPADA" className="bg-[#1b2430]">Ocupada</option>
-                <option value="MANUTENCAO" className="bg-[#1b2430]">Manutenção</option>
-              </select>
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
 
-              <select
-                value={ordenacao}
-                onChange={(e) => setOrdenacao(e.target.value)}
-                className="
-                  rounded-xl
-                  border border-[var(--border-token)]
-                  bg-[var(--surface-2)]
-                  text-[var(--text)]
-                  px-3 py-2.5
-                  text-sm
-                "
-              >
-                <option value="numero-asc" className="bg-[#1b2430]">Número (A-Z)</option>
-                <option value="numero-desc" className="bg-[#1b2430]">Número (Z-A)</option>
-                <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
-                <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
-                <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
-                <option value="status" className="bg-[#1b2430]">Status</option>
-              </select>
+                <div>
+                  <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                    Residência
+                  </label>
+                  <ResidenciaFiltro
+                    compact
+                    value={residenciaSelecionada}
+                    onChange={setResidenciaSelecionada}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                    Status
+                  </label>
+                  <select
+                    value={statusFiltro}
+                    onChange={(e) => setStatusFiltro(e.target.value)}
+                    className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
+                  >
+                    <option value="" className="bg-[#1b2430]">Todos os status</option>
+                    <option value="DISPONIVEL" className="bg-[#1b2430]">Disponível</option>
+                    <option value="OCUPADA" className="bg-[#1b2430]">Ocupada</option>
+                    <option value="MANUTENCAO" className="bg-[#1b2430]">Manutenção</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                    Organizar por
+                  </label>
+                  <select
+                    value={ordenacao}
+                    onChange={(e) => setOrdenacao(e.target.value)}
+                    className="w-full h-11 border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl px-3 text-sm"
+                  >
+                    <option value="numero-asc" className="bg-[#1b2430]">Número (A-Z)</option>
+                    <option value="numero-desc" className="bg-[#1b2430]">Número (Z-A)</option>
+                    <option value="residencia-asc" className="bg-[#1b2430]">Residência</option>
+                    <option value="aluguel-maior" className="bg-[#1b2430]">Aluguel (maior)</option>
+                    <option value="aluguel-menor" className="bg-[#1b2430]">Aluguel (menor)</option>
+                    <option value="status" className="bg-[#1b2430]">Status</option>
+                  </select>
+                </div>
+
+              </div>
 
             </div>
 
