@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import ResidenciaFiltro from "../../common/ResidenciaFiltro";
+import SearchInput from "../../common/SearchInput";
 import InquilinoActionsMenu from "../InquilinoActionsMenu";
 import EmptyState from "../../ui/EmptyState";
 
@@ -38,6 +39,8 @@ export default function InquilinosMobile({
   onNovoInquilino,
   onEdit,
   onDelete,
+  search,
+  onSearchChange,
   residenciaSelecionada,
   onResidenciaChange,
   statusFiltro,
@@ -118,6 +121,13 @@ export default function InquilinosMobile({
       {/* FILTROS */}
 
       <section className={`${cartao} p-3 space-y-2`}>
+
+        <SearchInput
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Pesquisar inquilino..."
+          className="h-11"
+        />
 
         <ResidenciaFiltro
           compact

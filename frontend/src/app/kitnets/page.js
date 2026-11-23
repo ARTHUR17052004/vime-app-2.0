@@ -329,6 +329,8 @@ function KitnetsPageConteudo() {
               onNovaKitnet={novaKitnet}
               onEdit={editarKitnet}
               onDelete={excluirKitnet}
+              search={search}
+              onSearchChange={setSearch}
               residenciaSelecionada={residenciaSelecionada}
               onResidenciaChange={setResidenciaSelecionada}
               statusFiltro={statusFiltro}

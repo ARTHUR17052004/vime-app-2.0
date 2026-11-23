@@ -438,6 +438,8 @@ export default function InquilinosPage() {
               onNovoInquilino={abrirExplicacao}
               onEdit={editarInquilino}
               onDelete={excluirInquilino}
+              search={search}
+              onSearchChange={setSearch}
               residenciaSelecionada={residenciaSelecionada}
               onResidenciaChange={setResidenciaSelecionada}
               statusFiltro={statusFiltro}

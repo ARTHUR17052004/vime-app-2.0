@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import ResidenciaFiltro from "../../common/ResidenciaFiltro";
+import SearchInput from "../../common/SearchInput";
 import KitnetActionsMenu from "../KitnetActionsMenu";
 import VacanciaKitnet from "../VacanciaKitnet";
 import EmptyState from "../../ui/EmptyState";
@@ -48,6 +49,8 @@ export default function KitnetsMobile({
   onNovaKitnet,
   onEdit,
   onDelete,
+  search,
+  onSearchChange,
   residenciaSelecionada,
   onResidenciaChange,
   statusFiltro,
@@ -135,6 +138,13 @@ export default function KitnetsMobile({
       {/* FILTROS */}
 
       <section className={`${cartao} p-3 space-y-2`}>
+
+        <SearchInput
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder="Pesquisar kitnet..."
+          className="h-11"
+        />
 
         <ResidenciaFiltro
           compact
