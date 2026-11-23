@@ -304,31 +304,6 @@ function FinanceiroPageConteudo() {
 
   };
 
-  // { motivoTerminoAntecipado, observacaoTerminoAntecipado, senhaConfirmacao }
-  // -- reaproveita o mesmo TerminoAntecipadoModal.jsx usado em Contratos/
-  // Kitnets/Inquilinos pra "quebra de contrato" (mesmos 3 motivos, mesma
-  // senha); aqui só classifica a Receita, não mexe em contrato/kitnet
-  // (isso já aconteceu antes, na vistoria de esvaziar kitnet).
-  const classificarInadimplenciaReceita = async (id, dados) => {
-
-    try {
-
-      await ReceitaService.classificarInadimplencia(id, {
-        motivoInadimplencia: dados.motivoTerminoAntecipado,
-        observacaoInadimplencia: dados.observacaoTerminoAntecipado,
-        senhaConfirmacao: dados.senhaConfirmacao,
-      });
-
-      await carregar();
-
-    } catch (err) {
-
-      throw err;
-
-    }
-
-  };
-
   const excluirDespesa = async (id) => {
 
     if (!window.confirm("Excluir despesa?"))
@@ -1025,7 +1000,6 @@ function FinanceiroPageConteudo() {
           onFixar={fixarReceita}
           onToggleRecorrente={toggleRecorrenteReceita}
           onArquivar={arquivarReceita}
-          onClassificarInadimplencia={classificarInadimplenciaReceita}
           onNovo={() => {
             setTipoModal("receita");
             setModalOpen(true);
@@ -1080,7 +1054,6 @@ function FinanceiroPageConteudo() {
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
-        onClassificarInadimplencia={classificarInadimplenciaReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);
@@ -1105,7 +1078,6 @@ function FinanceiroPageConteudo() {
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
-        onClassificarInadimplencia={classificarInadimplenciaReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);
@@ -1120,7 +1092,7 @@ function FinanceiroPageConteudo() {
         ordenacao={ordenacao}
         onOrdenar={setOrdenacao}
         titulo="Inadimplentes"
-        subtitulo="Receitas classificadas como Abandono, Inadimplência ou Quebra de Contrato -- já saíram da lista normal de Receitas."
+        subtitulo="Dívida de contratos já encerrados (Abandono, Inadimplência, Quebra de Contrato ou fim natural do contrato) -- classificada automaticamente ao encerrar, aguardando Marcar Pago ou Excluir."
         onDelete={excluirReceita}
         onUpdate={atualizarReceita}
         onMarcarPago={marcarReceitaComoPaga}
@@ -1130,7 +1102,6 @@ function FinanceiroPageConteudo() {
         onFixar={fixarReceita}
         onToggleRecorrente={toggleRecorrenteReceita}
         onArquivar={arquivarReceita}
-        onClassificarInadimplencia={classificarInadimplenciaReceita}
         onNovo={() => {
           setTipoModal("receita");
           setModalOpen(true);

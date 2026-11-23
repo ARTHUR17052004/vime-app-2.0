@@ -9,6 +9,7 @@ const WhatsappService = require("./whatsappService");
 const notificacaoService = require("./notificacaoService");
 const contratoDocumentoService = require("./contratoDocumentoService");
 const campoObrigatorioService = require("./campoObrigatorioService");
+const receitaService = require("./receitaService");
 const { filtroContrato } = require("../utils/escopoLocador");
 const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 const { diffCampos } = require("../utils/diffCampos");
@@ -742,6 +743,42 @@ const encerrar = async (id, autor, opcoes = {}) => {
       status: "CANCELADA"
     }
   });
+
+  // Débito que JÁ tinha vencido antes do fim de verdade é dívida real
+  // (não dá pra só cancelar) -- mas deixar ATRASADA pra sempre
+  // significava uma segunda viagem ao Financeiro pra classificar como
+  // Inadimplência, pedindo motivo+observação+senha nossa vez, repetindo
+  // o que "Encerrar contrato" já tinha acabado de perguntar. Reaproveita
+  // o motivo/observação da quebra quando teve (motivoEncerramento); no
+  // fim natural do contrato (sem quebra) usa um motivo genérico só pra
+  // tirar da lista ativa de Receitas e deixar esperando decisão em
+  // /financeiro/inadimplentes -- pedido do usuário em 23/11/2026.
+  const receitasParaClassificar = await prisma.receita.findMany({
+    where: {
+      contratoId: contrato.id,
+      status: { in: ["PENDENTE", "ATRASADA"] },
+      vencimento: { lte: contratoEncerrado.dataFim },
+      classificacaoInadimplencia: null,
+    },
+    select: { id: true },
+  });
+
+  for (const { id: receitaId } of receitasParaClassificar) {
+    try {
+      await receitaService.classificarInadimplencia(
+        receitaId,
+        {
+          motivoInadimplencia: motivoEncerramento || "CONTRATO_ENCERRADO",
+          observacaoInadimplencia:
+            observacaoEncerramento ||
+            `Contrato encerrado em ${contratoEncerrado.dataFim.toLocaleDateString("pt-BR")} -- cobrança já vencida antes do fim do contrato ficou em aberto.`,
+        },
+        autor
+      );
+    } catch (erro) {
+      console.error(`[contrato] Falha ao classificar receita ${receitaId} ao encerrar contrato ${contrato.id}:`, erro.message);
+    }
+  }
 
   // Mesma trava do job automático (verificarContratosJob) -- sem isso,
   // uma receita já PAGA e marcada recorrente continuava gerando o mês

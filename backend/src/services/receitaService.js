@@ -693,6 +693,12 @@ const classificarInadimplencia = async (id, { motivoInadimplencia, observacaoIna
     ABANDONO: "Abandono",
     INADIMPLENCIA: "Inadimplência",
     QUEBRA_DO_INQUILINO: "Quebra de Contrato",
+    // Classificação automática (ver contratoService.encerrar e
+    // verificarContratosJob) pra quando o contrato acabou no fim
+    // natural do prazo -- não é abandono/inadimplência/quebra, só uma
+    // cobrança que já tinha vencido antes do inquilino sair e ninguém
+    // decidiu o que fazer com ela ainda.
+    CONTRATO_ENCERRADO: "Contrato Encerrado",
   };
 
   await auditoriaService.registrar({

@@ -21,7 +21,6 @@ import ReceitaEditarModal from "./ReceitaEditarModal";
 import ReceitaMapaModal from "./ReceitaMapaModal";
 import ReceitaBoletoModal from "./ReceitaBoletoModal";
 import ReceitaExcluirModal from "./ReceitaExcluirModal";
-import TerminoAntecipadoModal from "../common/TerminoAntecipadoModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
@@ -207,7 +206,6 @@ export default function FinanceiroReceitas({
   onFixar,
   onToggleRecorrente,
   onArquivar,
-  onClassificarInadimplencia,
   onNovo,
   titulo = "Receitas",
   subtitulo = "Controle das receitas cadastradas.",
@@ -261,9 +259,6 @@ export default function FinanceiroReceitas({
     useState(false);
 
   const [excluirOpen, setExcluirOpen] =
-    useState(false);
-
-  const [inadimplenciaOpen, setInadimplenciaOpen] =
     useState(false);
 
   const [menuAberto, setMenuAberto] = useState(null);
@@ -376,18 +371,6 @@ export default function FinanceiroReceitas({
             label={item.recorrente ? "Desativar Recorrência" : "Ativar Recorrência"}
             onClick={() => {
               onToggleRecorrente?.(item.id, !item.recorrente);
-              setMenuAberto(null);
-            }}
-          />
-        )}
-
-        {podeEditar && item.status === "ATRASADA" && !item.classificacaoInadimplencia && (
-          <MenuButton
-            label="Inadimplência"
-            purple
-            onClick={() => {
-              setReceitaSelecionada(item);
-              setInadimplenciaOpen(true);
               setMenuAberto(null);
             }}
           />
@@ -1031,15 +1014,6 @@ export default function FinanceiroReceitas({
       onClose={() => setExcluirOpen(false)}
       receita={receitaSelecionada}
       onConfirmar={onDelete}
-    />
-
-    <TerminoAntecipadoModal
-      isOpen={inadimplenciaOpen}
-      onClose={() => setInadimplenciaOpen(false)}
-      titulo="Classificar inadimplência"
-      contexto={`"${receitaSelecionada?.descricao || "Essa cobrança"}" vai sair da lista de Receitas e passar pra Inadimplentes.`}
-      rotuloQuebra="Quebra de Contrato"
-      acao={(dados) => onClassificarInadimplencia?.(receitaSelecionada.id, dados)}
     />
 
   </>

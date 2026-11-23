@@ -1,6 +1,7 @@
 const prisma = require("../config/prisma");
 const logService = require("../services/logService");
 const notificacaoService = require("../services/notificacaoService");
+const receitaService = require("../services/receitaService");
 const WhatsappService = require("../services/whatsappService");
 const { emitirAtualizacao } = require("../socket");
 const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
@@ -80,6 +81,38 @@ module.exports = async () => {
     });
 
     receitasEncerradas += receitasVencidasCanceladas;
+
+    // Mesma lógica de contratoService.encerrar() -- débito que já tinha
+    // vencido antes do fim do contrato é dívida real (não cancela
+    // sozinho), mas também não pode ficar ATRASADA pra sempre esperando
+    // alguém lembrar de ir no Financeiro classificar como Inadimplência
+    // na mão. Fim automático nunca tem motivo de quebra (isso só existe
+    // quando alguém encerra manualmente por abandono/inadimplência/
+    // quebra) -- usa sempre o motivo genérico "Contrato Encerrado".
+    const receitasParaClassificar = await prisma.receita.findMany({
+      where: {
+        contratoId: contrato.id,
+        status: { in: ["PENDENTE", "ATRASADA"] },
+        vencimento: { lte: contrato.dataFim },
+        classificacaoInadimplencia: null,
+      },
+      select: { id: true },
+    });
+
+    for (const { id: receitaId } of receitasParaClassificar) {
+      try {
+        await receitaService.classificarInadimplencia(
+          receitaId,
+          {
+            motivoInadimplencia: "CONTRATO_ENCERRADO",
+            observacaoInadimplencia: `Contrato encerrado automaticamente em ${new Date(contrato.dataFim).toLocaleDateString("pt-BR")} -- cobrança já vencida antes do fim do contrato ficou em aberto.`,
+          },
+          { id: null, nome: "Scheduler" }
+        );
+      } catch (erro) {
+        console.error(`[JOB] Falha ao classificar receita ${receitaId} ao encerrar contrato ${contrato.id} automaticamente:`, erro.message);
+      }
+    }
 
     // Sem ignorarInquilinoId, kitnetAindaOcupada encontrava o PRÓPRIO
     // inquilino desse contrato (ainda com ativo:true nesse instante) e
