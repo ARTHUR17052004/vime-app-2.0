@@ -75,6 +75,11 @@ module.exports = async () => {
   const receitas = await prisma.receita.findMany({
     where: {
       status: 'ATRASADA',
+      // Só Aluguel -- cortar água/energia (e escalar até esvaziar a
+      // kitnet) por causa de uma Taxa ou Multa atrasada é
+      // desproporcional, e nem faz sentido pra uma cobrança avulsa sem
+      // contrato de moradia por trás (pedido do usuário em 23/11/2026).
+      categoria: 'Aluguel',
       vencimento: { lte: limite },
       vistoriaCorteAtrasoCriadaEm: null,
       // Só dispara risco de corte pra cobrança que virou um boleto de

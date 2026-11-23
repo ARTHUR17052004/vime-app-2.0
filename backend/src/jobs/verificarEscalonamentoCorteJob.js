@@ -41,6 +41,10 @@ module.exports = async () => {
       vistoriaEsvaziarId: null,
       status: { notIn: ['PAGA', 'PAGO', 'CANCELADA'] },
       gatewayReferencia: { not: null },
+      // Defesa em profundidade: corteRealizadoEm só devia existir pra
+      // Aluguel já (ver verificarAtrasoCorteJob.js), mas confere aqui
+      // também -- nunca esvaziar kitnet por causa de Taxa/Multa.
+      categoria: 'Aluguel',
     },
     include: {
       contrato: { include: { inquilino: true, kitnet: true, unidade: true } },
