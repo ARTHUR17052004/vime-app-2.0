@@ -623,41 +623,78 @@ function ContratosPageConteudo() {
 
           <PageSection>
 
-            <SearchInput
-              value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              placeholder="Pesquisar contrato..."
-            />
+          {/* Mesmo cartão único "Filtros" do Financeiro (título +
+              subtítulo + Pesquisar rotulado + campos em grid rotulados)
+              -- antes aqui eram 3 blocos soltos (busca, pílulas,
+              residência sem rótulo nem caixa). Pedido do usuário em
+              23/11/2026. */}
+          <div
+            className="
+              bg-[var(--surface)]
+              backdrop-blur-[24px]
+              rounded-2xl
+              border
+              border-[var(--border-token)]
+              p-6
+            "
+          >
 
-          </PageSection>
+            <div className="mb-6">
 
-        </FadeIn>
+              <h2 className="text-xl font-bold text-[var(--text)]">
+                Filtros
+              </h2>
 
-        <FadeIn delay={0.20}>
+              <p className="text-[var(--text-subtle)] mt-1">
+                Localize rapidamente qualquer contrato.
+              </p>
 
-          <PageSection>
+            </div>
 
-            <ContratoFilters
-              filtroSelecionado={
-                filtroSelecionado
-              }
-              setFiltroSelecionado={
-                setFiltroSelecionado
-              }
-            />
+            <div className="mb-5">
+              <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                Pesquisar
+              </label>
+              <SearchInput
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Pesquisar contrato..."
+              />
+            </div>
 
-            <div className="mt-4 flex flex-wrap gap-4 items-center">
+            <div className="mb-5">
+              <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                Status
+              </label>
+              <ContratoFilters
+                compact
+                filtroSelecionado={
+                  filtroSelecionado
+                }
+                setFiltroSelecionado={
+                  setFiltroSelecionado
+                }
+              />
+            </div>
 
-              <div className="flex-1 min-w-[220px]">
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-4">
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Residência
+                </label>
                 <ResidenciaFiltro
+                  compact
                   value={residenciaSelecionada}
                   onChange={setResidenciaSelecionada}
                 />
               </div>
 
             </div>
+
+          </div>
 
           </PageSection>
 
