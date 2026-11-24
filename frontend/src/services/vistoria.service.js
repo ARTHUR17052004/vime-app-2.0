@@ -1,6 +1,20 @@
 import { api } from "./api";
+import { API_URL } from "../config/api";
 
 export const VistoriaService = {
+
+  // Endereço de UMA foto/vídeo só (não o array inteiro embutido no
+  // JSON) -- ver vistoriaService.obterMidiaVistoria/obterMidiaMissao no
+  // backend pro motivo. Precisa de Authorization (não dá pra usar
+  // direto num <img src>/<video src>), por isso MidiaRemota.jsx busca
+  // isso com fetch() + token, nunca a URL crua na tela.
+  midiaUrl(vistoriaId, campo, indice) {
+    return `${API_URL}/vistorias/${vistoriaId}/midia/${campo}/${indice}`;
+  },
+
+  midiaMissaoUrl(vistoriaId, missaoId, indice) {
+    return `${API_URL}/vistorias/${vistoriaId}/missoes/${missaoId}/midia/${indice}`;
+  },
 
   listar() {
     return api("/vistorias");

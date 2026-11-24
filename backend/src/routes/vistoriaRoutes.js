@@ -26,12 +26,22 @@ router.get('/arquivo-contagem-fotos', permissaoMiddleware('vistorias.visualizar'
 
 router.get('/:id', permissaoMiddleware('vistorias.visualizar'), vistoriaController.buscarPorId);
 
+// Uma foto/vídeo só, servido como arquivo de verdade (não dentro do
+// JSON da vistoria) -- usado pela tela de visualização, ver comentário
+// em vistoriaService.obterMidiaVistoria. Precisa vir antes de
+// "/:id/missoes" só por organização (não conflita, caminhos diferentes).
+router.get('/:id/midia/:campo/:indice', permissaoMiddleware('vistorias.visualizar'), vistoriaController.midiaVistoria);
+
 router.get('/:id/missoes', permissaoMiddleware('vistorias.visualizar'), vistoriaController.listarMissoes);
 
 // Uma missão só, com as fotos completas -- buscado sob demanda ao
 // abrir o detalhe/edição de um registro (ver comentário em
 // vistoriaService.listarMissoesRealizadas).
 router.get('/:id/missoes/:missaoId', permissaoMiddleware('vistorias.visualizar'), vistoriaController.buscarMissao);
+
+// Mesma ideia de "/:id/midia" acima, só que pra foto/vídeo de uma
+// missão (vistoria "Geral").
+router.get('/:id/missoes/:missaoId/midia/:indice', permissaoMiddleware('vistorias.visualizar'), vistoriaController.midiaMissao);
 
 router.post('/:id/missoes/concluir', permissaoMiddleware('vistorias.editar'), vistoriaController.concluirMissoes);
 

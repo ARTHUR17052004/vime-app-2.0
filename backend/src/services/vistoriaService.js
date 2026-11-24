@@ -133,7 +133,7 @@ const listar = async (usuario) => {
 
 const buscarPorId = async (id) => {
 
-  const [vistoria, idsResidenciasAtivas] = await Promise.all([
+  const [vistoria, idsResidenciasAtivas, missoesFotosCount] = await Promise.all([
     prisma.vistoria.findUnique({
       where: { id },
       include: {
@@ -141,7 +141,27 @@ const buscarPorId = async (id) => {
         unidade: true,
         kitnet: true,
         progressos: { include: { unidade: true } },
-        missoes: { include: { unidade: true }, orderBy: { createdAt: 'desc' } },
+        // SEM "fotos" aqui de propósito (select, não include) -- uma
+        // vistoria "Geral" antiga acumula dezenas de missões, cada uma
+        // com até 15-25MB de vídeo em base64; incluir isso mesmo só
+        // pra descartar depois (ver abaixo) ainda obriga o Postgres a
+        // ler tudo isso do disco e mandar pela conexão -- é o que
+        // travava essa consulta (>120s, confirmado em 24/11/2026).
+        // A contagem de cada missão vem à parte (missoesFotosCount).
+        missoes: {
+          select: {
+            id: true,
+            vistoriaId: true,
+            unidadeId: true,
+            ciclo: true,
+            dataRealizacao: true,
+            realizadoPor: true,
+            observacoes: true,
+            createdAt: true,
+            unidade: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
         // Só existe quando a vistoria nasceu de uma cobrança atrasada
         // (ver verificarAtrasoCorteJob.js) -- é o que dá o contrato/
         // vencimento de verdade pra tela de detalhes mostrar em vez de
@@ -155,11 +175,38 @@ const buscarPorId = async (id) => {
       }
     }),
     residenciasAtivasIds(),
+    prisma.$queryRaw`
+      SELECT id, COALESCE(jsonb_array_length(fotos), 0)::int AS "fotosCount"
+      FROM "VistoriaMissao"
+      WHERE "vistoriaId" = ${id}
+    `,
   ]);
 
   if (!vistoria) return null;
 
-  return { ...vistoria, progressoMissoes: progressoMissoes(vistoria, idsResidenciasAtivas) };
+  const contagemPorMissaoId = new Map(missoesFotosCount.map((m) => [m.id, m.fotosCount]));
+
+  // Conteúdo de fotos/fotosConclusao (da vistoria e de cada missão)
+  // NUNCA vem aqui -- só a CONTAGEM (ver obterMidiaVistoria/
+  // obterMidiaMissao acima pro conteúdo de verdade, uma foto/vídeo de
+  // cada vez, sob demanda). Único consumidor disso hoje é a tela de
+  // detalhe (vistorias/[id]/page.jsx -- só visualização, nunca edita
+  // essas fotos por aqui), e um vídeo de conclusão sozinho passa fácil
+  // de 15-25MB em base64 -- embutir tudo (ainda mais somando as
+  // missões de uma vistoria "Geral" antiga) travava a conexão e/ou não
+  // chegava a carregar no celular (bug relatado em 24/11/2026).
+  return {
+    ...vistoria,
+    fotos: undefined,
+    fotosConclusao: undefined,
+    fotosCount: Array.isArray(vistoria.fotos) ? vistoria.fotos.length : 0,
+    fotosConclusaoCount: Array.isArray(vistoria.fotosConclusao) ? vistoria.fotosConclusao.length : 0,
+    missoes: (vistoria.missoes || []).map((m) => ({
+      ...m,
+      fotosCount: contagemPorMissaoId.get(m.id) || 0,
+    })),
+    progressoMissoes: progressoMissoes(vistoria, idsResidenciasAtivas),
+  };
 
 };
 
@@ -881,6 +928,56 @@ const removerMissao = async (missaoId) => {
 
 };
 
+// Converte um item de fotos/fotosConclusao (sempre "data:<mime>;base64,<...>"
+// -- ver arquivoMidia.js no frontend) em mime + Buffer puro, pra servir
+// como arquivo de verdade (ver obterMidiaVistoria/obterMidiaMissao
+// abaixo) em vez de embutir tudo no JSON da vistoria/missão inteira.
+function parseMidiaDataUrl(dataUrl) {
+  const match = /^data:([^;]+);base64,([\s\S]+)$/.exec(dataUrl || '');
+  if (!match) return null;
+  return { mime: match[1], buffer: Buffer.from(match[2], 'base64') };
+}
+
+// Mídia de uma vistoria REGULAR (fotos/fotosConclusao), uma de cada vez
+// -- é o que a TELA DE VISUALIZAÇÃO usa agora (ver DetalheModal em
+// VistoriaRealizadasTable.jsx, VistoriaCard.jsx, vistorias/[id]/page.jsx),
+// em vez de buscar o array inteiro de uma vez. Motivo: um vídeo de
+// conclusão sozinho já passa fácil de 15-25MB em base64 -- buscar tudo
+// junto (como buscarPorId faz, ainda usado pra EDITAR) trava a conexão
+// e/ou não chega a carregar no celular (bug relatado em 24/11/2026:
+// "Carregando fotos..." nunca terminava, ou a seção nem aparecia).
+const obterMidiaVistoria = async (id, campo, indice) => {
+
+  if (!['fotos', 'fotosConclusao'].includes(campo)) return null;
+
+  const vistoria = await prisma.vistoria.findUnique({
+    where: { id },
+    select: { [campo]: true },
+  });
+
+  const lista = vistoria?.[campo];
+  if (!Array.isArray(lista) || !lista[indice]) return null;
+
+  return parseMidiaDataUrl(lista[indice]);
+
+};
+
+// Mesma ideia de obterMidiaVistoria acima, só que pra uma missão
+// (vistoria "Geral").
+const obterMidiaMissao = async (missaoId, indice) => {
+
+  const missao = await prisma.vistoriaMissao.findUnique({
+    where: { id: missaoId },
+    select: { fotos: true },
+  });
+
+  const lista = missao?.fotos;
+  if (!Array.isArray(lista) || !lista[indice]) return null;
+
+  return parseMidiaDataUrl(lista[indice]);
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -895,4 +992,6 @@ module.exports = {
   buscarMissao,
   atualizarMissao,
   removerMissao,
+  obterMidiaVistoria,
+  obterMidiaMissao,
 };

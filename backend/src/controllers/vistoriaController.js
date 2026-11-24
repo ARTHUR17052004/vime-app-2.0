@@ -107,6 +107,63 @@ const removerMissao = async (req, res) => {
   res.json({ mensagem: 'Registro removido com sucesso.' });
 };
 
+// Serve UM arquivo (foto/vídeo) como arquivo de verdade (Content-Type
+// certo, sem base64/JSON no meio) -- ver obterMidiaVistoria/
+// obterMidiaMissao no service pro motivo. Suporta Range (usado pelo
+// próprio <video> do navegador pra pedir só um pedaço por vez, em vez
+// de exigir o arquivo inteiro antes de começar a tocar -- essencial
+// pra vídeo de vistoria no celular, que passa fácil de 15-25MB).
+function responderMidia(req, res, midia) {
+
+  if (!midia) {
+    return res.status(404).send('Mídia não encontrada.');
+  }
+
+  const { mime, buffer } = midia;
+  const total = buffer.length;
+  const range = req.headers.range;
+
+  res.setHeader('Content-Type', mime);
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Cache-Control', 'private, max-age=31536000, immutable');
+
+  if (!range) {
+    res.setHeader('Content-Length', total);
+    return res.status(200).send(buffer);
+  }
+
+  const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+
+  if (!match) {
+    res.setHeader('Content-Range', `bytes */${total}`);
+    return res.status(416).end();
+  }
+
+  const inicio = match[1] ? parseInt(match[1], 10) : 0;
+  const fim = match[2] ? Math.min(parseInt(match[2], 10), total - 1) : total - 1;
+
+  if (inicio >= total || inicio > fim) {
+    res.setHeader('Content-Range', `bytes */${total}`);
+    return res.status(416).end();
+  }
+
+  res.status(206);
+  res.setHeader('Content-Range', `bytes ${inicio}-${fim}/${total}`);
+  res.setHeader('Content-Length', fim - inicio + 1);
+  res.send(buffer.subarray(inicio, fim + 1));
+
+}
+
+const midiaVistoria = async (req, res) => {
+  const midia = await vistoriaService.obterMidiaVistoria(req.params.id, req.params.campo, Number(req.params.indice));
+  responderMidia(req, res, midia);
+};
+
+const midiaMissao = async (req, res) => {
+  const midia = await vistoriaService.obterMidiaMissao(req.params.missaoId, Number(req.params.indice));
+  responderMidia(req, res, midia);
+};
+
 module.exports = {
   listar,
   buscarPorId,
@@ -121,4 +178,6 @@ module.exports = {
   buscarMissao,
   atualizarMissao,
   removerMissao,
+  midiaVistoria,
+  midiaMissao,
 };

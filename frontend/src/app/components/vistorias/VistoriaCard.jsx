@@ -15,7 +15,7 @@ import {
 
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
-import MidiaVideo from "../ui/MidiaVideo";
+import MidiaRemota from "../ui/MidiaRemota";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
 import { VistoriaService } from "@/services/vistoria.service";
@@ -96,44 +96,40 @@ export default function VistoriaCard({
   const [lightbox, setLightbox] =
     useState({ vistoriaId: null, indice: null });
 
-  // Fotos/vídeos da baixa não vêm mais na listagem (ver vistoriaService.
-  // listar -- mídia em base64 estava derrubando a conexão de /vistorias
-  // inteira). Busca o detalhe completo só quando o card é expandido,
-  // uma vistoria de cada vez, e guarda em memória pra não rebuscar se
-  // fechar/abrir de novo.
-  const [fotosPorVistoria, setFotosPorVistoria] =
-    useState({});
-
-  const [carregandoFotos, setCarregandoFotos] =
-    useState(null);
+  // Fotos/vídeos da baixa não vêm mais na listagem nem no detalhe
+  // inteiro (ver vistoriaService.listar/obterMidiaVistoria -- um vídeo
+  // de conclusão sozinho passa fácil de 15-25MB em base64, derrubava a
+  // conexão de /vistorias e/ou travava no celular sem nem mostrar nada
+  // -- bug relatado em 24/11/2026). Busca só a CONTAGEM (uma vez,
+  // pra todas as vistorias) e monta os endereços de cada foto/vídeo
+  // (ver vistoriaService.midiaUrl) -- cada miniatura (MidiaRemota)
+  // busca a dela, sozinha, sob demanda, só quando o card expande.
+  const [contagemFotos, setContagemFotos] = useState({});
 
   useEffect(() => {
 
-    if (!aberto || fotosPorVistoria[aberto] !== undefined) return;
-
     let cancelado = false;
 
-    (async () => {
-
-      try {
-        setCarregandoFotos(aberto);
-        const detalhe = await VistoriaService.buscar(aberto);
-        if (!cancelado) {
-          setFotosPorVistoria((prev) => ({ ...prev, [aberto]: detalhe?.fotosConclusao || [] }));
-        }
-      } catch {
-        if (!cancelado) {
-          setFotosPorVistoria((prev) => ({ ...prev, [aberto]: [] }));
-        }
-      } finally {
-        if (!cancelado) setCarregandoFotos(null);
-      }
-
-    })();
+    VistoriaService.contarFotosConclusao()
+      .then((linhas) => {
+        if (cancelado) return;
+        const mapa = {};
+        for (const linha of linhas || []) mapa[linha.id] = linha.fotosCount;
+        setContagemFotos(mapa);
+      })
+      .catch(() => {});
 
     return () => { cancelado = true; };
 
-  }, [aberto, fotosPorVistoria]);
+  }, []);
+
+  const fotosPorVistoria = {};
+  if (aberto && contagemFotos[aberto] > 0) {
+    fotosPorVistoria[aberto] = Array.from(
+      { length: contagemFotos[aberto] },
+      (_, indice) => VistoriaService.midiaUrl(aberto, "fotosConclusao", indice)
+    );
+  }
 
   if (!vistorias.length) {
 
@@ -652,10 +648,6 @@ export default function VistoriaCard({
 
               </div>
 
-              {carregandoFotos === vistoria.id && (
-                <p className="mt-8 text-sm text-[var(--text-faint)]">Carregando fotos e vídeos...</p>
-              )}
-
               {(fotosPorVistoria[vistoria.id]?.length > 0) && (
 
                 <div className="mt-8">
@@ -666,25 +658,17 @@ export default function VistoriaCard({
 
                   <div className="grid md:grid-cols-3 gap-4">
 
-                    {fotosPorVistoria[vistoria.id].map((midia, index) => (
+                    {fotosPorVistoria[vistoria.id].map((url, index) => (
                       <button
                         key={index}
                         type="button"
                         onClick={() => setLightbox({ vistoriaId: vistoria.id, indice: index })}
                         className="relative group"
                       >
-                        {midia.startsWith("data:video") ? (
-                          <MidiaVideo
-                            src={midia}
-                            className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
-                          />
-                        ) : (
-                          <img
-                            src={midia}
-                            alt={`Mídia ${index + 1}`}
-                            className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
-                          />
-                        )}
+                        <MidiaRemota
+                          src={url}
+                          className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
+                        />
                         <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
                       </button>
                     ))}

@@ -14,6 +14,7 @@ import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
 import MidiaVideo from "../ui/MidiaVideo";
+import MidiaRemota from "../ui/MidiaRemota";
 import SeletorMidia from "../ui/SeletorMidia";
 import EmptyState from "../ui/EmptyState";
 import VistoriaMissaoActionsMenu from "./VistoriaMissaoActionsMenu";
@@ -398,35 +399,24 @@ function DetalheModal({ item, onClose }) {
   // lá em cima) -- então o estado inicial já pode nascer certo pro
   // item em questão, sem precisar de um efeito só pra resetar.
   const [lightboxIndice, setLightboxIndice] = useState(null);
-  const [fotos, setFotos] = useState([]);
-  const [carregandoFotos, setCarregandoFotos] = useState(() => !!item && item.fotosCount > 0);
 
-  useEffect(() => {
+  // Nem "missao" nem "regular" trazem o conteúdo de fotos na lista (só
+  // a contagem, ver comentário no backend) -- em vez de buscar o array
+  // inteiro de uma vez (um vídeo de conclusão sozinho passa fácil de
+  // 15-25MB em base64, trava a conexão e/ou não carrega no celular --
+  // bug relatado em 24/11/2026: "Carregando fotos..." nunca terminava),
+  // monta direto os endereços de CADA foto/vídeo (ver
+  // vistoriaService.midiaUrl/midiaMissaoUrl) -- cada miniatura
+  // (MidiaRemota) busca a dela, sozinha, sob demanda.
+  const fotos = useMemo(() => {
 
-    // Nem "missao" nem "regular" trazem o conteúdo de fotos na lista
-    // (só a contagem, ver comentário no backend) -- busca sob demanda,
-    // uma de cada vez, só quando o registro é aberto. Sem fotos
-    // nenhuma, nem vale a chamada.
-    if (!item || !item.fotosCount) return;
+    if (!item || !item.fotosCount) return [];
 
-    let cancelado = false;
-
-    const busca = item.tipo === "missao"
-      ? VistoriaService.buscarMissao(item.vistoriaId, item.missaoId).then((m) => m?.fotos)
-      : VistoriaService.buscar(item.vistoriaId).then((v) => v?.fotosConclusao);
-
-    busca
-      .then((lista) => {
-        if (!cancelado) setFotos(lista || []);
-      })
-      .catch(() => {
-        if (!cancelado) setFotos([]);
-      })
-      .finally(() => {
-        if (!cancelado) setCarregandoFotos(false);
-      });
-
-    return () => { cancelado = true; };
+    return Array.from({ length: item.fotosCount }, (_, indice) =>
+      item.tipo === "missao"
+        ? VistoriaService.midiaMissaoUrl(item.vistoriaId, item.missaoId, indice)
+        : VistoriaService.midiaUrl(item.vistoriaId, "fotosConclusao", indice)
+    );
 
   }, [item]);
 
@@ -475,44 +465,24 @@ function DetalheModal({ item, onClose }) {
             </div>
           )}
 
-          {carregandoFotos && (
-            <p className="text-sm text-[var(--text-subtle)]">Carregando fotos...</p>
-          )}
-
-          {!carregandoFotos && fotos.length > 0 && (
+          {fotos.length > 0 && (
             <div>
               <p className="text-[var(--text-faint)] uppercase text-xs mb-2">Fotos e Vídeos</p>
               <div className="grid grid-cols-3 gap-3">
-                {fotos.map((midia, index) =>
-                  midia.startsWith("data:video") ? (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setLightboxIndice(index)}
-                      className="relative group"
-                    >
-                      <MidiaVideo
-                        src={midia}
-                        className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
-                      />
-                      <span className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/20 transition" />
-                    </button>
-                  ) : (
-                    <button
-                      key={index}
-                      type="button"
-                      onClick={() => setLightboxIndice(index)}
-                      className="relative group"
-                    >
-                      <img
-                        src={midia}
-                        alt={`Mídia ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
-                      />
-                      <span className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/20 transition" />
-                    </button>
-                  )
-                )}
+                {fotos.map((url, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setLightboxIndice(index)}
+                    className="relative group"
+                  >
+                    <MidiaRemota
+                      src={url}
+                      className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
+                    />
+                    <span className="absolute inset-0 rounded-xl bg-black/0 group-hover:bg-black/20 transition" />
+                  </button>
+                ))}
               </div>
             </div>
           )}

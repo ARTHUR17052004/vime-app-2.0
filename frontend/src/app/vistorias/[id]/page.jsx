@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import SemPermissao from "../../components/ui/SemPermissao";
 import MidiaLightbox from "../../components/ui/MidiaLightbox";
-import MidiaVideo from "../../components/ui/MidiaVideo";
+import MidiaRemota from "../../components/ui/MidiaRemota";
 
 import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
@@ -355,7 +355,7 @@ export default function DetalhesVistoriaPage() {
 
         </div>
 
-        {vistoria.fotos?.length > 0 && (
+        {vistoria.fotosCount > 0 && (
 
           <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
@@ -365,25 +365,17 @@ export default function DetalhesVistoriaPage() {
 
             <div className="grid md:grid-cols-3 gap-4">
 
-              {vistoria.fotos.map((foto, index) => (
+              {Array.from({ length: vistoria.fotosCount }, (_, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => setLightbox({ grupo: "fotos", indice: index })}
                   className="relative group"
                 >
-                  {foto.startsWith("data:video") ? (
-                    <MidiaVideo
-                      src={foto}
-                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                    />
-                  ) : (
-                    <img
-                      src={foto}
-                      alt={`Foto ${index + 1}`}
-                      className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)] group-hover:scale-105 transition"
-                    />
-                  )}
+                  <MidiaRemota
+                    src={VistoriaService.midiaUrl(vistoria.id, "fotos", index)}
+                    className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)] group-hover:scale-105 transition"
+                  />
                   <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
                 </button>
               ))}
@@ -391,7 +383,7 @@ export default function DetalhesVistoriaPage() {
             </div>
 
             <MidiaLightbox
-              itens={vistoria.fotos}
+              itens={Array.from({ length: vistoria.fotosCount }, (_, index) => VistoriaService.midiaUrl(vistoria.id, "fotos", index))}
               indice={lightbox.grupo === "fotos" ? lightbox.indice : null}
               onClose={() => setLightbox({ grupo: null, indice: null })}
               onMudarIndice={(i) => setLightbox({ grupo: "fotos", indice: i })}
@@ -401,7 +393,7 @@ export default function DetalhesVistoriaPage() {
 
         )}
 
-        {(vistoria.fotosConclusao?.length > 0 || vistoria.observacoesConclusao) && (
+        {(vistoria.fotosConclusaoCount > 0 || vistoria.observacoesConclusao) && (
 
           <div className="bg-[var(--surface)] backdrop-blur-xl border border-[var(--border-token)] rounded-3xl p-8">
 
@@ -415,31 +407,23 @@ export default function DetalhesVistoriaPage() {
               </p>
             )}
 
-            {vistoria.fotosConclusao?.length > 0 && (
+            {vistoria.fotosConclusaoCount > 0 && (
 
               <>
 
                 <div className="grid md:grid-cols-3 gap-4">
 
-                  {vistoria.fotosConclusao.map((midia, index) => (
+                  {Array.from({ length: vistoria.fotosConclusaoCount }, (_, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => setLightbox({ grupo: "fotosConclusao", indice: index })}
                       className="relative group"
                     >
-                      {midia.startsWith("data:video") ? (
-                        <MidiaVideo
-                          src={midia}
-                          className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                        />
-                      ) : (
-                        <img
-                          src={midia}
-                          alt={`Mídia ${index + 1}`}
-                          className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
-                        />
-                      )}
+                      <MidiaRemota
+                        src={VistoriaService.midiaUrl(vistoria.id, "fotosConclusao", index)}
+                        className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
+                      />
                       <span className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/20 transition" />
                     </button>
                   ))}
@@ -447,7 +431,7 @@ export default function DetalhesVistoriaPage() {
                 </div>
 
                 <MidiaLightbox
-                  itens={vistoria.fotosConclusao}
+                  itens={Array.from({ length: vistoria.fotosConclusaoCount }, (_, index) => VistoriaService.midiaUrl(vistoria.id, "fotosConclusao", index))}
                   indice={lightbox.grupo === "fotosConclusao" ? lightbox.indice : null}
                   onClose={() => setLightbox({ grupo: null, indice: null })}
                   onMudarIndice={(i) => setLightbox({ grupo: "fotosConclusao", indice: i })}
