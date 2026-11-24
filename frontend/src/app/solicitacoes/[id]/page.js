@@ -9,8 +9,16 @@ import SemPermissao from "../../components/ui/SemPermissao";
 import { SolicitacaoService } from "@/services/solicitacao.service";
 import { AuditoriaService } from "@/services/auditoria.service";
 import SolicitacaoChat from "../../components/solicitacoes/SolicitacaoChat";
+import Badge from "../../components/ui/Badge";
 import { usePermissao } from "../../../hooks/usePermissao";
 import BotaoVoltar from "../../components/ui/BotaoVoltar";
+
+// Mesma etiqueta usada na lista (ver SolicitacaoCard.jsx).
+const APROVACAO_CONFIG = {
+  AGUARDANDO: { label: "Aguardando aprovação", badge: "yellow" },
+  APROVADA: { label: "Aprovada", badge: "emerald" },
+  REJEITADA: { label: "Rejeitada", badge: "red" },
+};
 
 function formatarData(data) {
   return data ? new Date(data).toLocaleString("pt-BR") : "-";
@@ -27,9 +35,13 @@ export default function DetalhesSolicitacaoPage() {
   const params = useParams();
 
   const podeVisualizar = usePermissao("solicitacoes.visualizar");
+  const podeAprovar = usePermissao("solicitacoes.aprovar");
 
   const [solicitacao, setSolicitacao] =
     useState(null);
+
+  const [respondendoAprovacao, setRespondendoAprovacao] =
+    useState(false);
 
   const [historico, setHistorico] =
     useState([]);
@@ -103,6 +115,34 @@ export default function DetalhesSolicitacaoPage() {
     carregar();
 
   }, [params.id]);
+
+  async function responderAprovacao(resposta) {
+
+    setRespondendoAprovacao(true);
+
+    try {
+
+      const atualizada = await SolicitacaoService.responderAprovacao(params.id, resposta);
+
+      setSolicitacao((prev) => ({
+        ...prev,
+        aprovacaoStatus: atualizada.aprovacaoStatus,
+        aprovacaoEm: atualizada.aprovacaoEm,
+        aprovacaoPor: atualizada.aprovacaoPor,
+        status: atualizada.status,
+      }));
+
+    } catch (erro) {
+
+      alert(erro.message || "Erro ao responder aprovação.");
+
+    } finally {
+
+      setRespondendoAprovacao(false);
+
+    }
+
+  }
 
   if (!podeVisualizar) {
     return <SemPermissao />;
@@ -206,6 +246,70 @@ export default function DetalhesSolicitacaoPage() {
             <h3 className="font-semibold text-emerald-400">
               {solicitacao.status}
             </h3>
+
+          </div>
+
+          <div>
+
+            <p className="text-[var(--text-subtle)]">
+              Aprovação
+            </p>
+
+            <div className="mt-1 flex items-center gap-2 flex-wrap">
+
+              <Badge variant={(APROVACAO_CONFIG[solicitacao.aprovacaoStatus] || APROVACAO_CONFIG.AGUARDANDO).badge}>
+                {(APROVACAO_CONFIG[solicitacao.aprovacaoStatus] || APROVACAO_CONFIG.AGUARDANDO).label}
+              </Badge>
+
+              {podeAprovar && solicitacao.aprovacaoStatus === "AGUARDANDO" && (
+
+                <>
+                  <button
+                    disabled={respondendoAprovacao}
+                    onClick={() => responderAprovacao("APROVADA")}
+                    className="
+                      px-3
+                      py-1.5
+                      rounded-lg
+                      text-xs
+                      font-semibold
+                      bg-emerald-500/10
+                      border
+                      border-emerald-500/30
+                      text-emerald-400
+                      hover:bg-emerald-500/20
+                      transition
+                      disabled:opacity-50
+                    "
+                  >
+                    Aprovar
+                  </button>
+
+                  <button
+                    disabled={respondendoAprovacao}
+                    onClick={() => responderAprovacao("REJEITADA")}
+                    className="
+                      px-3
+                      py-1.5
+                      rounded-lg
+                      text-xs
+                      font-semibold
+                      bg-red-500/10
+                      border
+                      border-red-500/30
+                      text-red-400
+                      hover:bg-red-500/20
+                      transition
+                      disabled:opacity-50
+                    "
+                  >
+                    Rejeitar
+                  </button>
+                </>
+
+              )}
+
+            </div>
 
           </div>
 

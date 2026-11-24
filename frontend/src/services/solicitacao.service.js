@@ -24,6 +24,13 @@ export const SolicitacaoService = {
     });
   },
 
+  responderAprovacao(id, resposta) {
+    return api(`/solicitacoes/${id}/aprovacao`, {
+      method: "PUT",
+      body: JSON.stringify({ resposta }),
+    });
+  },
+
   excluir(id) {
     return api(`/solicitacoes/${id}`, {
       method: "DELETE",

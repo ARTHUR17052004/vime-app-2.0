@@ -57,10 +57,23 @@ const remover = async (req, res) => {
 
 };
 
+const responderAprovacao = async (req, res) => {
+
+  const solicitacao = await solicitacaoService.responderAprovacao(
+    req.params.id,
+    req.body.resposta,
+    req.usuario
+  );
+
+  res.json(solicitacao);
+
+};
+
 module.exports = {
   listar,
   buscarPorId,
   criar,
   atualizar,
-  remover
+  remover,
+  responderAprovacao
 };

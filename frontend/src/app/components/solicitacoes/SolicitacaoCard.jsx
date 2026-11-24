@@ -16,6 +16,16 @@ import ActionMenu from "../ui/ActionMenu";
 import SolicitacaoRespostaRapidaModal from "./SolicitacaoRespostaRapidaModal";
 import PrazoSolicitacao from "./PrazoSolicitacao";
 import { usePermissao } from "@/hooks/usePermissao";
+import { SolicitacaoService } from "@/services/solicitacao.service";
+
+// Mesma etiqueta pros 3 estados de aprovação, usada aqui (lista) e no
+// detalhe da solicitação (solicitacoes/[id]/page.js) -- ver
+// solicitacaoService.js no backend (responderAprovacao/criar).
+const APROVACAO_CONFIG = {
+  AGUARDANDO: { label: "Aguardando aprovação", badge: "yellow" },
+  APROVADA: { label: "Aprovada", badge: "emerald" },
+  REJEITADA: { label: "Rejeitada", badge: "red" },
+};
 
 const STATUS_CONFIG = {
   SOLICITADA: {
@@ -52,12 +62,30 @@ export default function SolicitacaoCard({
   const podeClassificar = usePermissao("solicitacoes.classificar");
   const podeEditar = usePermissao("solicitacoes.editar");
   const podeExcluir = usePermissao("solicitacoes.excluir");
+  const podeAprovar = usePermissao("solicitacoes.aprovar");
 
   const [menuAberto, setMenuAberto] = useState(null);
 
   const [posicaoMenu, setPosicaoMenu] = useState({ top: 0, left: 0 });
 
   const [respondendo, setRespondendo] = useState(null);
+
+  const [respondendoAprovacao, setRespondendoAprovacao] = useState(null);
+
+  async function responderAprovacao(id, resposta) {
+
+    setRespondendoAprovacao(id);
+
+    try {
+      await SolicitacaoService.responderAprovacao(id, resposta);
+      onAtualizado?.();
+    } catch (erro) {
+      alert(erro.message || "Erro ao responder aprovação.");
+    } finally {
+      setRespondendoAprovacao(null);
+    }
+
+  }
 
   function abrirMenu(e, id) {
 
@@ -178,7 +206,66 @@ export default function SolicitacaoCard({
                     {item.status}
                   </Badge>
 
+                  {(() => {
+                    const aprovacao = APROVACAO_CONFIG[item.aprovacaoStatus] || APROVACAO_CONFIG.AGUARDANDO;
+                    return (
+                      <Badge variant={aprovacao.badge}>
+                        {aprovacao.label}
+                      </Badge>
+                    );
+                  })()}
+
                   <PrazoSolicitacao solicitacao={item} />
+
+                  {podeAprovar && item.aprovacaoStatus === "AGUARDANDO" && (
+
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+
+                      <button
+                        disabled={respondendoAprovacao === item.id}
+                        onClick={() => responderAprovacao(item.id, "APROVADA")}
+                        className="
+                          px-3
+                          py-1.5
+                          rounded-lg
+                          text-xs
+                          font-semibold
+                          bg-emerald-500/10
+                          border
+                          border-emerald-500/30
+                          text-emerald-400
+                          hover:bg-emerald-500/20
+                          transition
+                          disabled:opacity-50
+                        "
+                      >
+                        Aprovar
+                      </button>
+
+                      <button
+                        disabled={respondendoAprovacao === item.id}
+                        onClick={() => responderAprovacao(item.id, "REJEITADA")}
+                        className="
+                          px-3
+                          py-1.5
+                          rounded-lg
+                          text-xs
+                          font-semibold
+                          bg-red-500/10
+                          border
+                          border-red-500/30
+                          text-red-400
+                          hover:bg-red-500/20
+                          transition
+                          disabled:opacity-50
+                        "
+                      >
+                        Rejeitar
+                      </button>
+
+                    </div>
+
+                  )}
 
                 </div>
 

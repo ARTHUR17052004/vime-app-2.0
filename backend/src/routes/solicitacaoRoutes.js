@@ -22,6 +22,8 @@ router.post('/', permissaoMiddleware('solicitacoes.criar'), solicitacaoControlle
 
 router.put('/:id', permissaoMiddleware('solicitacoes.editar'), solicitacaoController.atualizar);
 
+router.put('/:id/aprovacao', permissaoMiddleware('solicitacoes.aprovar'), solicitacaoController.responderAprovacao);
+
 router.delete('/:id', permissaoMiddleware('solicitacoes.excluir'), solicitacaoController.remover);
 
 router.get('/:id/mensagens', permissaoMiddleware('solicitacoes.visualizar'), solicitacaoMensagemController.listar);

@@ -2,6 +2,7 @@ const prisma = require("../config/prisma");
 const axios = require("axios");
 const metaWhatsappService = require("./metaWhatsappService");
 const assistenteWhatsappService = require("./assistenteWhatsappService");
+const solicitacaoService = require("./solicitacaoService");
 const notificacaoService = require("./notificacaoService");
 const { getIO } = require("../socket");
 const { filtroInquilino } = require("../utils/escopoLocador");
@@ -857,6 +858,47 @@ class WhatsappService {
         }
 
         texto = texto || "[Mensagem não suportada]";
+
+        // Resposta do aprovador fixo de Solicitações (SIM/NÃO) -- ver
+        // solicitacaoService.criar/responderAprovacaoPorWhatsapp.
+        // Checado ANTES de virar uma conversa/contato normal: é um
+        // comando interno da equipe, não uma mensagem de inquilino, e
+        // nunca deveria acabar na tela de WhatsApp misturado com
+        // conversas de verdade. Só reage a SIM/NÃO exatos (sem
+        // pontuação/espaço sobrando) vindos do número certo -- qualquer
+        // outra coisa desse mesmo número (ou SIM/NÃO de outro número
+        // qualquer) segue o fluxo normal abaixo.
+        const comando = texto.trim().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+        if (comando === 'SIM' || comando === 'NAO') {
+
+          try {
+
+            const aprovador = await solicitacaoService.obterAprovador();
+
+            if (aprovador?.telefone && normalizarTelefoneChave(aprovador.telefone) === numero) {
+
+              const resposta = comando === 'SIM' ? 'APROVADA' : 'REJEITADA';
+
+              const solicitacaoResolvida = await solicitacaoService.responderAprovacaoPorWhatsapp(resposta);
+
+              const confirmacao = solicitacaoResolvida
+                ? `✅ Solicitação "${solicitacaoResolvida.titulo}" (${solicitacaoResolvida.numero}) marcada como ${resposta === 'APROVADA' ? 'APROVADA' : 'REJEITADA'}.`
+                : '⚠️ Não tem nenhuma solicitação aguardando aprovação agora.';
+
+              await metaWhatsappService.enviarMensagem(numero, confirmacao);
+
+              continue;
+
+            }
+
+          } catch (erroAprovacao) {
+
+            console.error('[solicitacao] Falha ao processar resposta de aprovação por WhatsApp:', erroAprovacao.message);
+
+          }
+
+        }
 
         let contato =
           await prisma.whatsappContato.findUnique({

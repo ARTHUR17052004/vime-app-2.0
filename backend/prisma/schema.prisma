@@ -646,6 +646,15 @@ model Solicitacao {
   // evita reenviar mais de uma vez por dia.
   ultimoAlertaPrazoEm DateTime?
 
+  // Aprovação por fora do fluxo normal de status -- ao criar, já sai
+  // uma mensagem de WhatsApp pro aprovador fixo perguntando Sim/Não
+  // (ver solicitacaoService.js); a resposta (no app ou pelo próprio
+  // WhatsApp) grava aqui, sem mexer em `status`. AGUARDANDO / APROVADA
+  // / REJEITADA. Pedido do usuário em 24/11/2026.
+  aprovacaoStatus String    @default("AGUARDANDO")
+  aprovacaoEm     DateTime?
+  aprovacaoPor    String?
+
   mensagens SolicitacaoMensagem[]
 
   createdAt DateTime @default(now())
@@ -656,6 +665,7 @@ model Solicitacao {
   @@index([prazo])
   @@index([locadorId])
   @@index([criadoPorId])
+  @@index([aprovacaoStatus])
 }
 
 model SolicitacaoMensagem {

@@ -105,7 +105,7 @@ const CATALOGO = [
   {
     modulo: "Solicitações",
     chave: "solicitacoes",
-    acoes: ["visualizar", "criar", "editar", "excluir", "classificar"],
+    acoes: ["visualizar", "criar", "editar", "excluir", "classificar", "aprovar"],
   },
   {
     modulo: "Vistorias",
