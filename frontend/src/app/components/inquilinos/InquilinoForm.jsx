@@ -69,6 +69,11 @@ export default function InquilinoForm({
     // pra sugerir automaticamente a Data Final acima).
     prazoContrato: "4",
 
+    // Dedução mensal (água + energia) -- opcional, usada só no
+    // Relatório de Receitas (Financeiro > Extratos). Em branco, o
+    // relatório usa o padrão do locador (Locador.taxaAdministracao).
+    valorDeducao: "",
+
     ativo: true,
   });
 
@@ -184,6 +189,9 @@ export default function InquilinoForm({
       prazoContrato:
         inquilino.prazoContrato || "4",
 
+      valorDeducao:
+        inquilino.valorDeducao ?? "",
+
       ativo:
         inquilino.ativo ?? true,
 
@@ -273,18 +281,35 @@ export default function InquilinoForm({
 
   }
 
+  // O form nunca submete de verdade (ver handleSubmit/avancarOuSalvar
+  // abaixo) -- isso é só uma rede de segurança caso algum navegador
+  // dispare "submit" mesmo assim (ex.: Enter em algum campo que escapou
+  // do bloquearEnvioPorEnter).
   function handleSubmit(e) {
-
     e.preventDefault();
+  }
+
+  // Botão único (Continuar/Salvar) SEMPRE type="button" -- nunca troca
+  // pra type="submit" dependendo da etapa. Bug real encontrado em
+  // 24/11/2026: quando esse botão trocava de type="button" (Continuar,
+  // etapa 2) pra type="submit" (Salvar, etapa 3) na MESMA posição, o
+  // clique que levava o usuário pra etapa 3 podia disparar a submissão
+  // nativa do form -- o navegador decide se o clique ativa um submit
+  // olhando o type do elemento DEPOIS do React re-renderizar em reação
+  // ao onClick, não antes. Na EDIÇÃO isso fechava o modal na hora (sem
+  // dar tempo de ver a etapa 3) porque Início/Fim do Contrato já vêm
+  // preenchidos, então validarStep(3) passava liso -- ao CRIAR um
+  // inquilino novo esses campos estão vazios, então a mesma falha só
+  // mostraria um erro de campo faltando, nunca fechava, e por isso
+  // passou despercebido até alguém editar um inquilino já existente.
+  function avancarOuSalvar() {
+
+    if (step < 3) {
+      proximoStep();
+      return;
+    }
 
     if (salvando) return;
-
-    // Um <input> de texto sozinho na etapa 2 (busca da kitnet) permite
-    // que o Enter dispare submissão implícita do form mesmo sem clicar
-    // em "Salvar Inquilino" -- isso não pode salvar com dados de uma
-    // etapa que o usuário nem viu ainda. Só a etapa 3 pode submeter de
-    // verdade.
-    if (step !== 3) return;
 
     if (!validarStep(3)) return;
 
@@ -316,11 +341,11 @@ export default function InquilinoForm({
 
   }
 
-  // Só a etapa 3 tem um botão type="submit" de verdade (as outras duas
-  // são type="button") -- sem essa trava, apertar Enter em qualquer
-  // campo da etapa 3 (ex.: digitando a data) já salvava e fechava o
-  // modal na hora, sem dar chance de revisar/editar antes. Enter
-  // continua funcionando normal em qualquer textarea (ex.: Observações).
+  // Nenhuma etapa tem botão type="submit" (ver avancarOuSalvar acima) --
+  // sem essa trava, apertar Enter em qualquer campo da etapa 3 (ex.:
+  // digitando a data) já salvava e fechava o modal na hora, sem dar
+  // chance de revisar/editar antes. Enter continua funcionando normal
+  // em qualquer textarea (ex.: Observações).
   function bloquearEnvioPorEnter(e) {
     if (e.key === "Enter" && e.target.tagName !== "TEXTAREA") {
       e.preventDefault();
@@ -439,31 +464,20 @@ export default function InquilinoForm({
 
         )}
 
-        {step < 3 ? (
-
-          <button
-            type="button"
-            onClick={proximoStep}
-            className="bg-emerald-600 hover:bg-emerald-700 text-[var(--text)] px-6 py-3 rounded-lg font-semibold transition-all"
-          >
-            Continuar
-          </button>
-
-        ) : (
-
-          <button
-            type="submit"
-            disabled={salvando}
-            className="bg-emerald-600 hover:bg-emerald-700 text-[var(--text)] px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {salvando
+        <button
+          type="button"
+          onClick={avancarOuSalvar}
+          disabled={step === 3 && salvando}
+          className="bg-emerald-600 hover:bg-emerald-700 text-[var(--text)] px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {step < 3
+            ? "Continuar"
+            : salvando
               ? "Salvando..."
               : inquilino
                 ? "Salvar Alterações"
                 : "Salvar Inquilino"}
-          </button>
-
-        )}
+        </button>
 
       </div>
 

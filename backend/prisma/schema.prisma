@@ -105,6 +105,13 @@ model Inquilino {
   telefoneEmergencia String?
   tipoGarantia       String?
   valorCaucao        Float?
+  // Dedução mensal (água + energia) usada no Relatório de Receitas
+  // (Financeiro > Extratos > Exportar Excel) -- fica no INQUILINO, não
+  // no Locador, porque o valor pode variar de inquilino pra inquilino
+  // mesmo dentro do mesmo locador (ver Locador.taxaAdministracao, que é
+  // só o valor padrão/sugerido). Null = usa o padrão do locador na hora
+  // de montar o relatório.
+  valorDeducao       Float?
   contratos          Contrato[]
   receitas           Receita[]
   whatsappContatos   WhatsappContato[]

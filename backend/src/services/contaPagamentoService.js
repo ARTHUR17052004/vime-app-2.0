@@ -208,11 +208,28 @@ const recebidoDoMes = async (id, mes) => {
       dataPagamento: { gte: inicio, lte: fim },
     },
     include: {
-      inquilino: { select: { nome: true, kitnet: { select: { numero: true, unidade: { select: { nome: true } } } } } },
+      inquilino: {
+        select: {
+          nome: true,
+          cpf: true,
+          valorDeducao: true,
+          kitnet: {
+            select: {
+              numero: true,
+              unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
+            },
+          },
+        },
+      },
       contrato: {
         select: {
-          inquilino: { select: { nome: true } },
-          kitnet: { select: { numero: true, unidade: { select: { nome: true } } } },
+          inquilino: { select: { nome: true, cpf: true, valorDeducao: true } },
+          kitnet: {
+            select: {
+              numero: true,
+              unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
+            },
+          },
         },
       },
     },
@@ -231,6 +248,19 @@ const recebidoDoMes = async (id, mes) => {
       pagador: r.inquilino?.nome || r.contrato?.inquilino?.nome || r.pagadorNome || null,
       unidade: kitnet?.unidade?.nome || null,
       kitnet: kitnet?.numero || null,
+      // Campos extras só pro Relatório de Receitas (Financeiro >
+      // Extratos > Exportar Excel) -- ver montarLinhaRelatorio no
+      // controller/frontend (FinanceiroAsaas.jsx) pra como cada um vira
+      // coluna da planilha.
+      nossoNumero: r.gatewayReferencia || null,
+      cpf: r.inquilino?.cpf || r.contrato?.inquilino?.cpf || r.pagadorCpf || null,
+      valorBruto: r.valor,
+      jurosValor: r.jurosValor || 0,
+      multaValor: r.multaValor || 0,
+      // Null = inquilino não tem valor próprio -- relatório cai pro
+      // padrão do locador da kitnet (ver fallback no frontend).
+      valorDeducaoInquilino: r.inquilino?.valorDeducao ?? r.contrato?.inquilino?.valorDeducao ?? null,
+      taxaAdministracaoLocador: kitnet?.unidade?.locadorRel?.taxaAdministracao ?? null,
     };
 
   });
@@ -240,6 +270,8 @@ const recebidoDoMes = async (id, mes) => {
     total: linhas.reduce((soma, l) => soma + Number(l.valor || 0), 0),
     quantidade: linhas.length,
     receitas: linhas,
+    taxaBoletoValor: conta.taxaBoletoValor || 0,
+    contaNome: conta.nome,
   };
 
 };

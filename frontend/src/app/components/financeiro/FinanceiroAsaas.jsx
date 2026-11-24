@@ -1,13 +1,65 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Landmark, QrCode, ChevronDown, ChevronUp } from "lucide-react";
+import { Landmark, QrCode, ChevronDown, ChevronUp, FileSpreadsheet } from "lucide-react";
 
 import Table from "../ui/Table";
 import { ContaPagamentoService } from "../../../services/contaPagamento.service";
+import { exportarExcel } from "../../../utils/exportar";
+import { usePermissao } from "../../../hooks/usePermissao";
 
 function mesAtual() {
   return new Date().toISOString().slice(0, 7);
+}
+
+// Extrai o valor do aluguel escrito manualmente na Descrição da
+// receita (ex.: "Aluguel: R$ 810,00   Excedente de energia", ver
+// ReceitaForm.jsx) -- é assim que o admin registra quando cobrou mais
+// que o aluguel normal numa boleto só. Sem esse padrão na descrição,
+// o valor aluguel do relatório é o próprio valor cobrado (não tem
+// excedente nenhum escondido).
+function valorAluguelDaDescricao(descricao) {
+  if (!descricao) return null;
+  const match = descricao.match(/alu[gq]uel[^\d]{0,12}([\d.]+,\d{2}|\d+)/i);
+  if (!match) return null;
+  const numero = Number(match[1].replace(/\./g, "").replace(",", "."));
+  return Number.isFinite(numero) ? numero : null;
+}
+
+// Monta a linha do Relatório de Receitas (modelo do contador): Valor
+// aluguel + Juros/multa - Tarifa boleto - Dedução + Excedentes = Valor
+// final. Ver contaPagamentoService.recebidoDoMes (backend) pra origem
+// de cada campo bruto.
+function montarLinhaRelatorio(item, taxaBoletoValor) {
+
+  const valorAluguelDescricao = valorAluguelDaDescricao(item.descricao);
+
+  const valorAluguel = valorAluguelDescricao ?? item.valorBruto;
+  const excedentes = valorAluguelDescricao !== null
+    ? Math.max(0, item.valorBruto - valorAluguelDescricao)
+    : 0;
+
+  const jurosMulta = Number(item.jurosValor || 0) + Number(item.multaValor || 0);
+  const tarifaBoleto = Number(taxaBoletoValor || 0);
+  // Dedução é do INQUILINO (pode variar de um pro outro) -- sem valor
+  // próprio definido, cai pro padrão do locador da kitnet.
+  const deducao = item.valorDeducaoInquilino ?? item.taxaAdministracaoLocador ?? 0;
+
+  const valorFinal = valorAluguel + jurosMulta - tarifaBoleto - deducao + excedentes;
+
+  return {
+    nossoNumero: item.nossoNumero || "-",
+    cpf: item.cpf || "-",
+    pagador: item.pagador || "-",
+    dataPagamento: item.dataPagamento,
+    valorAluguel,
+    jurosMulta,
+    tarifaBoleto,
+    deducao,
+    excedentes,
+    valorFinal,
+  };
+
 }
 
 function formatarMoeda(valor) {
@@ -38,6 +90,8 @@ function formatarDataHora(valor) {
 // Remonta (via `key` no pai, por conta+mês) toda vez que troca de
 // conta/mês, então já nasce no estado "carregando" certo.
 function RecebidoPainel({ contaId, mes }) {
+
+  const podeExportar = usePermissao("financeiro.exportar");
 
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
@@ -72,16 +126,77 @@ function RecebidoPainel({ contaId, mes }) {
 
   if (!resultado) return null;
 
+  function exportarRelatorioReceitas() {
+
+    const linhas = (resultado.receitas || []).map((item) =>
+      montarLinhaRelatorio(item, resultado.taxaBoletoValor)
+    );
+
+    const colunas = [
+      "Nosso nº", "Pagamento", "CPF", "Locatário",
+      "Valor aluguel", "Juros / mult", "Tarifa boleto", "Dedução", "Excedentes", "Valor final",
+    ];
+
+    const soma = (campo) => linhas.reduce((total, l) => total + Number(l[campo] || 0), 0);
+
+    exportarExcel({
+      abas: [{
+        nome: "Receitas",
+        colunas,
+        linhas: [
+          ...linhas.map((l) => [
+            l.nossoNumero,
+            formatarData(l.dataPagamento),
+            l.cpf,
+            l.pagador,
+            formatarMoeda(l.valorAluguel),
+            formatarMoeda(l.jurosMulta),
+            formatarMoeda(l.tarifaBoleto),
+            formatarMoeda(l.deducao),
+            formatarMoeda(l.excedentes),
+            formatarMoeda(l.valorFinal),
+          ]),
+          [],
+          [
+            "", "", "", "Total",
+            formatarMoeda(soma("valorAluguel")),
+            formatarMoeda(soma("jurosMulta")),
+            formatarMoeda(soma("tarifaBoleto")),
+            formatarMoeda(soma("deducao")),
+            formatarMoeda(soma("excedentes")),
+            formatarMoeda(soma("valorFinal")),
+          ],
+        ],
+      }],
+      infoLinhas: [`Relatório de Receitas - ${resultado.contaNome || ""} - ${mes}`],
+      nomeArquivo: `relatorio-receitas-${(resultado.contaNome || "conta").toLowerCase().replace(/\s+/g, "-")}`,
+    });
+
+  }
+
   return (
 
     <>
 
-      <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-6">
-        <p className="text-sm text-[var(--text-subtle)]">Recebido nessa conta em {mes}</p>
-        <p className="text-3xl font-bold text-[var(--text)] mt-1">{formatarMoeda(resultado.total)}</p>
-        <p className="text-sm text-[var(--text-faint)] mt-1">
-          {resultado.quantidade} cobrança{resultado.quantidade === 1 ? "" : "s"} paga{resultado.quantidade === 1 ? "" : "s"}
-        </p>
+      <div className="rounded-2xl border border-[var(--border-token)] bg-[var(--surface-2)] p-6 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-sm text-[var(--text-subtle)]">Recebido nessa conta em {mes}</p>
+          <p className="text-3xl font-bold text-[var(--text)] mt-1">{formatarMoeda(resultado.total)}</p>
+          <p className="text-sm text-[var(--text-faint)] mt-1">
+            {resultado.quantidade} cobrança{resultado.quantidade === 1 ? "" : "s"} paga{resultado.quantidade === 1 ? "" : "s"}
+          </p>
+        </div>
+
+        {podeExportar && resultado.receitas?.length > 0 && (
+          <button
+            type="button"
+            onClick={exportarRelatorioReceitas}
+            className="flex items-center gap-2 rounded-xl bg-emerald-500/15 border border-emerald-500/20 px-4 py-2.5 text-emerald-400 hover:bg-emerald-500/25 transition text-sm font-medium"
+          >
+            <FileSpreadsheet size={16} />
+            Exportar Excel
+          </button>
+        )}
       </div>
 
       {resultado.receitas?.length > 0 && (

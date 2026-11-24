@@ -55,6 +55,19 @@ export default function ContratoStep({
         />
       </Campo>
 
+      <Campo label="Dedução mensal (água + energia)">
+        <input
+          type="number"
+          step="0.01"
+          min="0"
+          name="valorDeducao"
+          value={formData.valorDeducao}
+          onChange={handleChange}
+          placeholder="Deixe em branco pra usar o padrão do locador"
+          className={inputStyle}
+        />
+      </Campo>
+
       <div className="col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
         <p className="font-semibold text-emerald-400">
           Contrato automático

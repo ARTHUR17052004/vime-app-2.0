@@ -47,6 +47,12 @@ const sanitizar = (dados) => {
     dados.valorCaucao = null;
   }
 
+  if (dados.valorDeducao !== undefined && dados.valorDeducao !== "") {
+    dados.valorDeducao = Number(dados.valorDeducao);
+  } else {
+    dados.valorDeducao = null;
+  }
+
   delete dados.id;
   delete dados.createdAt;
   delete dados.updatedAt;
