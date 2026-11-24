@@ -12,34 +12,46 @@ function mesAtual() {
   return new Date().toISOString().slice(0, 7);
 }
 
-// Extrai o valor do aluguel escrito manualmente na Descrição da
-// receita (ex.: "Aluguel: R$ 810,00   Excedente de energia", ver
-// ReceitaForm.jsx) -- é assim que o admin registra quando cobrou mais
-// que o aluguel normal numa boleto só. Sem esse padrão na descrição,
-// o valor aluguel do relatório é o próprio valor cobrado (não tem
-// excedente nenhum escondido).
-function valorAluguelDaDescricao(descricao) {
-  if (!descricao) return null;
-  const match = descricao.match(/alu[gq]uel[^\d]{0,12}([\d.]+,\d{2}|\d+)/i);
-  if (!match) return null;
-  const numero = Number(match[1].replace(/\./g, "").replace(",", "."));
-  return Number.isFinite(numero) ? numero : null;
-}
-
 // Monta a linha do Relatório de Receitas (modelo do contador): Valor
 // aluguel + Juros/multa - Tarifa boleto - Dedução + Excedentes = Valor
 // final. Ver contaPagamentoService.recebidoDoMes (backend) pra origem
 // de cada campo bruto.
+//
+// Valor aluguel vem do aluguel NOMINAL do contrato/kitnet
+// (valorAluguelContrato), não da Descrição -- a Descrição padrão de
+// toda receita recorrente é só "Aluguel - MM/AAAA" (sem valor nenhum
+// escrito), então tentar ler um valor dali confundia o "11" do mês com
+// reais (bug encontrado em 24/11/2026). Excedentes = o que foi cobrado
+// a mais que esse aluguel nominal (ex.: energia/água extra cobrados
+// junto no mesmo boleto).
+//
+// Juros/mult é ESTIMADO (taxa x dias de atraso) -- jurosValor/
+// multaValor na Receita são só a TAXA (%) configurada pro banco
+// calcular em caso de atraso, não o valor em reais efetivamente
+// cobrado/recebido (o BB não devolve isso pro nosso sistema hoje).
+// Multa é percentual fixo (aplicado uma vez, se atrasou); juros é taxa
+// MENSAL, proporcional aos dias corridos entre vencimento e pagamento
+// (mesma convenção configurada no boleto, ver BBApi.criarBoleto no
+// backend) -- pode não bater exatamente com o que o banco cobrou.
+function diasDeAtraso(vencimento, dataPagamento) {
+  if (!vencimento || !dataPagamento) return 0;
+  const umDia = 24 * 60 * 60 * 1000;
+  const dias = Math.floor((new Date(dataPagamento) - new Date(vencimento)) / umDia);
+  return Math.max(0, dias);
+}
+
 function montarLinhaRelatorio(item, taxaBoletoValor) {
 
-  const valorAluguelDescricao = valorAluguelDaDescricao(item.descricao);
-
-  const valorAluguel = valorAluguelDescricao ?? item.valorBruto;
-  const excedentes = valorAluguelDescricao !== null
-    ? Math.max(0, item.valorBruto - valorAluguelDescricao)
+  const valorAluguel = item.valorAluguelContrato ?? item.valorBruto;
+  const excedentes = item.valorAluguelContrato != null
+    ? Math.max(0, item.valorBruto - item.valorAluguelContrato)
     : 0;
 
-  const jurosMulta = Number(item.jurosValor || 0) + Number(item.multaValor || 0);
+  const atraso = diasDeAtraso(item.vencimento, item.dataPagamento);
+  const multa = atraso > 0 ? item.valorBruto * (Number(item.multaValor || 0) / 100) : 0;
+  const juros = atraso > 0 ? item.valorBruto * (Number(item.jurosValor || 0) / 100) * (atraso / 30) : 0;
+  const jurosMulta = multa + juros;
+
   const tarifaBoleto = Number(taxaBoletoValor || 0);
   // Dedução é do INQUILINO (pode variar de um pro outro) -- sem valor
   // próprio definido, cai pro padrão do locador da kitnet.
@@ -51,7 +63,12 @@ function montarLinhaRelatorio(item, taxaBoletoValor) {
     nossoNumero: item.nossoNumero || "-",
     cpf: item.cpf || "-",
     pagador: item.pagador || "-",
-    dataPagamento: item.dataPagamento,
+    // Coluna "Pagamento" = quando o dinheiro CAIU na conta
+    // (dataCredito), não quando o inquilino pagou (dataPagamento) --
+    // no BB esses dois dias podem divergir (compensação de boleto).
+    // Sem dataCredito ainda confirmada pelo banco, cai pra
+    // dataPagamento mesmo (Pix/Asaas sempre são iguais).
+    dataPagamento: item.dataCredito ?? item.dataPagamento,
     valorAluguel,
     jurosMulta,
     tarifaBoleto,
@@ -63,7 +80,10 @@ function montarLinhaRelatorio(item, taxaBoletoValor) {
 }
 
 function formatarMoeda(valor) {
-  return `R$ ${Number(valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+  // maximumFractionDigits explícito -- sem isso o toLocaleString deixa
+  // passar um 3º dígito decimal quando o valor tem dízima (ex.: juros
+  // estimado por dias de atraso), tipo "R$ 73,487" em vez de "R$ 73,49".
+  return `R$ ${Number(valor || 0).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function formatarData(valor) {

@@ -216,6 +216,7 @@ const recebidoDoMes = async (id, mes) => {
           kitnet: {
             select: {
               numero: true,
+              aluguel: true,
               unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
             },
           },
@@ -223,10 +224,12 @@ const recebidoDoMes = async (id, mes) => {
       },
       contrato: {
         select: {
+          valorAluguel: true,
           inquilino: { select: { nome: true, cpf: true, valorDeducao: true } },
           kitnet: {
             select: {
               numero: true,
+              aluguel: true,
               unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
             },
           },
@@ -245,6 +248,12 @@ const recebidoDoMes = async (id, mes) => {
       descricao: r.descricao,
       valor: r.valorLiquido ?? r.valor,
       dataPagamento: r.dataPagamento,
+      // Quando o dinheiro CAI na conta -- só o BB devolve isso separado
+      // de dataPagamento (compensação de boleto não é sempre no mesmo
+      // dia). Pix/Asaas creditam na hora, então ficam iguais; null
+      // quando o banco ainda não confirmou o crédito. Ver campo
+      // Receita.dataCredito no schema.
+      dataCredito: r.dataCredito,
       pagador: r.inquilino?.nome || r.contrato?.inquilino?.nome || r.pagadorNome || null,
       unidade: kitnet?.unidade?.nome || null,
       kitnet: kitnet?.numero || null,
@@ -255,6 +264,23 @@ const recebidoDoMes = async (id, mes) => {
       nossoNumero: r.gatewayReferencia || null,
       cpf: r.inquilino?.cpf || r.contrato?.inquilino?.cpf || r.pagadorCpf || null,
       valorBruto: r.valor,
+      vencimento: r.vencimento,
+      // Aluguel NOMINAL do contrato/kitnet (não da Descrição -- tentamos
+      // ler "Aluguel: R$ X" da Descrição antes, mas a Descrição padrão
+      // de toda receita recorrente é só "Aluguel - MM/AAAA", sem valor
+      // nenhum escrito; usar esse campo de verdade evita o bug de
+      // confundir o "11" do mês com um valor em reais). Null só quando
+      // não dá pra saber (receita avulsa sem contrato nem kitnet).
+      valorAluguelContrato: r.contrato?.valorAluguel ?? kitnet?.aluguel ?? null,
+      // jurosValor/multaValor NÃO são valor em reais -- são a TAXA (%)
+      // configurada no boleto pro banco calcular se atrasar (multa:
+      // percentual fixo aplicado uma vez só; jurosMora: taxa MENSAL,
+      // ver BBApi.criarBoleto). O sistema não guarda quanto foi
+      // EFETIVAMENTE cobrado/recebido (o BB não manda isso de volta pro
+      // nosso webhook/consulta hoje) -- o relatório ESTIMA a partir da
+      // taxa + dias de atraso (vencimento até dataPagamento), ver
+      // montarLinhaRelatorio no frontend. Pode não bater exatamente com
+      // o que o banco cobrou de verdade.
       jurosValor: r.jurosValor || 0,
       multaValor: r.multaValor || 0,
       // Null = inquilino não tem valor próprio -- relatório cai pro
