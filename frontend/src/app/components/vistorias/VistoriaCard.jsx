@@ -15,6 +15,7 @@ import {
 
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
+import MidiaVideo from "../ui/MidiaVideo";
 import { formatDate, formatDateTime } from "@/utils/formatDate";
 import { usePermissao } from "../../../hooks/usePermissao";
 import { VistoriaService } from "@/services/vistoria.service";
@@ -673,7 +674,7 @@ export default function VistoriaCard({
                         className="relative group"
                       >
                         {midia.startsWith("data:video") ? (
-                          <video
+                          <MidiaVideo
                             src={midia}
                             className="w-full h-40 object-cover rounded-2xl border border-[var(--border-token)]"
                           />

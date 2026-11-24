@@ -8,6 +8,7 @@ import { Clock, TriangleAlert } from "lucide-react";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import SeletorMidia from "../ui/SeletorMidia";
+import MidiaVideo from "../ui/MidiaVideo";
 import { formatDate } from "@/utils/formatDate";
 import { lerArquivoComoDataUrl, tamanhoTotalMB } from "@/utils/arquivoMidia";
 import { VistoriaService } from "@/services/vistoria.service";
@@ -333,7 +334,7 @@ export default function VistoriaConcluirModal({
             <div className="grid grid-cols-3 gap-3 mt-4">
               {midias.map((midia, index) =>
                 midia.startsWith("data:video") ? (
-                  <video
+                  <MidiaVideo
                     key={index}
                     src={midia}
                     controls

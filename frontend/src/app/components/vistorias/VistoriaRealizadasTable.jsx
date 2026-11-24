@@ -13,6 +13,7 @@ import Table from "../ui/Table";
 import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import MidiaLightbox from "../ui/MidiaLightbox";
+import MidiaVideo from "../ui/MidiaVideo";
 import SeletorMidia from "../ui/SeletorMidia";
 import EmptyState from "../ui/EmptyState";
 import VistoriaMissaoActionsMenu from "./VistoriaMissaoActionsMenu";
@@ -490,7 +491,7 @@ function DetalheModal({ item, onClose }) {
                       onClick={() => setLightboxIndice(index)}
                       className="relative group"
                     >
-                      <video
+                      <MidiaVideo
                         src={midia}
                         className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]"
                       />
@@ -714,7 +715,7 @@ function EditarModal({ item, onClose, onSalvo }) {
                 {fotos.map((midia, index) => (
                   <div key={index} className="relative">
                     {midia.startsWith("data:video") ? (
-                      <video src={midia} controls className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]" />
+                      <MidiaVideo src={midia} controls className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]" />
                     ) : (
                       <img src={midia} alt={`Mídia ${index + 1}`} className="w-full h-24 object-cover rounded-xl border border-[var(--border-token)]" />
                     )}

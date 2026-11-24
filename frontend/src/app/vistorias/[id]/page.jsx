@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import MainLayout from "../../components/layout/MainLayout";
 import SemPermissao from "../../components/ui/SemPermissao";
 import MidiaLightbox from "../../components/ui/MidiaLightbox";
+import MidiaVideo from "../../components/ui/MidiaVideo";
 
 import { VistoriaService } from "@/services/vistoria.service";
 import { AuditoriaService } from "@/services/auditoria.service";
@@ -372,7 +373,7 @@ export default function DetalhesVistoriaPage() {
                   className="relative group"
                 >
                   {foto.startsWith("data:video") ? (
-                    <video
+                    <MidiaVideo
                       src={foto}
                       className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
                     />
@@ -428,7 +429,7 @@ export default function DetalhesVistoriaPage() {
                       className="relative group"
                     >
                       {midia.startsWith("data:video") ? (
-                        <video
+                        <MidiaVideo
                           src={midia}
                           className="w-full h-52 object-cover rounded-2xl border border-[var(--border-token)]"
                         />

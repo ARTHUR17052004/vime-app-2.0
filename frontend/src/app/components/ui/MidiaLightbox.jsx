@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { X, Download, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import MidiaVideo from "./MidiaVideo";
 
 // Visualizador em tela cheia pra foto/vídeo de uma galeria -- thumbnail
 // pequena (grid de fotos de vistoria, chamado, etc.) não dá pra ver
@@ -91,7 +92,7 @@ export default function MidiaLightbox({ itens = [], indice, onClose, onMudarIndi
         )}
 
         {isVideo ? (
-          <video
+          <MidiaVideo
             src={midia}
             controls
             autoPlay

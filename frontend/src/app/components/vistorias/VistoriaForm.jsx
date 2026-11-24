@@ -7,6 +7,7 @@ import Input from "../ui/Input";
 import Select from "../ui/Select";
 import Textarea from "../ui/Textarea";
 import SeletorMidia from "../ui/SeletorMidia";
+import MidiaVideo from "../ui/MidiaVideo";
 
 import { UnidadeService } from "@/services/unidades.service";
 import { KitnetService } from "@/services/kitnets.service";
@@ -623,7 +624,7 @@ export default function VistoriaForm({
 
       {formData.fotos.map((foto, index) =>
         foto.startsWith("data:video") ? (
-          <video
+          <MidiaVideo
             key={index}
             src={foto}
             controls

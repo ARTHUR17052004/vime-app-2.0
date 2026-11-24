@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { ChamadoService } from "@/services/chamado.service";
 import { lerArquivoComoDataUrl } from "@/utils/arquivoMidia";
 import CameraCapture, { cameraSuportada } from "../ui/CameraCapture";
+import MidiaVideo from "../ui/MidiaVideo";
 
 const STATUS_OPCOES = [
   "ABERTO",
@@ -320,7 +321,7 @@ export default function ChamadoChat({
 
                       ) : msg.anexoTipo?.startsWith("video/") ? (
 
-                        <video
+                        <MidiaVideo
                           src={msg.anexoDados}
                           className="w-16 h-12 rounded-lg object-cover"
                           muted
