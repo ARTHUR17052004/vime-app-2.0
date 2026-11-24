@@ -22,6 +22,27 @@ const authMiddleware = async (req, res, next) => {
       process.env.JWT_SECRET || "vime_secret_dev"
     );
 
+    // perfil/locadorId/ativo vêm SEMPRE frescos do banco, nunca do JWT --
+    // o token só prova quem é (id). O JWT é assinado no login e dura até
+    // 30 dias no app instalado (ver authService.criarSessao); se
+    // confiássemos nesses campos dele, um usuário realocado de locador
+    // (ex.: SH -> ARA) ou desativado continuaria com o acesso ANTIGO até
+    // o token vencer ou ele deslogar/logar de novo -- foi exatamente
+    // assim que um contrato da SH vazou pra um usuário já da ARA no
+    // mobile (token de 30 dias, nunca relogou). Mesmo princípio que
+    // permissaoMiddleware já aplica pras permissões do perfil.
+    const usuarioAtual = await prisma.usuario.findUnique({
+      where: { id: decoded.id },
+      include: { perfil: true },
+    });
+
+    if (!usuarioAtual || !usuarioAtual.ativo) {
+      return res.status(401).json({
+        success: false,
+        message: "Sessão inválida. Faça login novamente.",
+      });
+    }
+
     // "Locador de trabalho": Administrador/Gerência/Operador enxergam todo
     // mundo por padrão (locadorId null no cadastro), mas podem escolher, só
     // na tela deles, focar num locador só (ARA ou SH) -- manda o id escolhido
@@ -30,8 +51,8 @@ const authMiddleware = async (req, res, next) => {
     // mexer em cada uma. Só vale pra quem já é irrestrito -- Diretoria e
     // qualquer um com locador fixo no cadastro ignora o header (continua
     // só vendo o que já era mostrado pra ele).
-    const perfilSemEspaco = (decoded.perfil || "").trim();
-    const podeEscolherLocador = !decoded.locadorId && ["ADMINISTRADOR", "GERENCIA", "OPERADOR"].includes(perfilSemEspaco);
+    const perfilSemEspaco = (usuarioAtual.perfil?.nome || "").trim();
+    const podeEscolherLocador = !usuarioAtual.locadorId && ["ADMINISTRADOR", "GERENCIA", "OPERADOR"].includes(perfilSemEspaco);
     const locadorEscolhido = req.headers["x-locador-filtro"];
 
     // Guardado à parte (não dá pra reconstruir depois de locadorId já ter
@@ -39,7 +60,15 @@ const authMiddleware = async (req, res, next) => {
     // sabadoFerramentasService.js) pra saber se pode trocar de locador
     // dentro da própria pergunta ("quantas vazias tem na ARA?") ou se
     // esse usuário só enxerga o locador fixo dele mesmo.
-    req.usuario = { ...decoded, podeEscolherLocador };
+    req.usuario = {
+      id: usuarioAtual.id,
+      nome: usuarioAtual.nome,
+      email: usuarioAtual.email,
+      perfil: perfilSemEspaco,
+      ativo: usuarioAtual.ativo,
+      locadorId: usuarioAtual.locadorId || null,
+      podeEscolherLocador,
+    };
 
     if (podeEscolherLocador && locadorEscolhido) {
       req.usuario = { ...req.usuario, locadorId: locadorEscolhido };
@@ -47,7 +76,7 @@ const authMiddleware = async (req, res, next) => {
 
     // Modo manutenção: só o Administrador continua passando -- todo o
     // resto (mesmo já logado) é barrado até ele desligar de novo.
-    if (decoded.perfil !== "ADMINISTRADOR") {
+    if (perfilSemEspaco !== "ADMINISTRADOR") {
 
       const configuracao = await prisma.configuracao.findFirst({
         orderBy: { id: "asc" },
