@@ -54,8 +54,19 @@ function RelogioAtrasoCorte({ desde }) {
   if (!desde) return null;
 
   const decorridoMs = Math.max(0, agora - new Date(desde).getTime());
-  const horas = Math.floor(decorridoMs / (60 * 60 * 1000));
+  const totalHoras = Math.floor(decorridoMs / (60 * 60 * 1000));
   const minutos = Math.floor((decorridoMs % (60 * 60 * 1000)) / (60 * 1000));
+
+  // Primeiras 24h conta só em horas (mais fácil de ler no início) --
+  // passado isso, mostra em dias (ex.: "1 dia e 3h20"), senão "27h30"
+  // vira difícil de visualizar de cabeça quantos dias já são. Pedido
+  // do usuário em 25/11/2026.
+  const dias = Math.floor(totalHoras / 24);
+  const horas = totalHoras % 24;
+
+  const texto = dias > 0
+    ? `${dias} ${dias === 1 ? "dia" : "dias"} e ${horas}h${String(minutos).padStart(2, "0")}`
+    : `${horas}h${String(minutos).padStart(2, "0")}`;
 
   return (
     <span
@@ -71,7 +82,7 @@ function RelogioAtrasoCorte({ desde }) {
       "
     >
       <TriangleAlert size={20} strokeWidth={2.5} />
-      Atrasado há {horas}h{String(minutos).padStart(2, "0")}
+      Atrasado há {texto}
     </span>
   );
 
