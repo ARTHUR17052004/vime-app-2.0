@@ -65,6 +65,7 @@ const authMiddleware = async (req, res, next) => {
       nome: usuarioAtual.nome,
       email: usuarioAtual.email,
       perfil: perfilSemEspaco,
+      perfilId: usuarioAtual.perfilId || null,
       ativo: usuarioAtual.ativo,
       locadorId: usuarioAtual.locadorId || null,
       podeEscolherLocador,

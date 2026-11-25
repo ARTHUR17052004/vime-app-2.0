@@ -7,9 +7,16 @@ const temPermissao = async (usuario, chave) => {
 
   if (usuario.perfil === "ADMINISTRADOR") return true;
 
-  const perfil = await prisma.perfil.findUnique({
-    where: { nome: usuario.perfil },
-  });
+  // Busca por id (sempre exato) sempre que possível. Buscar por nome
+  // quebra se o nome do Perfil tiver espaço sobrando (ex.: "GERENCIA "
+  // cadastrado com espaço no fim) -- bug real encontrado em 25/11/2026:
+  // a Mariana (perfil GERENCIA) ficou sem nenhuma permissão porque
+  // authMiddleware guarda o nome JÁ sem espaço (perfilSemEspaco), e
+  // essa busca por nome exigia bater com o nome crú do banco, que tinha
+  // o espaço -- nunca encontrava o Perfil e caía no fallback de [].
+  const perfil = usuario.perfilId
+    ? await prisma.perfil.findUnique({ where: { id: usuario.perfilId } })
+    : await prisma.perfil.findFirst({ where: { nome: usuario.perfil } });
 
   const permissoes = perfil?.permissoes || [];
 
