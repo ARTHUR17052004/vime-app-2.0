@@ -11,6 +11,7 @@ import {
   XCircle,
   Trash2,
   Pin,
+  TriangleAlert,
 } from "lucide-react";
 
 import Button from "../ui/Button";
@@ -59,19 +60,18 @@ function RelogioAtrasoCorte({ desde }) {
   return (
     <span
       className="
-        px-4
-        py-1.5
-        rounded-full
-        text-xs
-        font-bold
-        bg-red-500/20
-        text-red-300
-        border
-        border-red-500/40
+        inline-flex items-center gap-2
+        rounded-2xl
+        bg-red-600
+        px-4 py-2.5
+        text-base font-extrabold text-white
+        animate-pulse
         tabular-nums
+        shadow-[0_2px_14px_rgba(220,38,38,.55)]
       "
     >
-      ⏱ Atrasado há {horas}h{String(minutos).padStart(2, "0")}
+      <TriangleAlert size={20} strokeWidth={2.5} />
+      Atrasado há {horas}h{String(minutos).padStart(2, "0")}
     </span>
   );
 
