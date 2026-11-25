@@ -34,6 +34,7 @@ import { usePermissao } from "../../hooks/usePermissao";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { normalizarBusca } from "../../utils/busca";
 import { avancarUmaVez } from "../../utils/periodicidade";
+import { ehVistoriaDeCorte } from "../../utils/vistoriaCorte";
 
 // Mesmo dia local (não UTC) -- cópia do critério de VistoriaResumo.jsx
 // (onde "Realizadas hoje" já é calculado) pra alimentar os mesmos
@@ -495,7 +496,11 @@ const fixarVistoria = async (id, fixado) => {
       return vistoria.status === "PENDENTE";
 
     case "atrasadas":
-      return vistoria.status === "ATRASADA";
+      // Vistoria de corte conta como atrasada aqui mesmo com status
+      // PENDENTE -- o card já mostra "Atrasado há..." pro atraso da
+      // cobrança (RelogioAtrasoCorte), e ficava faltando na aba que
+      // promete justamente isso (pedido do usuário em 25/11/2026).
+      return vistoria.status === "ATRASADA" || ehVistoriaDeCorte(vistoria);
 
     // Visão Geral é o "resto" (nenhuma aba específica escolhida) --
     // Cancelada fica de fora daqui, senão vistoria cancelada (manual ou
@@ -543,7 +548,7 @@ const fixarVistoria = async (id, fixado) => {
 
     const missoesRealizadasHoje = missoesRealizadas.filter((m) => ehHoje(m.dataRealizacao)).length;
 
-    const atrasadas = vistorias.filter((v) => v.status === "ATRASADA").length;
+    const atrasadas = vistorias.filter((v) => v.status === "ATRASADA" || ehVistoriaDeCorte(v)).length;
 
     return (
 
