@@ -14,6 +14,16 @@ const { filtroContrato } = require("../utils/escopoLocador");
 const { kitnetAindaOcupada, inquilinoTemOutroContratoAtivo, gerarVistoriaDeEntrega } = require("../utils/kitnetOcupacao");
 const { diffCampos } = require("../utils/diffCampos");
 
+// Mesmo problema do vistoriaService.semMidia -- arquivoDados é o
+// PDF/foto do contrato em base64 (às vezes alguns MB), que não precisa
+// ir pro log de auditoria. Bug real encontrado em 25/11/2026 (ver
+// vistoriaService.semMidia pro contexto completo).
+function semArquivo(contrato) {
+  if (!contrato) return contrato;
+  const { arquivoDados, ...resto } = contrato;
+  return resto;
+}
+
 const CAMPOS_CONTRATO = {
   status: 'status',
   valorAluguel: { rotulo: 'valor do aluguel', tipo: 'moeda' },
@@ -370,7 +380,7 @@ const criar = async (dados, usuario) => {
     registroId: contrato.id,
     acao: "CRIAR",
     valorAnterior: null,
-    valorNovo: contrato
+    valorNovo: semArquivo(contrato)
   });
 
   // O contrato NÃO é mais enviado à Clicksign automaticamente aqui --
@@ -522,8 +532,8 @@ const atualizar = async (id, dados, autor) => {
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "ATUALIZAR",
-    valorAnterior: anterior,
-    valorNovo: contrato
+    valorAnterior: semArquivo(anterior),
+    valorNovo: semArquivo(contrato)
   });
 
   const alteracoes = diffCampos(anterior, contrato, CAMPOS_CONTRATO);
@@ -567,7 +577,7 @@ const remover = async (id, autor, opcoes = {}) => {
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "EXCLUIR",
-    valorAnterior: contrato,
+    valorAnterior: semArquivo(contrato),
     valorNovo: null
   });
 
@@ -720,8 +730,8 @@ const encerrar = async (id, autor, opcoes = {}) => {
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "ENCERRAR",
-    valorAnterior: contrato,
-    valorNovo: contratoEncerrado
+    valorAnterior: semArquivo(contrato),
+    valorNovo: semArquivo(contratoEncerrado)
   });
 
   // PENDENTE ou já ATRASADA, tanto faz -- o que importa é o vencimento
@@ -875,8 +885,8 @@ const renovar = async (id, autor) => {
     modulo: "CONTRATOS",
     registroId: contrato.id,
     acao: "RENOVAR",
-    valorAnterior: anterior,
-    valorNovo: contrato
+    valorAnterior: semArquivo(anterior),
+    valorNovo: semArquivo(contrato)
   });
 
   await logService.registrar({

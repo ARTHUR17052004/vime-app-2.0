@@ -237,6 +237,22 @@ const converterDatas = (dados) => {
 
 };
 
+// Remove os campos de mídia pesada (base64) antes de guardar no log de
+// auditoria -- sem isso, cada CRIAR/ATUALIZAR/EXCLUIR de uma vistoria
+// grava o blob inteiro de fotos/fotosConclusao em Auditoria.valorAnterior/
+// valorNovo (já vimos linhas de até 36MB). Como GET /auditoria não pagina
+// nem filtra campos, isso faz a consulta inteira travar com "Failed to
+// convert rust String into napi string" -- quebrando qualquer tela que
+// chame a auditoria (ex.: Mapa da Cobrança no Financeiro). Bug real
+// encontrado em 25/11/2026 via relato da usuária Mariana ("financeiro
+// dando erro"). fotosCount/fotosConclusaoCount (ver buscarPorId) já
+// bastam pra saber quantas mídias existiam em cada snapshot.
+function semMidia(vistoria) {
+  if (!vistoria) return vistoria;
+  const { fotos, fotosConclusao, ...resto } = vistoria;
+  return resto;
+}
+
 const criar = async (dados, autor) => {
 
   dados = converterDatas(dados);
@@ -263,7 +279,7 @@ const criar = async (dados, autor) => {
     registroId: vistoria.id,
     acao: "CRIAR",
     valorAnterior: null,
-    valorNovo: vistoria
+    valorNovo: semMidia(vistoria)
   });
 
   await logService.registrar({
@@ -327,8 +343,8 @@ const atualizar = async (id, dados, autor) => {
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
-    valorAnterior: anterior,
-    valorNovo: vistoria
+    valorAnterior: semMidia(anterior),
+    valorNovo: semMidia(vistoria)
   });
 
   const alteracoes = diffCampos(anterior, vistoria, CAMPOS_VISTORIA);
@@ -448,7 +464,7 @@ const remover = async (id, autor) => {
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "EXCLUIR",
-    valorAnterior: vistoria,
+    valorAnterior: semMidia(vistoria),
     valorNovo: null
   });
 
@@ -683,8 +699,8 @@ const concluirMissoes = async (vistoriaId, { unidadeIds, dataRealizacao, fotos, 
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
-    valorAnterior: vistoria,
-    valorNovo: vistoriaAtualizada
+    valorAnterior: semMidia(vistoria),
+    valorNovo: semMidia(vistoriaAtualizada)
   });
 
   await logService.registrar({
@@ -761,8 +777,8 @@ const cancelarRealizacao = async (vistoriaId, autor) => {
     modulo: "VISTORIAS",
     registroId: vistoria.id,
     acao: "ATUALIZAR",
-    valorAnterior: vistoria,
-    valorNovo: revertida,
+    valorAnterior: semMidia(vistoria),
+    valorNovo: semMidia(revertida),
   });
 
   await logService.registrar({
