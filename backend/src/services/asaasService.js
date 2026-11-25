@@ -388,6 +388,46 @@ const buscarTransacao = async (id, usuario) => {
 
 };
 
+// Mantém o boleto já registrado na Asaas alinhado quando alguém adia o
+// vencimento aqui no sistema DEPOIS de enviado. Sem isso, a Asaas
+// continua cobrando (e marcando como vencido) pelo vencimento ANTIGO,
+// e os jobs de conferência (verificarAsaasJob/webhook) voltam a marcar
+// a receita como ATRASADA sozinhos mesmo com o vencimento novo sendo
+// futuro -- bug real encontrado em 25/11/2026: JOSÉ ELIAS DE JESUS
+// teve o vencimento adiado de 21/11 pra 30/11 só aqui no sistema, a
+// Asaas nunca soube, continuou com dueDate=21/11 e reabriu a cobrança
+// como OVERDUE a cada consulta do job de 15 em 15 minutos. Melhor
+// esforço só -- nunca trava a edição em si (o vencimento aqui é o que
+// importa pro usuário; se a Asaas estiver fora do ar, loga e segue).
+const sincronizarVencimentoNaAsaas = async (receita, novoVencimento) => {
+
+  if (!receita?.gatewayReferencia || receita.gatewayProvider !== 'ASAAS') return;
+  if (!novoVencimento) return;
+
+  try {
+
+    const cred = receita.contaPagamento?.credenciais || {};
+    const override = cred.apiKey
+      ? { apiKey: cred.apiKey, walletId: cred.walletId || undefined }
+      : null;
+
+    await AsaasApi.atualizarCobranca(
+      receita.gatewayReferencia,
+      { dueDate: new Date(novoVencimento).toISOString().slice(0, 10) },
+      override
+    );
+
+  } catch (erro) {
+
+    console.error(
+      `[asaasService] Falha ao sincronizar novo vencimento da receita ${receita.id} com a Asaas:`,
+      erro.message
+    );
+
+  }
+
+};
+
 const enviarCobranca = async (receitaId, contaResolvida = null) => {
 
   const receita = await prisma.receita.findUnique({
@@ -838,5 +878,6 @@ module.exports = {
   buscarTransacao,
   enviarCobranca,
   resumo,
-  sincronizar
+  sincronizar,
+  sincronizarVencimentoNaAsaas
 };

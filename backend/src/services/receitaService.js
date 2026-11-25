@@ -10,6 +10,7 @@ const contaPagamentoService = require('./contaPagamentoService');
 const notificacaoService = require('./notificacaoService');
 const corteVistoriaService = require('./corteVistoriaService');
 const gatewayPagamentoService = require('./gatewayPagamentoService');
+const asaasService = require('./asaasService');
 const { doContrato, doInquilino, daReceita: locadorIdDaReceita } = require('../utils/locadorDeRegistro');
 const { diffCampos, formatarValor } = require('../utils/diffCampos');
 
@@ -520,6 +521,30 @@ const atualizar = async (id, dados, autor) => {
       dados.status = dados.vencimento < inicioDeHoje ? "ATRASADA" : "PENDENTE";
 
     }
+
+  }
+
+  // Receita já enviada ao banco e o vencimento realmente mudou? O
+  // boleto registrado na Asaas precisa saber do novo vencimento,
+  // senão ela continua cobrando (e marcando como vencida) pela data
+  // antiga -- ver sincronizarVencimentoNaAsaas (best-effort, nunca
+  // trava a edição). BB ainda não tem esse caminho implementado.
+  if (
+    dados.vencimento !== undefined &&
+    anterior?.gatewayReferencia &&
+    anterior.gatewayProvider === "ASAAS" &&
+    anterior.status !== "PAGA" &&
+    anterior.status !== "CANCELADA" &&
+    String(dados.vencimento) !== String(anterior.vencimento)
+  ) {
+
+    const contaPagamento = anterior.contaPagamentoId
+      ? await prisma.contaPagamento.findUnique({ where: { id: anterior.contaPagamentoId } })
+      : null;
+
+    asaasService
+      .sincronizarVencimentoNaAsaas({ ...anterior, contaPagamento }, dados.vencimento)
+      .catch((erro) => console.error('[asaasService] Falha ao sincronizar vencimento:', erro.message));
 
   }
 
