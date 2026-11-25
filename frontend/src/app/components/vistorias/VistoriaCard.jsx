@@ -240,9 +240,17 @@ export default function VistoriaCard({
                   {vistoria.status}
                 </span>
 
-                <AtrasoVistoria vistoria={vistoria} />
-
-                {corte && <RelogioAtrasoCorte desde={vistoria.data} />}
+                {corte ? (
+                  // Vistoria de corte já tem o relógio próprio logo abaixo
+                  // (conta o atraso da COBRANÇA, não o prazo da missão) --
+                  // mostrar os dois juntos dava a impressão de informação
+                  // contraditória (ex.: "4d restantes" ao lado de "atrasado
+                  // há 15h", um contando prazo de missão e outro atraso de
+                  // cobrança) -- bug relatado em 25/11/2026.
+                  <RelogioAtrasoCorte desde={vistoria.data} />
+                ) : (
+                  <AtrasoVistoria vistoria={vistoria} />
+                )}
 
                 <h2
                   className={`
