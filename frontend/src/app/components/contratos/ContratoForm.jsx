@@ -123,6 +123,16 @@ export default function ContratoForm({
   const [salvando, setSalvando] =
     useState(false);
 
+  // Mudar o dia de vencimento desloca a data de TODA cobrança futura
+  // gerada automaticamente desse contrato, não só da atual -- trava com
+  // senha (re-autenticação) só nesse campo, explicando o motivo (ver
+  // exigirConfirmacaoEdicaoVencimentoContrato no backend). Pedido do
+  // usuário em 25/11/2026.
+  const [confirmandoVencimento, setConfirmandoVencimento] = useState(false);
+  const [senhaConfirmacaoVencimento, setSenhaConfirmacaoVencimento] = useState("");
+  const [erroConfirmacaoVencimento, setErroConfirmacaoVencimento] = useState("");
+  const [payloadPendente, setPayloadPendente] = useState(null);
+
   const [formData, setFormData] =
     useState({
 
@@ -394,27 +404,7 @@ export default function ContratoForm({
 
   }
 
-  async function salvar(e) {
-
-    e.preventDefault();
-
-    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
-
-    // No Arquivo de Contratos (modoManual) dataFim nem aparece na tela
-    // -- não é mais digitada, é calculada sozinha a partir do Início
-    // (ver calcularFimCicloAtual logo abaixo), não faz sentido exigir.
-    const campos = modoManual
-      ? CAMPOS.filter((c) => c !== "dataFim")
-      : CAMPOS;
-
-    const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
-
-    if (faltando.length > 0) {
-      setErro(mensagemCamposFaltando(faltando));
-      return;
-    }
-
-    setErro("");
+  async function executarSave(payloadExtra = {}) {
 
     setSalvando(true);
 
@@ -459,15 +449,84 @@ export default function ContratoForm({
           ? (dataFimCalculada ? dataFimCalculada.fimCiclo.toISOString().slice(0, 10) : null)
           : (formData.dataFim || null),
 
+        ...payloadExtra,
+
       });
-
-    } catch {
-
-      // erro já é exibido pelo chamador (onSave)
 
     } finally {
 
       setSalvando(false);
+
+    }
+
+  }
+
+  async function salvar(e) {
+
+    e.preventDefault();
+
+    const exigidos = new Set([...obrigatorios, ...SEMPRE_OBRIGATORIOS]);
+
+    // No Arquivo de Contratos (modoManual) dataFim nem aparece na tela
+    // -- não é mais digitada, é calculada sozinha a partir do Início
+    // (ver calcularFimCicloAtual logo abaixo), não faz sentido exigir.
+    const campos = modoManual
+      ? CAMPOS.filter((c) => c !== "dataFim")
+      : CAMPOS;
+
+    const faltando = obterCamposFaltando(campos, formData, exigidos, ROTULOS);
+
+    if (faltando.length > 0) {
+      setErro(mensagemCamposFaltando(faltando));
+      return;
+    }
+
+    setErro("");
+
+    // Mudou o dia de vencimento de um contrato já existente? Pede
+    // senha antes de mandar pro backend (ver exigirConfirmacaoEdicaoVencimentoContrato).
+    // Criar um contrato novo, ou editar qualquer outro campo, segue
+    // direto sem essa trava.
+    if (contrato && Number(formData.diaVencimento) !== Number(contrato.diaVencimento)) {
+      setPayloadPendente(true);
+      setSenhaConfirmacaoVencimento("");
+      setErroConfirmacaoVencimento("");
+      setConfirmandoVencimento(true);
+      return;
+    }
+
+    try {
+      await executarSave();
+    } catch {
+      // erro já é exibido pelo chamador (onSave)
+    }
+
+  }
+
+  async function confirmarEdicaoVencimento(e) {
+
+    e.preventDefault();
+
+    if (!senhaConfirmacaoVencimento) {
+      setErroConfirmacaoVencimento("Digite sua senha pra confirmar.");
+      return;
+    }
+
+    setErroConfirmacaoVencimento("");
+
+    try {
+
+      await executarSave({ senhaConfirmacao: senhaConfirmacaoVencimento });
+
+      setConfirmandoVencimento(false);
+      setPayloadPendente(null);
+      setSenhaConfirmacaoVencimento("");
+
+    } catch (err) {
+
+      // Mantém o modal aberto -- senha errada é pra corrigir e tentar
+      // de novo, sem perder os dados do formulário.
+      setErroConfirmacaoVencimento(err.message || "Não foi possível confirmar a edição do vencimento.");
 
     }
 
@@ -904,6 +963,77 @@ export default function ContratoForm({
   <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">
     {erro}
   </div>
+)}
+
+{confirmandoVencimento && (
+
+  <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4">
+
+    <form
+      onSubmit={confirmarEdicaoVencimento}
+      autoComplete="off"
+      className="w-full max-w-md rounded-2xl border border-yellow-500/30 bg-[var(--surface)] p-7 space-y-5"
+    >
+
+      <h3 className="text-xl font-bold text-yellow-400">
+        Confirmar mudança de vencimento
+      </h3>
+
+      <p className="text-sm text-[var(--text-muted)]">
+        Mudar o dia de vencimento de {contrato?.diaVencimento} pra {formData.diaVencimento}
+        altera a data de TODAS as próximas cobranças geradas automaticamente desse contrato, não
+        só da atual. Digite sua senha pra confirmar.
+      </p>
+
+      <div>
+        <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+          Sua senha
+        </label>
+        <input
+          type="password"
+          name="senhaConfirmacaoEdicaoVencimentoContrato"
+          autoComplete="new-password"
+          autoFocus
+          value={senhaConfirmacaoVencimento}
+          onChange={(e) => setSenhaConfirmacaoVencimento(e.target.value)}
+          className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
+        />
+      </div>
+
+      {erroConfirmacaoVencimento && (
+        <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2.5 text-sm text-red-400">
+          {erroConfirmacaoVencimento}
+        </div>
+      )}
+
+      <div className="flex justify-end gap-3">
+
+        <button
+          type="button"
+          onClick={() => {
+            setConfirmandoVencimento(false);
+            setPayloadPendente(null);
+            setSenhaConfirmacaoVencimento("");
+          }}
+          className="px-5 py-2.5 rounded-xl border border-[var(--border-token)] text-[var(--text-muted)]"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          disabled={salvando}
+          className="px-5 py-2.5 rounded-xl bg-yellow-600 text-white font-semibold disabled:opacity-60"
+        >
+          {salvando ? "Confirmando..." : "Confirmar"}
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
 )}
 
 <div

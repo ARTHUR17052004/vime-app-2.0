@@ -465,6 +465,11 @@ const criar = async (dados, usuario) => {
 
 const atualizar = async (id, dados, autor) => {
 
+  // Já cumpriu seu papel no middleware (exigirConfirmacaoEdicaoVencimentoContrato)
+  // -- não é coluna do Contrato, o Prisma quebra com "Unknown argument"
+  // se sobrar aqui.
+  delete dados.senhaConfirmacao;
+
   dados = sanitizar(dados);
 
   // Mesma saída que criar() já tem pro Arquivo de Contratos (origem

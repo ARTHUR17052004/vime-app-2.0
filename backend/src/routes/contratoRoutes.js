@@ -6,7 +6,7 @@ const contratoController = require('../controllers/contratoController');
 
 const authMiddleware = require('../middlewares/authMiddleware');
 const permissaoMiddleware = require('../middlewares/permissaoMiddleware');
-const { temPermissao, exigirConfirmacaoTerminoAntecipado } = permissaoMiddleware;
+const { temPermissao, exigirConfirmacaoTerminoAntecipado, exigirConfirmacaoEdicaoVencimentoContrato } = permissaoMiddleware;
 const prisma = require('../config/prisma');
 
 router.use(authMiddleware);
@@ -79,7 +79,12 @@ router.delete('/:id/arquivo', podeContrato('editar'), contratoController.remover
 
 router.post('/', podeContrato('criar'), contratoController.criar);
 
-router.put('/:id', podeContrato('editar'), contratoController.atualizar);
+router.put(
+  '/:id',
+  podeContrato('editar'),
+  exigirConfirmacaoEdicaoVencimentoContrato,
+  contratoController.atualizar
+);
 
 router.delete(
   '/:id',

@@ -190,6 +190,73 @@ const exigirConfirmacaoEdicaoValor = async (req, res, next) => {
 
 };
 
+// Mudar o dia de vencimento de um Contrato não é só um detalhe de
+// exibição -- é o campo que a geração automática mensal de cobrança
+// usa pra todo mês seguinte (ver cobrancaRecorrenteService.gerarCobrancaParaContrato,
+// `contrato.diaVencimento`), então editar isso sem perceber desloca a
+// data de vencimento de TODO aluguel futuro desse contrato, não só da
+// cobrança do mês. Pedido do usuário em 25/11/2026, com medo de uma
+// edição por engano gerar cobrança futura com data errada. Exige senha
+// (re-autenticação) na edição, com a mensagem já explicando o motivo --
+// sem motivo escrito nem permissão própria (diferente de
+// exigirConfirmacaoEdicaoValor/Exclusao), só a confirmação em si.
+const exigirConfirmacaoEdicaoVencimentoContrato = async (req, res, next) => {
+
+  if (req.body?.diaVencimento === undefined || !req.params?.id) {
+    return next();
+  }
+
+  try {
+
+    const contrato = await prisma.contrato.findUnique({
+      where: { id: req.params.id },
+      select: { diaVencimento: true },
+    });
+
+    // Contrato não encontrado, ou reenviando o mesmo dia de sempre
+    // (formulário de Editar manda o valor atual de volta junto) --
+    // nada realmente mudando, não trava.
+    if (!contrato || Number(req.body.diaVencimento) === contrato.diaVencimento) {
+      return next();
+    }
+
+    if (!req.body.senhaConfirmacao) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Mudar o dia de vencimento do contrato altera a data de todas as próximas cobranças geradas automaticamente, não só da atual. Digite sua senha pra confirmar.",
+      });
+    }
+
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: req.usuario.id },
+    });
+
+    const senhaValida =
+      usuario && (await bcrypt.compare(req.body.senhaConfirmacao, usuario.senha));
+
+    if (!senhaValida) {
+      return res.status(403).json({
+        success: false,
+        message: "Senha incorreta.",
+      });
+    }
+
+    return next();
+
+  } catch (error) {
+
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Erro ao verificar a edição do dia de vencimento.",
+    });
+
+  }
+
+};
+
 // Excluir uma cobrança de vez é tão (ou mais) sensível quanto mudar o
 // valor dela -- principalmente depois do apagão de 11/2026 (29
 // cobranças duplicadas de aluguel), onde excluir ao invés de cancelar
@@ -484,6 +551,7 @@ module.exports.temPermissao = temPermissao;
 module.exports.permissaoOuMiddleware = permissaoOuMiddleware;
 module.exports.exigirPermissaoParaMarcarPago = exigirPermissaoParaMarcarPago;
 module.exports.exigirConfirmacaoEdicaoValor = exigirConfirmacaoEdicaoValor;
+module.exports.exigirConfirmacaoEdicaoVencimentoContrato = exigirConfirmacaoEdicaoVencimentoContrato;
 module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;
 module.exports.exigirConfirmacaoTerminoAntecipado = exigirConfirmacaoTerminoAntecipado;
 module.exports.exigirConfirmacaoInadimplencia = exigirConfirmacaoInadimplencia;
