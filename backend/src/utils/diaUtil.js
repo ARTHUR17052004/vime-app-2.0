@@ -124,8 +124,19 @@ const proximoDiaUtil = (data, feriadosSet) => {
 // "+72 horas" virou "+3 dias ÚTEIS" -- sábado, domingo e feriado não
 // contam pro relógio (o zelador não trabalha nesses dias). Usado nos
 // relógios de atraso->risco de corte e corte->esvaziar kitnet.
+//
+// dataBase cai num dia não-útil (ex.: vencimento no sábado)? Empurra
+// pro próximo dia útil ANTES de começar a contar -- senão dois
+// vencimentos em dias diferentes (sexta e sábado seguinte) caíam no
+// mesmo prazo final, porque contar 3 dias úteis a partir de sexta e a
+// partir de sábado pula o mesmo fim de semana e os dois terminam na
+// quarta. Bug relatado em 25/11/2026 (FRANCK, vencimento sábado,
+// aparecendo "tão atrasado" quanto EMILLY, vencimento sexta).
 const adicionarDiasUteis = (dataBase, quantidadeDias, feriadosSet) => {
-  const d = new Date(dataBase);
+  let d = new Date(dataBase);
+  if (!ehDiaUtil(d, feriadosSet)) {
+    d = proximoDiaUtil(d, feriadosSet);
+  }
   let contados = 0;
   while (contados < quantidadeDias) {
     d.setDate(d.getDate() + 1);
