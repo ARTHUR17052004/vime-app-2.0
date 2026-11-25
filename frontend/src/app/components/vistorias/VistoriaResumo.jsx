@@ -1,7 +1,5 @@
 "use client";
 
-import { ehVistoriaDeCorte } from "../../../utils/vistoriaCorte";
-
 // Mesmo dia local (não UTC) -- comparar por componente de data evita o
 // mesmo bug de fuso já corrigido em outros lugares do sistema.
 function ehHoje(data) {
@@ -46,12 +44,11 @@ export default function VistoriaResumo({
 
   const realizadas = regularesRealizadasHoje + missoesRealizadasHoje;
 
-  // Vistoria de corte conta como atrasada mesmo com status PENDENTE --
-  // ver ehVistoriaDeCorte (pedido do usuário em 25/11/2026).
   const atrasadas =
     vistorias.filter(
       (vistoria) =>
-        vistoria.status === "ATRASADA" || ehVistoriaDeCorte(vistoria)
+        vistoria.status ===
+        "ATRASADA"
     ).length;
 
   const total =

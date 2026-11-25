@@ -10,6 +10,8 @@ import {
   FileText,
   ChevronUp,
   ChevronDown,
+  Clock,
+  TriangleAlert,
 } from "lucide-react";
 
 import Table from "../ui/Table";
@@ -38,6 +40,27 @@ import { statusExibidoReceita } from "@/utils/statusReceita";
 //      (botão "Inadimplência" nos 3 pontinhos).
 // Já classificada (classificacaoInadimplencia) não tem mais relógio --
 // aí é estado final, cuidado em /financeiro/inadimplentes.
+// Mesmo padrão visual/de leitura que Vistorias já usa (AtrasoVistoria/
+// RelogioAtrasoCorte em VistoriaCard.jsx) -- amarelo pulsante contando
+// o tempo que falta, vermelho pulsante contando o tempo que já passou
+// (em vez de só um rótulo estático tipo "Risco de corte"), pedido do
+// usuário em 25/11/2026 pra padronizar o visual em todo o sistema.
+function formatarRestante(ms) {
+  const horas = Math.floor(ms / (60 * 60 * 1000));
+  const minutos = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+  return `${horas}h${String(minutos).padStart(2, "0")}`;
+}
+
+function formatarDecorrido(ms) {
+  const totalHoras = Math.floor(ms / (60 * 60 * 1000));
+  const minutos = Math.floor((ms % (60 * 60 * 1000)) / (60 * 1000));
+  const dias = Math.floor(totalHoras / 24);
+  const horas = totalHoras % 24;
+  return dias > 0
+    ? `${dias} ${dias === 1 ? "dia" : "dias"} e ${horas}h${String(minutos).padStart(2, "0")}`
+    : `${horas}h${String(minutos).padStart(2, "0")}`;
+}
+
 function RelogioCorte({ receita }) {
 
   const [agora, setAgora] = useState(() => Date.now());
@@ -49,36 +72,56 @@ function RelogioCorte({ receita }) {
 
   if (receita.classificacaoInadimplencia) return null;
 
-  const restante = (desde, rotulo) => {
+  const relogio = (desde, rotulo) => {
 
     const prazo = new Date(desde).getTime() + 72 * 60 * 60 * 1000;
     const restanteMs = prazo - agora;
 
     if (restanteMs <= 0) {
       return (
-        <Badge variant="purple" size="sm">
-          {rotulo} atrasado
-        </Badge>
+        <span
+          className="
+            inline-flex items-center gap-1.5
+            rounded-xl
+            bg-red-600
+            px-3 py-1.5
+            text-xs font-extrabold text-white
+            animate-pulse
+            tabular-nums
+            shadow-[0_2px_10px_rgba(220,38,38,.5)]
+          "
+        >
+          <TriangleAlert size={14} strokeWidth={2.5} />
+          {rotulo} atrasado há {formatarDecorrido(-restanteMs)}
+        </span>
       );
     }
 
-    const horas = Math.floor(restanteMs / (60 * 60 * 1000));
-    const minutos = Math.floor((restanteMs % (60 * 60 * 1000)) / (60 * 1000));
-
     return (
-      <Badge variant="purple" size="sm">
-        {rotulo} em {horas}h{String(minutos).padStart(2, "0")}
-      </Badge>
+      <span
+        className="
+          inline-flex items-center gap-1.5
+          rounded-xl
+          bg-amber-400
+          px-3 py-1.5
+          text-xs font-extrabold text-slate-900
+          tabular-nums
+          shadow-[0_2px_8px_rgba(245,158,11,.4)]
+        "
+      >
+        <Clock size={14} strokeWidth={2.5} />
+        {rotulo} em {formatarRestante(restanteMs)}
+      </span>
     );
 
   };
 
   if (receita.kitnetEsvaziadaEm) {
-    return restante(receita.kitnetEsvaziadaEm, "Classificar inadimplência");
+    return relogio(receita.kitnetEsvaziadaEm, "Classificar inadimplência");
   }
 
   if (receita.corteRealizadoEm) {
-    return restante(receita.corteRealizadoEm, "Esvaziar kitnet");
+    return relogio(receita.corteRealizadoEm, "Esvaziar kitnet");
   }
 
   // Sem boleto enviado ao banco, não existe "risco de corte" de
@@ -88,25 +131,7 @@ function RelogioCorte({ receita }) {
   const enviada = !!receita.gatewayReferencia && receita.status !== "PAGA" && receita.status !== "PAGO" && receita.status !== "CANCELADA";
   if (!receita.vencimento || !enviada) return null;
 
-  const prazo = new Date(receita.vencimento).getTime() + 72 * 60 * 60 * 1000;
-  const restanteMs = prazo - agora;
-
-  if (restanteMs <= 0) {
-    return (
-      <Badge variant="red" size="sm">
-        Risco de corte
-      </Badge>
-    );
-  }
-
-  const horas = Math.floor(restanteMs / (60 * 60 * 1000));
-  const minutos = Math.floor((restanteMs % (60 * 60 * 1000)) / (60 * 1000));
-
-  return (
-    <Badge variant="yellow" size="sm">
-      Corte em {horas}h{String(minutos).padStart(2, "0")}
-    </Badge>
-  );
+  return relogio(receita.vencimento, "Corte");
 
 }
 

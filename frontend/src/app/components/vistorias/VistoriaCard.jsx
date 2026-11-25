@@ -11,7 +11,6 @@ import {
   XCircle,
   Trash2,
   Pin,
-  TriangleAlert,
 } from "lucide-react";
 
 import Button from "../ui/Button";
@@ -25,68 +24,21 @@ import AtrasoVistoria from "./AtrasoVistoria";
 // Vistoria automática de corte de água/energia por falta de pagamento
 // (ver backend/src/jobs/verificarAtrasoCorteJob.js) -- é a única coisa
 // que cria vistoria com essa categoria, então basta isso pra marcar o
-// card com o visual de alerta (título vermelho, card piscando, relógio
-// contando o atraso) sem precisar de um campo novo no banco.
+// card com o visual de alerta (título vermelho, card piscando) sem
+// precisar de um campo novo no banco. O relógio (AtrasoVistoria, logo
+// abaixo) é o mesmo de qualquer vistoria -- conta o prazo da MISSÃO,
+// não o atraso da cobrança por trás (isso é assunto do Financeiro,
+// padronizado pelo usuário em 25/11/2026).
 //
 // Mas o alerta só faz sentido enquanto o corte ainda não foi feito --
 // uma vez Realizada (ou Cancelada), o card continuava vermelho/piscando
-// pra sempre, com o relógio de atraso contando sem parar mesmo depois
-// de resolvido (reportado em 18/11/2026). Por isso considera "corte"
-// só quando a vistoria ainda está aberta.
+// pra sempre (reportado em 18/11/2026). Por isso considera "corte" só
+// quando a vistoria ainda está aberta.
 const STATUS_ENCERRADOS_CORTE = ["REALIZADA", "CANCELADA"];
 
 const ehVistoriaDeCorte = (vistoria) =>
   vistoria.categoria === "Cobrança" &&
   !STATUS_ENCERRADOS_CORTE.includes(vistoria.status);
-
-// Conta subindo desde que a vistoria foi criada (exatamente quando as
-// 72h de atraso se completaram) -- reforça que quanto mais passa, pior
-// fica, diferente do relógio de contagem REGRESSIVA do Financeiro.
-function RelogioAtrasoCorte({ desde }) {
-
-  const [agora, setAgora] = useState(() => Date.now());
-
-  useEffect(() => {
-    const id = setInterval(() => setAgora(Date.now()), 60000);
-    return () => clearInterval(id);
-  }, []);
-
-  if (!desde) return null;
-
-  const decorridoMs = Math.max(0, agora - new Date(desde).getTime());
-  const totalHoras = Math.floor(decorridoMs / (60 * 60 * 1000));
-  const minutos = Math.floor((decorridoMs % (60 * 60 * 1000)) / (60 * 1000));
-
-  // Primeiras 24h conta só em horas (mais fácil de ler no início) --
-  // passado isso, mostra em dias (ex.: "1 dia e 3h20"), senão "27h30"
-  // vira difícil de visualizar de cabeça quantos dias já são. Pedido
-  // do usuário em 25/11/2026.
-  const dias = Math.floor(totalHoras / 24);
-  const horas = totalHoras % 24;
-
-  const texto = dias > 0
-    ? `${dias} ${dias === 1 ? "dia" : "dias"} e ${horas}h${String(minutos).padStart(2, "0")}`
-    : `${horas}h${String(minutos).padStart(2, "0")}`;
-
-  return (
-    <span
-      className="
-        inline-flex items-center gap-2
-        rounded-2xl
-        bg-red-600
-        px-4 py-2.5
-        text-base font-extrabold text-white
-        animate-pulse
-        tabular-nums
-        shadow-[0_2px_14px_rgba(220,38,38,.55)]
-      "
-    >
-      <TriangleAlert size={20} strokeWidth={2.5} />
-      Atrasado há {texto}
-    </span>
-  );
-
-}
 
 export default function VistoriaCard({
   vistorias,
@@ -251,17 +203,13 @@ export default function VistoriaCard({
                   {vistoria.status}
                 </span>
 
-                {corte ? (
-                  // Vistoria de corte já tem o relógio próprio logo abaixo
-                  // (conta o atraso da COBRANÇA, não o prazo da missão) --
-                  // mostrar os dois juntos dava a impressão de informação
-                  // contraditória (ex.: "4d restantes" ao lado de "atrasado
-                  // há 15h", um contando prazo de missão e outro atraso de
-                  // cobrança) -- bug relatado em 25/11/2026.
-                  <RelogioAtrasoCorte desde={vistoria.data} />
-                ) : (
-                  <AtrasoVistoria vistoria={vistoria} />
-                )}
+                {/* Mesmo relógio de qualquer vistoria (prazo da MISSÃO --
+                    dataProxima), mesmo sendo de corte -- o atraso da
+                    COBRANÇA por trás é assunto do Financeiro agora, não
+                    de Vistorias (padronizado pelo usuário em 25/11/2026:
+                    aqui vermelho = prazo do zelador estourado, nunca o
+                    atraso da dívida). */}
+                <AtrasoVistoria vistoria={vistoria} />
 
                 <h2
                   className={`
