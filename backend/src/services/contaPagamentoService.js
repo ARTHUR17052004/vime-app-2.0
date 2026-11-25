@@ -275,14 +275,22 @@ const recebidoDoMes = async (id, mes) => {
       // jurosValor/multaValor NÃO são valor em reais -- são a TAXA (%)
       // configurada no boleto pro banco calcular se atrasar (multa:
       // percentual fixo aplicado uma vez só; jurosMora: taxa MENSAL,
-      // ver BBApi.criarBoleto). O sistema não guarda quanto foi
-      // EFETIVAMENTE cobrado/recebido (o BB não manda isso de volta pro
-      // nosso webhook/consulta hoje) -- o relatório ESTIMA a partir da
-      // taxa + dias de atraso (vencimento até dataPagamento), ver
-      // montarLinhaRelatorio no frontend. Pode não bater exatamente com
-      // o que o banco cobrou de verdade.
+      // ver BBApi.criarBoleto). Servem só de FALLBACK no relatório
+      // (estimativa por taxa x dias de atraso) pra receitas antigas, ou
+      // de provedores/casos em que o valor real abaixo ainda não foi
+      // confirmado.
       jurosValor: r.jurosValor || 0,
       multaValor: r.multaValor || 0,
+      // Valor em REAIS de verdade que o provedor confirmou ter
+      // cobrado/recebido de multa/juros (BB: valorMultaRecebido da
+      // consulta; Asaas: value - originalValue). Null = não confirmado
+      // -- relatório cai pro cálculo ESTIMADO acima, ver
+      // montarLinhaRelatorio no frontend. Bug real encontrado em
+      // 25/11/2026: o estimado cobrava R$90,30 de um pagamento que o BB
+      // confirmou não ter cobrado nada (só 1 dia de atraso na
+      // compensação, sem multa/juros de verdade).
+      valorMultaRecebida: r.valorMultaRecebida,
+      valorJurosRecebido: r.valorJurosRecebido,
       // Null = inquilino não tem valor próprio -- relatório cai pro
       // padrão do locador da kitnet (ver fallback no frontend).
       valorDeducaoInquilino: r.inquilino?.valorDeducao ?? r.contrato?.inquilino?.valorDeducao ?? null,

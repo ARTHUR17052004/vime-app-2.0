@@ -494,6 +494,21 @@ model Receita {
   descontoDias              Int?
   multaValor                Float?
   jurosValor                Float?
+  // Valor em REAIS de verdade recebido de multa/juros -- diferente de
+  // multaValor/jurosValor acima, que são só a TAXA (%) configurada.
+  // Só preenchido quando o provedor confirma o que realmente cobrou
+  // (BB: valorMultaRecebido/valorJuroMoraRecebido da consulta;
+  // Asaas: value - originalValue). Null = não sabemos (fallback pro
+  // relatório estimar pela taxa x dias de atraso, pode não bater com o
+  // que o banco cobrou de verdade -- ver montarLinhaRelatorio no
+  // frontend). Bug real encontrado em 25/11/2026: o relatório estimava
+  // R$90,30 de juros/multa pro Roberto da Silva Amaral só porque a
+  // compensação do boleto BB caiu 1 dia depois do vencimento, mas a
+  // consulta direta no BB mostrou valorMultaRecebido=0 e
+  // valorJuroMoraRecebido=0 -- o banco não cobrou nada, o estimado tava
+  // errado.
+  valorMultaRecebida        Float?
+  valorJurosRecebido        Float?
   asaasPaymentId            String?         @unique
   asaasCustomerId           String?
   enviadaAsaas              Boolean         @default(false)

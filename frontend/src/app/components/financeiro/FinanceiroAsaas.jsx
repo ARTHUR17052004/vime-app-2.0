@@ -25,14 +25,17 @@ function mesAtual() {
 // a mais que esse aluguel nominal (ex.: energia/água extra cobrados
 // junto no mesmo boleto).
 //
-// Juros/mult é ESTIMADO (taxa x dias de atraso) -- jurosValor/
-// multaValor na Receita são só a TAXA (%) configurada pro banco
-// calcular em caso de atraso, não o valor em reais efetivamente
-// cobrado/recebido (o BB não devolve isso pro nosso sistema hoje).
-// Multa é percentual fixo (aplicado uma vez, se atrasou); juros é taxa
-// MENSAL, proporcional aos dias corridos entre vencimento e pagamento
-// (mesma convenção configurada no boleto, ver BBApi.criarBoleto no
-// backend) -- pode não bater exatamente com o que o banco cobrou.
+// Juros/multa usa o valor REAL confirmado pelo provedor
+// (valorMultaRecebida/valorJurosRecebido) sempre que disponível --
+// só cai pro cálculo ESTIMADO (taxa x dias de atraso) quando nenhum
+// dos dois foi confirmado ainda (receita antiga, ou provedor que não
+// devolve isso pro nosso sistema). O estimado usa jurosValor/
+// multaValor da Receita, que são só a TAXA (%) configurada pro banco
+// calcular em caso de atraso -- multa é percentual fixo (aplicado uma
+// vez, se atrasou), juros é taxa MENSAL proporcional aos dias corridos
+// entre vencimento e pagamento (mesma convenção configurada no
+// boleto, ver BBApi.criarBoleto no backend). Ver diasDeAtraso/
+// montarLinhaRelatorio abaixo.
 function diasDeAtraso(vencimento, dataPagamento) {
   if (!vencimento || !dataPagamento) return 0;
   const umDia = 24 * 60 * 60 * 1000;
@@ -47,10 +50,26 @@ function montarLinhaRelatorio(item, taxaBoletoValor) {
     ? Math.max(0, item.valorBruto - item.valorAluguelContrato)
     : 0;
 
-  const atraso = diasDeAtraso(item.vencimento, item.dataPagamento);
-  const multa = atraso > 0 ? item.valorBruto * (Number(item.multaValor || 0) / 100) : 0;
-  const juros = atraso > 0 ? item.valorBruto * (Number(item.jurosValor || 0) / 100) * (atraso / 30) : 0;
-  const jurosMulta = multa + juros;
+  // Prioridade pro valor REAL que o banco/provedor confirmou ter
+  // cobrado (ver contaPagamentoService.recebidoDoMes) -- só cai pro
+  // cálculo ESTIMADO por taxa x dias de atraso quando nenhum dos dois
+  // foi confirmado ainda (receita antiga, ou provedor que não devolve
+  // isso). Bug real encontrado em 25/11/2026: o estimado cobrava
+  // R$90,30 de juros/multa de um pagamento que o BB confirmou não ter
+  // cobrado NADA (1 dia de atraso só na compensação do boleto, sem
+  // multa/juros de verdade).
+  const temValorConfirmado = item.valorMultaRecebida != null || item.valorJurosRecebido != null;
+
+  let jurosMulta;
+
+  if (temValorConfirmado) {
+    jurosMulta = Number(item.valorMultaRecebida || 0) + Number(item.valorJurosRecebido || 0);
+  } else {
+    const atraso = diasDeAtraso(item.vencimento, item.dataPagamento);
+    const multa = atraso > 0 ? item.valorBruto * (Number(item.multaValor || 0) / 100) : 0;
+    const juros = atraso > 0 ? item.valorBruto * (Number(item.jurosValor || 0) / 100) * (atraso / 30) : 0;
+    jurosMulta = multa + juros;
+  }
 
   const tarifaBoleto = Number(taxaBoletoValor || 0);
   // Dedução é do INQUILINO (pode variar de um pro outro) -- sem valor

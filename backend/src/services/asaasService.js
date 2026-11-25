@@ -608,6 +608,43 @@ const resumo = async (usuario) => {
 
 };
 
+// "YYYY-MM-DD" (formato que a Asaas usa em paymentDate/creditDate) --
+// meio-dia local pra não cair no dia errado por fuso, mesma convenção
+// do paraData do bbService.
+function paraDataAsaas(valor) {
+  if (!valor || typeof valor !== "string") return null;
+  const match = valor.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return null;
+  return new Date(`${valor}T12:00:00`);
+}
+
+// Valor em REAIS de verdade recebido de multa/juros -- a Asaas devolve
+// originalValue (nominal, SEM multa/juros) só quando aplicou algum;
+// null quando não aplicou nada (pagou em dia ou sem multa/juros
+// configurado). interestValue é a parte de JUROS já separada; o resto
+// da diferença (value - originalValue - interestValue) é a MULTA.
+// Confirmado ao vivo em 25/11/2026 contra uma cobrança Asaas paga com
+// atraso mas sem multa/juros configurados na conta (originalValue
+// null, interestValue null) -- bate com valor=originalValue, igual
+// esperado. Mesmo princípio do bbService.extrairValorMultaRecebido:
+// usado pelo relatório no lugar do cálculo ESTIMADO sempre que
+// disponível.
+function extrairMultaJurosRecebidoAsaas(payment) {
+
+  const valor = Number(payment?.value);
+  const original = payment?.originalValue != null ? Number(payment.originalValue) : null;
+
+  if (!Number.isFinite(valor) || original == null || !Number.isFinite(original)) {
+    return { valorMultaRecebida: null, valorJurosRecebido: null };
+  }
+
+  const juros = Number.isFinite(Number(payment?.interestValue)) ? Number(payment.interestValue) : 0;
+  const multa = Math.max(0, valor - original - juros);
+
+  return { valorMultaRecebida: multa, valorJurosRecebido: juros };
+
+}
+
 const sincronizar = async (evento) => {
 
   if (!evento) {
@@ -658,13 +695,22 @@ const sincronizar = async (evento) => {
       // pro mesmo pagamento (comum em boleto).
       if (receita.status !== "PAGA") {
 
+        const { valorMultaRecebida, valorJurosRecebido } = extrairMultaJurosRecebidoAsaas(payment);
+
         const atualizada = await prisma.receita.update({
           where: {
             id: receita.id
           },
           data: {
             status: "PAGA",
-            dataPagamento: new Date(),
+            // paymentDate/creditDate vêm direto da Asaas (data real de
+            // pagamento/crédito) -- new Date() era só a hora em que
+            // ESSE webhook chegou aqui, podia vir bem depois do
+            // pagamento de verdade (retry, fila, etc.).
+            dataPagamento: paraDataAsaas(payment.paymentDate) || new Date(),
+            dataCredito: paraDataAsaas(payment.creditDate) || paraDataAsaas(payment.paymentDate) || null,
+            valorMultaRecebida,
+            valorJurosRecebido,
             confirmacaoPagtoEnviadaEm: new Date(),
           }
         });

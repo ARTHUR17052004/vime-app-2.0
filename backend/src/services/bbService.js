@@ -77,6 +77,25 @@ const extrairDataCredito = (payload) => {
   );
 };
 
+// Valor em REAIS de verdade que o BB cobrou/recebeu de multa/juros --
+// vem da MESMA consulta que confirma o pagamento (GET
+// /cobrancas/v2/boletos/{...}, CONFIRMADO ao vivo em 25/11/2026 contra
+// um boleto pago com 1 dia de atraso na compensação: o BB retornou
+// valorMultaRecebido=0 e valorJuroMoraRecebido=0, mesmo com a conta
+// configurada pra cobrar 10%/1% em caso de atraso -- ou seja, o BB não
+// cobrou nada nesse caso. Usado pelo Relatório de Receitas no lugar do
+// cálculo ESTIMADO (taxa x dias de atraso) sempre que disponível, ver
+// montarLinhaRelatorio no frontend.
+const extrairValorMultaRecebido = (payload) => {
+  const valor = Number(payload?.valorMultaRecebido);
+  return Number.isFinite(valor) ? valor : null;
+};
+
+const extrairValorJurosRecebido = (payload) => {
+  const valor = Number(payload?.valorJuroMoraRecebido);
+  return Number.isFinite(valor) ? valor : null;
+};
+
 const sincronizar = async (payload) => {
 
   if (!payload) {
@@ -121,6 +140,8 @@ const sincronizar = async (payload) => {
         status: 'PAGA',
         dataPagamento: extrairDataPagamento(payload),
         dataCredito: extrairDataCredito(payload),
+        valorMultaRecebida: extrairValorMultaRecebido(payload),
+        valorJurosRecebido: extrairValorJurosRecebido(payload),
         confirmacaoPagtoEnviadaEm: new Date(),
       },
     });
