@@ -55,17 +55,21 @@ export default function ContratoStep({
         />
       </Campo>
 
+      {/* Valores fixos (200,00 e 159,00) -- era um número livre, mas o
+          financeiro só usa esses dois valores de verdade, então vira
+          select pra não deixar digitar outra coisa por engano. Pedido
+          do usuário em 26/11/2026. */}
       <Campo label="Dedução mensal (água + energia)">
-        <input
-          type="number"
-          step="0.01"
-          min="0"
+        <select
           name="valorDeducao"
           value={formData.valorDeducao}
           onChange={handleChange}
-          placeholder="Deixe em branco pra usar o padrão do locador"
           className={inputStyle}
-        />
+        >
+          <option value="">Padrão do locador</option>
+          <option value="200">R$ 200,00</option>
+          <option value="159">R$ 159,00</option>
+        </select>
       </Campo>
 
       <div className="col-span-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">

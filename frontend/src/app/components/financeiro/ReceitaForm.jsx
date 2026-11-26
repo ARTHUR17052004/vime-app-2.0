@@ -61,6 +61,16 @@ export default function ReceitaForm({
   const [erroConfirmacaoValor, setErroConfirmacaoValor] = useState("");
   const [payloadPendente, setPayloadPendente] = useState(null);
 
+  // "Já nasce inadimplente" -- só na criação (editar já tem o fluxo
+  // dedicado nos 3 pontinhos do Financeiro). Classificar inadimplência
+  // é ação sensível (exigirConfirmacaoInadimplencia no backend exige
+  // motivo + observação + senha), então pede os 3 aqui também, mesmo
+  // sendo logo na criação. Pedido do usuário em 26/11/2026.
+  const [inadimplenteNaCriacao, setInadimplenteNaCriacao] = useState(false);
+  const [motivoInadimplenciaCriacao, setMotivoInadimplenciaCriacao] = useState("");
+  const [observacaoInadimplenciaCriacao, setObservacaoInadimplenciaCriacao] = useState("");
+  const [senhaInadimplenciaCriacao, setSenhaInadimplenciaCriacao] = useState("");
+
   useEffect(() => {
 
     async function carregarInquilinos() {
@@ -169,6 +179,28 @@ export default function ReceitaForm({
 
         atualizado.descricao = `Aluguel - ${agora.getMonth() + 1}/${agora.getFullYear()}`;
 
+        // Dia de vencimento do contrato (mesmo padrão default usado na
+        // etapa 3 do cadastro de inquilino -- ver ContratoForm.jsx):
+        // dia fixo da Residência, senão o dia do mês do início do
+        // contrato. Preenche o mês ATUAL (não o próximo, diferente da
+        // recorrência automática -- aqui é lançamento manual, pro mês
+        // que o admin está olhando), e nunca estoura o mês (ex.: dia
+        // 31 em fevereiro vira o último dia). Continua editável depois
+        // -- só o ponto de partida. Pedido do usuário em 26/11/2026.
+        const diaVencimento =
+          inquilino.kitnet?.unidade?.vencimento ||
+          (inquilino.dataInicioContrato ? new Date(inquilino.dataInicioContrato).getUTCDate() : null);
+
+        if (diaVencimento) {
+
+          const ultimoDiaDoMes = new Date(agora.getFullYear(), agora.getMonth() + 1, 0).getDate();
+          const dia = Math.min(diaVencimento, ultimoDiaDoMes);
+          const vencimento = new Date(agora.getFullYear(), agora.getMonth(), dia);
+
+          atualizado.vencimento = vencimento.toISOString().slice(0, 10);
+
+        }
+
       }
 
       return atualizado;
@@ -202,6 +234,12 @@ export default function ReceitaForm({
     // backend a partir da conta de pagamento, nunca editável aqui.
     // Recorrência também não -- vira uma ação na própria linha da
     // receita, depois de criada (igual Enviar ao Banco).
+    ...(inadimplenteNaCriacao && {
+      classificarInadimplenciaNaCriacao: true,
+      motivoInadimplencia: motivoInadimplenciaCriacao,
+      observacaoInadimplencia: observacaoInadimplenciaCriacao,
+      senhaConfirmacao: senhaInadimplenciaCriacao,
+    }),
   });
 
   const executarSave = async (payload) => {
@@ -239,6 +277,25 @@ export default function ReceitaForm({
     }
 
     setErro("");
+
+    if (!receitaEditando && inadimplenteNaCriacao) {
+
+      if (!motivoInadimplenciaCriacao) {
+        setErro("Selecione o motivo da inadimplência.");
+        return;
+      }
+
+      if (!observacaoInadimplenciaCriacao.trim()) {
+        setErro("Escreva a observação da inadimplência.");
+        return;
+      }
+
+      if (!senhaInadimplenciaCriacao) {
+        setErro("Digite sua senha pra confirmar a inadimplência.");
+        return;
+      }
+
+    }
 
     const payload = montarPayload();
 
@@ -474,6 +531,103 @@ export default function ReceitaForm({
         </div>
 
       </div>
+
+      {!receitaEditando && (
+
+        <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-5 space-y-4">
+
+          <div className="flex items-center justify-between gap-4">
+
+            <div>
+              <p className="font-semibold text-[var(--text)]">
+                Já nasce inadimplente
+              </p>
+              <p className="text-xs text-[var(--text-faint)] mt-0.5">
+                Classifica essa cobrança como inadimplência assim que for criada -- ela já entra
+                direto em /financeiro/inadimplentes, com o motivo escolhido abaixo.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setInadimplenteNaCriacao((atual) => !atual)}
+              role="switch"
+              aria-checked={inadimplenteNaCriacao}
+              className={`
+                shrink-0
+                relative
+                w-14 h-8
+                rounded-full
+                transition
+                ${inadimplenteNaCriacao ? "bg-purple-500" : "bg-[var(--surface-3)]"}
+              `}
+            >
+              <span
+                className={`
+                  absolute top-1
+                  w-6 h-6
+                  rounded-full
+                  bg-white
+                  transition-all
+                  ${inadimplenteNaCriacao ? "left-7" : "left-1"}
+                `}
+              />
+            </button>
+
+          </div>
+
+          {inadimplenteNaCriacao && (
+
+            <div className="space-y-4 pt-2 border-t border-purple-500/20">
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Motivo<span className="ml-1 text-red-400">*</span>
+                </label>
+                <select
+                  value={motivoInadimplenciaCriacao}
+                  onChange={(e) => setMotivoInadimplenciaCriacao(e.target.value)}
+                  className={inputStyle}
+                >
+                  <option value="">Selecione...</option>
+                  <option value="ABANDONO">Abandono</option>
+                  <option value="INADIMPLENCIA">Inadimplência</option>
+                  <option value="QUEBRA_DO_INQUILINO">Quebra de Contrato</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Observação<span className="ml-1 text-red-400">*</span>
+                </label>
+                <textarea
+                  value={observacaoInadimplenciaCriacao}
+                  onChange={(e) => setObservacaoInadimplenciaCriacao(e.target.value)}
+                  placeholder="Detalhe o que aconteceu..."
+                  className={`${inputStyle} min-h-[90px] resize-none`}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs text-[var(--text-faint)] mb-1.5">
+                  Sua senha<span className="ml-1 text-red-400">*</span>
+                </label>
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  value={senhaInadimplenciaCriacao}
+                  onChange={(e) => setSenhaInadimplenciaCriacao(e.target.value)}
+                  className={inputStyle}
+                />
+              </div>
+
+            </div>
+
+          )}
+
+        </div>
+
+      )}
 
       {erro && (
         <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3 text-sm text-red-400">

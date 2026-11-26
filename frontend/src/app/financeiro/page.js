@@ -240,19 +240,60 @@ function FinanceiroPageConteudo() {
 
   const salvarReceita = async (dados) => {
 
+    // "Já nasce inadimplente" (ReceitaForm) -- cria normal e, se marcado,
+    // já classifica em seguida reaproveitando o MESMO endpoint sensível
+    // (senha+motivo+observação) do botão "Inadimplência" dos 3 pontinhos,
+    // só separados do payload de criação antes de mandar pro backend
+    // (campos extras quebrariam o create). Pedido do usuário em 26/11/2026.
+    const {
+      classificarInadimplenciaNaCriacao,
+      motivoInadimplencia,
+      observacaoInadimplencia,
+      senhaConfirmacao,
+      ...payloadCriacao
+    } = dados;
+
+    let receitaCriada;
+
     try {
 
-      await ReceitaService.criar(dados);
-
-      await carregar();
-
-      setModalOpen(false);
+      const criado = await ReceitaService.criar(payloadCriacao);
+      receitaCriada = criado.data || criado;
 
     } catch (err) {
 
       alert(err.message || "Erro ao salvar receita.");
+      return;
 
     }
+
+    if (classificarInadimplenciaNaCriacao) {
+
+      try {
+
+        await ReceitaService.classificarInadimplencia(receitaCriada.id, {
+          motivoInadimplencia,
+          observacaoInadimplencia,
+          senhaConfirmacao,
+        });
+
+      } catch (err) {
+
+        // A receita já foi criada de verdade -- só a classificação
+        // falhou (ex.: senha errada). Avisa claro pra não parecer que
+        // nada foi salvo; classificar manualmente depois continua
+        // disponível nos 3 pontinhos.
+        alert(
+          `Receita criada, mas não foi possível classificar como inadimplência: ${err.message || "erro desconhecido"}. Classifique manualmente pelos 3 pontinhos da lista.`
+        );
+
+      }
+
+    }
+
+    await carregar();
+
+    setModalOpen(false);
 
   };
 
