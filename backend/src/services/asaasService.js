@@ -671,10 +671,25 @@ function paraDataAsaas(valor) {
 // disponível.
 function extrairMultaJurosRecebidoAsaas(payment) {
 
-  const valor = Number(payment?.value);
-  const original = payment?.originalValue != null ? Number(payment.originalValue) : null;
+  if (!Number.isFinite(Number(payment?.value))) {
+    return { valorMultaRecebida: null, valorJurosRecebido: null };
+  }
 
-  if (!Number.isFinite(valor) || original == null || !Number.isFinite(original)) {
+  // originalValue null = a própria Asaas confirma que NÃO aplicou
+  // multa/juros nessa cobrança -- é um ZERO confirmado, não "sem
+  // informação". Tratar como null (como era antes) fazia o relatório
+  // cair pro cálculo ESTIMADO de novo bem no caso que já estava 100%
+  // confirmado como R$0,00 -- bug irmão do de 25/11/2026 encontrado no
+  // bbService (mesma raiz: confundir "não sabemos" com "sabemos que é
+  // zero").
+  if (payment?.originalValue == null) {
+    return { valorMultaRecebida: 0, valorJurosRecebido: 0 };
+  }
+
+  const valor = Number(payment.value);
+  const original = Number(payment.originalValue);
+
+  if (!Number.isFinite(original)) {
     return { valorMultaRecebida: null, valorJurosRecebido: null };
   }
 

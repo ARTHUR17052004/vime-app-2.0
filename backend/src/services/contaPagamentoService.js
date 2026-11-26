@@ -191,6 +191,36 @@ const extratoPixDoMes = async (id, mes) => {
 // nenhum) -- isso aqui é só o que o PRÓPRIO sistema cobrou e já
 // confirmou como pago, com o inquilino/kitnet certinho (não precisa
 // adivinhar por CPF).
+// CEP no cadastro vem sem máscara consistente ("74969170", "75259-705",
+// " 74640050") -- normaliza pro padrão NNNNN-NNN só na hora de montar o
+// relatório, sem mexer no dado cru salvo (pedido do usuário em
+// 25/11/2026, junto com Unidade/Kitnet e vigência do contrato no
+// Relatório de Receitas).
+function formatarCep(cep) {
+  const digitos = String(cep || '').replace(/\D/g, '');
+  if (digitos.length !== 8) return cep || null;
+  return `${digitos.slice(0, 5)}-${digitos.slice(5)}`;
+}
+
+function enderecoCompleto(unidade) {
+  if (!unidade) return null;
+  const linha1 = [unidade.logradouro, unidade.numero].filter(Boolean).join(', ');
+  const linha2 = [unidade.bairro, unidade.cidade && unidade.uf ? `${unidade.cidade}/${unidade.uf}` : unidade.cidade].filter(Boolean).join(' - ');
+  return [linha1, unidade.complemento, linha2].filter(Boolean).join(' - ') || null;
+}
+
+const SELECT_UNIDADE_ENDERECO = {
+  nome: true,
+  logradouro: true,
+  numero: true,
+  complemento: true,
+  bairro: true,
+  cidade: true,
+  uf: true,
+  cep: true,
+  locadorRel: { select: { taxaAdministracao: true } },
+};
+
 const recebidoDoMes = async (id, mes) => {
 
   const conta = await buscarPorId(id);
@@ -217,7 +247,7 @@ const recebidoDoMes = async (id, mes) => {
             select: {
               numero: true,
               aluguel: true,
-              unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
+              unidade: { select: SELECT_UNIDADE_ENDERECO },
             },
           },
         },
@@ -225,12 +255,14 @@ const recebidoDoMes = async (id, mes) => {
       contrato: {
         select: {
           valorAluguel: true,
+          dataInicio: true,
+          dataFim: true,
           inquilino: { select: { nome: true, cpf: true, valorDeducao: true } },
           kitnet: {
             select: {
               numero: true,
               aluguel: true,
-              unidade: { select: { nome: true, locadorRel: { select: { taxaAdministracao: true } } } },
+              unidade: { select: SELECT_UNIDADE_ENDERECO },
             },
           },
         },
@@ -265,6 +297,14 @@ const recebidoDoMes = async (id, mes) => {
       cpf: r.inquilino?.cpf || r.contrato?.inquilino?.cpf || r.pagadorCpf || null,
       valorBruto: r.valor,
       vencimento: r.vencimento,
+      // Endereço completo + CEP (normalizado) da Unidade da kitnet --
+      // pedido do usuário em 25/11/2026 pro Relatório de Receitas.
+      enderecoCompleto: enderecoCompleto(kitnet?.unidade),
+      cep: formatarCep(kitnet?.unidade?.cep),
+      // Vigência do contrato (início/fim) -- null quando a receita é
+      // avulsa, sem contrato por trás.
+      contratoDataInicio: r.contrato?.dataInicio ?? null,
+      contratoDataFim: r.contrato?.dataFim ?? null,
       // Aluguel NOMINAL do contrato/kitnet (não da Descrição -- tentamos
       // ler "Aluguel: R$ X" da Descrição antes, mas a Descrição padrão
       // de toda receita recorrente é só "Aluguel - MM/AAAA", sem valor
