@@ -39,7 +39,7 @@ import SearchInput from "../components/common/SearchInput";
 
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
-import { codigoFiltroReceita } from "../../utils/statusReceita";
+import { receitaCombinaComFiltro } from "../../utils/statusReceita";
 import { arredondarCentavos } from "../../utils/dinheiro";
 
 // Colar um nome (de uma tabela, PDF etc.) às vezes traz espaço não-
@@ -650,25 +650,14 @@ function FinanceiroPageConteudo() {
     )
       return false;
 
-    // "Não enviada ao banco" corta por fora do status normal (Pendente,
-    // Atrasada...) -- é sobre ter sido mandada pro banco ou não, não
-    // sobre vencimento. Mesmo critério do selo amarelo na lista.
-    if (statusFiltro === "NAO_ENVIADA") {
-      const naoEnviada =
-        !item.gatewayReferencia &&
-        item.status !== "PAGA" &&
-        item.status !== "PAGO" &&
-        item.status !== "CANCELADA";
-      if (!naoEnviada) return false;
-    } else if (
-      // codigoFiltroReceita (não statusExibidoReceita -- esse agora só
-      // devolve o status cru, "Atrasada" nunca é substituído por um
-      // selo de escalada, ver statusReceita.js) -- senão filtrar por
-      // "Pendente" também trazia quem já estava "Em Aberto" (PENDENTE
-      // por baixo, só mostrado diferente por já ter sido enviada ao
-      // banco).
-      statusFiltro && codigoFiltroReceita(item) !== statusFiltro
-    ) return false;
+    // receitaCombinaComFiltro checa cada opção à parte (uma receita
+    // Atrasada que já teve o corte realizado bate em "Atrasada" E em
+    // "Corte de Água e Energia" ao mesmo tempo -- os selos empilham na
+    // lista, o filtro não pode tratar como categorias que se excluem,
+    // ver statusReceita.js).
+    if (statusFiltro && !receitaCombinaComFiltro(item, statusFiltro)) {
+      return false;
+    }
 
     if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
 

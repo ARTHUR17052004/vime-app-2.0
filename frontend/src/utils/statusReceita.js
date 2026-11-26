@@ -44,18 +44,34 @@ export function statusExibidoReceita(item) {
 
 }
 
-// Igual statusExibidoReceita, mas pro FILTRO de Status (Financeiro >
-// Extratos) -- esse sim precisa saber o estágio mais avançado da
-// escalada pra filtrar "só quem está em risco de corte" etc. (o selo
-// visual da lista usa statusExibidoReceita + badgesEscaladaReceita
-// empilhados; o filtro continua de um valor só).
-export function codigoFiltroReceita(item) {
+// Pro FILTRO de Status (Financeiro > Extratos). Os selos da escalada
+// EMPILHAM na lista (badgesEscaladaReceita) -- uma receita atrasada
+// que já teve o corte realizado continua Atrasada E virou Corte de
+// Água e Energia ao mesmo tempo, nunca uma coisa OU outra. Por isso
+// cada opção do filtro é checada à parte (uma receita pode bater em
+// mais de uma); antes o filtro devolvia um código só por item (o
+// "estágio mais avançado"), escondendo de "Atrasada" qualquer receita
+// que já tivesse avançado na escalada -- bug relatado em 26/11/2026
+// (duas dezenas de receita atrasada sumiam do filtro "Atrasada" assim
+// que entravam em risco de corte).
+export function receitaCombinaComFiltro(item, filtro) {
 
-  if (item.classificacaoInadimplencia) return "INADIMPLENTE";
-  if (item.kitnetEsvaziadaEm) return "ESVAZIAR_KITNET";
-  if (item.corteRealizadoEm) return "CORTE_AGUA_ENERGIA";
+  if (!filtro) return true;
 
-  return statusExibidoReceita(item).codigo;
+  if (filtro === "INADIMPLENTE") return !!item.classificacaoInadimplencia;
+  if (filtro === "ESVAZIAR_KITNET") return !!item.kitnetEsvaziadaEm;
+  if (filtro === "CORTE_AGUA_ENERGIA") return !!item.corteRealizadoEm;
+
+  if (filtro === "NAO_ENVIADA") {
+    return (
+      !item.gatewayReferencia &&
+      item.status !== "PAGA" &&
+      item.status !== "PAGO" &&
+      item.status !== "CANCELADA"
+    );
+  }
+
+  return statusExibidoReceita(item).codigo === filtro;
 
 }
 
