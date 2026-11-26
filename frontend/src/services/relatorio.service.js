@@ -13,4 +13,21 @@ export const RelatorioService = {
     });
   },
 
+  listarAgendados() {
+    return api("/relatorios/agendados");
+  },
+
+  agendar(dados) {
+    return api("/relatorios/agendados", {
+      method: "POST",
+      body: JSON.stringify(dados),
+    });
+  },
+
+  cancelarAgendado(id) {
+    return api(`/relatorios/agendados/${id}`, {
+      method: "DELETE",
+    });
+  },
+
 };

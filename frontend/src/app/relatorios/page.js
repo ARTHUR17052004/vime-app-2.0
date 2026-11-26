@@ -10,6 +10,7 @@ import RelatorioStats from "../components/relatorios/RelatorioStats";
 import RelatorioFilters from "../components/relatorios/RelatorioFilters";
 import RelatorioCards from "../components/relatorios/RelatorioCards";
 import RelatorioComparativo from "../components/relatorios/RelatorioComparativo";
+import RelatorioEnvio from "../components/relatorios/RelatorioEnvio";
 import FadeIn from "../components/ui/FadeIn";
 import PageHeader from "../components/ui/PageHeader";
 import PageSection from "../components/ui/PageSection";
@@ -21,6 +22,8 @@ export default function RelatoriosPage() {
 
   const podeVisualizar = usePermissao("relatorios.visualizar");
   const podeExportar = usePermissao("relatorios.exportar");
+  const podeEnviar = usePermissao("relatorios.enviar");
+  const podeCancelarEnvio = usePermissao("relatorios.cancelarEnvio");
 
   const [pesquisa, setPesquisa] =
     useState("");
@@ -171,6 +174,16 @@ export default function RelatoriosPage() {
           <PageSection spacing="xxl">
 
             <RelatorioComparativo podeExportar={podeExportar} />
+
+          </PageSection>
+
+        </FadeIn>
+
+        <FadeIn delay={0.30}>
+
+          <PageSection spacing="xxl">
+
+            <RelatorioEnvio podeEnviar={podeEnviar} podeCancelar={podeCancelarEnvio} />
 
           </PageSection>
 

@@ -18,7 +18,7 @@ async function obterConfig() {
 
 }
 
-async function enviarEmail({ para, assunto, html, texto }) {
+async function enviarEmail({ para, assunto, html, texto, anexos }) {
 
   const config = await obterConfig();
 
@@ -44,6 +44,11 @@ async function enviarEmail({ para, assunto, html, texto }) {
     subject: assunto,
     text: texto,
     html,
+    // [{ filename, content: Buffer, contentType }] -- usado pelo envio
+    // agendado de relatório (ver relatorioEnvioService.js) pra anexar o
+    // PDF/Excel gerado na hora, sem precisar hospedar o arquivo em
+    // lugar nenhum.
+    ...(anexos?.length ? { attachments: anexos } : {}),
   });
 
 }

@@ -115,7 +115,10 @@ const CATALOGO = [
   {
     modulo: "Relatórios",
     chave: "relatorios",
-    acoes: ["visualizar", "exportar"],
+    // "enviar"/"cancelarEnvio" são da área de envio agendado por e-mail
+    // (ver RelatorioEnvio.jsx) -- à parte de "exportar" (baixar na hora)
+    // de propósito, pra dar pra liberar um sem liberar o outro.
+    acoes: ["visualizar", "exportar", "enviar", "cancelarEnvio"],
   },
   {
     modulo: "Suporte Técnico",
@@ -184,6 +187,7 @@ const ROTULOS_ACAO = {
   testarConexao: "Testar conexão",
   enviar: "Enviar",
   cancelar: "Cancelar",
+  cancelarEnvio: "Cancelar envio agendado",
   signatariosFixos: "Signatários fixos",
   sincronizar: "Sincronizar",
   conectar: "Conectar / QR Code",

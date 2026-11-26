@@ -25,6 +25,7 @@ const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
 const dispararReceitasBanco = require("./dispararReceitasBancoJob");
 const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
 const diagnosticoMemoria = require("./diagnosticoMemoriaJob");
+const enviarRelatoriosAgendados = require("./enviarRelatoriosAgendadosJob");
 
 const iniciarJobs = () => {
 
@@ -62,6 +63,11 @@ const iniciarJobs = () => {
   // A EFI nem webhook tem configurado ainda -- sem isso, uma cobrança
   // paga na EFI nunca seria reconhecida sozinha (ver verificarEfiJob.js).
   cron.schedule("*/15 * * * *", verificarEfi);
+
+  // Envio agendado de relatório -- o usuário escolhe a hora exata que
+  // quer receber, não pode esperar o lote diário das 8h (ver
+  // enviarRelatoriosAgendadosJob.js).
+  cron.schedule("*/15 * * * *", enviarRelatoriosAgendados);
 
   // Emissão mensal de Aluguel: dia 20 só CRIA a receita do mês seguinte
   // (Pendente, sem enviar ao banco) -- dá a janela de ~10 dias pra

@@ -1361,3 +1361,38 @@ model Feriado {
 
   @@unique([data])
 }
+
+// Envio agendado de um relatório (ver backend/src/config/catalogoRelatorios.js
+// e frontend/src/app/components/relatorios/RelatorioEnvio.jsx) -- o
+// admin escolhe UM relatório do catálogo (relatorioChave, mesmas chaves
+// de utils/tiposRelatorio.js), o formato, um e-mail de destino e uma
+// data/hora; o job enviarRelatoriosAgendadosJob.js gera o arquivo nessa
+// hora e manda. relatorioTitulo é uma cópia do rótulo no momento do
+// agendamento (sobrevive se o catálogo mudar depois). Pedido do usuário
+// em 26/11/2026: "fica acumulando" e precisa diferenciar cada envio por
+// data/hora/destinatário -- por isso cada linha aqui é o
+// histórico/fila inteiro, não só a configuração.
+model RelatorioAgendado {
+  id                 String    @id @default(uuid())
+  relatorioChave     String
+  relatorioTitulo    String
+  formato            String // "pdf" | "excel"
+  destinatarioEmail  String
+  dataAgendada       DateTime
+  status             String    @default("PENDENTE") // PENDENTE | ENVIADO | ERRO | CANCELADO
+  enviadoEm          DateTime?
+  erro               String?
+  // Só preenchidos quando relatorioChave = "EXTRATO_CONTA" (o Relatório
+  // de Receitas por conta/mês de FinanceiroAsaas.jsx, fora do catálogo
+  // genérico de utils/tiposRelatorio.js porque precisa de conta+mês pra
+  // existir -- ver extratoContaRelatorio.js). Null nos outros.
+  contaPagamentoId   String?
+  mesReferencia      String? // "AAAA-MM"
+  criadoPorId        String?
+  criadoPorNome      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([status])
+  @@index([dataAgendada])
+}
