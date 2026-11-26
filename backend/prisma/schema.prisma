@@ -521,6 +521,12 @@ model Receita {
   gatewayReferencia         String? // id/número da cobrança no provedor (equivalente ao asaasPaymentId, só que genérico)
   linkBoleto                String? // link do PDF/boleto no provedor (bankSlipUrl da Asaas, urlImagemBoleto do BB) -- usado pra anexar no WhatsApp
   linhaDigitavel            String? // código pra digitar/colar no app do banco em vez de abrir o link
+  // "Nosso Número" de verdade do boleto -- só Asaas por enquanto (campo
+  // nossoNumero da resposta /payments). gatewayReferencia pra Asaas é
+  // o id interno (pay_xxxx), usado pra consultar a API, não o que
+  // aparece impresso no boleto -- por isso esse campo à parte, usado
+  // só no Relatório de Receitas (pedido do usuário em 26/11/2026).
+  nossoNumero               String?
   // Pix "copia e cola" do próprio boleto (BB: qrCode.emv da resposta de
   // registro; EFI: pix.qrcode) -- quando a conta tem Pix habilitado,
   // dá pra pagar sem nem abrir o link/PDF do boleto.

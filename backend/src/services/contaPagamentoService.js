@@ -293,7 +293,14 @@ const recebidoDoMes = async (id, mes) => {
       // Extratos > Exportar Excel) -- ver montarLinhaRelatorio no
       // controller/frontend (FinanceiroAsaas.jsx) pra como cada um vira
       // coluna da planilha.
-      nossoNumero: r.gatewayReferencia || null,
+      //
+      // Nosso Número: Asaas usa o campo próprio (r.nossoNumero, o que
+      // aparece impresso no boleto de verdade) -- gatewayReferencia
+      // pra Asaas é só o id interno (pay_xxxx), nunca o nosso número.
+      // BB/outros continuam usando gatewayReferencia, que já É o nosso
+      // número de verdade pra eles. Pedido do usuário em 26/11/2026.
+      nossoNumero: (r.gatewayProvider === 'ASAAS' ? r.nossoNumero : null) || r.gatewayReferencia || null,
+      gatewayProvider: r.gatewayProvider || null,
       cpf: r.inquilino?.cpf || r.contrato?.inquilino?.cpf || r.pagadorCpf || null,
       valorBruto: r.valor,
       vencimento: r.vencimento,

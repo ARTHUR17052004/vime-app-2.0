@@ -188,46 +188,60 @@ function RecebidoPainel({ contaId, mes }) {
       montarLinhaRelatorio(item, resultado.taxaBoletoValor)
     );
 
+    // Cada conta é de um provedor só -- basta olhar o primeiro item
+    // pra saber se esse relatório inteiro é da Asaas. Modelo próprio
+    // pedido pela Asaas (pedido do usuário em 26/11/2026): sem a
+    // coluna Excedentes (não existe esse caso lá) e "Pagamento" vira
+    // "Data de Recebimento" (deixa explícito que é o dia que o
+    // dinheiro caiu na conta, não o dia que o inquilino pagou -- ver
+    // comentário de montarLinhaRelatorio acima sobre dataCredito).
+    const ehAsaas = resultado.receitas?.[0]?.gatewayProvider === "ASAAS";
+
     const colunas = [
-      "Nosso nº", "Pagamento", "CPF", "Locatário", "Unidade/Kitnet", "Endereço", "CEP",
-      "Mês referência", "Vigência do contrato",
-      "Valor aluguel", "Juros / mult", "Tarifa boleto", "Dedução", "Excedentes", "Valor final",
+      "Nosso nº", ehAsaas ? "Data de Recebimento" : "Pagamento", "CPF", "Locatário",
+      "Unidade/Kitnet", "Endereço", "CEP", "Mês referência", "Vigência do contrato",
+      "Valor aluguel", "Juros / mult", "Tarifa boleto", "Dedução",
+      ...(ehAsaas ? [] : ["Excedentes"]),
+      "Valor final",
     ];
 
     const soma = (campo) => linhas.reduce((total, l) => total + Number(l[campo] || 0), 0);
+
+    const linhaPlanilha = (l) => [
+      l.nossoNumero,
+      formatarData(l.dataPagamento),
+      l.cpf,
+      l.pagador,
+      l.unidadeKitnet,
+      l.enderecoCompleto,
+      l.cep,
+      l.mesReferencia,
+      l.vigenciaContrato,
+      formatarMoeda(l.valorAluguel),
+      formatarMoeda(l.jurosMulta),
+      formatarMoeda(l.tarifaBoleto),
+      formatarMoeda(l.deducao),
+      ...(ehAsaas ? [] : [formatarMoeda(l.excedentes)]),
+      formatarMoeda(l.valorFinal),
+    ];
 
     exportarExcel({
       abas: [{
         nome: "Receitas",
         colunas,
         linhas: [
-          ...linhas.map((l) => [
-            l.nossoNumero,
-            formatarData(l.dataPagamento),
-            l.cpf,
-            l.pagador,
-            l.unidadeKitnet,
-            l.enderecoCompleto,
-            l.cep,
-            l.mesReferencia,
-            l.vigenciaContrato,
-            formatarMoeda(l.valorAluguel),
-            formatarMoeda(l.jurosMulta),
-            formatarMoeda(l.tarifaBoleto),
-            formatarMoeda(l.deducao),
-            formatarMoeda(l.excedentes),
-            formatarMoeda(l.valorFinal),
-          ]),
+          ...linhas.map(linhaPlanilha),
           [],
-          [
-            "", "", "", "Total", "", "", "", "",  "",
-            formatarMoeda(soma("valorAluguel")),
-            formatarMoeda(soma("jurosMulta")),
-            formatarMoeda(soma("tarifaBoleto")),
-            formatarMoeda(soma("deducao")),
-            formatarMoeda(soma("excedentes")),
-            formatarMoeda(soma("valorFinal")),
-          ],
+          linhaPlanilha({
+            cpf: "", pagador: "Total", unidadeKitnet: "", enderecoCompleto: "", cep: "",
+            mesReferencia: "", vigenciaContrato: "",
+            valorAluguel: soma("valorAluguel"),
+            jurosMulta: soma("jurosMulta"),
+            tarifaBoleto: soma("tarifaBoleto"),
+            deducao: soma("deducao"),
+            excedentes: soma("excedentes"),
+            valorFinal: soma("valorFinal"),
+          }),
         ],
       }],
       infoLinhas: [`Relatório de Receitas - ${resultado.contaNome || ""} - ${mes}`],

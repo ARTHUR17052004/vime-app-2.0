@@ -615,6 +615,12 @@ const enviarCobranca = async (receitaId, contaResolvida = null) => {
         cobrancaEnviadaEm: new Date(),
         gatewayProvider: 'ASAAS',
         gatewayReferencia: cobranca.id,
+        // Nosso Número de verdade (o que aparece impresso no boleto) --
+        // gatewayReferencia/cobranca.id é só o id interno da Asaas
+        // (pay_xxxx), usado pra consultar a API, nunca o que o relatório
+        // de receitas deve mostrar como "Nosso nº" (pedido do usuário
+        // em 26/11/2026).
+        nossoNumero: cobranca.nossoNumero || null,
       },
     });
 
