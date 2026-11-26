@@ -5,17 +5,19 @@ const diaUtil = require('../utils/diaUtil');
 
 /*
   Segundo estágio da escalada de corte de água/energia (pedido do
-  usuário em 18/11/2026) -- verificarAtrasoCorteJob.js cuida do
-  primeiro (atraso 72h+ -> vistoria "REALIZAR CORTE DE ÁGUA E
-  ENERGIA"). Esse aqui cuida do segundo: a vistoria de corte foi
-  Realizada (ver vistoriaService.atualizar, que grava
-  Receita.corteRealizadoEm) mas a cobrança continua sem resolver por
-  mais 72h -> dispara a vistoria "ESVAZIAR KITNET", que ao ser
-  Realizada encerra o contrato e libera a kitnet sozinha.
+  usuário em 18/11/2026, prazo ajustado em 26/11/2026) --
+  verificarAtrasoCorteJob.js cuida do primeiro (atraso 72h ÚTEIS+ ->
+  vistoria "REALIZAR CORTE DE ÁGUA E ENERGIA"). Esse aqui cuida do
+  segundo: a vistoria de corte foi Realizada (ver vistoriaService.atualizar,
+  que grava Receita.corteRealizadoEm) mas a cobrança continua sem
+  resolver por mais 48h -> dispara a vistoria "FAZER DESOCUPAÇÃO DE
+  IMÓVEL", que ao ser Realizada encerra o contrato e libera a kitnet
+  sozinha.
 
-  "72h depois do corte realizado" = corteRealizadoEm + 3 dias, mesma
-  régua de verificarAtrasoCorteJob.js. vistoriaEsvaziarCriadaEm evita
-  criar duas vezes pra mesma Receita.
+  "48h depois do corte realizado" = corteRealizadoEm + 2 dias ÚTEIS
+  (mesma régua de dias úteis de verificarAtrasoCorteJob.js, só que 2
+  em vez de 3). vistoriaEsvaziarCriadaEm evita criar duas vezes pra
+  mesma Receita.
 */
 const resolverResponsavelZelador = async () => {
 
@@ -35,10 +37,10 @@ module.exports = async () => {
 
   const agora = new Date();
 
-  // Pré-filtro solto (72h corridas) -- igual verificarAtrasoCorteJob.js,
-  // a conta exata de 3 dias ÚTEIS é feita depois com diaUtil.
+  // Pré-filtro solto (48h corridas) -- igual verificarAtrasoCorteJob.js,
+  // a conta exata de 2 dias ÚTEIS é feita depois com diaUtil.
   const limite = new Date(agora);
-  limite.setHours(limite.getHours() - 72);
+  limite.setHours(limite.getHours() - 48);
 
   const candidatas = await prisma.receita.findMany({
     where: {
@@ -62,12 +64,12 @@ module.exports = async () => {
   const feriadosSet = await diaUtil.obterFeriadosSet([agora.getFullYear(), agora.getFullYear() + 1]);
 
   const receitas = candidatas.filter(
-    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.corteRealizadoEm), 3, feriadosSet) <= agora
+    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.corteRealizadoEm), 2, feriadosSet) <= agora
   );
 
   if (receitas.length === 0) return;
 
-  console.log(`[JOB] Criando vistoria de "esvaziar kitnet" pra ${receitas.length} cobrança(s) com corte realizado há 3 dias úteis+ sem quitação...`);
+  console.log(`[JOB] Criando vistoria de "desocupação de imóvel" pra ${receitas.length} cobrança(s) com corte realizado há 2 dias úteis+ sem quitação...`);
 
   const responsavel = await resolverResponsavelZelador();
 
@@ -81,25 +83,25 @@ module.exports = async () => {
 
     if (!kitnet || !unidade) continue;
 
-    // Já existe um "esvaziar kitnet" aberto pra essa mesma kitnet --
-    // não cria outro, mesma trava de verificarAtrasoCorteJob.js.
-    const jaTemEsvaziarAberto = await prisma.vistoria.findFirst({
-      where: { kitnetId: kitnet.id, titulo: corteVistoriaService.TITULO_ESVAZIAR_KITNET, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
+    // Já existe uma "desocupação" aberta pra essa mesma kitnet -- não
+    // cria outra, mesma trava de verificarAtrasoCorteJob.js.
+    const jaTemDesocupacaoAberta = await prisma.vistoria.findFirst({
+      where: { kitnetId: kitnet.id, titulo: corteVistoriaService.TITULO_FAZER_DESOCUPACAO, status: { notIn: ['CANCELADA', 'REALIZADA'] } },
       select: { id: true },
     });
 
-    if (jaTemEsvaziarAberto) continue;
+    if (jaTemDesocupacaoAberta) continue;
 
     try {
 
-      // Mesmo prazo de 3 dias ÚTEIS do primeiro estágio -- sem
-      // responder até lá, o job de status (atualizarStatusVistoriasJob)
-      // já vira ATRASADA sozinho.
+      // Mesmo prazo de 3 dias ÚTEIS do primeiro estágio pro zelador
+      // executar a missão -- sem responder até lá, o job de status
+      // (atualizarStatusVistoriasJob) já vira ATRASADA sozinho.
       const dataProxima = diaUtil.adicionarDiasUteis(new Date(), 3, feriadosSet);
 
       const vistoria = await vistoriaService.criar({
-        titulo: corteVistoriaService.TITULO_ESVAZIAR_KITNET,
-        descricao: `Corte de água/energia realizado há 72h+ e a cobrança de ${inquilino?.nome || 'inquilino'} (R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}) continua sem quitação. Conforme o contrato, a kitnet deve ser esvaziada.`,
+        titulo: corteVistoriaService.TITULO_FAZER_DESOCUPACAO,
+        descricao: `Corte de água/energia realizado há 48h+ e a cobrança de ${inquilino?.nome || 'inquilino'} (R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}) continua sem quitação. Conforme o contrato, o imóvel deve ser desocupado.`,
         unidadeId: unidade.id,
         kitnetId: kitnet.id,
         categoria: 'Cobrança',
@@ -120,12 +122,12 @@ module.exports = async () => {
 
     } catch (erro) {
 
-      console.error(`[JOB] Erro ao criar vistoria de esvaziar kitnet da receita ${receita.id}:`, erro.message);
+      console.error(`[JOB] Erro ao criar vistoria de desocupação de imóvel da receita ${receita.id}:`, erro.message);
 
     }
 
   }
 
-  console.log(`[JOB] ${criadas} vistoria(s) de "esvaziar kitnet" criada(s).`);
+  console.log(`[JOB] ${criadas} vistoria(s) de "desocupação de imóvel" criada(s).`);
 
 };

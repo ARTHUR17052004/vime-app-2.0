@@ -15,29 +15,14 @@ export const ROTULO_INADIMPLENCIA = {
   QUEBRA_DO_INQUILINO: "Quebra de Contrato",
 };
 
-// Escalada do corte de água/energia (ver corteVistoriaService.js no
-// backend) -- vem ANTES de ATRASADA/PAGA de propósito: o `status` da
-// Receita continua ATRASADA por baixo o tempo todo (pra não sumir da
-// cobrança automática/Dashboard/Insights/relatórios), então sem checar
-// esses campos primeiro o selo mostraria só "Atrasada" pro tempo
-// inteiro do processo, escondendo em que estágio a cobrança está.
+// Selo de status "cru" -- Atrasada/Paga/Cancelada/etc. Antes a escalada
+// de corte de água/energia (kitnetEsvaziadaEm/corteRealizadoEm/
+// classificacaoInadimplencia) substituía esse selo por um só ("Corte de
+// Água e Energia", "Esvaziar Kitnet"...), escondendo que a cobrança
+// continua Atrasada o tempo todo. Pedido do usuário em 26/11/2026:
+// "Atrasada" nunca some -- os selos da escalada (ver badgesEscaladaReceita
+// abaixo) aparecem JUNTO, nunca no lugar dele.
 export function statusExibidoReceita(item) {
-
-  if (item.classificacaoInadimplencia) {
-    return {
-      codigo: "INADIMPLENTE",
-      texto: ROTULO_INADIMPLENCIA[item.classificacaoInadimplencia] || item.classificacaoInadimplencia,
-      variant: "purple",
-    };
-  }
-
-  if (item.kitnetEsvaziadaEm) {
-    return { codigo: "ESVAZIAR_KITNET", texto: "Esvaziar Kitnet", variant: "purple" };
-  }
-
-  if (item.corteRealizadoEm) {
-    return { codigo: "CORTE_AGUA_ENERGIA", texto: "Corte de Água e Energia", variant: "purple" };
-  }
 
   if (item.status === "PAGO" || item.status === "PAGA") {
     return { codigo: "PAGA", texto: "Pago", variant: "emerald" };
@@ -56,6 +41,55 @@ export function statusExibidoReceita(item) {
   }
 
   return { codigo: "PENDENTE", texto: "Pendente", variant: "yellow" };
+
+}
+
+// Igual statusExibidoReceita, mas pro FILTRO de Status (Financeiro >
+// Extratos) -- esse sim precisa saber o estágio mais avançado da
+// escalada pra filtrar "só quem está em risco de corte" etc. (o selo
+// visual da lista usa statusExibidoReceita + badgesEscaladaReceita
+// empilhados; o filtro continua de um valor só).
+export function codigoFiltroReceita(item) {
+
+  if (item.classificacaoInadimplencia) return "INADIMPLENTE";
+  if (item.kitnetEsvaziadaEm) return "ESVAZIAR_KITNET";
+  if (item.corteRealizadoEm) return "CORTE_AGUA_ENERGIA";
+
+  return statusExibidoReceita(item).codigo;
+
+}
+
+// Pilha de selos da escalada de corte de água/energia -> desocupação de
+// imóvel (ver corteVistoriaService.js no backend) -- somam em cima do
+// selo de status acima, nunca substituem ele: "Atrasada" fica vermelho
+// o tempo todo, e cada etapa concluída vira um selo vermelho a mais;
+// a etapa aberta no momento (aguardando corte/aguardando desocupação)
+// já aparece como o relógio ao vivo (RelogioCorte), não precisa de selo
+// estático aqui também. Pedido do usuário em 26/11/2026.
+export function badgesEscaladaReceita(item) {
+
+  const badges = [];
+
+  if (item.corteRealizadoEm) {
+    badges.push({ texto: "Corte realizado", variant: "red" });
+  }
+
+  if (item.kitnetEsvaziadaEm) {
+
+    badges.push({ texto: "Desocupação realizada", variant: "red" });
+
+    badges.push(
+      item.classificacaoInadimplencia
+        ? {
+          texto: ROTULO_INADIMPLENCIA[item.classificacaoInadimplencia] || item.classificacaoInadimplencia,
+          variant: "purple",
+        }
+        : { texto: "Aguardando tratativa", variant: "purple" }
+    );
+
+  }
+
+  return badges;
 
 }
 

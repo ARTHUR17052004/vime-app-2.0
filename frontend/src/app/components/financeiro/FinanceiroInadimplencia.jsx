@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 
 import Table from "../ui/Table";
-import { statusExibidoReceita } from "@/utils/statusReceita";
+import { statusExibidoReceita, badgesEscaladaReceita } from "@/utils/statusReceita";
 
 export default function FinanceiroInadimplencia({
   receitas,
@@ -196,7 +196,7 @@ export default function FinanceiroInadimplencia({
                 </p>
 
                 <p className="text-red-400 mt-2">
-                  Status: {statusExibidoReceita(item).texto}
+                  Status: {badgesEscaladaReceita(item).at(-1)?.texto || statusExibidoReceita(item).texto}
                 </p>
 
               </div>

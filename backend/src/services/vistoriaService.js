@@ -377,11 +377,13 @@ const atualizar = async (id, dados, autor) => {
   // Vistoria automática de corte de água/energia (categoria "Cobrança",
   // ver corteVistoriaService.js) sendo marcada Realizada -- cada título
   // avança um estágio da escalada combinada com o usuário em
-  // 18/11/2026: "REALIZAR CORTE..." começa o relógio de 72h de
-  // "aguardando esvaziar" na Receita; "ESVAZIAR KITNET" encerra o
+  // 18/11/2026 (renomeada e com prazo ajustado em 26/11/2026):
+  // "REALIZAR CORTE..." começa o relógio de 48h de "aguardando
+  // desocupação" na Receita; "FAZER DESOCUPAÇÃO DE IMÓVEL" encerra o
   // contrato e libera a kitnet sozinha (mesmo mecanismo da Quebra de
-  // Contrato -- ver contratoService.encerrar), e começa o relógio de
-  // "aguardando classificação de inadimplência". `dados.concluidaEm`
+  // Contrato -- ver contratoService.encerrar), e vira o selo (fixo,
+  // sem prazo) "aguardando tratativa" até a inadimplência ser
+  // classificada. `dados.concluidaEm`
   // só vem preenchido no fluxo de verdade (VistoriaConcluirModal, que
   // já exige foto/vídeo + motivo pra categoria "Cobrança") -- uma
   // edição manual qualquer (ex.: trocar o status direto no formulário
@@ -409,7 +411,7 @@ const atualizar = async (id, dados, autor) => {
           data: { corteRealizadoEm: new Date() },
         });
 
-      } else if (anterior.titulo === corteVistoriaService.TITULO_ESVAZIAR_KITNET) {
+      } else if (anterior.titulo === corteVistoriaService.TITULO_FAZER_DESOCUPACAO) {
 
         if (anterior.kitnetId) {
 
@@ -424,7 +426,7 @@ const atualizar = async (id, dados, autor) => {
 
             await contratoService.encerrar(contratoAtivo.id, autor, {
               motivoEncerramento: 'INADIMPLENCIA',
-              observacaoEncerramento: `Encerrado automaticamente -- kitnet esvaziada após a vistoria "${anterior.titulo}" (corte de água/energia sem quitação em 72h).`,
+              observacaoEncerramento: `Encerrado automaticamente -- imóvel desocupado após a vistoria "${anterior.titulo}" (corte de água/energia sem quitação em 48h).`,
             });
 
           }

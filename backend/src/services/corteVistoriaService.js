@@ -12,21 +12,24 @@ const diaUtil = require('../utils/diaUtil');
   (Guilherme Rodrigues Oliveira: vencimento corrigido e cobrança
   enviada, mas a vistoria de corte continuava Pendente).
 
-  Escalada em 2 estágios, mesma ponte pros dois (pedido do usuário em
-  18/11/2026): atraso 72h+ -> vistoria "REALIZAR CORTE DE ÁGUA E
-  ENERGIA" -> realizada mas a cobrança continua sem resolver por mais
-  72h -> vistoria "ESVAZIAR KITNET" (que, ao ser realizada, encerra o
-  contrato e libera a kitnet sozinha -- ver vistoriaService.atualizar).
-  Cada estágio é descrito aqui (ver ESTAGIOS) pra não duplicar a mesma
-  lógica de cancelar/resolver duas vezes.
+  Escalada em 2 estágios (pedido do usuário em 18/11/2026, renomeado e
+  reajustado em 26/11/2026): atraso 72h ÚTEIS+ -> vistoria "REALIZAR
+  CORTE DE ÁGUA E ENERGIA" -> realizada mas a cobrança continua sem
+  resolver por mais 48h ÚTEIS -> vistoria "FAZER DESOCUPAÇÃO DE
+  IMÓVEL" (que, ao ser realizada, encerra o contrato e libera a kitnet
+  sozinha -- ver vistoriaService.atualizar). Cada estágio é descrito
+  aqui (ver ESTAGIOS) pra não duplicar a mesma lógica de
+  cancelar/resolver duas vezes. Nomes internos dos campos (vistoriaEsvaziarId/
+  vistoriaEsvaziarCriadaEm/kitnetEsvaziadaEm) continuam com o nome
+  antigo no banco -- só o TÍTULO que o zelador vê e o texto mudaram.
 */
 
 const TITULO_REALIZAR_CORTE = 'REALIZAR CORTE DE ÁGUA E ENERGIA';
-const TITULO_ESVAZIAR_KITNET = 'ESVAZIAR KITNET';
+const TITULO_FAZER_DESOCUPACAO = 'FAZER DESOCUPAÇÃO DE IMÓVEL';
 
 const ESTAGIOS = [
   { campoVistoriaId: 'vistoriaCorteId', campoCriadaEm: 'vistoriaCorteAtrasoCriadaEm', titulo: TITULO_REALIZAR_CORTE },
-  { campoVistoriaId: 'vistoriaEsvaziarId', campoCriadaEm: 'vistoriaEsvaziarCriadaEm', titulo: TITULO_ESVAZIAR_KITNET },
+  { campoVistoriaId: 'vistoriaEsvaziarId', campoCriadaEm: 'vistoriaEsvaziarCriadaEm', titulo: TITULO_FAZER_DESOCUPACAO },
 ];
 
 // Mesmo critério usado na criação (verificarAtrasoCorteJob.js) --
@@ -221,5 +224,5 @@ module.exports = {
   cancelarVinculada,
   cancelarVinculadaPorInadimplencia,
   TITULO_REALIZAR_CORTE,
-  TITULO_ESVAZIAR_KITNET,
+  TITULO_FAZER_DESOCUPACAO,
 };

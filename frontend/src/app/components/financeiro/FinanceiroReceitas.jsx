@@ -26,20 +26,22 @@ import ReceitaExcluirModal from "./ReceitaExcluirModal";
 
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { usePermissao } from "../../../hooks/usePermissao";
-import { statusExibidoReceita } from "@/utils/statusReceita";
+import { statusExibidoReceita, badgesEscaladaReceita } from "@/utils/statusReceita";
 
-// Relógio da escalada de corte de água/energia (ver corteVistoriaService.js
-// no backend) -- 3 janelas de 72h em sequência, cada uma só existe
-// enquanto a anterior não foi resolvida:
-//   1) vencimento+72h -- ainda não tem vistoria de corte (ehVistoriaDeCorte
-//      no backend cria ela quando esse prazo vence).
-//   2) corteRealizadoEm+72h -- corte já realizado, contando pra escalar
-//      pra "esvaziar kitnet" se a cobrança continuar sem resolver.
-//   3) kitnetEsvaziadaEm+72h -- kitnet já esvaziada (contrato encerrado
-//      sozinho), contando até alguém classificar a inadimplência
-//      (botão "Inadimplência" nos 3 pontinhos).
-// Já classificada (classificacaoInadimplencia) não tem mais relógio --
-// aí é estado final, cuidado em /financeiro/inadimplentes.
+// Relógio da escalada de corte de água/energia -> desocupação de imóvel
+// (ver corteVistoriaService.js no backend) -- 2 janelas em sequência,
+// cada uma só existe enquanto a etapa anterior não foi concluída:
+//   1) vencimento+72h ÚTEIS -- ainda não tem vistoria de corte
+//      (verificarAtrasoCorteJob cria ela quando esse prazo vence).
+//   2) corteRealizadoEm+48h ÚTEIS -- corte já realizado, contando pra
+//      disparar "FAZER DESOCUPAÇÃO DE IMÓVEL" se a cobrança continuar
+//      sem resolver.
+// Depois de kitnetEsvaziadaEm (desocupação realizada) não tem mais
+// relógio -- vira selo estático (ver badgesEscaladaReceita em
+// statusReceita.js), sem prazo, até alguém classificar a inadimplência
+// (botão "Inadimplência" nos 3 pontinhos). Pedido do usuário em
+// 26/11/2026.
+//
 // Mesmo padrão visual/de leitura que Vistorias já usa (AtrasoVistoria/
 // RelogioAtrasoCorte em VistoriaCard.jsx) -- amarelo pulsante contando
 // o tempo que falta, vermelho pulsante contando o tempo que já passou
@@ -70,11 +72,13 @@ function RelogioCorte({ receita }) {
     return () => clearInterval(id);
   }, []);
 
-  if (receita.classificacaoInadimplencia) return null;
+  // Desocupação já realizada (ou inadimplência já classificada) -- não
+  // tem mais prazo rolando, vira selo estático fixo (badgesEscaladaReceita).
+  if (receita.classificacaoInadimplencia || receita.kitnetEsvaziadaEm) return null;
 
-  const relogio = (desde, rotulo) => {
+  const relogio = (desde, rotulo, horasPrazo) => {
 
-    const prazo = new Date(desde).getTime() + 72 * 60 * 60 * 1000;
+    const prazo = new Date(desde).getTime() + horasPrazo * 60 * 60 * 1000;
     const restanteMs = prazo - agora;
 
     if (restanteMs <= 0) {
@@ -116,12 +120,8 @@ function RelogioCorte({ receita }) {
 
   };
 
-  if (receita.kitnetEsvaziadaEm) {
-    return relogio(receita.kitnetEsvaziadaEm, "Classificar inadimplência");
-  }
-
   if (receita.corteRealizadoEm) {
-    return relogio(receita.corteRealizadoEm, "Esvaziar kitnet");
+    return relogio(receita.corteRealizadoEm, "Desocupação", 48);
   }
 
   // Sem boleto enviado ao banco, não existe "risco de corte" de
@@ -131,7 +131,7 @@ function RelogioCorte({ receita }) {
   const enviada = !!receita.gatewayReferencia && receita.status !== "PAGA" && receita.status !== "PAGO" && receita.status !== "CANCELADA";
   if (!receita.vencimento || !enviada) return null;
 
-  return relogio(receita.vencimento, "Corte");
+  return relogio(receita.vencimento, "Corte", 72);
 
 }
 
@@ -696,7 +696,7 @@ export default function FinanceiroReceitas({
                     R$ {item.valor}
                   </span>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
 
                     <Badge variant={statusExibido(item).variant}>
                       {statusExibido(item).texto}
@@ -710,6 +710,15 @@ export default function FinanceiroReceitas({
                         em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
                       </span>
                     )}
+
+                    {/* Selos fixos da escalada (corte/desocupação já
+                        realizados) -- empilham em cima de "Atrasada",
+                        nunca substituem. Pedido do usuário em 26/11/2026. */}
+                    {badgesEscaladaReceita(item).map((badge, indice) => (
+                      <Badge key={indice} variant={badge.variant} size="sm">
+                        {badge.texto}
+                      </Badge>
+                    ))}
 
                     {item.status === "ATRASADA" && (
                       <RelogioCorte receita={item} />
@@ -916,6 +925,15 @@ export default function FinanceiroReceitas({
                           em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
                         </span>
                       )}
+
+                      {/* Selos fixos da escalada (corte/desocupação já
+                          realizados) -- empilham em cima de "Atrasada",
+                          nunca substituem. Pedido do usuário em 26/11/2026. */}
+                      {badgesEscaladaReceita(item).map((badge, indice) => (
+                        <Badge key={indice} variant={badge.variant} size="sm">
+                          {badge.texto}
+                        </Badge>
+                      ))}
 
                       {item.status === "ATRASADA" && (
                         <RelogioCorte receita={item} />

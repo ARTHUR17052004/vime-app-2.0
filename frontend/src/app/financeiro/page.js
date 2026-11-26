@@ -39,7 +39,7 @@ import SearchInput from "../components/common/SearchInput";
 
 import { usePermissao } from "../../hooks/usePermissao";
 import { socket } from "../../services/socket";
-import { statusExibidoReceita } from "../../utils/statusReceita";
+import { codigoFiltroReceita } from "../../utils/statusReceita";
 import { arredondarCentavos } from "../../utils/dinheiro";
 
 // Colar um nome (de uma tabela, PDF etc.) às vezes traz espaço não-
@@ -620,11 +620,13 @@ function FinanceiroPageConteudo() {
         item.status !== "CANCELADA";
       if (!naoEnviada) return false;
     } else if (
-      // Mesmo critério usado pro selo na lista (statusExibidoReceita) --
-      // senão filtrar por "Pendente" também trazia quem já estava "Em
-      // Aberto" (PENDENTE por baixo, só mostrado diferente por já ter
-      // sido enviada ao banco).
-      statusFiltro && statusExibidoReceita(item).codigo !== statusFiltro
+      // codigoFiltroReceita (não statusExibidoReceita -- esse agora só
+      // devolve o status cru, "Atrasada" nunca é substituído por um
+      // selo de escalada, ver statusReceita.js) -- senão filtrar por
+      // "Pendente" também trazia quem já estava "Em Aberto" (PENDENTE
+      // por baixo, só mostrado diferente por já ter sido enviada ao
+      // banco).
+      statusFiltro && codigoFiltroReceita(item) !== statusFiltro
     ) return false;
 
     if (contaFiltro && item.contaPagamentoId !== contaFiltro) return false;
@@ -925,7 +927,7 @@ function FinanceiroPageConteudo() {
               <option value="EM_ABERTO" className="bg-[#1b2430]">Em Aberto</option>
               <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
               <option value="CORTE_AGUA_ENERGIA" className="bg-[#1b2430]">Corte de Água e Energia</option>
-              <option value="ESVAZIAR_KITNET" className="bg-[#1b2430]">Esvaziar Kitnet</option>
+              <option value="ESVAZIAR_KITNET" className="bg-[#1b2430]">Desocupação de Imóvel</option>
               <option value="NAO_ENVIADA" className="bg-[#1b2430]">Não enviada ao banco</option>
               <option value="PAGA" className="bg-[#1b2430]">Paga</option>
               <option value="CANCELADA" className="bg-[#1b2430]">Cancelada</option>
