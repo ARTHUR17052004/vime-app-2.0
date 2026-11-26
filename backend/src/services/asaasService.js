@@ -836,42 +836,87 @@ const sincronizar = async (evento) => {
 
       break;
 
+    // Esses 3 eventos acontecem por uma ação direta na própria Asaas
+    // (painel ou API dela, fora do nosso sistema) -- nunca somos nós
+    // quem cancela/estorna/restaura um boleto, só recebemos o aviso.
+    // Antes trocavam o status calado, sem log nem notificação nenhuma
+    // -- bug real encontrado em 26/11/2026: 18 boletos de aluguel
+    // sumiram da Asaas (limpeza de duplicata que alguém fez direto lá)
+    // e ninguém no sistema ficou sabendo, só foi notado dias depois
+    // olhando a tela do Financeiro. Mesmo princípio já aplicado nos
+    // jobs automáticos: nenhuma mudança dessas pode acontecer calada.
     case "PAYMENT_REFUNDED":
 
-      await prisma.receita.update({
-        where: {
-          id: receita.id
-        },
-        data: {
-          status: "ESTORNADA"
-        }
-      });
+      if (receita.status !== "ESTORNADA") {
+
+        await prisma.receita.update({
+          where: { id: receita.id },
+          data: { status: "ESTORNADA" }
+        });
+
+        await notificacaoService.criar({
+          origem: "ASAAS",
+          titulo: "Cobrança estornada",
+          mensagem: await notificacaoService.renderizarMensagem(
+            'COBRANCA_ESTORNADA_ASAAS',
+            { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
+            `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi estornado direto na Asaas.`
+          ),
+          link: "/asaas-transacoes",
+          locadorId: await locadorDaReceita(receita.id),
+        });
+
+      }
 
       break;
 
     case "PAYMENT_DELETED":
 
-      await prisma.receita.update({
-        where: {
-          id: receita.id
-        },
-        data: {
-          status: "CANCELADA"
-        }
-      });
+      if (receita.status !== "CANCELADA") {
+
+        await prisma.receita.update({
+          where: { id: receita.id },
+          data: { status: "CANCELADA" }
+        });
+
+        await notificacaoService.criar({
+          origem: "ASAAS",
+          titulo: "Cobrança excluída na Asaas",
+          mensagem: await notificacaoService.renderizarMensagem(
+            'COBRANCA_EXCLUIDA_ASAAS',
+            { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
+            `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi excluído direto na Asaas (confira se não ficou sem nenhuma cobrança no lugar).`
+          ),
+          link: "/asaas-transacoes",
+          locadorId: await locadorDaReceita(receita.id),
+        });
+
+      }
 
       break;
 
     case "PAYMENT_RESTORED":
 
-      await prisma.receita.update({
-        where: {
-          id: receita.id
-        },
-        data: {
-          status: "PENDENTE"
-        }
-      });
+      if (receita.status !== "PENDENTE") {
+
+        await prisma.receita.update({
+          where: { id: receita.id },
+          data: { status: "PENDENTE" }
+        });
+
+        await notificacaoService.criar({
+          origem: "ASAAS",
+          titulo: "Cobrança restaurada na Asaas",
+          mensagem: await notificacaoService.renderizarMensagem(
+            'COBRANCA_RESTAURADA_ASAAS',
+            { descricao: receita.descricao, inquilino: nomeInquilino, valor: receita.valor },
+            `${receita.descricao}${nomeInquilino ? ` (${nomeInquilino})` : ""} — R$ ${receita.valor} foi restaurado direto na Asaas.`
+          ),
+          link: "/asaas-transacoes",
+          locadorId: await locadorDaReceita(receita.id),
+        });
+
+      }
 
       break;
 
