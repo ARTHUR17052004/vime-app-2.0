@@ -702,6 +702,15 @@ export default function FinanceiroReceitas({
                       {statusExibido(item).texto}
                     </Badge>
 
+                    {/* Não existe campo próprio de "quando foi cancelada" --
+                        updatedAt serve de proxy (Cancelada é estado final, sem
+                        edição depois). Pedido do usuário em 26/11/2026. */}
+                    {item.status === "CANCELADA" && item.updatedAt && (
+                      <span className="text-xs text-[var(--text-faint)]">
+                        em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
+                      </span>
+                    )}
+
                     {item.status === "ATRASADA" && (
                       <RelogioCorte receita={item} />
                     )}
@@ -898,6 +907,15 @@ export default function FinanceiroReceitas({
                       <Badge variant={statusExibido(item).variant}>
                         {statusExibido(item).texto}
                       </Badge>
+
+                      {/* Não existe campo próprio de "quando foi cancelada" --
+                          updatedAt serve de proxy (Cancelada é estado final,
+                          sem edição depois). Pedido do usuário em 26/11/2026. */}
+                      {item.status === "CANCELADA" && item.updatedAt && (
+                        <span className="text-xs text-[var(--text-faint)]">
+                          em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
+                        </span>
+                      )}
 
                       {item.status === "ATRASADA" && (
                         <RelogioCorte receita={item} />

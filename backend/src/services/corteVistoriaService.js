@@ -70,7 +70,22 @@ const resolverSeNaoCabeMais = async (receitaId) => {
 
     const vistoria = await prisma.vistoria.findUnique({ where: { id: vistoriaId } });
 
-    if (vistoria && vistoria.status !== 'CANCELADA' && vistoria.status !== 'REALIZADA') {
+    // Já foi REALIZADA de verdade (zelador cumpriu essa etapa) -- "não
+    // tá mais em risco" aqui só é sobre essa etapa especificamente
+    // (aindaEmRisco usa o mesmo critério de vencimento+3 dias úteis da
+    // CRIAÇÃO), não quer dizer que a etapa nunca aconteceu. A etapa
+    // SEGUINTE (corte -> esvaziar) tem seu próprio prazo e critério,
+    // independente deste (ver verificarEscalonamentoCorteJob,
+    // corteRealizadoEm). Limpar o vínculo aqui fazia o job de criação
+    // enxergar a receita como candidata do zero de novo, recriando a
+    // MESMA etapa já concluída -- bug real encontrado em 26/11/2026
+    // (CELSON SILVA GOMES, kitnet 01 VIME VI: o corte já tinha sido
+    // realizado dia 25/11, mas nasceu uma vistoria NOVA de "Realizar
+    // corte" pra mesma dívida no dia seguinte). Pular todo o resto do
+    // estágio quando já está Realizada -- nada aqui se aplica mais.
+    if (vistoria?.status === 'REALIZADA') continue;
+
+    if (vistoria && vistoria.status !== 'CANCELADA') {
 
       await vistoriaService.atualizar(vistoria.id, {
         status: 'CANCELADA',

@@ -106,6 +106,10 @@ export default function VistoriaRealizadasTable({
       vistoriaId: m.vistoriaId,
       vistoria: m.vistoria?.titulo || "-",
       residencia: m.unidade?.nome || "-",
+      // Missão é sempre da Residência inteira (não de uma kitnet
+      // específica) -- diferente das vistorias "regulares" abaixo, que
+      // podem mirar uma kitnet só (ex.: corte de água/energia).
+      kitnet: "-",
       ciclo: m.ciclo,
       dataHora: m.dataRealizacao,
       responsavel: m.realizadoPor || "-",
@@ -120,6 +124,7 @@ export default function VistoriaRealizadasTable({
         vistoriaId: v.id,
         vistoria: v.nomeVistoria,
         residencia: v.unidadeNome,
+        kitnet: v.kitnetNome || "-",
         ciclo: "-",
         dataHora: v.concluidaEm,
         responsavel: v.responsavel || "-",
@@ -173,6 +178,7 @@ export default function VistoriaRealizadasTable({
   const colunas = [
     { key: "vistoria", title: "Vistoria", sortKeys: ["vistoria-asc", "vistoria-desc"] },
     { key: "residencia", title: "Residência", sortKeys: ["residencia-asc", "residencia-desc"] },
+    { key: "kitnet", title: "Kitnet" },
     { key: "ciclo", title: "Ciclo", sortKey: "ciclo" },
     { key: "dataHora", title: "Data/Hora Realizada", sortKeys: ["data-antiga", "data-recente"], render: (item) => formatDateTime(item.dataHora) },
     { key: "responsavel", title: "Responsável", sortKey: "responsavel-asc" },
@@ -283,6 +289,7 @@ export default function VistoriaRealizadasTable({
                     <p className="mt-0.5 flex items-center gap-1 text-[12px] text-[var(--text-subtle)] truncate">
                       <Building2 size={12} className="shrink-0" />
                       {item.residencia}
+                      {item.kitnet !== "-" && ` · ${item.kitnet}`}
                       {item.ciclo !== "-" && ` · Ciclo ${item.ciclo}`}
                     </p>
                   </div>
@@ -449,6 +456,11 @@ function DetalheModal({ item, onClose }) {
             <div>
               <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Residência</p>
               <p className="text-[var(--text)] font-medium">{item.residencia || "-"}</p>
+            </div>
+
+            <div>
+              <p className="text-[var(--text-faint)] uppercase text-xs mb-1">Kitnet</p>
+              <p className="text-[var(--text)] font-medium">{item.kitnet || "-"}</p>
             </div>
 
             <div>
