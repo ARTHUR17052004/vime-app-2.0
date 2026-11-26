@@ -78,6 +78,18 @@ function montarLinhaRelatorio(item, taxaBoletoValor) {
 
   const valorFinal = valorAluguel + jurosMulta - tarifaBoleto - deducao + excedentes;
 
+  // Período = os dois (pedido do usuário em 25/11/2026): mês de
+  // referência da cobrança (vem do próprio vencimento -- toda receita
+  // recorrente vence no mês a que se refere) + vigência do contrato
+  // por trás (início/fim), quando tiver um.
+  const mesReferencia = item.vencimento
+    ? new Date(item.vencimento).toLocaleDateString("pt-BR", { month: "2-digit", year: "numeric", timeZone: "UTC" })
+    : "-";
+
+  const vigenciaContrato = item.contratoDataInicio
+    ? `${formatarData(item.contratoDataInicio)} a ${item.contratoDataFim ? formatarData(item.contratoDataFim) : "-"}`
+    : "-";
+
   return {
     nossoNumero: item.nossoNumero || "-",
     cpf: item.cpf || "-",
@@ -88,6 +100,11 @@ function montarLinhaRelatorio(item, taxaBoletoValor) {
     // Sem dataCredito ainda confirmada pelo banco, cai pra
     // dataPagamento mesmo (Pix/Asaas sempre são iguais).
     dataPagamento: item.dataCredito ?? item.dataPagamento,
+    unidadeKitnet: [item.unidade, item.kitnet ? `Kitnet ${item.kitnet}` : null].filter(Boolean).join(" - ") || "-",
+    enderecoCompleto: item.enderecoCompleto || "-",
+    cep: item.cep || "-",
+    mesReferencia,
+    vigenciaContrato,
     valorAluguel,
     jurosMulta,
     tarifaBoleto,
@@ -172,7 +189,8 @@ function RecebidoPainel({ contaId, mes }) {
     );
 
     const colunas = [
-      "Nosso nº", "Pagamento", "CPF", "Locatário",
+      "Nosso nº", "Pagamento", "CPF", "Locatário", "Unidade/Kitnet", "Endereço", "CEP",
+      "Mês referência", "Vigência do contrato",
       "Valor aluguel", "Juros / mult", "Tarifa boleto", "Dedução", "Excedentes", "Valor final",
     ];
 
@@ -188,6 +206,11 @@ function RecebidoPainel({ contaId, mes }) {
             formatarData(l.dataPagamento),
             l.cpf,
             l.pagador,
+            l.unidadeKitnet,
+            l.enderecoCompleto,
+            l.cep,
+            l.mesReferencia,
+            l.vigenciaContrato,
             formatarMoeda(l.valorAluguel),
             formatarMoeda(l.jurosMulta),
             formatarMoeda(l.tarifaBoleto),
@@ -197,7 +220,7 @@ function RecebidoPainel({ contaId, mes }) {
           ]),
           [],
           [
-            "", "", "", "Total",
+            "", "", "", "Total", "", "", "", "",  "",
             formatarMoeda(soma("valorAluguel")),
             formatarMoeda(soma("jurosMulta")),
             formatarMoeda(soma("tarifaBoleto")),
