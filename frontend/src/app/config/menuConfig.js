@@ -50,7 +50,7 @@ const menuConfig = [
         // estreita (o "BY" sozinho, depois "(Soluções"/"Rápidas)"
         // partidos pelo parêntese). O título da página continua com o
         // nome completo.
-        label: "BY Soluções Rápidas",
+        label: "BI Soluções Rápidas",
         href: "/visao-geral",
         icon: LayoutGrid,
         permissao: "insights.visualizar",

@@ -351,7 +351,7 @@ export default function VisaoGeralPage() {
 
     } catch (err) {
 
-      setErro(err.message || "Não foi possível carregar o BY (Soluções Rápidas).");
+      setErro(err.message || "Não foi possível carregar o BI (Soluções Rápidas).");
 
     } finally {
 
@@ -449,7 +449,7 @@ export default function VisaoGeralPage() {
 
                 <div>
                   <h1 className="text-4xl font-black text-[var(--text)]">
-                    BY (Soluções Rápidas)
+                    BI (Soluções Rápidas)
                   </h1>
                   <p className="text-[var(--text-subtle)]">
                     Indicadores de toda a operação, organizados por módulo.

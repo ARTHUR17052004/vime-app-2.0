@@ -24,7 +24,7 @@ import { usePermissoes } from "../../../../hooks/usePermissao";
 // barra -- Inquilinos continua acessível pelo "Mais".
 const CANDIDATOS = [
   { label: "Contratos", href: "/contratos", icon: FileText, permissao: "contratos.visualizar" },
-  { label: "BY", href: "/visao-geral", icon: Brain, permissao: "insights.visualizar" },
+  { label: "BI", href: "/visao-geral", icon: Brain, permissao: "insights.visualizar" },
   { label: "Financeiro", href: "/financeiro", icon: Wallet, permissao: "financeiro.visualizar" },
   { label: "Inquilinos", href: "/inquilinos", icon: Users, permissao: "inquilinos.visualizar" },
   { label: "Solicitações", href: "/solicitacoes", icon: ClipboardList, permissao: "solicitacoes.visualizar" },

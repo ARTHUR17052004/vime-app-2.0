@@ -11,6 +11,7 @@ const { Server } = require("socket.io");
 
 const iniciarJobs = require("./src/jobs");
 const { setIO, registrarConexao, removerConexao } = require("./src/socket");
+const prisma = require("./src/config/prisma");
 
 const authRoutes = require("./src/routes/authRoutes");
 const auditoriaRoutes = require("./src/routes/auditoriaRoutes");
@@ -46,6 +47,7 @@ const pushRoutes = require("./src/routes/pushRoutes");
 const relatorioRoutes = require("./src/routes/relatorioRoutes");
 const insightsRoutes = require("./src/routes/insightsRoutes");
 const sabadoRoutes = require("./src/routes/sabadoRoutes");
+const boletoPublicoRoutes = require("./src/routes/boletoPublicoRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -155,6 +157,9 @@ app.use("/signatarios-fixos", signatarioFixoRoutes);
 app.use("/relatorios", relatorioRoutes);
 app.use("/insights", insightsRoutes);
 app.use("/sabado", sabadoRoutes);
+// Pública de propósito (ver boletoPublicoRoutes.js) -- a Meta precisa
+// buscar o PDF sem autenticação pra anexar no WhatsApp.
+app.use("/boletos", boletoPublicoRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
@@ -196,7 +201,7 @@ function parseCookies(cookieHeader = "") {
     }, {});
 }
 
-io.use((socket, next) => {
+io.use(async (socket, next) => {
   try {
     const cookies = parseCookies(socket.handshake.headers.cookie);
     const token = socket.handshake.auth?.token || cookies.token;
@@ -210,7 +215,32 @@ io.use((socket, next) => {
       process.env.JWT_SECRET || "vime_secret_dev"
     );
 
-    socket.usuario = decoded;
+    // Mesma correção de authMiddleware.js (commit 03a8a0c) -- aqui NUNCA
+    // tinha sido aplicada: perfil/locadorId/ativo vinham direto do JWT
+    // (até 30 dias velho no app instalado), então um usuário realocado
+    // de locador (ex.: SH -> ARA) continuava entrando na sala
+    // `locador:<antigo>` e recebendo notificação em tempo real de dados
+    // da empresa errada, mesmo já sem acesso nenhum por HTTP -- bug
+    // relatado de novo em 26/11/2026 (SH aparecendo pro usuário da ARA
+    // no mobile). Sempre busca fresco do banco antes de entrar em
+    // qualquer sala.
+    const usuarioAtual = await prisma.usuario.findUnique({
+      where: { id: decoded.id },
+      include: { perfil: true },
+    });
+
+    if (!usuarioAtual || !usuarioAtual.ativo) {
+      return next();
+    }
+
+    socket.usuario = {
+      id: usuarioAtual.id,
+      nome: usuarioAtual.nome,
+      email: usuarioAtual.email,
+      perfil: (usuarioAtual.perfil?.nome || "").trim(),
+      ativo: usuarioAtual.ativo,
+      locadorId: usuarioAtual.locadorId || null,
+    };
 
     next();
   } catch (error) {
