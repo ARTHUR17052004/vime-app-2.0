@@ -47,7 +47,6 @@ const pushRoutes = require("./src/routes/pushRoutes");
 const relatorioRoutes = require("./src/routes/relatorioRoutes");
 const insightsRoutes = require("./src/routes/insightsRoutes");
 const sabadoRoutes = require("./src/routes/sabadoRoutes");
-const boletoPublicoRoutes = require("./src/routes/boletoPublicoRoutes");
 
 const errorMiddleware = require("./src/middlewares/errorMiddleware");
 
@@ -157,9 +156,6 @@ app.use("/signatarios-fixos", signatarioFixoRoutes);
 app.use("/relatorios", relatorioRoutes);
 app.use("/insights", insightsRoutes);
 app.use("/sabado", sabadoRoutes);
-// Pública de propósito (ver boletoPublicoRoutes.js) -- a Meta precisa
-// buscar o PDF sem autenticação pra anexar no WhatsApp.
-app.use("/boletos", boletoPublicoRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
