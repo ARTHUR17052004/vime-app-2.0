@@ -730,6 +730,14 @@ export default function FinanceiroReceitas({
                       </Badge>
                     ))}
 
+                    {/* Contrato já encerrou mas essa receita venceu DEPOIS
+                        do encerramento -- não é cancelada, fica em aberto
+                        normal, só avisa que o inquilino já se desvinculou
+                        da kitnet. Pedido do usuário em 26/11/2026. */}
+                    {item.contrato?.status === "ENCERRADO" && (
+                      <Badge variant="gray" size="sm">Contrato encerrado</Badge>
+                    )}
+
                     {item.status === "ATRASADA" && (
                       <RelogioCorte receita={item} />
                     )}
@@ -945,6 +953,14 @@ export default function FinanceiroReceitas({
                           {badge.texto}
                         </Badge>
                       ))}
+
+                      {/* Contrato já encerrou mas essa receita venceu DEPOIS
+                          do encerramento -- não é cancelada, fica em aberto
+                          normal, só avisa que o inquilino já se desvinculou
+                          da kitnet. Pedido do usuário em 26/11/2026. */}
+                      {item.contrato?.status === "ENCERRADO" && (
+                        <Badge variant="gray" size="sm">Contrato encerrado</Badge>
+                      )}
 
                       {item.status === "ATRASADA" && (
                         <RelogioCorte receita={item} />

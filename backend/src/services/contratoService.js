@@ -739,27 +739,13 @@ const encerrar = async (id, autor, opcoes = {}) => {
     valorNovo: semArquivo(contratoEncerrado)
   });
 
-  // PENDENTE ou já ATRASADA, tanto faz -- o que importa é o vencimento
-  // ser DEPOIS do fim real do contrato (contratoEncerrado.dataFim): é
-  // cobrança de um período que o inquilino nem mora mais lá. Sem o
-  // ATRASADA aqui, essa receita ficava cobrando (e escalando pra corte
-  // de água/energia -- verificarAtrasoCorteJob) um ex-inquilino, porque
-  // ela já tinha vencido ANTES de alguém notar que precisava encerrar
-  // (bug relatado em 23/11/2026, contratos 8e32aaeb.../2dab1282...).
-  await prisma.receita.updateMany({
-    where: {
-      contratoId: contrato.id,
-      status: { in: ["PENDENTE", "ATRASADA"] },
-      vencimento: {
-        gt: contratoEncerrado.dataFim
-      }
-    },
-    data: {
-      status: "CANCELADA",
-      canceladaEm: new Date(),
-      canceladaPor: autor?.nome || "Sistema",
-    }
-  });
+  // Receita com vencimento DEPOIS do fim do contrato (ex: venceu dia 30
+  // e o contrato encerrou dia 26) NÃO é cancelada -- fica em aberto
+  // normal, podendo ser paga, mesmo com o inquilino já desvinculado da
+  // kitnet. Pedido do usuário em 26/11/2026: encerrar contrato não pode
+  // apagar uma cobrança que já foi gerada; o vínculo inquilino/kitnet se
+  // desfaz, a cobrança não. A tela de Financeiro mostra a etiqueta
+  // "Contrato encerrado" nesses casos (via receita.contrato.status).
 
   // Débito que JÁ tinha vencido antes do fim de verdade é dívida real
   // (não dá pra só cancelar) -- mas deixar ATRASADA pra sempre
