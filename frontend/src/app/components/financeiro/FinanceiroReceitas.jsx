@@ -76,6 +76,15 @@ function RelogioCorte({ receita }) {
   // tem mais prazo rolando, vira selo estático fixo (badgesEscaladaReceita).
   if (receita.classificacaoInadimplencia || receita.kitnetEsvaziadaEm) return null;
 
+  // Corte de água/energia (e a escalada inteira) só existe pra Aluguel
+  // -- cortar por causa de uma Multa/Taxa/Outros atrasada é
+  // desproporcional e NENHUMA vistoria chega a ser criada pra essas
+  // categorias (ver verificarAtrasoCorteJob.js, categoria: 'Aluguel').
+  // Esse relógio não checava a categoria e mostrava "Corte atrasado"
+  // pra Multa/Taxa mesmo sem vistoria nenhuma disparada de verdade --
+  // bug relatado em 26/11/2026.
+  if (receita.categoria !== "Aluguel") return null;
+
   const relogio = (desde, rotulo, horasPrazo) => {
 
     const prazo = new Date(desde).getTime() + horasPrazo * 60 * 60 * 1000;
