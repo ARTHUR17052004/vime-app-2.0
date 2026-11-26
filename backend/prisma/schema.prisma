@@ -592,6 +592,16 @@ model Receita {
   classificadaInadimplenciaEm    DateTime?
   classificadaInadimplenciaPor   String?
 
+  // Quando (e quem) cancelou de verdade -- sem isso, a tela usava
+  // updatedAt como aproximação do "quando foi cancelada", mas
+  // updatedAt muda com QUALQUER edição do registro depois (ex.: um
+  // backfill de campo qualquer), mostrando uma data de cancelamento
+  // errada. canceladaPor = "Asaas" pros 2 casos automáticos (webhook/
+  // encerramento de contrato), nome de verdade só quando sair uma
+  // ação manual de cancelar no futuro. Pedido do usuário em 26/11/2026.
+  canceladaEm                    DateTime?
+  canceladaPor                   String?
+
   // Dedupe (um por dia, não um só pra sempre -- ver lembreteEnviadoEm)
   // do aviso INTERNO (sino/WhatsApp da equipe, não do inquilino) de
   // "cobrança perto de vencer (ou já vencida) e ainda não foi enviada

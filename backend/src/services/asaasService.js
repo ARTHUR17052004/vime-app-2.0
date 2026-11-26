@@ -876,7 +876,7 @@ const sincronizar = async (evento) => {
 
         await prisma.receita.update({
           where: { id: receita.id },
-          data: { status: "CANCELADA" }
+          data: { status: "CANCELADA", canceladaEm: new Date(), canceladaPor: "Asaas" }
         });
 
         await notificacaoService.criar({

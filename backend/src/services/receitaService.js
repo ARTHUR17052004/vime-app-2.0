@@ -524,6 +524,17 @@ const atualizar = async (id, dados, autor) => {
 
   }
 
+  // Defesa extra: se esse caminho genérico chegar a cancelar uma
+  // receita (hoje só os webhooks/encerramento de contrato cancelam
+  // direto, sem passar por aqui), registra quando de verdade -- nunca
+  // usa updatedAt como aproximação (muda com qualquer edição depois,
+  // mostrando uma data de cancelamento errada -- bug relatado em
+  // 26/11/2026).
+  if (dados.status === "CANCELADA" && anterior?.status !== "CANCELADA") {
+    dados.canceladaEm = new Date();
+    dados.canceladaPor = autor?.nome || "Sistema";
+  }
+
   // Receita já enviada ao banco e o vencimento realmente mudou? O
   // boleto registrado na Asaas precisa saber do novo vencimento,
   // senão ela continua cobrando (e marcando como vencida) pela data

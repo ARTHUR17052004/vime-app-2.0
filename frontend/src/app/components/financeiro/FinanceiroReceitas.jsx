@@ -711,12 +711,13 @@ export default function FinanceiroReceitas({
                       {statusExibido(item).texto}
                     </Badge>
 
-                    {/* Não existe campo próprio de "quando foi cancelada" --
-                        updatedAt serve de proxy (Cancelada é estado final, sem
-                        edição depois). Pedido do usuário em 26/11/2026. */}
-                    {item.status === "CANCELADA" && item.updatedAt && (
-                      <span className="text-xs text-[var(--text-faint)]">
-                        em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
+                    {/* canceladaEm é a data real do cancelamento -- updatedAt
+                        mudava com qualquer edição depois (ex.: um backfill de
+                        campo qualquer), mostrando uma data errada. Bug
+                        relatado em 26/11/2026. */}
+                    {item.status === "CANCELADA" && item.canceladaEm && (
+                      <span className="text-xs text-[var(--text-faint)]" title={item.canceladaPor ? `Cancelada por ${item.canceladaPor}` : undefined}>
+                        em {new Date(item.canceladaEm).toLocaleDateString("pt-BR")}
                       </span>
                     )}
 
@@ -926,12 +927,13 @@ export default function FinanceiroReceitas({
                         {statusExibido(item).texto}
                       </Badge>
 
-                      {/* Não existe campo próprio de "quando foi cancelada" --
-                          updatedAt serve de proxy (Cancelada é estado final,
-                          sem edição depois). Pedido do usuário em 26/11/2026. */}
-                      {item.status === "CANCELADA" && item.updatedAt && (
-                        <span className="text-xs text-[var(--text-faint)]">
-                          em {new Date(item.updatedAt).toLocaleDateString("pt-BR")}
+                      {/* canceladaEm é a data real do cancelamento -- updatedAt
+                          mudava com qualquer edição depois (ex.: um backfill de
+                          campo qualquer), mostrando uma data errada. Bug
+                          relatado em 26/11/2026. */}
+                      {item.status === "CANCELADA" && item.canceladaEm && (
+                        <span className="text-xs text-[var(--text-faint)]" title={item.canceladaPor ? `Cancelada por ${item.canceladaPor}` : undefined}>
+                          em {new Date(item.canceladaEm).toLocaleDateString("pt-BR")}
                         </span>
                       )}
 

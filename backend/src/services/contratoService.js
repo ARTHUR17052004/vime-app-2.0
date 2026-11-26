@@ -755,7 +755,9 @@ const encerrar = async (id, autor, opcoes = {}) => {
       }
     },
     data: {
-      status: "CANCELADA"
+      status: "CANCELADA",
+      canceladaEm: new Date(),
+      canceladaPor: autor?.nome || "Sistema",
     }
   });
 
