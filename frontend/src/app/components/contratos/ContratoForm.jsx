@@ -152,7 +152,12 @@ export default function ContratoForm({
 
       diaVencimento: "",
 
-      status: "ATIVO",
+      // Contrato novo nasce PENDENTE -- só vira ATIVO de verdade quando
+      // alguém assina na Clicksign (ver clicksignService.js, webhook de
+      // assinatura). Bug relatado em 27/11/2026: contrato aparecia
+      // "Ativo" na lista mesmo recém-enviado, ainda esperando a
+      // inquilina assinar.
+      status: "PENDENTE",
 
       observacoes: "",
 
