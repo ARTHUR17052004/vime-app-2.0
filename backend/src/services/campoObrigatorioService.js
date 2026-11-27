@@ -51,6 +51,7 @@ const rotulosPadrao = {
   vencimento: 'Dia de Vencimento',
   cpf: 'CPF',
   dataNascimento: 'Data de Nascimento',
+  sexo: 'Sexo',
   contatoEmergencia: 'Contato de Emergência',
   telefoneEmergencia: 'Telefone de Emergência',
   metragem: 'Metragem',

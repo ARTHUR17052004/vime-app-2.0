@@ -106,6 +106,20 @@ export default function StepDadosPessoais({
         />
       </Campo>
 
+      <Campo label="Sexo" obrigatorio={obrigatorios.has("sexo")}>
+        <select
+          name="sexo"
+          value={formData.sexo}
+          onChange={handleChange}
+          className={inputStyle}
+          required={obrigatorios.has("sexo")}
+        >
+          <option value="">Selecione...</option>
+          <option value="MASCULINO">Masculino</option>
+          <option value="FEMININO">Feminino</option>
+        </select>
+      </Campo>
+
       <Campo
         label="Nome do Contato de Emergência"
         obrigatorio={obrigatorios.has("contatoEmergencia")}
