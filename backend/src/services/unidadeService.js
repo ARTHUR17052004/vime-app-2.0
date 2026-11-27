@@ -129,6 +129,7 @@ const criar = async (dados) => {
       numero: String(i + 1).padStart(2, '0'),
       metragem: 20,
       aluguel: unidade.aluguel || 0,
+      diaVencimento: unidade.vencimento || null,
       unidadeId: unidade.id,
     }));
 
@@ -172,6 +173,15 @@ const sincronizarKitnets = async (antes, depois) => {
     });
   }
 
+  const vencimentoMudou = (depois.vencimento ?? null) !== (antes.vencimento ?? null);
+
+  if (vencimentoMudou) {
+    await prisma.kitnet.updateMany({
+      where: { unidadeId: depois.id, diaVencimentoManual: false },
+      data: { diaVencimento: depois.vencimento || null },
+    });
+  }
+
   const alvo = depois.kitnets || 0;
   const diferenca = alvo - kitnets.length;
 
@@ -186,6 +196,7 @@ const sincronizarKitnets = async (antes, depois) => {
       numero: String(maiorNumero + i + 1).padStart(2, '0'),
       metragem: 20,
       aluguel: depois.aluguel || 0,
+      diaVencimento: depois.vencimento || null,
       unidadeId: depois.id,
     }));
 

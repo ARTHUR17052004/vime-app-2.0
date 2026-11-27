@@ -216,7 +216,7 @@ const criar = async (dados) => {
           dataInicio: inquilino.dataInicioContrato,
           dataFim: inquilino.dataFimContrato || undefined,
           valorAluguel: kitnet.aluguel,
-          diaVencimento: unidade.vencimento || dataInicio.getDate(),
+          diaVencimento: kitnet.diaVencimento || unidade.vencimento || dataInicio.getDate(),
           indiceReajuste: inquilino.indiceReajuste || null,
           tipoGarantia: inquilino.tipoGarantia || null,
           valorCaucao: inquilino.valorCaucao || null,

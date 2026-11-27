@@ -62,6 +62,15 @@ model Kitnet {
   // true depois que o aluguel dessa kitnet é editado individualmente --
   // a partir daí, mudar o valor da Residência não sobrescreve mais ela.
   aluguelManual       Boolean         @default(false)
+  // Dia de vencimento FIXO dessa kitnet -- pedido do usuário em
+  // 27/11/2026: cada kitnet tem seu próprio dia de cobrança, em vez de
+  // herdar sempre o mesmo dia de toda a Residência (Unidade.vencimento)
+  // ou cair no dia do mês da Data de Início do contrato (fallback
+  // antigo). Mesmo padrão aluguel/aluguelManual: nasce puxando o
+  // vencimento da Residência, mas para de seguir depois que é editada
+  // na própria kitnet.
+  diaVencimento       Int?
+  diaVencimentoManual Boolean         @default(false)
   // Desde quando o status é DISPONIVEL, ininterruptamente -- mantido
   // sozinho pela extensão do Prisma Client (ver config/prisma.js), não
   // por cada service que muda o status. Null enquanto não é DISPONIVEL.

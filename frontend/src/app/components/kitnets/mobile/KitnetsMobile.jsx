@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import {
   Building2,
+  CalendarClock,
   CheckCircle2,
   DollarSign,
   House,
@@ -266,6 +267,13 @@ export default function KitnetsMobile({
                     <DollarSign size={13} className="text-[var(--text-faint)]" />
                     R$ {kitnet.aluguel}
                   </span>
+
+                  {kitnet.diaVencimento && (
+                    <span className="flex items-center gap-1.5">
+                      <CalendarClock size={13} className="text-[var(--text-faint)]" />
+                      Dia {kitnet.diaVencimento}
+                    </span>
+                  )}
 
                 </div>
 

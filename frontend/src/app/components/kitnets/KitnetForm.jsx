@@ -13,7 +13,7 @@ import { obterCamposFaltando, mensagemCamposFaltando } from "@/utils/validacaoOb
 import { ContaPagamentoService } from "@/services/contaPagamento.service";
 import ConfirmVistoriaEntregaModal from "../common/ConfirmVistoriaEntregaModal";
 
-const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "status", "observacoes"];
+const CAMPOS = ["nome", "unidadeId", "numero", "metragem", "aluguel", "diaVencimento", "status", "observacoes"];
 
 const SEMPRE_OBRIGATORIOS = new Set(["unidadeId", "numero", "metragem", "aluguel"]);
 
@@ -23,6 +23,7 @@ const ROTULOS = {
   numero: "Número",
   metragem: "Metragem",
   aluguel: "Valor do Aluguel",
+  diaVencimento: "Dia de Vencimento",
   status: "Status",
   observacoes: "Observações",
 };
@@ -49,6 +50,7 @@ export default function KitnetForm({
     numero: "",
     metragem: "",
     aluguel: "",
+    diaVencimento: "",
     status: "DISPONIVEL",
     observacoes: "",
     contaPagamentoId: "",
@@ -151,6 +153,9 @@ export default function KitnetForm({
         aluguel:
           kitnet.aluguel || "",
 
+        diaVencimento:
+          kitnet.diaVencimento || "",
+
         status:
           kitnet.status || "DISPONIVEL",
 
@@ -172,6 +177,7 @@ export default function KitnetForm({
         numero: "",
         metragem: "",
         aluguel: "",
+        diaVencimento: "",
         status: "DISPONIVEL",
         observacoes: "",
         contaPagamentoId: "",
@@ -271,6 +277,8 @@ export default function KitnetForm({
 
       aluguel: Number(formData.aluguel),
 
+      diaVencimento: formData.diaVencimento ? Number(formData.diaVencimento) : null,
+
       status: formData.status,
 
       observacoes: formData.observacoes,
@@ -361,6 +369,18 @@ export default function KitnetForm({
           name="aluguel"
           type="number"
           value={formData.aluguel}
+          onChange={handleChange}
+        />
+
+        <Input
+          label="Dia de Vencimento"
+          required={obrigatorios.has("diaVencimento")}
+          name="diaVencimento"
+          type="number"
+          min={1}
+          max={31}
+          placeholder="Padrão da Residência"
+          value={formData.diaVencimento}
           onChange={handleChange}
         />
 

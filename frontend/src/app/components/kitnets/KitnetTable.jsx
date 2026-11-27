@@ -64,6 +64,13 @@ export default function KitnetTable({
     },
 
     {
+      key: "diaVencimento",
+      title: "Vencimento",
+      render: (item) =>
+        item.diaVencimento ? `Dia ${item.diaVencimento}` : "-",
+    },
+
+    {
       key: "status",
       title: "Status",
       render: (item) => {

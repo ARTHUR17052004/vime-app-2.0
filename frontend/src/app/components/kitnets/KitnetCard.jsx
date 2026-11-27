@@ -6,6 +6,7 @@ import {
   Building2,
   Ruler,
   Wallet,
+  CalendarClock,
 } from "lucide-react";
 
 import DashboardCard from "../dashboard/DashboardCard";
@@ -140,6 +141,12 @@ export default function KitnetCard({
           label="Aluguel"
           value={`R$ ${kitnet.aluguel || "0,00"}`}
           valueClass="text-emerald-400 font-bold"
+        />
+
+        <InfoRow
+          icon={<CalendarClock size={18} />}
+          label="Vencimento"
+          value={kitnet.diaVencimento ? `Dia ${kitnet.diaVencimento}` : "-"}
         />
 
       </div>

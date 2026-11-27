@@ -70,6 +70,7 @@ const MODULOS = [
       { campo: "numero", label: "Número", travado: true },
       { campo: "metragem", label: "Metragem", travado: true },
       { campo: "aluguel", label: "Valor do Aluguel", travado: true },
+      { campo: "diaVencimento", label: "Dia de Vencimento" },
       { campo: "status", label: "Status" },
       { campo: "observacoes", label: "Observações" },
     ],
