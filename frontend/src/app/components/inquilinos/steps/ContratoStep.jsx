@@ -55,10 +55,10 @@ export default function ContratoStep({
         />
       </Campo>
 
-      {/* Valores fixos (200,00 e 159,00) -- era um número livre, mas o
-          financeiro só usa esses dois valores de verdade, então vira
-          select pra não deixar digitar outra coisa por engano. Pedido
-          do usuário em 26/11/2026. */}
+      {/* Valores fixos -- era um número livre, mas o financeiro só usa
+          esses valores de verdade, então vira select pra não deixar
+          digitar outra coisa por engano. Pedido do usuário em
+          26/11/2026 (200/159) e 27/11/2026 (110). */}
       <Campo label="Dedução mensal (água + energia)">
         <select
           name="valorDeducao"
@@ -69,6 +69,7 @@ export default function ContratoStep({
           <option value="">Padrão do locador</option>
           <option value="200">R$ 200,00</option>
           <option value="159">R$ 159,00</option>
+          <option value="110">R$ 110,00</option>
         </select>
       </Campo>
 
