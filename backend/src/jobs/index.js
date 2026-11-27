@@ -26,6 +26,7 @@ const dispararReceitasBanco = require("./dispararReceitasBancoJob");
 const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
 const diagnosticoMemoria = require("./diagnosticoMemoriaJob");
 const enviarRelatoriosAgendados = require("./enviarRelatoriosAgendadosJob");
+const verificarVistoriasOrfas = require("./verificarVistoriasOrfasJob");
 
 // Todo cron.schedule abaixo passa isso como 3º argumento -- processo
 // inteiro roda em TZ=UTC agora (ver server.js, bug do Prisma com
@@ -47,6 +48,14 @@ const iniciarJobs = () => {
   // por dia deixaria passar de 24h até 48h).
   cron.schedule("0 * * * *", atualizarStatusVistorias, FUSO);
   cron.schedule("0 * * * *", fecharChamadosResolvidos, FUSO);
+
+  // Rede de segurança da "Vistoria de entrega" -- o gatilho síncrono
+  // (config/prisma.js) cobre o caminho normal, mas qualquer mudança de
+  // status de kitnet fora dele (script de correção, edição direta no
+  // banco) deixa a vistoria órfã presa aberta pra sempre, ou uma kitnet
+  // vazia sem vistoria nenhuma. Bug recorrente em 27/11/2026 -- ver
+  // verificarVistoriasOrfasJob.js.
+  cron.schedule("0 * * * *", verificarVistoriasOrfas, FUSO);
 
   // Mesma lógica das duas de cima (janela fina de 72h, não pode
   // esperar o lote diário das 8h) -- ver verificarAtrasoCorteJob.js.
@@ -83,7 +92,17 @@ const iniciarJobs = () => {
   // Roda 1h antes do lote diário das 8h (nunca ao mesmo tempo) só pra
   // nunca correr em paralelo com ele -- sem depender de nenhum dos dois
   // de verdade.
-  cron.schedule("0 7 20 * *", gerarCobrancasRecorrentes, FUSO);
+  //
+  // Repete todo dia de 20 a 30 (não só uma vez no dia 20) -- pedido do
+  // usuário em 27/11/2026: a regra original só rodava no dia 20, e um
+  // contrato cujo aluguel do mês corrente só foi pago DEPOIS do dia 20
+  // (bem comum) nunca mais tinha a cobrança seguinte gerada até o
+  // próximo ciclo inteiro, mesmo já pago -- auditoria encontrou 38 de
+  // 112 contratos ATIVO nessa situação. A checagem de "já existe"/
+  // "ainda tem pendente" (gerarCobrancaParaContrato) já é idempotente,
+  // então rodar de novo todo dia só pega quem ainda não tinha sido
+  // gerado, nunca duplica.
+  cron.schedule("0 7 20-30 * *", gerarCobrancasRecorrentes, FUSO);
 
   // Disparo automático ao banco: dia 01, depois da janela de revisão.
   cron.schedule("0 7 1 * *", dispararReceitasBanco, FUSO);

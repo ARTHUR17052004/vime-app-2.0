@@ -95,9 +95,14 @@ const prisma = comRetryDeConexao.$extends({
             // cancela a vistoria de entrega automática se ainda não foi
             // Realizada, senão fica presa aberta pra sempre. Require
             // tardio (dentro da função) pra evitar ciclo: kitnetOcupacao
-            // usa este próprio arquivo (module.exports de prisma).
+            // usa este próprio arquivo (module.exports de prisma). Awaited
+            // de propósito -- sem isso, uma mudança de status seguida de
+            // outra bem rápido (ou o processo reiniciando no meio) corria
+            // sem garantia nenhuma de que isso aqui chegou a rodar (ver
+            // verificarVistoriasOrfasJob.js, a rede de segurança pra
+            // quando isso falhar mesmo assim).
             const { cancelarVistoriaDeEntrega } = require('../utils/kitnetOcupacao');
-            cancelarVistoriaDeEntrega(args.where.id);
+            await cancelarVistoriaDeEntrega(args.where.id);
           }
 
         }
