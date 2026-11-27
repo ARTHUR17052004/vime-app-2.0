@@ -1,3 +1,16 @@
+// Força UTC pro processo inteiro, ANTES de qualquer outro require --
+// sem isso, o Prisma escreve campos "timestamp without time zone"
+// (todo DateTime do schema sem @db.Timestamptz, que é a maioria) usando
+// o fuso do SISTEMA OPERACIONAL do servidor pra decidir a hora "de
+// parede" a gravar, enquanto LÊ esses mesmos campos tratando os dígitos
+// como se já fossem UTC -- essa assimetria desalinha valores que
+// deveriam ser idênticos (ex.: Receita.vencimento copiado direto de
+// Contrato.dataInicio saiu 3h na frente, virando o dia seguinte errado
+// na tela pro fuso de Brasília). Bug relatado em 27/11/2026 (contrato
+// da ERIKA LIMA DE ALENCAR, vencimento da 1ª cobrança saiu 26/11 em vez
+// de 27/11, mesmo com Contrato.dataInicio = 27/11 certinho no banco).
+process.env.TZ = "UTC";
+
 require("dotenv").config();
 
 const express = require("express");

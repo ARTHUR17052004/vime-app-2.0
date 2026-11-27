@@ -27,10 +27,17 @@ const avisoDisparoReceitas = require("./avisoDisparoReceitasJob");
 const diagnosticoMemoria = require("./diagnosticoMemoriaJob");
 const enviarRelatoriosAgendados = require("./enviarRelatoriosAgendadosJob");
 
+// Todo cron.schedule abaixo passa isso como 3º argumento -- processo
+// inteiro roda em TZ=UTC agora (ver server.js, bug do Prisma com
+// "timestamp without time zone"), mas os horários aqui (ex.: "8h",
+// "20") sempre quiseram dizer hora de Brasília, nunca UTC. Sem isso,
+// o lote diário das 8h passaria a disparar 5h da manhã.
+const FUSO = { timezone: "America/Sao_Paulo" };
+
 const iniciarJobs = () => {
 
   // TEMPORÁRIO -- diagnóstico do OOM de 16/11/2026, ver diagnosticoMemoriaJob.js.
-  cron.schedule("* * * * *", diagnosticoMemoria);
+  cron.schedule("* * * * *", diagnosticoMemoria, FUSO);
 
   // Status (Programada -> Pendente -> Atrasada) depende de estar perto
   // ou ter passado do prazo na hora certa -- de hora em hora é fino o
@@ -38,36 +45,36 @@ const iniciarJobs = () => {
   // (notificações, cobranças...) nesse ritmo também. Fechar chamado
   // resolvido há 24h é a mesma ideia (24h é uma janela fina, uma vez
   // por dia deixaria passar de 24h até 48h).
-  cron.schedule("0 * * * *", atualizarStatusVistorias);
-  cron.schedule("0 * * * *", fecharChamadosResolvidos);
+  cron.schedule("0 * * * *", atualizarStatusVistorias, FUSO);
+  cron.schedule("0 * * * *", fecharChamadosResolvidos, FUSO);
 
   // Mesma lógica das duas de cima (janela fina de 72h, não pode
   // esperar o lote diário das 8h) -- ver verificarAtrasoCorteJob.js.
-  cron.schedule("0 * * * *", verificarAtrasoCorte);
+  cron.schedule("0 * * * *", verificarAtrasoCorte, FUSO);
 
   // Segundo estágio da mesma escalada -- ver verificarEscalonamentoCorteJob.js.
-  cron.schedule("0 * * * *", verificarEscalonamentoCorte);
+  cron.schedule("0 * * * *", verificarEscalonamentoCorte, FUSO);
 
   // Não espera o lote diário das 8h -- quem pergunta "foi pago?" quer
   // saber na hora, não no dia seguinte. O webhook do BB existe mas
   // nunca foi confirmado ao vivo, então isso é o que garante de verdade
   // que o sistema reconhece o pagamento sem depender dele disparar certo.
-  cron.schedule("*/15 * * * *", verificarBoletosBB);
+  cron.schedule("*/15 * * * *", verificarBoletosBB, FUSO);
 
   // Mesmo motivo do job do BB acima: a Asaas também tem webhook, mas ele
   // às vezes some sozinho (a Asaas pausa um webhook depois de falhas
   // repetidas de entrega, sem avisar ninguém) -- isso já fez o sistema
   // cobrar gente que já tinha pago (ver verificarAsaasJob.js).
-  cron.schedule("*/15 * * * *", verificarAsaas);
+  cron.schedule("*/15 * * * *", verificarAsaas, FUSO);
 
   // A EFI nem webhook tem configurado ainda -- sem isso, uma cobrança
   // paga na EFI nunca seria reconhecida sozinha (ver verificarEfiJob.js).
-  cron.schedule("*/15 * * * *", verificarEfi);
+  cron.schedule("*/15 * * * *", verificarEfi, FUSO);
 
   // Envio agendado de relatório -- o usuário escolhe a hora exata que
   // quer receber, não pode esperar o lote diário das 8h (ver
   // enviarRelatoriosAgendadosJob.js).
-  cron.schedule("*/15 * * * *", enviarRelatoriosAgendados);
+  cron.schedule("*/15 * * * *", enviarRelatoriosAgendados, FUSO);
 
   // Emissão mensal de Aluguel: dia 20 só CRIA a receita do mês seguinte
   // (Pendente, sem enviar ao banco) -- dá a janela de ~10 dias pra
@@ -76,10 +83,10 @@ const iniciarJobs = () => {
   // Roda 1h antes do lote diário das 8h (nunca ao mesmo tempo) só pra
   // nunca correr em paralelo com ele -- sem depender de nenhum dos dois
   // de verdade.
-  cron.schedule("0 7 20 * *", gerarCobrancasRecorrentes);
+  cron.schedule("0 7 20 * *", gerarCobrancasRecorrentes, FUSO);
 
   // Disparo automático ao banco: dia 01, depois da janela de revisão.
-  cron.schedule("0 7 1 * *", dispararReceitasBanco);
+  cron.schedule("0 7 1 * *", dispararReceitasBanco, FUSO);
 
   cron.schedule("0 8 * * *", async () => {
 
@@ -124,7 +131,7 @@ const iniciarJobs = () => {
 
     console.log("==========================");
 
-  });
+  }, FUSO);
 
 };
 

@@ -686,7 +686,7 @@ export default function FinanceiroReceitas({
 
                   <span className="ml-auto shrink-0">
                     {item.vencimento
-                      ? new Date(item.vencimento).toLocaleDateString("pt-BR")
+                      ? new Date(item.vencimento).toLocaleDateString("pt-BR", { timeZone: "UTC" })
                       : "-"}
                   </span>
                 </div>
@@ -912,7 +912,7 @@ export default function FinanceiroReceitas({
 
                   <td className="text-[var(--text-subtle)] pr-4">
                     {item.vencimento
-                      ? new Date(item.vencimento).toLocaleDateString("pt-BR")
+                      ? new Date(item.vencimento).toLocaleDateString("pt-BR", { timeZone: "UTC" })
                       : "-"}
                   </td>
 

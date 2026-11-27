@@ -11,17 +11,32 @@ export function formatDate(date) {
     return new Date(ano, mes - 1, dia).toLocaleDateString("pt-BR").split("/").join("-");
   }
 
-  return new Date(date).toLocaleDateString("pt-BR").split("/").join("-");
+  // Mesmo problema do caso acima, só que pro timestamp completo que
+  // volta da API (ex.: "2026-11-27T00:00:00.000Z") -- todo campo de
+  // "dia" do sistema (vencimento, dataInicio, dataFim...) é guardado
+  // como meia-noite UTC, então formatar no fuso local (Brasil, UTC-3)
+  // também "voltava" um dia aqui. Fixa a exibição em UTC pra bater
+  // sempre com o dia guardado, não com o fuso de quem está vendo. Bug
+  // relatado em 27/11/2026 (vencimento da 1ª cobrança do contrato da
+  // Erika aparecia 26/11 em vez de 27/11).
+  return new Date(date)
+    .toLocaleDateString("pt-BR", { timeZone: "UTC" })
+    .split("/")
+    .join("-");
 }
 
 export function formatDateTime(date) {
   if (!date) return "-";
 
-  // Passa o valor original (string) pro formatDate, não um Date já
-  // convertido -- senão a proteção contra "AAAA-MM-DD vira meia-noite
-  // UTC" lá dentro nunca dispara, porque ela só reconhece esse formato
-  // como string, não como Date.
-  return `${formatDate(date)} ${new Date(date).toLocaleTimeString("pt-BR", {
+  // Diferente de formatDate: aqui o horário importa de verdade (ex.:
+  // "enviado em", "vistoria realizada em") -- não é um campo de "dia"
+  // guardado como meia-noite UTC, é um instante de verdade. Por isso
+  // formata TUDO no fuso local (não chama formatDate, que agora força
+  // UTC), senão o dia podia aparecer descolado do horário mostrado do
+  // lado (ex.: 27/11 23h desse jeito vira 28/11 em UTC).
+  const d = new Date(date);
+
+  return `${d.toLocaleDateString("pt-BR").split("/").join("-")} ${d.toLocaleTimeString("pt-BR", {
     hour: "2-digit",
     minute: "2-digit",
   })}`;
