@@ -24,5 +24,6 @@ router.put("/config/:tipo", apenasAdministradorGeral, relatorioConfigController.
 router.get("/agendados", permissaoMiddleware("relatorios.visualizar"), relatorioEnvioController.listar);
 router.post("/agendados", permissaoMiddleware("relatorios.enviar"), relatorioEnvioController.criar);
 router.delete("/agendados/:id", permissaoMiddleware("relatorios.cancelarEnvio"), relatorioEnvioController.cancelar);
+router.get("/agendados/:id/arquivo", permissaoMiddleware("relatorios.visualizar"), relatorioEnvioController.baixarArquivo);
 
 module.exports = router;

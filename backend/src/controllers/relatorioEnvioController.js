@@ -15,4 +15,11 @@ const cancelar = async (req, res) => {
   return res.json({ success: true, data: dados });
 };
 
-module.exports = { listar, criar, cancelar };
+const baixarArquivo = async (req, res) => {
+  const { buffer, nomeArquivo, mimeType } = await relatorioEnvioService.obterArquivo(req.params.id);
+  res.set("Content-Type", mimeType);
+  res.set("Content-Disposition", `attachment; filename="${nomeArquivo}"`);
+  return res.send(buffer);
+};
+
+module.exports = { listar, criar, cancelar, baixarArquivo };

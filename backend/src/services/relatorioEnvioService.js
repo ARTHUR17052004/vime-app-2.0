@@ -7,6 +7,17 @@ const { gerarRelatorioExtratoConta } = require("../utils/extratoContaRelatorio")
 const contaPagamentoService = require("./contaPagamentoService");
 const emailService = require("./emailService");
 const logService = require("./logService");
+const { somarMeses } = require("./contratoDocumentoService");
+
+// "AAAA-MM" + 1 mês, sem depender de Date (evita fuso virando o mês
+// errado) -- usado só pra avançar o mês de referência do Extrato numa
+// série recorrente.
+function somarMesReferencia(mesReferencia) {
+  const [ano, mes] = mesReferencia.split("-").map(Number);
+  const proximoMes = mes === 12 ? 1 : mes + 1;
+  const proximoAno = mes === 12 ? ano + 1 : ano;
+  return `${proximoAno}-${String(proximoMes).padStart(2, "0")}`;
+}
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -52,6 +63,7 @@ const validarCriacao = async (dados) => {
       mesReferencia: dados.mesReferencia,
       email,
       dataAgendada,
+      recorrente: !!dados.recorrente,
     };
 
   }
@@ -79,6 +91,7 @@ const validarCriacao = async (dados) => {
     mesReferencia: null,
     email,
     dataAgendada,
+    recorrente: !!dados.recorrente,
   };
 
 };
@@ -96,6 +109,7 @@ const criar = async (dados, autor) => {
       dataAgendada: resolvido.dataAgendada,
       contaPagamentoId: resolvido.contaPagamentoId,
       mesReferencia: resolvido.mesReferencia,
+      recorrente: resolvido.recorrente,
       criadoPorId: autor?.id || null,
       criadoPorNome: autor?.nome || "Sistema",
     },
@@ -106,7 +120,7 @@ const criar = async (dados, autor) => {
     usuarioNome: autor?.nome || "Sistema",
     modulo: "RELATORIOS",
     acao: "AGENDAR_ENVIO",
-    descricao: `${autor?.nome || "Alguém"} agendou o envio de "${resolvido.relatorioTitulo}" (${resolvido.formato.toUpperCase()}) pra ${resolvido.email} em ${resolvido.dataAgendada.toLocaleString("pt-BR")}.`,
+    descricao: `${autor?.nome || "Alguém"} agendou o envio de "${resolvido.relatorioTitulo}" (${resolvido.formato.toUpperCase()}) pra ${resolvido.email} em ${resolvido.dataAgendada.toLocaleString("pt-BR")}${resolvido.recorrente ? ", repetindo todo mês" : ""}.`,
   });
 
   return agendamento;
@@ -189,6 +203,7 @@ const processarPendentes = async () => {
         : gerarExcelBuffer(relatorio);
 
       const nomeArquivo = `${agendamento.relatorioTitulo.replace(/[^\p{L}\p{N}]+/gu, "-")}.${ehPdf ? "pdf" : "xlsx"}`;
+      const contentType = ehPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
       await emailService.enviarEmail({
         para: agendamento.destinatarioEmail,
@@ -198,13 +213,20 @@ const processarPendentes = async () => {
         anexos: [{
           filename: nomeArquivo,
           content: buffer,
-          contentType: ehPdf ? "application/pdf" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          contentType,
         }],
       });
 
       await prisma.relatorioAgendado.update({
         where: { id: agendamento.id },
-        data: { status: "ENVIADO", enviadoEm: new Date(), erro: null },
+        data: {
+          status: "ENVIADO",
+          enviadoEm: new Date(),
+          erro: null,
+          arquivoDados: buffer.toString("base64"),
+          arquivoNomeOriginal: nomeArquivo,
+          arquivoMimeType: contentType,
+        },
       });
 
       await logService.registrar({
@@ -212,6 +234,28 @@ const processarPendentes = async () => {
         acao: "ENVIAR_RELATORIO",
         descricao: `Relatório "${agendamento.relatorioTitulo}" enviado pra ${agendamento.destinatarioEmail}.`,
       });
+
+      // Recorrente: só cria o próximo agendamento DEPOIS de um envio
+      // bem-sucedido -- cancelar o próximo da fila naturalmente encerra
+      // a série, sem precisar de nenhuma lógica extra de "série".
+      if (agendamento.recorrente) {
+        await prisma.relatorioAgendado.create({
+          data: {
+            relatorioChave: agendamento.relatorioChave,
+            relatorioTitulo: agendamento.contaPagamentoId
+              ? agendamento.relatorioTitulo.replace(/\d{4}-\d{2}$/, somarMesReferencia(agendamento.mesReferencia))
+              : agendamento.relatorioTitulo,
+            formato: agendamento.formato,
+            destinatarioEmail: agendamento.destinatarioEmail,
+            dataAgendada: somarMeses(agendamento.dataAgendada, 1),
+            contaPagamentoId: agendamento.contaPagamentoId,
+            mesReferencia: agendamento.mesReferencia ? somarMesReferencia(agendamento.mesReferencia) : null,
+            recorrente: true,
+            criadoPorId: agendamento.criadoPorId,
+            criadoPorNome: agendamento.criadoPorNome,
+          },
+        });
+      }
 
     } catch (erro) {
 
@@ -228,9 +272,28 @@ const processarPendentes = async () => {
 
 };
 
+// Devolve o arquivo exatamente como foi mandado por e-mail (nunca gera
+// de novo -- os dados de origem podem ter mudado desde o envio).
+const obterArquivo = async (id) => {
+
+  const agendamento = await prisma.relatorioAgendado.findUnique({ where: { id } });
+
+  if (!agendamento || agendamento.status !== "ENVIADO" || !agendamento.arquivoDados) {
+    throw new Error("Esse relatório ainda não foi enviado, ou o arquivo não está mais disponível.");
+  }
+
+  return {
+    buffer: Buffer.from(agendamento.arquivoDados, "base64"),
+    nomeArquivo: agendamento.arquivoNomeOriginal || "relatorio",
+    mimeType: agendamento.arquivoMimeType || "application/octet-stream",
+  };
+
+};
+
 module.exports = {
   criar,
   listar,
   cancelar,
   processarPendentes,
+  obterArquivo,
 };

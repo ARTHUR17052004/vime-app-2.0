@@ -1390,6 +1390,22 @@ model RelatorioAgendado {
   mesReferencia      String? // "AAAA-MM"
   criadoPorId        String?
   criadoPorNome      String?
+
+  // Guarda o PDF/Excel de verdade que foi mandado (base64), só depois
+  // de ENVIADO -- pedido do usuário em 27/11/2026: botão "Baixar" na
+  // tela de envio precisa mostrar exatamente o que foi mandado, não
+  // gerar de novo na hora (os dados podem ter mudado desde então).
+  arquivoDados        String?
+  arquivoNomeOriginal String?
+  arquivoMimeType     String?
+
+  // Marca "repete todo mês" -- a cada envio com sucesso,
+  // processarPendentes() cria sozinho o próximo agendamento (mesmo
+  // e-mail/relatório, 1 mês depois), copiando recorrente:true de novo.
+  // Cancelar o próximo PENDENTE da fila encerra a série (não tem envio
+  // bem-sucedido pra gerar o seguinte). Pedido do usuário em 27/11/2026.
+  recorrente         Boolean   @default(false)
+
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
 

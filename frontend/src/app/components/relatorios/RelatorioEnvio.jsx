@@ -3,7 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Send, Mail, Clock, X, CheckCircle2, AlertCircle } from "lucide-react";
+import { Send, Mail, Clock, X, CheckCircle2, AlertCircle, Download, Repeat } from "lucide-react";
 
 import Card from "../ui/Card";
 import Select from "../ui/Select";
@@ -13,6 +13,7 @@ import Button from "../ui/Button";
 import { RelatorioService } from "@/services/relatorio.service";
 import { ContaPagamentoService } from "@/services/contaPagamento.service";
 import { formatDateTime } from "@/utils/formatDate";
+import { mostrarBlobNaAba } from "@/utils/abrirArquivoBaixado";
 
 // "Extrato de Receitas" (Financeiro > Extratos, FinanceiroAsaas.jsx) não
 // é um relatório do catálogo genérico -- precisa de conta+mês, então
@@ -54,6 +55,7 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
   const [sucesso, setSucesso] = useState("");
   const [enviandoForm, setEnviandoForm] = useState(false);
   const [cancelandoId, setCancelandoId] = useState(null);
+  const [baixandoId, setBaixandoId] = useState(null);
 
   const [relatorioChave, setRelatorioChave] = useState("");
   const [formato, setFormato] = useState("pdf");
@@ -61,6 +63,7 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
   const [dataAgendada, setDataAgendada] = useState(paraInputDatetime(new Date()));
   const [contaPagamentoId, setContaPagamentoId] = useState("");
   const [mesReferencia, setMesReferencia] = useState(mesAtual());
+  const [recorrente, setRecorrente] = useState(false);
 
   const ehExtratoConta = relatorioChave === CHAVE_EXTRATO_CONTA;
 
@@ -115,10 +118,11 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
         formato: ehExtratoConta ? "excel" : formato,
         destinatarioEmail: destinatarioEmail.trim(),
         dataAgendada: new Date(dataAgendada).toISOString(),
+        recorrente,
         ...(ehExtratoConta ? { contaPagamentoId, mesReferencia } : {}),
       });
 
-      setSucesso("Envio agendado.");
+      setSucesso(recorrente ? "Envio agendado, repetindo todo mês." : "Envio agendado.");
       setDestinatarioEmail("");
       await carregar();
 
@@ -146,6 +150,27 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
       setErro(err.message || "Erro ao cancelar o envio.");
     } finally {
       setCancelandoId(null);
+    }
+
+  }
+
+  // Aba aberta ANTES do fetch (ver abrirArquivoBaixado.js) -- mesmo
+  // truque do "Baixar PDF" de Contratos, pra não ser bloqueado como
+  // pop-up e funcionar em navegador mobile/PWA instalado.
+  async function baixar(agendamento) {
+
+    const aba = window.open("", "_blank");
+    setErro("");
+    setBaixandoId(agendamento.id);
+
+    try {
+      const blob = await RelatorioService.baixarAgendado(agendamento.id);
+      mostrarBlobNaAba(aba, blob, { nomeArquivo: `${agendamento.relatorioTitulo}.${agendamento.formato === "pdf" ? "pdf" : "xlsx"}` });
+    } catch (err) {
+      aba?.close();
+      setErro(err.message || "Erro ao baixar o relatório.");
+    } finally {
+      setBaixandoId(null);
     }
 
   }
@@ -230,10 +255,22 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
             onChange={(e) => setDataAgendada(e.target.value)}
           />
 
-          <div className="md:col-span-5">
+          <div className="md:col-span-5 flex items-center justify-between gap-4 flex-wrap">
+
             <Button type="submit" leftIcon={<Send size={15} />} disabled={enviandoForm} loading={enviandoForm}>
               Agendar envio
             </Button>
+
+            <label className="flex items-center gap-2 text-sm text-[var(--text-subtle)] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={recorrente}
+                onChange={(e) => setRecorrente(e.target.checked)}
+                className="rounded border-[var(--border-token)]"
+              />
+              Repetir todo mês (mesmo relatório, e-mail e dia)
+            </label>
+
           </div>
 
         </form>
@@ -272,7 +309,14 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
                   const Icone = status.Icone;
                   return (
                     <tr key={a.id} className="border-b border-[var(--border-token)]/50">
-                      <td className="py-2.5 pr-3 text-[var(--text)]">{a.relatorioTitulo}</td>
+                      <td className="py-2.5 pr-3 text-[var(--text)]">
+                        <span className="flex items-center gap-1.5">
+                          {a.relatorioTitulo}
+                          {a.recorrente && (
+                            <Repeat size={12} className="text-[var(--text-faint)]" title="Repete todo mês" />
+                          )}
+                        </span>
+                      </td>
                       <td className="py-2.5 pr-3 text-[var(--text-subtle)]">{a.destinatarioEmail}</td>
                       <td className="py-2.5 pr-3 text-[var(--text-subtle)] uppercase">{a.formato}</td>
                       <td className="py-2.5 pr-3 text-[var(--text-subtle)]">{formatDateTime(a.dataAgendada)}</td>
@@ -286,7 +330,17 @@ export default function RelatorioEnvio({ podeEnviar = true, podeCancelar = true 
                         )}
                       </td>
                       <td className="py-2.5 pr-3 text-[var(--text-subtle)]">{a.enviadoEm ? formatDateTime(a.enviadoEm) : "-"}</td>
-                      <td className="py-2.5 pr-3 text-right">
+                      <td className="py-2.5 pr-3 text-right whitespace-nowrap">
+                        {a.status === "ENVIADO" && (
+                          <button
+                            onClick={() => baixar(a)}
+                            disabled={baixandoId === a.id}
+                            className="text-xs text-emerald-400 hover:text-emerald-300 font-medium disabled:opacity-50 inline-flex items-center gap-1 mr-3"
+                          >
+                            <Download size={13} />
+                            Baixar
+                          </button>
+                        )}
                         {podeCancelar && a.status === "PENDENTE" && (
                           <button
                             onClick={() => cancelar(a.id)}
