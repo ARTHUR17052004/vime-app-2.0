@@ -304,7 +304,17 @@ class ClicksignApiV3 {
 
     const resposta = await this.buscarDocumento(envelopeId, documentId);
 
-    const url = resposta?.data?.links?.files?.original || resposta?.data?.links?.files?.signed;
+    // "original" é o arquivo-fonte de ANTES da assinatura -- quando o
+    // contrato nasce de um modelo (DOCX, ver criarDocumentoDeModelo),
+    // "original" é o .docx cru, não um PDF (o navegador tentava abrir
+    // isso como PDF e dava "Falha ao carregar documento PDF" -- bug
+    // relatado em 27/11/2026, contrato da ERIKA LIMA DE ALENCAR). O que
+    // queremos pra "Baixar PDF" é sempre o resultado FINAL assinado
+    // ("signed"), que a Clicksign já entrega em PDF de verdade,
+    // independente do formato original. Só cai pro "original" se por
+    // algum motivo a Clicksign não mandar o "signed" (documento ainda
+    // não fechado, por exemplo).
+    const url = resposta?.data?.links?.files?.signed || resposta?.data?.links?.files?.original;
 
     if (!url) {
       throw new Error("A Clicksign não retornou um link de download para esse documento.");
