@@ -29,6 +29,7 @@ const cartao = `
 `;
 
 const MOTIVO_ENCERRAMENTO = {
+  FIM_DE_CONTRATO: "Fim do contrato (encerramento normal)",
   ABANDONO: "Abandono",
   INADIMPLENCIA: "Inadimplência",
   QUEBRA_DO_INQUILINO: "Quebra do inquilino",
@@ -151,9 +152,11 @@ export default function ContratoDetalheMobile({ contrato }) {
           {contrato.status === "ENCERRADO" && contrato.motivoEncerramento && (
             <div className="py-3">
               <p className="text-[12px] text-[var(--text-subtle)]">
-                Encerrado por quebra de contrato
+                {contrato.motivoEncerramento === "FIM_DE_CONTRATO"
+                  ? "Encerrado manualmente antes do fim previsto"
+                  : "Encerrado por quebra de contrato"}
               </p>
-              <p className="mt-1 text-[14px] font-bold text-red-400">
+              <p className={`mt-1 text-[14px] font-bold ${contrato.motivoEncerramento === "FIM_DE_CONTRATO" ? "text-[var(--text)]" : "text-red-400"}`}>
                 {MOTIVO_ENCERRAMENTO[contrato.motivoEncerramento] || contrato.motivoEncerramento}
               </p>
               {contrato.observacaoEncerramento && (

@@ -323,6 +323,15 @@ const exigirConfirmacaoExclusao = async (req, res, next) => {
 // nada de texto livre aqui (a observação é que é livre).
 const MOTIVOS_TERMINO_ANTECIPADO = ["ABANDONO", "INADIMPLENCIA", "QUEBRA_DO_INQUILINO"];
 
+// Motivo "calmo" pra encerrar um contrato manualmente antes do dataFim
+// sem cair na narrativa de quebra (abandono/inadimplência/quebra do
+// inquilino) -- pedido do usuário em 27/11/2026: precisa dar pra
+// encerrar normal, sem motivo alarmante. Só aceito onde a rota passar
+// `permitirFimNormal: true` pra exigirConfirmacaoTerminoAntecipado
+// (hoje só o encerrar de Contrato -- excluir contrato/kitnet/inquilino
+// continua exigindo um motivo "de verdade").
+const MOTIVO_FIM_NORMAL = "FIM_DE_CONTRATO";
+
 // Classificar uma Receita como inadimplência de verdade (botão
 // "Inadimplência" nos 3 pontinhos do Financeiro) -- mesmo motivo fixo +
 // observação + senha de exigirConfirmacaoTerminoAntecipado, só que aqui
@@ -417,7 +426,7 @@ const exigirConfirmacaoInadimplencia = async (req, res, next) => {
 // (direto, ou via Contrato ATIVO do Inquilino/Kitnet sendo excluído) --
 // `obterContrato(req)` devolve `{ id, dataFim }` do contrato a
 // avaliar/encerrar, ou null se não tiver nenhum.
-const exigirConfirmacaoTerminoAntecipado = (obterContrato) => async (req, res, next) => {
+const exigirConfirmacaoTerminoAntecipado = (obterContrato, opcoes = {}) => async (req, res, next) => {
 
   try {
 
@@ -430,13 +439,19 @@ const exigirConfirmacaoTerminoAntecipado = (obterContrato) => async (req, res, n
       return next();
     }
 
+    const motivosAceitos = opcoes.permitirFimNormal
+      ? [...MOTIVOS_TERMINO_ANTECIPADO, MOTIVO_FIM_NORMAL]
+      : MOTIVOS_TERMINO_ANTECIPADO;
+
     const motivo = String(req.body?.motivoTerminoAntecipado || "").toUpperCase();
 
-    if (!MOTIVOS_TERMINO_ANTECIPADO.includes(motivo)) {
+    if (!motivosAceitos.includes(motivo)) {
       return res.status(400).json({
         success: false,
         requerConfirmacaoTerminoAntecipado: true,
-        message: "Selecione o motivo (Abandono, Inadimplência ou Quebra do inquilino).",
+        message: opcoes.permitirFimNormal
+          ? "Selecione o motivo (Fim do contrato, Abandono, Inadimplência ou Quebra do inquilino)."
+          : "Selecione o motivo (Abandono, Inadimplência ou Quebra do inquilino).",
       });
     }
 
@@ -484,8 +499,10 @@ const exigirConfirmacaoTerminoAntecipado = (obterContrato) => async (req, res, n
 
     return res.json({
       success: true,
-      quebraDeContrato: true,
-      message: "Contrato encerrado por quebra de contrato.",
+      quebraDeContrato: motivo !== MOTIVO_FIM_NORMAL,
+      message: motivo === MOTIVO_FIM_NORMAL
+        ? "Contrato encerrado."
+        : "Contrato encerrado por quebra de contrato.",
       data: contratoEncerrado,
     });
 
@@ -556,3 +573,4 @@ module.exports.exigirConfirmacaoExclusao = exigirConfirmacaoExclusao;
 module.exports.exigirConfirmacaoTerminoAntecipado = exigirConfirmacaoTerminoAntecipado;
 module.exports.exigirConfirmacaoInadimplencia = exigirConfirmacaoInadimplencia;
 module.exports.MOTIVOS_TERMINO_ANTECIPADO = MOTIVOS_TERMINO_ANTECIPADO;
+module.exports.MOTIVO_FIM_NORMAL = MOTIVO_FIM_NORMAL;

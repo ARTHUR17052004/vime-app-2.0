@@ -677,6 +677,15 @@ const encerrar = async (id, autor, opcoes = {}) => {
   // encerramento normal, no fim natural do contrato.
   const { motivoEncerramento, observacaoEncerramento } = opcoes;
 
+  // "FIM_DE_CONTRATO" é o motivo calmo de exigirConfirmacaoTerminoAntecipado
+  // (permitirFimNormal) -- encerra ANTES do dataFim, mas não é
+  // abandono/inadimplência/quebra do inquilino. Pedido do usuário em
+  // 27/11/2026: precisa dar pra encerrar manualmente "sem motivo
+  // alarmante". Conta como término antecipado pra fins de dataFim
+  // (muda pra hoje), mas não entra na narrativa de quebra (notificação,
+  // classificação de receita, destaque vermelho na tela do contrato).
+  const ehQuebraDeContrato = !!motivoEncerramento && motivoEncerramento !== "FIM_DE_CONTRATO";
+
   // Sem o include, contrato.inquilino ficava undefined e a mensagem de
   // encerramento (mais abaixo) tentava mandar pro telefone vazio --
   // nunca chegava a ninguém, só criava um contato "55" fantasma no
@@ -771,7 +780,7 @@ const encerrar = async (id, autor, opcoes = {}) => {
       await receitaService.classificarInadimplencia(
         receitaId,
         {
-          motivoInadimplencia: motivoEncerramento || "CONTRATO_ENCERRADO",
+          motivoInadimplencia: ehQuebraDeContrato ? motivoEncerramento : "CONTRATO_ENCERRADO",
           observacaoInadimplencia:
             observacaoEncerramento ||
             `Contrato encerrado em ${contratoEncerrado.dataFim.toLocaleDateString("pt-BR")} -- cobrança já vencida antes do fim do contrato ficou em aberto.`,
@@ -813,8 +822,8 @@ const encerrar = async (id, autor, opcoes = {}) => {
 
   await notificacaoService.criar({
     origem: "SISTEMA",
-    titulo: motivoEncerramento ? "QUEBRA DE CONTRATO" : "Contrato encerrado",
-    mensagem: motivoEncerramento
+    titulo: ehQuebraDeContrato ? "QUEBRA DE CONTRATO" : "Contrato encerrado",
+    mensagem: ehQuebraDeContrato
       ? `${autor?.nome || "Alguém"} registrou quebra de contrato -- ${contrato.inquilino?.nome || "inquilino"} (${contrato.kitnet?.unidade?.nome || "?"}, kitnet ${contrato.kitnet?.nome || contrato.kitnet?.numero || "?"}), motivo: ${MOTIVO_ROTULO[motivoEncerramento] || motivoEncerramento}. Observação: ${observacaoEncerramento || "-"}`
       : await notificacaoService.renderizarMensagem(
           'CONTRATO_ENCERRADO',

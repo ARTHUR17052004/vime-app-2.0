@@ -562,8 +562,13 @@ function ContratosPageConteudo() {
             <TerminoAntecipadoModal
               isOpen={!!terminoAntecipado}
               onClose={() => setTerminoAntecipado(null)}
-              titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+              titulo={
+                terminoAntecipado?.tipo === "encerrar"
+                  ? "Encerrar contrato antes do fim previsto"
+                  : "Quebra de contrato -- excluir contrato"
+              }
               contexto="Esse contrato ainda não chegou no fim (dataFim). Ele não será excluído -- vai ser encerrado, com o motivo registrado, pra manter o histórico."
+              permitirFimNormal={terminoAntecipado?.tipo === "encerrar"}
               acao={async (extra) => {
                 if (terminoAntecipado.tipo === "encerrar") {
                   await ContratoService.encerrar(terminoAntecipado.id, extra);
@@ -806,8 +811,13 @@ function ContratosPageConteudo() {
         <TerminoAntecipadoModal
           isOpen={!!terminoAntecipado}
           onClose={() => setTerminoAntecipado(null)}
-          titulo={`Quebra de contrato -- ${terminoAntecipado?.tipo === "encerrar" ? "encerrar" : "excluir"} contrato`}
+          titulo={
+            terminoAntecipado?.tipo === "encerrar"
+              ? "Encerrar contrato antes do fim previsto"
+              : "Quebra de contrato -- excluir contrato"
+          }
           contexto="Esse contrato ainda não chegou no fim (dataFim). Ele não será excluído -- vai ser encerrado, com o motivo registrado, pra manter o histórico."
+          permitirFimNormal={terminoAntecipado?.tipo === "encerrar"}
           acao={async (extra) => {
             if (terminoAntecipado.tipo === "encerrar") {
               await ContratoService.encerrar(terminoAntecipado.id, extra);

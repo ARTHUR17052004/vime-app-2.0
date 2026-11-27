@@ -20,7 +20,14 @@ import { useState } from "react";
 // nos dois -- só o texto exibido muda.
 const ROTULO_PADRAO_QUEBRA = "Quebra do inquilino";
 
-export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contexto, acao, rotuloQuebra = ROTULO_PADRAO_QUEBRA }) {
+// Motivo calmo, só liberado por quem chama (hoje: "Encerrar contrato",
+// em contratos/page.js) via `permitirFimNormal` -- encerra antes do
+// dataFim, mas sem cair na narrativa de quebra (abandono/inadimplência/
+// quebra do inquilino). Pedido do usuário em 27/11/2026. Mesmo valor
+// que permissaoMiddleware.MOTIVO_FIM_NORMAL no backend.
+const MOTIVO_FIM_NORMAL = "FIM_DE_CONTRATO";
+
+export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contexto, acao, rotuloQuebra = ROTULO_PADRAO_QUEBRA, permitirFimNormal = false }) {
 
   const [passo, setPasso] = useState(1);
   const [motivo, setMotivo] = useState("");
@@ -110,8 +117,10 @@ export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contex
           </h3>
 
           <p className="text-sm text-[var(--text-muted)]">
-            {contexto || "Essa ação acontece antes do fim do contrato (dataFim)."} Isso conta como
-            quebra de contrato -- selecione o motivo e escreva uma observação pra continuar.
+            {contexto || "Essa ação acontece antes do fim do contrato (dataFim)."}{" "}
+            {permitirFimNormal
+              ? 'Selecione "Fim do contrato" pra um encerramento normal, sem problema, ou um dos outros motivos se foi uma quebra de contrato -- escreva uma observação e confirme com sua senha.'
+              : "Isso conta como quebra de contrato -- selecione o motivo e escreva uma observação pra continuar."}
           </p>
 
           <div>
@@ -124,6 +133,9 @@ export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contex
               className="border border-[var(--border-token)] bg-[var(--surface-2)] text-[var(--text)] rounded-xl p-3 w-full"
             >
               <option value="" className="bg-[#1b2430]">Selecione...</option>
+              {permitirFimNormal && (
+                <option value={MOTIVO_FIM_NORMAL} className="bg-[#1b2430]">Fim do contrato (encerramento normal)</option>
+              )}
               <option value="ABANDONO" className="bg-[#1b2430]">Abandono</option>
               <option value="INADIMPLENCIA" className="bg-[#1b2430]">Inadimplência</option>
               <option value="QUEBRA_DO_INQUILINO" className="bg-[#1b2430]">{rotuloQuebra}</option>
@@ -185,7 +197,9 @@ export default function TerminoAntecipadoModal({ isOpen, onClose, titulo, contex
           </h3>
 
           <p className="text-sm text-[var(--text-muted)]">
-            Digite sua senha pra confirmar a quebra de contrato.
+            {motivo === MOTIVO_FIM_NORMAL
+              ? "Digite sua senha pra confirmar o encerramento."
+              : "Digite sua senha pra confirmar a quebra de contrato."}
           </p>
 
           <div>

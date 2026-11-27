@@ -210,11 +210,14 @@ export default function DetalhesContratoPage() {
           {contrato.status === "ENCERRADO" && contrato.motivoEncerramento && (
             <div className="md:col-span-2">
               <p className="text-[var(--text-subtle)]">
-                Encerrado por quebra de contrato
+                {contrato.motivoEncerramento === "FIM_DE_CONTRATO"
+                  ? "Encerrado manualmente antes do fim previsto"
+                  : "Encerrado por quebra de contrato"}
               </p>
 
-              <h2 className="font-bold text-xl text-red-400">
+              <h2 className={`font-bold text-xl ${contrato.motivoEncerramento === "FIM_DE_CONTRATO" ? "text-[var(--text)]" : "text-red-400"}`}>
                 {{
+                  FIM_DE_CONTRATO: "Fim do contrato (encerramento normal)",
                   ABANDONO: "Abandono",
                   INADIMPLENCIA: "Inadimplência",
                   QUEBRA_DO_INQUILINO: "Quebra do inquilino",

@@ -96,7 +96,7 @@ router.delete(
 router.patch(
   '/:id/encerrar',
   podeContrato('editar'),
-  exigirConfirmacaoTerminoAntecipado(obterContratoDoContrato),
+  exigirConfirmacaoTerminoAntecipado(obterContratoDoContrato, { permitirFimNormal: true }),
   contratoController.encerrar
 );
 
