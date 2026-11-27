@@ -114,6 +114,10 @@ model Inquilino {
   telefoneEmergencia String?
   tipoGarantia       String?
   valorCaucao        Float?
+  // "MASCULINO" | "FEMININO" -- pedido do usuário em 27/11/2026. Texto
+  // livre (não enum) pra não travar deploy se precisar de mais opções
+  // depois, mesmo padrão de status/categoria usados no resto do schema.
+  sexo               String?
   // Dedução mensal (água + energia) usada no Relatório de Receitas
   // (Financeiro > Extratos > Exportar Excel) -- fica no INQUILINO, não
   // no Locador, porque o valor pode variar de inquilino pra inquilino
@@ -576,6 +580,21 @@ model Receita {
   // destes campos (ver statusReceita.js).
   corteRealizadoEm            DateTime?
 
+  // Etapa do meio da escalada (pedido do usuário em 27/11/2026): corte
+  // realizado, cobrança continua sem resolver -> "FECHAR PORTA COM
+  // GRADE" -> só depois disso sem resolver é que escala pra "esvaziar
+  // kitnet" (ver verificarFecharPortaCorteJob.js). Mesmo padrão de
+  // vistoriaCorteAtrasoCriadaEm/vistoriaCorteId.
+  vistoriaPortaCriadaEm       DateTime?
+  vistoriaPortaId             String?   @unique
+  vistoriaPorta               Vistoria? @relation("VistoriaPorta", fields: [vistoriaPortaId], references: [id], onDelete: SetNull)
+
+  // Quando a vistoria de "fechar porta com grade" foi marcada Realizada
+  // -- começa a contar as 48h pra escalar pra "esvaziar kitnet" (antes
+  // esse relógio começava direto de corteRealizadoEm; agora espera essa
+  // etapa do meio também).
+  portaFechadaEm              DateTime?
+
   // Mesma ideia de vistoriaCorteAtrasoCriadaEm/vistoriaCorteId, pra
   // escalada seguinte.
   vistoriaEsvaziarCriadaEm    DateTime?
@@ -879,6 +898,10 @@ model Vistoria {
   // Lado oposto de Receita.vistoriaCorteId -- a receita que gerou esta
   // vistoria de risco de corte, se for uma dessas (ver verificarAtrasoCorteJob.js).
   receitaOrigem Receita? @relation("VistoriaCorte")
+
+  // Lado oposto de Receita.vistoriaPortaId -- idem, pra etapa do meio
+  // ("fechar porta com grade").
+  receitaOrigemPorta Receita? @relation("VistoriaPorta")
 
   // Lado oposto de Receita.vistoriaEsvaziarId -- idem, pra escalada de
   // "esvaziar kitnet".

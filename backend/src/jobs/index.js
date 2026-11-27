@@ -20,6 +20,7 @@ const verificarBoletosBB = require("./verificarBoletosBBJob");
 const verificarAsaas = require("./verificarAsaasJob");
 const verificarEfi = require("./verificarEfiJob");
 const verificarAtrasoCorte = require("./verificarAtrasoCorteJob");
+const verificarFecharPortaCorte = require("./verificarFecharPortaCorteJob");
 const verificarEscalonamentoCorte = require("./verificarEscalonamentoCorteJob");
 const verificarCobrancaNaoEnviada = require("./verificarCobrancaNaoEnviadaJob");
 const dispararReceitasBanco = require("./dispararReceitasBancoJob");
@@ -61,7 +62,10 @@ const iniciarJobs = () => {
   // esperar o lote diário das 8h) -- ver verificarAtrasoCorteJob.js.
   cron.schedule("0 * * * *", verificarAtrasoCorte, FUSO);
 
-  // Segundo estágio da mesma escalada -- ver verificarEscalonamentoCorteJob.js.
+  // Segundo estágio da mesma escalada -- ver verificarFecharPortaCorteJob.js.
+  cron.schedule("0 * * * *", verificarFecharPortaCorte, FUSO);
+
+  // Terceiro (e último) estágio -- ver verificarEscalonamentoCorteJob.js.
   cron.schedule("0 * * * *", verificarEscalonamentoCorte, FUSO);
 
   // Não espera o lote diário das 8h -- quem pergunta "foi pago?" quer

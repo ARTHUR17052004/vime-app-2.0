@@ -4,20 +4,22 @@ const corteVistoriaService = require('../services/corteVistoriaService');
 const diaUtil = require('../utils/diaUtil');
 
 /*
-  Segundo estágio da escalada de corte de água/energia (pedido do
-  usuário em 18/11/2026, prazo ajustado em 26/11/2026) --
-  verificarAtrasoCorteJob.js cuida do primeiro (atraso 72h ÚTEIS+ ->
-  vistoria "REALIZAR CORTE DE ÁGUA E ENERGIA"). Esse aqui cuida do
-  segundo: a vistoria de corte foi Realizada (ver vistoriaService.atualizar,
-  que grava Receita.corteRealizadoEm) mas a cobrança continua sem
-  resolver por mais 48h -> dispara a vistoria "FAZER DESOCUPAÇÃO DE
-  IMÓVEL", que ao ser Realizada encerra o contrato e libera a kitnet
-  sozinha.
+  Terceiro (e último) estágio da escalada de corte de água/energia
+  (pedido do usuário em 18/11/2026, prazo ajustado em 26/11/2026, etapa
+  do meio inserida em 27/11/2026 -- ANTES era o segundo estágio,
+  disparado direto de corteRealizadoEm). verificarAtrasoCorteJob.js
+  cuida do primeiro (atraso 3 dias ÚTEIS+ -> vistoria "REALIZAR CORTE DE
+  ÁGUA E ENERGIA") e verificarFecharPortaCorteJob.js cuida do segundo
+  (corte realizado + 2 dias úteis -> "FECHAR PORTA COM GRADE"). Esse
+  aqui cuida do terceiro: a vistoria de "fechar porta" foi Realizada
+  (ver vistoriaService.atualizar, que grava Receita.portaFechadaEm) mas
+  a cobrança continua sem resolver por mais 2 dias úteis -> dispara a
+  vistoria "FAZER DESOCUPAÇÃO DE IMÓVEL", que ao ser Realizada encerra
+  o contrato e libera a kitnet sozinha.
 
-  "48h depois do corte realizado" = corteRealizadoEm + 2 dias ÚTEIS
-  (mesma régua de dias úteis de verificarAtrasoCorteJob.js, só que 2
-  em vez de 3). vistoriaEsvaziarCriadaEm evita criar duas vezes pra
-  mesma Receita.
+  "48h depois da porta fechada" = portaFechadaEm + 2 dias ÚTEIS (mesma
+  régua de dias úteis dos outros estágios). vistoriaEsvaziarCriadaEm
+  evita criar duas vezes pra mesma Receita.
 */
 const resolverResponsavelZelador = async () => {
 
@@ -44,13 +46,13 @@ module.exports = async () => {
 
   const candidatas = await prisma.receita.findMany({
     where: {
-      corteRealizadoEm: { not: null, lte: limite },
+      portaFechadaEm: { not: null, lte: limite },
       vistoriaEsvaziarId: null,
       status: { notIn: ['PAGA', 'PAGO', 'CANCELADA'] },
       gatewayReferencia: { not: null },
-      // Defesa em profundidade: corteRealizadoEm só devia existir pra
-      // Aluguel já (ver verificarAtrasoCorteJob.js), mas confere aqui
-      // também -- nunca esvaziar kitnet por causa de Taxa/Multa.
+      // Defesa em profundidade: portaFechadaEm só devia existir pra
+      // Aluguel já (ver verificarFecharPortaCorteJob.js), mas confere
+      // aqui também -- nunca esvaziar kitnet por causa de Taxa/Multa.
       categoria: 'Aluguel',
     },
     include: {
@@ -64,12 +66,12 @@ module.exports = async () => {
   const feriadosSet = await diaUtil.obterFeriadosSet([agora.getFullYear(), agora.getFullYear() + 1]);
 
   const receitas = candidatas.filter(
-    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.corteRealizadoEm), 2, feriadosSet) <= agora
+    (receita) => diaUtil.adicionarDiasUteis(new Date(receita.portaFechadaEm), 2, feriadosSet) <= agora
   );
 
   if (receitas.length === 0) return;
 
-  console.log(`[JOB] Criando vistoria de "desocupação de imóvel" pra ${receitas.length} cobrança(s) com corte realizado há 2 dias úteis+ sem quitação...`);
+  console.log(`[JOB] Criando vistoria de "desocupação de imóvel" pra ${receitas.length} cobrança(s) com porta fechada há 2 dias úteis+ sem quitação...`);
 
   const responsavel = await resolverResponsavelZelador();
 
@@ -101,7 +103,7 @@ module.exports = async () => {
 
       const vistoria = await vistoriaService.criar({
         titulo: corteVistoriaService.TITULO_FAZER_DESOCUPACAO,
-        descricao: `Corte de água/energia realizado há 48h+ e a cobrança de ${inquilino?.nome || 'inquilino'} (R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}) continua sem quitação. Conforme o contrato, o imóvel deve ser desocupado.`,
+        descricao: `Porta fechada com grade há 2 dias úteis+ e a cobrança de ${inquilino?.nome || 'inquilino'} (R$ ${Number(receita.valor).toFixed(2)}, venceu em ${new Date(receita.vencimento).toLocaleDateString('pt-BR')}) continua sem quitação. Conforme o contrato, o imóvel deve ser desocupado.`,
         unidadeId: unidade.id,
         kitnetId: kitnet.id,
         categoria: 'Cobrança',

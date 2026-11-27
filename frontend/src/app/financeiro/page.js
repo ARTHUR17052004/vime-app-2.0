@@ -957,6 +957,7 @@ function FinanceiroPageConteudo() {
               <option value="EM_ABERTO" className="bg-[#1b2430]">Em Aberto</option>
               <option value="ATRASADA" className="bg-[#1b2430]">Atrasada</option>
               <option value="CORTE_AGUA_ENERGIA" className="bg-[#1b2430]">Corte de Água e Energia</option>
+              <option value="FECHAR_PORTA" className="bg-[#1b2430]">Porta Fechada com Grade</option>
               <option value="ESVAZIAR_KITNET" className="bg-[#1b2430]">Desocupação de Imóvel</option>
               <option value="NAO_ENVIADA" className="bg-[#1b2430]">Não enviada ao banco</option>
               <option value="PAGA" className="bg-[#1b2430]">Paga</option>

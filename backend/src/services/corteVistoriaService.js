@@ -12,23 +12,29 @@ const diaUtil = require('../utils/diaUtil');
   (Guilherme Rodrigues Oliveira: vencimento corrigido e cobrança
   enviada, mas a vistoria de corte continuava Pendente).
 
-  Escalada em 2 estágios (pedido do usuário em 18/11/2026, renomeado e
-  reajustado em 26/11/2026): atraso 72h ÚTEIS+ -> vistoria "REALIZAR
-  CORTE DE ÁGUA E ENERGIA" -> realizada mas a cobrança continua sem
-  resolver por mais 48h ÚTEIS -> vistoria "FAZER DESOCUPAÇÃO DE
+  Escalada em 3 estágios (pedido do usuário em 18/11/2026, renomeado e
+  reajustado em 26/11/2026, etapa do meio adicionada em 27/11/2026):
+  atraso 3 dias ÚTEIS+ -> vistoria "REALIZAR CORTE DE ÁGUA E ENERGIA"
+  -> realizada mas a cobrança continua sem resolver por mais 2 dias
+  ÚTEIS -> vistoria "FECHAR PORTA COM GRADE" -> realizada e ainda sem
+  resolver por mais 2 dias ÚTEIS -> vistoria "FAZER DESOCUPAÇÃO DE
   IMÓVEL" (que, ao ser realizada, encerra o contrato e libera a kitnet
-  sozinha -- ver vistoriaService.atualizar). Cada estágio é descrito
-  aqui (ver ESTAGIOS) pra não duplicar a mesma lógica de
-  cancelar/resolver duas vezes. Nomes internos dos campos (vistoriaEsvaziarId/
-  vistoriaEsvaziarCriadaEm/kitnetEsvaziadaEm) continuam com o nome
-  antigo no banco -- só o TÍTULO que o zelador vê e o texto mudaram.
+  sozinha -- ver vistoriaService.atualizar). Soma ~7 dias úteis do
+  vencimento até a desocupação, do jeito que o usuário pediu. Cada
+  estágio é descrito aqui (ver ESTAGIOS) pra não duplicar a mesma
+  lógica de cancelar/resolver duas vezes. Nomes internos dos campos
+  (vistoriaEsvaziarId/vistoriaEsvaziarCriadaEm/kitnetEsvaziadaEm)
+  continuam com o nome antigo no banco -- só o TÍTULO que o zelador vê
+  e o texto mudaram.
 */
 
 const TITULO_REALIZAR_CORTE = 'REALIZAR CORTE DE ÁGUA E ENERGIA';
+const TITULO_FECHAR_PORTA = 'FECHAR PORTA COM GRADE';
 const TITULO_FAZER_DESOCUPACAO = 'FAZER DESOCUPAÇÃO DE IMÓVEL';
 
 const ESTAGIOS = [
   { campoVistoriaId: 'vistoriaCorteId', campoCriadaEm: 'vistoriaCorteAtrasoCriadaEm', titulo: TITULO_REALIZAR_CORTE },
+  { campoVistoriaId: 'vistoriaPortaId', campoCriadaEm: 'vistoriaPortaCriadaEm', titulo: TITULO_FECHAR_PORTA },
   { campoVistoriaId: 'vistoriaEsvaziarId', campoCriadaEm: 'vistoriaEsvaziarCriadaEm', titulo: TITULO_FAZER_DESOCUPACAO },
 ];
 
@@ -224,5 +230,6 @@ module.exports = {
   cancelarVinculada,
   cancelarVinculadaPorInadimplencia,
   TITULO_REALIZAR_CORTE,
+  TITULO_FECHAR_PORTA,
   TITULO_FAZER_DESOCUPACAO,
 };

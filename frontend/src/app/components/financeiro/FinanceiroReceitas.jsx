@@ -129,8 +129,15 @@ function RelogioCorte({ receita }) {
 
   };
 
+  // Etapa do meio (pedido do usuário em 27/11/2026): corte realizado,
+  // aguarda fechar a porta com grade; porta fechada, aguarda a
+  // desocupação -- mesmo relógio, só muda o rótulo/campo de origem.
+  if (receita.portaFechadaEm) {
+    return relogio(receita.portaFechadaEm, "Desocupação", 48);
+  }
+
   if (receita.corteRealizadoEm) {
-    return relogio(receita.corteRealizadoEm, "Desocupação", 48);
+    return relogio(receita.corteRealizadoEm, "Fechar porta", 48);
   }
 
   // Sem boleto enviado ao banco, não existe "risco de corte" de

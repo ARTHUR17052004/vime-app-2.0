@@ -377,13 +377,15 @@ const atualizar = async (id, dados, autor) => {
   // Vistoria automática de corte de água/energia (categoria "Cobrança",
   // ver corteVistoriaService.js) sendo marcada Realizada -- cada título
   // avança um estágio da escalada combinada com o usuário em
-  // 18/11/2026 (renomeada e com prazo ajustado em 26/11/2026):
-  // "REALIZAR CORTE..." começa o relógio de 48h de "aguardando
-  // desocupação" na Receita; "FAZER DESOCUPAÇÃO DE IMÓVEL" encerra o
-  // contrato e libera a kitnet sozinha (mesmo mecanismo da Quebra de
-  // Contrato -- ver contratoService.encerrar), e vira o selo (fixo,
-  // sem prazo) "aguardando tratativa" até a inadimplência ser
-  // classificada. `dados.concluidaEm`
+  // 18/11/2026 (renomeada e com prazo ajustado em 26/11/2026, etapa do
+  // meio adicionada em 27/11/2026): "REALIZAR CORTE..." começa o
+  // relógio de "aguardando fechar a porta"; "FECHAR PORTA COM GRADE"
+  // começa o relógio seguinte de "aguardando desocupação"; "FAZER
+  // DESOCUPAÇÃO DE IMÓVEL" encerra o contrato e libera a kitnet sozinha
+  // (mesmo mecanismo da Quebra de Contrato -- ver
+  // contratoService.encerrar), e vira o selo (fixo, sem prazo)
+  // "aguardando tratativa" até a inadimplência ser classificada.
+  // `dados.concluidaEm`
   // só vem preenchido no fluxo de verdade (VistoriaConcluirModal, que
   // já exige foto/vídeo + motivo pra categoria "Cobrança") -- uma
   // edição manual qualquer (ex.: trocar o status direto no formulário
@@ -409,6 +411,13 @@ const atualizar = async (id, dados, autor) => {
         await prisma.receita.updateMany({
           where: { vistoriaCorteId: id, corteRealizadoEm: null },
           data: { corteRealizadoEm: new Date() },
+        });
+
+      } else if (anterior.titulo === corteVistoriaService.TITULO_FECHAR_PORTA) {
+
+        await prisma.receita.updateMany({
+          where: { vistoriaPortaId: id, portaFechadaEm: null },
+          data: { portaFechadaEm: new Date() },
         });
 
       } else if (anterior.titulo === corteVistoriaService.TITULO_FAZER_DESOCUPACAO) {

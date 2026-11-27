@@ -60,6 +60,7 @@ export function receitaCombinaComFiltro(item, filtro) {
 
   if (filtro === "INADIMPLENTE") return !!item.classificacaoInadimplencia;
   if (filtro === "ESVAZIAR_KITNET") return !!item.kitnetEsvaziadaEm;
+  if (filtro === "FECHAR_PORTA") return !!item.portaFechadaEm;
   if (filtro === "CORTE_AGUA_ENERGIA") return !!item.corteRealizadoEm;
 
   if (filtro === "NAO_ENVIADA") {
@@ -88,6 +89,10 @@ export function badgesEscaladaReceita(item) {
 
   if (item.corteRealizadoEm) {
     badges.push({ texto: "Corte realizado", variant: "red" });
+  }
+
+  if (item.portaFechadaEm) {
+    badges.push({ texto: "Porta fechada", variant: "red" });
   }
 
   if (item.kitnetEsvaziadaEm) {
