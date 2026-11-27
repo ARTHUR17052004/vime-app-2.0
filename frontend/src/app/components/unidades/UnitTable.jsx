@@ -71,11 +71,6 @@ export default function UnitTable({
             </p>
 
             <p>
-              📅 Vencimento: Dia{" "}
-              {unidade.vencimento || "-"}
-            </p>
-
-            <p>
               👤 Locador:{" "}
               {unidade.locador || "-"}
             </p>

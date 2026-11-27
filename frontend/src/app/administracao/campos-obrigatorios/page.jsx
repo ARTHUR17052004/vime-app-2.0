@@ -39,7 +39,6 @@ const MODULOS = [
       { campo: "locadorId", label: "Locador" },
       { campo: "kitnets", label: "Quantidade de Kitnets", travado: true },
       { campo: "aluguel", label: "Valor do Aluguel" },
-      { campo: "vencimento", label: "Dia de Vencimento" },
       { campo: "dataInicioCobranca", label: "Data de Início da Cobrança" },
       { campo: "status", label: "Status" },
       { campo: "observacoes", label: "Observações" },

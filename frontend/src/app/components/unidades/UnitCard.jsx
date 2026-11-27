@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import {
   MapPin,
   Home,
-  Calendar,
   User,
   Wallet,
 } from "lucide-react";
@@ -153,12 +152,6 @@ export default function UnitCard({
           icon={<Home size={18} />}
           label="Kitnets"
           value={unidade.kitnets || 0}
-        />
-
-        <InfoRow
-          icon={<Calendar size={18} />}
-          label="Vencimento"
-          value={`Dia ${unidade.vencimento || "-"}`}
         />
 
         <InfoRow

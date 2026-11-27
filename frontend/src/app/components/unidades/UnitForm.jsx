@@ -14,7 +14,7 @@ import { validarCep } from "@/utils/validadores";
 
 const CAMPOS = [
   "nome", "cep", "logradouro", "numero", "complemento", "bairro", "cidade", "uf",
-  "locadorId", "kitnets", "aluguel", "vencimento", "dataInicioCobranca", "status", "observacoes",
+  "locadorId", "kitnets", "aluguel", "dataInicioCobranca", "status", "observacoes",
 ];
 
 const SEMPRE_OBRIGATORIOS = new Set(["nome", "cidade", "uf", "kitnets"]);
@@ -31,7 +31,6 @@ const ROTULOS = {
   locadorId: "Locador",
   kitnets: "Quantidade de Kitnets",
   aluguel: "Valor do Aluguel",
-  vencimento: "Dia de Vencimento",
   dataInicioCobranca: "Data de Início da Cobrança",
   status: "Status",
   observacoes: "Observações",
@@ -70,8 +69,6 @@ export default function UnitForm({
     kitnets: "",
 
     aluguel: "",
-
-    vencimento: "",
 
     dataInicioCobranca: "",
 
@@ -185,12 +182,6 @@ export default function UnitForm({
 
         aluguel:
           unidade.aluguel || "",
-
-        // Diferente de "" (nunca configurado -- vence sempre no dia do
-        // cadastro do contrato). "|| '10'" apagava esse "em branco"
-        // intencional toda vez que a residência era reaberta pra editar.
-        vencimento:
-          unidade.vencimento != null ? String(unidade.vencimento) : "",
 
         dataInicioCobranca:
           unidade.dataInicioCobranca
@@ -348,14 +339,6 @@ export default function UnitForm({
 
       locador: selecionado?.nome || "",
 
-      // Puxa o "Dia de Vencimento" padrão configurado no cadastro
-      // desse locador -- evita ter que preencher residência por
-      // residência. Ainda dá pra sobrescrever manualmente depois.
-      vencimento:
-        selecionado?.diaVencimentoPadrao != null
-          ? String(selecionado.diaVencimentoPadrao)
-          : "",
-
     }));
 
   }
@@ -385,13 +368,6 @@ export default function UnitForm({
       const aluguel = Number(formData.aluguel);
       if (!Number.isFinite(aluguel) || aluguel <= 0) {
         return "Valor do Aluguel deve ser um número maior que zero.";
-      }
-    }
-
-    if (formData.vencimento !== "") {
-      const vencimento = parseInt(formData.vencimento, 10);
-      if (!Number.isInteger(vencimento) || vencimento < 1 || vencimento > 31) {
-        return "Dia do Vencimento deve ser um número entre 1 e 31.";
       }
     }
 
@@ -673,16 +649,6 @@ export default function UnitForm({
             name="aluguel"
             value={formData.aluguel}
             onChange={handleChange}
-          />
-
-          <Input
-            label="Dia do Vencimento"
-            required={obrigatorios.has("vencimento")}
-            name="vencimento"
-            value={formData.vencimento}
-            onChange={handleChange}
-            placeholder="Em branco = sempre no dia do cadastro"
-            helperText="Preenchido automaticamente com o padrão do locador escolhido acima. Deixe em branco pra cada contrato vencer no dia em que foi cadastrado, ou um número fixo (ex.: 1) pra todo mundo vencer sempre nesse dia do mês."
           />
 
           <div>

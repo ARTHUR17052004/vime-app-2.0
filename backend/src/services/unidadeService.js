@@ -47,20 +47,6 @@ const sanitizar = (dados) => {
     dados.aluguel = null;
   }
 
-  if (dados.vencimento !== undefined && dados.vencimento !== "") {
-
-    const vencimento = parseInt(dados.vencimento, 10);
-
-    if (!Number.isInteger(vencimento) || vencimento < 1 || vencimento > 31) {
-      throw new Error('Dia de Vencimento deve ser um número entre 1 e 31.');
-    }
-
-    dados.vencimento = vencimento;
-
-  } else {
-    dados.vencimento = null;
-  }
-
   // Select sem locador escolhido manda "" -- isso não é null nem um id
   // válido, então a Prisma tenta usar "" como foreign key e quebra com
   // "Foreign key constraint violated".
@@ -80,6 +66,12 @@ const sanitizar = (dados) => {
   delete dados.locadorRel;
   delete dados.contratos;
   delete dados.kitnetsRelacionadas;
+
+  // Pedido do usuário em 27/11/2026: vencimento não existe mais no
+  // nível de Residência -- só por kitnet (Kitnet.diaVencimento). Campo
+  // continua existindo na tabela (histórico), só não é mais escrito por
+  // aqui.
+  delete dados.vencimento;
 
   return dados;
 
@@ -129,7 +121,6 @@ const criar = async (dados) => {
       numero: String(i + 1).padStart(2, '0'),
       metragem: 20,
       aluguel: unidade.aluguel || 0,
-      diaVencimento: unidade.vencimento || null,
       unidadeId: unidade.id,
     }));
 
@@ -173,15 +164,6 @@ const sincronizarKitnets = async (antes, depois) => {
     });
   }
 
-  const vencimentoMudou = (depois.vencimento ?? null) !== (antes.vencimento ?? null);
-
-  if (vencimentoMudou) {
-    await prisma.kitnet.updateMany({
-      where: { unidadeId: depois.id, diaVencimentoManual: false },
-      data: { diaVencimento: depois.vencimento || null },
-    });
-  }
-
   const alvo = depois.kitnets || 0;
   const diferenca = alvo - kitnets.length;
 
@@ -196,7 +178,6 @@ const sincronizarKitnets = async (antes, depois) => {
       numero: String(maiorNumero + i + 1).padStart(2, '0'),
       metragem: 20,
       aluguel: depois.aluguel || 0,
-      diaVencimento: depois.vencimento || null,
       unidadeId: depois.id,
     }));
 

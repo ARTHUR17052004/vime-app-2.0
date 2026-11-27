@@ -326,11 +326,10 @@ export default function ContratoForm({
 
       // Mesmo padrão default do contrato gerado automático na etapa 3
       // do cadastro de inquilino (ver inquilinoService.js) -- dia fixo
-      // da própria kitnet, senão o da Residência, senão o dia do mês
-      // do início do contrato.
+      // da própria kitnet (não mais da Residência -- pedido do usuário
+      // em 27/11/2026), senão o dia do mês do início do contrato.
       const diaVencimentoPadrao =
         inquilino?.kitnet?.diaVencimento ||
-        inquilino?.kitnet?.unidade?.vencimento ||
         (inquilino?.dataInicioContrato ? new Date(inquilino.dataInicioContrato).getDate() : null);
 
       setFormData((prev) => ({
