@@ -31,6 +31,23 @@ function paraEnvio(telefone) {
     d = "55" + d;
   }
 
+  // Celular brasileiro cadastrado no formato antigo (DDD + 8 dígitos,
+  // sem o "9" que virou obrigatório em todo o país a partir de 2016) --
+  // descoberto de novo em 27/11/2026 com Luís e outros: a Meta não acha
+  // o WhatsApp de quem nunca escreveu pra gente primeiro quando o
+  // número vai sem esse "9" ("Message undeliverable" direto, sempre).
+  // Auditoria no banco no mesmo dia achou 112 de 116 inquilinos
+  // cadastrados assim -- não é exceção, é o padrão de cadastro daqui.
+  // Só completa quando o local tem 8 dígitos e começa com 6-9 (faixa
+  // histórica de celular; fixo sempre começa com 2-5, esse não mexe).
+  if (d.length === 12 && d.startsWith("55")) {
+    const ddd = d.slice(2, 4);
+    const local = d.slice(4);
+    if (local.length === 8 && /^[6-9]/.test(local)) {
+      d = `55${ddd}9${local}`;
+    }
+  }
+
   return d;
 
 }

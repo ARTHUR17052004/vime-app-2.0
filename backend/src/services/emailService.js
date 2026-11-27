@@ -38,7 +38,7 @@ async function enviarEmail({ para, assunto, html, texto, anexos }) {
     },
   });
 
-  await transportador.sendMail({
+  const info = await transportador.sendMail({
     from: `"${config.nomeSistema}" <${config.usuario}>`,
     to: para,
     subject: assunto,
@@ -50,6 +50,18 @@ async function enviarEmail({ para, assunto, html, texto, anexos }) {
     // lugar nenhum.
     ...(anexos?.length ? { attachments: anexos } : {}),
   });
+
+  // sendMail resolve (sem erro nenhum) assim que o SERVIDOR SMTP aceita
+  // a mensagem pra retransmitir -- isso não quer dizer que ela chegou
+  // na caixa de entrada de verdade. Mas quando o próprio servidor já
+  // recusa um destinatário na hora (endereço inexistente, por ex.), ele
+  // devolve isso em `info.rejected` em vez de lançar erro -- sem essa
+  // conferência, "RelatorioAgendado" ficava ENVIADO mesmo numa recusa
+  // dessas (achado em 27/11/2026, investigando e-mail de extrato que o
+  // sistema achava que tinha mandado mas nunca chegou).
+  if (info?.rejected?.length) {
+    throw new Error(`E-mail recusado pelo servidor para: ${info.rejected.join(", ")}`);
+  }
 
 }
 
