@@ -62,30 +62,9 @@ const validarNumeroUnico = async (unidadeId, numero, { ignorarId } = {}) => {
 
 };
 
-// Mesma validação de Unidade.vencimento (unidadeService.sanitizar) --
-// aqui dá pra chegar com undefined (campo não mandado, mantém o atual/
-// null) ou com um valor fora de 1-31.
-const validarDiaVencimento = (dados) => {
-
-  if (dados.diaVencimento === undefined || dados.diaVencimento === null || dados.diaVencimento === '') {
-    return;
-  }
-
-  const dia = parseInt(dados.diaVencimento, 10);
-
-  if (!Number.isInteger(dia) || dia < 1 || dia > 31) {
-    throw new Error('Dia de Vencimento deve ser um número entre 1 e 31.');
-  }
-
-  dados.diaVencimento = dia;
-
-};
-
 const criar = async (dados, usuario) => {
 
   await campoObrigatorioService.validar('kitnet', dados);
-
-  validarDiaVencimento(dados);
 
   const unidade = await prisma.unidade.findUnique({
     where: { id: dados.unidadeId }
@@ -121,10 +100,9 @@ const criar = async (dados, usuario) => {
 
   const kitnet = await prisma.kitnet.create({
     // Criada manualmente aqui (fora do lote automático da Residência)
-    // -- o valor (e o dia de vencimento) já vieram escolhidos pelo
-    // usuário, então não deixa a edição da Residência sobrescrever
-    // depois.
-    data: { ...dados, aluguelManual: true, diaVencimentoManual: true }
+    // -- o valor já veio escolhido pelo usuário, então não deixa a
+    // edição da Residência sobrescrever depois.
+    data: { ...dados, aluguelManual: true }
   });
 
   // Já nasce vazia (status padrão é DISPONIVEL) -- mesmo gatilho de
@@ -144,8 +122,6 @@ const atualizar = async (id, dados) => {
   // não quebrar nenhuma chamada antiga que não manda esse campo.
   const gerarVistoriaEntrega = dados.gerarVistoriaEntrega !== false;
   delete dados.gerarVistoriaEntrega;
-
-  validarDiaVencimento(dados);
 
   const atual = await prisma.kitnet.findUnique({ where: { id } });
 
@@ -172,15 +148,6 @@ const atualizar = async (id, dados) => {
     Number(dados.aluguel) !== atual.aluguel
   ) {
     dados.aluguelManual = true;
-  }
-
-  // Mesma trava do aluguel, pro dia de vencimento.
-  if (
-    atual &&
-    dados.diaVencimento !== undefined &&
-    Number(dados.diaVencimento) !== atual.diaVencimento
-  ) {
-    dados.diaVencimentoManual = true;
   }
 
   // "ocupada" e "status" representam a mesma coisa, mas quando o

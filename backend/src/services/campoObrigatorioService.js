@@ -49,7 +49,6 @@ const rotulosPadrao = {
   kitnets: 'Quantidade de Kitnets',
   aluguel: 'Valor do Aluguel',
   vencimento: 'Dia de Vencimento',
-  diaVencimento: 'Dia de Vencimento',
   cpf: 'CPF',
   dataNascimento: 'Data de Nascimento',
   contatoEmergencia: 'Contato de Emergência',

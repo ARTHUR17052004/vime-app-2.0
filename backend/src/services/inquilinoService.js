@@ -216,10 +216,13 @@ const criar = async (dados) => {
           dataInicio: inquilino.dataInicioContrato,
           dataFim: inquilino.dataFimContrato || undefined,
           valorAluguel: kitnet.aluguel,
-          // Pedido do usuário em 27/11/2026: vencimento vem da própria
-          // kitnet, não mais da Residência -- sem isso, cai no dia do
-          // mês da Data de Início mesmo.
-          diaVencimento: kitnet.diaVencimento || dataInicio.getDate(),
+          // Regra única a partir de 27/11/2026 (pedido do usuário):
+          // vencimento é SEMPRE o dia do mês da Data de Início do
+          // contrato, de nenhum outro lugar (nem kitnet, nem
+          // Residência) -- tentativas anteriores com fallback pra
+          // kitnet/Residência geraram confusão e um bug de vencimento
+          // errado.
+          diaVencimento: dataInicio.getDate(),
           indiceReajuste: inquilino.indiceReajuste || null,
           tipoGarantia: inquilino.tipoGarantia || null,
           valorCaucao: inquilino.valorCaucao || null,
